@@ -1,4 +1,8 @@
 java:
+  devmemoryRequests: 2048Mi
+  devcpuRequests: 2000m
+  devmemoryLimits: 4096Mi
+  devcpuLimits: 4000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
@@ -22,6 +26,7 @@ java:
         - courtnav-functional-test-pwd
         - filtered-court-ids
         - da-filtered-court-ids
+        - ca-default-court-epimms-id
         - postcode-lookup-token
         - prl-rd-api-system-username
         - prl-rd-api-system-user-password
@@ -58,9 +63,7 @@ java:
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1199-aac-manage-case-assignment
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal

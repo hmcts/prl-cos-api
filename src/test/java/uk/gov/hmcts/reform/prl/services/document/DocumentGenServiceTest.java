@@ -19,15 +19,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -42,9 +48,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -53,9 +58,11 @@ import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
@@ -64,11 +71,18 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +94,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -90,7 +105,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
@@ -101,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -112,35 +128,37 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@SuppressWarnings({"java:S1607"})
 public class DocumentGenServiceTest {
 
     @Mock
@@ -176,6 +194,9 @@ public class DocumentGenServiceTest {
     UploadDocumentService uploadService;
 
     @Mock
+    private Time dateTime;
+
+    @Mock
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     @Mock
@@ -185,6 +206,7 @@ public class DocumentGenServiceTest {
     protected String fl401RespC8TemplateWelsh;
 
     public static final String authToken = "Bearer TestAuthToken";
+
 
     CaseData c100CaseData;
     CaseData c100CaseDataFinal;
@@ -198,6 +220,29 @@ public class DocumentGenServiceTest {
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
     MockMultipartFile file;
+
+    private DocumentRequest documentRequest;
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private CaseService caseService;
+
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+
+    @Mock
+    AllTabServiceImpl allTabService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
+
+    private Document caseDoc;
+    private QuarantineLegalDoc quarantineCaseDoc;
+
 
     @Before
     public void setUp() {
@@ -284,7 +329,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(Yes).build())
-                .taskListVersion(TASK_LIST_VERSION_V2)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(No)
@@ -312,8 +357,8 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
-                .taskListVersion(TASK_LIST_VERSION_V2)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(No).build())
+            .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
@@ -331,12 +376,24 @@ public class DocumentGenServiceTest {
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
-                .taskListVersion(TASK_LIST_VERSION_V2)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
             .keepChildrenInfoConfidential(Yes)
@@ -348,29 +405,15 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
-            .build();
-
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-
-        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
             .build();
 
         fl401CaseData = CaseData.builder()
@@ -413,11 +456,56 @@ public class DocumentGenServiceTest {
         ReflectionTestUtils.setField(documentGenService, "organisationService", organisationService);
         ReflectionTestUtils.setField(documentGenService, "documentLanguageService", documentLanguageService);
         ReflectionTestUtils.setField(documentGenService, "dgsService", dgsService);
-        ReflectionTestUtils.setField(documentGenService, "c100DocumentTemplateFinderService", c100DocumentTemplateFinderService);
-        ReflectionTestUtils.setField(documentGenService, "allegationOfHarmRevisedService", allegationOfHarmRevisedService);
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "c100DocumentTemplateFinderService",
+            c100DocumentTemplateFinderService
+        );
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "allegationOfHarmRevisedService",
+            allegationOfHarmRevisedService
+        );
         ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
         ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
         ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
+        ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
+
+        doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(), any(), any(), any());
+        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        );
+        doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
+        doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(), any());
+        doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(), any(), any(), any());
+
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("POSITION_STATEMENTS")
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        caseDoc = Document.builder()
+            .documentFileName("test.pdf")
+            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
+            .documentBinaryUrl(null)
+            .documentHash(null)
+            .categoryId(null)
+            .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))
+            .build();
+
+        quarantineCaseDoc = QuarantineLegalDoc.builder()
+            .categoryId("positionStatements")
+            .positionStatementsDocument(caseDoc)
+            .build();
     }
 
     @Test
@@ -436,10 +524,12 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
-                .builder().newAllegationsOfHarmYesNo(Yes).build()).allegationOfHarm(null).build();
+                                                                            .builder().newAllegationsOfHarmYesNo(Yes).build()).allegationOfHarm(
+            null).build();
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -477,7 +567,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
-        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataFinal);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
 
@@ -500,7 +591,6 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
-
 
 
     @Test
@@ -581,7 +671,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
@@ -619,7 +710,8 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
-        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataC1A);
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -769,12 +861,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -796,30 +888,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -887,12 +957,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -914,30 +984,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -998,14 +1046,6 @@ public class DocumentGenServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
-
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -1022,30 +1062,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1083,22 +1101,14 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -1116,30 +1126,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1177,22 +1165,14 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -1210,30 +1190,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1266,22 +1224,14 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -1297,28 +1247,6 @@ public class DocumentGenServiceTest {
             .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
@@ -1340,25 +1268,34 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationWithMap() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
-        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false, respondentDetails);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    public void testDocGenerationWithNoName() throws Exception {
-        Map<String, Object> respondentDetails = new HashMap<>();
-        documentGenService.convertToPdf("auth", Document.builder().build());
-        verify(caseDocumentClient, times(0)).getDocumentBinary(
-                authToken, "s2s token", generatedDocumentInfo.getUrl()
+        documentGenService.generateSingleDocument(
+            "auth",
+            c100CaseData,
+            DOCUMENT_COVER_SHEET_HINT,
+            false,
+            respondentDetails
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
         );
     }
 
     @Test
-    public void testDocGenerationWithNoPeriods() throws Exception {
-        Map<String, Object> respondentDetails = new HashMap<>();
+    public void testDocGenerationWithNoName() {
+        documentGenService.convertToPdf("auth", Document.builder().build());
+        verify(caseDocumentClient, times(0)).getDocumentBinary(
+            authToken, "s2s token", generatedDocumentInfo.getUrl()
+        );
+    }
+
+    @Test
+    public void testDocGenerationWithNoPeriods() {
         documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
-                authToken, "s2s token", generatedDocumentInfo.getUrl()
+            authToken, "s2s token", generatedDocumentInfo.getUrl()
         );
     }
 
@@ -1389,12 +1326,12 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDeleteDocument() throws Exception {
+    public void testDeleteDocument() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
-                .builder()
-                .status("Success")
-                .build();
+            .builder()
+            .status("Success")
+            .build();
         doNothing().when(uploadService).deleteDocument(authToken, "TEST_DOCUMENT_ID");
         //When
         DocumentResponse response = documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
@@ -1403,23 +1340,24 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testDeleteDocumentException() throws Exception {
+    public void testDeleteDocumentException() {
         //Given
         DocumentResponse documentResponse = DocumentResponse
             .builder()
             .status("Success")
             .build();
-        doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(any(),any());
+        doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(any(),
+                                                                                                            any());
 
         assertExpectedException(() -> {
             documentGenService
                 .deleteDocument(authToken, "TEST_DOCUMENT_ID");
-        }, RuntimeException.class,"Exception while delete document");
+        }, RuntimeException.class, "Exception while delete document");
 
     }
 
     @Test
-    public void testDownloadDocument() throws Exception {
+    public void testDownloadDocument() {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
@@ -1429,12 +1367,12 @@ public class DocumentGenServiceTest {
         )).thenReturn(expectedResponse);
 
         //When
-        ResponseEntity<?> response =  documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
+        ResponseEntity<?> response = documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
         //Then
         assertEquals(OK, response.getStatusCode());
     }
 
-    @Test (expected = RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void testDownloadDocumentThrowException() {
         when(uploadService.downloadDocument(authToken, "TEST_DOCUMENT_ID"
         )).thenThrow(RuntimeException.class);
@@ -1455,8 +1393,10 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
 
-        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(authToken,
-                                                                                                       c100CaseData);
+        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(
+            authToken,
+            c100CaseData
+        );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
         assertTrue(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
@@ -1475,8 +1415,10 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
 
-        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(authToken,
-                                                                                                       c100CaseData);
+        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(
+            authToken,
+            c100CaseData
+        );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
         assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
@@ -1485,18 +1427,21 @@ public class DocumentGenServiceTest {
     public void testGenerateDocumentsForCitizen() throws Exception {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
-                .builder().isGenEng(true).build());
+                                                                                   .builder().isGenEng(true).build());
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         //When
-        Map<String, Object> response = documentGenService.generateDocumentsForCitizenSubmission(authToken, c100CaseData);
+        Map<String, Object> response = documentGenService.generateDocumentsForCitizenSubmission(
+            authToken,
+            c100CaseData
+        );
         //Then
         assertEquals(Yes.toString(), response.get(IS_ENG_DOC_GEN));
     }
 
     @Test
     public void testSingleDocGenerationForEnglish() throws Exception {
-        documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_ENGLISH, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_RESPONDENT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
@@ -1527,9 +1472,20 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateC8DocumentForRespondent() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
-        respondentDetails.put("dynamic_fileName","test.pdf");
-        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false, respondentDetails);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any());
+        respondentDetails.put("dynamic_fileName", "test.pdf");
+        documentGenService.generateSingleDocument(
+            "auth",
+            c100CaseData,
+            DOCUMENT_COVER_SHEET_HINT,
+            false,
+            respondentDetails
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 
     @Test
@@ -1546,9 +1502,12 @@ public class DocumentGenServiceTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
-        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataNotIssued);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataNotIssued);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataNotIssued);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataNotIssued);
 
@@ -1575,7 +1534,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", "Your position statements");
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1586,7 +1545,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1597,32 +1556,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName("test-position-stmt.docx")
-                                   .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1639,7 +1572,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", YOUR_WITNESS_STATEMENTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1650,7 +1583,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1661,32 +1594,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1703,7 +1610,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", OTHER_WITNESS_STATEMENTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1714,7 +1621,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1725,32 +1632,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1767,7 +1648,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", MEDICAL_RECORDS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1778,7 +1659,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1789,32 +1670,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1831,7 +1686,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", MAIL_SCREENSHOTS_MEDIA_FILES);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1842,7 +1697,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1853,32 +1708,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1895,7 +1724,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", LETTERS_FROM_SCHOOL);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1906,7 +1735,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1917,32 +1746,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -1959,7 +1762,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", TENANCY_MORTGAGE_AGREEMENTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -1970,7 +1773,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -1981,32 +1784,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2023,7 +1800,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", PREVIOUS_ORDERS_SUBMITTED);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2034,7 +1811,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2045,32 +1822,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2087,7 +1838,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", MEDICAL_REPORTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2098,7 +1849,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2109,32 +1860,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2151,7 +1876,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", PATERNITY_TEST_REPORTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2162,7 +1887,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2173,32 +1898,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2215,7 +1914,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", DRUG_AND_ALCOHOL_TESTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2226,7 +1925,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2237,32 +1936,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2279,7 +1952,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", POLICE_REPORTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2290,7 +1963,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2301,32 +1974,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2343,7 +1990,7 @@ public class DocumentGenServiceTest {
         Map<String, String> documentValues = new HashMap<>();
         documentValues.put("caseId", "1664294549087405");
         documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
         documentValues.put("documentType", OTHER_DOCUMENTS);
         documentValues.put("partyName", "Sonali Citizen");
         documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
@@ -2354,7 +2001,7 @@ public class DocumentGenServiceTest {
             .values(documentValues)
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
@@ -2365,32 +2012,6 @@ public class DocumentGenServiceTest {
             Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-
-        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
-            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
-            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
-            .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
-            .dateCreated(LocalDate.now())
-            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(documentType.replace("Your", partyName + "'s"))
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build())
-            .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
-            .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
         verify(dgsService, times(1)).generateCitizenDocument(
@@ -2403,7 +2024,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateC7Document() throws  Exception {
+    public void testGenerateC7Document() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(123456789123L)
             .welshLanguageRequirement(Yes)
@@ -2426,9 +2047,11 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_DRAFT_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_FINAL_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_FINAL_HINT, false);
-        verify(dgsService, times(6)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService, times(8)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -2449,7 +2072,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            c100CaseData
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -2487,7 +2113,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, c100CaseDataFinal);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            c100CaseDataFinal
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -2528,7 +2157,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            fl401CaseData
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -2568,7 +2200,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, c100CaseDataC1A);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            c100CaseDataC1A
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -2609,7 +2244,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            fl401CaseData
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
@@ -2646,7 +2284,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData1);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(
+            authToken,
+            fl401CaseData1
+        );
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -2716,12 +2357,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -2743,30 +2384,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2833,12 +2452,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -2860,30 +2479,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2944,14 +2541,6 @@ public class DocumentGenServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
-            .childFullName("child")
-            .childsAge("12")
-            .isRespondentResponsibleForChild(YesOrNo.Yes)
-            .build();
-
-
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -2968,30 +2557,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -3029,9 +2596,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3054,18 +2621,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -3103,9 +2660,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3129,19 +2686,8 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -3174,9 +2720,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3197,82 +2743,6 @@ public class DocumentGenServiceTest {
             .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
-
-        documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
-    }
-
-    @Test
-    public void testGenerateDocumentsForTestingSupportForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("FL401-Final.docx")
-                               .build())
-            .applicantsFL401(applicant)
-            .respondentsFL401(applicant)
-            .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
@@ -3298,53 +2768,11 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForGetDocumentBytes() throws Exception {
+    public void testForGetDocumentBytes() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
-            .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("FL401-Final.docx")
-                               .build())
-            .applicantsFL401(applicant)
-            .respondentsFL401(applicant)
-            .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
             .build();
 
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
@@ -3361,58 +2789,12 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForGetDocumentBytesException() throws Exception {
+    public void testForGetDocumentBytesException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("FL401-Final.docx")
-                               .build())
-            .applicantsFL401(applicant)
-            .respondentsFL401(applicant)
-            .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Resource expectedResource = new ClassPathResource("documents/document.pdf");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
 
         assertExpectedException(() -> {
             documentGenService
@@ -3422,52 +2804,11 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForGetDocumentBytesFileNotFoundException() throws Exception {
+    public void testForGetDocumentBytesFileNotFoundException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
-            .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("FL401-Final.docx")
-                               .build())
-            .applicantsFL401(applicant)
-            .home(null)
-            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
             .build();
 
         Resource expectedResource = new ClassPathResource("documents/document1.pdf");
@@ -3484,27 +2825,11 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForConvertToPdf() throws Exception {
+    public void testForConvertToPdf() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
             .hashToken("testHashToken")
-            .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
@@ -3521,10 +2846,10 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(),anyString(),any()))
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenReturn(generatedDocumentInfo);
 
-        documentGenService.convertToPdf(authToken,document);
+        documentGenService.convertToPdf(authToken, document);
 
         verify(caseDocumentClient, times(1)).getDocumentBinary(
             authToken, "s2s token", generatedDocumentInfo.getUrl()
@@ -3532,27 +2857,11 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForConvertToPdfException() throws Exception {
+    public void testForConvertToPdfException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
             .hashToken("testHashToken")
-            .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         Resource expectedResource = new ClassPathResource("documents/document1.pdf");
@@ -3569,12 +2878,12 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(),anyString(),any()))
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenReturn(generatedDocumentInfo);
 
         assertExpectedException(() -> {
             documentGenService
-                .convertToPdf(authToken,document);
+                .convertToPdf(authToken, document);
         }, InvalidResourceException.class, "Doc name FL401-Final.docx");
     }
 
@@ -3615,6 +2924,245 @@ public class DocumentGenServiceTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testGenerateAndUploadDocument() throws Exception {
+        //Given
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        //When
+        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
+            Mockito.anyString(),
+            Mockito.any(DocumentRequest.class),
+            Mockito.any()
+        );
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        //Action
+        DocumentResponse documentResponse = documentGenService.generateAndUploadDocument(authToken, documentRequest);
+
+        //Then
+        assertNotNull(documentResponse);
+        assertNotNull(documentResponse.getDocument());
+        assertEquals(SUCCESS, documentResponse.getStatus());
+    }
+
+    @Test
+    public void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
+        //Given
+        documentRequest = documentRequest.toBuilder()
+            .isConfidential(Yes)
+            .isRestricted(Yes)
+            .restrictDocumentDetails("test")
+            .documents(List.of(Document.builder().build())).build();
+
+        CaseData caseData = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                         EventRequestData.builder().build(),
+                                                                                                         StartEventResponse.builder().build(),
+                                                                                                         stringObjectMap,
+                                                                                                         caseData,
+                                                                                                         null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
+            startAllTabsUpdateDataContents);
+        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
+            quarantineCaseDoc);
+        when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
+                                                                 .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
+
+        //Action
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
+            authToken,
+            documentRequest
+        );
+
+        assertNotNull(caseDetails);
+        assertNotNull(caseDetailsUpdated);
+        assertNotNull(caseDetailsUpdated.getData());
+    }
+
+    @Test
+    public void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
+        //Given
+        documentRequest = documentRequest.toBuilder()
+            .categoryId("FM5_STATEMENTS")
+            .isConfidential(No)
+            .isRestricted(No)
+            .restrictDocumentDetails("test")
+            .documents(List.of(caseDoc)).build();
+        CaseData caseData = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        //When
+        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("fm5StatementsDocument", caseDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc
+            .builder()
+            .hasTheConfidentialDocumentBeenRenamed(
+                YesOrNo.No)
+            .isConfidential(null)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test")
+                          .build())
+            .isRestricted(null)
+            .restrictedDetails(null)
+            .categoryId("test")
+            .uploaderRole("Citizen")
+            .build();
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
+            quarantineLegalDoc);
+        when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
+                                                                 .roles(List.of(Roles.CITIZEN.getValue())).build());
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
+            startAllTabsUpdateDataContents);
+
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
+
+        //Action
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
+            authToken,
+            documentRequest
+        );
+
+        //Then
+        assertNotNull(caseDetails);
+        //CORRECT ASSERTIONS LATER
+        assertNotNull(caseDetailsUpdated);
+        assertNotNull(caseDetailsUpdated.getData());
+
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetServeOrderTemplate", "citizen_cover_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_en", template);
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateWelsh() {
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "docCoverSheetWelshServeOrderTemplate",
+            "citizen_cover_letter_wel"
+        );
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_wel", template);
+    }
+
+    @Test
+    public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
+                                                                            .builder()
+                                                                            .newAllegationsOfHarmYesNo(Yes).build())
+            .allegationOfHarm(null).build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(
+            authToken,
+            c100CaseData
+        );
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+    }
+
+    @Test
+    public void testGenerateDraftDocumentsForCaseResubmissionTest2() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+
+        c100CaseData = c100CaseData.toBuilder()
+            .applicantsConfidentialDetails(new ArrayList<>())
+            .childrenConfidentialDetails(new ArrayList<>())
+            .allegationOfHarmRevised(AllegationOfHarmRevised
+                                         .builder().newAllegationsOfHarmYesNo(No).build()).allegationOfHarm(null).build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(
+            authToken,
+            c100CaseData
+        );
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
     }
 }
 

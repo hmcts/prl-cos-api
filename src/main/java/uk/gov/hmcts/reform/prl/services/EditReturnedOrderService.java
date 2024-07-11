@@ -176,6 +176,7 @@ public class EditReturnedOrderService {
                 Event.EDIT_RETURNED_ORDER.getId()
             ));
         }
+        caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftOrder.getLabelForOrdersDynamicList());
         return caseDataMap;
     }
 

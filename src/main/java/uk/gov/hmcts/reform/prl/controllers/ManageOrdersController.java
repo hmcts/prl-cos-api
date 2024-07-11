@@ -200,7 +200,7 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
@@ -426,7 +426,6 @@ public class ManageOrdersController {
             }
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

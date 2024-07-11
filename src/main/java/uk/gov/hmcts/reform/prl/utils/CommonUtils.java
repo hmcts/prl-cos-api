@@ -124,9 +124,7 @@ public class CommonUtils {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null
-                && (caseData.getApplicantsFL401().getRepresentativeFirstName() != null
-                || caseData.getApplicantsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
@@ -137,9 +135,7 @@ public class CommonUtils {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null
-                && (caseData.getRespondentsFL401().getRepresentativeFirstName() != null
-                || caseData.getRespondentsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null) {
                 caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
@@ -148,7 +144,7 @@ public class CommonUtils {
         }
     }
 
-    private static UUID generateUuid() {
+    public static UUID generateUuid() {
         return UUID.randomUUID();
     }
 
