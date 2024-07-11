@@ -1157,7 +1157,7 @@ public class CaseService {
             categoryId
         )) {
             citizenNotifications.add(CitizenNotification.builder()
-                                         .respondentNames(
+                                         .partyNames(
                                              respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
                                                                                         categoryId))
                                          .id(notificationType).show(true).build());
