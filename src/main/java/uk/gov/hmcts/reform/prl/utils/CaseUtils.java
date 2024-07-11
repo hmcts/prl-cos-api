@@ -663,6 +663,10 @@ public class CaseUtils {
         return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
     }
 
+    public static String getPartyIdListAsString(List<Element<PartyDetails>> parties) {
+        return String.join("," , parties.stream().map(Element::getId).map(uuid -> uuid.toString()).toList());
+    }
+
     public static boolean isCaseWithoutNotice(CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {

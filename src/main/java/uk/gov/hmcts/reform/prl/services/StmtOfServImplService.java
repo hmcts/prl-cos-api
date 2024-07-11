@@ -71,6 +71,7 @@ public class StmtOfServImplService {
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL = "Respondent has been served personally by Court through email";
     private static final String BY_POST = "By post";
     public static final String UN_SERVED_RESPONDENT_PACK = "unServedRespondentPack";
+    public static final String UNSERVED_CITIZEN_RESPONDENT_PACK = "unservedCitizenRespondentPack";
     public static final String STMT_OF_SERVICE_FOR_APPLICATION = "stmtOfServiceForApplication";
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -126,7 +127,7 @@ public class StmtOfServImplService {
                     String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(null)
-                        .selectedPartyId("00000000-0000-0000-0000-000000000000")
+                        .selectedPartyId(CaseUtils.getPartyIdListAsString(caseData.getRespondents()))
                         .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                         .servedDateTimeOption(recipient.getServedDateTimeOption())
@@ -315,30 +316,6 @@ public class StmtOfServImplService {
                                                                    caseData.getRespondents(),
                                                                    caseData.getRespondentsFL401()))
                                              .build()));
-        } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
-            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            List<Element<Document>> packDocs = new ArrayList<>();
-            caseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
-                                                                                     Templates.PRL_LET_ENG_RE5
-                    )));
-                }
-            });
-            packDocs.addAll(unServedRespondentPack.getPackDocument());
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty("Applicant Lip")
-                                             .bulkPrintId("Respondent will be served personally by Applicant LIP")
-                                             .printedDocs(String.join(",", packDocs.stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                             .partyIds(getPartyIds(caseTypeOfApplication,
-                                                                   caseData.getRespondents(),
-                                                                   caseData.getRespondentsFL401()))
-                                             .build()));
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -367,9 +344,8 @@ public class StmtOfServImplService {
             = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
-        log.info("Unserved respondent pack {}", updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK));
-        if (null != updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK)
-            && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())) {
+        if (null != updatedCaseDataMap.get(UNSERVED_CITIZEN_RESPONDENT_PACK)
+            && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument())) {
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
             updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
@@ -381,7 +357,9 @@ public class StmtOfServImplService {
                     sosObject.getPartiesServed(),
                     updatedCaseDataMap
                 );
-                updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
+                updatedCaseDataMap.put(UNSERVED_CITIZEN_RESPONDENT_PACK,
+                                       updateUnserVedCitizenRespondentPack(sosObject.getPartiesServed(), updatedCaseData.getServiceOfApplication()
+                                           .getUnservedCitizenRespondentPack()));
             }
         }
         allTabService.submitAllTabsUpdate(
@@ -393,10 +371,15 @@ public class StmtOfServImplService {
         );
     }
 
+    private SoaPack updateUnserVedCitizenRespondentPack(List<String> partiesServed, SoaPack unservedCitizenRespondentPack) {
+        unservedCitizenRespondentPack.getPartyIds().stream().map(Element::getValue).toList().removeAll(partiesServed);
+        return CollectionUtils.isNotEmpty(unservedCitizenRespondentPack.getPartyIds()) ? unservedCitizenRespondentPack : null;
+    }
+
     private void updateFinalListOfServedApplications(String authorisation, String authorization,
                                                      CaseData updatedCaseData, List<String> partiesList, Map<String, Object> updatedCaseDataMap) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument();
+        List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument();
         List<String> partiesServed = new ArrayList<>();
         List<Element<NotificationDetails>> notifications = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
@@ -429,7 +412,9 @@ public class StmtOfServImplService {
                                                           .modeOfService(BY_POST)
                                                           .whoIsResponsible("Applicant Lip")
                                                           .bulkPrintDetails(List.of(element(BulkPrintDetails.builder()
-                                                                                .bulkPrintId("Application personally served by applicant Lip")
+                                                                                .bulkPrintId("Application personally served by "
+                                                                                                 + userService.getUserDetails(authorisation)
+                                                                                    .getFullName())
                                                                                 .servedParty(String.join(",", partiesServed))
                                                                                 .printedDocs(String.join(",", unwrapElements(packDocs).stream()
                                                                                     .filter(Objects::nonNull)
