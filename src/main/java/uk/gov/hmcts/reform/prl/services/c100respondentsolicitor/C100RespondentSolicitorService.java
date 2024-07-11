@@ -17,7 +17,11 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -42,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -101,6 +106,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.communicationHelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.documentsHelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.docsprint;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.largeprintdocs;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum.signlanguage;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.commhelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.docsformat;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.nosupport;
 import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -121,6 +135,7 @@ public class C100RespondentSolicitorService {
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
     public static final String TASK_LIST_VERSION = "taskListVersion";
+    private static final String COLON = ";";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -1231,7 +1246,9 @@ public class C100RespondentSolicitorService {
                 null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
                 ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
-        if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+        log.info("Almost here");
+        if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            log.info("found citizen as a source");
             populateCitizenAttendingTheHearingDataMap(response, dataMap);
         } else {
             dataMap.put("attendingTheCourt", response.getAttendToCourt());
@@ -1407,6 +1424,18 @@ public class C100RespondentSolicitorService {
                     .build();
             }
 
+            List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
+            if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
+                log.info("reasonableAdjustmentsEnumList processed");
+                attendToCourt = attendToCourt.toBuilder()
+                    .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
+                    .disabilityNeeds(
+                        buildDisabilityNeeds(
+                            response.getSupportYouNeed()
+                        ))
+                    .build();
+            }
+
             dataMap.put("attendingTheCourt", attendToCourt);
         }
     }
@@ -1447,6 +1476,169 @@ public class C100RespondentSolicitorService {
             .filter(x -> x.getId().equalsIgnoreCase(noSafetyrequirements.getId()))
             .findFirst();
         return safetyArrangementsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
+    }
+
+    private static YesOrNo buildHaveAnyDisability(List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums) {
+        Optional<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnum
+            = reasonableAdjustmentsEnums
+            .stream()
+            .filter(x -> x.getId().equalsIgnoreCase(nosupport.getId()))
+            .findFirst();
+        return reasonableAdjustmentsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
+    }
+
+    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed) {
+        List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums = supportYouNeed.getReasonableAdjustments();
+        StringBuilder adjustmentRequired = new StringBuilder();
+        String documentInformation;
+        String communicationHelpDetails;
+        String extraSupportDetails;
+        String feelComfortableSupportDetails;
+        String helpTravellingMovingBuildingSupportDetails;
+        if (reasonableAdjustmentsEnums.contains(nosupport)) {
+            return nosupport.getDisplayedValue();
+        }
+        if (reasonableAdjustmentsEnums.contains(docsformat)) {
+            documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed);
+            adjustmentRequired.append(documentsHelp.getDisplayedValue()).append(COLON).append(documentInformation);
+        }
+        if (reasonableAdjustmentsEnums.contains(commhelp)) {
+            communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(communicationHelp.getDisplayedValue()).append(COLON)
+                .append(communicationHelpDetails);
+        }
+        /*if (reasonableAdjustmentsEnums.contains(hearingsupport.name())) {
+            extraSupportDetails = buildExtraSupport(c100RebuildReasonableAdjustmentsElements
+                                                        .getSupportCourt(), c100RebuildReasonableAdjustmentsElements);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(extraSupport.getDisplayedValue()).append(COLON)
+                .append(extraSupportDetails);
+        }
+        if (reasonableAdjustmentsEnums.contains(hearingcomfort.name())) {
+            feelComfortableSupportDetails = buildFeelComfortableSupport(c100RebuildReasonableAdjustmentsElements
+                                                                            .getFeelComfortable(), c100RebuildReasonableAdjustmentsElements);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(feelComfortableSupport.getDisplayedValue()).append(COLON)
+                .append(feelComfortableSupportDetails);
+        }
+        if (reasonableAdjustmentsEnums.contains(travellinghelp.name())) {
+            helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(c100RebuildReasonableAdjustmentsElements
+                                                                                                      .getTravellingCourt(),
+                                                                                                       c100RebuildReasonableAdjustmentsElements);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(helpTravellingMovingBuildingSupport.getDisplayedValue()).append(COLON)
+                .append(helpTravellingMovingBuildingSupportDetails);
+        }*/
+        return String.valueOf(adjustmentRequired);
+    }
+
+    /*private static String buildHelpTravellingMovingBuildingSupport(String[] travellingCourt,
+                                                                   C100RebuildReasonableAdjustmentsElements c100RaElements) {
+        return Arrays.stream(travellingCourt).toList().stream()
+            .map(element -> buildTravellingCourtElement(element,
+                                                        c100RaElements.getParkingSpaceSubField(),
+                                                        c100RaElements.getDifferentTypeChairSubField(),
+                                                        c100RaElements.getTravellingCourtOtherSubField()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }*/
+
+    /*private static String buildTravellingCourtElement(String element, String parkingSpaceSubField,
+                                                      String differentTypeChairSubField, String travellingCourtOtherSubField) {
+        if (parkingSpace.name().equalsIgnoreCase(element)) {
+            return parkingSpace.getDisplayedValue() + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
+        } else if (differentTypeChair.name().equalsIgnoreCase(element)) {
+            return differentTypeChair.getDisplayedValue() + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
+        } else if (travellingCourtOther.name().equalsIgnoreCase(element)) {
+            return travellingCourtOther.getDisplayedValue() + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
+        } else {
+            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+        }
+    }*/
+
+    /*private static String buildFeelComfortableSupport(String[] feelComfortable,
+                                                      C100RebuildReasonableAdjustmentsElements c100RaElements) {
+        return Arrays.stream(feelComfortable).toList().stream()
+            .map(element -> buildFeelComfortableElement(element,
+                                                        c100RaElements.getAppropriateLightingSubField(),
+                                                        c100RaElements.getFeelComfortableOtherSubField()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }*/
+
+    /*private static String buildFeelComfortableElement(String element, String appropriateLightingSubField,
+                                                      String feelComfortableOtherSubField) {
+        if (appropriateLighting.name().equalsIgnoreCase(element)) {
+            return appropriateLighting.getDisplayedValue() + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
+        } else if (feelComportableOther.name().equalsIgnoreCase(element)) {
+            return feelComportableOther.getDisplayedValue() + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
+        } else {
+            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+        }
+    }*/
+
+    /*private static String buildExtraSupport(String[] supportCourt, C100RebuildReasonableAdjustmentsElements
+        c100RaElements) {
+        return Arrays.stream(supportCourt).toList().stream()
+            .map(element -> buildSupportCourtElement(element,
+                                                     c100RaElements.getSupportWorkerCarerSubField(),
+                                                     c100RaElements.getFriendFamilyMemberSubField(),
+                                                     c100RaElements.getTherapyAnimalSubField(),
+                                                     c100RaElements.getSupportCourtOtherSubField()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }*/
+
+    /*private static String buildSupportCourtElement(String element, String supportWorkerCarerSubField,
+                                                   String friendFamilyMemberSubField, String therapyAnimalSubField,
+                                                   String supportCourtOtherSubField) {
+        if (supportWorkerCarer.name().equalsIgnoreCase(element)) {
+            return supportWorkerCarer.getDisplayedValue() + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
+        } else if (friendFamilyMember.name().equalsIgnoreCase(element)) {
+            return friendFamilyMember.getDisplayedValue() + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
+        } else if (therapyAnimal.name().equalsIgnoreCase(element)) {
+            return therapyAnimal.getDisplayedValue() + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
+        } else if (supportCourtOther.name().equalsIgnoreCase(element)) {
+            return supportCourtOther.getDisplayedValue() + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
+        } else {
+            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+        }
+    }*/
+
+    private static String buildCommunicationHelp(List<HelpCommunicationEnum> communicationHelp, ReasonableAdjustmentsSupport
+        support) {
+        return communicationHelp.stream()
+            .map(element -> buildCommunicationHelpElement(element.getDisplayedValue(),
+                                                          support.getSignLanguageDetails(),
+                                                          support.getDescribeOtherNeed()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildCommunicationHelpElement(String element, String signLanguageInterpreterDetails,
+                                                        String communicationHelpOtherDetails) {
+        if (signlanguage.name().equalsIgnoreCase(element)) {
+            return signlanguage.getDisplayedValue() + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
+        } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element)) {
+            return HelpCommunicationEnum.other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
+        } else {
+            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+        }
+    }
+
+    private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed) {
+        return documentInformation.stream()
+            .map(element -> buildDocumentInformationElement(element,
+                                                            supportYouNeed.getDocsDetails(),
+                                                            supportYouNeed.getLargePrintDetails(),
+                                                            supportYouNeed.getOtherDetails()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildDocumentInformationElement(DocsSupportEnum element, String specifiedColorDocumentsDetails,
+                                                          String largePrintDocumentsDetails, String otherDetails) {
+        if (docsprint.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return docsprint.getDisplayedValue() + OPEN_BRACKET + specifiedColorDocumentsDetails + CLOSE_BRACKET;
+        } else if (largeprintdocs.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return largeprintdocs.getDisplayedValue() + OPEN_BRACKET + largePrintDocumentsDetails + CLOSE_BRACKET;
+        } else if (other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
+        } else {
+            return DisabilityRequirementEnum.valueOf(element.getDisplayedValue()).getDisplayedValue();
+        }
     }
 
     private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
