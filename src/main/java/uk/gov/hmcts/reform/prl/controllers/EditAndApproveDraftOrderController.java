@@ -240,13 +240,14 @@ public class EditAndApproveDraftOrderController {
 
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
-            draftAnOrderService.getApprovedDraftOrderNameForWA(caseData)
+            draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())
         );
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
             callbackRequest.getEventId()
         ));
+
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
