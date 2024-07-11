@@ -100,6 +100,7 @@ public class CallbackControllerFunctionalTest {
         if (preCreatedCaseId == null) {
             try {
                 preCreatedCaseId = createCcdTestCase();
+                log.info("preCreatedCaseId: {}", preCreatedCaseId);
             } catch (Exception e) {
                 log.error("Error while creating Ccd Case", e);
             }
