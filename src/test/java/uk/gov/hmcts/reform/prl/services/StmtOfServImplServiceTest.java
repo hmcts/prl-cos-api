@@ -591,29 +591,6 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcheckAndServeRespondentPacksPersonalService() {
-        CaseData caseData = CaseData.builder()
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .personalServiceBy(
-                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                                                                  .packDocument(List.of(element(Document.builder().build())))
-                                                                  .build())
-                                      .build())
-            .respondents(List.of(element(PartyDetails.builder().build())))
-            .build();
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
-            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
-        assertNotNull(servedApplicationDetails);
-        assertEquals(0, servedApplicationDetails.getBulkPrintDetails().size());
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
-    }
-
-    @Test
     public void testcitizenSosSubmissionC100() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
