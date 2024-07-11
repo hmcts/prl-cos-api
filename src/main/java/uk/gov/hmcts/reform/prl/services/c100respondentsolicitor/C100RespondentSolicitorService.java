@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
@@ -1615,7 +1614,7 @@ public class C100RespondentSolicitorService {
         } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element)) {
             return HelpCommunicationEnum.other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
         } else {
-            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+            return HelpCommunicationEnum.valueOf(element).getDisplayedValue();
         }
     }
 
@@ -1637,7 +1636,7 @@ public class C100RespondentSolicitorService {
         } else if (other.name().equalsIgnoreCase(element.getDisplayedValue())) {
             return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
         } else {
-            return DisabilityRequirementEnum.valueOf(element.getDisplayedValue()).getDisplayedValue();
+            return DocsSupportEnum.valueOf(element.getDisplayedValue()).getDisplayedValue();
         }
     }
 
