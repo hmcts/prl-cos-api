@@ -108,6 +108,7 @@ public class TaskListRenderer {
 
         lines.addAll(renderTasksErrors(tasksErrors));
 
+
         return String.join("\n\n", lines);
     }
 
@@ -259,10 +260,10 @@ public class TaskListRenderer {
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
             .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
                           + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
-            .withTask(tasks.get(CHILD_DETAILS_REVISED))
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
+            .withTask(tasks.get(CHILD_DETAILS_REVISED))
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships")
@@ -271,10 +272,6 @@ public class TaskListRenderer {
             .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
             .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
             .withErrors(List.of(EventValidationErrors
-                                    .builder()
-                                    .event(CHILD_DETAILS_REVISED)
-                                    .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR.getError()))
-                                    .build(),EventValidationErrors
                                     .builder()
                                     .event(APPLICANT_DETAILS)
                                     .errors(Collections.singletonList(EventErrorsEnum.APPLICANTS_DETAILS_ERROR.getError()))
@@ -286,6 +283,10 @@ public class TaskListRenderer {
                                     .builder()
                                     .event(OTHER_PEOPLE_IN_THE_CASE_REVISED)
                                     .errors(Collections.singletonList(EventErrorsEnum.OTHER_PEOPLE_REVISED_ERROR.getError()))
+                                    .build(), EventValidationErrors
+                                    .builder()
+                                    .event(CHILD_DETAILS_REVISED)
+                                    .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR.getError()))
                                     .build()));
 
         final TaskSection requiredDetails = newSection(ADD_REQUIRED_DETAILS)
