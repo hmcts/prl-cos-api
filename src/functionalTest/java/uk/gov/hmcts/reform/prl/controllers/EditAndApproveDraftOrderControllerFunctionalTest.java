@@ -127,13 +127,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenJudge_admin_populate_draft_order_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("orderName", "C21");
-        caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
-        Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any(),
-                                                                    ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(caseDataMap);
+
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
 
         String requestBodyRevised = requestBody

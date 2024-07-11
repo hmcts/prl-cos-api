@@ -5041,45 +5041,6 @@ public class DraftAnOrderServiceTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
         DraftOrder draftOrder = DraftOrder.builder()
-            .typeOfOrder(CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue())
-            .orderTypeId(CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue())
-            .manageOrderHearingDetails(List.of(element(HearingData.builder()
-
-                                                           .confirmedHearingDates(DynamicList.builder().build()).build())))
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy("test title")
-                              .dateCreated(nowTime)
-                              .build())
-            .build();
-
-        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(
-            "ecc87361-d2bb-4400-a910-e5754888385b"))
-            .value(draftOrder).build();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
-            .draftOrderCollection(draftOrderCollection)
-            .build();
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
-            TEST_UUID));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
-        assertNotNull(name);
-        assertTrue(name.contains(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue()));
-        assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
-            PrlAppsConstants.D_MMM_YYYY_HH_MM,
-            Locale.ENGLISH
-        ))));
-    }
-
-    @Test
-    public void testOrderNameForWaFieldInDraftOrderJourney() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-        LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
-        DraftOrder draftOrder = DraftOrder.builder()
             .typeOfOrder(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue())
             .orderTypeId(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue())
             .manageOrderHearingDetails(List.of(element(HearingData.builder()
@@ -5114,6 +5075,7 @@ public class DraftAnOrderServiceTest {
             Locale.ENGLISH
         ))));
     }
+
 
     @Test
     public void testOrderNameForWaFieldInDraftUploadOrderJourney() {

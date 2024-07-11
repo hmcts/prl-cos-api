@@ -2187,6 +2187,7 @@ public class DraftAnOrderService {
         }
         List<Element<DraftOrder>> draftOrderCollection = generateDraftOrderCollection(caseData, authorisation);
         caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+        caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderCollection.get(0).getId());
         caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, callbackRequest.getEventId()));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
