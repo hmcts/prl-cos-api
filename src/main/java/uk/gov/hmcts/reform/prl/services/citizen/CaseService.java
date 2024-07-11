@@ -474,8 +474,8 @@ public class CaseService {
                                                               Map<String, String> partyIdAndType) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
-        if (caseData.getState().equals(PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            || caseData.getState().equals(DECISION_OUTCOME)) {
+        if (PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
+            || DECISION_OUTCOME.equals(caseData.getState())) {
 
             if (!partyIdAndType.isEmpty()) {
                 citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
