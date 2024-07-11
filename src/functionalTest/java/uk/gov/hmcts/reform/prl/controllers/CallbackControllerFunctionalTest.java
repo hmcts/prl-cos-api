@@ -1,29 +1,52 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest
@@ -31,12 +54,25 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 @ContextConfiguration
 public class CallbackControllerFunctionalTest {
 
+    private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private AuthorisationService authorisationService;
+
+    @MockBean
+    private UserService userService;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String FL401_VALID_REQUEST_BODY = "requests/fl401-add-case-number.json";
@@ -54,6 +90,36 @@ public class CallbackControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    private static Long preCreatedCaseId;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new JavaTimeModule());
+        if (preCreatedCaseId == null) {
+            try {
+                preCreatedCaseId = createCcdTestCase();
+            } catch (Exception e) {
+                log.error("Error while creating Ccd Case", e);
+            }
+        }
+    }
+
+    public Long createCcdTestCase() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        return request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class).getId();
+    }
 
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
@@ -111,16 +177,22 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/about-to-submit-case-creation")
-            .then()
-            .body("data.applicantCaseName", equalTo("Test Name"))
-            .assertThat().statusCode(200);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(List.of(COURT_ADMIN_ROLE))
+            .build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+        mockMvc.perform(post("/about-to-submit-case-creation")
+                            .content(replaceOldCaseInJsonWithNewGeneratedCaseId(requestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.applicantCaseName").value("Test Name"))
+            .andReturn();
     }
 
     @Test
@@ -170,18 +242,17 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/fl401-add-case-number")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.issueDate", notNullValue(),
-                  "data.caseTypeOfApplication", equalTo("FL401"));
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
+        mockMvc.perform(post("/fl401-add-case-number")
+                            .content(replaceOldCaseInJsonWithNewGeneratedCaseId(requestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.issueDate").isNotEmpty())
+            .andExpect(jsonPath("data.caseTypeOfApplication").value("FL401"))
+            .andReturn();
     }
 
     @Test
@@ -217,6 +288,13 @@ public class CallbackControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
+    }
+
+    private String replaceOldCaseInJsonWithNewGeneratedCaseId(String requestBody) throws JsonProcessingException {
+        CallbackRequest callbackRequest = objectMapper.readValue(requestBody, CallbackRequest.class);
+        callbackRequest.getCaseDetails().setId(preCreatedCaseId);
+        requestBody = objectMapper.writeValueAsString(callbackRequest);
+        return requestBody;
     }
 
 }

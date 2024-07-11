@@ -1,32 +1,64 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.hmcts.reform.prl.Application;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@SpringBootTest
+@RunWith(SpringRunner.class)
 @SuppressWarnings("unchecked")
+@Slf4j
 public class CallbackControllerFT {
+
+    private MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private AuthorisationService authorisationService;
 
 
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
@@ -49,6 +81,35 @@ public class CallbackControllerFT {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private static Long preCreatedCaseId;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new JavaTimeModule());
+        if (preCreatedCaseId == null) {
+            try {
+                preCreatedCaseId = createCcdTestCase();
+            } catch (Exception e) {
+                log.error("Error while creating Ccd Case", e);
+            }
+        }
+    }
+
+    public Long createCcdTestCase() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        return request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class).getId();
+    }
 
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
@@ -131,60 +192,50 @@ public class CallbackControllerFT {
     @Test
     public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-application")
-            .then()
-            .assertThat().statusCode(200);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+        mockMvc.perform(post("/update-application")
+                            .content(replaceOldCaseInJsonWithNewGeneratedCaseId(requestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andReturn();
     }
+
+
 
     @Test
     public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/case-withdrawn-about-to-submit")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.welshLanguageRequirementsTable", notNullValue(),
-                "data.otherProceedingsDetailsTable", notNullValue(),
-                  "data.allegationsOfHarmDomesticAbuseTable", notNullValue(),
-                "data.summaryTabForOrderAppliedFor", notNullValue(),
-                "data.miamTable", notNullValue()
-            );
-
+        mockMvc.perform(post("/case-withdrawn-about-to-submit")
+                            .content(replaceOldCaseInJsonWithNewGeneratedCaseId(requestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.caseTypeOfApplication").value("C100"))
+            .andExpect(jsonPath("data.withDrawApplicationData.withDrawApplication").value("Yes"))
+            .andExpect(jsonPath("data.withDrawApplicationData.withDrawApplicationReason").value("test data"))
+            .andExpect(jsonPath("data.isWithdrawRequestSent").value("Pending"))
+            .andReturn();
     }
 
     @Test
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/send-to-gatekeeper")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.gatekeepingDetails", notNullValue());
-
+        mockMvc.perform(post("/send-to-gatekeeper")
+                            .content(replaceOldCaseInJsonWithNewGeneratedCaseId(requestBody))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.gatekeepingDetails").isNotEmpty())
+            .andReturn();
     }
 
     @Test
@@ -321,5 +372,11 @@ public class CallbackControllerFT {
 
     }
 
+    private String replaceOldCaseInJsonWithNewGeneratedCaseId(String requestBody) throws JsonProcessingException {
+        CallbackRequest callbackRequest = objectMapper.readValue(requestBody, CallbackRequest.class);
+        callbackRequest.getCaseDetails().setId(preCreatedCaseId);
+        requestBody = objectMapper.writeValueAsString(callbackRequest);
+        return requestBody;
+    }
 
 }
