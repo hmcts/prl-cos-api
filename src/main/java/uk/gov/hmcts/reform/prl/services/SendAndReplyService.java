@@ -686,7 +686,7 @@ public class SendAndReplyService {
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
         final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
-        Message newMessage = Message.builder()
+        return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
@@ -722,8 +722,6 @@ public class SendAndReplyService {
             .replyHistory(null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
-
-        return newMessage;
     }
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
