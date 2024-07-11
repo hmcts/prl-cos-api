@@ -33,10 +33,9 @@ public class ServiceOfApplication {
 
     @JsonProperty("soaServeToRespondentOptions")
     private final YesOrNo soaServeToRespondentOptions;
-    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
-    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
-    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
-    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptions;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptions;
+
     @JsonProperty("soaRecipientsOptions")
     private final DynamicMultiSelectList soaRecipientsOptions;
     private final DynamicMultiSelectList soaOtherParties;
@@ -69,4 +68,12 @@ public class ServiceOfApplication {
     private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
     @JsonProperty("isConfidential")
     private final YesOrNo isConfidential;
+
+    /*
+    * The below fields are no longer used in the SOA.
+    * */
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
 }
