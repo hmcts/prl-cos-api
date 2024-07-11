@@ -264,6 +264,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -395,6 +396,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -589,7 +591,6 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
-        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
