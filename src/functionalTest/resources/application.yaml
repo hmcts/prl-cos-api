@@ -229,7 +229,6 @@ idam:
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
-    scope: openid profile roles manage-user
     authorize:
       context-path: /oauth2/authorize
     token:
