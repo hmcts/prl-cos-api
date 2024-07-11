@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
@@ -1179,8 +1180,7 @@ public class C100RespondentSolicitorService {
                                               Response response,
                                               String requestOriginatedFrom) {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
-        List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
-        dataMap.put("respondentsExistingProceedings", proceedingsList);
+
         populateAohDataMap(response, dataMap);
         populateRespondToAohDataMap(response, dataMap);
         //citizen current or previous proceeding data
@@ -1197,17 +1197,17 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("signedBy", solicitorRepresentedRespondent.getValue().getLabelForDynamicList());
         dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-        dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
+        dataMap.put(
+            "consentToTheApplication",
+            getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
+        );
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
         dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
         dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put(
-            "currentOrPastProceedingsForChildren",
-            response.getCurrentOrPastProceedingsForChildren() != null ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
-        );
+
         if (response.getCitizenInternationalElements() != null) {
             dataMap.put(
                 "reasonForChild",
@@ -1245,16 +1245,38 @@ public class C100RespondentSolicitorService {
             );
         }
         dataMap.put(
-                "solicitorRepresented",
-                null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
-                ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
+            "solicitorRepresented",
+            null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
+        );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+
         log.info("Almost here");
         if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
             log.info("found citizen as a source");
             populateCitizenAttendingTheHearingDataMap(response, dataMap);
+            if (response.getCurrentOrPreviousProceedings() != null) {
+                List<Element<Proceedings>> proceedingsList
+                    = response.getCurrentOrPreviousProceedings().getProceedingsList();
+                dataMap.put("currentOrPreviousProceedings", proceedingsList);
+                dataMap.put(
+                    "haveChildrenBeenInvolvedInCourtCase",
+                    response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase()
+                );
+                dataMap.put(
+                    "courtOrderMadeForProtection",
+                    response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection()
+                );
+            }
         } else {
             dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
+            dataMap.put("respondentsExistingProceedings", proceedingsList);
+            dataMap.put(
+                "currentOrPastProceedingsForChildren",
+                response.getCurrentOrPastProceedingsForChildren() != null
+                    ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
+            );
         }
         if (null != response.getResponseToAllegationsOfHarm()
             && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
