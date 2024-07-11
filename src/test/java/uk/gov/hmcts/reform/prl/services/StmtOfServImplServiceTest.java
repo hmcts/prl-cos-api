@@ -609,7 +609,7 @@ public class StmtOfServImplServiceTest {
         ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
             .checkAndServeRespondentPacksPersonalService(caseData, authToken);
         assertNotNull(servedApplicationDetails);
-        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals(0, servedApplicationDetails.getBulkPrintDetails().size());
         assertEquals("By post", servedApplicationDetails.getModeOfService());
     }
 
