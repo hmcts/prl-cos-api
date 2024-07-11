@@ -52,9 +52,12 @@ public enum Event {
     FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
+
+    //Other events which are not relevant to task list
     TS_SOLICITOR_APPLICATION("testingSupportDummySolicitorCreate", "TS-Solicitor application"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyAdminCreateNoc", "TS-Admin application-Noc"),
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve an order"),
+    REMOVE_DRAFT_ORDER("removeDraftOrder", "Remove draft order"),
     DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
     UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
@@ -64,6 +67,7 @@ public enum Event {
     CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
     ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
     SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
+    TS_CA_URGENT_CASE("testingSupportCAUrgentCases", "TS-Urgent case"),
     AMEND_MIAM_POLICY_UPGRADE("amendMiamPolicyUpgrade", "Amend MIAM"),
     SOLICITOR_CREATE("solicitorCreate", "Solicitor application");
 
@@ -96,10 +100,10 @@ public enum Event {
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
-                CHILD_DETAILS_REVISED,
                 APPLICANT_DETAILS,
                 RESPONDENT_DETAILS,
                 OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                CHILD_DETAILS_REVISED,
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 CHILDREN_AND_APPLICANTS,
                 CHILDREN_AND_RESPONDENTS,

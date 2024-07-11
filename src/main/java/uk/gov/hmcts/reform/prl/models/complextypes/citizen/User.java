@@ -12,4 +12,5 @@ public class User {
     private String idamId;
     private String email;
     private final YesOrNo solicitorRepresented;
+    private String pcqId;
 }

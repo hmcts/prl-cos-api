@@ -16,14 +16,15 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -110,7 +111,7 @@ public class CafCassCaseData {
         try {
             if (otherDocuments != null) {
                 List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
-                    .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).collect(Collectors.toList());
+                    .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).toList();
                 this.otherDocuments = updatedOtherDocumentList;
             }
         } catch (Exception e) {
@@ -125,8 +126,6 @@ public class CafCassCaseData {
                 && !ObjectUtils.isEmpty(otherDocumentsElement.getValue().getDocumentOther())
                 && StringUtils.hasText(otherDocumentsElement.getValue().getDocumentOther().getDocumentUrl())) {
                 Document documentOther = otherDocumentsElement.getValue().getDocumentOther();
-                URL url = new URL(documentOther.getDocumentUrl());
-                documentOther.setDocumentUrl(getDocumentId(url));
                 otherDocumentsElement.getValue().setDocumentOther(documentOther);
             }
         } catch (Exception e) {
@@ -152,6 +151,41 @@ public class CafCassCaseData {
     private CafCassDocument finalDocument;
 
     private List<OrderTypeEnum> ordersApplyingFor;
+
+    public List<Element<Child>> getChildren() {
+
+        children = new ArrayList<>();
+
+        if (newChildDetails != null) {
+            newChildDetails.stream().forEach(
+                newChildDetail -> {
+                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
+                    children.add(Element.<Child>builder()
+                                     .id(newChildDetail.getId())
+                                     .value(Child.builder()
+                                                .firstName(childDetailsRevised.getFirstName())
+                                                .lastName(childDetailsRevised.getLastName())
+                                                .gender(childDetailsRevised.getGender())
+                                                .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                                .otherGender(childDetailsRevised.getOtherGender())
+                                                .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                                .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                                .whoDoesTheChildLiveWith(childDetailsRevised.getWhoDoesTheChildLiveWith() != null
+                                                                             ? partyIdAndPartyTypeMap
+                                                    .get(childDetailsRevised.getWhoDoesTheChildLiveWith()
+                                                             .getValue().getCode())
+                                                                             : null
+                                                )
+                                                .build())
+                                     .build());
+
+                }
+            );
+        }
+        return children;
+
+
+    }
 
     private List<Element<Child>> children;
 
@@ -204,9 +238,55 @@ public class CafCassCaseData {
 
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
+    @Getter(AccessLevel.NONE)
+    private Map<String, WhoDoesTheChildLiveWith> partyIdAndPartyTypeMap;
+
+
+    public void setApplicants(List<Element<ApplicantDetails>> applicants) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+        applicants.stream().forEach(
+            applicantDetailsElement -> partyIdAndPartyTypeMap.put(
+                String.valueOf(applicantDetailsElement.getId()),
+                WhoDoesTheChildLiveWith.builder()
+                    .partyId(String.valueOf(applicantDetailsElement.getId()))
+                    .childAddress(applicantDetailsElement.getValue().getAddress())
+                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
+                                       .concat(" ")
+                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyType(PartyTypeEnum.APPLICANT)
+                    .build()
+
+            )
+        );
+        this.applicants = applicants;
+    }
+
     private List<Element<ApplicantDetails>> applicants;
 
+    public void setRespondents(List<Element<ApplicantDetails>> respondents) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+        respondents.stream().forEach(
+            applicantDetailsElement -> partyIdAndPartyTypeMap.put(
+                String.valueOf(applicantDetailsElement.getId()),
+                WhoDoesTheChildLiveWith.builder()
+                    .partyId(String.valueOf(applicantDetailsElement.getId()))
+                    .childAddress(applicantDetailsElement.getValue().getAddress())
+                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
+                                       .concat(" ")
+                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyType(PartyTypeEnum.RESPONDENT)
+                    .build()
+            )
+        );
+        this.respondents = respondents;
+    }
+
     private List<Element<ApplicantDetails>> respondents;
+
 
     private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
@@ -258,41 +338,15 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;
 
-    @Getter(AccessLevel.NONE)
-    private List<Element<ChildDetailsCafcass>> newChildDetails;
-
-    public void setNewChildDetails(List<Element<ChildDetailsCafcass>> newChildDetails) {
-        if (this.children == null) {
-            this.children = new ArrayList<>();
-        }
-        if (newChildDetails != null) {
-            newChildDetails.stream().forEach(
-                newChildDetail -> {
-                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
-                    this.children.add(Element.<Child>builder()
-                                          .id(newChildDetail.getId())
-                                          .value(Child.builder()
-                                                     .firstName(childDetailsRevised.getFirstName())
-                                                     .lastName(childDetailsRevised.getLastName())
-                                                     .gender(childDetailsRevised.getGender())
-                                                     .dateOfBirth(childDetailsRevised.getDateOfBirth())
-                                                     .otherGender(childDetailsRevised.getOtherGender())
-                                                     .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
-                                                     .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
-                                                     .build())
-                                          .build());
-
-                }
-            );
-        }
-
-        this.newChildDetails = newChildDetails;
-    }
 
     @Getter(AccessLevel.NONE)
     private List<Element<ApplicantDetails>> otherPartyInTheCaseRevised;
 
     public void setOtherPartyInTheCaseRevised(List<Element<ApplicantDetails>> otherPartyInTheCaseRevised) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+
         if (this.otherPeopleInTheCaseTable == null) {
             this.otherPeopleInTheCaseTable = new ArrayList<>();
         }
@@ -300,6 +354,18 @@ public class CafCassCaseData {
         if (otherPartyInTheCaseRevised != null) {
             otherPartyInTheCaseRevised.stream().forEach(
                 otherPartyInTheCase -> {
+                    partyIdAndPartyTypeMap.put(
+                        String.valueOf(otherPartyInTheCase.getId()),
+                        WhoDoesTheChildLiveWith.builder()
+                            .partyId(String.valueOf(otherPartyInTheCase.getId()))
+                            .childAddress(otherPartyInTheCase.getValue().getAddress())
+                            .partyFullName(otherPartyInTheCase.getValue().getFirstName()
+                                               .concat(" ")
+                                               .concat(otherPartyInTheCase.getValue().getLastName()))
+                            .partyType(PartyTypeEnum.OTHERPEOPLE)
+                            .build()
+
+                    );
                     ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
                     this.otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
                                                            .id(otherPartyInTheCase.getId())
@@ -336,6 +402,11 @@ public class CafCassCaseData {
         }
         this.otherPartyInTheCaseRevised = otherPartyInTheCaseRevised;
     }
+
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<ChildDetailsCafcass>> newChildDetails;
+
 
     public List<Element<RelationshipToPartiesCafcass>> getChildAndApplicantRelations() {
         List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
@@ -429,5 +500,7 @@ public class CafCassCaseData {
     private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
 
     private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
 
 }
