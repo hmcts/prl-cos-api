@@ -214,6 +214,7 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "Client-Context";
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
