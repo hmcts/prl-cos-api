@@ -17,7 +17,7 @@ case:
       uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
 
 prl:
-  environment: ${APP_ENV:preview}
+  environment: aat
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
