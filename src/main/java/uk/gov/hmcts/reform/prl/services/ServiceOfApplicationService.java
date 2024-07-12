@@ -2324,6 +2324,7 @@ public class ServiceOfApplicationService {
             "soaRecipientsOptions",
             "soaServingRespondentsOptionsDA",
             "soaServingRespondentsOptionsCA",
+            "soaServingRespondentsOptions",
             "soaServeToRespondentOptions",
             "soaOtherPeoplePresentInCaseFlag",
             "soaIsOrderListEmpty",
