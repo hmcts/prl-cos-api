@@ -107,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.docsprint;
@@ -1308,6 +1309,9 @@ public class C100RespondentSolicitorService {
         if (null != solicitorRepresentedRespondent.getValue().getGender()) {
             dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
         }
+        if (null != solicitorRepresentedRespondent.getValue().getAddressLivedLessThan5YearsDetails()) {
+            dataMap.put("addressHistory", solicitorRepresentedRespondent.getValue().getAddressLivedLessThan5YearsDetails());
+        }
     }
 
     private void populateRepresentativeDetails(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap) {
@@ -1413,16 +1417,6 @@ public class C100RespondentSolicitorService {
         log.info("Inside populateCitizenAttendingTheHearingDataMap");
         if (response.getSupportYouNeed() != null) {
             log.info("response.getSupportYouNeed() is not null");
-            AttendToCourt attendToCourt = AttendToCourt.builder().build();
-            List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
-            if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
-                attendToCourt = attendToCourt.toBuilder()
-                    .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
-                    .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
-                    .build();
-                log.info("languageRequirementsEnums processed");
-            }
-
             List<AttendingToCourtEnum> attendingToCourtEnumList = response.getSupportYouNeed().getAttendingToCourt();
             if (attendingToCourtEnumList != null && !attendingToCourtEnumList.isEmpty()) {
                 log.info("attendingToCourtEnumList processed");
@@ -1434,6 +1428,16 @@ public class C100RespondentSolicitorService {
                     log.info("hearingsByPhone processed");
                     dataMap.put("hearingsByPhone", "Yes");
                 }
+            }
+
+            AttendToCourt attendToCourt = AttendToCourt.builder().build();
+            List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
+            if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
+                attendToCourt = attendToCourt.toBuilder()
+                    .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
+                    .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
+                    .build();
+                log.info("languageRequirementsEnums processed");
             }
 
             List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
@@ -1456,7 +1460,7 @@ public class C100RespondentSolicitorService {
                     .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
                     .disabilityNeeds(
                         buildDisabilityNeeds(
-                            response.getSupportYouNeed()
+                            response.getSupportYouNeed(), dataMap
                         ))
                     .build();
             }
@@ -1512,7 +1516,7 @@ public class C100RespondentSolicitorService {
         return reasonableAdjustmentsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
     }
 
-    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed) {
+    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap) {
         List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums = supportYouNeed.getReasonableAdjustments();
         StringBuilder adjustmentRequired = new StringBuilder();
         String documentInformation;
@@ -1525,28 +1529,48 @@ public class C100RespondentSolicitorService {
         }
         if (reasonableAdjustmentsEnums.contains(docsformat)) {
             documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed);
-            adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
+            if (!documentInformation.isEmpty()) {
+                dataMap.put("documentsInAlternativeFormatNeeded", YES);
+                dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
+                adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
+            }
         }
         if (reasonableAdjustmentsEnums.contains(commhelp)) {
             communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
-                .append(communicationHelpDetails);
+            if (!communicationHelpDetails.isEmpty()) {
+                dataMap.put("helpInCommunicationNeeded", YES);
+                dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
+                    .append(communicationHelpDetails);
+            }
         }
         if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
             extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
-                .append(extraSupportDetails);
+            if (!extraSupportDetails.isEmpty()) {
+                dataMap.put("extraSupportNeeded", YES);
+                dataMap.put("extraSupportDetails", extraSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
+                    .append(extraSupportDetails);
+            }
         }
         if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
             feelComfortableSupportDetails = buildFeelComfortableSupport(supportYouNeed.getCourtComfort(), supportYouNeed);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
-                .append(feelComfortableSupportDetails);
+            if (!feelComfortableSupportDetails.isEmpty()) {
+                dataMap.put("feelComfortableNeeed", YES);
+                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
+                    .append(feelComfortableSupportDetails);
+            }
         }
         if (reasonableAdjustmentsEnums.contains(travellinghelp)) {
             helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(supportYouNeed.getTravellingToCourt(),
                                                                                                        supportYouNeed);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
-                .append(helpTravellingMovingBuildingSupportDetails);
+            if (!helpTravellingMovingBuildingSupportDetails.isEmpty()) {
+                dataMap.put("helpNeededTravellingToNeeded", YES);
+                dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
+                    .append(helpTravellingMovingBuildingSupportDetails);
+            }
         }
         return String.valueOf(adjustmentRequired);
     }
