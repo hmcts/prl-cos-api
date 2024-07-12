@@ -804,22 +804,7 @@ public class SendAndReplyService {
             }).findFirst();
 
         if (otherApplicationDocumentsElement.isPresent()) {
-            List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
-            otherApplicationDocuments.addAll(otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument());
-
-            if (otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
-                otherApplicationDocuments.addAll(
-                    otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupportingEvidenceBundle().stream()
-                        .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
-            }
-
-            if (otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupplementsBundle() != null) {
-                otherApplicationDocuments.addAll(
-                    otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupplementsBundle().stream()
-                        .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
-            }
-
-            return otherApplicationDocuments;
+            return getOtherApplicationDocuments(otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle());
         }
 
         Optional<Element<AdditionalApplicationsBundle>> c2ApplicationDocumentsElement = additionalApplicationElements
@@ -834,31 +819,52 @@ public class SendAndReplyService {
             }).findFirst();
 
         if (c2ApplicationDocumentsElement.isPresent()) {
-            List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
-            c2ApplicationDocuments.addAll(c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument());
-
-            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupportingEvidenceBundle() != null) {
-                c2ApplicationDocuments.addAll(
-                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupportingEvidenceBundle().stream()
-                        .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
-            }
-
-            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupplementsBundle() != null) {
-                c2ApplicationDocuments.addAll(
-                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupplementsBundle().stream()
-                        .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
-            }
-
-            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getAdditionalDraftOrdersBundle() != null) {
-                c2ApplicationDocuments.addAll(
-                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getAdditionalDraftOrdersBundle().stream()
-                        .map(draftOrdersDocument -> element(draftOrdersDocument.getValue().getDocument())).toList());
-            }
-
-            return c2ApplicationDocuments;
+            return getC2ApplicationDocuments(c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle());
         }
 
         return emptyList();
+    }
+
+    private static List<Element<Document>> getOtherApplicationDocuments(OtherApplicationsBundle otherApplicationsBundle) {
+        List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
+        otherApplicationDocuments.addAll(otherApplicationsBundle.getFinalDocument());
+
+        if (otherApplicationsBundle.getSupportingEvidenceBundle() != null) {
+            otherApplicationDocuments.addAll(
+                otherApplicationsBundle.getSupportingEvidenceBundle().stream()
+                    .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+        }
+
+        if (otherApplicationsBundle.getSupplementsBundle() != null) {
+            otherApplicationDocuments.addAll(
+                otherApplicationsBundle.getSupplementsBundle().stream()
+                    .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+        }
+        return otherApplicationDocuments;
+    }
+
+    private static List<Element<Document>> getC2ApplicationDocuments(C2DocumentBundle c2DocumentBundle) {
+        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
+        c2ApplicationDocuments.addAll(c2DocumentBundle.getFinalDocument());
+
+        if (c2DocumentBundle.getSupportingEvidenceBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getSupportingEvidenceBundle().stream()
+                    .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+        }
+
+        if (c2DocumentBundle.getSupplementsBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getSupplementsBundle().stream()
+                    .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+        }
+
+        if (c2DocumentBundle.getAdditionalDraftOrdersBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getAdditionalDraftOrdersBundle().stream()
+                    .map(draftOrdersDocument -> element(draftOrdersDocument.getValue().getDocument())).toList());
+        }
+        return c2ApplicationDocuments;
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
