@@ -804,7 +804,22 @@ public class SendAndReplyService {
             }).findFirst();
 
         if (otherApplicationDocumentsElement.isPresent()) {
-            return otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument();
+            List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
+            otherApplicationDocuments.addAll(otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument());
+
+            if (otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
+                otherApplicationDocuments.addAll(
+                    otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupportingEvidenceBundle().stream()
+                        .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+            }
+
+            if (otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupplementsBundle() != null) {
+                otherApplicationDocuments.addAll(
+                    otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getSupplementsBundle().stream()
+                        .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+            }
+
+            return otherApplicationDocuments;
         }
 
         Optional<Element<AdditionalApplicationsBundle>> c2ApplicationDocumentsElement = additionalApplicationElements
@@ -819,7 +834,28 @@ public class SendAndReplyService {
             }).findFirst();
 
         if (c2ApplicationDocumentsElement.isPresent()) {
-            return c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument();
+            List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
+            c2ApplicationDocuments.addAll(c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument());
+
+            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupportingEvidenceBundle() != null) {
+                c2ApplicationDocuments.addAll(
+                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupportingEvidenceBundle().stream()
+                        .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+            }
+
+            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupplementsBundle() != null) {
+                c2ApplicationDocuments.addAll(
+                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getSupplementsBundle().stream()
+                        .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+            }
+
+            if (c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getAdditionalDraftOrdersBundle() != null) {
+                c2ApplicationDocuments.addAll(
+                    c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getAdditionalDraftOrdersBundle().stream()
+                        .map(draftOrdersDocument -> element(draftOrdersDocument.getValue().getDocument())).toList());
+            }
+
+            return c2ApplicationDocuments;
         }
 
         return emptyList();
