@@ -514,7 +514,6 @@ public class StmtOfServImplService {
                                                           respondent,
                                                           true
                                                       )).toList());
-
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 //send to respondent
@@ -608,6 +607,7 @@ public class StmtOfServImplService {
                                                      .partyType(PartyType.RESPONDENT)
                                                      .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                                                      .build())
+                                   .documents(ElementUtils.wrapElements(coverLetters))
                                    .build());
             } catch (Exception e) {
                 log.error(
