@@ -55,12 +55,15 @@ public class ServiceOfApplicationEmailService {
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
             buildCafcassEmail(caseData)
         );
+        ZonedDateTime zonedDateTime1 = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        log.info("cafcass served timestamp {} ",DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime1));
+        log.info("cafcass old timestamp {} ",DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime));
         return EmailNotificationDetails.builder()
             .emailAddress(email)
             .servedParty(servedParty)
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime1)).build();
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseData caseData) {
