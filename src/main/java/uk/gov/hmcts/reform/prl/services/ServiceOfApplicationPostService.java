@@ -111,7 +111,6 @@ public class ServiceOfApplicationPostService {
                 coverSheetTemplate, isWelsh
             ), dataMap
         );
-        log.info("coverPagePartyName is: {}", name);
         return generatedDocumentInfo;
     }
 
