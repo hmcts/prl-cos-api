@@ -137,6 +137,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -1521,9 +1522,7 @@ public class ServiceOfApplicationService {
                                                         packDocs,
                                                         SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                         fieldsMap,
-                                                        doesC1aExists(caseData).equals(Yes)
-                                                            ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
-                                                            : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
+                                                        CA_APPLICANT_SERVICE_APPLICATION
                     );
                 } else {
                     Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
