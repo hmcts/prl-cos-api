@@ -10,8 +10,8 @@ import java.util.Map;
 @Builder
 public class UserTask {
     @JsonProperty("task_data")
-    private Map<String, Object> task_data;
+    private Map<String, Object> taskData;
 
     @JsonProperty("complete_task")
-    private boolean complete_task;
+    private boolean completeTask;
 }
