@@ -73,6 +73,7 @@ public class SendgridService {
         attachments.setFilename(subject);
         attachments.setType("application/json");
         attachments.setDisposition("attachment");
+        log.info("Initiating email to RPA through sendgrid from {}, to {}", fromEmail, toEmail);
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
         mail.addAttachments(attachments);
         Request request = new Request();
