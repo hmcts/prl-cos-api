@@ -72,10 +72,10 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
-                                                                          String email,
-                                                                          List<Document> docs,
-                                                                          SendgridEmailTemplateNames template,
-                                                                          Map<String, Object> dynamicData,
+                                                      String email,
+                                                      List<Document> docs,
+                                                      SendgridEmailTemplateNames template,
+                                                      Map<String, Object> dynamicData,
                                                                           String servedParty) {
         try {
             boolean emailSentSuccessfully = sendgridService.sendEmailUsingTemplateWithAttachments(
