@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.clientContext;
+package uk.gov.hmcts.reform.prl.models.clientcontext;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
