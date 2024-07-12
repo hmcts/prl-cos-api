@@ -2754,6 +2754,7 @@ public class ServiceOfApplicationService {
             generateUnServedPacksForCourtAdminBailiff(authorization, caseDataUpdated, caseData, c100StaticDocs, true,
                                                       caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().toString());
         }
+        log.info("casedataupdated packs {}", caseDataUpdated);
     }
 
     private void generateUnServedPacksForCourtAdminBailiff(String authorization,
