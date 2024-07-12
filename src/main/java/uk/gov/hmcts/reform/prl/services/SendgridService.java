@@ -65,6 +65,7 @@ public class SendgridService {
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
     public void sendEmail(JsonObject caseData) throws IOException {
+        log.info("Initiating email to RPA through sendgrid from {}, to {}", fromEmail, toEmail);
         String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
@@ -73,7 +74,6 @@ public class SendgridService {
         attachments.setFilename(subject);
         attachments.setType("application/json");
         attachments.setDisposition("attachment");
-        log.info("Initiating email to RPA through sendgrid from {}, to {}", fromEmail, toEmail);
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
         mail.addAttachments(attachments);
         Request request = new Request();
