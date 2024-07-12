@@ -370,6 +370,8 @@ public class ServiceOfApplicationService {
             email,
             servedParty
         )));
+        log.info("Email notification details confi 9 {}", emailNotificationDetails);
+
         return emailNotificationDetails;
     }
 
@@ -413,6 +415,7 @@ public class ServiceOfApplicationService {
                                 PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY);
                         if (null != emailNotification) {
                             emailNotificationDetails.add(element(emailNotification));
+                            log.info("Email notification details {}", emailNotification);
                         }
                     } catch (IOException e) {
                         log.error("Failed to serve email to Local Authority", e);
@@ -539,6 +542,7 @@ public class ServiceOfApplicationService {
                         dynamicData,
                         SERVED_PARTY_APPLICANT_SOLICITOR
                     );
+                log.info("Email notification details {}", emailNotification);
                 if (null != emailNotification) {
                     emailNotificationDetails.add(element(emailNotification));
                 }
@@ -619,6 +623,7 @@ public class ServiceOfApplicationService {
                                                    PRL_COURT_ADMIN);
         if (null != emailNotification) {
             emailNotificationDetails.add(element(emailNotification));
+
         }
         List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs);
         final SoaPack unservedRespondentPack = SoaPack.builder()
@@ -842,6 +847,8 @@ public class ServiceOfApplicationService {
                         if (null != emailNotification) {
                             emailNotificationDetails.add(element(emailNotification));
                         }
+                        log.info("Email notification details confi 6{}", emailNotificationDetails);
+
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1146,6 +1153,7 @@ public class ServiceOfApplicationService {
                                                                   selectedApplicant,
                                                                   fieldMap.get(COVER_LETTER_TEMPLATE),
                                                                   notifyTemplate);
+            log.info("email notification confi 2 {}",emailNotification);
         } else {
             log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
             emailNotification = sendSoaPacksToPartyViaEmail(fieldMap.get(AUTHORIZATION),
@@ -1154,13 +1162,19 @@ public class ServiceOfApplicationService {
                                                             selectedApplicant,
                                                             fieldMap.get(COVER_LETTER_TEMPLATE),
                                                             emailTemplate);
+            log.info("email notification confi 4 {}",emailNotification);
+
         }
 
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification.toBuilder()
                                                      .partyIds(String.valueOf(selectedApplicant.getId()))
                                                      .build()));
+            log.info("email notification confi 5 {}",emailNotification);
+
         }
+        log.info("Email notification details {}", emailNotificationDetails);
+
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
@@ -1563,6 +1577,8 @@ public class ServiceOfApplicationService {
                                                 selectedRespondent.getValue().getSolicitorEmail(), docs,
                                                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                                                 dynamicData, SERVED_PARTY_RESPONDENT)));
+                        log.info("Email notification details confi 8 {}", emailNotificationDetails);
+
                     } catch (Exception e) {
                         log.error("Failed to send email to respondent solicitor {}", e.getMessage());
                     }
@@ -1609,6 +1625,7 @@ public class ServiceOfApplicationService {
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 );
                 if (null != emailNotification) {
+                    log.info("email notification confidential 3 {}",emailNotification);
                     return emailNotification;
                 }
             } catch (Exception e) {
@@ -1651,6 +1668,7 @@ public class ServiceOfApplicationService {
                 throw new RuntimeException(e);
             }
         }
+        log.info("Email notification details {}", emailNotification);
         return emailNotification;
     }
 
@@ -1695,6 +1713,7 @@ public class ServiceOfApplicationService {
                         );
                     if (null != emailNotification) {
                         emailNotificationDetails.add(element(emailNotification));
+                        log.info("Email notification details {}", emailNotification);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -2845,6 +2864,7 @@ public class ServiceOfApplicationService {
                     authorization, unServedApplicantPack, unServedRespondentPack);
                 if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
+                    log.info("Email notification details 1 {}", emailNotification);
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else if (unServedApplicantPack != null
@@ -3047,6 +3067,8 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT_SOLICITOR
             ));
         }
+        log.info("Email notification details {}", emailNotificationDetails);
+
     }
 
     public List<DynamicMultiselectListElement> createPartyDynamicMultiSelectListElement(List<Element<String>> partyList) {
@@ -3064,6 +3086,8 @@ public class ServiceOfApplicationService {
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        log.info("serving time {}",DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))));
 
         final ResponseEntity<SubmittedCallbackResponse> response;
 
