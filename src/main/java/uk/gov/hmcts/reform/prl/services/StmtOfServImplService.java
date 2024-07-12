@@ -372,8 +372,9 @@ public class StmtOfServImplService {
     }
 
     private SoaPack updateUnserVedCitizenRespondentPack(List<String> partiesServed, SoaPack unservedCitizenRespondentPack) {
-        unservedCitizenRespondentPack.getPartyIds().stream().map(Element::getValue).toList().removeAll(partiesServed);
-        return CollectionUtils.isNotEmpty(unservedCitizenRespondentPack.getPartyIds()) ? unservedCitizenRespondentPack : null;
+        List<String> partyIds = new ArrayList<>(unservedCitizenRespondentPack.getPartyIds().stream().map(Element::getValue).toList());
+        partyIds.removeAll(partiesServed);
+        return CollectionUtils.isNotEmpty(partyIds) ? unservedCitizenRespondentPack : null;
     }
 
     private void updateFinalListOfServedApplications(String authorisation, String authorization,
