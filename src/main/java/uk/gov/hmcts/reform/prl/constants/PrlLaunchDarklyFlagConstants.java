@@ -11,5 +11,6 @@ public class PrlLaunchDarklyFlagConstants {
 
     public static final String CREATE_URGENT_CASES_FLAG = "create-urgent-cases";
     public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
+    public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
 }

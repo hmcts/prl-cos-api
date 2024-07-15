@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.citizen;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
@@ -16,8 +18,17 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CitizenDocumentsManagement {
 
-    @JsonProperty("citizenDocuments")
+    @JsonIgnore
     public List<CitizenDocuments> citizenDocuments;
+
+    @JsonProperty("applicantDocuments")
+    public List<CitizenDocuments> applicantDocuments;
+
+    @JsonProperty("respondentDocuments")
+    public List<CitizenDocuments> respondentDocuments;
+
+    @JsonProperty("citizenOtherDocuments")
+    public List<CitizenDocuments> citizenOtherDocuments;
 
     @JsonProperty("citizenOrders")
     public List<CitizenDocuments> citizenOrders;
@@ -30,31 +41,33 @@ public class CitizenDocumentsManagement {
      */
     private List<CitizenNotification> citizenNotifications;
 
-    public static final List<String> unReturnedCategoriesForUI =
-        List.of(
-            "safeguardingLetter",
+    public static final Set<String> unReturnedCategoriesForUI =
+        Set.of(
             "section37Report",
-            "section7Report",
             "16aRiskAssessment",
-            "guardianReport",
-            "specialGuardianshipReport",
-            "otherDocs",
             "sec37Report",
-            "localAuthorityOtherDoc",
-            "emailsToCourtToRequestHearingsAdjourned",
             "publicFundingCertificates",
             "noticesOfActingDischarge",
             "requestForFASFormsToBeChanged",
-            "witnessAvailability",
             "lettersOfComplaint",
             "SPIPReferralRequests",
             "homeOfficeDWPResponses",
             "internalCorrespondence",
             "importantInfoAboutAddressAndContact",
-            "privacyNotice",
             "specialMeasures",
-            "anyOtherDoc",
             "noticeOfHearing",
             "caseSummary"
+        );
+
+    public static final Set<String> otherDocumentsCategoriesForUI =
+        Set.of(
+            "magistratesFactsAndReasons",
+            "otherWitnessStatements",
+            "localAuthorityOtherDoc",
+            "emailsToCourtToRequestHearingsAdjourned",
+            "witnessAvailability",
+            "privacyNotice",
+            "anyOtherDoc",
+            "courtBundle"
         );
 }
