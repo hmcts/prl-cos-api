@@ -586,11 +586,13 @@ public class ManageOrderEmailService {
                                                             List<Document> orderDocuments,
                                                             Map<String, Object> dynamicDataForEmail) {
 
-        List<Element<PartyDetails>> applicantList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
+        List<Element<PartyDetails>> partyList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
                                                                           caseData.getApplicantsFL401()));
+        partyList.add(element(caseData.getRespondentsFL401().getPartyId(),
+                                                                          caseData.getRespondentsFL401()));
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
-                                             applicantList,
+                                             partyList,
                                              caseData,
                                              authorisation,
                                              dynamicDataForEmail,
