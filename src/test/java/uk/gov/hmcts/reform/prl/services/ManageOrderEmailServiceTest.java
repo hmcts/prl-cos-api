@@ -852,8 +852,8 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantDA)
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder().partyId(UUID.randomUUID()).
-                                  build())
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.randomUUID())
+                    .build())
             .children(listOfChildren)
             .courtName("testcourt")
             .manageOrders(manageOrders)
