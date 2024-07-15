@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -1240,28 +1241,36 @@ public class CaseService {
                 ordersFromPreviousProceedings.addAll(caseData.getExistingProceedings().stream()
                                                          .map(Element::getValue)
                                                          .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
-                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
-                                                                                                         proceeding.getUploadRelevantOrder(),
-                                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
-                                                                                                         SERVED_PARTY_APPLICANT))
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(
+                                                             caseData,
+                                                             proceeding.getUploadRelevantOrder(),
+                                                             PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                             SERVED_PARTY_APPLICANT,
+                                                             caseData.getApplicants().get(0).getId()
+                                                         ))
                                                          .toList());
             }
 
             //Respondent
-            ordersFromPreviousProceedings.addAll(caseData.getRespondents().stream()
-                                                     .map(Element::getValue)
-                                                     .filter(party -> null != party.getResponse()
-                                                         && CollectionUtils.isNotEmpty(party.getResponse().getRespondentExistingProceedings()))
-                                                     .map(party -> party.getResponse().getRespondentExistingProceedings().stream()
-                                                         .map(Element::getValue)
-                                                         .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
-                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
-                                                                                                         proceeding.getUploadRelevantOrder(),
-                                                                                                         ORDERS_FROM_OTHER_PROCEEDINGS,
-                                                                                                         SERVED_PARTY_RESPONDENT))
-                                                         .toList()
-                                                     ).flatMap(Collection::stream)
-                                                     .toList());
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                ordersFromPreviousProceedings.addAll(caseData.getRespondents().stream()
+                                                         .filter(party -> null != party.getValue().getResponse()
+                                                             && CollectionUtils.isNotEmpty(
+                                                                 party.getValue().getResponse().getRespondentExistingProceedings()))
+                                                         .map(party -> party.getValue().getResponse().getRespondentExistingProceedings().stream()
+                                                             .map(Element::getValue)
+                                                             .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
+                                                             .map(proceeding -> getOrdersFromPrevProceedings(
+                                                                 caseData,
+                                                                 proceeding.getUploadRelevantOrder(),
+                                                                 ORDERS_FROM_OTHER_PROCEEDINGS,
+                                                                 SERVED_PARTY_RESPONDENT,
+                                                                 party.getId()
+                                                             ))
+                                                             .toList()
+                                                         ).flatMap(Collection::stream)
+                                                         .toList());
+            }
         }
 
         //FL401 case
@@ -1272,10 +1281,13 @@ public class CaseService {
                 ordersFromPreviousProceedings.addAll(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
                                                          .map(Element::getValue)
                                                          .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
-                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
-                                                                                                         proceeding.getUploadRelevantOrder(),
-                                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
-                                                                                                         SERVED_PARTY_APPLICANT))
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(
+                                                             caseData,
+                                                             proceeding.getUploadRelevantOrder(),
+                                                             PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                             SERVED_PARTY_APPLICANT,
+                                                             caseData.getApplicantsFL401().getPartyId()
+                                                         ))
                                                          .toList());
             }
 
@@ -1285,10 +1297,13 @@ public class CaseService {
                 ordersFromPreviousProceedings.addAll(caseData.getRespondentsFL401().getResponse().getRespondentExistingProceedings().stream()
                                                          .map(Element::getValue)
                                                          .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
-                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
-                                                                                                         proceeding.getUploadRelevantOrder(),
-                                                                                                         ORDERS_FROM_OTHER_PROCEEDINGS,
-                                                                                                         SERVED_PARTY_RESPONDENT))
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(
+                                                             caseData,
+                                                             proceeding.getUploadRelevantOrder(),
+                                                             ORDERS_FROM_OTHER_PROCEEDINGS,
+                                                             SERVED_PARTY_RESPONDENT,
+                                                             caseData.getRespondentsFL401().getPartyId()
+                                                         ))
                                                          .toList());
             }
         }
@@ -1299,13 +1314,11 @@ public class CaseService {
     private CitizenDocuments getOrdersFromPrevProceedings(CaseData caseData,
                                                           Document document,
                                                           String categoryId,
-                                                          String partyType) {
-        String partyId = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? caseData.getApplicantsFL401().getPartyId().toString()
-            : caseData.getApplicants().get(0).getId().toString();
+                                                          String partyType,
+                                                          UUID partyId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD);
         return CitizenDocuments.builder()
-            .partyId(partyId)
+            .partyId(partyId.toString())
             .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
