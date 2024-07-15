@@ -1188,11 +1188,11 @@ public class C100RespondentSolicitorService {
         if (null != response.getCurrentOrPreviousProceedings()) {
             dataMap.put(
                 "haveChildrenBeenInvolvedInCourtCase",
-                response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase()
+                getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase())
             );
             dataMap.put(
                 "courtOrderMadeForProtection",
-                response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection()
+                getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection())
             );
             dataMap.put("proceedingsList", response.getCurrentOrPreviousProceedings().getProceedingsList());
         }
@@ -1262,11 +1262,11 @@ public class C100RespondentSolicitorService {
                 dataMap.put("currentOrPreviousProceedings", proceedingsList);
                 dataMap.put(
                     "haveChildrenBeenInvolvedInCourtCase",
-                    response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase()
+                    getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase())
                 );
                 dataMap.put(
                     "courtOrderMadeForProtection",
-                    response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection()
+                    getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection())
                 );
             }
         } else {
