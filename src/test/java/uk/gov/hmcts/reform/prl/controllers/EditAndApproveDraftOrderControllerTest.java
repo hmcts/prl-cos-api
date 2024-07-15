@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.clientcontext.ClientContext;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -123,10 +122,11 @@ public class EditAndApproveDraftOrderControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
-    public static ClientContext clientContext;
+    public static Map<String, Object> clientContext = new HashMap<>();
 
     @Before
     public void setUp() {
+        clientContext.put("test", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -198,7 +198,6 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void shouldGenerateDraftOrderDropdownNoDraftOrders() {
-
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
