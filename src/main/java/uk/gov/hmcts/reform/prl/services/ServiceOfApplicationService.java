@@ -478,52 +478,60 @@ public class ServiceOfApplicationService {
             }
         } else {
             log.info("Sending service of application notifications to FL401 citizens");
-            if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                log.info("Sending service of application notifications to FL401 citizens - applicant Lip Personal service");
-                whoIsResponsibleForServing = handleNotificationsDaPersonalApplicantLip(
-                    caseData,
-                    authorization,
-                    emailNotificationDetails,
-                    bulkPrintDetails,
-                    caseDataMap,
-                    staticDocs
-                );
+            if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+                && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
+                && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
+                handleNotificationDaNonPersonalService(caseData, authorization, emailNotificationDetails, bulkPrintDetails,
+                                                       staticDocs);
             } else {
-                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-                List<Document> packCdocs = new ArrayList<>();
-                Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
-                packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
-                packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
-                if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    Map<String, String> fieldsMap = new HashMap<>();
-                    fieldsMap.put(AUTHORIZATION, authorization);
-                    fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                    sendEmailToApplicantLipPersonalServiceCaDa(
+                if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                    log.info("Sending service of application notifications to FL401 citizens - applicant Lip Personal service");
+                    whoIsResponsibleForServing = handleNotificationsDaPersonalApplicantLip(
                         caseData,
+                        authorization,
                         emailNotificationDetails,
-                        element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                        packCdocs,
-                        SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_PER_CA_CB,
-                        fieldsMap,
-                        EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV
+                        bulkPrintDetails,
+                        caseDataMap,
+                        staticDocs
                     );
                 } else {
-                    sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
-                                               bulkPrintDetails,
-                                               element(
-                                                   caseData.getApplicantsFL401().getPartyId(),
-                                                   caseData.getApplicantsFL401()
-                                               ),
-                                               Templates.PRL_LET_ENG_AP1
-                    );
+                    whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+                    List<Document> packCdocs = new ArrayList<>();
+                    Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
+                    packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+                    packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
+                    if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                        Map<String, String> fieldsMap = new HashMap<>();
+                        fieldsMap.put(AUTHORIZATION, authorization);
+                        fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
+                        sendEmailToApplicantLipPersonalServiceCaDa(
+                            caseData,
+                            emailNotificationDetails,
+                            element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                            packCdocs,
+                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_PER_CA_CB,
+                            fieldsMap,
+                            EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV
+                        );
+                    } else {
+                        sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
+                                                   bulkPrintDetails,
+                                                   element(
+                                                       caseData.getApplicantsFL401().getPartyId(),
+                                                       caseData.getApplicantsFL401()
+                                                   ),
+                                                   Templates.PRL_LET_ENG_AP1
+                        );
+                    }
+                    generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
+                                                         caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions()
+                                                             .toString());
                 }
-                generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
-                                                     caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions()
-                                                         .toString());
             }
+
         }
         return whoIsResponsibleForServing;
     }
