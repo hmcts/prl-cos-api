@@ -990,7 +990,7 @@ public class ServiceOfApplicationService {
                     coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
                                                                        PRL_LET_ENG_FL401_RE1);
                 }
-                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, applicantFl401.get(0),
+                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, respondentFl401.get(0),
                                                     coverLetter, servedParty);
             }
 
