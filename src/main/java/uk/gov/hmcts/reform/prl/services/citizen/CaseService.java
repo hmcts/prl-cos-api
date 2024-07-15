@@ -82,6 +82,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_FROM_OTHER_PROCEEDINGS;
@@ -673,9 +674,9 @@ public class CaseService {
         respondentDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
 
         return CitizenDocumentsManagement.builder()
+            .citizenDocuments(citizenDocuments)
             .applicantDocuments(applicantDocuments)
             .respondentDocuments(respondentDocuments)
-            .citizenDocuments(citizenDocuments)
             .citizenOtherDocuments(otherDocuments.stream()
                                 .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
                                 .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
@@ -1401,7 +1402,7 @@ public class CaseService {
             .filter(sos -> null != sos.getStmtOfServiceDocument())
             .map(sos ->
                      CitizenDocuments.builder()
-                         //.categoryId() What should be category for these?
+                         .categoryId(ANY_OTHER_DOC)
                          .document(sos.getStmtOfServiceDocument())
                          .uploadedDate(sos.getServedDateTimeOption())
                          .build()

@@ -68,6 +68,7 @@ public class CitizenDocumentsManagement {
             "witnessAvailability",
             "privacyNotice",
             "anyOtherDoc",
-            "courtBundle"
+            "courtBundle",
+            "fm5Statements"
         );
 }
