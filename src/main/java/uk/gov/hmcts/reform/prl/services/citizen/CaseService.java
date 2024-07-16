@@ -792,6 +792,7 @@ public class CaseService {
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
             .document(existingDocument)
             .documentLanguage(quarantineDoc.getDocumentLanguage())
+            .createdDate(quarantineDoc.getDocumentUploadedDate().toLocalDate())
             .build();
     }
 
@@ -1437,6 +1438,7 @@ public class CaseService {
             .map(addDoc -> addDoc.getAdditionalDocuments().stream()
                 .map(Element::getValue)
                 .map(document -> CitizenDocuments.builder()
+                    .categoryId(ANY_OTHER_DOC) //Added some default category
                     .document(document)
                     .uploadedDate(LocalDateTime.of(LocalDate.parse(addDoc.getUploadedDateTime().split(",")[0],
                                                                    DATE_FORMATTER_D_MMM_YYYY),
