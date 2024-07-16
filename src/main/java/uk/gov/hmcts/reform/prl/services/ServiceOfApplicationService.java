@@ -895,6 +895,7 @@ public class ServiceOfApplicationService {
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> staticDocs) {
+        staticDocs = staticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList();
         List<Element<PartyDetails>> applicantFl401 = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
                                                                            caseData.getApplicantsFL401()));
         List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
@@ -1760,6 +1761,38 @@ public class ServiceOfApplicationService {
             }
         });
         return emailNotificationDetails;
+    }
+
+    private void handleNotificationsToDaCitizenApplicants(String authorization, List<Element<PartyDetails>> selectedApplicants,
+                                                          CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                          List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> packDocs) {
+        selectedApplicants.forEach(applicant -> {
+            if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
+                Map<String, String> fieldsMap = new HashMap<>();
+                fieldsMap.put(AUTHORIZATION, authorization);
+                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
+                sendEmailToApplicantLipPersonalServiceCaDa(caseData,
+                                                           emailNotificationDetails,
+                                                           applicant,
+                                                           packDocs,
+                                                           SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                           fieldsMap,
+                                                           SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
+                );
+            } else {
+                Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                            applicant, PRL_LET_ENG_AP1);
+                sendPostWithAccessCodeLetterToParty(caseData,
+                                                    authorization,
+                                                    packDocs,
+                                                    bulkPrintDetails,
+                                                    applicant,
+                                                    coverLetter,
+                                                    SERVED_PARTY_APPLICANT
+                );
+            }
+
+        });
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
@@ -2960,7 +2993,7 @@ public class ServiceOfApplicationService {
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
             .toList();
         log.info("*** applicantfl401 selected {}", applicantFl401);
         log.info("*** respondetnt fl401 selected {}", respondentFl401);
@@ -3405,6 +3438,7 @@ public class ServiceOfApplicationService {
                 unServedApplicantPack.getPersonalServiceBy())
                 || SoaCitizenServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
+                log.info("Court admin/ Bailiff personal service - notification to applicant");
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                     //remove cover letters & notify applicants
                     notifyC100ApplicantsPersonalServiceCourtAdminBailiff(authorization,
@@ -3438,18 +3472,30 @@ public class ServiceOfApplicationService {
                             PRL_LET_ENG_AP1
                         );
                     }
-
                 }
             } else {
-                emailNotificationDetails.addAll(sendNotificationsToCitizenApplicantsC100(
-                    authorization,
-                    applicantList,
-                    caseData,
-                    bulkPrintDetails,
-                    removeCoverLettersFromThePacks(packDocs))
-                );
+                log.info("Non personal service - notification to applicant Lip");
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    emailNotificationDetails.addAll(sendNotificationsToCitizenApplicantsC100(
+                        authorization,
+                        applicantList,
+                        caseData,
+                        bulkPrintDetails,
+                        removeCoverLettersFromThePacks(packDocs))
+                    );
+                } else {
+                    handleNotificationsToDaCitizenApplicants(
+                            authorization,
+                            Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401())),
+                            caseData,
+                            emailNotificationDetails,
+                            bulkPrintDetails,
+                            removeCoverLettersFromThePacks(packDocs));
+                }
+
             }
         } else {
+            log.info("Sending notification to applicant solicitor");
             emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
                 caseData,
                 authorization,
