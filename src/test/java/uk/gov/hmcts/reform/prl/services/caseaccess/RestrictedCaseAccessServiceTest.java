@@ -312,7 +312,7 @@ public class RestrictedCaseAccessServiceTest {
         when(idamApi.getUserByUserId(anyString(), anyString())).thenReturn(UserDetails.builder().build());
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .eventId(MARK_CASE_AS_RESTRICTED.getValue())
+            .eventId(MARK_CASE_AS_PRIVATE.getValue())
             .caseDetails(CaseDetails.builder().id(1234567891234567L)
                              .data(caseDataUpdated)
                              .build())
@@ -331,7 +331,7 @@ public class RestrictedCaseAccessServiceTest {
             RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .eventId(MARK_CASE_AS_PRIVATE.getValue())
+            .eventId(MARK_CASE_AS_RESTRICTED.getValue())
             .caseDetails(CaseDetails.builder().id(1234567891234567L)
                              .data(caseDataUpdated)
                              .build())
