@@ -146,6 +146,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
+    public static final DateTimeFormatter DATE_FORMATTER_D_MMM_YYYY = DateTimeFormatter.ofPattern(D_MMM_YYYY);
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -556,7 +558,6 @@ public class CaseService {
         ServiceOfApplication serviceOfApplication,
         Map<String, String> partyIdAndType) {
         final CitizenDocuments[] citizenDocuments = {null};
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
         nullSafeCollection(servedApplicationDetails.getEmailNotificationDetails()).stream()
             .map(Element::getValue)
@@ -570,7 +571,7 @@ public class CaseService {
                     .servedParty(emailNotificationDetails.getServedParty())
                     .uploadedDate(LocalDateTime.parse(
                         emailNotificationDetails.getTimeStamp(),
-                        formatter
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
                     ))
                     .applicantSoaPack(
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
@@ -619,7 +620,6 @@ public class CaseService {
         Map<String, String> partyIdAndType) {
 
         final CitizenDocuments[] citizenDocuments = {null};
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
         nullSafeCollection(servedApplicationDetails.getBulkPrintDetails()).stream()
             .map(Element::getValue)
@@ -633,7 +633,7 @@ public class CaseService {
                     .servedParty(bulkPrintDetails.getServedParty())
                     .uploadedDate(LocalDateTime.parse(
                         bulkPrintDetails.getTimeStamp(),
-                        formatter
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
                     ))
                     .applicantSoaPack(
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
@@ -867,7 +867,8 @@ public class CaseService {
             && null != order.getOtherDetails().getOrderCreatedDate()) {
             return LocalDate.parse(
                 order.getOtherDetails().getOrderCreatedDate(),
-                DateTimeFormatter.ofPattern(D_MMM_YYYY));
+                DATE_FORMATTER_D_MMM_YYYY
+            );
         }
         return null;
     }
@@ -877,7 +878,7 @@ public class CaseService {
             && null != order.getOtherDetails().getOrderMadeDate()) {
             return LocalDate.parse(
                 order.getOtherDetails().getOrderMadeDate(),
-                DateTimeFormatter.ofPattern(D_MMM_YYYY)
+                DATE_FORMATTER_D_MMM_YYYY
             );
         } else if (null != order.getDateCreated()) {
             //If order made date is not available then fallback to order created date.
@@ -1364,8 +1365,6 @@ public class CaseService {
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
                                                    List<Element<Document>> documents) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
-
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
@@ -1375,7 +1374,8 @@ public class CaseService {
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
-                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(), formatter))
+                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                                                           DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
                          .build()
             ).toList();
     }
@@ -1430,8 +1430,6 @@ public class CaseService {
 
     private List<CitizenDocuments> getAdditionalDocuments(CitizenDocuments order,
                                                           List<Element<AdditionalOrderDocument>> additionalOrderDocuments) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
-
         return additionalOrderDocuments.stream()
             .map(Element::getValue)
             .filter(addDoc -> getStringsSplitByDelimiter(addDoc.getServedOrders(), COMMA)
@@ -1440,7 +1438,8 @@ public class CaseService {
                 .map(Element::getValue)
                 .map(document -> CitizenDocuments.builder()
                     .document(document)
-                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(), formatter))
+                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(),
+                                                      DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
                     .build())
                 .toList())
             .flatMap(Collection::stream)
@@ -1448,7 +1447,7 @@ public class CaseService {
     }
 
     private String getOrderLabelForDynamicList(CitizenDocuments order) {
-        return String.format("%s - %s", order.getOrderType(), order.getCreatedDate());
+        return String.format("%s - %s", order.getOrderType(), order.getCreatedDate().format(DATE_FORMATTER_D_MMM_YYYY));
     }
 
     private boolean isFirstHearingCompleted(String authorization, String caseId) {
