@@ -97,6 +97,23 @@ There is no need to remove postgres and java or similar core images.
 ### Managing Preview environment PODs
 Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.
 
+### Functional Tests
+#### On Jenkins Pipeline
+In order to make the Functional tests pass on Jenkins pipeline we will have to make some changes in values.preview.template.yaml
+file. We will have to point AAT URLs instead of Preview URLs for the below properties:
+```
+CORE_CASE_DATA_API_URL
+CCD_CASE_DOCS_AM_API
+ACA_SERVICE_API_BASEURL
+BUNDLE_URL
+```
+#### On Local
+Running Functional tests on local would require to add all the secrets values in the `src/main/resources/application.yaml` and `src/functionalTest/resources/application.yaml` files.
+Along with this run the class `uk.gov.hmcts.reform.prl.Application` using Run/Debug configurations and once its started then you can test the Functional Test cases.
+
+CAUTION NOTE:
+Make sure we don't commit the secrets over GitHub as it's a security violation.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
