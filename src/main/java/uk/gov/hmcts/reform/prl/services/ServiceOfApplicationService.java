@@ -904,50 +904,14 @@ public class ServiceOfApplicationService {
             .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        if (CollectionUtils.isNotEmpty(applicantFl401)) {
-            String emailAddress = applicantFl401.get(0).getValue().getEmail();
-            String servedParty = applicantFl401.get(0).getValue().getLabelForDynamicList();
-            List<Document> docs = new ArrayList<>();
-            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-            boolean sendEmail = true;
-            if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
-                emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
-                servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
-            } else {
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
-                if (!ContactPreferences.email.equals(applicantFl401.get(0).getValue().getContactPreferences())) {
-                    sendEmail = false;
-                }
-            }
-            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
-            if (sendEmail) {
-                try {
-                    log.info(
-                        "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
-                        caseData.getId()
-                    );
+        sendNotificationsDaNonPersonalApplicant(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, applicantFl401);
+        sendNotificationsDaNonPersonalRespondent(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, respondentFl401);
+    }
 
-                    dynamicData.put("name", servedParty);
-                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                    populateLanguageMap(caseData, dynamicData);
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailUsingTemplateWithAttachments(
-                                                                 authorization, emailAddress,
-                                                                 docs,
-                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                                                                 dynamicData,
-                                                                 servedParty
-                                                             )));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0),
-                                                                            PRL_LET_ENG_AP2);
-                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, applicantFl401.get(0),
-                                                    coverLetter, servedParty);
-            }
-        }
+    private void sendNotificationsDaNonPersonalRespondent(CaseData caseData, String authorization,
+                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                          List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                          List<Document> staticDocs, List<Element<PartyDetails>> respondentFl401) {
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
             String emailAddress = respondentFl401.get(0).getValue().getEmail();
             String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
@@ -962,9 +926,13 @@ public class ServiceOfApplicationService {
                     sendEmail = false;
                 } else {
                     if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                        docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
+                        docs.add(generateCoverLetterBasedOnCaseAccess(
+                            authorization,
+                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
                     } else {
-                        docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
+                        docs.add(generateCoverLetterBasedOnCaseAccess(
+                            authorization,
+                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
                     }
                 }
             }
@@ -998,10 +966,65 @@ public class ServiceOfApplicationService {
                     coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
                                                                        PRL_LET_ENG_FL401_RE1);
                 }
-                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, respondentFl401.get(0),
+                sendPostWithAccessCodeLetterToParty(caseData,
+                                                    authorization, docs,
+                                                    bulkPrintDetails, respondentFl401.get(0),
                                                     coverLetter, servedParty);
             }
 
+        }
+    }
+
+    private void sendNotificationsDaNonPersonalApplicant(CaseData caseData, String authorization,
+                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                         List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> staticDocs,
+                                                         List<Element<PartyDetails>> applicantFl401) {
+        if (CollectionUtils.isNotEmpty(applicantFl401)) {
+            String emailAddress = applicantFl401.get(0).getValue().getEmail();
+            String servedParty = applicantFl401.get(0).getValue().getLabelForDynamicList();
+            List<Document> docs = new ArrayList<>();
+            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            boolean sendEmail = true;
+            if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
+                emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
+                servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
+            } else {
+                docs.add(generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
+                if (!ContactPreferences.email.equals(applicantFl401.get(0).getValue().getContactPreferences())) {
+                    sendEmail = false;
+                }
+            }
+            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
+            if (sendEmail) {
+                try {
+                    log.info(
+                        "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
+                        caseData.getId()
+                    );
+                    dynamicData.put("name", servedParty);
+                    populateLanguageMap(caseData, dynamicData);
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                             .sendEmailUsingTemplateWithAttachments(
+                                                                 authorization, emailAddress,
+                                                                 docs,
+                                                                 SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                                 dynamicData,
+                                                                 servedParty
+                                                             )));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                            caseData, applicantFl401.get(0),
+                                                                            PRL_LET_ENG_AP2);
+                sendPostWithAccessCodeLetterToParty(caseData,
+                                                    authorization, docs,
+                                                    bulkPrintDetails, applicantFl401.get(0),
+                                                    coverLetter, servedParty);
+            }
         }
     }
 
