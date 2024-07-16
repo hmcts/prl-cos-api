@@ -71,4 +71,9 @@ public class CitizenDocumentsManagement {
             "courtBundle",
             "fm5Statements"
         );
+
+    public static final Set<String> redundantDocumentsCategories =
+        Set.of(
+            "transcriptsOfJudgements"
+        );
 }

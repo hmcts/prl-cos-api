@@ -130,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.otherDocumentsCategoriesForUI;
+import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.redundantDocumentsCategories;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
@@ -658,15 +659,17 @@ public class CaseService {
         List<CitizenDocuments> respondentDocuments = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(citizenDocuments)) {
-            citizenDocuments.forEach(citizenDoc -> {
-                if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
-                    applicantDocuments.add(citizenDoc);
-                } else if (SERVED_PARTY_RESPONDENT.equalsIgnoreCase(citizenDoc.getPartyType())) {
-                    respondentDocuments.add(citizenDoc);
-                } else {
-                    otherDocuments.add(citizenDoc);
-                }
-            });
+            citizenDocuments.stream()
+                .filter(citizenDoc -> !redundantDocumentsCategories.contains(citizenDoc.getCategoryId()))
+                .forEach(citizenDoc -> {
+                    if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                        applicantDocuments.add(citizenDoc);
+                    } else if (SERVED_PARTY_RESPONDENT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                        respondentDocuments.add(citizenDoc);
+                    } else {
+                        otherDocuments.add(citizenDoc);
+                    }
+                });
         }
 
         //Sort documents based on uploaded date
