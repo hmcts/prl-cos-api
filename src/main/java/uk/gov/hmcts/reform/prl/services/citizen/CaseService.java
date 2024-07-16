@@ -1438,8 +1438,9 @@ public class CaseService {
                 .map(Element::getValue)
                 .map(document -> CitizenDocuments.builder()
                     .document(document)
-                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(),
-                                                      DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
+                    .uploadedDate(LocalDateTime.of(LocalDate.parse(addDoc.getUploadedDateTime().split(",")[0],
+                                                                   DATE_FORMATTER_D_MMM_YYYY),
+                                                   LocalTime.of(0, 0)))
                     .build())
                 .toList())
             .flatMap(Collection::stream)
