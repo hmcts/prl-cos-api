@@ -1163,7 +1163,8 @@ public class C100RespondentSolicitorService {
                     isConfidentialSetByCitizen,
                 dataMap,
                 isConfidentialDataPresent,
-                    response
+                    response,
+                requestOriginatedFrom
             );
             log.info("inside checkIfConfidentialDataPresent - 3");
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
@@ -1388,17 +1389,26 @@ public class C100RespondentSolicitorService {
                                                           boolean isConfidentialSetByCitizen,
                                                           Map<String, Object> dataMap,
                                                           boolean isConfidentialDataPresent,
-                                                          Response response) {
+                                                          Response response,
+                                                          String requestOriginatedFrom) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.address))) {
             dataMap.put(ADDRESS, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getAddress()) {
-            dataMap.put(ADDRESS, response.getCitizenDetails().getAddress().getAddressLine1());
-        } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
-            dataMap.put(ADDRESS, solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        } else if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
+            } else if (null != response.getCitizenDetails().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
+            }
+        } else {
+            if (null != response.getCitizenDetails().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
+            } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
+            }
         }
         return isConfidentialDataPresent;
     }
