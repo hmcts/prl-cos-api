@@ -4,26 +4,41 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccessmanagement.CaseSecurityClassificationEnum;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PUBLIC;
@@ -63,6 +78,18 @@ public class RestrictedCaseAccessService {
         and any previous access restrictions will be removed""";
     public static final String PRIVATE_CONFIRMATION_HEADER = "# Case marked as private";
 
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final SystemUserService systemUserService;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    private final IdamApi idamApi;
+
+    public static final List<String> ROLE_CATEGORIES = List.of("JUDICIAL",
+                                                     "LEGAL_OPERATIONS",
+                                                     "CTSC",
+                                                     "ADMIN");
 
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
         log.info("** restrictedCaseAccessAboutToSubmit event started");
@@ -102,7 +129,7 @@ public class RestrictedCaseAccessService {
         }
 
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-            applicantCaseName =  applicantCaseName + RESTRICTED_CASE;
+            applicantCaseName = applicantCaseName + RESTRICTED_CASE;
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
             applicantCaseName = applicantCaseName + PRIVATE_CASE;
         }
@@ -212,6 +239,91 @@ public class RestrictedCaseAccessService {
             .build();
         log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
         return aboutToStartOrSubmitCallbackResponse;
+    }
+
+    public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
+        log.info("** retrieveAssignedUserRoles event started");
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
+        if (MARK_CASE_AS_RESTRICTED.equals(caseEvent) || MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
+            List<String> assignedUserDetailsHtml = fetchAssignedUserDetails(callbackRequest);
+            if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
+                caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
+            } else if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
+                caseDataUpdated.put("errors", "No one have access to this case right now, "
+                    + "Please provide access to the people with right permissions");
+            }
+        }
+        log.info("** retrieveAssignedUserRoles done");
+        return caseDataUpdated;
+    }
+
+    private List<String> fetchAssignedUserDetails(CallbackRequest callbackRequest) {
+        List<String> assignedUserDetailsHtml = new ArrayList<>();
+        Map<String, String> assignedUserDetails = new HashMap<>();
+        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+            .attributes(QueryAttributes.builder()
+                            .caseId(List.of(callbackRequest.getCaseDetails().getId().toString()))
+                            .build())
+            .validAt(LocalDateTime.now())
+            .build();
+        log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
+        String systemAuthorisation = systemUserService.getSysUserToken();
+
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
+            systemAuthorisation,
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentQueryRequest
+        );
+        log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
+
+        if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
+            && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
+            roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
+                .forEach(roleAssignmentResponse -> {
+                    log.info("** Fetching user details from idam for actorId {} " + roleAssignmentResponse.getActorId());
+                    UserDetails userDetails = idamApi.getUserByUserId(
+                        systemAuthorisation,
+                        roleAssignmentResponse.getActorId()
+                    );
+                    if (ObjectUtils.isNotEmpty(userDetails)) {
+                        assignedUserDetails.put(
+                            userDetails.getFullName() + HYPHEN_SEPARATOR + userDetails.getEmail(),
+                            roleAssignmentResponse.getRoleCategory()
+                        );
+                    }
+                });
+        }
+        log.info("** AssignedUserDetails " + assignedUserDetails);
+        if (!assignedUserDetails.isEmpty()) {
+            assignedUserDetailsHtml.add("<table class=\"govuk-table\">");
+            assignedUserDetailsHtml.add(
+                "<caption class=\"govuk-table__caption govuk-table__caption--m\">Users with access</caption>");
+            assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
+            assignedUserDetailsHtml.add(
+                "<tr class=\"govuk-table__row\"><th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-half\">Name</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Case role</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Email address</th></tr>");
+            assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
+            assignedUserDetailsHtml.add("<tbody class=\"govuk-table__body\">");
+            for (Map.Entry<String, String> entry : assignedUserDetails.entrySet()) {
+                assignedUserDetailsHtml.add("<tr class=\"govuk-table__row\">");
+                String name = entry.getKey().split(HYPHEN_SEPARATOR)[0];
+                String email = entry.getKey().split(HYPHEN_SEPARATOR)[1];
+                assignedUserDetailsHtml.add("<td class=\"govuk-table__cell\">" + name + "</td>"
+                                                + "<td class=\"govuk-table__cell\">" + entry.getValue()
+                                                + "</td><td class=\"govuk-table__cell\">" + email + "</td>");
+                assignedUserDetailsHtml.add("</tr>");
+            }
+            assignedUserDetailsHtml.add("</tbody>");
+            assignedUserDetailsHtml.add("</table>");
+            assignedUserDetailsHtml.add("</div>");
+        }
+        log.info("** assignedUserDetailsText " + assignedUserDetailsHtml);
+        return assignedUserDetailsHtml;
     }
 
 }
