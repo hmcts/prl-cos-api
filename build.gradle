@@ -26,7 +26,7 @@ def versions = [
   bcpkixJdk18on                : '1.73',
   ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.9.4',
-  commonsIo                    : '2.7',
+  commonsIo                    : '2.16.1',
   commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
@@ -46,8 +46,7 @@ def versions = [
   lombok                       : '1.18.30',
   pact                         : '4.1.11',
   pitest                       : '1.7.3',
-  puppyCrawl                   : '8.43',
-  reformPropertiesVolume       : '0.0.4',
+  puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '5.1.7',
   sendLetterClient             : '4.0.2',
   serenity                     : '4.0.28',
@@ -315,7 +314,6 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.4'
@@ -326,7 +324,6 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.20.0'
-  implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
   implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
@@ -338,7 +335,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.2.1'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.3.0'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.15'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
