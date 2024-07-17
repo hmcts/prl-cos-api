@@ -86,6 +86,10 @@ public class RestrictedCaseAccessService {
 
     private final IdamApi idamApi;
 
+    public static final List<String> ROLE_CATEGORIES = List.of("JUDICIAL",
+                                                     "LEGAL_OPERATIONS",
+                                                     "CTSC",
+                                                     "ADMIN");
 
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
         log.info("** restrictedCaseAccessAboutToSubmit event started");
@@ -278,7 +282,8 @@ public class RestrictedCaseAccessService {
         if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
             && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
             roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                .stream().forEach(roleAssignmentResponse -> {
+                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
+                .forEach(roleAssignmentResponse -> {
                     log.info("** Fetching user details from idam for actorId {} " + roleAssignmentResponse.getActorId());
                     UserDetails userDetails = idamApi.getUserByUserId(
                         systemAuthorisation,
