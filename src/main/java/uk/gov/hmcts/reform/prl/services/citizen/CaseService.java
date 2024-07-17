@@ -146,7 +146,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
+    public static final String SYSTEM = "System";
+    public static final String YYYY_MM_DD = "yyyy-MM-dd";
     public static final DateTimeFormatter DATE_FORMATTER_D_MMM_YYYY = DateTimeFormatter.ofPattern(D_MMM_YYYY);
+    public static final DateTimeFormatter DATE_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(YYYY_MM_DD);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
@@ -156,8 +159,6 @@ public class CaseService {
     private final UserService userService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
-
-    public static final String DATE_FORMATTER_YYYY_MM_DD = "yyyy-MM-dd";
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -577,12 +578,14 @@ public class CaseService {
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? emailNotificationDetails.getDocs().stream()
                             .map(Element::getValue)
+                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
                             .toList() : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? emailNotificationDetails.getDocs().stream()
-                                .map(Element::getValue)
+                            .map(Element::getValue)
+                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
                                 .toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
@@ -639,12 +642,14 @@ public class CaseService {
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? bulkPrintDetails.getPrintDocs().stream()
                             .map(Element::getValue)
+                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
                             .toList() : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? bulkPrintDetails.getPrintDocs().stream()
-                                .map(Element::getValue)
+                            .map(Element::getValue)
+                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
                                 .toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
@@ -1224,17 +1229,17 @@ public class CaseService {
                                                         String categoryId,
                                                         String submittedDate,
                                                         boolean isWelsh) {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD);
         return CitizenDocuments.builder()
             .partyId(TEST_UUID) //system generated docs
             .partyType(SERVED_PARTY_APPLICANT)
             .categoryId(categoryId)
             .document(isWelsh ? null : document)
             .documentWelsh(isWelsh ? document : null)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(submittedDate, formatter),
+            .uploadedDate(LocalDateTime.of(LocalDate.parse(submittedDate,
+                                                           DATE_FORMATTER_YYYY_MM_DD),
                                            LocalTime.of(0, 0)))
             .documentLanguage(isWelsh ? WELSH : ENGLISH)
+            .uploadedBy(SYSTEM)
             .build();
     }
 
@@ -1322,13 +1327,13 @@ public class CaseService {
                                                           String categoryId,
                                                           String partyType,
                                                           UUID partyId) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD);
         return CitizenDocuments.builder()
             .partyId(partyId.toString())
             .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(), formatter),
+            .uploadedDate(LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(),
+                                                           DATE_FORMATTER_YYYY_MM_DD),
                                            LocalTime.of(0, 0)))
             .build();
     }

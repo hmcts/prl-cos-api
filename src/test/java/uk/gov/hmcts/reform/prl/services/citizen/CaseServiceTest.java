@@ -94,7 +94,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
-import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_FORMATTER_YYYY_MM_DD;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -269,7 +269,7 @@ public class CaseServiceTest {
             .finalWelshDocument(document)
             .c1ADocument(document)
             .c1AWelshDocument(document)
-            .dateSubmitted(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD)))
+            .dateSubmitted(LocalDateTime.now().format(DateTimeFormatter.ofPattern(YYYY_MM_DD)))
             .existingProceedings(List.of(element(ProceedingDetails.builder().uploadRelevantOrder(document).build())))
             .reviewDocuments(ReviewDocuments.builder()
                                  .legalProfUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
