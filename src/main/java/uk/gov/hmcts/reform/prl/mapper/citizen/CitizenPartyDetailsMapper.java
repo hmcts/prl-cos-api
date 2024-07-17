@@ -556,6 +556,9 @@ public class CitizenPartyDetailsMapper {
             .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
+            .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
+                ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5Years())
             .isAtAddressLessThan5YearsWithDontKnow(
                 mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(existingPartyDetails, citizenProvidedPartyDetails))
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
@@ -579,6 +582,14 @@ public class CitizenPartyDetailsMapper {
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if ("Yes".equalsIgnoreCase(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().getDisplayedValue())) {
+            return Yes;
+        } else {
+            return No;
+        }
     }
 
     private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails existingPartyDetails,
