@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -17,19 +18,27 @@ import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -74,6 +83,14 @@ public class RestrictedCaseAccessServiceTest {
 
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private IdamApi idamApi;
 
 
     @Test
@@ -162,7 +179,8 @@ public class RestrictedCaseAccessServiceTest {
                                                                                                         StartEventResponse.builder().build(),
                                                                                                         caseData.toMap(
                                                                                                             objectMapper),
-                                                                                                        caseData, null
+                                                                                                        caseData,
+                                                                                                        null
         );
 
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
@@ -201,13 +219,14 @@ public class RestrictedCaseAccessServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent("test",
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        caseData.toMap(
-                                                                                                            objectMapper),
-                                                                                                        caseData,
-                                                                                                        null
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "test",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(
+                objectMapper),
+            caseData,
+            null
         );
 
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
@@ -246,13 +265,14 @@ public class RestrictedCaseAccessServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent("test",
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        caseData.toMap(
-                                                                                                            objectMapper),
-                                                                                                        caseData,
-                                                                                                        null
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "test",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(
+                objectMapper),
+            caseData,
+            null
         );
 
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
@@ -274,6 +294,53 @@ public class RestrictedCaseAccessServiceTest {
             PUBLIC_CONFIRMATION_HEADER + PUBLIC_CONFIRMATION_SUBTEXT,
             response.getBody().getConfirmationHeader()
         );
+    }
+
+    @Test
+    public void testRetrieveAssignedUserRolesWithUsers() {
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleCategory("PROFESSIONAL");
+        roleAssignmentResponse.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8a");
+        RoleAssignmentResponse roleAssignmentResponse1 = new RoleAssignmentResponse();
+        roleAssignmentResponse1.setRoleCategory("LEGAL_OPERATIONS");
+        roleAssignmentResponse1.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8b");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()
+            .roleAssignmentResponse(List.of(roleAssignmentResponse, roleAssignmentResponse1))
+            .build();
+        when(roleAssignmentApi.queryRoleAssignments(anyString(), anyString(), any(), any(
+            RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
+        when(idamApi.getUserByUserId(anyString(), anyString())).thenReturn(UserDetails.builder().build());
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId(MARK_CASE_AS_PRIVATE.getValue())
+            .caseDetails(CaseDetails.builder().id(1234567891234567L)
+                             .data(caseDataUpdated)
+                             .build())
+            .build();
+        caseDataUpdated = restrictedCaseAccessService.retrieveAssignedUserRoles(callbackRequest);
+        assertNotNull(caseDataUpdated.get("assignedUserDetailsText"));
+    }
+
+    @Test
+    public void testRetrieveAssignedUserRolesWithoutUsers() {
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()
+            .build();
+        when(roleAssignmentApi.queryRoleAssignments(anyString(), anyString(), any(), any(
+            RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId(MARK_CASE_AS_RESTRICTED.getValue())
+            .caseDetails(CaseDetails.builder().id(1234567891234567L)
+                             .data(caseDataUpdated)
+                             .build())
+            .build();
+        caseDataUpdated = restrictedCaseAccessService.retrieveAssignedUserRoles(callbackRequest);
+        assertNotNull(caseDataUpdated.get("errors"));
     }
 }
 

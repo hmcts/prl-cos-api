@@ -25,6 +25,9 @@ import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService;
 
+import java.util.List;
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -35,6 +38,33 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class RestrictedCaseAccessController {
     private final AuthorisationService authorisationService;
     private final RestrictedCaseAccessService restrictedCaseAccessService;
+
+    @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark case as restricted")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse restrictedCaseAccessAboutToStart(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = restrictedCaseAccessService.retrieveAssignedUserRoles(callbackRequest);
+            if (caseDataUpdated.containsKey("errors")) {
+                return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(caseDataUpdated.get("errors").toString()))
+                    .build();
+            } else {
+                return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
+                    .builder()
+                    .data(caseDataUpdated)
+                    .build();
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mark case as restricted")

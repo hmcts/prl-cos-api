@@ -234,6 +234,7 @@ idam:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    scope: openid profile roles manage-user
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
