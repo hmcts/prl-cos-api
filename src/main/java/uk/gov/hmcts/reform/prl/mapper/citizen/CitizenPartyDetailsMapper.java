@@ -559,7 +559,7 @@ public class CitizenPartyDetailsMapper {
             .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
                 ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
                 : existingPartyDetails.getIsAtAddressLessThan5Years())
-            .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
+            .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow()
                 ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
                 : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())

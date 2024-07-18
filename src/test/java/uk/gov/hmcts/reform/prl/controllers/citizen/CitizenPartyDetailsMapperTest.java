@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
@@ -360,6 +361,62 @@ public class CitizenPartyDetailsMapperTest {
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
                                                                                                                        authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws IOException {
+        setUpCA();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                .firstName("Test")
+                .lastName("User")
+                .isAtAddressLessThan5Years(YesOrNo.Yes)
+                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                .response(Response.builder().build())
+                .user(User.builder()
+                    .email("test@gmail.com")
+                    .idamId("123")
+                    .solicitorRepresented(YesOrNo.Yes)
+                    .build())
+                .citizenSosObject(CitizenSos.builder()
+                    .partiesServed("123,234,1234")
+                    .build())
+                .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsNo() throws IOException {
+        setUpCA();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                .firstName("Test")
+                .lastName("User")
+                .isAtAddressLessThan5Years(YesOrNo.No)
+                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.no)
+                .response(Response.builder().build())
+                .user(User.builder()
+                    .email("test@gmail.com")
+                    .idamId("123")
+                    .solicitorRepresented(YesOrNo.Yes)
+                    .build())
+                .citizenSosObject(CitizenSos.builder()
+                    .partiesServed("123,234,1234")
+                    .build())
+                .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken);
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
