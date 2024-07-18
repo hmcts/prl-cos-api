@@ -34,14 +34,13 @@ public class Document {
     LocalDateTime uploadTimeStamp;
 
 
-
     @JsonCreator
     public Document(@JsonProperty("document_url") String documentUrl,
                     @JsonProperty("document_binary_url") String documentBinaryUrl,
                     @JsonProperty("document_filename") String documentFileName,
                     @JsonProperty("document_hash") String documentHash,
                     @JsonProperty("category_id") String categoryId,
-                    Date documentCreatedOn, LocalDateTime uploadTimeStamp) {
+                    JsonProperty("document_creation_date") Date documentCreatedOn, JsonProperty("upload_timestamp")LocalDateTime uploadTimeStamp) {
         this.documentUrl = documentUrl;
         this.documentBinaryUrl = documentBinaryUrl;
         this.documentFileName = documentFileName;
