@@ -258,6 +258,7 @@ public class CafCassCaseData {
 
     @Getter(AccessLevel.NONE)
     private YesOrNo mpuClaimingExemptionMiam;
+
     public void setMpuClaimingExemptionMiam(YesOrNo mpuClaimingExemptionMiam) {
         this.claimingExemptionMiam = mpuClaimingExemptionMiam.getDisplayedValue();
     }
@@ -276,8 +277,7 @@ public class CafCassCaseData {
 
         mpuExemptionReasons.stream()
             .forEach(
-                reasonEnum ->
-                {
+                reasonEnum -> {
                     if (reasonEnum.equals(mpuDomesticAbuse)) {
                         domesticViolenceEvidence[0] = mpuDomesticAbuse.getDisplayedValue();
                     } else if (reasonEnum.equals(mpuChildProtectionConcern)) {
