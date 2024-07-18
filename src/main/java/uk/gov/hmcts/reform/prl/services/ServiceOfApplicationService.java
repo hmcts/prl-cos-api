@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -133,6 +134,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
@@ -284,6 +286,7 @@ public class ServiceOfApplicationService {
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
     private final CaseInviteManager caseInviteManager;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1238,6 +1241,11 @@ public class ServiceOfApplicationService {
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
 
+        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+            caseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        }
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
         }
@@ -2361,14 +2369,17 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        }
         return dataMap;
     }
 
     private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
         String code = null;
         String isLinked = null;
-        if (null != caseInvite) {
+        if (null != caseInvite && launchDarklyClient.isFeatureEnabled(
+            ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             code = caseInvite.getAccessCode();
             isLinked = caseInvite.getHasLinked();
         }
@@ -2401,7 +2412,7 @@ public class ServiceOfApplicationService {
         return null;
     }
 
-    private List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
+    public List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites();
         if (CollectionUtils.isEmpty(caseInvites)) {
             caseInvites =  new ArrayList<>();
