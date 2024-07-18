@@ -507,7 +507,7 @@ public class ServiceOfApplicationService {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                        sendEmailToApplicantLipPersonalServiceCaDa(
+                        sendEmailToCitizenLipPersonalServiceCaDa(
                             caseData,
                             emailNotificationDetails,
                             element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
@@ -560,7 +560,7 @@ public class ServiceOfApplicationService {
             Map<String, String> fieldsMap = new HashMap<>();
             fieldsMap.put(AUTHORIZATION, authorization);
             fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-            sendEmailToApplicantLipPersonalServiceCaDa(
+            sendEmailToCitizenLipPersonalServiceCaDa(
                 caseData,
                 emailNotificationDetails,
                 applicant,
@@ -1195,13 +1195,13 @@ public class ServiceOfApplicationService {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
-                    sendEmailToApplicantLipPersonalServiceCaDa(caseData,
-                                                               emailNotificationDetails,
-                                                               selectedApplicant,
-                                                               docs,
-                                                               SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                               fieldsMap,
-                                                               doesC1aExists(caseData).equals(Yes)
+                    sendEmailToCitizenLipPersonalServiceCaDa(caseData,
+                                                             emailNotificationDetails,
+                                                             selectedApplicant,
+                                                             docs,
+                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                             fieldsMap,
+                                                             doesC1aExists(caseData).equals(Yes)
                                                             ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
                                                             : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
@@ -1237,7 +1237,7 @@ public class ServiceOfApplicationService {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP8);
-                    sendEmailToApplicantLipPersonalServiceCaDa(
+                    sendEmailToCitizenLipPersonalServiceCaDa(
                         caseData,
                         emailNotificationDetails,
                         applicant,
@@ -1359,35 +1359,35 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private void sendEmailToApplicantLipPersonalServiceCaDa(CaseData caseData,
-                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                            Element<PartyDetails> selectedApplicant,
-                                                            List<Document> docs,
-                                                            SendgridEmailTemplateNames emailTemplate,
-                                                            Map<String, String> fieldMap,
-                                                            EmailTemplateNames notifyTemplate) {
+    private void sendEmailToCitizenLipPersonalServiceCaDa(CaseData caseData,
+                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                          Element<PartyDetails> party,
+                                                          List<Document> docs,
+                                                          SendgridEmailTemplateNames emailTemplate,
+                                                          Map<String, String> fieldMap,
+                                                          EmailTemplateNames notifyTemplate) {
         EmailNotificationDetails emailNotification;
-        if (CaseUtils.isCitizenAccessEnabled(selectedApplicant.getValue())) {
-            log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
+        if (CaseUtils.isCitizenAccessEnabled(party.getValue())) {
+            log.debug("Applicant has access to dashboard -> send gov notify email for {}", party.getId());
             emailNotification = sendEmailToUnrepresentedApplicant(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
-                                                                  selectedApplicant,
+                                                                  party,
                                                                   fieldMap.get(COVER_LETTER_TEMPLATE),
                                                                   notifyTemplate);
         } else {
-            log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
+            log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", party.getId());
             emailNotification = sendSoaPacksToPartyViaEmail(fieldMap.get(AUTHORIZATION),
                                                             caseData,
                                                             docs,
-                                                            selectedApplicant,
+                                                            party,
                                                             fieldMap.get(COVER_LETTER_TEMPLATE),
                                                             emailTemplate);
         }
 
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification.toBuilder()
-                                                     .partyIds(String.valueOf(selectedApplicant.getId()))
+                                                     .partyIds(String.valueOf(party.getId()))
                                                      .build()));
         }
     }
@@ -1737,13 +1737,13 @@ public class ServiceOfApplicationService {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, Templates.PRL_LET_ENG_AP6);
-                    sendEmailToApplicantLipPersonalServiceCaDa(caseData,
-                                                               emailNotificationDetails,
-                                                               selectedApplicant,
-                                                               packDocs,
-                                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                                               fieldsMap,
-                                                               doesC1aExists(caseData).equals(Yes)
+                    sendEmailToCitizenLipPersonalServiceCaDa(caseData,
+                                                             emailNotificationDetails,
+                                                             selectedApplicant,
+                                                             packDocs,
+                                                             SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                             fieldsMap,
+                                                             doesC1aExists(caseData).equals(Yes)
                                                             ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
                                                             : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
@@ -1771,18 +1771,18 @@ public class ServiceOfApplicationService {
             if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                 Map<String, String> fieldsMap = new HashMap<>();
                 fieldsMap.put(AUTHORIZATION, authorization);
-                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                sendEmailToApplicantLipPersonalServiceCaDa(caseData,
-                                                           emailNotificationDetails,
-                                                           applicant,
-                                                           packDocs,
-                                                           SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                                           fieldsMap,
-                                                           SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
+                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP2);
+                sendEmailToCitizenLipPersonalServiceCaDa(caseData,
+                                                         emailNotificationDetails,
+                                                         applicant,
+                                                         packDocs,
+                                                         SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                         fieldsMap,
+                                                         SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                 );
             } else {
                 Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                            applicant, PRL_LET_ENG_AP1);
+                                                                            applicant, PRL_LET_ENG_AP2);
                 sendPostWithAccessCodeLetterToParty(caseData,
                                                     authorization,
                                                     packDocs,
@@ -3254,13 +3254,23 @@ public class ServiceOfApplicationService {
                     log.info("Respondent list {}", respondentList);
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                         log.info("Applicant is not represented");
-                        sendNotificationsToCitizenRespondentsC100(authorization,
-                                                                  respondentList,
-                                                                  caseData,
-                                                                  bulkPrintDetails,
-                                                                  removeCoverLettersFromThePacks(respondentDocs),
-                                                                  false
-                        );
+                        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                            sendNotificationsToCitizenRespondentsC100(authorization,
+                                                                      respondentList,
+                                                                      caseData,
+                                                                      bulkPrintDetails,
+                                                                      removeCoverLettersFromThePacks(respondentDocs),
+                                                                      false
+                            );
+                        } else {
+                            handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
+                                caseData,
+                                authorization,
+                                emailNotificationDetails,
+                                bulkPrintDetails,
+                                respondentDocs
+                            );
+                        }
                     } else {
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
                         sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
@@ -3318,6 +3328,42 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
+    private void handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails, List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> respondentDocs) {
+        String template = PRL_LET_ENG_FL401_RE1;
+        if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            template = PRL_LET_ENG_FL401_RE4;
+        }
+        Element<PartyDetails> respondent = element(
+            caseData.getRespondentsFL401().getPartyId(),
+            caseData.getRespondentsFL401());
+        if (ContactPreferences.email.equals(caseData.getRespondentsFL401().getContactPreferences())) {
+            Map<String, String> fieldsMap = new HashMap<>();
+            fieldsMap.put(AUTHORIZATION, authorization);
+            fieldsMap.put(COVER_LETTER_TEMPLATE, template);
+            sendEmailToCitizenLipPersonalServiceCaDa(
+                caseData,
+                emailNotificationDetails,
+                respondent,
+                respondentDocs,
+                SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                fieldsMap,
+                SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
+            );
+        } else {
+            Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                        respondent, template);
+            sendPostWithAccessCodeLetterToParty(
+                caseData,
+                authorization,
+                respondentDocs,
+                bulkPrintDetails,
+                respondent,
+                coverLetter,
+                respondent.getValue().getLabelForDynamicList()
+            );
+        }
+    }
+
     private String sendNotificationsAfterConfCheckPersonalServiceApplicantLip(CaseData caseData, String authorization,
                                                                               List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                               List<Element<BulkPrintDetails>> bulkPrintDetails,
@@ -3342,7 +3388,7 @@ public class ServiceOfApplicationService {
                 Map<String, String> fieldsMap = new HashMap<>();
                 fieldsMap.put(AUTHORIZATION, authorization);
                 fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                sendEmailToApplicantLipPersonalServiceCaDa(
+                sendEmailToCitizenLipPersonalServiceCaDa(
                     caseData,
                     emailNotificationDetails,
                     element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
@@ -3459,7 +3505,7 @@ public class ServiceOfApplicationService {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                        sendEmailToApplicantLipPersonalServiceCaDa(
+                        sendEmailToCitizenLipPersonalServiceCaDa(
                             caseData,
                             emailNotificationDetails,
                             element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
