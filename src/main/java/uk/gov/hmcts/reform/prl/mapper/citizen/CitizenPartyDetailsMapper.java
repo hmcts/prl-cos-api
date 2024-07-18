@@ -559,8 +559,9 @@ public class CitizenPartyDetailsMapper {
             .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
                 ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
                 : existingPartyDetails.getIsAtAddressLessThan5Years())
-            .isAtAddressLessThan5YearsWithDontKnow(
-                mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(existingPartyDetails, citizenProvidedPartyDetails))
+            .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
+                ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
@@ -592,14 +593,11 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails existingPartyDetails,
-                                                                                     PartyDetails citizenProvidedPartyDetails) {
-        if (StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())) {
+    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if (citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().equals(Yes)) {
             return YesNoDontKnow.yes;
-        } else if (null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()) {
-            return YesNoDontKnow.no;
         } else {
-            return existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow();
+            return YesNoDontKnow.no;
         }
     }
 
