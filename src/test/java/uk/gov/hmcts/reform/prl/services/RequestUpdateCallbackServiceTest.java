@@ -253,7 +253,7 @@ public class RequestUpdateCallbackServiceTest {
                                                                                                   .SUBMITTED.getDisplayedValue()).build())
                                                      .build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .additionalApplicationFeesToPay("£232.00")
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(
