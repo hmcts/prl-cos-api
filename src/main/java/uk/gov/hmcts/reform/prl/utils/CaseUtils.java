@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -490,6 +491,18 @@ public class CaseUtils {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","));
+    }
+
+    public static CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
+                .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
+                ).findFirst();
+            if (caseInvite.isPresent()) {
+                return caseInvite.map(Element::getValue).orElse(null);
+            }
+        }
+        return null;
     }
 
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
