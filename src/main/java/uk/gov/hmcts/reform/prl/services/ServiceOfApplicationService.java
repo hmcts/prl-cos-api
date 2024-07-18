@@ -3231,7 +3231,7 @@ public class ServiceOfApplicationService {
                     unServedRespondentPack
                 );
             } else {
-                if (ObjectUtils.isNotEmpty(unServedApplicantPack)) {
+                if (ObjectUtils.isNotEmpty(unServedApplicantPack) && CollectionUtils.isNotEmpty(unServedApplicantPack.getPackDocument())) {
                     log.info("Court admin personal or non personal service to applicant {}", unServedApplicantPack);
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
