@@ -3328,7 +3328,10 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    private void handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails, List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> respondentDocs) {
+    private void handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(CaseData caseData, String authorization,
+                                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                           List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                                           List<Document> respondentDocs) {
         String template = PRL_LET_ENG_FL401_RE1;
         if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
             template = PRL_LET_ENG_FL401_RE4;
