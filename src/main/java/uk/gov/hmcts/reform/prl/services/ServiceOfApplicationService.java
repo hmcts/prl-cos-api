@@ -1048,6 +1048,7 @@ public class ServiceOfApplicationService {
                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                     List<DynamicMultiselectListElement> selectedRespondents,
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
+        log.info("Sending notification to respondent solicitor");
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
@@ -1800,6 +1801,7 @@ public class ServiceOfApplicationService {
                                                           CaseData caseData,  List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                           List<Document> docs, boolean isStaticDocs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        log.info("Sending notification to respondent");
         selectedRespondents.forEach(respondent -> {
             Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
             if (selectedParty.isPresent()) {
@@ -3249,7 +3251,9 @@ public class ServiceOfApplicationService {
                         partyIds);
 
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
+                    log.info("Respondent list {}", respondentList);
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                        log.info("Applicant is not represented");
                         sendNotificationsToCitizenRespondentsC100(authorization,
                                                                   respondentList,
                                                                   caseData,
