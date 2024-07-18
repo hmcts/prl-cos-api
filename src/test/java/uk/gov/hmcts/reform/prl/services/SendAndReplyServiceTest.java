@@ -124,6 +124,8 @@ public class SendAndReplyServiceTest {
 
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
+
     @Value("${xui.url}")
     private String manageCaseUrl;
 
@@ -1971,7 +1973,16 @@ public class SendAndReplyServiceTest {
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
                             .judicialOrMagistrateTierList(dynamicList)
-                            .applicationsList(dynamicList)
+                            .applicationsList(DynamicList.builder()
+                                                  .listItems(Arrays.asList(DynamicListElement.builder()
+                                                                               .code(UUID.fromString(TEST_UUID))
+                                                                               .label("test")
+                                                                               .build()))
+                                                  .value(DynamicListElement.builder()
+                                                             .code(UUID.fromString(TEST_UUID))
+                                                             .label("test")
+                                                             .build())
+                                                  .build())
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
                             .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
@@ -1989,6 +2000,70 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         sendAndReplyService.closeAwPTask(caseData);
         Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
+    }
+
+
+    @Test
+    public void testDoNotCloseCloseAwPTask() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
+            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(DynamicList.builder()
+                                                  .listItems(Arrays.asList(DynamicListElement.builder()
+                                                                               .code(UUID.fromString(TEST_UUID))
+                                                                               .label("test")
+                                                                               .build(),DynamicListElement.builder()
+                                                      .code(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                                      .label("test")
+                                                      .build()))
+                                                  .build())
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        sendAndReplyService.closeAwPTask(caseData);
+        Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
     }
 
     @Test
