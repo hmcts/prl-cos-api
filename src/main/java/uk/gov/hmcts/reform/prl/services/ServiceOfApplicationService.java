@@ -3231,7 +3231,8 @@ public class ServiceOfApplicationService {
                     unServedRespondentPack
                 );
             } else {
-                if (unServedApplicantPack != null) {
+                if (ObjectUtils.isNotEmpty(unServedApplicantPack)) {
+                    log.info("Court admin personal or non personal service to applicant {}", unServedApplicantPack);
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
                     if (unServedApplicantPack.getPersonalServiceBy() != null) {
@@ -3240,7 +3241,9 @@ public class ServiceOfApplicationService {
                             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                     }
                 }
-                if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
+                if (ObjectUtils.isNotEmpty(unServedRespondentPack) && null == unServedRespondentPack.getPersonalServiceBy()) {
+                    log.info("non personal service to respondent {}", unServedRespondentPack);
+
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                     final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                         partyIds);
