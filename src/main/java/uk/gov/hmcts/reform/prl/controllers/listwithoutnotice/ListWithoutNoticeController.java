@@ -49,7 +49,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
     public static final String CONFIRMATION_BODY_PREFIX_CA = """
         ### What happens next
-        Admin will be notified to list the case without notice.\n
+        Admin will be notified to list the case without notice.
         The hearing instructions will be saved in case notes.
         """;
 
