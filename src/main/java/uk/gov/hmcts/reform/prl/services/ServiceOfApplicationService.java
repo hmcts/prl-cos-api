@@ -1184,7 +1184,7 @@ public class ServiceOfApplicationService {
                                                                    CaseData caseData,
                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                   List<Document> packLdocs) {
+                                                                   List<Document> docs) {
         caseData.getApplicants().forEach(selectedApplicant -> {
             if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
@@ -1206,7 +1206,7 @@ public class ServiceOfApplicationService {
                     sendSoaPacksToPartyViaPost(
                         authorization,
                         caseData,
-                        packLdocs, //C9 to be sent for all applicants
+                        docs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
                         PRL_LET_ENG_AP7
@@ -3739,7 +3739,7 @@ public class ServiceOfApplicationService {
         List<Document> coverLetters = new ArrayList<>();
         CaseInvite caseInvite = null;
         if (isAccessCodeNeeded
-            && !isAccessEnabled(party)
+            && !CaseUtils.hasDashboardAccess(party)
             && !CaseUtils.hasLegalRepresentation(party.getValue())) {
             caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
