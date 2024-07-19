@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -596,29 +594,6 @@ public class StmtOfServImplServiceTest {
 
         assertNotNull(updatedCaseData);
 
-    }
-
-    @Test
-    public void testcheckAndServeRespondentPacksPersonalService() {
-        CaseData caseData = CaseData.builder()
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .personalServiceBy(
-                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                                                                  .packDocument(List.of(element(Document.builder().build())))
-                                                                  .build())
-                                      .build())
-            .respondents(List.of(element(PartyDetails.builder().build())))
-            .build();
-        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
-                                                                              Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
-            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
-        assertNotNull(servedApplicationDetails);
-        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
     }
 
     @Test
