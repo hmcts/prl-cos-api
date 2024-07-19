@@ -4339,6 +4339,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
     }
+
     @Test
     public void testGetRe7CoverLettersEnglishWelsh() {
         CaseData caseData = CaseData.builder().id(12345L)

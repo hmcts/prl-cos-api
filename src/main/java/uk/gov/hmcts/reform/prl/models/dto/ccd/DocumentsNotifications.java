@@ -18,5 +18,5 @@ import java.util.List;
 public class DocumentsNotifications {
 
     //PRL-5979 - RE7 access code cover letter
-    private List<Element<DocumentsNotification>> respondentAccessCodeNotifications;
+    private List<Element<DocumentsNotification>> accessCodeNotifications;
 }
