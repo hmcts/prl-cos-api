@@ -1522,7 +1522,9 @@ public class ServiceOfApplicationService {
                                                         packDocs,
                                                         SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                         fieldsMap,
-                                                        CA_APPLICANT_SERVICE_APPLICATION
+                                                        doesC1aExists(caseData).equals(Yes)
+                                                            ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                            : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
                     Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
