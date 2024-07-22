@@ -78,10 +78,8 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForCa() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
@@ -112,10 +110,8 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForCaC2WithoutNotice() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.c2Order)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
@@ -148,10 +144,8 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForDaApplicant() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.c2Order)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
@@ -176,10 +170,8 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForDaRespondnet() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.c2Order)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
@@ -204,10 +196,9 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForError() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -239,10 +230,9 @@ public class ApplicationsFeeCalculatorTest {
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
@@ -288,10 +278,9 @@ public class ApplicationsFeeCalculatorTest {
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -336,10 +325,9 @@ public class ApplicationsFeeCalculatorTest {
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
@@ -385,10 +373,9 @@ public class ApplicationsFeeCalculatorTest {
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
@@ -434,10 +421,9 @@ public class ApplicationsFeeCalculatorTest {
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.c2Order
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .representedPartyType(CA_APPLICANT)
             .temporaryC2Document(c2DocumentBundle)
@@ -479,10 +465,8 @@ public class ApplicationsFeeCalculatorTest {
 
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
-            ))
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.c2Order)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle1)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
