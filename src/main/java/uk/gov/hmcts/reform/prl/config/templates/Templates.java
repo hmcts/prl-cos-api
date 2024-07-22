@@ -19,9 +19,15 @@ public class Templates {
     public static final String PRL_LET_ENG_FL401_RE4 = "PRL-LET-ENG-FL401-RE4.docx";
     public static final String PRL_LET_ENG_RE5 = "PRL-LET-ENG-C100-RE5.docx";
     public static final String PRL_LET_ENG_C100_RE6 = "PRL-LET-ENG-C100-RE6.docx";
-    public static final String PRL_LET_ENG_RE7 = "PRL-LET-ENG-C100-RE7.docx";
 
+    public static final String PRL_LET_ENG_C100_RE7 = "PRL-LET-ENG-C100-RE7.docx";
+    public static final String PRL_LET_WEL_C100_RE7 = "PRL-LET-WEL-C100-RE7.docx";
+    public static final String PRL_LET_ENG_FL401_RE8 = "PRL-LET-ENG-FL401-RE8.docx";
+    public static final String PRL_LET_WEL_FL401_RE8 = "PRL-LET-WEL-FL401-RE8.docx";
     public static final String PRL_LTR_ENG_C100_FM5 = "PRL-LTR-ENG-C100-FM5.docx";
 
     public static final String PRL_LET_ENG_LIST_WITHOUT_NOTICE = "PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx";
+
+    public static final String RE7_HINT = "RE7";
+    public static final String RE8_HINT = "RE8";
 }

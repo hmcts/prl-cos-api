@@ -9,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.config.templates.Templates;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -23,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
@@ -47,6 +47,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
@@ -55,7 +57,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
@@ -73,11 +77,14 @@ public class StmtOfServImplService {
     public static final String UN_SERVED_RESPONDENT_PACK = "unServedRespondentPack";
     public static final String UNSERVED_CITIZEN_RESPONDENT_PACK = "unservedCitizenRespondentPack";
     public static final String STMT_OF_SERVICE_FOR_APPLICATION = "stmtOfServiceForApplication";
+    public static final String ACCESS_CODE_NOTIFICATIONS = "accessCodeNotifications";
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final AllTabServiceImpl allTabService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final DocumentLanguageService documentLanguageService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -126,7 +133,6 @@ public class StmtOfServImplService {
                         .toList();
                     String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(null)
                         .selectedPartyId(CaseUtils.getPartyIdListAsString(caseData.getRespondents()))
                         .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -134,7 +140,6 @@ public class StmtOfServImplService {
                         .build();
                 } else {
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(null)
                         .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                         .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -144,7 +149,6 @@ public class StmtOfServImplService {
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
-                    .respondentDynamicList(null)
                     .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                     .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                     .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -158,14 +162,30 @@ public class StmtOfServImplService {
                 .equals(caseData.getStatementOfService()
                             .getStmtOfServiceWhatWasServed())
             ) {
-                caseData = cleanupAndServeRespondentPacksPersonalService(caseData, authorisation);
+                List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
+                    finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
+                }
+                finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksPersonalService(
+                    caseData,
+                    authorisation
+                )));
+
                 caseDataUpdateMap.put(
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
                 );
                 caseDataUpdateMap.put(UN_SERVED_RESPONDENT_PACK, null);
+
+                //PRL-5979 - Send cover letter with access code to respondents
+                caseDataUpdateMap.put(
+                    ACCESS_CODE_NOTIFICATIONS,
+                    sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, recipient)
+                );
             }
-            elementList.add(element(recipient));
+            elementList.add(element(recipient.toBuilder()
+                                        .respondentDynamicList(null) //clear dynamic list after sending access code info
+                                        .build()));
         }
 
         caseDataUpdateMap.put(
@@ -224,21 +244,6 @@ public class StmtOfServImplService {
         }
 
         return Collections.emptyList();
-    }
-
-    private CaseData cleanupAndServeRespondentPacksPersonalService(CaseData caseData, String authorisation) {
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
-            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
-        }
-        finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksPersonalService(
-            caseData,
-            authorisation
-        )));
-        return caseData.toBuilder()
-            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
-            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedRespondentPack(null).build())
-            .build();
     }
 
     private List<DynamicListElement> getRespondentsList(CaseData caseData) {
@@ -382,22 +387,16 @@ public class StmtOfServImplService {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument();
         List<String> partiesServed = new ArrayList<>();
-        List<Element<NotificationDetails>> notifications = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
             updatedCaseData.getRespondents().forEach(respondent -> {
                 if (partiesList.contains(String.valueOf(respondent.getId()))) {
                     partiesServed.add(respondent.getValue().getLabelForDynamicList());
                 }
-                sendCoverLetterToRespondent(authorization, updatedCaseData, notifications, respondent);
             });
         } else {
             if (partiesList.contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
                 partiesServed.add(updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
             }
-            sendCoverLetterToRespondent(authorization, updatedCaseData, notifications,
-                                        element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                                                updatedCaseData.getRespondentsFL401()));
-
         }
         log.info("pack docs {}", packDocs);
         if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
@@ -428,50 +427,11 @@ public class StmtOfServImplService {
                                                                                 .partyIds(String.join(",", partiesList))
                                                                                 .build()))).build()));
         updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        updatedCaseDataMap.put("accessCodeNotifications", notifications);
-    }
-
-    private void sendCoverLetterToRespondent(String authorization, CaseData updatedCaseData, List<Element<NotificationDetails>> notifications,
-                                             Element<PartyDetails> respondent) {
-        if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
-                                                  updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
-            List<Document> docs = null;
-            try {
-                docs = new ArrayList<>(serviceOfApplicationPostService
-                                                          .getCoverSheets(updatedCaseData, authorization,
-                                                                          respondent.getValue().getAddress(),
-                                                                          respondent.getValue().getLabelForDynamicList(),
-                                                                          DOCUMENT_COVER_SHEET_HINT
-                                                          ));
-                docs.add(coverLetter);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            BulkPrintDetails bulkPrintDetails1 = serviceOfApplicationPostService.sendPostNotificationToParty(
-                updatedCaseData,
-                authorization,
-                respondent,
-                docs,
-                respondent.getValue().getLabelForDynamicList()
-            );
-            notifications.add(element(NotificationDetails.builder()
-                                          .bulkPrintId(bulkPrintDetails1.getBulkPrintId())
-                                          .notificationType(NotificationType.BULK_PRINT)
-                                          .partyId(String.valueOf(respondent.getId()))
-                                          .partyType(PartyType.RESPONDENT)
-                                          .sentDateTime(LocalDateTime.now())
-                                          .build()));
-        }
-    }
-
-    private Document getCoverLetter(String authorization, CaseData updatedCaseData, Element<PartyDetails> respondent, String applicantName) {
-        CaseInvite caseInvite = serviceOfApplicationService.getCaseInvite(respondent.getId(), updatedCaseData.getCaseInvites());
-        Map<String, Object> dataMap = serviceOfApplicationService.populateAccessCodeMap(
-            updatedCaseData,
-            respondent, caseInvite);
-        dataMap.put("applicantName", applicantName);
-        return serviceOfApplicationService.fetchCoverLetter(authorization, Templates.PRL_LET_ENG_RE7, dataMap);
+        //PRL-5979 - Send cover letter with access code to respondents
+        updatedCaseDataMap.put(
+            ACCESS_CODE_NOTIFICATIONS,
+            sendAccessCodesToRespondentsByLip(authorization, updatedCaseData, partiesList)
+        );
     }
 
     private void updateStatementOfServiceCollection(CitizenSos sosObject, CaseData updatedCaseData,
@@ -511,4 +471,177 @@ public class StmtOfServImplService {
             stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
         }
     }
+
+
+    private List<Element<DocumentsNotification>> sendAccessCodesToRespondentsByCourtLegalRep(String authorization,
+                                                                                             CaseData caseData,
+                                                                                             StmtOfServiceAddRecipient recipient) {
+        List<Element<DocumentsNotification>> documentsNotifications = getExistingAccessCodeNotifications(caseData);
+        //PRL-5979 - Send cover letter with access code to respondent only if LD flag is enabled
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
+                    //send to all respondents
+                    documentsNotifications.addAll(caseData.getRespondents().stream()
+                                                      .map(respondent -> sendAccessCodeCoverLetter(
+                                                          authorization,
+                                                          caseData,
+                                                          respondent,
+                                                          true
+                                                      )).toList());
+                } else {
+                    //send to selected respondent
+                    documentsNotifications.addAll(caseData.getRespondents().stream()
+                                                      .filter(respondent -> respondent.getId().toString().equals(
+                                                          recipient.getRespondentDynamicList().getValue().getCode()))
+                                                      .map(respondent -> sendAccessCodeCoverLetter(
+                                                          authorization,
+                                                          caseData,
+                                                          respondent,
+                                                          true
+                                                      )).toList());
+                }
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                //send to respondent
+                documentsNotifications.add(sendAccessCodeCoverLetter(
+                    authorization,
+                    caseData,
+                    element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401()),
+                    false
+                ));
+            }
+        } else {
+            documentsNotifications.add(getNoAccessCodeDocumentsNotification());
+        }
+
+        return documentsNotifications.stream().filter(Objects::nonNull).toList();
+    }
+
+    private List<Element<DocumentsNotification>> sendAccessCodesToRespondentsByLip(String authorization,
+                                                                                   CaseData caseData,
+                                                                                   List<String> partiesList) {
+        List<Element<DocumentsNotification>> documentsNotifications = getExistingAccessCodeNotifications(caseData);
+        //PRL-5979 - Send cover letter with access code to respondent only if LD flag is enabled
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                documentsNotifications.addAll(caseData.getRespondents().stream()
+                                                  .filter(respondent -> partiesList.contains(String.valueOf(respondent.getId())))
+                                                  .map(respondent ->
+                                                           sendAccessCodeCoverLetter(
+                                                               authorization,
+                                                               caseData,
+                                                               respondent,
+                                                               true
+                                                           )).toList());
+
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                //send to respondent
+                documentsNotifications.add(sendAccessCodeCoverLetter(
+                    authorization,
+                    caseData,
+                    element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401()),
+                    false
+                ));
+            }
+        } else {
+            documentsNotifications.add(getNoAccessCodeDocumentsNotification());
+        }
+        return documentsNotifications.stream().filter(Objects::nonNull).toList();
+    }
+
+    private List<Element<DocumentsNotification>> getExistingAccessCodeNotifications(CaseData caseData) {
+        return null != caseData.getDocumentsNotifications()
+            && CollectionUtils.isNotEmpty(caseData.getDocumentsNotifications()
+                                              .getAccessCodeNotifications())
+            ? caseData.getDocumentsNotifications().getAccessCodeNotifications()
+            : new ArrayList<>();
+    }
+
+    private Element<DocumentsNotification> sendAccessCodeCoverLetter(String authorization,
+                                                                     CaseData caseData,
+                                                                     Element<PartyDetails> respondent,
+                                                                     boolean isC100Case) {
+        if (!CaseUtils.hasDashboardAccess(respondent)
+            && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+            List<Document> documents = null;
+            try {
+                //cover sheets
+                documents = new ArrayList<>(serviceOfApplicationPostService
+                                                .getCoverSheets(caseData, authorization,
+                                                                respondent.getValue().getAddress(),
+                                                                respondent.getValue().getLabelForDynamicList(),
+                                                                DOCUMENT_COVER_SHEET_HINT
+                                                ));
+
+                //cover letters
+                List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(
+                    authorization,
+                    caseData,
+                    respondent,
+                    isC100Case ? RE7_HINT : RE8_HINT,
+                    true
+                );
+
+                documents.addAll(coverLetters);
+
+                //post letters via bulk print
+                BulkPrintDetails bulkPrintDetails = serviceOfApplicationPostService.sendPostNotificationToParty(
+                    caseData,
+                    authorization,
+                    respondent,
+                    documents,
+                    respondent.getValue().getLabelForDynamicList()
+                );
+
+                return element(DocumentsNotification.builder()
+                                   .notification(NotificationDetails.builder()
+                                                     .bulkPrintId(bulkPrintDetails.getBulkPrintId())
+                                                     .notificationType(NotificationType.BULK_PRINT)
+                                                     .partyId(String.valueOf(respondent.getId()))
+                                                     .partyType(PartyType.RESPONDENT)
+                                                     .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                     .build())
+                                   .documents(ElementUtils.wrapElements(coverLetters))
+                                   .build());
+            } catch (Exception e) {
+                log.error(
+                    "SOS: Exception occurred in sending access code cover letter to respondent {} ",
+                    respondent.getId(),
+                    e
+                );
+                return null;
+            }
+        } else {
+            log.warn(
+                "Respondent {} is either represented or has got dashboard access, no need to send access code",
+                respondent.getId()
+            );
+            return element(DocumentsNotification.builder()
+                               .notification(NotificationDetails.builder()
+                                                 .partyId(String.valueOf(respondent.getId()))
+                                                 .partyType(PartyType.RESPONDENT)
+                                                 .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                 .remarks(
+                                                     "Respondent is either represented or has got dashboard access, no need to send access code")
+                                                 .build())
+                               .build());
+        }
+    }
+
+    private Element<DocumentsNotification> getNoAccessCodeDocumentsNotification() {
+        log.warn(
+            "LD flag {} is not enabled to send access code in cover letter for citizen",
+            ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER
+        );
+        return element(DocumentsNotification.builder()
+                           .notification(NotificationDetails.builder()
+                                             .partyType(PartyType.RESPONDENT)
+                                             .sentDateTime(LocalDateTime.now(ZoneId.of(
+                                                 LONDON_TIME_ZONE)))
+                                             .remarks(
+                                                 "Citizen journey is not enabled to send access code for respondents")
+                                             .build())
+                           .build());
+    }
+
 }

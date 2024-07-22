@@ -73,7 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -84,11 +83,17 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP2
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE1;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_RE7;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_FL401_RE8;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -1179,17 +1184,8 @@ public class ServiceOfApplicationService {
                                                                    CaseData caseData,
                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                   List<Document> packLdocs) {
-
-        List<Document> packLDocsWithoutC9 = packLdocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
-        AtomicBoolean isNotFirstApplicant = new AtomicBoolean(false);
+                                                                   List<Document> docs) {
         caseData.getApplicants().forEach(selectedApplicant -> {
-            List<Document> docs = packLDocsWithoutC9;
-            if (!isNotFirstApplicant.get()) {
-                docs = packLdocs;
-            }
-            isNotFirstApplicant.set(true);
             if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
@@ -1210,7 +1206,7 @@ public class ServiceOfApplicationService {
                     sendSoaPacksToPartyViaPost(
                         authorization,
                         caseData,
-                        docs,
+                        docs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
                         PRL_LET_ENG_AP7
@@ -2652,6 +2648,9 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+        }
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
         }
@@ -3730,5 +3729,49 @@ public class ServiceOfApplicationService {
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
+    }
+
+    public List<Document> getCoverLetters(String authorization,
+                                          CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String templateHint,
+                                          boolean isAccessCodeNeeded) {
+        List<Document> coverLetters = new ArrayList<>();
+        CaseInvite caseInvite = null;
+        if (isAccessCodeNeeded
+            && !CaseUtils.hasDashboardAccess(party)
+            && !CaseUtils.hasLegalRepresentation(party.getValue())) {
+            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+        }
+        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        //English
+        if (documentLanguage.isGenEng()) {
+            coverLetters.add(fetchCoverLetter(authorization, getCoverLetterTemplate(templateHint, false), dataMap));
+        }
+        //Welsh
+        if (documentLanguage.isGenWelsh) {
+            coverLetters.add(fetchCoverLetter(authorization, getCoverLetterTemplate(templateHint, true), dataMap));
+        }
+
+        return coverLetters;
+    }
+
+    private String getCoverLetterTemplate(String templateHint,
+                                          boolean isWelsh) {
+        return switch (templateHint) {
+            case RE7_HINT -> getRe7Template(isWelsh);
+            case RE8_HINT -> getRe8Template(isWelsh);
+
+            default -> "";
+        };
+    }
+
+    private String getRe7Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_WEL_C100_RE7 : PRL_LET_ENG_C100_RE7;
+    }
+
+    private String getRe8Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_WEL_FL401_RE8 : PRL_LET_ENG_FL401_RE8;
     }
 }
