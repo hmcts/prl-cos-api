@@ -88,12 +88,12 @@ public class FeesAndPaymentCitizenController {
     public FeeResponseForCitizen fetchFeesAmountByType(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @PathVariable("fee-type") String fee_type
+        @PathVariable("fee-type") String feeType
     ) {
         FeeResponse feeResponse = null;
         try {
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                feeResponse = feeService.fetchFeeDetails(FeeType.valueOf(fee_type));
+                feeResponse = feeService.fetchFeeDetails(FeeType.valueOf(feeType));
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
