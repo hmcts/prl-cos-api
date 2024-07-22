@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -26,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -72,6 +69,7 @@ public class AllTabServiceImpl implements AllTabsService {
     public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
+            log.info("all tab update triggered");
             return mapAndSubmitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     caseId,
@@ -222,8 +220,7 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(List<Element<CaseInvite>> caseInvites,
-                                         String authorisation,
+    public void updatePartyDetailsForNoc(String authorisation,
                                          String caseId,
                                          StartEventResponse startEventResponse,
                                          EventRequestData eventRequestData,
@@ -238,7 +235,6 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
-            setCaseInvitesIfNeeded(caseInvites, dataMap);
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
@@ -276,11 +272,6 @@ public class AllTabServiceImpl implements AllTabsService {
         return combinedFieldsMap;
     }
 
-    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
-        if (CollectionUtils.isNotEmpty(caseInvites)) {
-            caseDataUpdatedMap.put("caseInvites", caseInvites);
-        }
-    }
 
     @Override
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
