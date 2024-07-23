@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -119,104 +120,9 @@ public class ServiceOfApplicationPostService {
         UploadResponse uploadResponse = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            List<MultipartFile> files = new ArrayList<>();
-            if (documentLanguage.isGenEng()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    PRIVACY_DOCUMENT_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                ));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    PRIVACY_DOCUMENT_FILENAME_WELSH,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
-                ));
-            }
-            //PRL-5360 - Remove mediation voucher & add new President note
-            if (documentLanguage.isGenEng()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    SOA_FAMILY_PRESIDENTS_NOTE,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
-                ));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    SOA_FAMILY_PRESIDENTS_NOTE_WELSH,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE_WELSH)
-                ));
-            }
-            files.addAll(
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C7_BLANK_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_C9_PERSONAL_SERVICE_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
-                    )
-                )
-            );
-            if (documentLanguage.isGenEng()) {
-                files.add(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C1A_BLANK_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
-                    ));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                files.add(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C1A_BLANK_DOCUMENT_WELSH_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_WELSH_FILENAME)
-                    ));
-            }
-
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                files
-            );
+            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage);
         } else {
-
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_FL415_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-                    )
-                )
-            );
+            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage);
         }
         if (null != uploadResponse) {
             List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
@@ -224,6 +130,120 @@ public class ServiceOfApplicationPostService {
             return generatedDocList;
         }
         return Collections.emptyList();
+    }
+
+    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage) {
+        List<MultipartFile> files = new ArrayList<>();
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                PRIVACY_DOCUMENT_FILENAME,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+            ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                PRIVACY_DOCUMENT_FILENAME_WELSH,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
+            ));
+        }
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                SOA_FL415_FILENAME,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+            ));
+        }
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
+    }
+
+    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage) {
+        List<MultipartFile> files = new ArrayList<>();
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                PRIVACY_DOCUMENT_FILENAME,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+            ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                PRIVACY_DOCUMENT_FILENAME_WELSH,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
+            ));
+        }
+        //PRL-5360 - Remove mediation voucher & add new President note
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                SOA_FAMILY_PRESIDENTS_NOTE,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
+            ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                SOA_FAMILY_PRESIDENTS_NOTE_WELSH,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE_WELSH)
+            ));
+        }
+        files.addAll(
+            List.of(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    C7_BLANK_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+                ),
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_C9_PERSONAL_SERVICE_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                )
+            )
+        );
+        if (documentLanguage.isGenEng()) {
+            files.add(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    C1A_BLANK_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
+                ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    C1A_BLANK_DOCUMENT_WELSH_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_WELSH_FILENAME)
+                ));
+        }
+
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
     }
 
     public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
@@ -300,7 +320,7 @@ public class ServiceOfApplicationPostService {
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+            .printedDocs(String.join(",", docs.stream().filter(Objects::nonNull).map(Document::getDocumentFileName).toList()))
             .recipientsName(partyDetails.getLabelForDynamicList())
             .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)

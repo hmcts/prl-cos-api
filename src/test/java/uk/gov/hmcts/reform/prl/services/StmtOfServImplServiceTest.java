@@ -9,7 +9,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -22,9 +26,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,12 +38,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -55,6 +66,12 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;
@@ -245,6 +262,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -376,6 +394,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -496,6 +515,7 @@ public class StmtOfServImplServiceTest {
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
                                     .stmtOfServiceAddRecipient(listOfSos)
+                                    .stmtOfServiceForApplication(listOfSos)
                                     .build())
             .build();
 
@@ -507,6 +527,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -576,8 +597,9 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testcheckAndServeRespondentPacksPersonalService() {
+    public void testcitizenSosSubmissionC100() {
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(
@@ -585,16 +607,68 @@ public class StmtOfServImplServiceTest {
                                                                   .packDocument(List.of(element(Document.builder().build())))
                                                                   .build())
                                       .build())
-            .respondents(List.of(element(PartyDetails.builder().build())))
+            .statementOfService(StatementOfService.builder()
+
+                                    .build())
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),PartyDetails.builder().build())))
             .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap,
+                                                                                                        caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
         when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
                                                                               Mockito.any(),Mockito.anyString()))
             .thenReturn(Document.builder().build());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
-            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
-        assertNotNull(servedApplicationDetails);
-        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
+        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
+                .partiesServed(List.of("123", "234", "1234"))
+                .partiesServedDate("2020-08-01")
+                .citizenSosDocs(Document.builder().documentFileName("test").build())
+            .build());
+        verify(allTabService, times(1))
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testcitizenSosSubmissionFl401() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                                                                  .packDocument(List.of(element(Document.builder().build())))
+                                                                  .build())
+                                      .build())
+            .statementOfService(StatementOfService.builder()
+
+                                    .build())
+            .respondentsFL401(PartyDetails.builder().firstName("hello").lastName("World").partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap,
+                                                                                                        caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
+            .partiesServed(List.of("123", "234", "1234"))
+            .partiesServedDate("2020-08-01")
+            .citizenSosDocs(Document.builder().documentFileName("test").build())
+            .build());
+        verify(allTabService, times(1))
+            .submitAllTabsUpdate(Mockito.anyString(), Mockito.anyString(), Mockito.any(),Mockito.any(),Mockito.any());
     }
 }

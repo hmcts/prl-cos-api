@@ -113,7 +113,9 @@ public class DynamicMultiSelectListService {
                                                        + caseData.getRespondentsFL401().getRepresentativeLastName()
                                                        + " (Respondent solicitor)")
                                             .build());
-            listItems.add(DynamicMultiselectListElement.builder().code(code).label(name).build());
+            listItems.add(DynamicMultiselectListElement.builder()
+                              .code(String.valueOf(caseData.getRespondentsFL401().getPartyId()))
+                                        .label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> respondentdetails = new HashMap<>();
         respondentdetails.put("respondents", listItems);
@@ -149,7 +151,9 @@ public class DynamicMultiSelectListService {
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
                                                       + caseData.getApplicantsFL401().getRepresentativeLastName()
                                                       + "(Applicant solicitor)").build());
-            listItems.add(DynamicMultiselectListElement.builder().code(code).label(name).build());
+            listItems.add(DynamicMultiselectListElement.builder()
+                              .code(String.valueOf(caseData.getApplicantsFL401().getPartyId()))
+                              .label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> applicantdetails = new HashMap<>();
         applicantdetails.put("applicants", listItems);
