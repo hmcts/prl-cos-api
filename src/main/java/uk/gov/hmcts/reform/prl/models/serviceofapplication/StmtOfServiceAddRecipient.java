@@ -28,5 +28,4 @@ public class StmtOfServiceAddRecipient {
     private final String selectedPartyId;
     private final String selectedPartyName;
     private SosUploadedByEnum uploadedBy;
-    private String uploaderName;
 }

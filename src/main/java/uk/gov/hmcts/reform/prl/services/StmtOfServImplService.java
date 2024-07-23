@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
@@ -66,6 +67,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZON
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
@@ -229,7 +232,7 @@ public class StmtOfServImplService {
                 );
 
                 //PRL-6122 served parties in order collection if sos for orders
-                updateOrdersServedParties(orderCollection,
+                updateOrdersServedParties(caseData, orderCollection,
                                           ManageOrdersUtils.getServedParties(caseData.getRespondents()));
 
             } else {
@@ -245,7 +248,7 @@ public class StmtOfServImplService {
                             finalRecipient.getRespondentDynamicList().getValue().getCode()))
                     .toList();
                 //PRL-6122
-                updateOrdersServedParties(orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
+                updateOrdersServedParties(caseData, orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             recipient = getRecipient(authorisation,
@@ -254,20 +257,21 @@ public class StmtOfServImplService {
                                      recipient.getRespondentDynamicList().getValue().getLabel()
             );
             //PRL-6122
-            updateOrdersServedParties(orderCollection,
+            updateOrdersServedParties(caseData, orderCollection,
                                       List.of(ManageOrdersUtils.getServedParty(caseData.getRespondentsFL401())));
         }
         return recipient;
     }
 
-    private void updateOrdersServedParties(List<Element<OrderDetails>> orderCollection,
+    private void updateOrdersServedParties(CaseData caseData,
+                                           List<Element<OrderDetails>> orderCollection,
                                            List<Element<ServedParties>> servedParties) {
         log.info("Inside *updateOrdersServedParties*, servedParties {}", servedParties);
         if (CollectionUtils.isNotEmpty(orderCollection)) {
             //PRL-6122 served parties in order collection
             nullSafeCollection(orderCollection)
                 .stream()
-                .filter(order -> "PENDING".equals(order.getValue().getSosStatus()))
+                .filter(order -> SOS_PENDING.equals(order.getValue().getSosStatus()))
                 .forEach(order -> {
                     log.info("Order is pending for SOS {}", order.getId());
                     List<Element<ServedParties>> updatedServedParties = new ArrayList<>(order.getValue().getServeOrderDetails().getServedParties());
@@ -278,24 +282,38 @@ public class StmtOfServImplService {
                                                .servedParties(updatedServedParties)
                                                .build())
                         .build();
-                    //ADD LOGIC TO CLEAR SOS STATUS
+                    //Update order sos status
+                    //FL401 - COMPLETED always as there is only one respondent
+                    //C100 - COMPLETED if all respondents are served, determined by checking respondents with served parties
+                    updatedOrder = areAllRespondentsServed(updatedOrder, caseData)
+                        ? updatedOrder.toBuilder().sosStatus(SOS_COMPLETED).build()
+                        : updatedOrder;
 
                     orderCollection.set(orderCollection.indexOf(order), element(order.getId(), updatedOrder));
                 });
         }
     }
 
+    private boolean areAllRespondentsServed(OrderDetails updatedOrder,
+                                            CaseData caseData) {
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            || caseData.getRespondents().stream()
+            .map(respondent -> respondent.getId().toString())
+            .allMatch(updatedOrder.getServeOrderDetails().getServedParties().stream()
+                          .map(Element::getValue)
+                          .map(ServedParties::getPartyId)
+                          .collect(Collectors.toSet())::contains);
+    }
+
     private StmtOfServiceAddRecipient getRecipient(String authorisation,
                                                    StmtOfServiceAddRecipient recipient,
                                                    String selectedPartyId,
                                                    String selectedPartyName) {
-        //UserDetails userDetails = userService.getUserDetails(authorisation);
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
             .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
             .servedDateTimeOption(recipient.getServedDateTimeOption())
-            //.uploaderName(userDetails.getFullName())
             .uploadedBy(getSosUploadedBy(authorisation))
             .build();
     }
