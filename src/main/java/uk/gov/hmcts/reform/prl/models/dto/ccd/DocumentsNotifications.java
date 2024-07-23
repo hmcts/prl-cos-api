@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
