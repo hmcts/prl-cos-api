@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -601,7 +602,7 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(
                                                                       SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                                                                   .packDocument(List.of(element(Document.builder().build())))
@@ -639,10 +640,11 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(
                                                                       SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                                                                   .packDocument(List.of(element(Document.builder().build())))
+                                                                         .partyIds(List.of(element("123")))
                                                                   .build())
                                       .build())
             .statementOfService(StatementOfService.builder()
@@ -665,6 +667,7 @@ public class StmtOfServImplServiceTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
             .partiesServed(List.of("123", "234", "1234"))
+            .isOrder(YesOrNo.No)
             .partiesServedDate("2020-08-01")
             .citizenSosDocs(Document.builder().documentFileName("test").build())
             .build());
