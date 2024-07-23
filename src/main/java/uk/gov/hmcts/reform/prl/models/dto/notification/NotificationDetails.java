@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationDetails {
 
-    private String partyId;
-    private PartyType partyType;
-    private NotificationType notificationType;
-    private String bulkPrintId;
-    private LocalDateTime sentDateTime;
-    private String remarks;
+    private final String partyId;
+    private final PartyType partyType;
+    private final NotificationType notificationType;
+    private final String bulkPrintId;
+    private final LocalDateTime sentDateTime;
+    private final String remarks;
 }

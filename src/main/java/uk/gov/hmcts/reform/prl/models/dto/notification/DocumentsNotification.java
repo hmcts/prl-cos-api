@@ -17,7 +17,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentsNotification {
 
-    private NotificationDetails notification;
+    private final NotificationDetails notification;
     private final List<Element<Document>> documents;
 
 }
