@@ -15,7 +15,7 @@ public enum SosUploadedByEnum {
     @JsonProperty("COURT_STAFF")
     COURT_STAFF("COURT_STAFF", "Court staff"),
     @JsonProperty("APPLICANT_SOLICITOR")
-    APPLICANT_SOLICITOR("APP_LEGAL_REP", "Applicant solicitor"),
+    APPLICANT_SOLICITOR("APPLICANT_SOLICITOR", "Applicant solicitor"),
     @JsonProperty("APPLICANT_LIP")
     APPLICANT_LIP("APPLICANT_LIP", "Applicant LiP");
 
