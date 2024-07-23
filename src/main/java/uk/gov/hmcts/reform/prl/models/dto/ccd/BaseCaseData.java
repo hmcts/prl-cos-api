@@ -64,5 +64,5 @@ public class BaseCaseData {
     private YesOrNo isSdoSelected;
 
     @JsonUnwrapped
-    private final DocumentsNotifications documentsNotifications;
+    private DocumentsNotifications documentsNotifications;
 }
