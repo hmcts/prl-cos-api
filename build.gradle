@@ -39,7 +39,7 @@ def versions = [
   httpComponents               : '4.5.14',
   jackson                      : '2.17.0',
   jacksonDatatypeJsr           : '2.16.0',
-  jsonAssert                   : '1.2.3',
+  jsonAssert                   : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
   junit                        : '4.13.2',
   junitPlatform                : '5.7.2',
