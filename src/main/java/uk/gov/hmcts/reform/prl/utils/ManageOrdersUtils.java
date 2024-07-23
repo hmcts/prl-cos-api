@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -48,6 +50,8 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameL
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class ManageOrdersUtils {
@@ -399,6 +403,24 @@ public class ManageOrdersUtils {
             isOrderEdited = true;//default true for edit returned order
         }
         return isOrderEdited;
+    }
+
+    public static List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
+        return nullSafeCollection(parties).stream()
+            .map(applicant -> element(ServedParties.builder()
+                                          .partyId(String.valueOf(applicant.getId()))
+                                          .partyName(applicant.getValue().getLabelForDynamicList())
+                                          .servedDateTime(LocalDateTime.now())
+                                          .build()))
+            .toList();
+    }
+
+    public static Element<ServedParties> getServedParty(PartyDetails party) {
+        return element(ServedParties.builder()
+                           .partyId(String.valueOf(party.getPartyId()))
+                           .partyName(party.getLabelForDynamicList())
+                           .servedDateTime(LocalDateTime.now())
+                           .build());
     }
 }
 

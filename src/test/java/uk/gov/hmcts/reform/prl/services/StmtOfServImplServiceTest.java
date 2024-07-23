@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
@@ -72,6 +73,9 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;
@@ -202,7 +206,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForC100WhileServingApplicationPack() {
+    public void testToHandleSosAboutToSubmitForC100WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -264,14 +268,14 @@ public class StmtOfServImplServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForC100WhileServingOrder() {
+    public void testToHandleSosAboutToSubmitForC100WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -325,14 +329,14 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForFL401WhileServingApplicationPack() {
+    public void testToHandleSosAboutToSubmitForFL401WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -396,14 +400,14 @@ public class StmtOfServImplServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForFL401WhileServingOrder() {
+    public void testToHandleSosAboutToSubmitForFL401WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -459,14 +463,14 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForC100Scenario2WhileServingApplicationPack() {
+    public void testToHandleSosAboutToSubmitForC100Scenario2WhileServingApplicationPack() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -529,14 +533,14 @@ public class StmtOfServImplServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
     }
 
     @Test
-    public void testToRetrieveAllRespondentNamesForC100Scenario2WhileServingOrder() {
+    public void testToHandleSosAboutToSubmitForC100Scenario2WhileServingOrder() {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -590,7 +594,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SosUploadedByEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -26,4 +27,6 @@ public class StmtOfServiceAddRecipient {
     private final List<Document> citizenSosDocs;
     private final String selectedPartyId;
     private final String selectedPartyName;
+    private SosUploadedByEnum uploadedBy;
+    private String uploaderName;
 }

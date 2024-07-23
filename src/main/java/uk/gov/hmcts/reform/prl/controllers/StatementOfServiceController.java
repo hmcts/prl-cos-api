@@ -78,7 +78,7 @@ public class StatementOfServiceController {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(stmtOfServImplService.retrieveAllRespondentNames(
+                .data(stmtOfServImplService.handleSosAboutToSubmit(
                     callbackRequest.getCaseDetails(),
                     authorisation
                 )).build();

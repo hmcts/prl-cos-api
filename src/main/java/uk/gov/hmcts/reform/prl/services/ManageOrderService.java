@@ -166,7 +166,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.res
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -1607,7 +1606,7 @@ public class ManageOrderService {
             updatePersonalServedParties(servingRespondentsOptionsCA, servedParties, representativeName);
             //PRL-4113 - update all applicants party ids in case of personal service
             if (Yes.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
-                servedParties.addAll(getServedParties(caseData.getApplicants()));
+                servedParties.addAll(ManageOrdersUtils.getServedParties(caseData.getApplicants()));
             }
         }
         //FL401 - personal service
@@ -1615,28 +1614,10 @@ public class ManageOrderService {
             SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders().getServingRespondentsOptionsDA();
             updatePersonalServedParties(servingRespondentsOptionsDA, servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
-            servedParties.add(getServedParty(caseData.getApplicantsFL401()));
+            servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
         }
 
         return servedParties;
-    }
-
-    private List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
-        return nullSafeCollection(parties).stream()
-            .map(applicant -> element(ServedParties.builder()
-                                          .partyId(String.valueOf(applicant.getId()))
-                                          .partyName(applicant.getValue().getLabelForDynamicList())
-                                          .servedDateTime(LocalDateTime.now())
-                                          .build()))
-            .toList();
-    }
-
-    private Element<ServedParties> getServedParty(PartyDetails party) {
-        return element(ServedParties.builder()
-                           .partyId(String.valueOf(party.getPartyId()))
-                           .partyName(party.getLabelForDynamicList())
-                           .servedDateTime(LocalDateTime.now())
-                           .build());
     }
 
     private void updatePersonalServedParties(SoaSolicitorServingRespondentsEnum servingRespondentsOptions,
