@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
@@ -88,6 +87,33 @@ public class PaymentRequestService {
             );
     }
 
+    private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
+        return createPaymentRequest.getFeeType() == FeeType.C100_SUBMISSION_FEE
+            || createPaymentRequest.getFeeType() == FeeType.PARENTAL_ORDER
+            || createPaymentRequest.getFeeType() == FeeType.DECLARATION_OF_PARENTAGE
+            || createPaymentRequest.getFeeType() == FeeType.SPECIAL_GUARDIANSHIP_ORDER;
+    }
+
+    private PaymentResponse handleC100Payment(String authorization,
+                                              CaseData caseData,
+                                              Map<String, Object> caseDataMap,
+                                              CreatePaymentRequest createPaymentRequest,
+                                              FeeResponse feeResponse) {
+        paymentResponse = createPayment(
+            authorization,
+            createPaymentRequest,
+            caseData.getPaymentServiceRequestReferenceNumber(),
+            caseData.getPaymentReferenceNumber(),
+            feeResponse
+        );
+
+        //update service request & payment request reference
+        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+
+        return paymentResponse;
+    }
+
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
         log.info("Inside createPayment -> request {}", createPaymentRequest);
@@ -135,33 +161,6 @@ public class PaymentRequestService {
             startAllTabsUpdateDataContent.eventRequestData(),
             caseDataMap
         );
-
-        return paymentResponse;
-    }
-
-    private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
-        return createPaymentRequest.getFeeType() == FeeType.C100_SUBMISSION_FEE
-            || createPaymentRequest.getFeeType() == FeeType.PARENTAL_ORDER
-            || createPaymentRequest.getFeeType() == FeeType.DECLARATION_OF_PARENTAGE
-            || createPaymentRequest.getFeeType() == FeeType.SPECIAL_GUARDIANSHIP_ORDER;
-    }
-
-    private PaymentResponse handleC100Payment(String authorization,
-                                              CaseData caseData,
-                                              Map<String, Object> caseDataMap,
-                                              CreatePaymentRequest createPaymentRequest,
-                                              FeeResponse feeResponse) {
-        paymentResponse = createPayment(
-            authorization,
-            createPaymentRequest,
-            caseData.getPaymentServiceRequestReferenceNumber(),
-            caseData.getPaymentReferenceNumber(),
-            feeResponse
-        );
-
-        //update service request & payment request reference
-        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
 
         return paymentResponse;
     }
