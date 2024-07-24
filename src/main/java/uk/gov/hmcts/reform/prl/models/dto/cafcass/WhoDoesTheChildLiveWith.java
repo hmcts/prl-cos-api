@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-
 
 @Data
 @AllArgsConstructor
@@ -15,9 +13,9 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
-public class HearingDetails {
-
-    private DynamicList hearingTypes;
-    private DynamicList confirmedHearingDates;
-
+public class WhoDoesTheChildLiveWith {
+    private String partyId;
+    private String partyFullName;
+    private PartyTypeEnum partyType;
+    private Address childAddress;
 }
