@@ -134,6 +134,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_NOT_REQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
@@ -166,7 +168,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.res
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -653,6 +654,8 @@ public class ManageOrderService {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
         } else {
+            setRecipientsOptions(caseData, headerMap);
+            setOtherParties(caseData, headerMap);
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
     }
@@ -1607,7 +1610,7 @@ public class ManageOrderService {
             updatePersonalServedParties(servingRespondentsOptionsCA, servedParties, representativeName);
             //PRL-4113 - update all applicants party ids in case of personal service
             if (Yes.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
-                servedParties.addAll(getServedParties(caseData.getApplicants()));
+                servedParties.addAll(ManageOrdersUtils.getServedParties(caseData.getApplicants()));
             }
         }
         //FL401 - personal service
@@ -1615,28 +1618,10 @@ public class ManageOrderService {
             SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders().getServingRespondentsOptionsDA();
             updatePersonalServedParties(servingRespondentsOptionsDA, servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
-            servedParties.add(getServedParty(caseData.getApplicantsFL401()));
+            servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
         }
 
         return servedParties;
-    }
-
-    private List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
-        return nullSafeCollection(parties).stream()
-            .map(applicant -> element(ServedParties.builder()
-                                          .partyId(String.valueOf(applicant.getId()))
-                                          .partyName(applicant.getValue().getLabelForDynamicList())
-                                          .servedDateTime(LocalDateTime.now())
-                                          .build()))
-            .toList();
-    }
-
-    private Element<ServedParties> getServedParty(PartyDetails party) {
-        return element(ServedParties.builder()
-                           .partyId(String.valueOf(party.getPartyId()))
-                           .partyName(party.getLabelForDynamicList())
-                           .servedDateTime(LocalDateTime.now())
-                           .build());
     }
 
     private void updatePersonalServedParties(SoaSolicitorServingRespondentsEnum servingRespondentsOptions,
@@ -1805,6 +1790,8 @@ public class ManageOrderService {
         OrderDetails amended = order.getValue().toBuilder()
             .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
             .serveOrderDetails(serveOrderDetails)
+            //Revisit for FL401 orders
+            .sosStatus(Yes.equals(serveOnRespondent) ? SOS_PENDING : SOS_NOT_REQUIRED)
             .build();
 
         orders.set(orders.indexOf(order), element(order.getId(), amended));

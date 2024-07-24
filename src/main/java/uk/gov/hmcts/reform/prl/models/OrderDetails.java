@@ -70,6 +70,9 @@ public class OrderDetails {
     @JsonProperty("bulkPrintOrderDetails")
     private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;
 
+    //PENDING - personal, COMPLETED - after sos is done for all respondents, NOT_REQUIRED - non-personal
+    private String sosStatus;
+
     @JsonIgnore
     public String getLabelForDynamicList() {
 

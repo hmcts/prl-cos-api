@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -538,17 +539,34 @@ public class ManageOrderEmailService {
                                                     List<EmailInformation> otherOrganisationEmailList,
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
-        log.info("*** DA Personal service represented serving option selected {}",manageOrders.getServingRespondentsOptionsDA());
-        log.info("*** DA Personal service unrepresented serving option selected {}", manageOrders.getServingOptionsForNonLegalRep());
-        String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
+        if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            handleFL401NonPersonalServiceNotifications(authorisation,
+                                                        caseData,
+                                                        manageOrders,
+                                                        bulkPrintOrderDetails,
+                                                        orderDocuments,
+                                                        dynamicDataForEmail);
 
-        handleFL401PersonalServiceNotifications(authorisation,
-                                                caseData,
-                                                orderDocuments,
-                                                dynamicDataForEmail,
-                                                servingOptions,
-                                                bulkPrintOrderDetails);
+
+        } else {
+            log.info("*** DA Personal service represented serving option selected {}",
+                     manageOrders.getServingRespondentsOptionsDA());
+            log.info(
+                "*** DA Personal service unrepresented serving option selected {}",
+                manageOrders.getServingOptionsForNonLegalRep()
+            );
+            String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
+                ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
+
+            handleFL401PersonalServiceNotifications(
+                authorisation,
+                caseData,
+                orderDocuments,
+                dynamicDataForEmail,
+                servingOptions,
+                bulkPrintOrderDetails
+            );
+        }
 
         if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
             .contains(ServeOtherPartiesOptions.other)) {
@@ -561,6 +579,29 @@ public class ManageOrderEmailService {
             });
         }
     }
+
+    private void handleFL401NonPersonalServiceNotifications(String authorisation, CaseData caseData,
+                                                            ManageOrders manageOrders,
+                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                                            List<Document> orderDocuments,
+                                                            Map<String, Object> dynamicDataForEmail) {
+
+        List<Element<PartyDetails>> partyList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
+                                                                      caseData.getApplicantsFL401()),
+                                                              element(caseData.getRespondentsFL401().getPartyId(),
+                                                                      caseData.getRespondentsFL401()));
+
+        DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+        sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
+                                             partyList,
+                                             caseData,
+                                             authorisation,
+                                             dynamicDataForEmail,
+                                             bulkPrintOrderDetails,
+                                             orderDocuments);
+
+    }
+
 
     private void handleC100PersonalServiceNotifications(String authorisation, CaseData caseData,
                                                         List<Document> orderDocuments,

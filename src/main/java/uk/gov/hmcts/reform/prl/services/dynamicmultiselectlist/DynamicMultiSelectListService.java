@@ -106,8 +106,9 @@ public class DynamicMultiSelectListService {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
                 + " (Respondent)";
+            String code = caseData.getRespondentsFL401().getPartyId().toString();
             respondentSolicitorList.add(DynamicMultiselectListElement.builder()
-                                            .code(name)
+                                            .code(code)
                                             .label(caseData.getRespondentsFL401().getRepresentativeFirstName() + " "
                                                        + caseData.getRespondentsFL401().getRepresentativeLastName()
                                                        + " (Respondent solicitor)")
@@ -145,7 +146,8 @@ public class DynamicMultiSelectListService {
             String name = caseData.getApplicantsFL401().getFirstName() + " "
                 + caseData.getApplicantsFL401().getLastName()
                 + "(Applicant)";
-            applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(name)
+            String code = caseData.getApplicantsFL401().getPartyId().toString();
+            applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(code)
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
                                                       + caseData.getApplicantsFL401().getRepresentativeLastName()
                                                       + "(Applicant solicitor)").build());
