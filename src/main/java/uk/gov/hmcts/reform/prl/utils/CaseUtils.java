@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
@@ -71,7 +72,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -170,10 +173,6 @@ public class CaseUtils {
     public static boolean isCaseCreatedByCitizen(CaseData caseData) {
         log.info("case created by {}", caseData.getCaseCreatedBy());
         log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
-            return true;
-        }
-
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
             0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
@@ -482,7 +481,7 @@ public class CaseUtils {
         return givenZonedTime.withZoneSameInstant(ZoneId.of(EUROPE_LONDON)).toLocalDateTime();
     }
 
-    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+    public static boolean isCitizenAccessEnabled(PartyDetails party) {
         return party != null && party.getUser() != null
             && party.getUser().getIdamId() != null;
     }
@@ -526,7 +525,7 @@ public class CaseUtils {
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue())
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
-                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
+                && parties.get(index).getValue().getUser().getIdamId().equals(
                 partyId)))
             .findFirst()
             .orElse(-1);
@@ -676,6 +675,10 @@ public class CaseUtils {
         return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
     }
 
+    public static String getPartyIdListAsString(List<Element<PartyDetails>> parties) {
+        return String.join(",", parties.stream().map(Element::getId).map(UUID::toString).toList());
+    }
+
     public static boolean isCaseWithoutNotice(CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
@@ -790,7 +793,8 @@ public class CaseUtils {
                                                    UserDetails userDetails) {
         //This would check for user roles from AM for Judge/Legal advisor/Court admin
         //and then return the corresponding idam role base on that
-        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
+        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(
+            RoleAssignmentResponse::getRoleName).toList();
 
         String idamRole;
         if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
@@ -850,5 +854,10 @@ public class CaseUtils {
             return respondent1.getDateOfBirth();
         }
         return null;
+    }
+
+    public static String getCurrentDate() {
+        return DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
     }
 }

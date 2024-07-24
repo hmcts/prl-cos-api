@@ -537,8 +537,8 @@ public class CaseService {
     }
 
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
-        return null != serviceOfApplication.getUnServedRespondentPack()
-            && null != serviceOfApplication.getUnServedRespondentPack().getPackDocument()
+        return ObjectUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack())
+            && CollectionUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack().getPackDocument())
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
