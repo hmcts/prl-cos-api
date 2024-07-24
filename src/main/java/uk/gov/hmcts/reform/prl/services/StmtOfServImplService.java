@@ -290,6 +290,7 @@ public class StmtOfServImplService {
                         : updatedOrder;
 
                     orderCollection.set(orderCollection.indexOf(order), element(order.getId(), updatedOrder));
+                    log.info("Order SOS done, SOS status is updated to {}", updatedOrder.getSosStatus());
                 });
         }
     }
