@@ -1029,4 +1029,9 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
 }
