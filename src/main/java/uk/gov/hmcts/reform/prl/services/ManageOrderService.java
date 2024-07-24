@@ -637,9 +637,9 @@ public class ManageOrderService {
     }
 
     private void populateOtherServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
+        setRecipientsOptions(caseData, headerMap);
+        setOtherParties(caseData, headerMap);
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
-            setRecipientsOptions(caseData, headerMap);
-            setOtherParties(caseData, headerMap);
             if (caseData.getIsCafcass() != null) {
                 headerMap.put(
                     PrlAppsConstants.IS_CAFCASS,
@@ -654,8 +654,6 @@ public class ManageOrderService {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
         } else {
-            setRecipientsOptions(caseData, headerMap);
-            setOtherParties(caseData, headerMap);
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
     }
