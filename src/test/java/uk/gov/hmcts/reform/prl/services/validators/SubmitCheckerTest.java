@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubmitCheckerTest {
@@ -40,4 +41,8 @@ public class SubmitCheckerTest {
         assertFalse(submitChecker.hasMandatoryCompleted(caseData));
     }
 
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(submitChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
 }

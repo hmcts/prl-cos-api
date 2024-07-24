@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -15,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
@@ -25,10 +26,10 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.all
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OtherPeopleInTheCaseChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    public final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -38,7 +39,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             if (others.isEmpty()) {
                 return false;
@@ -65,7 +66,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {
@@ -130,6 +131,11 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             party.getCanYouProvidePhoneNumber()
         );
         return baseFields && additionalFields && childFields.stream().anyMatch(Optional::isPresent);
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

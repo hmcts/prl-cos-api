@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoCrossExaminationCourtCheckEnum {
     @JsonProperty("other")
-    other("other", "Other direction for Cross examination prohibition applies");
+    other("other", "Other direction for Cross-examination prohibition applies");
 
     private final String id;
     private final String displayedValue;

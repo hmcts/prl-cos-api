@@ -8,9 +8,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -46,6 +46,8 @@ public class CcdCaseApiTest {
     @Mock
     StartEventResponse startEventResponse;
 
+    @Mock
+    EventRequestData eventRequestData;
 
     private static final String AUTH = "auth";
 
@@ -89,34 +91,4 @@ public class CcdCaseApiTest {
         CaseDetails expectedResponse = ccdCaseApi.getCase(AUTH, "12345");
         assertEquals(caseDetails.getCaseTypeId(), expectedResponse.getCaseTypeId());
     }
-
-    @Test
-    public void testLinkCitizen() {
-        CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder()
-                              .amendOrderDynamicList(DynamicList.builder()
-                                                         .value(DynamicListElement.builder()
-                                                                    .code(UUID.randomUUID())
-                                                                    .build()).build()).build())
-            .build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("solicitor@example.com")
-            .surname("Solicitor")
-            .id("testId")
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId("12345").build();
-        when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
-        when(authTokenGenerator.generate()).thenReturn(AUTH);
-        when(citizenCoreCaseDataService.linkDefendant(
-            AUTH,
-            Long.valueOf("12345"),
-            caseData,
-            CaseEvent.LINK_CITIZEN,
-            startEventResponse
-        )).thenReturn(caseDetails);
-        ccdCaseApi.linkCitizenToCase(AUTH, AUTH, "12345", caseData, startEventResponse);
-        assertEquals(caseDetails.getCaseTypeId(), caseDetails.getCaseTypeId());
-    }
-
 }

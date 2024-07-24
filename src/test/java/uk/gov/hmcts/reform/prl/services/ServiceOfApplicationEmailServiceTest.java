@@ -1,30 +1,28 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,46 +32,61 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ServiceOfApplicationEmailServiceTest {
 
     @Mock
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Mock
     private EmailService emailService;
-
-    @Mock
-    private UserService userService;
 
     @InjectMocks
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
     @Mock
-    private DgsService dgsService;
-
-    @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
-
-    @Mock
-    private Time dateTime;
-
-    @Mock
-    private ObjectMapper objectMapper;
+    SendgridService sendgridService;
 
     @Test
-    public void testC100EmailNotification() throws Exception {
-        CafcassServiceApplicationEnum cafcassServiceApplicationEnum = CafcassServiceApplicationEnum.cafcass;
-
-        element("test@test.com");
-
+    public void testCafcassEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .confirmRecipients(ConfirmRecipients.builder()
-                                   .otherEmailAddressList(List.of(element("test@test.com")))
-                                   .cafcassEmailAddressList(List.of(element("test@test.com")))
-                                   .cafcassEmailOptionChecked(List.of(cafcassServiceApplicationEnum)).build())
+            .applicantCaseName("Test Case 45678")
+            .build();
+
+        serviceOfApplicationEmailService.sendEmailNotificationToCafcass(caseData, "email", "cafcass");
+
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
+                                               Mockito.any(),
+                                               Mockito.any(), Mockito.any()
+        );
+    }
+
+    @Test
+    public void testLocalAuthorityEmail() throws IOException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .build();
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
+        serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData, "email",
+                                                                              List.of(Document.builder().build()),
+                                                                               "Local authority");
+
+        verify(sendgridService, times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testLocalAuthorityEmailNotification() throws Exception {
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
                                             .representativeFirstName("FirstName")
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                            .canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .email("test@applicant.com")
                                             .build())))
             .respondents(List.of(element(PartyDetails.builder()
                                              .solicitorEmail("test@gmail.com")
@@ -83,136 +96,35 @@ public class ServiceOfApplicationEmailServiceTest {
                                              .build())))
 
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData,
+                                                                               "test@applicant.com",
+                                                                               List.of(Document.builder().build()),
+                                                                               PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService, times(4)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+        assertNotNull(emailNotificationDetails);
     }
 
     @Test
-    public void testC100EmailNotificationForMultipleApplicants() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName")
-                            .representativeFirstName("FirstName")
-                            .build()),
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName1")
-                            .representativeFirstName("FirstName1")
-                            .build())
-            ))
-            .respondents(List.of(
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName")
-                            .representativeFirstName("FirstName")
-                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                            .build()),
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName1")
-                            .representativeFirstName("FirstName1")
-                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                            .build())
-            ))
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+    public void testsendEmailUsingTemplateWithAttachments() throws Exception {
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
+        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
+                                                                               "", List.of(Document.builder().build()),
+                                                                               SendgridEmailTemplateNames
+                                                                                   .SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                                               new HashMap<>(),
+                                                                               PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService, times(3)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+        verify(sendgridService, times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
-    public void testFl401EmailNotification() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .solicitorEmail("test@gmail.com")
-                                  .representativeLastName("LastName")
-                                  .representativeFirstName("FirstName")
-                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                  .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService, times(2)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
-    }
-
-    @Test
-    public void testFl401EmailNotificationWithoutRespondentSolicitor() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService, times(1)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
-    }
-
-    @Test
-    public void testSendEmailToC100Applicants() throws Exception {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("first")
-            .lastName("last")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("app@gmail.com")
-            .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .applicants(applicantList)
-            .build();
-
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-
-        verify(emailService, times(1)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+    public void testCitizenEmailVars() {
+        EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
+                                                                                                         .id(123L)
+                                                                                                         .build(),
+                                                                                 PartyDetails.builder().build(), "Yes");
+        assertEquals("123", emailTemplateVars.getCaseReference());
     }
 }

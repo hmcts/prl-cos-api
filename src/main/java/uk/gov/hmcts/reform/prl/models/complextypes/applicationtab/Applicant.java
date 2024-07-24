@@ -3,13 +3,14 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Applicant {
 
@@ -30,7 +31,7 @@ public class Applicant {
     private final YesOrNo isEmailAddressConfidential;
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
-    private final String contactPreferences;
+    private final ContactPreferences contactPreferences;
 
     private final String representativeFirstName;
     private final String representativeLastName;

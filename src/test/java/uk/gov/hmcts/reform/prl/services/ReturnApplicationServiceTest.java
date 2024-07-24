@@ -13,14 +13,22 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum.witnessStatementNotProvided;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
@@ -33,9 +41,64 @@ public class ReturnApplicationServiceTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadServices;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
+
     CaseData casedata;
 
     CaseData caseDataFl401;
+
+    String otherSelected = "Case name: null\n"
+        + "Reference code: 0\n"
+        + "\n"
+        + "Dear null,\n"
+        + "\n"
+        + "Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n"
+        + "\n"
+        + "Consent order not provided\n"
+        + "\n"
+        + "Your application is being returned because the document uploaded is not a draft consent order and/or is not signed by both parties.\n"
+        + "\n"
+        + "Next steps\n"
+        + "\n"
+        + "Please upload the correct version of the document and it contains all the relevant details.\n"
+        + "\n"
+        + "\n"
+        + "Other reason\n"
+        + "\n"
+        + "\n"
+        + "Please resolve these issues and resubmit your application.\n"
+        + "\n"
+        + "Kind regards,\n"
+        + "solicitor@example.com Solicitor";
+
+    String otherSelectedFl401 = "Case name: null\n"
+        + "Reference code: 0\n"
+        + "\n"
+        + "Dear John Smith,\n"
+        + "\n"
+        + "Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n"
+        + "\n"
+        + "Application incomplete\n"
+        + "\n"
+        + "Your application has been returned because the application is not complete and does not contain the all required information.\n"
+        + "You may need to request additional information to progress the case.\n"
+        + "\n"
+        + "Next steps\n"
+        + "\n"
+        + "Please check the application and ensure all relevant sections have been completed in full.\n"
+        + "\n"
+        + "\n"
+        + "Other reason\n"
+        + "\n"
+        + "\n"
+        + "Please resolve these issues and resubmit your application.\n"
+        + "\n"
+        + "Kind regards,\n"
+        + "solicitor@example.com Solicitor";
 
     @Before
     public void setUp() {
@@ -78,6 +141,70 @@ public class ReturnApplicationServiceTest {
             .build();
 
         assertFalse(returnApplicationService.noRejectReasonSelected(casedata));
+    }
+
+    @Test
+    public void testOtherC1000therOptionSelectedFirst() {
+
+        List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(RejectReasonEnum.otherReason);
+        rejectReasonList.add(consentOrderNotProvided);
+
+        casedata = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .rejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelected, returnApplicationService.getReturnMessage(casedata, userDetails));
+    }
+
+    @Test
+    public void testOtherOptionC100OtherOptionSelectedSecond() {
+
+        List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(consentOrderNotProvided);
+        rejectReasonList.add(RejectReasonEnum.otherReason);
+
+        casedata = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .rejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelected, returnApplicationService.getReturnMessage(casedata, userDetails));
+    }
+
+    @Test
+    public void testOtherOptionFl401OtherOptionSelectedFirst() {
+
+        List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(FL401RejectReasonEnum.otherReason);
+        rejectReasonList.add(FL401RejectReasonEnum.applicationIncomplete);
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        caseDataFl401 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .fl401RejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelectedFl401, returnApplicationService.getReturnMessage(caseDataFl401, userDetails));
+    }
+
+    @Test
+    public void testOtherOptionFl401OtherOptionSelectedSecond() {
+
+        List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(FL401RejectReasonEnum.applicationIncomplete);
+        rejectReasonList.add(FL401RejectReasonEnum.otherReason);
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        caseDataFl401 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .fl401RejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelectedFl401, returnApplicationService.getReturnMessage(caseDataFl401, userDetails));
     }
 
     @Test
@@ -143,8 +270,7 @@ public class ReturnApplicationServiceTest {
             .append("Case name: TestCase\n")
             .append("Reference code: 123\n\n")
             .append("Dear " + returnApplicationService.getLegalFullName(casedata) + ",\n\n")
-            .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
+            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n");
 
         for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
@@ -184,11 +310,17 @@ public class ReturnApplicationServiceTest {
     @Test
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
-        returnMsgStr.append("                            \n\n");
-        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
-                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+        returnMsgStr.append("""
+                                <br>
+                                <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
+                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
 
-        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+                                """);
+
+        returnMsgStr.append("""
+        Your application has been returned for the following reasons:
+
+            """);
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
@@ -203,8 +335,9 @@ public class ReturnApplicationServiceTest {
             }
         }
 
-        returnMsgStr.append("Resolve these concerns and resend your application."
-                                + "You have been emailed the full details of your application return.");
+        returnMsgStr.append("""
+        Resolve these concerns and resend your application.
+        You have been emailed the full details of your application return.""");
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(casedata));
@@ -214,11 +347,17 @@ public class ReturnApplicationServiceTest {
     @Test
     public void testGetReturnMessageForTaskListfl401() {
         StringBuilder returnMsgStr = new StringBuilder();
-        returnMsgStr.append("                            \n\n");
-        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
-                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+        returnMsgStr.append("""
+                                <br>
+                                <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
+                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
 
-        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+                                """);
+
+        returnMsgStr.append("""
+        Your application has been returned for the following reasons:
+
+            """);
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseDataFl401.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseDataFl401.getRejectReason()) {
@@ -233,13 +372,28 @@ public class ReturnApplicationServiceTest {
             }
         }
 
-        returnMsgStr.append("Resolve these concerns and resend your application."
-                                + "You have been emailed the full details of your application return.");
+        returnMsgStr.append("""
+        Resolve these concerns and resend your application.
+        You have been emailed the full details of your application return.""");
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(caseDataFl401));
 
     }
 
+    @Test
+    public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
+        casedata = casedata.toBuilder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .build();
+        when(miamPolicyUpgradeFileUploadServices.renameMiamPolicyUpgradeDocumentWithoutConfidential(
+            any(CaseData.class))).thenReturn(casedata);
+        when(allTabsService.getNewMiamPolicyUpgradeDocumentMap(any(CaseData.class), anyMap())).thenReturn(anyMap());
+        assertNotNull(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(
+            casedata,
+            new HashMap<>()
+        ));
+    }
 
 }

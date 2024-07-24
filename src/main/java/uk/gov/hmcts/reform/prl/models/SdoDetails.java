@@ -45,9 +45,11 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -89,13 +91,25 @@ public class SdoDetails {
     private final SdoWrittenStatementEnum sdoPositionStatementWritten;
     private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     private final String sdoJoiningInstructionsForRH;
+    //Not required - start
     private final List<SdoApplicantRespondentEnum> sdoHearingAllegationsMadeBy;
     private final List<SdoCourtRequestedEnum> sdoHearingCourtHasRequested;
+    //Not required - end
+    private final HearingData sdoDirectionsForFactFindingHearingDetails;
+    private final SdoCourtRequestedEnum sdoHearingCourtRequests;
+    private final DynamicMultiSelectList sdoWhoMadeAllegationsList;
+    private final DynamicMultiSelectList sdoWhoNeedsToRespondAllegationsList;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoAllegationsDeadlineDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoWrittenResponseDeadlineDate;
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
+    private final String sdoWhoMadeAllegationsText;
+    private final String sdoWhoNeedsToRespondAllegationsText;
     private final String sdoHearingMaximumPages;
     private final int sdoHearingHowManyWitnessEvidence;
+    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     private final String sdoUpdateContactDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -158,8 +172,6 @@ public class SdoDetails {
     private final List<Element<SdoDioProvideOtherDetails>> sdoMiamOtherDetails;
     private final HearingData sdoDraHearingDetails;
     private final HearingData sdoSettlementHearingDetails;
-    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
-    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
     private final List<DioOtherDirectionEnum> sdoInterpreterOtherDetailsCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoInterpreterOtherDetails;
     private final List<SdoCafcassFileAndServeCheckEnum> sdoCafcassFileAndServeCheck;
@@ -203,4 +215,9 @@ public class SdoDetails {
     private final String sdoCrossExaminationEditContent;
     private final int sdoDocsEvidenceWitnessEvidence;
 
+    private final String sdoAfterSecondGatekeeping;
+    private final List<Element<AddNewPreamble>> sdoAddNewPreambleCollection;
+    private final String sdoNextStepsAfterGatekeeping;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcass;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcassCymru;
 }

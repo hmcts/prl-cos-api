@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,7 +25,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 
 @Slf4j
@@ -96,9 +100,13 @@ public class DraftOrder {
     @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
     private final String manageOrdersCaseNo;
+    @JsonProperty("manageOrdersApplicant")
     private final String manageOrdersApplicant;
+    @JsonProperty("manageOrdersApplicantReference")
     private final String manageOrdersApplicantReference;
+    @JsonProperty("manageOrdersRespondent")
     private final String manageOrdersRespondent;
+    @JsonProperty("manageOrdersRespondentReference")
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate manageOrdersRespondentDob;
@@ -115,10 +123,15 @@ public class DraftOrder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final String orderSelectionType;
     private final String orderCreatedBy;
+    //Below field not only for admin and judge but also holds solicitors,
+    // naming convention was wrong due to the requirement change
     @JsonProperty("isOrderUploadedByJudgeOrAdmin")
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
@@ -130,7 +143,6 @@ public class DraftOrder {
     private final C21OrderOptionsEnum c21OrderOptions;
     //PRL-3318 - Added for storing hearing dropdown
     private DynamicList hearingsType;
-
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
 
@@ -139,10 +151,13 @@ public class DraftOrder {
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
-        log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
-            "%s",
-            this.orderTypeId
+            "%s - %s",
+            this.orderTypeId,
+            this.getOtherDetails().getDateCreated().format(DateTimeFormatter.ofPattern(
+                PrlAppsConstants.D_MMM_YYYY_HH_MM,
+                Locale.ENGLISH
+            ))
         );
     }
 }

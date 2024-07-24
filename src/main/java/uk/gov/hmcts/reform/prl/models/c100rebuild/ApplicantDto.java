@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+
 
 @Data
 @Builder(toBuilder = true)
@@ -20,7 +20,7 @@ public class ApplicantDto {
     private String applicantLastName;
     private String[] contactDetailsPrivate;
     private String[] contactDetailsPrivateAlternative;
-    @JsonIgnore
+
     private RelationshipDetails relationshipDetails;
     private PersonalDetails personalDetails;
     private ContactDetail applicantContactDetail;

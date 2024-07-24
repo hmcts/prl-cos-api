@@ -3,18 +3,19 @@ package uk.gov.hmcts.reform.prl.utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.ApplicantOfAdditionalApplication;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -94,19 +95,29 @@ public class ApplicantsListGenerator {
         List<Element<ApplicantOfAdditionalApplication>> parties = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<Element<Child>> children = caseData.getChildren();
-            children.forEach(child -> parties.add(
-                element(ApplicantOfAdditionalApplication.builder().code(child.getId().toString())
-                            .name(child.getValue().getFirstName() + " " + child.getValue().getLastName() + ", Child " + i.getAndIncrement())
-                            .build()))
-            );
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                    || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+                List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+                children.forEach(child -> parties.add(
+                    element(ApplicantOfAdditionalApplication.builder().code(child.getId().toString())
+                                .name(child.getValue().getFirstName() + " " + child.getValue().getLastName() + ", Child " + i.getAndIncrement())
+                                .build()))
+                );
+            } else {
+                List<Element<Child>> children = caseData.getChildren();
+                children.forEach(child -> parties.add(
+                    element(ApplicantOfAdditionalApplication.builder().code(child.getId().toString())
+                                .name(child.getValue().getFirstName() + " " + child.getValue().getLastName() + ", Child " + i.getAndIncrement())
+                                .build()))
+                );
+            }
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails =
                 ofNullable(caseData.getApplicantChildDetails());
             if (applicantChildDetails.isPresent()) {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 children.forEach(child -> parties.add(
                     element(ApplicantOfAdditionalApplication.builder().code("Child " + i.getAndIncrement())
                                 .name(child.getFullName() + ", Child " + i.getAndIncrement())

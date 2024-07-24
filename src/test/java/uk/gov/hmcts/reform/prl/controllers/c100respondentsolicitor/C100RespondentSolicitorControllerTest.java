@@ -1,21 +1,29 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -29,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -39,7 +49,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -61,14 +74,24 @@ public class C100RespondentSolicitorControllerTest {
     ObjectMapper objectMapper;
 
     @Mock
+    EventService eventService;
+
+    @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     Map<String, Object> c7DraftMap = new HashMap<>();
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -126,7 +149,7 @@ public class C100RespondentSolicitorControllerTest {
                                            .documentFileName("c7DraftFilename.pdf")
                                            .build())
                 .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                               .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                               .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                .confidentiality(Yes)
                                                .confidentialityList(confidentialityListEnums)
                                                .build())
@@ -136,6 +159,8 @@ public class C100RespondentSolicitorControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .respondents(respondentList)
             .build();
+
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Test
@@ -154,9 +179,10 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest)).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -179,9 +205,10 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest)).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -204,9 +231,10 @@ public class C100RespondentSolicitorControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
-        when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse response = c100RespondentSolicitorController
-            .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+            .generateConfidentialityDynamicSelectionDisplay(authToken,s2sToken,callbackRequest);
 
         assertEquals(123L, response.getData().getId());
     }
@@ -244,8 +272,10 @@ public class C100RespondentSolicitorControllerTest {
         caseDataUpdated.put("draftC7ResponseDoc", document);
         when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authToken)).thenReturn(
             caseDataUpdated);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.generateC7ResponseDraftDocument(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -272,9 +302,10 @@ public class C100RespondentSolicitorControllerTest {
             errorList,
             authToken
         )).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -297,17 +328,165 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,
-            authToken,
-            errorList
+            authToken, callbackRequest
         )).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
         assertTrue(response.getData().containsKey("state"));
+    }
+
+    @Test
+    public void testC7ResponseSubmitted() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
+        when(respondentSolicitorService.submittedC7Response(
+            caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
+
+        ResponseEntity<SubmittedCallbackResponse> response = c100RespondentSolicitorController
+            .submittedC7Response(authToken, callbackRequest);
+
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testExceptionForHandleAboutToStart() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.handleAboutToStart(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForHandleAboutToSubmit() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForValidateResponse() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForC7DraftDocument() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.generateC7ResponseDraftDocument(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForConfidentiality() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.generateConfidentialityDynamicSelectionDisplay(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForUpdateC7Response() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100RespondentSolicitorController.updateC7ResponseSubmit(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
 

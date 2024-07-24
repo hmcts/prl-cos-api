@@ -1,8 +1,15 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -14,7 +21,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 
 
 @Slf4j
@@ -37,7 +50,7 @@ public class CommonUtils {
                 return localDateTime.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -50,7 +63,7 @@ public class CommonUtils {
                 return parse.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -61,7 +74,7 @@ public class CommonUtils {
             Date date = new Date();
             return dateFormat.format(date);
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
     }
@@ -111,9 +124,7 @@ public class CommonUtils {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null
-                && (caseData.getApplicantsFL401().getRepresentativeFirstName() != null
-                || caseData.getApplicantsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
@@ -124,22 +135,65 @@ public class CommonUtils {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
             }
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null) {
+                caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
+            }
+            if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getRespondentsFL401().setSolicitorOrgUuid(generateUuid());
+            }
         }
     }
 
-    private static UUID generateUuid() {
+    public static UUID generateUuid() {
         return UUID.randomUUID();
     }
 
     public static String formatDate(String pattern, LocalDate localDate) {
         try {
             if (localDate != null) {
-                return localDate.format(DateTimeFormatter.ofPattern(pattern));
+                return localDate.format(DateTimeFormatter.ofPattern(pattern,  Locale.ENGLISH));
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
+    }
+
+    public static DynamicList getDynamicList(List<DynamicListElement> listItems) {
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
+    }
+
+    public static DynamicMultiSelectList getDynamicMultiselectList(List<DynamicMultiselectListElement> listItems) {
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
+            .listItems(listItems).build();
+    }
+
+    public static String[] getPersonalCode(Object judgeDetails) {
+        String[] personalCodes = new String[3];
+        try {
+            personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
+                                                                .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return personalCodes;
+    }
+
+    public static String[] getIdamId(Object judgeDetails) {
+        String[] idamIds = new String[3];
+        try {
+            idamIds[0] = new ObjectMapper().readValue(
+                new ObjectMapper()
+                    .writeValueAsString(judgeDetails),
+                JudicialUser.class
+            ).getIdamId();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return idamIds;
     }
 
     public static LocalDate formattedLocalDate(String date, String pattern) {
@@ -150,18 +204,23 @@ public class CommonUtils {
         return null;
     }
 
-
-    public static String getFormattedStringDate(String date, String format) {
+    public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
-            if (date != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                LocalDate parse = LocalDate.parse(date, formatter);
-                return parse.toString();
+            if (null != localDateTime) {
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+                    .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING + "in formatDateTime Method", e);
         }
-        return " ";
+        return "";
     }
 
+    public static boolean isEmpty(@Nullable String string) {
+        return string == null || string.isEmpty();
+    }
+
+    public static boolean isNotEmpty(@Nullable String string) {
+        return !isEmpty(string);
+    }
 }

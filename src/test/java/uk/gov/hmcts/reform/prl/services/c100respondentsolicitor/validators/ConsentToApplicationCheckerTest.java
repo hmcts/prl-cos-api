@@ -65,7 +65,7 @@ public class ConsentToApplicationCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent);
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -91,15 +91,44 @@ public class ConsentToApplicationCheckerTest {
 
         caseData = CaseData.builder().respondents(respondentList).build();
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(),Mockito.any(),Mockito.any());
-        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent);
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent, true);
 
         assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isFinished(respondent);
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(respondent, true);
 
         Assert.assertTrue(anyNonEmpty);
+    }
+
+    @Test
+    public void hasStartedNoResponse() {
+        PartyDetails blankRespondent = PartyDetails.builder().build();
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(blankRespondent, true);
+
+        Assert.assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasFinishedNoResponse() {
+        PartyDetails blankRespondent = PartyDetails.builder().build();
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent, true);
+
+        Assert.assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasFinishedEmptyResponse() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .build())
+            .build();
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent, true);
+
+        Assert.assertFalse(anyNonEmpty);
     }
 }

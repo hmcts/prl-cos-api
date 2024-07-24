@@ -41,4 +41,20 @@ public class ServiceAuthenticationGenerator {
 
         return "Bearer " + response.getBody().asString();
     }
+
+    public String generateTokenForCcd() {
+        final Response response = RestAssured
+            .given()
+            .relaxedHTTPSValidation()
+            .baseUri(s2sUrl)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .body(Map.of("microservice", "ccd_data"))
+            .when()
+            .post("/testing-support/lease")
+            .andReturn();
+
+        assertThat(response.getStatusCode()).isEqualTo(200);
+
+        return "Bearer " + response.getBody().asString();
+    }
 }

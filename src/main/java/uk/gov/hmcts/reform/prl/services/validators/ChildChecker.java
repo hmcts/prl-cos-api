@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -10,13 +11,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
@@ -26,10 +27,10 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChildChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -40,7 +41,7 @@ public class ChildChecker implements EventChecker {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (Child c : children) {
                 if (!(validateMandatoryFieldsCompleted(c)) || !(validateAdditionalFieldsCompleted(caseData))) {
@@ -67,7 +68,7 @@ public class ChildChecker implements EventChecker {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (Child c : children) {
                 if (validateAnyFieldStarted(c)) {
@@ -157,4 +158,8 @@ public class ChildChecker implements EventChecker {
         return  fields.stream().anyMatch(Optional::isPresent);
     }
 
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
+    }
 }

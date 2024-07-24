@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentia
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 
@@ -13,7 +13,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class KeepDetailsPrivate {
-    private final YesNoDontKnow otherPeopleKnowYourContactDetails;
+    private final YesNoIDontKnow otherPeopleKnowYourContactDetails;
     private final YesOrNo confidentiality;
     private List<ConfidentialityListEnum> confidentialityList;
 }

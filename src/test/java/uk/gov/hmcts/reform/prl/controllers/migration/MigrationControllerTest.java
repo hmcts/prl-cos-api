@@ -7,21 +7,25 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagMigrationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class MigrationControllerTest {
 
     @Mock
@@ -29,6 +33,12 @@ public class MigrationControllerTest {
 
     @InjectMocks
     MigrationController migrationController;
+
+    @Mock
+    CaseFlagMigrationService caseFlagMigrationService;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
 
     Map<String, Object> caseDataMap;
@@ -56,6 +66,11 @@ public class MigrationControllerTest {
         callbackRequest = CallbackRequest.builder()
                 .caseDetails(caseDetails)
                 .build();
+        Map<String,Object> caseFlags = new HashMap<String, Object>();
+        caseFlags.put("caApplicant1InternalFlags", Flags.builder().build());
+        when(partyLevelCaseFlagsService.generatePartyCaseFlags(any(CaseData.class))).thenReturn(caseFlags);
+        when(caseFlagMigrationService.migrateCaseForCaseFlags(any(Map.class))).thenReturn(caseFlags);
+
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
     }
@@ -63,6 +78,12 @@ public class MigrationControllerTest {
     @Test
     public void handleSubmitted() {
         migrationController.handleSubmitted(callbackRequest, "testAuth");
-        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.anyString());
+    }
+
+    @Test
+    public void handleAboutSubmit() {
+        migrationController.handleAboutToSubmit("testAuth",callbackRequest);
+        verify(partyLevelCaseFlagsService,times(1)).generatePartyCaseFlags(caseData);
     }
 }

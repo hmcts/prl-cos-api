@@ -28,7 +28,7 @@ java:
     PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request-update
     PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api
+    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,payment_app,ccd_data
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -40,27 +40,56 @@ java:
     JUDICIAL_USERS_API: http://rd-judicial-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     COMMON_DATA_API: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    APP_ENV: "prod"
+
 
   keyVaults:
     prl:
+      resourceGroup: prl
       secrets:
-        - prl-cos-idam-client-secret
-        - microservicekey-prl-cos-api
-        - system-update-user-username
-        - system-update-user-password
-        - notification-client-api-key
-        - test-genericpassword
-        - launchDarkly-sdk-key
-        - send-grid-api-key
-        - rpa-notify-to-email
-        - rpa-notify-from-email
-        - AppInsightsInstrumentationKey
-        - southampton-court-email-address
-        - idam-solicitor-username
-        - idam-solicitor-password
-        - filtered-court-ids
-        - da-filtered-court-ids
-        - postcode-lookup-token
-        - prl-rd-api-system-username
-        - prl-rd-api-system-user-password
-        - welsh-court-mapping
+        - name: prl-cos-idam-client-secret
+          alias: IDAM_CLIENT_SECRET
+        - name: microservicekey-prl-cos-api
+          alias: IDAM_S2S_AUTH_TOTP_SECRET
+        - name: system-update-user-username
+          alias: SYSTEM_UPDATE_USER_USERNAME
+        - name: system-update-user-password
+          alias: PRL_SYSTEM_UPDATE_PASSWORD
+        - name: notification-client-api-key
+          alias: UK_GOV_NOTIFY_API_KEY
+        - name: test-genericpassword
+          alias: PRL_GENERIC_PASSWORD
+        - name: launchDarkly-sdk-key
+          alias: LAUNCH_DARKLY_SDK_KEY
+        - name: send-grid-api-key
+          alias: SEND_GRID_API_KEY
+        - name: rpa-notify-to-email
+          alias: RPA_NOTIFY_TO_EMAIL
+        - name: rpa-notify-from-email
+          alias: RPA_NOTIFY_FROM_EMAIL
+        - name: AppInsightsInstrumentationKey
+          alias: APP_INSIGHTS_INSTRUMENTATION_KEY
+        - name: southampton-court-email-address
+          alias: SOUTHAMPTON_COURT_EMAIL_ADDRESS
+        - name: idam-solicitor-username
+          alias: IDAM_SOLICITOR_USERNAME
+        - name: idam-solicitor-password
+          alias: IDAM_SOLICITOR_PASSWORD
+        - name: filtered-court-ids
+          alias: COURT_IDS_TO_FILTER
+        - name: da-filtered-court-ids
+          alias: DA_COURT_IDS_TO_FILTER
+        - name: ca-default-court-epimms-id
+          alias: CA_DEFAULT_COURT_EPIMMS_ID
+        - name: postcode-lookup-token
+          alias: POST_CODE_LOOKUP_KEY
+        - name: prl-rd-api-system-username
+          alias: PRL_IDAM_REFDATA_USERNAME
+        - name: prl-rd-api-system-user-password
+          alias: PRL_IDAM_REFDATA_PASSWORD
+        - name: welsh-court-mapping
+          alias: WELSH_COURT_MAPPING
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string

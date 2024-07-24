@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
 
 import java.math.BigDecimal;
 
@@ -23,4 +24,12 @@ public class FeeDto {
     private Integer version;
     @JsonProperty("volume")
     private Integer volume;
+
+    public static FeeDto fromFeeResponse(FeeResponse feeResponse) {
+        return FeeDto.builder()
+            .calculatedAmount(feeResponse.getAmount())
+            .version(feeResponse.getVersion())
+            .code(feeResponse.getCode())
+            .build();
+    }
 }

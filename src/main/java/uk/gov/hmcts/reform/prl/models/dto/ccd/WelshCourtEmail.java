@@ -23,7 +23,8 @@ public class WelshCourtEmail {
         CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
         final String[] courtEmail = {""};
 
-        if (caseManagementLocation.getRegionId() != null) {
+        if (caseManagementLocation != null
+            && caseManagementLocation.getRegionId() != null) {
             if (welshCourtEmailMapping.length() > 0) {
                 LOGGER.info("welsh Court email retrieved from the vault");
             }
@@ -34,11 +35,10 @@ public class WelshCourtEmail {
                         && caseManagementLocation.getRegionId().equals(courtMapping.get(1))) {
                         courtEmail[0] = courtMapping.get(3);
                     }
-
                 }
             );
-
-        } else if (caseManagementLocation.getRegion() != null) {
+        } else if (caseManagementLocation != null
+            && caseManagementLocation.getRegion() != null) {
             Arrays.stream(welshCourtEmailMapping.split(",")).forEach(
                 value -> {
                     List<String> courtMapping = Arrays.asList(value.split("--"));
@@ -46,11 +46,9 @@ public class WelshCourtEmail {
                         && caseManagementLocation.getRegion().equals(courtMapping.get(1))) {
                         courtEmail[0] = courtMapping.get(3);
                     }
-
                 }
             );
         }
-
         return courtEmail[0] != null && courtEmail[0].length() > 1 ? courtEmail[0] : null;
     }
 

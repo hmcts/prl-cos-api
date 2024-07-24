@@ -82,7 +82,7 @@ public class AmendedOrderStamper {
 
             // build message
             final LocalDate now = time.now().toLocalDate();
-            final String message = "Amended under the slip rule - " + now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.UK));
+            final String message = "Amended under the slip rule - " + now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH));
 
             // message properties
             final PDRectangle pageSize = page.getMediaBox();

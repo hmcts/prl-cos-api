@@ -38,6 +38,9 @@ public class ManageOrderEmail extends EmailTemplateVars {
     @JsonProperty("issueDate")
     private final String issueDate;
 
+    @JsonProperty("instructions")
+    private final String instructions;
+
     private final String caseLink;
 
     private final String dashboardLink;
@@ -49,7 +52,7 @@ public class ManageOrderEmail extends EmailTemplateVars {
                             String courtEmail, String firstName,
                             String lastName, String fullName,
                             String familyManNumber, String caseUrgency, String orderLink,
-                            String issueDate, String caseLink,
+                            String issueDate, String instructions, String caseLink,
                             String dashboardLink) {
         super(caseReference);
         this.caseName = caseName;
@@ -61,6 +64,7 @@ public class ManageOrderEmail extends EmailTemplateVars {
         this.caseUrgency = caseUrgency;
         this.orderLink = orderLink;
         this.issueDate = issueDate;
+        this.instructions = instructions;
         this.caseLink = caseLink;
         this.dashboardLink = dashboardLink;
     }

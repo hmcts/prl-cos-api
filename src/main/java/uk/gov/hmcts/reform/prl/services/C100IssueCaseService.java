@@ -6,13 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -23,8 +26,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
@@ -35,13 +38,12 @@ public class C100IssueCaseService {
 
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
-    private final SendgridService sendgridService;
-    private final C100JsonMapper c100JsonMapper;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
+    private final EventService eventPublisher;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -56,18 +58,13 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
-                String courtId = caseData.getCourtCodeFromFact();
-                courtId = getFactCourtId(courtVenue.get(), courtId);
+                String courtId = getFactCourtId(courtVenue.get());
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
                     .courtSeal(courtSeal).courtId(baseLocationId)
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-                caseDataUpdated.put("courtCodeFromFact", courtId);
-            }
-            if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-                requireNonNull(caseData);
-                sendgridService.sendEmail(c100JsonMapper.map(caseData));
+                caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
@@ -92,17 +89,11 @@ public class C100IssueCaseService {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(
-                caseDataUpdated).build());
-        } catch (Exception ex) {
-            log.error("Email notification could not be sent", ex);
-        }
-
         return caseDataUpdated;
     }
 
-    public String getFactCourtId(CourtVenue courtVenue, String courtId) {
+    public String getFactCourtId(CourtVenue courtVenue) {
+        String courtId = "";
         String factUrl = courtVenue.getFactUrl();
         if (factUrl != null && factUrl.split("/").length > 4) {
             Court court = null;
@@ -116,5 +107,21 @@ public class C100IssueCaseService {
             }
         }
         return courtId;
+    }
+
+    public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+            SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
+                .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
+                .caseDetailsModel(callbackRequest.getCaseDetails())
+                .build();
+            eventPublisher.publishEvent(rpaEmailNotificationEvent);
+        }
+        CaseWorkerNotificationEmailEvent notifyLocalCourtEvent = CaseWorkerNotificationEmailEvent.builder()
+            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue())
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .build();
+        eventPublisher.publishEvent(notifyLocalCourtEvent);
     }
 }

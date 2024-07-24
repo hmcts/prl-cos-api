@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,58 +7,52 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 public class UploadAdditionalApplicationController {
-
-    public static final String TEMPORARY_OTHER_APPLICATIONS_BUNDLE = "temporaryOtherApplicationsBundle";
-    public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
-    public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
-    public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
-    public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    private final ObjectMapper objectMapper;
-
-    @Autowired
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
+    private final AuthorisationService authorisationService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/pre-populate-applicants", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
-    public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get("applicants"));
-        listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
-        listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestHeader("Authorization")
+                                                                      @Parameter(hidden = true) String authorisation,
+                                                                      @RequestBody CallbackRequest callbackRequest,
+                                                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(uploadAdditionalApplicationService.prePopulateApplicants(
+                          callbackRequest,
+                          authorisation
+                      )
+                ).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
+
 
     @PostMapping(path = "/upload-additional-application/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create additional application bundle ")
@@ -68,42 +60,76 @@ public class UploadAdditionalApplicationController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse createUploadAdditionalApplicationBundle(@RequestHeader("Authorization")
                                                                                         @Parameter(hidden = true) String authorisation,
-                                                                                        @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements =
-            uploadAdditionalApplicationService.getAdditionalApplicationElements(
+                                                                                        @RequestBody CallbackRequest callbackRequest,
+                                                                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
+                                                                                        String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
+            Map<String, Object> caseDataUpdated
+                = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
+                systemAuthorisation,
                 authorisation,
-                caseData
+                callbackRequest
             );
-        additionalApplicationElements.sort(Comparator.comparing(
-            m -> m.getValue().getUploadedDateTime(),
-            Comparator.reverseOrder()
-        ));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
-        cleanUpUploadAdditionalApplicationData(caseDataUpdated);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
-        if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
-            caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
-        }
-        if (caseDataUpdated.containsKey(TEMPORARY_C_2_DOCUMENT)) {
-            caseDataUpdated.remove(TEMPORARY_C_2_DOCUMENT);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICANTS_LIST)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICANTS_LIST);
-        }
-        if (caseDataUpdated.containsKey(TYPE_OF_C_2_APPLICATION)) {
-            caseDataUpdated.remove(TYPE_OF_C_2_APPLICATION);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
+    @PostMapping(path = "/upload-additional-application/mid-event/calculate-fee", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to calculate fees for additional applications ")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Bundle created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse calculateAdditionalApplicationsFee(@RequestHeader("Authorization")
+                                                                                   @Parameter(hidden = true) String authorisation,
+                                                                                   @RequestBody CallbackRequest callbackRequest,
+                                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
+                                                                                   String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
+                    authorisation,
+                    callbackRequest
+                )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
+    @PostMapping(path = "/upload-additional-application/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to calculate fees for additional applications ")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Bundle created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<SubmittedCallbackResponse> uploadAdditionalApplicationSubmittedEvent(@RequestHeader("Authorization")
+                                                                                               @Parameter(hidden = true) String authorisation,
+                                                                                               @RequestBody CallbackRequest callbackRequest,
+                                                                                               @RequestHeader
+                                                                                                   (PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
+                                                                                               String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return ok(uploadAdditionalApplicationService.uploadAdditionalApplicationSubmitted(callbackRequest));
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/upload-additional-application/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Generate applicants")
+    public AboutToStartOrSubmitCallbackResponse populateHearingList(@RequestHeader("Authorization")
+                                                                    @Parameter(hidden = true) String authorisation,
+                                                                    @RequestBody CallbackRequest callbackRequest,
+                                                                    @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(uploadAdditionalApplicationService.populateHearingList(systemAuthorisation, callbackRequest))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }

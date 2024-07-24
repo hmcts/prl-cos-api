@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsE
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -31,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherPersonsElement
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
@@ -45,8 +48,9 @@ public class CaseDataMapper {
     public static final String HYPHEN_SEPARATOR = " - ";
 
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = CaseData.builder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
@@ -86,16 +90,30 @@ public class CaseDataMapper {
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
         }
 
+        if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
+            c100RebuildChildDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+        }
+
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements);
+            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements,
+                                               c100RebuildData.getApplicantPcqId());
         }
 
-        if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
-            C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
-            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+        if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements, c100RebuildChildDetailsElements);
+        }
+
+        if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
+            C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
+            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
+                                                        c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
@@ -110,22 +128,19 @@ public class CaseDataMapper {
             updateReasonableAdjustmentsElementsForCaseData(caseDataBuilder, c100RebuildReasonableAdjustmentsElements);
         }
 
-        if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
-            C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
-            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
-        }
-
-        if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
-            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
-            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
-        }
-
         if (isNotEmpty(c100RebuildData.getC100RebuildConsentOrderDetails())) {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
+        }
+
+        if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
+            mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+            C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
+            updateSafetyConcernsElementsForCaseData(caseDataBuilder,
+                                                    c100C100RebuildSafetyConcernsElements,
+                                                    c100RebuildChildDetailsElements);
         }
 
         return caseDataBuilder.build();

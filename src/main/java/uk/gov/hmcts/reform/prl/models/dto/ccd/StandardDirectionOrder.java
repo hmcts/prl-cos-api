@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.SdoPartyToProvideDetailsEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSafeguardingCafcassCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSection7CheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoWitnessStatementsCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
@@ -46,10 +47,13 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -64,24 +68,38 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StandardDirectionOrder {
+public class StandardDirectionOrder implements MappableObject {
 
     @JsonProperty("sdoPreamblesList")
     private final List<SdoPreamblesEnum> sdoPreamblesList;
+    @JsonProperty("sdoPreamblesTempList")
+    private final List<SdoPreamblesEnum> sdoPreamblesTempList;
     @JsonProperty("sdoHearingsAndNextStepsList")
     private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsList;
+    @JsonProperty("sdoHearingsAndNextStepsTempList")
+    private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsTempList;
     @JsonProperty("sdoCafcassOrCymruList")
     private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruList;
+    @JsonProperty("sdoCafcassOrCymruTempList")
+    private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruTempList;
     @JsonProperty("sdoLocalAuthorityList")
     private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityList;
+    @JsonProperty("sdoLocalAuthorityTempList")
+    private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityTempList;
     @JsonProperty("sdoCourtList")
     private final List<SdoCourtEnum> sdoCourtList;
+    @JsonProperty("sdoCourtTempList")
+    private final List<SdoCourtEnum> sdoCourtTempList;
     @JsonProperty("sdoDocumentationAndEvidenceList")
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
+    @JsonProperty("sdoDocumentationAndEvidenceTempList")
+    private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceTempList;
     @JsonProperty("sdoFurtherList")
     private final List<SdoFurtherInstructionsEnum> sdoFurtherList;
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
+    @JsonProperty("sdoOtherTempList")
+    private final List<SdoOtherEnum> sdoOtherTempList;
 
     @JsonProperty("sdoRightToAskCourt")
     private final String sdoRightToAskCourt;
@@ -111,20 +129,40 @@ public class StandardDirectionOrder {
     private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     @JsonProperty("sdoJoiningInstructionsForRH")
     private final String sdoJoiningInstructionsForRH;
+    //Not required - start
     @JsonProperty("sdoHearingAllegationsMadeBy")
     private final List<SdoApplicantRespondentEnum> sdoHearingAllegationsMadeBy;
     @JsonProperty("sdoHearingCourtHasRequested")
     private final List<SdoCourtRequestedEnum> sdoHearingCourtHasRequested;
+    //Not required - end
+    @JsonProperty("sdoDirectionsForFactFindingHearingDetails")
+    private final HearingData sdoDirectionsForFactFindingHearingDetails;
+    @JsonProperty("sdoHearingCourtRequests")
+    private final SdoCourtRequestedEnum sdoHearingCourtRequests;
+    @JsonProperty("sdoWhoMadeAllegationsList")
+    private final DynamicMultiSelectList sdoWhoMadeAllegationsList;
+    @JsonProperty("sdoWhoNeedsToRespondAllegationsList")
+    private final DynamicMultiSelectList sdoWhoNeedsToRespondAllegationsList;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoAllegationsDeadlineDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoWrittenResponseDeadlineDate;
     @JsonProperty("sdoHearingReportsAlsoSentTo")
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
+    @JsonProperty("sdoWhoMadeAllegationsText")
+    private final String sdoWhoMadeAllegationsText;
+    @JsonProperty("sdoWhoNeedsToRespondAllegationsText")
+    private final String sdoWhoNeedsToRespondAllegationsText;
     @JsonProperty("sdoHearingMaximumPages")
     private final String sdoHearingMaximumPages;
     @JsonProperty("sdoHearingHowManyWitnessEvidence")
     private final int sdoHearingHowManyWitnessEvidence;
+    @JsonProperty("sdoFactFindingOtherCheck")
+    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
+    @JsonProperty("sdoFactFindingOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
+    private final String sdoWhoNeedsToRespondAllegationsListText;
+    private final String sdoWhoMadeAllegationsListText;
     @JsonProperty("sdoDocsEvidenceWitnessEvidence")
     private final int sdoDocsEvidenceWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
@@ -235,10 +273,6 @@ public class StandardDirectionOrder {
     private final HearingData sdoDraHearingDetails;
     @JsonProperty("sdoSettlementHearingDetails")
     private final HearingData sdoSettlementHearingDetails;
-    @JsonProperty("sdoFactFindingOtherCheck")
-    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
-    @JsonProperty("sdoFactFindingOtherDetails")
-    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
     @JsonProperty("sdoInterpreterOtherDetailsCheck")
     private final List<DioOtherDirectionEnum> sdoInterpreterOtherDetailsCheck;
     @JsonProperty("sdoInterpreterOtherDetails")
@@ -319,4 +353,18 @@ public class StandardDirectionOrder {
     private final String sdoCrossExaminationEditContent;
     @JsonProperty("sdoNamedJudgeFullName")
     private String sdoNamedJudgeFullName;
+
+    private final String sdoAfterSecondGatekeeping;
+    private final List<Element<AddNewPreamble>> sdoAddNewPreambleCollection;
+    private final String sdoNextStepsAfterGatekeeping;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcass;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcassCymru;
+    private final String sdoNewPartnerPartiesCafcassText;
+    private final String sdoNewPartnerPartiesCafcassCymruText;
+    @JsonProperty("sdoAllocateDecisionJudgeFullName")
+    private String sdoAllocateDecisionJudgeFullName;
+    @JsonProperty("listElementsSetToDefaultValue")
+    private YesOrNo listElementsSetToDefaultValue;
+    @JsonProperty("editedOrderHasDefaultCaseFields")
+    private YesOrNo editedOrderHasDefaultCaseFields;
 }

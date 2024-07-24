@@ -1,56 +1,83 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 public class C100IssueCaseControllerFunctionalTest {
 
-    private MockMvc mockMvc;
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    protected IdamTokenGenerator idamTokenGenerator;
 
-    @MockBean
-    private CaseWorkerEmailService caseWorkerEmailService;
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
 
     @Test
     public void givenRequestBody_whenIssue_and_send_to_local_court_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/issue-and-send-to-local-court")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.caseTypeOfApplication", equalTo("C100"),
+                  "data.issueDate",  equalTo(today),
+                  "data.localCourtAdmin[0].value", notNullValue(),
+                  "data.courtList.value.code", notNullValue(),
+                  "data.courtList.value.label", notNullValue()
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenIssue_and_send_to_local_court_notify_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/issue-and-send-to-local-court")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/issue-and-send-to-local-court-notification")
+            .then()
+            .assertThat().statusCode(200);
     }
 
 }

@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -78,7 +77,6 @@ public class SolicitorEmailServiceTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -168,7 +166,68 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
-        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
+        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, false), email);
+
+    }
+
+    @Test
+    public void testIsApplicantPayingC100() throws NotFoundException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(court.getCourtName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId() + "#Service%20Request")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+
+        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, true), email);
 
     }
 
@@ -788,5 +847,47 @@ public class SolicitorEmailServiceTest {
         assertEquals("hello@gmail.com", caseDetails.getCaseData().getApplicantSolicitorEmailAddress());
     }
 
+    @Test
+    public void testHelpWithFeesEmail() throws NotFoundException {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+            .state("PENDING").caseId("123").caseData(
+                CaseData.builder()
+                    .id(12345L)
+                    .applicantCaseName("TestCaseName")
+                    .applicants(listOfApplicants)
+                    .children(listOfChildren)
+                    .courtName("testcourt")
+                    .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder().state(caseDetails.getState())
+            .id(Long.valueOf(caseDetails.getCaseId()))
+            .data(caseDetails.getCaseData()
+                      .toMap(objectMapper)).build();
+        when(emailService.getCaseData(caseDetails1)).thenReturn(caseData);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        solicitorEmailService.sendHelpWithFeesEmail(caseDetails);
+        assertEquals("hello@gmail.com", caseDetails.getCaseData().getApplicantSolicitorEmailAddress());
+    }
 }
 

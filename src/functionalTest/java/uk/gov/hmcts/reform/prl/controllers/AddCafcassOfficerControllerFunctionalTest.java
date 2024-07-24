@@ -1,54 +1,71 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 public class AddCafcassOfficerControllerFunctionalTest {
 
-    private MockMvc mockMvc;
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
 
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @MockBean
-    private AddCafcassOfficerService addCafcassOfficerService;
+    private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
+
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/add-cafcass-officer/about-to-submit")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+
+        AboutToStartOrSubmitCallbackResponse response =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/add-cafcass-officer/about-to-submit")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.caseStatus.state", equalTo("Submitted"),
+                  "data.caseTypeOfApplication", equalTo("C100"),
+                  "data.newChildDetails.list_items", hasSize(1),
+                  "data.newChildDetails[0].value.cafcassOfficerName", notNullValue(),
+                  "data.newChildDetails[0].value.cafcassOfficerPhoneNo", notNullValue(),
+                  "data.newChildDetails[0].value.cafcassOfficerEmailAddress", notNullValue()
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        Assert.assertNotNull(response.getData().get("newChildDetails"));
     }
 }

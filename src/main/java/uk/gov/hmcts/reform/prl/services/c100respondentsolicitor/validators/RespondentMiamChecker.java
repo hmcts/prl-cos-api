@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,19 +21,16 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentMiamChecker implements RespondentEventChecker {
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         return response.filter(value -> ofNullable(value.getMiam())
             .filter(miam -> anyNonEmpty(
-                miam.getAttendedMiam(),
-                miam.getReasonNotAttendingMiam(),
-                miam.getWillingToAttendMiam(),
                 miam.getAttendedMiam(),
                 miam.getReasonNotAttendingMiam(),
                 miam.getWillingToAttendMiam()
@@ -40,42 +38,39 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
-
-        if (response.isPresent()) {
-            Optional<Miam> miam
-                = Optional.ofNullable(response.get().getMiam());
-            if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
-                respondentTaskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
-        }
+        boolean isFinished = false;
         respondentTaskErrorService.addEventError(
             MIAM,
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
-        return false;
+        if (response.isPresent()) {
+            Optional<Miam> miam
+                = Optional.ofNullable(response.get().getMiam());
+            if (miam.isPresent() && checkMiamManadatoryCompleted(miam.get())) {
+                respondentTaskErrorService.removeError(MIAM_ERROR);
+                isFinished = true;
+            }
+        }
+        return isFinished;
     }
 
-    private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
+    private boolean checkMiamManadatoryCompleted(Miam miam) {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
-        if (miam.isPresent()) {
-            fields.add(ofNullable(miam.get().getAttendedMiam()));
-            Optional<YesOrNo> attendMiam = ofNullable(miam.get().getAttendedMiam());
-            if (attendMiam.isPresent()
-                && YesOrNo.No.equals(attendMiam.get())) {
-                fields.add(ofNullable(miam.get().getWillingToAttendMiam()));
-                YesOrNo willingToAttendMiam = miam.get().getWillingToAttendMiam();
-                if (YesOrNo.No.equals(willingToAttendMiam)) {
-                    fields.add(ofNullable(miam.get().getReasonNotAttendingMiam()));
-                }
+        fields.add(ofNullable(miam.getAttendedMiam()));
+        Optional<YesOrNo> attendMiam = ofNullable(miam.getAttendedMiam());
+        if (attendMiam.isPresent()
+            && YesOrNo.No.equals(attendMiam.get())) {
+            fields.add(ofNullable(miam.getWillingToAttendMiam()));
+            YesOrNo willingToAttendMiam = miam.getWillingToAttendMiam();
+            if (YesOrNo.No.equals(willingToAttendMiam)) {
+                fields.add(ofNullable(miam.getReasonNotAttendingMiam()));
             }
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
     }
 }

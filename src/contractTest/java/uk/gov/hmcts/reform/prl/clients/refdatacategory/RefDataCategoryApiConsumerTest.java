@@ -26,7 +26,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @PactFolder("pacts")
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "referenceDataCategoryApi", port = "8894")
-@TestPropertySource(properties = {"refdata.api.url=localhost:8894", "idam.api.url=localhost:5000"})
+@TestPropertySource(
+    properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=http://localhost:8899",
+        "fis_hearing.api.url=localhost:5000",
+        "refdata.api.url=localhost:8894",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "fis_hearing.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=localhost:8894",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=http://localhost:8899",
+        "amRoleAssignment.api.url="
+    }
+)
 @ContextConfiguration(
         classes = {RefDataCategoryApiConsumerApplication.class, IdamApiConsumerApplication.class})
 public class RefDataCategoryApiConsumerTest {

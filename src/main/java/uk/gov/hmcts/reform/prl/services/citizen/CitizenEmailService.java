@@ -18,15 +18,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOA
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenEmailService {
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    UserService userService;
-
+    private final EmailService emailService;
+    private final UserService userService;
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 
@@ -52,7 +47,6 @@ public class CitizenEmailService {
     }
 
     public void sendCitizenCaseWithdrawalEmail(String authorisation, CaseData caseData) {
-        log.info("Inside sendCitizenCaseWithdrawalEmail");
         UserDetails userDetails = userService.getUserDetails(authorisation);
         EmailTemplateVars emailTemplate = buildCitizenCaseSubmissionEmail(
             userDetails, String.valueOf(caseData.getId()), caseData.getApplicantCaseName());

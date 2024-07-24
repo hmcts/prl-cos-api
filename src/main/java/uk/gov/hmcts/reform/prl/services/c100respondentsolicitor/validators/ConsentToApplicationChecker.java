@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,12 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConsentToApplicationChecker implements RespondentEventChecker {
-
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -43,16 +43,24 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
-
+        boolean isFinished;
         if (response.isPresent()) {
             Optional<Consent> consent = Optional.ofNullable(response.get().getConsent());
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
                 respondentTaskErrorService.removeError(CONSENT_ERROR);
-                return true;
+                isFinished = true;
+            } else {
+                isFinished = addErrorAndReturn();
             }
+        } else {
+            isFinished = addErrorAndReturn();
         }
+        return isFinished;
+    }
+
+    private boolean addErrorAndReturn() {
         respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
         return false;
     }

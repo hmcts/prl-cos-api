@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -51,7 +51,7 @@ public class KeepDetailsPrivateCheckerTest {
                           .builder()
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
@@ -66,7 +66,7 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -82,20 +82,20 @@ public class KeepDetailsPrivateCheckerTest {
                           .build())
             .build();
 
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent, true);
         Assert.assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent, true);
         Assert.assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
         respondent = null;
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent, true);
         Assert.assertFalse(anyNonEmpty);
     }
 

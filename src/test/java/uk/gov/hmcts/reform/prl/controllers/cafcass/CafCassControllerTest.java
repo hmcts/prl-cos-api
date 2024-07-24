@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
@@ -49,6 +50,7 @@ public class CafCassControllerTest {
     @Test
     public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),
             CafCassResponse.class
@@ -70,8 +72,8 @@ public class CafCassControllerTest {
             objectMapper.writeValueAsString(expectedCafCassResponse),
             objectMapper.writeValueAsString(realCafCassResponse)
         );
-        assertEquals(realCafCassResponse.getTotal(), 4);
-        assertEquals(realCafCassResponse.getCases().size(), 4);
+        assertEquals(4, realCafCassResponse.getTotal());
+        assertEquals(4, realCafCassResponse.getCases().size());
     }
 
     @Test

@@ -1,6 +1,5 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
-import uk.gov.hmcts.contino.GithubAPI
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -48,7 +47,12 @@ def secrets = [
       secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
       secret('filtered-court-ids', 'COURT_IDS_TO_FILTER'),
       secret('da-filtered-court-ids', 'DA_COURT_IDS_TO_FILTER'),
-      secret('welsh-court-mapping', 'WELSH_COURT_MAPPING')
+      secret('ca-default-court-epimms-id', 'CA_DEFAULT_COURT_EPIMMS_ID'),
+      secret('welsh-court-mapping', 'WELSH_COURT_MAPPING'),
+      secret('judge-testuser-one', 'JUDGE_USER_NAME'),
+      secret('judge-testpassword', 'JUDGE_PASSWORD'),
+      secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
+      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
    ]
 ]
 
@@ -58,6 +62,27 @@ withPipeline(type, product, component) {
   enableAksStagingDeployment()
   enableSlackNotifications(channel)
   disableLegacyDeployment()
+
+  afterSuccess('sonarscan') {
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/test",
+      reportFiles          : "index.html",
+      reportName           : "Unit Tests Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/integration",
+      reportFiles          : "index.html",
+      reportName           : "Integration Test Report"
+    ]
+  }
 
   afterAlways('checkout') {
     echo 'prl-cos-api checked out'
@@ -93,10 +118,6 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
-    def githubApi = new GithubAPI(this)
-    if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
-      enableCleanupOfHelmReleaseOnSuccess()
-    }
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }

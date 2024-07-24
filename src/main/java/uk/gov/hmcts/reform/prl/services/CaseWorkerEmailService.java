@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -23,23 +21,19 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.service.notify.NotificationClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseWorkerEmailService {
-
-    private final NotificationClient notificationClient;
-    private final EmailTemplatesConfig emailTemplatesConfig;
-    private final ObjectMapper objectMapper;
-
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String WITHOUT_NOTICE = "Without notice";
@@ -48,9 +42,7 @@ public class CaseWorkerEmailService {
     private static final String YES = "Yes";
     private static final String NO = "No";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -71,11 +63,11 @@ public class CaseWorkerEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantNamesList = applicants.stream()
             .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
+            .toList();
 
         final String applicantNames = String.join(", ", applicantNamesList);
 
@@ -83,11 +75,11 @@ public class CaseWorkerEmailService {
             .getRespondents()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> respondentsList = respondents.stream()
             .map(PartyDetails::getLastName)
-            .collect(Collectors.toList());
+            .toList();
 
         final String respondentNames = String.join(", ", respondentsList);
 
@@ -176,11 +168,11 @@ public class CaseWorkerEmailService {
                 .getApplicants()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             List<String> applicantEmailList = applicants.stream()
                 .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
+                .toList();
 
             email = applicantEmailList.get(0);
 
@@ -229,11 +221,11 @@ public class CaseWorkerEmailService {
             .getGatekeeper()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> emailList = gatekeeperEmails.stream()
             .map(GatekeeperEmail::getEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         emailList.forEach(email ->   emailService.send(
             email,
@@ -278,11 +270,11 @@ public class CaseWorkerEmailService {
             .getLocalCourtAdmin()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> emailList = localCourtAdminEmails.stream()
             .map(LocalCourtAdminEmail::getEmail)
-            .collect(Collectors.toList());
+            .toList();
         emailList.forEach(email -> {
             if (null != email) {
                 emailService.send(
@@ -303,24 +295,23 @@ public class CaseWorkerEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        List<Child> child = caseData
-            .getChildren()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<YesOrNo> emailAddressInfo = applicants.stream()
             .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
                 && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
             .map(PartyDetails::getIsEmailAddressConfidential)
-            .collect(Collectors.toList());
+            .toList();
 
         String isConfidential = NO;
         if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            || (!TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                && !TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())// requires review
+                && caseData
+                .getChildren()
+                .stream()
+                .map(Element::getValue).anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
         }
 

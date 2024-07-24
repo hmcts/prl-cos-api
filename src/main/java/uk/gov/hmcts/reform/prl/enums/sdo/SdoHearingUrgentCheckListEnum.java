@@ -12,15 +12,15 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum SdoHearingUrgentCheckListEnum {
 
     @JsonProperty("immediateRisk")
-    immediateRisk("immediateRisk", "There is evidence of immediate risk of harm to the child[ren]"),
+    immediateRisk("immediateRisk", "There is evidence of immediate risk of harm to the child(ren)"),
     @JsonProperty("applicantsCare")
-    applicantsCare("applicantsCare","There is evidence to suggest that the respondent seeks to remove the child[ren] from the applicant's care"),
+    applicantsCare("applicantsCare","There is evidence to suggest that the respondent seeks to remove the child(ren) from the applicant's care"),
     @JsonProperty("seekToFrustrate")
     seekToFrustrate("seekToFrustrate", "There is evidence to suggest that the respondent would seek to frustrate the process if the application "
         + "is not heard urgently"),
     @JsonProperty("leaveTheJurisdiction")
     leaveTheJurisdiction("leaveTheJurisdiction",  "There is evidence to suggest that the respondent may attempt to leave the jurisdiction with "
-        + "the child[ren] if the application is not heard urgently"),
+        + "the child(ren) if the application is not heard urgently"),
     @JsonProperty("other")
     other("other","Another reason that has not been listed");
 

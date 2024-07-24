@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.prl.clients.cafcass.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Service("cafcassHearingService")
@@ -36,7 +36,7 @@ public class HearingService {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             filterHearings();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in getHearings", e);
         }
         return hearingDetails;
     }
@@ -45,35 +45,10 @@ public class HearingService {
         try {
             listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
         } catch (Exception e) {
-            log.error("Error while getHearingsForAllCases {}",e.getMessage());
+            log.error("Error while getHearingsForAllCases {}",e);
+            return Collections.emptyList();
         }
         return listOfHearingDetails;
-    }
-
-    private void filterHearingsForListOfCaseIds() {
-
-        for (Hearings hearingDetailsFromList : listOfHearingDetails) {
-            if (hearingDetailsFromList != null && hearingDetailsFromList.getCaseHearings() != null) {
-
-                final List<CaseHearing> caseHearings = hearingDetailsFromList.getCaseHearings();
-
-                final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
-
-                final List<CaseHearing> hearings = caseHearings.stream()
-                    .filter(hearing ->
-                                hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
-                                    hearing.getHmcStatus()))
-                    )
-                    .collect(
-                        Collectors.toList());
-
-                // if we find any hearing after filteration, change hmc status to null as it's not required in response.
-                if (hearings != null && !hearings.isEmpty()) {
-                    hearingDetailsFromList.setCaseHearings(hearings);
-                    log.debug("Hearings filtered based on Listed hearing");
-                }
-            }
-        }
     }
 
     private void filterHearings() {
@@ -82,15 +57,14 @@ public class HearingService {
 
             final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
 
-            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).toList();
 
             final List<CaseHearing> hearings = caseHearings.stream()
                     .filter(hearing ->
                         hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
                             hearing.getHmcStatus()))
                     )
-                .collect(
-                    Collectors.toList());
+                .toList();
 
 
             // if we find any hearing after filteration, change hmc status to null as it's not required in response.

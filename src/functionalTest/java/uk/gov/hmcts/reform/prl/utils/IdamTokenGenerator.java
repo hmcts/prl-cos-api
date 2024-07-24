@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.username}")
@@ -16,12 +20,6 @@ public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.password}")
     private String solicitorPassword;
-
-    @Value("${idam.systemupdate.username}")
-    private String systemUpdateUsername;
-
-    @Value("${idam.systemupdate.password}")
-    private String systemUpdatePassword;
 
     @Value("${idam.citizen.username}")
     private String citizenUsername;
@@ -31,6 +29,9 @@ public class IdamTokenGenerator {
 
     @Autowired
     private IdamClient idamClient;
+
+    @Autowired
+    private SystemUserService systemUserService;
 
     @Value("${idam.apigateway.username}")
     private String apiGwUserName;
@@ -44,12 +45,40 @@ public class IdamTokenGenerator {
     @Value("${idam.cafcass.password}")
     private String cafcassPassword;
 
+    @Value("${idam.judge.username}")
+    private String judgeUserName;
+
+    @Value("${idam.judge.password}")
+    private String judgePassword;
+
+    @Value("${idam.admin.username}")
+    private String courtAdminUsername;
+
+    @Value("${idam.admin.password}")
+    private String courtAdminPassword;
+
+    private String solicitorIdamToken;
+
+    private String systemIdamToken;
+
+    private String judgeIdamToken;
+
+    private String cafcassIdamToken;
+
+    private String citizenIdamToken;
+
+    private String courtAdminIdamToken;
+
     public String generateIdamTokenForSolicitor() {
-        return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+        return solicitorIdamToken;
     }
 
     public String generateIdamTokenForSystem() {
-        return idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
+        return systemIdamToken;
+    }
+
+    public String generateIdamTokenForJudge() {
+        return judgeIdamToken;
     }
 
     public String generateIdamTokenForCourtNav() {
@@ -61,7 +90,7 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCafcass() {
-        return idamClient.getAccessToken(cafcassUserName, cafcassPassword);
+        return cafcassIdamToken;
     }
 
     public UserDetails getUserDetailsFor(final String token) {
@@ -69,8 +98,21 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCitizen() {
-        System.out.println("citizenUsername -- " + citizenUsername + "--citizenPassword--" + citizenPassword);
-        return idamClient.getAccessToken(citizenUsername, citizenPassword);
+        return citizenIdamToken;
     }
 
+    public String generateIdamTokenForCourtAdmin() {
+        return courtAdminIdamToken;
+    }
+
+    @PostConstruct
+    public void beforeTestClass() {
+        log.info(":::: Generating Bearer Token From Idam");
+        solicitorIdamToken = idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+        systemIdamToken = systemUserService.getSysUserToken();
+        judgeIdamToken = idamClient.getAccessToken(judgeUserName, judgePassword);
+        cafcassIdamToken = idamClient.getAccessToken(cafcassUserName, cafcassPassword);
+        citizenIdamToken = idamClient.getAccessToken(citizenUsername, citizenPassword);
+        courtAdminIdamToken = idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
+    }
 }
