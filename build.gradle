@@ -289,10 +289,10 @@ dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
 
-    implementation 'org.testng:testng:7.7.1'
-  implementation 'org.testng:testng:7.7.1'
-  implementation 'org.testng:testng:7.7.1'
-  implementation 'org.testng:testng:7.7.1'
+    implementation 'org.testng:testng:7.10.2'
+  implementation 'org.testng:testng:7.10.2'
+  implementation 'org.testng:testng:7.10.2'
+  implementation 'org.testng:testng:7.10.2'
   implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
   implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
