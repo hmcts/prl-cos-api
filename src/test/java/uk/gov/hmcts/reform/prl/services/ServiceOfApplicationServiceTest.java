@@ -662,8 +662,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap.get("unservedApplicantPack"));
     }
 
     @Test
@@ -702,8 +702,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap.get("unservedApplicantPack"));
     }
 
     @Test
@@ -742,8 +742,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap.get("unservedApplicantPack"));
     }
 
     @Test
@@ -782,8 +782,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap.get("unservedApplicantPack"));
     }
 
     @Test
