@@ -134,6 +134,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_NOT_REQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
@@ -1786,6 +1788,8 @@ public class ManageOrderService {
         OrderDetails amended = order.getValue().toBuilder()
             .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
             .serveOrderDetails(serveOrderDetails)
+            //Revisit for FL401 orders
+            .sosStatus(Yes.equals(serveOnRespondent) ? SOS_PENDING : SOS_NOT_REQUIRED)
             .build();
 
         orders.set(orders.indexOf(order), element(order.getId(), amended));
