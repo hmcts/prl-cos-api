@@ -87,6 +87,8 @@ public class ConfidentialityCheckController {
                 caseData,
                 callbackRequest.getEventId()
             ));
+            //PRL-3466 - auto link citizen case if conf check is approved
+            serviceOfApplicationService.autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {

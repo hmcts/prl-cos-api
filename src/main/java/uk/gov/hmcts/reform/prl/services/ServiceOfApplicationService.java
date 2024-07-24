@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -142,6 +144,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -196,6 +200,10 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
+
+    public static final String IS_C8_CHECK_NEEDED = "isC8CheckNeeded";
+    public static final String IS_C8_CHECK_APPROVED = "isC8CheckApproved";
+
     private static final String DATE_CREATED = CaseUtils.getCurrentDate();
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
@@ -1406,6 +1414,9 @@ public class ServiceOfApplicationService {
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         //PRL-5566 - Set FM5 notification flag to No during SOA
         caseDataMap.put("fm5RemindersSent", "NO");
+        //PRL-3466 - auto link citizen case if conf check is not required
+        autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
+
         return caseDataMap;
     }
 
@@ -1422,9 +1433,9 @@ public class ServiceOfApplicationService {
             if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
             }
-            soaWaMap.put("isC8CheckNeeded", isC8CheckNeeded);
+            soaWaMap.put(IS_C8_CHECK_NEEDED, isC8CheckNeeded);
         } else if (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)) {
-            soaWaMap.put("isC8CheckApproved", (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
+            soaWaMap.put(IS_C8_CHECK_APPROVED, (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
                 && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) ? YES : NO);
             responsibleForService = (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
                 && caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() != null)
@@ -3773,5 +3784,60 @@ public class ServiceOfApplicationService {
 
     private String getRe8Template(boolean isWelsh) {
         return isWelsh ? PRL_LET_WEL_FL401_RE8 : PRL_LET_ENG_FL401_RE8;
+    }
+  
+     /**
+     * Auto link citizen case
+     * 1. After SOA event & no confidential check required.
+     * 2. After Confidential check event is approved.
+     */
+    public void autoLinkCitizenCase(CaseData caseData,
+                                    Map<String, Object> caseDataMap,
+                                    String eventId) {
+        if (isAutoLinkRequired(eventId, caseDataMap)
+            && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+
+            applicants.stream()
+                .filter(party -> !hasLegalRepresentation(party.getValue())
+                    && !hasDashboardAccess(party)
+                    && isPartyEmailSameAsIdamEmail(caseData, party))
+                .findFirst()
+                .ifPresent(party -> {
+                    log.info(
+                        "*** Auto linking citizen case for primary applicant, partyId: {} and partyIndex: {}",
+                        party.getId(),
+                        applicants.indexOf(party)
+                    );
+                    User user = null != party.getValue().getUser()
+                        ? party.getValue().getUser().toBuilder().build()
+                        : User.builder().build();
+                    user = user.toBuilder()
+                        .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
+                        .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
+                        .build();
+
+                    PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+
+                    caseDataMap.put(APPLICANTS, applicants);
+                });
+        }
+    }
+
+    private boolean isAutoLinkRequired(String eventId,
+                                       Map<String, Object> caseDataMap) {
+        return ((Event.SOA.getId().equals(eventId)
+            && NO.equals(caseDataMap.get(IS_C8_CHECK_NEEDED)))
+            || (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)
+            && YES.equals(caseDataMap.get(IS_C8_CHECK_APPROVED))));
+    }
+
+    private boolean isPartyEmailSameAsIdamEmail(CaseData caseData,
+                                                Element<PartyDetails> party) {
+        return CollectionUtils.isNotEmpty(caseData.getUserInfo())
+            && isNotEmpty(party.getValue().getEmail())
+            && party.getValue().getEmail().equalsIgnoreCase(
+            caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
 }
