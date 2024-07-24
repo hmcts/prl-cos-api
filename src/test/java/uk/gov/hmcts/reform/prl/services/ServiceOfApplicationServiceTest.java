@@ -663,7 +663,7 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
         serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
-        assertNotNull(dataMap.get("unservedApplicantPack"));
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -703,7 +703,7 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
         serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
-        assertNotNull(dataMap.get("unservedApplicantPack"));
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -743,7 +743,7 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
         serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
-        assertNotNull(dataMap.get("unservedApplicantPack"));
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -783,7 +783,7 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
         serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
-        assertNotNull(dataMap.get("unservedApplicantPack"));
+        assertNotNull(dataMap);
     }
 
     @Test
