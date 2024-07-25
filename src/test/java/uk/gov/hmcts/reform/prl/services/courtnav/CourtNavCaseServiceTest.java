@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -110,7 +111,8 @@ public class CourtNavCaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
-        caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").build();
+        caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").documentManagementDetails(
+            DocumentManagementDetails.builder().build()).build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         file = new MockMultipartFile(

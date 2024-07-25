@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,10 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,8 +35,11 @@ import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -42,7 +48,9 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -129,6 +137,10 @@ public class CourtNavCaseService {
             Map<String, Object> fields = new HashMap<>();
 
             fields.put("courtNavUploadedDocs", updatedCaseData.getCourtNavUploadedDocs());
+            fields.put(
+                "courtnavQuarantineDocumentList",
+                updatedCaseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList()
+            );
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
@@ -136,11 +148,13 @@ public class CourtNavCaseService {
                            .build())
                 .data(fields).build();
 
-            coreCaseDataService.submitUpdate(authorisation,
-                                             eventRequestData,
-                                             caseDataContent,
-                                             caseId,
-                                             true);
+            coreCaseDataService.submitUpdate(
+                authorisation,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                true
+            );
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
         } else {
@@ -159,9 +173,15 @@ public class CourtNavCaseService {
     }
 
     private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
-                                                CaseData tempCaseData, Document document) {
+                                                    CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
             ? tempCaseData.getApplicantCaseName() : COURTNAV;
+        uk.gov.hmcts.reform.prl.models.documents.Document courtNavDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl(document.links.self.href)
+            .documentBinaryUrl(document.links.binary.href)
+            .documentHash(document.hashToken)
+            .documentFileName(fileName).build();
+
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
@@ -171,11 +191,7 @@ public class CourtNavCaseService {
                                              .documentUploadedDate(new Date().toString()).build())
                         .partyName(partyName).isApplicant(NA_COURTNAV)
                         .parentDocumentType(NA_COURTNAV)
-                        .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                             .documentUrl(document.links.self.href)
-                                             .documentBinaryUrl(document.links.binary.href)
-                                             .documentHash(document.hashToken)
-                                             .documentFileName(fileName).build()).build());
+                        .citizenDocument(courtNavDoc).build());
         if (tempCaseData.getCourtNavUploadedDocs() != null) {
             uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
             uploadedDocumentsList.add(uploadedDocsElement);
@@ -184,9 +200,41 @@ public class CourtNavCaseService {
             uploadedDocumentsList.add(uploadedDocsElement);
         }
 
-        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
+
+        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList)
+            .documentManagementDetails(tempCaseData.getDocumentManagementDetails().toBuilder().courtnavQuarantineDocumentList(
+                getCourtnavQuarantineDocumentList(fileName, tempCaseData, partyName, courtNavDoc)).build())
+            .build();
 
         return tempCaseData;
+    }
+
+    private List<Element<QuarantineLegalDoc>> getCourtnavQuarantineDocumentList(String fileName,
+                                                                                CaseData tempCaseData,
+                                                                                String partyName,
+                                                                                uk.gov.hmcts.reform.prl.models.documents.Document
+                                                                                    courtNavDoc) {
+        List<Element<QuarantineLegalDoc>> courtnavQuarantineDocumentList = tempCaseData
+            .getDocumentManagementDetails().getCourtnavQuarantineDocumentList();
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId("courtnavQuarantine")
+            .categoryName("Courtnav uploaded")
+            .isConfidential(Yes)
+            .fileName(fileName)
+            .uploadedBy(COURTNAV)
+            .uploaderRole(Roles.COURTNAV.getValue())
+            .courtnavQuarantineDocument(courtNavDoc)
+            .documentParty(partyName)
+            .build();
+
+        if (CollectionUtils.isEmpty(courtnavQuarantineDocumentList)) {
+            courtnavQuarantineDocumentList = new ArrayList<>();
+        }
+        courtnavQuarantineDocumentList.add(ElementUtils.element(quarantineLegalDoc));
+
+        return courtnavQuarantineDocumentList;
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {

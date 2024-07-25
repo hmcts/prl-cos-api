@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -54,6 +55,8 @@ public class ReviewDocumentService {
     public static final String CAFCASS_QUARANTINE_DOCS_LIST = "cafcassQuarantineDocsList";
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
+
+    public static final String COURTNAV_QUARANTINE_DOCUMENT_LIST = "courtnavQuarantineDocumentList";
 
     private final AllTabServiceImpl allTabService;
     private final SystemUserService systemUserService;
@@ -199,6 +202,25 @@ public class ReviewDocumentService {
                                                .build()).toList());
             tempQuarantineDocumentList.addAll(convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments()));
         }
+        //Courtnav uploaded docs
+        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList())) {
+            log.info("inside prepare for courtnav uploaded docs");
+            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
+                                               .build())
+                                           .toList());
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList());
+            log.info("dynamicListElements " + dynamicListElements);
+            log.info("exit prepare for courtnav uploaded docs");
+        }
         caseDataUpdated.put("tempQuarantineDocumentList", tempQuarantineDocumentList);
         return dynamicListElements;
     }
@@ -270,6 +292,14 @@ public class ReviewDocumentService {
                                                         caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
                                                         CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST);
+
+            }
+            //courtnav uploaded docs
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList()) {
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
+                                                        COURTNAV_ROLE, COURTNAV_QUARANTINE_DOCUMENT_LIST);
 
             }
             //Bulk scan

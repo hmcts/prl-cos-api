@@ -31,11 +31,15 @@ public class ReviewDocuments {
     //private List<Element<UploadedDocuments>> citizenUploadDocListConfTab;
     //private List<Element<UploadedDocuments>> citizenUploadedDocListDocTab;
 
+
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> courtnavUploadedDocListDocTab;
+
+    private List<Element<QuarantineLegalDoc>> courtnavUploadedDocListConfTab;
 
     //PRL-4320 - manage docs redesign
     private List<Element<QuarantineLegalDoc>> restrictedDocuments;

@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
@@ -498,6 +499,7 @@ public class ManageDocumentsService {
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
             case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
+            case COURTNAV_ROLE -> quarantineLegalDoc.getCourtnavQuarantineDocument();
             default -> null;
         };
     }
@@ -577,6 +579,9 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
             }
+            case COURTNAV_ROLE ->
+                caseDataUpdated.put(isDocumentTab ? "courtnavUploadedDocListDocTab" : "courtnavQuarantineDocumentList",
+                                    quarantineDocs);
             case CITIZEN ->
                 caseDataUpdated.put(isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
                                     quarantineDocs);
@@ -621,6 +626,11 @@ public class ManageDocumentsService {
                 isDocumentTab,
                 caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(),
                 caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
+            );
+            case COURTNAV_ROLE -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtnavUploadedDocListDocTab(),
+                caseData.getReviewDocuments().getCourtnavUploadedDocListConfTab()
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };

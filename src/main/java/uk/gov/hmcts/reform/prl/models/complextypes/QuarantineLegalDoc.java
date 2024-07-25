@@ -87,6 +87,7 @@ public class QuarantineLegalDoc {
     private final Document localAuthorityOtherDocDocument;
     private final Document pathfinderDocument;
     private final Document draftOrdersDocument;
+    private final Document courtnavQuarantineDocument;
 
     // Adding Bulk scan attributes
     public final String fileName;
@@ -116,7 +117,7 @@ public class QuarantineLegalDoc {
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
-            "applicationsWithinProceedings", "applicationsFromOtherProceedings"
+            "applicationsWithinProceedings", "applicationsFromOtherProceedings", "courtnavQuarantine"
         };
     }
 }

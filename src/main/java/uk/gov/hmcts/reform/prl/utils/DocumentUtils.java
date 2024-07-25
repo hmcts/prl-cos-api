@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 
@@ -101,6 +102,7 @@ public class DocumentUtils {
         wierdCategory.put("homeOfficeDWPResponses", "homeOfficeDwpResponsesDocument");
         wierdCategory.put("DNAReports_expertReport", "dnaReportsExpertReportDocument");
         wierdCategory.put("drugAndAlcoholTest(toxicology)", "drugAndAlcoholTestDocument");
+        wierdCategory.put("courtnavQuarantine", "applicantStatementsDocument");
 
         return wierdCategory.get(categoryId);
 
@@ -128,6 +130,8 @@ public class DocumentUtils {
             loggedInUserType = CITIZEN;
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType = BULK_SCAN;
+        } else if (roles.contains(Roles.COURTNAV.getValue())) {
+            loggedInUserType = COURTNAV_ROLE;
         } else {
             loggedInUserType = CAFCASS;
         }
