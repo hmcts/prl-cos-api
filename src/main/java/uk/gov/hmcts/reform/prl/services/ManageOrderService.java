@@ -658,6 +658,8 @@ public class ManageOrderService {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
         } else {
+            setRecipientsOptions(caseData, headerMap);
+            setOtherParties(caseData, headerMap);
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
     }
@@ -1603,9 +1605,12 @@ public class ManageOrderService {
     }
 
     private String getWhoIsResponsibleToServeOrderDA(ManageOrders manageOrders) {
-        return NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId()
-            : manageOrders.getServingRespondentsOptionsDA().getId();
+        if (Yes.equals(manageOrders.getServeToRespondentOptions())) {
+            return NO.equals(manageOrders.getDisplayLegalRepOption())
+                ? manageOrders.getServingOptionsForNonLegalRep().getId()
+                : manageOrders.getServingRespondentsOptionsDA().getId();
+        }
+        return null;
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
