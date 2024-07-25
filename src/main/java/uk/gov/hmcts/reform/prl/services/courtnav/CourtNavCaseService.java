@@ -219,8 +219,8 @@ public class CourtNavCaseService {
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .categoryId("courtnavQuarantine")
-            .categoryName("Courtnav uploaded")
+            .categoryId("applicantStatements")
+            .categoryName("Applicant's statements")
             .isConfidential(Yes)
             .fileName(fileName)
             .uploadedBy(COURTNAV)

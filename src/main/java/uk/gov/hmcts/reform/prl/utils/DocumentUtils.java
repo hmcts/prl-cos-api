@@ -102,7 +102,6 @@ public class DocumentUtils {
         wierdCategory.put("homeOfficeDWPResponses", "homeOfficeDwpResponsesDocument");
         wierdCategory.put("DNAReports_expertReport", "dnaReportsExpertReportDocument");
         wierdCategory.put("drugAndAlcoholTest(toxicology)", "drugAndAlcoholTestDocument");
-        wierdCategory.put("courtnavQuarantine", "applicantStatementsDocument");
 
         return wierdCategory.get(categoryId);
 
