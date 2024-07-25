@@ -219,6 +219,7 @@ public class ReviewDocumentService {
                                            .toList());
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList());
             log.info("dynamicListElements " + dynamicListElements);
+            log.info("tempQuarantineDocumentList " + tempQuarantineDocumentList);
             log.info("exit prepare for courtnav uploaded docs");
         }
         caseDataUpdated.put("tempQuarantineDocumentList", tempQuarantineDocumentList);
@@ -233,7 +234,7 @@ public class ReviewDocumentService {
             List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
-
+            log.info("quarantineLegalDocElement " + quarantineLegalDocElement);
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                     caseDataUpdated,
                     legalDocElement,
@@ -245,7 +246,7 @@ public class ReviewDocumentService {
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
-
+        log.info("submittedBy " + submittedBy);
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
         String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
