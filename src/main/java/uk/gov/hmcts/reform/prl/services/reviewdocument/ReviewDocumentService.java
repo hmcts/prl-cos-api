@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
@@ -236,6 +237,7 @@ public class ReviewDocumentService {
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
             log.info("quarantineLegalDocElement " + quarantineLegalDocElement);
+            quarantineLegalDocElement = resetUploaderRoleForCourtNavUploadedDocs(quarantineLegalDocElement);
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                     caseDataUpdated,
                     legalDocElement,
@@ -244,11 +246,22 @@ public class ReviewDocumentService {
         }
     }
 
+    private static Optional<Element<QuarantineLegalDoc>> resetUploaderRoleForCourtNavUploadedDocs(Optional<Element<QuarantineLegalDoc>>
+                                                                                                      quarantineLegalDocElement) {
+        if (quarantineLegalDocElement.isPresent() && COURTNAV.equals(quarantineLegalDocElement.get().getValue().getUploadedBy())) {
+            quarantineLegalDocElement = Optional.of(element(
+                quarantineLegalDocElement.get().getId(),
+                quarantineLegalDocElement.get().getValue().toBuilder().uploaderRole(
+                    COURTNAV_USER).build()
+            ));
+        }
+        return quarantineLegalDocElement;
+    }
+
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
         log.info("submittedBy " + submittedBy);
-        submittedBy = null == submittedBy ? "COURTNAV" : submittedBy;
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
         String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
@@ -300,7 +313,7 @@ public class ReviewDocumentService {
             //courtnav uploaded docs
             if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList()) {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
-                                                        caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                                                        caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
                                                         COURTNAV_USER, COURTNAV_QUARANTINE_DOCUMENT_LIST);
 

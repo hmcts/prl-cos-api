@@ -495,7 +495,7 @@ public class ManageDocumentsService {
 
     public Document getQuarantineDocumentForUploader(String uploadedBy,
                                                      QuarantineLegalDoc quarantineLegalDoc) {
-        log.info("uploadedBy" + uploadedBy);
+        log.info("uploadedBy " + uploadedBy);
         return switch (uploadedBy) {
             case LEGAL_PROFESSIONAL -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
