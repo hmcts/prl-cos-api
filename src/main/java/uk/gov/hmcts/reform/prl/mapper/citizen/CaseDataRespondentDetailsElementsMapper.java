@@ -80,7 +80,7 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static Address buildAddress(C100Address c100Address) {
         return Address.builder().addressLine1(c100Address.getAddressLine1()).addressLine2(c100Address.getAddressLine2()).postTown(
-            c100Address.getPostTown()).county(c100Address.getCounty()).postCode(c100Address.getPostCode()).build();
+            c100Address.getPostTown()).country(c100Address.getCountry()).postCode(c100Address.getPostCode()).build();
     }
 
     private static LocalDate buildDateOfBirth(RespondentDetails respondentDetails) {

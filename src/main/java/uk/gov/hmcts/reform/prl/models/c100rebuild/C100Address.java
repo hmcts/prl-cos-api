@@ -21,8 +21,8 @@ public class C100Address  {
     private  String addressLine3;
     @JsonProperty("PostTown")
     private  String postTown;
-    @JsonProperty("County")
-    private  String county;
+    @JsonProperty("Country")
+    private  String country;
     @JsonProperty("PostCode")
     private  String postCode;
     @JsonProperty("addressHistory")
