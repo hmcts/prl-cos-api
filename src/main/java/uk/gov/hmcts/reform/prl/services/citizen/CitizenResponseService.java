@@ -479,11 +479,13 @@ public class CitizenResponseService {
                                                                                            .toInstant()))
                                                           .build())
                            .categoryId(getCategoryId(element))
+                           .categoryName(getCategoryName(element.getValue()))
                            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                            .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                            .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                            .uploaderRole(PrlAppsConstants.CITIZEN)
                            .documentLanguage(language)
+                           .isConfidential(Yes)
                            .build())
                 .id(element.getId()).build();
             finalQuarantineDocs.add(quarantineLegalDoc);
@@ -507,6 +509,7 @@ public class CitizenResponseService {
                                .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                                .uploaderRole(PrlAppsConstants.CITIZEN)
                                .documentLanguage(language)
+                               .isConfidential(Yes)
                                .build())
                     .id(CommonUtils.generateUuid()).build();
                 finalQuarantineDocs.add(quarantineLegalDoc);
@@ -531,6 +534,18 @@ public class CitizenResponseService {
             };
         }
 
+        return "";
+    }
+
+    private String getCategoryName(Document document) {
+        if (null != document && null != document.getDocumentFileName()) {
+            return switch (document.getDocumentFileName()) {
+                case "C7_Document.pdf", "Final_C7_response_Welsh.pdf" -> "Respondent application";
+                case "C1A_allegation_of_harm.pdf",
+                     "Final_C1A_allegation_of_harm_Welsh.pdf" -> "Respondent C1A application";
+                default -> "";
+            };
+        }
         return "";
     }
 }
