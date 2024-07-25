@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -299,7 +299,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
-                                                        COURTNAV_ROLE, COURTNAV_QUARANTINE_DOCUMENT_LIST);
+                                                        COURTNAV_USER, COURTNAV_QUARANTINE_DOCUMENT_LIST);
 
             }
             //Bulk scan
