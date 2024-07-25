@@ -1485,7 +1485,7 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order,serveRecipientName);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
+            .getPersonallyServeRespondentsOptions();
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
@@ -1603,9 +1603,8 @@ public class ManageOrderService {
                 ));
             }
             //personal service
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA = caseData
-                .getManageOrders().getServingRespondentsOptionsCA();
-            updatePersonalServedParties(servingRespondentsOptionsCA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update all applicants party ids in case of personal service
             if (Yes.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
                 servedParties.addAll(ManageOrdersUtils.getServedParties(caseData.getApplicants()));
@@ -1613,8 +1612,8 @@ public class ManageOrderService {
         }
         //FL401 - personal service
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders().getServingRespondentsOptionsDA();
-            updatePersonalServedParties(servingRespondentsOptionsDA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
             servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
         }
@@ -1645,13 +1644,9 @@ public class ManageOrderService {
     }
 
     private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
-        if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCA() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCA();
-        }
-        return servingRespondentsOptions;
+        return caseData.getManageOrders().getPersonallyServeRespondentsOptions() != null ? caseData.getManageOrders()
+                .getPersonallyServeRespondentsOptions() : null;
+
     }
 
     private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
