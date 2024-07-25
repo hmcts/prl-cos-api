@@ -251,6 +251,7 @@ public class ManageDocumentsService {
                     quarantineLegalDoc
                 );
             }
+            log.info("quarantineLegalDoc with restrictedKey ==> " + quarantineLegalDoc);
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
@@ -517,6 +518,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
             case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
+            case COURTNAV_USER -> quarantineLegalDoc.toBuilder().courtnavQuarantineDocument(manageDocument.getDocument()).build();
             default -> null;
         };
     }
