@@ -22,7 +22,7 @@ public class C100Address  {
     @JsonProperty("PostTown")
     private  String postTown;
     @JsonProperty("County")
-    private  String country;
+    private  String county;
     @JsonProperty("PostCode")
     private  String postCode;
     @JsonProperty("addressHistory")
