@@ -3923,7 +3923,9 @@ public class ManageOrderServiceTest {
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .manageOrders(ManageOrders.builder().serveOrderDynamicList(partyDynamicMultiSelectList)
-                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other)).build())
+                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                              .build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .applicantsFL401(PartyDetails.builder().build())
@@ -4717,6 +4719,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders.toBuilder()
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .serveOrderDynamicList(dynamicMultiSelectList)
+                              .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
