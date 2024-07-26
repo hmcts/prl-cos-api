@@ -82,9 +82,9 @@ public class CaseInviteManagerTest {
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(launchDarklyClient.isFeatureEnabled("generate-pin")).thenReturn(true);
-        when(c100CaseInviteService.generateAndSendCaseInvite(any()))
+        when(c100CaseInviteService.sendCaseInviteEmail(any()))
             .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
-        when(fl401CaseInviteService.generateAndSendCaseInvite(any()))
+        when(fl401CaseInviteService.sendCaseInviteEmail(any()))
             .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
         when(c100CaseInviteService.generateCaseInvite(any(), any()))
             .thenReturn(caseInvite1);
@@ -95,7 +95,7 @@ public class CaseInviteManagerTest {
     @Test
     public void testGeneratePinAndNotificationEmailForC100() throws Exception {
 
-        CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        CaseData actualCaseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
 
         assertEquals(2, actualCaseData.getCaseInvites().size());
         assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
@@ -108,7 +108,7 @@ public class CaseInviteManagerTest {
     @Test
     public void testGeneratePinAndNotificationEmailForFL401() throws Exception {
 
-        CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
+        CaseData actualCaseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
         assertEquals(2, actualCaseData.getCaseInvites().size());

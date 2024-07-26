@@ -59,7 +59,7 @@ public class CourtFinderService {
                             : getCorrectPartyPostcode(caseData));
             }
         } catch (Exception e) {
-            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e.getMessage());
+            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
         if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {
@@ -130,7 +130,8 @@ public class CourtFinderService {
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             return getCorrectPartyPostcodeV2(caseData);
         }
         //current requirements use the first child if multiple children present

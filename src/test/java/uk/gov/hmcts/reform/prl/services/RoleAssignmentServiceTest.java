@@ -63,6 +63,7 @@ public class RoleAssignmentServiceTest {
 
         Map<String, Object> dataMap = new HashMap<>();
         caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
+        roleAssignmentService.setEnvironment("aat");
     }
 
     @Test

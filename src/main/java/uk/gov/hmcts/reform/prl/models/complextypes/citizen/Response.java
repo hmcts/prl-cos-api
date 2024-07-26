@@ -54,6 +54,7 @@ public class Response {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+    private String respondingCitizenAoH;
 
     @JsonUnwrapped
     @Builder.Default

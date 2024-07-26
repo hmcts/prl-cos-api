@@ -83,14 +83,14 @@ public class AttendToCourtCheckerTest {
     @Test
     public void isStartedTest() {
 
-        Boolean bool = attendToCourtChecker.isStarted(respondent);
+        Boolean bool = attendToCourtChecker.isStarted(respondent, true);
 
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryCompletedTest() {
-        Boolean bool = attendToCourtChecker.isFinished(respondent);
+        Boolean bool = attendToCourtChecker.isFinished(respondent, true);
 
         assertTrue(bool);
     }

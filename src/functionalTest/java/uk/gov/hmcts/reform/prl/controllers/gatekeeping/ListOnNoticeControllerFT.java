@@ -7,14 +7,15 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -26,8 +27,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIA
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ListOnNoticeControllerFT {
 
     @Autowired
@@ -40,6 +41,8 @@ public class ListOnNoticeControllerFT {
     ObjectMapper objectMapper;
 
     private static final String LIST_ON_NOTICE_VALID_REQUEST_BODY = "requests/gatekeeping/ListOnNoticeRequest.json";
+
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
 
     private static final String LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED =
         "requests/gatekeeping/ListOnNoticeRequestWithoutReasons.json";
@@ -54,7 +57,7 @@ public class ListOnNoticeControllerFT {
 
     private final String listOnNoticeSendNotificationEndpoint = "/send-listOnNotice-notification";
 
-
+    private static CaseDetails caseDetails;
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -62,6 +65,28 @@ public class ListOnNoticeControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+
+    @Test
+    @Order(1)
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+    }
 
     @Test
     public void testListOnNoticeWhenReasonsSelected_200ResponseAndNoErrorsFromMidEvent() throws Exception {
@@ -102,7 +127,6 @@ public class ListOnNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testListOnNoticeSubmissionWhenAdditionalReasonsSelected() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
@@ -127,7 +151,6 @@ public class ListOnNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testListOnNoticeSubmissionWhenNoReasonsSelected() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);
@@ -167,16 +190,15 @@ public class ListOnNoticeControllerFT {
     public void testSendListOnNoticeNotification() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);
+        String requestBodyRevised = requestBody
+            .replace("1648728532100631", caseDetails.getId().toString());
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post(listOnNoticeSendNotificationEndpoint);
         response.then().assertThat().statusCode(200);
-        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 }

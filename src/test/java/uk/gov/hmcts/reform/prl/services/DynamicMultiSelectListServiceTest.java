@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
@@ -131,6 +132,16 @@ public class DynamicMultiSelectListServiceTest {
     public void testChildDetails() {
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
             .getChildrenMultiSelectList(caseData);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testChildDetailsScenario2() {
+        List<Element<ChildDetailsRevised>> children = List.of(Element.<ChildDetailsRevised>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(ChildDetailsRevised.builder().isFinalOrderIssued(YesOrNo.No).build()).build());
+        caseDataC100 = caseDataC100.toBuilder().taskListVersion("v2").newChildDetails(children).build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseDataC100);
         assertNotNull(listItems);
     }
 
@@ -278,6 +289,16 @@ public class DynamicMultiSelectListServiceTest {
 
     @Test
     public void testDynamicMultiSelectForDocmosis() {
+
+        caseData = caseData.toBuilder()
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutChildren((Yes))
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .build();
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         assertNotNull(str);
