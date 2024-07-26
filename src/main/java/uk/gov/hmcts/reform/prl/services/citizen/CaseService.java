@@ -103,8 +103,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF3_PERS_SERV_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -119,6 +117,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -470,7 +469,7 @@ public class CaseService {
             getAllCitizenDashboardNotifications(authToken, caseData, citizenDocumentsManagement, userDetails, partyIdAndType);
         if (CollectionUtils.isNotEmpty(citizenNotifications)) {
             citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
-                .citizenNotifications(citizenNotifications.stream().filter(CitizenNotification::isShow).toList())
+                .citizenNotifications(citizenNotifications)
                 .build();
         }
 
@@ -846,6 +845,7 @@ public class CaseService {
                                   ? order.getServeOrderDetails().getWhoIsResponsibleToServe() : null)
             .isMultiple(null != order.getServeOrderDetails()
                             && YesOrNo.Yes.equals(order.getServeOrderDetails().getMultipleOrdersServed()))
+            .isSosCompleted(SOS_COMPLETED.equals(order.getSosStatus()))
             .build();
     }
 
@@ -995,11 +995,8 @@ public class CaseService {
                                    citizenNotifications);
 
         //PRL-5688 - Orders notifications
-        if (CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenOrders())) {
-            citizenNotifications.add(CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(false).build());
-        } else {
-            addOrderNotifications(citizenDocumentsManagement.getCitizenOrders(), citizenNotifications);
+        if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders())) {
+            addOrderNotifications(caseData, citizenDocumentsManagement.getCitizenOrders(), citizenNotifications);
         }
 
         //PRL-5431 - SOA & SOS notifications
@@ -1017,25 +1014,46 @@ public class CaseService {
         return citizenNotifications;
     }
 
-    private void addOrderNotifications(List<CitizenDocuments> citizenOrders,
+    private void addOrderNotifications(CaseData caseData,
+                                       List<CitizenDocuments> citizenOrders,
                                        List<CitizenNotification> citizenNotifications) {
-        CitizenNotification citizenNotification;
         List<CitizenDocuments> multipleOrdersServed = getMultipleOrdersServed(citizenOrders);
+        Map<String, Object> notifMap = new HashMap<>();
+        notifMap.put(IS_NEW, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isNew));
+        notifMap.put(IS_FINAL, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal));
+        notifMap.put(IS_MULTIPLE, multipleOrdersServed.size() > 1);
 
         if (citizenOrders.get(0).isPersonalService()) {
-            //CRNF3 - personal service by unrepresented applicant lip
-            citizenNotification = CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(true).isPersonalService(true).build();
+            //personal service by unrepresented applicant lip
+            notifMap.put(IS_PERSONAL, true);
+            if (citizenOrders.get(0).isSosCompleted()) {
+                //CA - CAN3, DA - DN6
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
+            } else {
+                //CRNF3
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
+            }
         } else {
-            //CRNF2 - personal service by Court admin/bailiff & non-personal service
-            citizenNotification = CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(true).isPersonalService(false).build();
+            //personal service by Court admin/bailiff & non-personal service
+            notifMap.put(IS_PERSONAL, false);
+            if (citizenOrders.get(0).isSosCompleted()) {
+                //CA - CAN3, DA - DN6
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
+            } else {
+                //CRNF2
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_APPLICANT_RESPONDENT, notifMap));
+            }
         }
+        //Any order where SOS is not completed
+        if (isAnyOrderPersonalServicePendingSos(citizenOrders)) {
+            notifMap.put(IS_PERSONAL, true);
+            citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
+        }
+    }
 
-        citizenNotification = citizenNotification.toBuilder()
-            .isNew(multipleOrdersServed.stream().anyMatch(CitizenDocuments::isNew))
-            .isFinal(multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal))
-            .isMultiple(multipleOrdersServed.size() > 1)
-            .build();
-        citizenNotifications.add(citizenNotification);
+    private boolean isAnyOrderPersonalServicePendingSos(List<CitizenDocuments> citizenOrders) {
+        return citizenOrders.stream()
+            .anyMatch(order -> order.isPersonalService() && !order.isSosCompleted());
     }
 
     private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {

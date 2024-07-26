@@ -36,6 +36,7 @@ public class CitizenDocuments {
     private boolean wasCafcassServed;
     private boolean wasCafcassCymruServed;
     private boolean isPersonalService;
+    private boolean isSosCompleted;
 
     private String orderType;
     private LocalDate createdDate;

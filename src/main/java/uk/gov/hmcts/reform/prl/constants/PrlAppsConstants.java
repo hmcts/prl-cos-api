@@ -1028,10 +1028,6 @@ public class PrlAppsConstants {
     public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
     public static final String SOA_BY_POST = "By post";
 
-    //Citizen dashboard notifications
-    public static final String CRNF2_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
-    public static final String CRNF3_PERS_SERV_APPLICANT = "CRNF3_PERS_SERV_APPLICANT";
-
     //Order SOS statuses
     public static final String SOS_PENDING = "PENDING";
     public static final String SOS_COMPLETED = "COMPLETED";
