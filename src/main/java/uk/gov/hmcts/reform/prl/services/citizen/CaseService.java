@@ -662,11 +662,15 @@ public class CaseService {
             citizenDocuments.stream()
                 .filter(citizenDoc -> !redundantDocumentsCategories.contains(citizenDoc.getCategoryId()))
                 .forEach(citizenDoc -> {
-                    if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                    //Other documents categories
+                    if (otherDocumentsCategoriesForUI.contains(citizenDoc.getCategoryId())) {
+                        otherDocuments.add(citizenDoc);
+                    } else if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
                         applicantDocuments.add(citizenDoc);
                     } else if (SERVED_PARTY_RESPONDENT.equalsIgnoreCase(citizenDoc.getPartyType())) {
                         respondentDocuments.add(citizenDoc);
                     } else {
+                        //if not applicant/respondent add to other docs
                         otherDocuments.add(citizenDoc);
                     }
                 });
@@ -739,11 +743,6 @@ public class CaseService {
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
-
-
-        otherDocuments.addAll(citizenDocuments.stream()
-                                  .filter(citDoc -> otherDocumentsCategoriesForUI.contains(citDoc.getCategoryId()))
-                                  .toList());
 
         return citizenDocuments;
     }
