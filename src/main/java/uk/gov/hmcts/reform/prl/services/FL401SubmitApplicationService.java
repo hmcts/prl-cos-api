@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmail
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -114,6 +115,7 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         return caseDataUpdated;
     }
@@ -133,7 +135,7 @@ public class FL401SubmitApplicationService {
                 .build();
 
         } catch (Exception e) {
-            log.error("Notification could not be sent due to {} ", e.getMessage());
+            log.error("Notification could not be sent due to ", e);
             caseData = caseData.toBuilder()
                 .isNotificationSent("No")
                 .build();
