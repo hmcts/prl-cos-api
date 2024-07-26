@@ -1040,4 +1040,9 @@ public class PrlAppsConstants {
     public static final String CAN6B_VIEW_RESPONSE_C1AR_APPLICANT = "CAN6B_VIEW_C1AR_RESPONSE_APPLICANT";
     public static final String CRNF2_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
     public static final String CRNF3_PERS_SERV_APPLICANT = "CRNF3_PERS_SERV_APPLICANT";
+
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
 }
