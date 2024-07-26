@@ -10,7 +10,7 @@ buildscript {
 plugins {
   id 'application'
   id 'checkstyle'
-  id 'com.github.ben-manes.versions' version '0.42.0'
+  id 'com.github.ben-manes.versions' version '0.51.0'
   id 'info.solidsoft.pitest' version '1.7.4'
   id 'io.spring.dependency-management' version '1.1.6'
   id 'jacoco'
@@ -43,7 +43,7 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '4.13.2',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.30',
+  lombok                       : '1.18.34',
   pact                         : '4.1.11',
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
@@ -293,8 +293,8 @@ dependencies {
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
   testImplementation("org.projectlombok:lombok:${versions.lombok}")
@@ -302,7 +302,7 @@ dependencies {
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
   implementation group: 'junit', name: 'junit', version: versions.junit
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '3.0.2'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.5'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -323,7 +323,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.20.0'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.23.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
   implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
@@ -336,7 +336,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.3.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.15'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.14.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
@@ -475,11 +475,11 @@ dependencies {
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
 
 
-  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-  contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
+  contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.3")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
