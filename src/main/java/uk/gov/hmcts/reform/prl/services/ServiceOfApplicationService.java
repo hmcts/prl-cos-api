@@ -3777,7 +3777,7 @@ public class ServiceOfApplicationService {
         return isWelsh ? PRL_LET_WEL_FL401_RE8 : PRL_LET_ENG_FL401_RE8;
     }
 
-     /**
+    /**
      * Auto link citizen case
      * 1. After SOA event & no confidential check required.
      * 2. After Confidential check event is approved.
