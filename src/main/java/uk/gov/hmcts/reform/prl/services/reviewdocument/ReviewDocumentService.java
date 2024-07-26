@@ -57,7 +57,7 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
 
-    public static final String COURTNAV_QUARANTINE_DOCUMENT_LIST = "courtnavQuarantineDocumentList";
+    public static final String COURTNAV_QUARANTINE_DOCUMENT_LIST = "courtNavQuarantineDocumentList";
 
     private final AllTabServiceImpl allTabService;
     private final SystemUserService systemUserService;
@@ -204,9 +204,9 @@ public class ReviewDocumentService {
             tempQuarantineDocumentList.addAll(convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments()));
         }
         //Courtnav uploaded docs
-        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList())) {
+        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
             log.info("inside prepare for courtnav uploaded docs");
-            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList().stream()
+            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
                                                    element.getValue().getUploaderRole(),
@@ -218,7 +218,7 @@ public class ReviewDocumentService {
                                                ))
                                                .build())
                                            .toList());
-            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList());
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList());
             log.info("dynamicListElements " + dynamicListElements);
             log.info("tempQuarantineDocumentList " + tempQuarantineDocumentList);
             log.info("exit prepare for courtnav uploaded docs");
@@ -311,9 +311,9 @@ public class ReviewDocumentService {
 
             }
             //courtnav uploaded docs
-            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList()) {
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList()) {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
-                                                        caseData.getDocumentManagementDetails().getCourtnavQuarantineDocumentList(),
+                                                        caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
                                                         COURTNAV_USER, COURTNAV_QUARANTINE_DOCUMENT_LIST);
 

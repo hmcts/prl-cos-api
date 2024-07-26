@@ -33,8 +33,8 @@ public class DocumentManagementDetails {
     @JsonProperty("tempQuarantineDocumentList")
     List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList;
 
-    @JsonProperty("courtnavQuarantineDocumentList")
-    List<Element<QuarantineLegalDoc>> courtnavQuarantineDocumentList;
+    @JsonProperty("courtNavQuarantineDocumentList")
+    List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList;
 
     //NOT IN USE
     @JsonProperty("citizenUploadQuarantineDocsList")

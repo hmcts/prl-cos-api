@@ -37,9 +37,8 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
-    private List<Element<QuarantineLegalDoc>> courtnavUploadedDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocTab;
 
-    private List<Element<QuarantineLegalDoc>> courtnavUploadedDocListConfTab;
 
     //PRL-4320 - manage docs redesign
     private List<Element<QuarantineLegalDoc>> restrictedDocuments;

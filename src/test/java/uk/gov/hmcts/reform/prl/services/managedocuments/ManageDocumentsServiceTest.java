@@ -1771,7 +1771,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testGetQuarantineDocumentForUploaderCitizen() {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .courtnavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
+            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
                                            .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build()).build();
         uk.gov.hmcts.reform.prl.models.documents.Document quarantineDocument = manageDocumentsService
             .getQuarantineDocumentForUploader("courtnav", quarantineLegalDoc
