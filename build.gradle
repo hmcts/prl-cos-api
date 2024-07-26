@@ -187,8 +187,8 @@ allprojects {
 
       dependencySet(group: 'org.codehaus.plexus', version: '2.8.0') {
         entry 'plexus-classworlds'
-        entry 'plexus-component-annotations'
-        entry 'plexus-container-default'
+        //entry 'plexus-component-annotations'
+        //entry 'plexus-container-default'
       }
     }
   }
