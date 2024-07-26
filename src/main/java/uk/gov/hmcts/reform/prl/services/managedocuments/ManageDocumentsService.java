@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -502,7 +503,7 @@ public class ManageDocumentsService {
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
             case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
-            case COURTNAV_USER -> quarantineLegalDoc.getCourtNavQuarantineDocument();
+            case COURTNAV, COURTNAV_USER -> quarantineLegalDoc.getCourtNavQuarantineDocument();
             default -> null;
         };
     }

@@ -228,6 +228,7 @@ public class ReviewDocumentService {
     }
 
     public void getReviewedDocumentDetailsNew(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("DocumentManagementDetails " + caseData.getDocumentManagementDetails());
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());

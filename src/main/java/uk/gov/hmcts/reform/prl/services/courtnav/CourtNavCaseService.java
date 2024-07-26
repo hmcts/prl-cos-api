@@ -129,18 +129,10 @@ public class CourtNavCaseService {
                 List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
-                document.getOriginalFilename(),
-                typeOfDocument,
-                tempCaseData,
-                uploadResponse.getDocuments().get(0)
-            );
 
             Map<String, Object> fields = new HashMap<>();
 
-            fields.put("courtNavUploadedDocs", updatedCaseData.getCourtNavUploadedDocs());
-
-            QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocumentList(
+            QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
                 tempCaseData,
                 uploadResponse.getDocuments().get(0)
@@ -148,7 +140,7 @@ public class CourtNavCaseService {
 
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 courtNavQuarantineLegalDoc,
-                updatedCaseData,
+                tempCaseData,
                 fields,
                 COURTNAV_USER
             );
@@ -219,12 +211,12 @@ public class CourtNavCaseService {
         return tempCaseData;
     }
 
-    private QuarantineLegalDoc getCourtNavQuarantineDocumentList(String fileName,
-                                                                 CaseData caseData,
-                                                                 Document uploadedDocument) {
+    private QuarantineLegalDoc getCourtNavQuarantineDocument(String fileName,
+                                                             CaseData caseData,
+                                                             Document uploadedDocument) {
 
-        String partyName = caseData.getApplicantCaseName() != null
-            ? caseData.getApplicantCaseName() : COURTNAV;
+        String partyName = caseData.getApplicantsFL401() != null
+            ? caseData.getApplicantsFL401().getLabelForDynamicList() : COURTNAV;
 
         uk.gov.hmcts.reform.prl.models.documents.Document courtNavDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentUrl(uploadedDocument.links.self.href)
