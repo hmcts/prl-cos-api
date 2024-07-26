@@ -4719,7 +4719,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders.toBuilder()
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .serveOrderDynamicList(dynamicMultiSelectList)
-                              .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                              .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(

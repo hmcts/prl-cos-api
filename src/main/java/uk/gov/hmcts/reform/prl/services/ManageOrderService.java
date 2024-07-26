@@ -1496,7 +1496,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderDA(caseData.getManageOrders()));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
@@ -1576,7 +1576,7 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderCA(caseData.getManageOrders()));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
@@ -1594,19 +1594,13 @@ public class ManageOrderService {
         );
     }
 
-    private String getWhoIsResponsibleToServeOrderCA(ManageOrders manageOrders) {
+    private String getWhoIsResponsibleToServeOrder(ManageOrders manageOrders) {
         if (Yes.equals(manageOrders.getServeToRespondentOptions())) {
             return NO.equals(manageOrders.getDisplayLegalRepOption())
                 ? manageOrders.getServingOptionsForNonLegalRep().getId()
-                : manageOrders.getServingRespondentsOptionsCA().getId();
+                : manageOrders.getPersonallyServeRespondentsOptions().getId();
         }
         return null;
-    }
-
-    private String getWhoIsResponsibleToServeOrderDA(ManageOrders manageOrders) {
-        return NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId()
-            : manageOrders.getServingRespondentsOptionsDA().getId();
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
