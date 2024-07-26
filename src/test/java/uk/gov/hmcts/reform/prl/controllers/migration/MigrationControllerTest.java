@@ -78,7 +78,7 @@ public class MigrationControllerTest {
     @Test
     public void handleSubmitted() {
         migrationController.handleSubmitted(callbackRequest, "testAuth");
-        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.anyString());
     }
 
     @Test
