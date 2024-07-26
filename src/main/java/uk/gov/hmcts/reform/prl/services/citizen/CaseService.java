@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.citizen.NotificationNames;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -77,6 +79,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -96,15 +99,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN10_FM5;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN4_SOA_PERS_NONPERS_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN5_SOA_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN6A_VIEW_RESPONSE_C1A_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN6B_VIEW_RESPONSE_C1AR_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN6_VIEW_RESPONSE_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN7_SOA_PERSONAL_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN8_SOS_PERSONAL_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN9_SOA_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
@@ -151,6 +145,12 @@ public class CaseService {
     public static final DateTimeFormatter DATE_FORMATTER_D_MMM_YYYY = DateTimeFormatter.ofPattern(D_MMM_YYYY);
     public static final DateTimeFormatter DATE_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(YYYY_MM_DD);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+    public static final String COVER_LETTER_PREFIX = "cover_letter";
+    public static final String IS_NEW = "IS_NEW";
+    public static final String IS_FINAL = "IS_FINAL";
+    public static final String IS_MULTIPLE = "IS_MULTIPLE";
+    public static final String IS_PERSONAL = "IS_PERSONAL";
+    public static final String PARTY_NAMES = "PARTY_NAMES";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -159,6 +159,7 @@ public class CaseService {
     private final UserService userService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
+    private final DashboardNotificationsConfig notificationsConfig;
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -578,14 +579,14 @@ public class CaseService {
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? emailNotificationDetails.getDocs().stream()
                             .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
+                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
                             .toList() : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? emailNotificationDetails.getDocs().stream()
                             .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
+                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
                                 .toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
@@ -596,12 +597,6 @@ public class CaseService {
                     .build()
         );
         return citizenDocuments[0];
-    }
-
-    private List<String> getPartyIds(List<Element<PartyDetails>> parties) {
-        return CollectionUtils.isNotEmpty(parties)
-            ? parties.stream().map(Element::getId).map(Objects::toString).map(String::trim).toList()
-            : Collections.emptyList();
     }
 
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication,
@@ -642,14 +637,14 @@ public class CaseService {
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? bulkPrintDetails.getPrintDocs().stream()
                             .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
+                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
                             .toList() : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
                             ? bulkPrintDetails.getPrintDocs().stream()
                             .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains("cover_letter"))
+                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
                                 .toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
@@ -1011,14 +1006,14 @@ public class CaseService {
         //PRL-5431 - SOA & SOS notifications
         if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())) {
             //SOA applicant/respondent notifications
-            addSoaNotifications(citizenDocumentsManagement, citizenNotifications, userDetails, partyIdAndType);
+            addSoaNotifications(caseData, citizenDocumentsManagement, citizenNotifications, userDetails, partyIdAndType);
 
             //SOS notifications
             addSosNotifications(caseData, citizenDocumentsManagement, citizenNotifications, partyIdAndType.get(PARTY_TYPE));
         }
 
         //Respondent response notification to applicant
-        addRespondentResponseNotification(citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
+        addRespondentResponseNotification(caseData, citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
         return citizenNotifications;
     }
@@ -1071,45 +1066,47 @@ public class CaseService {
             && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
             && !isFm5UploadedByParty(citizenDocuments, userDetails)
             && !isFirstHearingCompleted(authorization, String.valueOf(caseData.getId()))) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN10_FM5).show(true).build());
-        } else {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN10_FM5).show(false).build());
+            //CAN10
+            citizenNotifications.addAll(getNotifications(caseData, NotificationNames.FM5_REMINDER_APPLICANT_RESPONDENT, null));
         }
     }
 
-    private void addSoaNotifications(CitizenDocumentsManagement citizenDocumentsManagement,
+    private void addSoaNotifications(CaseData caseData,
+                                     CitizenDocumentsManagement citizenDocumentsManagement,
                                      List<CitizenNotification> citizenNotifications,
                                      UserDetails userDetails,
                                      Map<String, String> partyIdAndType) {
         CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
-        if (isAnyOrderServedPostSoa(citizenAppPack, citizenDocumentsManagement.getCitizenOrders())) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
-        } else {
-            if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
-                && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) { //logged in party is applicant
-                //SOA Applicant - personal service(unrepresented applicant)
-                if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
-                    citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(true)
-                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
-                    citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(true)
-                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
-                } else {
-                    //SOA Applicant - personal(court admin/court bailiff) OR non-personal service
-                    citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true)
-                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
-                }
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
-            }
+        //SOA Applicant - personal service(unrepresented applicant) pending sos.
+        if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
+            && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
+            && UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())
+            && !isSosCompletedPostSoa(caseData)) {
+            //CA - CAN7 & CAN9, DA - DN2
+            Map<String, Object> notifMap = new HashMap<>();
+            notifMap.put(IS_PERSONAL, citizenAppPack.isPersonalService());
+            citizenNotifications.addAll(getNotifications(caseData, NotificationNames.SOA_PERSONAL_APPLICANT, notifMap));
+        }
 
-            //SOA Respondent - non-personal
-            if (CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())
-                && SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is respondent
-                && !isResponseSubmittedByRespondent(citizenDocumentsManagement.getCitizenDocuments(), userDetails.getId())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
+        if (!isAnyOrderServedPostSoa(citizenAppPack, citizenDocumentsManagement.getCitizenOrders())) {
+            //SOA Applicant - personal(court admin/court bailiff) OR non-personal service
+            if (SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
+                && CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
+                && (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
+                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))) {
+                //CA - CAN4, DA - DN1
+                Map<String, Object> notifMap = new HashMap<>();
+                notifMap.put(IS_PERSONAL, citizenAppPack.isPersonalService());
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.SOA_APPLICANT, notifMap));
+            } else if (SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is respondent
+                && CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())
+                && !isResponseSubmittedByRespondent(
+                citizenDocumentsManagement.getCitizenDocuments(),
+                userDetails.getId()
+            )) {
+                //SOA Respondent - non-personal, personal(after SOS) - before response submission
+                //CA - CAN5, DA - DN3
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.SOA_RESPONDENT, null));
             }
         }
     }
@@ -1119,62 +1116,64 @@ public class CaseService {
                                      List<CitizenNotification> citizenNotifications,
                                      String partyType) {
         if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
-            && isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
-            log.info("*** SOS is completed for respondents ***");
+            && isSosCompletedPostSoa(caseData)
+            && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
             CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
-            //SOS by unrepresented applicant
-            if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
-                citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
-            }
-
             //SOS by Court admin/Court bailiff
-            if ((PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
-                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))
-                && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
+            if (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
+                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible())) {
+                //CA - CAN8, DA - DN5
+                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.SOA_SOS_CA_CB_APPLICANT, null));
             }
         }
     }
 
 
-    private void addRespondentResponseNotification(CitizenDocumentsManagement citizenDocumentsManagement,
+    private void addRespondentResponseNotification(CaseData caseData,
+                                                   CitizenDocumentsManagement citizenDocumentsManagement,
                                                    List<CitizenNotification> citizenNotifications,
                                                    String partyType) {
-        if (SERVED_PARTY_APPLICANT.equals(partyType)) {
-            //logged in party is applicant
-            populateCitizenResponseNotifications(citizenDocumentsManagement,
-                                                 citizenNotifications, RESPONDENT_APPLICATION,
-                                                 CAN6_VIEW_RESPONSE_APPLICANT);
-            //CAN6 A
-            populateCitizenResponseNotifications(citizenDocumentsManagement,
-                                                 citizenNotifications, RESPONDENT_C1A_APPLICATION,
-                                                 CAN6A_VIEW_RESPONSE_C1A_APPLICANT);
+        if (SERVED_PARTY_APPLICANT.equals(partyType)) { //logged in party is applicant
+            //CAN6
+            populateCitizenResponseNotifications(caseData,
+                                                 citizenDocumentsManagement,
+                                                 citizenNotifications,
+                                                 RESPONDENT_APPLICATION,
+                                                 NotificationNames.VIEW_RESPONDENT_RESP_APPLICANT
+            );
+            //CAN6A
+            populateCitizenResponseNotifications(caseData,
+                                                 citizenDocumentsManagement,
+                                                 citizenNotifications,
+                                                 RESPONDENT_C1A_APPLICATION,
+                                                 NotificationNames.VIEW_RESPONDENT_C1A_APPL_APPLICANT
+            );
             //CAN6B
-            populateCitizenResponseNotifications(citizenDocumentsManagement,
-                                                 citizenNotifications, RESPONDENT_C1A_RESPONSE,
-                                                 CAN6B_VIEW_RESPONSE_C1AR_APPLICANT);
+            populateCitizenResponseNotifications(caseData,
+                                                 citizenDocumentsManagement,
+                                                 citizenNotifications,
+                                                 RESPONDENT_C1A_RESPONSE,
+                                                 NotificationNames.VIEW_RESPONDENT_C1A_RESP_APPLICANT
+            );
         }
     }
 
-    private void populateCitizenResponseNotifications(CitizenDocumentsManagement citizenDocumentsManagement,
+    private void populateCitizenResponseNotifications(CaseData caseData,
+                                                      CitizenDocumentsManagement citizenDocumentsManagement,
                                                       List<CitizenNotification> citizenNotifications,
-                                                      String categoryId, String notificationType) {
+                                                      String categoryId,
+                                                      NotificationNames notificationName) {
         if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), categoryId)
             && !isAnyOrderServedPostLatestResp(
             citizenDocumentsManagement.getCitizenDocuments(),
             citizenDocumentsManagement.getCitizenOrders(),
             categoryId
         )) {
-            citizenNotifications.add(CitizenNotification.builder()
-                                         .partyNames(
-                                             respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
-                                                                                        categoryId))
-                                         .id(notificationType).show(true).build());
-        } else {
-            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(false).build());
+            Map<String, Object> notifMap = new HashMap<>();
+            notifMap.put(PARTY_NAMES, respondentNamesForProvidedResponseCategory(
+                citizenDocumentsManagement.getCitizenDocuments(), categoryId));
+
+            citizenNotifications.addAll(getNotifications(caseData, notificationName, notifMap));
         }
     }
 
@@ -1514,7 +1513,12 @@ public class CaseService {
                 && citizenOrder.getServedDateTime().isAfter(postDateTime));
     }
 
-    private boolean isSosCompletedPostSoa(CaseData caseData, List<String> partyIds) {
+    private boolean isSosCompletedPostSoa(CaseData caseData) {
+        List<String> partyIds = CaseUtils.getPartyIdList(
+            caseData.getCaseTypeOfApplication(),
+            caseData.getRespondents(),
+            caseData.getRespondentsFL401()
+        );
         log.info("Respondent partyIds for SOS check {}", partyIds);
         return (null != caseData.getStatementOfService())
             && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
@@ -1552,5 +1556,46 @@ public class CaseService {
             && citizenDocuments.stream()
             .anyMatch(citizenDocument -> RESPONDENT_APPLICATION.equals(citizenDocument.getCategoryId())
                 && idamId.equals(citizenDocument.getPartyId()));
+    }
+
+
+    private List<CitizenNotification> getNotifications(CaseData caseData,
+                                                       NotificationNames notificationName,
+                                                       Map<String, Object> notifMap) {
+        Set<String> notificationIds = getNotificationIds(
+            CaseUtils.getCaseTypeOfApplication(caseData),
+            notificationName
+        );
+        //empty check added as not all case types have all notifications
+        if (CollectionUtils.isNotEmpty(notificationIds)) {
+            return notificationIds.stream()
+                .map(notification -> {
+                    CitizenNotification citizenNotification = CitizenNotification.builder()
+                        .id(notification)
+                        .show(true)
+                        .build();
+                    if (null != notifMap && !notifMap.isEmpty()) {
+                        citizenNotification = citizenNotification.toBuilder()
+                            .isNew((Boolean) notifMap.get(IS_NEW))
+                            .isFinal((Boolean) notifMap.get(IS_FINAL))
+                            .isMultiple((Boolean) notifMap.get(IS_MULTIPLE))
+                            .isPersonalService((Boolean) notifMap.get(IS_PERSONAL))
+                            .partyNames((String) notifMap.get(PARTY_NAMES))
+                            .build();
+                    }
+                    return citizenNotification;
+                }).toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private Set<String> getNotificationIds(String caseTypeOfApplication,
+                                           NotificationNames notificationName) {
+        String notification = notificationsConfig.getNotifications().get(caseTypeOfApplication).get(notificationName);
+        log.info("Retrieved notification ids {} for notification name {} & {} case type", notification, caseTypeOfApplication, notificationName);
+        if (null != notification) {
+            return getStringsSplitByDelimiter(notification, COMMA);
+        }
+        return Collections.emptySet();
     }
 }

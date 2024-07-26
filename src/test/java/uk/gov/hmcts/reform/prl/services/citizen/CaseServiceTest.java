@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.citizen.NotificationNames;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -111,6 +113,9 @@ public class CaseServiceTest {
     public static final String accessCode = "123456";
     private static final Logger log = LoggerFactory.getLogger(CaseServiceTest.class);
 
+    public static final String CA_SOA_APPLICANT = "CAN4_SOA_PERSONAL_NON_PERSONAL_APPLICANT";
+    public static final String DA_SOA_APPLICANT = "DN1_SOA_PERSONAL_NON_PERSONAL_APPLICANT";
+
     @InjectMocks
     private CaseService caseService;
     @Mock
@@ -139,6 +144,9 @@ public class CaseServiceTest {
 
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    @Mock
+    private DashboardNotificationsConfig notificationsConfig;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -318,6 +326,12 @@ public class CaseServiceTest {
         when(objectMapper.convertValue(quarantineLegalDoc, Map.class)).thenReturn(map);
         when(objectMapper.convertValue(map.get("miamCertificateDocument"), Document.class))
             .thenReturn(quarantineLegalDoc.getMiamCertificateDocument());
+
+        when(notificationsConfig.getNotifications())
+            .thenReturn(
+                Map.of(C100_CASE_TYPE, Map.of(NotificationNames.SOA_APPLICANT, CA_SOA_APPLICANT),
+                       FL401_CASE_TYPE, Map.of(NotificationNames.SOA_APPLICANT, DA_SOA_APPLICANT))
+            );
     }
 
     @Test
