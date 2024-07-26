@@ -299,11 +299,11 @@ fees-register:
       service: other
     C4_WHEREABOUTS_OF_A_MISSING_CHILD:
       channel: default
-      event: miscellaneous
+      event: issue
       jurisdiction1: family
       jurisdiction2: family court
-      keyword: WarrantSearchChild
-      service: private law
+      keyword: AppnPrivateOther
+      service: other
     FL407_ARREST_WARRANT:
       channel: default
       event: general application
