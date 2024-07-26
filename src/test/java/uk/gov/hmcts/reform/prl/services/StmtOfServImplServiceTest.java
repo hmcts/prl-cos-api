@@ -507,10 +507,12 @@ public class StmtOfServImplServiceTest {
         List<Element<Document>> documentList = new ArrayList<>();
         documentList.add(element(c9Doc));
         documentList.add(element(finalDocument));
+        UUID partyId = UUID.randomUUID();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .respondents(listOfRespondents)
+            .respondents(Collections.singletonList(Element.<PartyDetails>builder().id(partyId)
+                                                .value(listOfRespondents.stream().findFirst().get().getValue()).build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -537,7 +539,9 @@ public class StmtOfServImplServiceTest {
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
-
+        assertEquals(partyId.toString(),
+                     ((List<Element<StmtOfServiceAddRecipient>>)updatedCaseData.get("stmtOfServiceForApplication"))
+                         .get(0).getValue().getSelectedPartyId());
     }
 
     @Test

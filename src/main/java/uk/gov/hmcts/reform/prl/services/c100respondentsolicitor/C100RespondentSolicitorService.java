@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -1494,6 +1495,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .solicitorRepresentedPartyName(partyName)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyId(partyId)
             .document(c7doc)
                 .build();
@@ -1511,6 +1513,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(c1aDoc)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();
@@ -1527,6 +1530,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(document)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();

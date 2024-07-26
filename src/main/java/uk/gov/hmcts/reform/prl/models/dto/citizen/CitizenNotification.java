@@ -15,5 +15,10 @@ public class CitizenNotification {
 
     private String id;
     private boolean show;
+    private boolean isNew;
+    private boolean isFinal;
+    private boolean isMultiple;
+    private boolean isPersonalService;
+    private String partyNames;
 
 }
