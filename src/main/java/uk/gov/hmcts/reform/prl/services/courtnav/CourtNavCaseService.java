@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -142,7 +140,7 @@ public class CourtNavCaseService {
                 courtNavQuarantineLegalDoc,
                 tempCaseData,
                 fields,
-                COURTNAV_USER
+                COURTNAV
             );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -231,7 +229,7 @@ public class CourtNavCaseService {
             .isConfidential(Yes)
             .fileName(fileName)
             .uploadedBy(COURTNAV)
-            .uploaderRole(Roles.COURTNAV.getValue())
+            .uploaderRole(COURTNAV)
             .courtNavQuarantineDocument(courtNavDocument)
             .documentParty(partyName)
             .build();

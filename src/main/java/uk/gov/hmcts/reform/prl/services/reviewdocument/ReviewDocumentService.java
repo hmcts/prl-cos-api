@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -253,7 +252,7 @@ public class ReviewDocumentService {
             quarantineLegalDocElement = Optional.of(element(
                 quarantineLegalDocElement.get().getId(),
                 quarantineLegalDocElement.get().getValue().toBuilder().uploaderRole(
-                    COURTNAV_USER).build()
+                    COURTNAV).build()
             ));
         }
         return quarantineLegalDocElement;
@@ -316,7 +315,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
-                                                        COURTNAV_USER, COURTNAV_QUARANTINE_DOCUMENT_LIST);
+                                                        COURTNAV, COURTNAV_QUARANTINE_DOCUMENT_LIST);
 
             }
             //Bulk scan
