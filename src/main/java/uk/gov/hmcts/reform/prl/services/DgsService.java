@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
 import java.util.HashMap;
@@ -48,7 +49,6 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
-        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
@@ -177,6 +177,39 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
+    public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
+                                                         DocumentRequest documentRequest,
+                                                         String prlCitizenUploadTemplate) throws DocumentGenerationException {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        String caseId = documentRequest.getCaseId();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseId(caseId)
+            .caseData(CaseData.builder()
+                          .id(Long.parseLong(caseId))
+                          .citizenUploadedStatement(documentRequest.getFreeTextStatements())
+                          .build())
+            .build();
+        tempCaseDetails.put(
+            CASE_DETAILS_STRING,
+            AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
+        );
+
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation,
+                                              GenerateDocumentRequest.builder()
+                                                  .template(prlCitizenUploadTemplate)
+                                                  .values(tempCaseDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
+        return generatedDocumentInfo;
+    }
 
     public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
                                                              String templateName, String caseId) throws Exception {

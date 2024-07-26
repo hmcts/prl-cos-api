@@ -17,6 +17,120 @@
       "performingAction": null,
       "judgeLaReviewRequired": null,
       "markedToServeEmailNotification": "Yes",
+      "applicants": [
+        {
+          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+          "value": {
+            "firstName": "test",
+            "lastName": "data",
+            "previousName": null,
+            "dateOfBirth": "1989-11-30",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "placeOfBirth": "London",
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "",
+              "County": "",
+              "Country": "",
+              "PostCode": "RH117RQ"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": "No",
+            "isAtAddressLessThan5Years": "No",
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": "4635635636",
+            "isPhoneNumberConfidential": "No",
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": null,
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "isPlaceOfBirthKnown": null,
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": "repFirstName",
+            "representativeLastName": "repLastName",
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "doTheyHaveLegalRepresentation": null,
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "respondents": [
+        {
+          "id": "29959b30-f49e-483b-a963-d53a88a93209",
+          "value": {
+            "firstName": "Ball",
+            "lastName": "Lowe",
+            "previousName": null,
+            "dateOfBirth": null,
+            "isDateOfBirthUnknown": null,
+            "gender": "female",
+            "otherGender": null,
+            "placeOfBirth": null,
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "London",
+              "County": "",
+              "Country": "",
+              "PostCode": "N14 5AL"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": null,
+            "isAtAddressLessThan5Years": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": null,
+            "isPhoneNumberConfidential": null,
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": "No",
+            "isCurrentAddressKnown": "Yes",
+            "canYouProvidePhoneNumber": "No",
+            "isPlaceOfBirthKnown": "No",
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
+            "doTheyHaveLegalRepresentation": "no",
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
       "orderCollection": [
         {
           "id": "87e63f63-c0d8-4593-bfbb-565799a8a63f",
@@ -247,6 +361,7 @@
       "serveOrderAdditionalDocuments": [
       ],
       "serveToRespondentOptions": "Yes",
+      "servingRespondentsOptionsCA": "applicantLegalRepresentative",
       "recipientsOptions": {
         "value": [
           {
@@ -285,6 +400,13 @@
           }
         ]
       },
+      "courtList": {
+        "value": {
+          "code": "234946:",
+          "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+        },
+        "list_items": null
+      },
       "otherParties": {
         "value": [
         ],
@@ -298,7 +420,46 @@
       "cafcassCymruServedOptions": "Yes",
       "cafcassCymruEmail": "test@hmcts.net",
       "serveOtherPartiesCA": [
-      ]
+      ],
+      "caApplicant2Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+      },
+      "caApplicant3Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+      },
+      "changeOrganisationRequestField": {
+        "CreatedBy": null,
+        "CaseRoleId": {
+          "value": {
+              "code": "[C100APPLICANTSOLICITOR2]",
+              "label": "Respondent solicitor A"
+            },
+          "list_items": [
+            {
+              "code": "[C100APPLICANTSOLICITOR2]",
+              "label": "Respondent solicitor A"
+            }
+          ]
+        },
+        "ApprovalStatus": 1,
+        "RequestTimestamp": null,
+        "OrganisationToAdd": {
+          "OrganisationID": "QO4A1Q8"
+        },
+        "OrganisationToRemove": {
+          "OrganisationID": "QO4A1Q8"
+        }
+      }
     },
     "event": {
       "id": "manageOrders",

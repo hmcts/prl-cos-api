@@ -65,13 +65,13 @@ public class CourtNavCaseController {
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
-            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData, authorisation);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 authorisation,
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
+            courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
@@ -95,7 +95,6 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
