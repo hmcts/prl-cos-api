@@ -237,25 +237,12 @@ public class ReviewDocumentService {
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
             log.info("quarantineLegalDocElement " + quarantineLegalDocElement);
-            quarantineLegalDocElement = resetUploaderRoleForCourtNavUploadedDocs(quarantineLegalDocElement);
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                     caseDataUpdated,
                     legalDocElement,
                     legalDocElement.getValue().getUploaderRole()
             ));
         }
-    }
-
-    private static Optional<Element<QuarantineLegalDoc>> resetUploaderRoleForCourtNavUploadedDocs(Optional<Element<QuarantineLegalDoc>>
-                                                                                                      quarantineLegalDocElement) {
-        if (quarantineLegalDocElement.isPresent() && COURTNAV.equals(quarantineLegalDocElement.get().getValue().getUploadedBy())) {
-            quarantineLegalDocElement = Optional.of(element(
-                quarantineLegalDocElement.get().getId(),
-                quarantineLegalDocElement.get().getValue().toBuilder().uploaderRole(
-                    COURTNAV).build()
-            ));
-        }
-        return quarantineLegalDocElement;
     }
 
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
