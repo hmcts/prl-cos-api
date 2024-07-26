@@ -101,7 +101,7 @@ public class PaymentRequestService {
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
-            CallbackRequest request = buildCallBackRequest(createPaymentRequest);
+            CallbackRequest request = buildCallBackRequest(createPaymentRequest, caseData.getApplicantCaseName());
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info(
                     "Help with fees is opted, first time submission -> creating only service request for the case id: {}",
@@ -188,7 +188,7 @@ public class PaymentRequestService {
         }
     }
 
-    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
+    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest, String applicantCaseName) {
         return CallbackRequest
             .builder()
             .caseDetails(CaseDetails
@@ -197,7 +197,7 @@ public class PaymentRequestService {
                              .caseData(CaseData
                                            .builder()
                                            .id(Long.parseLong(createPaymentRequest.getCaseId()))
-                                           .applicantCaseName(createPaymentRequest.getApplicantCaseName())
+                                           .applicantCaseName(applicantCaseName)
                                            .build()).build())
             .build();
     }

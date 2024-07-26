@@ -16,10 +16,10 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.OTHER_PROCEEDINGS;
 
 @RunWith(MockitoJUnitRunner.class)
 
@@ -75,45 +75,45 @@ public class RespondentsEventsChekerTest {
 
     @Test
     public void whenConsentEventHasMandatory_thenReturnsTrue() {
-        when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(CONSENT, respondent));
+        when(consentToApplicationChecker.isFinished(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(CONSENT, respondent, true));
 
     }
 
     @Test
     public void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
-        when(respondentAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, respondent));
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, respondent, true));
 
     }
 
     @Test
     public void whenKeepDetailsPrivateEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(keepDetailsPrivateChecker.isStarted(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, respondent));
+        when(keepDetailsPrivateChecker.isStarted(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, respondent, true));
     }
 
     @Test
     public void whenInternationalElementEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(internationalElementsChecker.isStarted(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, respondent));
+        when(internationalElementsChecker.isStarted(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, respondent, true));
     }
 
     @Test
     public void checkGetMiamEventStatus() {
-        when(respondentMiamChecker.isFinished(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(MIAM, respondent));
+        when(respondentMiamChecker.isFinished(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(MIAM, respondent, true));
     }
 
     @Test
     public void checkAttendToCourtEventStatus() {
-        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, respondent));
+        when(attendToCourtChecker.isFinished(respondent, true)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, respondent, true));
     }
 
     @Test
     public void checkGetEventStatus() {
-        assertTrue(respondentEventsChecker.getEventStatus().containsKey(CURRENT_OR_PREVIOUS_PROCEEDINGS));
+        assertTrue(respondentEventsChecker.getEventStatus().containsKey(OTHER_PROCEEDINGS));
         assertTrue(respondentEventsChecker.getEventStatus().containsValue(currentOrPastProceedingsChecker));
     }
 

@@ -10,21 +10,21 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_DOCUMENT_UPLOAD_EVENT_ID;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
@@ -47,6 +47,7 @@ public class CafcassUploadDocService {
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
+    private final AllTabServiceImpl allTabService;
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
@@ -68,50 +69,36 @@ public class CafcassUploadDocService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            updateCcdAfterUploadingDocument(authorisation, document, typeOfDocument, caseId, caseData, uploadResponse);
+            updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
 
         }
     }
 
-    private void updateCcdAfterUploadingDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId,
+    private void updateCcdAfterUploadingDocument(MultipartFile document, String typeOfDocument, String caseId,
                                                  CaseData tempCaseData, UploadResponse uploadResponse) {
 
         // get the existing CCD record with all the uploaded documents
-        CaseData caseData = getCaseDataWithUploadedDocs(
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            String.valueOf(
+                caseId),
+            CaseEvent.CAFCASS_ENGLAND_DOCUMENT_UPLOAD.getValue()
+        );
+        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataUpdated.put("cafcassUploadedDocs", getCaseDataWithUploadedDocs(
             caseId,
             document.getOriginalFilename(),
             typeOfDocument,
             tempCaseData,
             uploadResponse.getDocuments().get(0)
-        );
+        ).getCafcassUploadedDocs());
 
-        StartEventResponse startEventResponse =
-            coreCaseDataApi.startEventForCaseWorker(
-                authorisation,
-                authTokenGenerator.generate(),
-                idamClient.getUserInfo(authorisation).getUid(),
-                PrlAppsConstants.JURISDICTION,
-                PrlAppsConstants.CASE_TYPE,
-                caseId,
-                CAFCASS_DOCUMENT_UPLOAD_EVENT_ID
-            );
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(caseData).build();
-
-        coreCaseDataApi.submitEventForCaseWorker(
-            authorisation,
-            authTokenGenerator.generate(),
-            idamClient.getUserInfo(authorisation).getUid(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            true,
-            caseDataContent
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(caseId),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
@@ -125,7 +112,7 @@ public class CafcassUploadDocService {
                 caseId
             );
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }

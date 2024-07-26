@@ -6,11 +6,16 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
+import java.util.Optional;
+
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -75,6 +80,21 @@ public class HearingRequestDataMapper {
                 isHearingDynamicListItemsNullifyReq,
                 numberOfRespondentSolicitors
             );
+            if (numberOfApplicant > 0 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
+                caseData)) {
+                if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                }
+                if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                }
+                if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                                                              " (Applicant solicitor)"));
+                }
+            }
+
         }
     }
 
@@ -327,7 +347,7 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getConfirmedHearingDates(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         } else {
-            hearingData.setConfirmedHearingDates(DynamicList.builder().build());
+            hearingData.setConfirmedHearingDates(DynamicList.builder().value(DynamicListElement.EMPTY).build());
             mapDynamicListItems(hearingData.getConfirmedHearingDates(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         }

@@ -39,15 +39,23 @@ public class NoticeOfChangeContentProvider {
                                                   String solicitorName,
                                                   String litigantName,
                                                   boolean isOtherPerson,
+                                                  boolean isRemoveLegalRep,
                                                   String accessCode) {
-        return NoticeOfChangeEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .litigantName(litigantName)
-            .citizenSignUpLink(citizenUrl)
-            .accessCode(accessCode)
-            .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
-            .build();
+        if (isOtherPerson && isRemoveLegalRep) {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .build();
+        } else {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .solicitorName(solicitorName)
+                .litigantName(litigantName)
+                .citizenSignUpLink(citizenUrl)
+                .accessCode(accessCode)
+                .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
+                .build();
+        }
     }
 }

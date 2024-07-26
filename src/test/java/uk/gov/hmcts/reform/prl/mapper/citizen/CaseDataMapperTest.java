@@ -13,9 +13,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +58,10 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenQuarantineDocsList(new ArrayList<>())
+                                               .build())
+                .taskListVersion("v2")
                 .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -74,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
                 .build())
                 .build();
     }
+
 
     @Test
     public void testCaseDataMapper() throws IOException {
@@ -273,7 +280,10 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
     public void testCaseDataMapperWhenAllBlocksEmpty() throws IOException {
 
         //When
-        CaseData caseData1 = CaseData.builder().c100RebuildData(C100RebuildData.builder().build()).build();
+        CaseData caseData1 = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(new ArrayList<>())
+                                           .build())
+            .c100RebuildData(C100RebuildData.builder().build()).build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
@@ -413,13 +423,29 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         //Then
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getConsentOrder());
-        assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
         "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
      void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom(resourcePath))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrnsForASingleChild.json"})
+    void testCaseDataMapperForSafetyConcernsForASingleChild(String resourcePath) throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()

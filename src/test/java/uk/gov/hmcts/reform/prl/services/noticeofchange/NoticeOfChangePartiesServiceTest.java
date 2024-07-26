@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -80,7 +81,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -353,7 +353,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -444,7 +443,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -519,7 +517,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -584,7 +581,6 @@ public class NoticeOfChangePartiesServiceTest {
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
 
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -661,7 +657,6 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -737,7 +732,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -1451,6 +1445,67 @@ public class NoticeOfChangePartiesServiceTest {
                                                       && YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())
                                                       ? YesOrNo.No : partyDetails.getIsRemoveLegalRepresentativeRequested())
             .build();
+    }
+
+
+    @Test
+    public void testSubmittedStopRepresentingWithAccessCode() {
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        UUID uuid = partyDetailsElement.getId();
+        applicant.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+        CaseInvite caseInvite = CaseInvite.builder().partyId(uuid).accessCode("123").build();
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicant)
+            .caseInvites(List.of(element(caseInvite)))
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
+        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
 
 }

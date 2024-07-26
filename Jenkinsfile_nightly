@@ -17,23 +17,33 @@ def channel = '#prl-tech-notifications'
 
 def secrets = [
   'prl-${env}':[
-    secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
-    secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
-    secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
-    secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
-    secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
-    secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
-    secret("southampton-court-email-address", "SOUTHAMPTON_COURT_EMAIL_ADDRESS"),
-    secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
-    secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
-    secret("send-grid-api-key", "SEND_GRID_API_KEY"),
-    secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
-    secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
-    secret("citizen-user", "IDAM_CITIZEN_USERNAME"),
-    secret("citizen-password", "IDAM_CITIZEN_PASSWORD"),
-    secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
-    secret('judge-testuser-one', 'JUDGE_USER_NAME'),
-    secret('judge-testpassword', 'JUDGE_PASSWORD')
+          secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
+          secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
+          secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
+          secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
+          secret('notification-client-api-key', 'UK_GOV_NOTIFY_API_KEY'),
+          secret('test-genericpassword', 'PRL_GENERIC_PASSWORD'),
+          secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
+          secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
+          secret("southampton-court-email-address", "SOUTHAMPTON_COURT_EMAIL_ADDRESS"),
+          secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
+          secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
+          secret("send-grid-api-key", "SEND_GRID_API_KEY"),
+          secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
+          secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
+          secret("cafcass-svc-username", "CAFCASS_USERNAME"),
+          secret("cafcass-svc-password", "CAFCASS_PASSWORD"),
+          secret("citizen-user", "IDAM_CITIZEN_USERNAME"),
+          secret("citizen-password", "IDAM_CITIZEN_PASSWORD"),
+          secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
+          secret('filtered-court-ids', 'COURT_IDS_TO_FILTER'),
+          secret('da-filtered-court-ids', 'DA_COURT_IDS_TO_FILTER'),
+          secret('ca-default-court-epimms-id', 'CA_DEFAULT_COURT_EPIMMS_ID'),
+          secret('welsh-court-mapping', 'WELSH_COURT_MAPPING'),
+          secret('judge-testuser-one', 'JUDGE_USER_NAME'),
+          secret('judge-testpassword', 'JUDGE_PASSWORD'),
+          secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
+          secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
   ]
 ]
 
@@ -53,7 +63,7 @@ withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableSlackNotifications(channel)
   enableFortifyScan()
-  enableMutationTest()
+  enableMutationTest(150)
   enableFullFunctionalTest(200)
 
   afterAlways('fullFunctionalTest') {
