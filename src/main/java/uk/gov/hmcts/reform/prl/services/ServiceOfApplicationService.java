@@ -1776,6 +1776,7 @@ public class ServiceOfApplicationService {
     private void handleNotificationsToDaCitizenApplicants(String authorization, List<Element<PartyDetails>> selectedApplicants,
                                                           CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> packDocs) {
+        log.info("Sending notification to DA Applicant {}", selectedApplicants);
         selectedApplicants.forEach(applicant -> {
             if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                 Map<String, String> fieldsMap = new HashMap<>();
@@ -1803,6 +1804,8 @@ public class ServiceOfApplicationService {
             }
 
         });
+        log.info("email notification details {}", emailNotificationDetails);
+        log.info("bulk print details {}", bulkPrintDetails);
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
@@ -2830,7 +2833,7 @@ public class ServiceOfApplicationService {
             generateUnServedPacksForCourtAdminBailiff(authorization, caseDataUpdated, caseData, c100StaticDocs, true,
                                                       caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().toString());
         }
-        log.info("casedataupdated packs {}", caseDataUpdated);
+        log.info("casedataupdated packs {} *** {}", caseDataUpdated.get(UNSERVED_APPLICANT_PACK), caseDataUpdated.get(UNSERVED_RESPONDENT_PACK));
     }
 
     private void generateUnServedPacksForCourtAdminBailiff(String authorization,
@@ -3489,6 +3492,7 @@ public class ServiceOfApplicationService {
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            log.info("Citizen case");
             if (SoaCitizenServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())
                 || SoaCitizenServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(
