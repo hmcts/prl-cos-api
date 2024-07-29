@@ -3488,8 +3488,12 @@ public class ServiceOfApplicationService {
                                                           SoaPack unServedApplicantPack,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails) {
         final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
-        final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
+        List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            applicantList = Arrays.asList(DynamicMultiselectListElement.builder()
+                                              .code(String.valueOf(caseData.getApplicantsFL401().getPartyId())).build());
+        }
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             log.info("Citizen case");
