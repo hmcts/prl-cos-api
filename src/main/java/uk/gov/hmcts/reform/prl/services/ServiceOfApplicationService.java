@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -298,6 +299,7 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
+    private final CaseInviteManager caseInviteManager;
     private final DgsService dgsService;
     private final LaunchDarklyClient launchDarklyClient;
 
@@ -566,9 +568,6 @@ public class ServiceOfApplicationService {
         }
         packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs));
         removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
-        log.info("pack E docs {}", packEdocs);
-        log.info("pack F docs {}", packFdocs);
-        log.info("pack docs {}", docs);
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
             Map<String, String> fieldsMap = new HashMap<>();
             fieldsMap.put(AUTHORIZATION, authorization);
@@ -1152,7 +1151,6 @@ public class ServiceOfApplicationService {
         String whoIsResponsibleForServing;
         //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
         log.info("Service of application, unrepresented applicant/citizen case");
-        log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions());
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
@@ -1473,6 +1471,12 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
+
+        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+            caseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        }
 
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
@@ -2998,8 +3002,6 @@ public class ServiceOfApplicationService {
             .getSoaRecipientsOptions().getValue());
         fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
             .toList();
-        log.info("*** applicantfl401 selected {}", applicantFl401);
-        log.info("*** respondetnt fl401 selected {}", respondentFl401);
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (CollectionUtils.isNotEmpty(applicantFl401)) {
@@ -3235,7 +3237,6 @@ public class ServiceOfApplicationService {
                 );
             } else {
                 if (ObjectUtils.isNotEmpty(unServedApplicantPack) && CollectionUtils.isNotEmpty(unServedApplicantPack.getPackDocument())) {
-                    log.info("Court admin personal or non personal service to applicant {}", unServedApplicantPack);
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
                     if (unServedApplicantPack.getPersonalServiceBy() != null) {
@@ -3245,14 +3246,11 @@ public class ServiceOfApplicationService {
                     }
                 }
                 if (ObjectUtils.isNotEmpty(unServedRespondentPack) && null == unServedRespondentPack.getPersonalServiceBy()) {
-                    log.info("non personal service to respondent {}", unServedRespondentPack);
-
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                     final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                         partyIds);
 
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
-                    log.info("Respondent list {}", respondentList);
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                         log.info("Applicant is not represented");
                         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
