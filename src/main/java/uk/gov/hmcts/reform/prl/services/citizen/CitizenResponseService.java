@@ -277,6 +277,10 @@ public class CitizenResponseService {
                     .response(updatedPartyDetails.getResponse().toBuilder()
                                   .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
                                                                    .toBuilder()
+                                                                   .responseToAllegationsOfHarmDocument(isNotEmpty(
+                                                                       c1aFinalResponseEngDocument) ? c1aFinalResponseEngDocument : null)
+                                                                   .responseToAllegationsOfHarmWelshDocument(isNotEmpty(
+                                                                       c1aFinalResponseWelDocument) ? c1aFinalResponseWelDocument : null)
                                                                    .build())
                                   .build())
                     .build();
