@@ -748,7 +748,7 @@ public class ManageOrderEmailService {
         } else if ((SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
             //PRL-5365, PRL-5556 - send email/post notifications to all C100 applicants
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)
+            if (CaseUtils.isCitizenCase(caseData)
                 && C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 log.info("*** courtAdmin/courtBailiff: Send email/post notifications to all C100 applicants");
                 caseData.getApplicants().forEach(applicant -> sendNotificationsToParty(
