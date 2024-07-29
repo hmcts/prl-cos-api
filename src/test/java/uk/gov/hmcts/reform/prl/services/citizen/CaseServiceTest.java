@@ -92,7 +92,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
@@ -265,7 +264,7 @@ public class CaseServiceTest {
             .servedBy("FullName")
             .servedAt(formatter)
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(COURT)
+            .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
             .bulkPrintDetails(bulkPrintDetails).build();
         servedApplicationDetailsEmailOnly = ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy("FullName")
@@ -752,7 +751,6 @@ public class CaseServiceTest {
 
         //Action
         CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
-        log.info("{}", citizenDocumentsManagement);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -809,17 +807,12 @@ public class CaseServiceTest {
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
-        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenOrders().stream().findFirst().get().getPartyId());
-        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenApplicationPacks().stream().findFirst().get().getPartyId());
-        /*Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
-            Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));*/
-        //assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
-        //assertEquals(false, notifications.get(CAN10_FM5));
-        //assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
-        //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
-        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
@@ -861,7 +854,11 @@ public class CaseServiceTest {
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_SOA_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 }
