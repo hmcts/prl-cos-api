@@ -826,7 +826,6 @@ public class PrlAppsConstants {
     public static final String SOA_APPLICATION_SCREEN_1 = "serviceOfApplicationScreen1";
     public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
     public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
-    public static final String CASE_CREATED_BY = "caseCreatedBy";
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
 
