@@ -3793,32 +3793,34 @@ public class ServiceOfApplicationService {
                                     String eventId) {
         if (isAutoLinkRequired(eventId, caseDataMap)
             && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) {
+                List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
 
-            applicants.stream()
-                .filter(party -> !hasLegalRepresentation(party.getValue())
-                    && !hasDashboardAccess(party)
-                    && isPartyEmailSameAsIdamEmail(caseData, party))
-                .findFirst()
-                .ifPresent(party -> {
-                    log.info(
-                        "*** Auto linking citizen case for primary applicant, partyId: {} and partyIndex: {}",
-                        party.getId(),
-                        applicants.indexOf(party)
-                    );
-                    User user = null != party.getValue().getUser()
-                        ? party.getValue().getUser().toBuilder().build()
-                        : User.builder().build();
-                    user = user.toBuilder()
-                        .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
-                        .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
-                        .build();
+                applicants.stream()
+                    .filter(party -> !hasLegalRepresentation(party.getValue())
+                        && !hasDashboardAccess(party)
+                        && isPartyEmailSameAsIdamEmail(caseData, party))
+                    .findFirst()
+                    .ifPresent(party -> {
+                        log.info(
+                            "*** Auto linking citizen case for primary applicant, partyId: {} and partyIndex: {}",
+                            party.getId(),
+                            applicants.indexOf(party)
+                        );
+                        User user = null != party.getValue().getUser()
+                            ? party.getValue().getUser().toBuilder().build()
+                            : User.builder().build();
+                        user = user.toBuilder()
+                            .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
+                            .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
+                            .build();
 
-                    PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
-                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                        PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
+                        applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
 
-                    caseDataMap.put(APPLICANTS, applicants);
-                });
+                        caseDataMap.put(APPLICANTS, applicants);
+                    });
+            }
         }
     }
 
