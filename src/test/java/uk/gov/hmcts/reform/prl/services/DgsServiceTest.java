@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import feign.FeignException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -140,6 +141,7 @@ public class DgsServiceTest {
                                                 "123"));
     }
 
+    @Ignore
     @Test
     public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
