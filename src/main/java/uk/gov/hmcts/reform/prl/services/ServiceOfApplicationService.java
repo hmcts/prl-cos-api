@@ -3793,7 +3793,7 @@ public class ServiceOfApplicationService {
                                     String eventId) {
         if (isAutoLinkRequired(eventId, caseDataMap)
             && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
 
                 applicants.stream()
