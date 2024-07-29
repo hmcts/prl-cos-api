@@ -608,9 +608,9 @@ public class CaseService {
                                                                     ServedApplicationDetails servedApplicationDetails) {
         //populate respondent unserved packs only in case of personal service by unrepresented lip
         return UNREPRESENTED_APPLICANT.equals(servedApplicationDetails.getWhoIsResponsible())
-            && null != serviceOfApplication.getUnServedRespondentPack()
-            && CollectionUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack().getPackDocument())
-            ? serviceOfApplication.getUnServedRespondentPack()
+            && null != serviceOfApplication.getUnservedCitizenRespondentPack()
+            && CollectionUtils.isNotEmpty(serviceOfApplication.getUnservedCitizenRespondentPack().getPackDocument())
+            ? serviceOfApplication.getUnservedCitizenRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
             .toList() : null;
