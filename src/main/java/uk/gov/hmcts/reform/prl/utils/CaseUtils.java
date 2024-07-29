@@ -171,8 +171,8 @@ public class CaseUtils {
     }
 
     /*
-    Below method checks for Both if the case is a
-    citizen case or the main applicant in the case is not represented.
+    Below method checks for Both if the case is a citizen case
+    or the main applicant in the case is not represented.
     * **/
     public static boolean isCitizenCase(CaseData caseData) {
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
