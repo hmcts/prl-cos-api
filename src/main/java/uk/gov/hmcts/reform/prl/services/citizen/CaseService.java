@@ -1053,6 +1053,7 @@ public class CaseService {
 
     private boolean isAnyOrderPersonalServicePendingSos(List<CitizenDocuments> citizenOrders) {
         return citizenOrders.stream()
+            .skip(1) //skip first order as it's already handled
             .anyMatch(order -> order.isPersonalService() && !order.isSosCompleted());
     }
 
@@ -1593,11 +1594,11 @@ public class CaseService {
                         .build();
                     if (null != notifMap && !notifMap.isEmpty()) {
                         citizenNotification = citizenNotification.toBuilder()
-                            .isNew((Boolean) notifMap.get(IS_NEW))
-                            .isFinal((Boolean) notifMap.get(IS_FINAL))
-                            .isMultiple((Boolean) notifMap.get(IS_MULTIPLE))
-                            .isPersonalService((Boolean) notifMap.get(IS_PERSONAL))
-                            .partyNames((String) notifMap.get(PARTY_NAMES))
+                            .isNew(ObjectUtils.isNotEmpty(notifMap.get(IS_NEW)) ? (Boolean) notifMap.get(IS_NEW) : false)
+                            .isFinal(ObjectUtils.isNotEmpty(notifMap.get(IS_FINAL)) ? (Boolean) notifMap.get(IS_FINAL) : false)
+                            .isMultiple(ObjectUtils.isNotEmpty(notifMap.get(IS_MULTIPLE)) ? (Boolean) notifMap.get(IS_MULTIPLE) : false)
+                            .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) ? (Boolean) notifMap.get(IS_PERSONAL) : false)
+                            .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
                             .build();
                     }
                     return citizenNotification;
