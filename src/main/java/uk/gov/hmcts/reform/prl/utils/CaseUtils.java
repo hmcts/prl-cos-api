@@ -169,12 +169,10 @@ public class CaseUtils {
     }
 
     /*
-    Below method checks for Both if the case is created by
-    citizen or the main applicant in the case is not represented.
+    Below method checks for Both if the case is a citizen case
+    or the main applicant in the case is not represented.
     * **/
-    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
-        log.info("case created by {}", caseData.getCaseCreatedBy());
-        log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
+    public static boolean isCitizenCase(CaseData caseData) {
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
             0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }

@@ -103,7 +103,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
@@ -125,7 +124,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_P
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
@@ -135,7 +133,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
@@ -207,6 +204,7 @@ public class ServiceOfApplicationService {
 
     private static final String DATE_CREATED = CaseUtils.getCurrentDate();
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -395,7 +393,7 @@ public class ServiceOfApplicationService {
         String whoIsResponsibleForServing;
 
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            if (CaseUtils.isCitizenCase(caseData)) {
                 whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(
                     caseData,
                     authorization,
@@ -436,7 +434,7 @@ public class ServiceOfApplicationService {
             }
 
         } else {
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            if (CaseUtils.isCitizenCase(caseData)) {
                 log.info("Case created by citizen");
                 whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
                                                                                       authorization,
@@ -1456,7 +1454,7 @@ public class ServiceOfApplicationService {
     private String getResponsibleForService(CaseData caseData) {
         String responsibleForService = null;
         if (Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            if (CaseUtils.isCitizenCase(caseData)) {
                 responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().getId();
             } else {
                 responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptions().getId();
@@ -2497,7 +2495,7 @@ public class ServiceOfApplicationService {
                                                                                                String.valueOf(caseData.getId())));
             caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
         }
-        caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
+        caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, CaseUtils.isCitizenCase(caseData) ? "No" : "Yes");
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
@@ -2668,7 +2666,7 @@ public class ServiceOfApplicationService {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
-            dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+            dataMap.put("isCitizen", CaseUtils.isCitizenCase(caseData));
         }
         return dataMap;
     }
@@ -3185,7 +3183,7 @@ public class ServiceOfApplicationService {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         List<Element<Document>> packDocs = new ArrayList<>();
-        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+        if (CaseUtils.isCitizenCase(caseData)) {
             selectedPartyIds.forEach(partyId -> {
                 Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
                 party.ifPresent(element -> packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
@@ -3254,7 +3252,7 @@ public class ServiceOfApplicationService {
                         partyIds);
 
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
-                    if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                    if (CaseUtils.isCitizenCase(caseData)) {
                         log.info("Applicant is not represented");
                         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                             sendNotificationsToCitizenRespondentsC100(authorization,
@@ -3495,7 +3493,7 @@ public class ServiceOfApplicationService {
                                               .code(String.valueOf(caseData.getApplicantsFL401().getPartyId())).build());
         }
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
-        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+        if (CaseUtils.isCitizenCase(caseData)) {
             log.info("Citizen case");
             if (SoaCitizenServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())
