@@ -609,8 +609,6 @@ public class ManageOrderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
 
-    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         //PRL-4212 - populate fields only when it's needed
@@ -1649,6 +1647,7 @@ public class ManageOrderService {
 
     private void updatePersonalServedParties(SoaSolicitorServingRespondentsEnum servingRespondentsOptions,
                                              List<Element<ServedParties>> servedParties, String representativeName) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         if (null != servingRespondentsOptions) {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                 .equals(servingRespondentsOptions)) {
