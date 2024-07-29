@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -21,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -40,6 +36,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -53,13 +50,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentService {
 
+    public static final String LEGAL_PROF_QUARANTINE_DOCS_LIST = "legalProfQuarantineDocsList";
+    public static final String CAFCASS_QUARANTINE_DOCS_LIST = "cafcassQuarantineDocsList";
+    public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
+    public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
+
     private final AllTabServiceImpl allTabService;
-    private final CaseDocumentClient caseDocumentClient;
-    private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
 
-    private final ObjectMapper objectMapper;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -116,15 +115,6 @@ public class ReviewDocumentService {
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
-    public static final String CITIZEN_UPLOAD_DOC_LIST_CONF_TAB = "citizenUploadDocListConfTab";
-    public static final String BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB = "bulkScannedDocListConfTab";
-    public static final String LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB = "legalProfUploadDocListDocTab";
-    public static final String CAFCASS_UPLOAD_DOC_LIST_DOC_TAB = "cafcassUploadDocListDocTab";
-    public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
-    public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
-    public static final String BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
-    public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
-    public static final String CONFIDENTIAL = "Confidential_";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
@@ -132,14 +122,14 @@ public class ReviewDocumentService {
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        //solcitor
         if (isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
                                                        element.getValue().getUploaderRole(),
                                                        element.getValue()
-                                                   )
-                                                          .getDocumentFileName()
+                                                   ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -148,15 +138,14 @@ public class ReviewDocumentService {
                                            .toList());
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList());
         }
-        //added for cafcass
+        //Cafcass
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
                                                        element.getValue().getUploaderRole(),
                                                        element.getValue()
-                                                   )
-                                                          .getDocumentFileName()
+                                                   ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -172,8 +161,7 @@ public class ReviewDocumentService {
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
                                                        element.getValue().getUploaderRole(),
                                                        element.getValue()
-                                                   )
-                                                          .getDocumentFileName()
+                                                   ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -182,17 +170,23 @@ public class ReviewDocumentService {
                                            .toList());
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList());
         }
-        if (isNotEmpty(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList())) {
-            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList().stream()
+        //citizen
+        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
+            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(element.getValue().getCitizenDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + CommonUtils.formatDate(
-                                                   D_MMM_YYYY,
-                                                   element.getValue().getDateCreated()
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
                                                ))
-                                               .build()).toList());
-            //Handle Citizen Document management later
+                                               .build())
+                                           .toList());
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
         }
+        //bulkscan
         if (isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
@@ -244,175 +238,110 @@ public class ReviewDocumentService {
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
         boolean isDocumentFound = false;
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            //solicitor uploaded docs
             if (null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-                quarantineLegalDocElementOptional =
-                    getQuarantineDocumentById(
-                        caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
-                        uuid
-                    );
-                if (quarantineLegalDocElementOptional.isPresent()) {
-                    isDocumentFound = true;
-                    processDocumentsAfterReviewNew(
-                        caseData,
-                        caseDataUpdated,
-                        quarantineLegalDocElementOptional,
-                        UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
-                        SOLICITOR
-                    );
-
-                    removeDocumentFromQuarantineList(
-                        caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
-                        uuid,
-                        caseDataUpdated,
-                        "legalProfQuarantineDocsList"
-                    );
-                }
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
+                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST);
 
             }
-            isDocumentFound = processCafcassDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
-
-            isDocumentFound = processCourtStaffQuarantineDocs(caseDataUpdated, caseData, uuid, isDocumentFound);
-
-            processCitizenUploadQuarantineDocs(caseDataUpdated, caseData, uuid, isDocumentFound);
-
-            if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
-                quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
-                if (quarantineLegalDocElementOptional.isPresent()) {
-                    processDocumentsAfterReviewNew(
-                        caseData,
-                        caseDataUpdated,
-                        quarantineLegalDocElementOptional,
-                        UserDetails.builder().roles(List.of(Roles.BULK_SCAN.getValue())).build(),
-                        BULK_SCAN
-                    );
-                    removeFromScannedDocumentListAfterReview(caseDataUpdated, caseData, uuid);
-                }
+            //cafcass uploaded docs
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()) {
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(CAFCASS)).build(),
+                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST);
 
             }
-        }
+            //court staff uploaded docs
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()) {
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
+                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST);
 
-
-    }
-
-    private static void processCitizenUploadQuarantineDocs(Map<String, Object> caseDataUpdated,
-                                                           CaseData caseData, UUID uuid, boolean isDocumentFound) {
-        if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList()) {
-
-            Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getDocumentManagementDetails()
-                .getCitizenUploadQuarantineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarantineCitizenDocElementOptional.isPresent()) {
-                Element<UploadedDocuments> quarantineCitizenDocElement = quarantineCitizenDocElementOptional.get();
-                //remove from quarantine
-                caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList().remove(
-                    quarantineCitizenDocElement);
-
-                if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(quarantineCitizenDocElement);
-                    caseDataUpdated.put(
-                        CITIZEN_UPLOAD_DOC_LIST_CONF_TAB,
-                        caseData.getReviewDocuments().getCitizenUploadDocListConfTab()
-                    );
-                } else {
-                    caseDataUpdated.put(CITIZEN_UPLOAD_DOC_LIST_CONF_TAB, List.of(quarantineCitizenDocElement));
-                }
             }
+            //citizen uploaded docs
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
+                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST);
+
+            }
+            //Bulk scan
+            processBulkScanDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
         }
     }
 
-    private boolean processCourtStaffQuarantineDocs(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
-        if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()) {
-            quarantineLegalDocElementOptional =
-                getQuarantineDocumentById(
-                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
-                    uuid
-                );
-            if (quarantineLegalDocElementOptional.isPresent()) {
-                isDocumentFound = true;
-                processDocumentsAfterReviewNew(
-                    caseData,
-                    caseDataUpdated,
-                    quarantineLegalDocElementOptional,
-                    UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
-                    COURT_STAFF
-                );
-                removeDocumentFromQuarantineList(
-                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
-                    uuid,
-                    caseDataUpdated,
-                    "courtStaffQuarantineDocsList"
-                );
-            }
-
-        }
-        return isDocumentFound;
-    }
-
-    private boolean processCafcassDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
-        if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()) {
-            quarantineLegalDocElementOptional =
-                getQuarantineDocumentById(
-                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
-                    uuid
-                );
-            if (quarantineLegalDocElementOptional.isPresent()) {
-                isDocumentFound = true;
-                processDocumentsAfterReviewNew(
-                    caseData,
-                    caseDataUpdated,
-                    quarantineLegalDocElementOptional,
-                    UserDetails.builder().roles(List.of(CAFCASS)).build(),
-                    CAFCASS
-                );
-                removeDocumentFromQuarantineList(
-                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
-                    uuid,
-                    caseDataUpdated,
-                    "cafcassQuarantineDocsList"
-                );
-            }
-
-        }
-        return isDocumentFound;
-    }
-
-    private void removeDocumentFromQuarantineList(List<Element<QuarantineLegalDoc>> quarantineList, UUID uuid,
-                                                  Map<String, Object> caseDataUpdated, String caseDataObjectToBeModified) {
-        //new changes done
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
-            getQuarantineDocumentById(quarantineList, uuid);
+    private boolean processReviewDocument(CaseData caseData,
+                                          Map<String, Object> caseDataUpdated,
+                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                          UUID uuid,
+                                          UserDetails userDetails,
+                                          String userRole,
+                                          String quarantineDocsListToBeModified) {
+        boolean isDocumentFound = false;
+        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = getQuarantineDocumentById(
+            quarantineDocsList,
+            uuid
+        );
         if (quarantineLegalDocElementOptional.isPresent()) {
-            Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
-            //remove document from quarantine
-            quarantineList.remove(quarantineLegalDocElement);
-            caseDataUpdated.put(caseDataObjectToBeModified, quarantineList);
-        }
-    }
-
-    private void processDocumentsAfterReviewNew(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional,
-                                                UserDetails userDetails, String userRole) {
-        if (quarantineLegalDocElementOptional.isPresent()) {
-            QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
-            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-                tempQuarantineDoe = tempQuarantineDoe.toBuilder()
-                    .isConfidential(null)
-                    .isRestricted(null)
-                    .restrictedDetails(null)
-                    .build();
-            }
-            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-                tempQuarantineDoe,
-                userDetails,
+            isDocumentFound = true;
+            processDocumentsAfterReviewNew(
                 caseData,
                 caseDataUpdated,
+                quarantineLegalDocElementOptional.get(),
+                userDetails,
                 userRole
             );
+
+            //remove document from quarantine
+            quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
+            caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
+        }
+        return isDocumentFound;
+    }
+
+    private void processDocumentsAfterReviewNew(CaseData caseData,
+                                                Map<String, Object> caseDataUpdated,
+                                                Element<QuarantineLegalDoc> quarantineLegalDocElement,
+                                                UserDetails userDetails,
+                                                String userRole) {
+        QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElement.getValue();
+        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            tempQuarantineDoe = tempQuarantineDoe.toBuilder()
+                .isConfidential(null)
+                .isRestricted(null)
+                .restrictedDetails(null)
+                .build();
+        }
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            tempQuarantineDoe,
+            userDetails,
+            caseData,
+            caseDataUpdated,
+            userRole
+        );
+    }
+
+    private void processBulkScanDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
+        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
+        if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
+            quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
+            if (quarantineLegalDocElementOptional.isPresent()) {
+                processDocumentsAfterReviewNew(
+                    caseData,
+                    caseDataUpdated,
+                    quarantineLegalDocElementOptional.get(),
+                    UserDetails.builder().roles(List.of(Roles.BULK_SCAN.getValue())).build(),
+                    BULK_SCAN
+                );
+                removeFromScannedDocumentListAfterReview(caseDataUpdated, caseData, uuid);
+            }
         }
     }
 
@@ -474,7 +403,7 @@ public class ReviewDocumentService {
     public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
-            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList())
+            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(

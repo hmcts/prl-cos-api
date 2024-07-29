@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_SOLICITOR_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -156,6 +157,7 @@ public class EditReturnedOrderService {
         } else {
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
         }
+        caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftOrder.getLabelForOrdersDynamicList());
         return caseDataMap;
     }
 

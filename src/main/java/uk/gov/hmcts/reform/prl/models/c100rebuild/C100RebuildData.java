@@ -33,4 +33,5 @@ public class C100RebuildData {
     private String helpWithFeesReferenceNumber;
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
+    private String applicantPcqId;
 }
