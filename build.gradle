@@ -3,7 +3,10 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34") {
+      exclude group: "org.codehaus.groovy", module: "groovy"
+    }
+
   }
 }
 
@@ -184,6 +187,9 @@ allprojects {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
+
+      dependency group: 'org.apache.groovy', name: 'groovy', version: '4.0.22'
+
     }
   }
 }
