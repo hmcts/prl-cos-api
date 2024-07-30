@@ -2667,6 +2667,11 @@ public class ServiceOfApplicationService {
         }
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             dataMap.put("isCitizen", CaseUtils.isCitizenCase(caseData));
+            // This check is added to disable or enable DA citizen journey as needed
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && !launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
+                dataMap.put("isCitizen", false);
+            }
         }
         return dataMap;
     }
@@ -3592,6 +3597,7 @@ public class ServiceOfApplicationService {
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
+            caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, null);
             caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
             caseDataMap.put(UNSERVED_OTHERS_PACK, null);
             caseDataMap.put(UNSERVED_LA_PACK, null);
