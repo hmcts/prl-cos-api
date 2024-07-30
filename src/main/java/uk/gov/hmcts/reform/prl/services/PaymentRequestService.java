@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -40,11 +39,9 @@ public class PaymentRequestService {
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
-    private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
-    private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
     private final AllTabServiceImpl allTabService;
@@ -94,11 +91,11 @@ public class PaymentRequestService {
             || createPaymentRequest.getFeeType() == FeeType.SPECIAL_GUARDIANSHIP_ORDER;
     }
 
-    private PaymentResponse handleC100Payment(String authorization,
-                                              CaseData caseData,
-                                              Map<String, Object> caseDataMap,
-                                              CreatePaymentRequest createPaymentRequest,
-                                              FeeResponse feeResponse) {
+    private PaymentResponse handleApplicationPayment(String authorization,
+                                                     CaseData caseData,
+                                                     Map<String, Object> caseDataMap,
+                                                     CreatePaymentRequest createPaymentRequest,
+                                                     FeeResponse feeResponse) {
         paymentResponse = createPayment(
             authorization,
             createPaymentRequest,
@@ -143,7 +140,7 @@ public class PaymentRequestService {
 
         if (isApplicationNotAwp(createPaymentRequest)) {
             log.info("*** Citizen C100 and other applications case payment ***");
-            paymentResponse = handleC100Payment(
+            paymentResponse = handleApplicationPayment(
                 authorization,
                 caseData,
                 caseDataMap,
