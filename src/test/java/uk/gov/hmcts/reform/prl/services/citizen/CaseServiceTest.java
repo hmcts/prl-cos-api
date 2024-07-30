@@ -54,6 +54,8 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
@@ -95,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
@@ -111,10 +114,14 @@ public class CaseServiceTest {
     public static final String accessCode = "123456";
     private static final Logger log = LoggerFactory.getLogger(CaseServiceTest.class);
 
+    public static final String CA_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT,CAN9_SOA_PERSONAL_APPLICANT";
+    public static final String DA_SOA_PERSONAL_APPLICANT = "DN2_SOA_PERSONAL_APPLICANT";
     public static final String CA_SOA_APPLICANT = "CAN4_SOA_PERSONAL_NON_PERSONAL_APPLICANT";
     public static final String CA_SOA_RESPONDENT = "CAN5_SOA_RESPONDENT";
     public static final String DA_SOA_APPLICANT = "DN1_SOA_PERSONAL_NON_PERSONAL_APPLICANT";
     public static final String DA_SOA_RESPONDENT = "DN3_SOA_RESPONDENT";
+    public static final String CA_SOA_SOS_CA_CB_APPLICANT = "CAN8_SOA_SOS_PERSONAL_APPLICANT";
+    public static final String DA_SOA_SOS_CA_CB_APPLICANT = "DN5_SOA_SOS_PERSONAL_APPLICANT";
     public static final String ORDER_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
     public static final String ORDER_PERSONAL_APPLICANT = "CRNF3_PERSONAL_SERV_APPLICANT";
     public static final String CA_ORDER_SOS_CA_CB_APPLICANT = "CAN3_ORDER_SOS_CA_CB";
@@ -333,13 +340,17 @@ public class CaseServiceTest {
         when(objectMapper.convertValue(map.get("miamCertificateDocument"), Document.class))
             .thenReturn(quarantineLegalDoc.getMiamCertificateDocument());
 
-        Map<NotificationNames, String> canMap = Map.of(NotificationNames.SOA_APPLICANT, CA_SOA_APPLICANT,
+        Map<NotificationNames, String> canMap = Map.of(NotificationNames.SOA_PERSONAL_APPLICANT, CA_SOA_PERSONAL_APPLICANT,
+                                                       NotificationNames.SOA_APPLICANT, CA_SOA_APPLICANT,
                                                        NotificationNames.SOA_RESPONDENT, CA_SOA_RESPONDENT,
+                                                       NotificationNames.SOA_SOS_CA_CB_APPLICANT, CA_SOA_SOS_CA_CB_APPLICANT,
                                                        NotificationNames.ORDER_PERSONAL_APPLICANT, ORDER_PERSONAL_APPLICANT,
                                                        NotificationNames.ORDER_APPLICANT_RESPONDENT, ORDER_APPLICANT_RESPONDENT,
                                                        NotificationNames.ORDER_SOS_CA_CB_APPLICANT, CA_ORDER_SOS_CA_CB_APPLICANT);
-        Map<NotificationNames, String> dnMap = Map.of(NotificationNames.SOA_APPLICANT, DA_SOA_APPLICANT,
+        Map<NotificationNames, String> dnMap = Map.of(NotificationNames.SOA_PERSONAL_APPLICANT, DA_SOA_PERSONAL_APPLICANT,
+                                                      NotificationNames.SOA_APPLICANT, DA_SOA_APPLICANT,
                                                       NotificationNames.SOA_RESPONDENT, DA_SOA_RESPONDENT,
+                                                      NotificationNames.SOA_SOS_CA_CB_APPLICANT, DA_SOA_SOS_CA_CB_APPLICANT,
                                                       NotificationNames.ORDER_PERSONAL_APPLICANT, ORDER_PERSONAL_APPLICANT,
                                                       NotificationNames.ORDER_APPLICANT_RESPONDENT, ORDER_APPLICANT_RESPONDENT,
                                                       NotificationNames.ORDER_SOS_CA_CB_APPLICANT, DA_ORDER_SOS_CA_CB_APPLICANT);
@@ -839,7 +850,7 @@ public class CaseServiceTest {
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
-        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
@@ -874,5 +885,137 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+    }
+
+    @Test
+    public void testCitizenApplicantSoaPersonalServiceC100() {
+        //Given
+        servedApplicationDetails = servedApplicationDetails.toBuilder()
+            .whoIsResponsible(UNREPRESENTED_APPLICANT)
+            .build();
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .state(State.DECISION_OUTCOME)
+            .applicants(List.of(element(testUuid, partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals("CAN9_SOA_PERSONAL_APPLICANT", citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals("CAN7_SOA_PERSONAL_APPLICANT", citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
+    }
+
+    @Test
+    public void testCitizenApplicantSoaPersonalServiceFL401() {
+        //Given
+        servedApplicationDetails = servedApplicationDetails.toBuilder()
+            .whoIsResponsible(UNREPRESENTED_APPLICANT)
+            .build();
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .state(State.DECISION_OUTCOME)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_SOA_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+    }
+
+    @Test
+    public void testCitizenApplicantSosCompletedC100() {
+        //Given
+        servedApplicationDetails = servedApplicationDetails.toBuilder()
+            .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
+            .build();
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .state(State.DECISION_OUTCOME)
+            .applicants(List.of(element(testUuid, partyDetails)))
+            .respondents(List.of(element(testUuid, partyDetails)))
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals(CA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
+    }
+
+    @Test
+    public void testCitizenApplicantSosCompletedFL401() {
+        //Given
+        servedApplicationDetails = servedApplicationDetails.toBuilder()
+            .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
+            .build();
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .state(State.DECISION_OUTCOME)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
     }
 }
