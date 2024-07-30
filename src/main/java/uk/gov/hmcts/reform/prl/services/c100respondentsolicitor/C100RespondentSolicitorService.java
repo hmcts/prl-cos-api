@@ -1282,8 +1282,8 @@ public class C100RespondentSolicitorService {
         }
         if (null != response.getResponseToAllegationsOfHarm()
             && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
-            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
-                .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
+            dataMap.put("isRespondToAllegationOfHarm", getValueForYesOrNoEnum(response.getResponseToAllegationsOfHarm()
+                .getResponseToAllegationsOfHarmYesOrNoResponse()));
         }
     }
 

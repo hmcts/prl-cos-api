@@ -39,8 +39,6 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
-        log.info("templateName " + templateName);
-        log.info("dataMap -> responseToAllegationsOfHarmYesOrNoResponse " + dataMap.get("responseToAllegationsOfHarmYesOrNoResponse"));
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
