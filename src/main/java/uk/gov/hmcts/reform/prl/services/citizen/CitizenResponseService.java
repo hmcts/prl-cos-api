@@ -322,9 +322,8 @@ public class CitizenResponseService {
                 responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)), "en");
             }
             if (documentLanguage.isGenWelsh()) {
-                Map<String, Object> welshDataMap = new HashMap<>();
-                welshDataMap.putAll(dataMap);
-                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, welshDataMap)), "cy");
+                c100RespondentSolicitorService.populateAohDataMapForWelsh(dataMap);
+                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)), "cy");
             }
         }
     }

@@ -1423,6 +1423,18 @@ public class C100RespondentSolicitorService {
         }
     }
 
+    public void populateAohDataMapForWelsh(Map<String, Object> dataMap) {
+        if (dataMap.containsKey(RESP_CHILD_ABUSES_DOCMOSIS)) {
+            List<Element<RespChildAbuseBehaviour>> childAbuses = objectMapper.convertValue(dataMap.get(
+                RESP_CHILD_ABUSES_DOCMOSIS), new TypeReference<List<Element<RespChildAbuseBehaviour>>>() {});
+            List<Map<String, Object>> childAbusesList = new ArrayList<>();
+            for (Element<RespChildAbuseBehaviour> el : childAbuses) {
+                childAbusesList.add(objectMapper.convertValue(el, Map.class));
+            }
+            dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS, childAbusesList);
+        }
+    }
+
     private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
         log.info("Inside populateCitizenAttendingTheHearingDataMap");
         if (response.getSupportYouNeed() != null) {
