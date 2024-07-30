@@ -495,7 +495,7 @@ public class CaseService {
                                                          Map<String, String> partyIdAndType) {
         final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
 
-        caseData.getFinalServedApplicationDetailsList().stream()
+        nullSafeCollection(caseData.getFinalServedApplicationDetailsList()).stream()
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
