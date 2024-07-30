@@ -143,6 +143,13 @@ public class CourtNavCaseService {
                 COURTNAV
             );
 
+            manageDocumentsService.setFlagsForWaTask(
+                tempCaseData,
+                fields,
+                COURTNAV,
+                courtNavQuarantineLegalDoc
+            );
+
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
