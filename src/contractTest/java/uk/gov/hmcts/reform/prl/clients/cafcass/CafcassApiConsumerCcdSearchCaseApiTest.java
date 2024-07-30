@@ -32,7 +32,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM;
