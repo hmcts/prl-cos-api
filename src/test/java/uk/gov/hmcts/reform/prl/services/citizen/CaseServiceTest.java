@@ -717,9 +717,6 @@ public class CaseServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(testUuid, partyDetails)))
             .state(State.DECISION_OUTCOME)
-            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
-                List.of(element(Document.builder().documentBinaryUrl(
-                    "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
 
@@ -777,9 +774,6 @@ public class CaseServiceTest {
             .state(State.DECISION_OUTCOME)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
-            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
-                List.of(element(Document.builder().documentBinaryUrl(
-                    "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
 
@@ -899,8 +893,8 @@ public class CaseServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.DECISION_OUTCOME)
             .applicants(List.of(element(testUuid, partyDetails)))
-            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
-                List.of(element(Document.builder().documentBinaryUrl(
+            .serviceOfApplication(ServiceOfApplication.builder().unservedCitizenRespondentPack(
+                SoaPack.builder().packDocument(List.of(element(Document.builder().documentBinaryUrl(
                     "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
@@ -909,8 +903,9 @@ public class CaseServiceTest {
         CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
@@ -930,8 +925,8 @@ public class CaseServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
-            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
-                List.of(element(Document.builder().documentBinaryUrl(
+            .serviceOfApplication(ServiceOfApplication.builder().unservedCitizenRespondentPack(
+                SoaPack.builder().packDocument(List.of(element(Document.builder().documentBinaryUrl(
                     "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .state(State.DECISION_OUTCOME)
@@ -944,6 +939,9 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
@@ -980,8 +978,7 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
-        assertEquals(CA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
+        assertEquals(CA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
@@ -1015,7 +1012,6 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
-        assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(2).getId());
+        assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 }
