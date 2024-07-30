@@ -64,6 +64,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(respondentDetails.getPersonalDetails().getDateOfBirth() != null ? Yes : No)
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
