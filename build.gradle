@@ -477,6 +477,7 @@ dependencies {
   contractTestRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
   contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
   contractTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
