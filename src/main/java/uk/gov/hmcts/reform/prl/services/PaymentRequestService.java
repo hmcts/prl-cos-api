@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
@@ -84,33 +85,6 @@ public class PaymentRequestService {
             );
     }
 
-    private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
-        return createPaymentRequest.getFeeType() == FeeType.C100_SUBMISSION_FEE
-            || createPaymentRequest.getFeeType() == FeeType.PARENTAL_ORDER
-            || createPaymentRequest.getFeeType() == FeeType.DECLARATION_OF_PARENTAGE
-            || createPaymentRequest.getFeeType() == FeeType.SPECIAL_GUARDIANSHIP_ORDER;
-    }
-
-    private PaymentResponse handleApplicationPayment(String authorization,
-                                                     CaseData caseData,
-                                                     Map<String, Object> caseDataMap,
-                                                     CreatePaymentRequest createPaymentRequest,
-                                                     FeeResponse feeResponse) {
-        paymentResponse = createPayment(
-            authorization,
-            createPaymentRequest,
-            caseData.getPaymentServiceRequestReferenceNumber(),
-            caseData.getPaymentReferenceNumber(),
-            feeResponse
-        );
-
-        //update service request & payment request reference
-        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-
-        return paymentResponse;
-    }
-
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
         log.info("Inside createPayment -> request {}", createPaymentRequest);
@@ -121,8 +95,6 @@ public class PaymentRequestService {
                 CITIZEN_CASE_UPDATE.getValue()
             );
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-
         if (null == caseData) {
             log.info(
                 "Retrieved caseData is null for caseId {}, please provide a valid caseId",
@@ -140,16 +112,22 @@ public class PaymentRequestService {
 
         if (isApplicationNotAwp(createPaymentRequest)) {
             log.info("*** Citizen C100 and other applications case payment ***");
-            paymentResponse = handleApplicationPayment(
+            paymentResponse = createPayment(
                 authorization,
-                caseData,
-                caseDataMap,
                 createPaymentRequest,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getPaymentReferenceNumber(),
                 feeResponse
             );
         } else {
             log.info("*** Citizen awp payment *** ** call awp method here");
         }
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //update service request & payment request reference
+        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+
         //update case
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -309,5 +287,12 @@ public class PaymentRequestService {
                     })
                     .build()
             );
+    }
+
+    private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
+        return FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())
+            || FeeType.PARENTAL_ORDER.equals(createPaymentRequest.getFeeType())
+            || FeeType.DECLARATION_OF_PARENTAGE.equals(createPaymentRequest.getFeeType())
+            || FeeType.SPECIAL_GUARDIANSHIP_ORDER.equals(createPaymentRequest.getFeeType());
     }
 }
