@@ -87,6 +87,7 @@ public class DgsService {
                                                        Map<String, Object> dataMap) throws Exception {
         Map<String, Object> welshDataMap = new HashMap<>();
         welshDataMap.putAll(dataMap);
+        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -97,7 +98,8 @@ public class DgsService {
                 welshDataMap.put(k, updatedWelshObj);
             }
         });
-
+        log.info("generateWelshDocument : welshDataMap -> respDomesticBehaviours " + welshDataMap.get("respDomesticBehaviours"));
+        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         return generateDocument(authorisation, caseId, templateName,
                                 welshDataMap
         );
