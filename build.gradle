@@ -471,13 +471,13 @@ dependencies {
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  implementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
-  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
+  implementation 'org.junit.vintage:junit-vintage-engine:5.10.3'
+  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.10.3"
 
 
   contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
   contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.3")
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.3"
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
 
