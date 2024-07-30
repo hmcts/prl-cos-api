@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,7 +91,7 @@ public class DgsService {
                                                        Map<String, Object> dataMap) throws Exception {
 
         String copyOfDataMap = objectMapper.writeValueAsString(dataMap);
-        Map<String, Object> welshDataMap = objectMapper.convertValue(copyOfDataMap, Map.class);
+        Map<String, Object> welshDataMap = objectMapper.convertValue(copyOfDataMap, new TypeReference<Map<String, Object>>() {});
 
         log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));

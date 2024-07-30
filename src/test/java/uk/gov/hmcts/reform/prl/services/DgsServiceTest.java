@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.Before;
@@ -32,7 +33,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -189,8 +189,10 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        when(objectMapper.writeValueAsString(respondentDetails)).thenReturn("{\"fullName\":\"test\"}");
-        when(objectMapper.convertValue(anyString(), eq(Map.class))).thenReturn(respondentDetails);
+        String josnString = "{\"fullName\":\"test\"}";
+        when(objectMapper.writeValueAsString(respondentDetails)).thenReturn(josnString);
+        when(objectMapper.convertValue(eq(josnString),
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(respondentDetails);
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails.getCaseId(), "C100",
                                                       PRL_DRAFT_TEMPLATE, respondentDetails
         ), generatedDocumentInfo);
