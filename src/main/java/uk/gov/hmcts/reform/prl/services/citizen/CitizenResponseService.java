@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -92,6 +93,19 @@ public class CitizenResponseService {
                 DOCUMENT_C7_DRAFT_HINT,
                 isWelsh,
                 updateCurrentRespondent(caseData, partyId)
+        );
+    }
+
+    public Document generateAndReturnDraftC1A(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("Inside generateAndReturnDraftC1A");
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C1A_DRAFT_HINT,
+            isWelsh,
+            updateCurrentRespondent(caseData, partyId)
         );
     }
 

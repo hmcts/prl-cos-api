@@ -60,6 +60,25 @@ public class CitizenResponseController {
         }
     }
 
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c1ADraftDocument", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Generate a C1A PDF for citizen as part of Respond to the Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public Document generateC1ADraftDocument(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken,
+        @RequestBody DocumentRequest documentRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return citizenResponseService.generateAndReturnDraftC1A(caseId, partyId, authorisation, documentRequest.isWelsh());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/{caseId}/submit-citizen-response", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Submit C7 response and generate all docs for citizen respondent")
     @ApiResponses(value = {
