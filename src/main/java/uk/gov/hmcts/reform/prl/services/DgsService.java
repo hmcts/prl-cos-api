@@ -39,8 +39,6 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
-        log.info("teamplate name " + templateName);
-        log.info("dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -88,8 +86,6 @@ public class DgsService {
 
         Map<String, Object> welshDataMap = new HashMap<>();
         welshDataMap.putAll(dataMap);
-        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
-        log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));
         welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -100,10 +96,6 @@ public class DgsService {
                 welshDataMap.put(k, updatedWelshObj);
             }
         });
-        log.info("generateWelshDocument : welshDataMap -> respDomesticBehaviours " + welshDataMap.get("respDomesticBehaviours"));
-        log.info("generateWelshDocument : welshDataMap -> consentToTheApplication " + welshDataMap.get("consentToTheApplication"));
-        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
-        log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));
         return generateDocument(authorisation, caseId, templateName,
                                 welshDataMap
         );
