@@ -77,6 +77,35 @@ public class FeesAndPaymentCitizenController {
             .amount(feeResponse.getAmount().toString()).build();
     }
 
+    @GetMapping(path = "/{fee-type}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Case is created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public FeeResponseForCitizen fetchFeesAmountByType(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @PathVariable("fee-type") String feeType
+    ) {
+        FeeResponse feeResponse = null;
+        try {
+            if (isAuthorized(authorisation, serviceAuthorization)) {
+                feeResponse = feeService.fetchFeeDetails(FeeType.valueOf(feeType));
+            } else {
+                throw (new RuntimeException(LOGGERMESSAGE));
+            }
+        } catch (Exception e) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(e.getMessage())
+                .build();
+        }
+        return FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build();
+    }
+
     @PostMapping(path = "/create-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Endpoint to create payment request . Returns payment related details if "
             + "successful")
@@ -95,7 +124,7 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
 
-        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
+        return paymentRequestService.createPayment(authorization, createPaymentRequest);
 
     }
 
