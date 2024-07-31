@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.bundle;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,7 +70,7 @@ public class CreateBundleConsumerTest {
     private final String validResponseBody = "bundle/ValidResponseBody.json";
 
     @Pact(provider = "createBundleApi", consumer = "prl_cos")
-    private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws Exception {
+    private V4Pact generateCreateBundleResponse(PactDslWithProvider builder) throws Exception {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
             .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.applicantPositionStatements).build());
@@ -91,7 +91,7 @@ public class CreateBundleConsumerTest {
             .status(200)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")
 
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.refdata;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import org.apache.http.HttpStatus;
@@ -64,7 +64,7 @@ public class ReferenceDataStaffUserConsumerTest {
     private final String validResponseBody = "gatekeeping/StaffDetailsResponseBody.json";
 
     @Pact(provider = "staffResponseDetailsApi", consumer = "prl_cos")
-    public RequestResponsePact generateStaffUsers(PactDslWithProvider builder) throws Exception {
+    public V4Pact generateStaffUsers(PactDslWithProvider builder) throws Exception {
         // @formatter:off
         return builder
             .given("Staff User details for given servicename")
@@ -76,7 +76,7 @@ public class ReferenceDataStaffUserConsumerTest {
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

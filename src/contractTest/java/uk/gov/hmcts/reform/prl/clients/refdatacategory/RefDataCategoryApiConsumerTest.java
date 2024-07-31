@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.refdatacategory;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import org.apache.http.HttpStatus;
@@ -58,7 +58,7 @@ public class RefDataCategoryApiConsumerTest {
     static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     @Pact(provider = "referenceDataCategoryApi", consumer = "prl_cos_api")
-    public RequestResponsePact generateCategoryApiConsumerTest(PactDslWithProvider builder)
+    public V4Pact generateCategoryApiConsumerTest(PactDslWithProvider builder)
             throws Exception {
 
         return builder.given("case hearing/hearings exist for a case ")
@@ -76,7 +76,7 @@ public class RefDataCategoryApiConsumerTest {
                 .willRespondWith()
                 .body(ResourceLoader.loadJson(response), "application/json")
                 .status(HttpStatus.SC_OK)
-                .toPact();
+                .toPact(V4Pact.class);
     }
 
     @Test

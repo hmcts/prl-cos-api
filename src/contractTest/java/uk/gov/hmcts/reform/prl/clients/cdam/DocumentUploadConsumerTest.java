@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.cdam;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +56,7 @@ public class DocumentUploadConsumerTest {
     CaseDocumentClientApi caseDocumentClientApi;
 
     @Pact(provider = "case-document-am-client-api", consumer = "prl_cos")
-    private RequestResponsePact uploadDocument(PactDslWithProvider builder) throws Exception {
+    private V4Pact uploadDocument(PactDslWithProvider builder) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         return builder
@@ -69,7 +69,7 @@ public class DocumentUploadConsumerTest {
                 .willRespondWith()
                 .status(HttpStatus.SC_OK)
                 .body(mapper.writeValueAsString(createDocumentUploadResponse()), "application/json")
-                .toPact();
+                .toPact(V4Pact.class);
     }
 
     @Test

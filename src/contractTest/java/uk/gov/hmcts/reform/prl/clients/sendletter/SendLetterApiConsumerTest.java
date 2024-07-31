@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.sendletter;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +79,7 @@ public class SendLetterApiConsumerTest {
     private final String validResponseBody = "response/send-letter-response.json";
 
     @Pact(provider = "sendLetter_lookUp", consumer = "prl_cos")
-    private RequestResponsePact generateSendLetterPact(PactDslWithProvider builder) throws Exception {
+    private V4Pact generateSendLetterPact(PactDslWithProvider builder) throws Exception {
 
         String caseId = "1697022507599892";
 
@@ -108,7 +108,7 @@ public class SendLetterApiConsumerTest {
             .body(new ObjectMapper().writeValueAsString(letterWithPdfsRequest), "application/json")
             .status(HttpStatus.SC_OK)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

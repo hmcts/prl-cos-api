@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpStatus;
@@ -57,7 +57,7 @@ public class IdamApiConsumerTest {
     }
 
     @Pact(provider = "Idam_api", consumer = "prl_cos")
-    public RequestResponsePact executeGetUserInfo(PactDslWithProvider builder) {
+    public V4Pact executeGetUserInfo(PactDslWithProvider builder) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("redirect_uri", "http://www.dummy-pact-service.com/callback");
@@ -76,7 +76,7 @@ public class IdamApiConsumerTest {
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(createUserInfoResponse())
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

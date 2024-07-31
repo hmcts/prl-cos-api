@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.prl.clients.refdata;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ public class CommonRefDataConsumerTest {
 
 
     @Pact(provider = "commonDataRefApi", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForCategoryId(PactDslWithProvider builder) throws Exception {
+    public V4Pact generatePactFragmentForCategoryId(PactDslWithProvider builder) throws Exception {
         // @formatter:off
         return builder
             .given("Common Data")
@@ -74,7 +74,7 @@ public class CommonRefDataConsumerTest {
             .willRespondWith()
             .status(200)
             .body(ResourceLoader.loadJson(validResponseBody), "application/json")
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

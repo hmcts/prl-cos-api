@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.cdam;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,7 +40,7 @@ public class DocumentDeleteConsumerTest {
     CaseDocumentClientApi caseDocumentClientApi;
 
     @Pact(provider = "case-document-am-client-api", consumer = "prl_cos")
-    private RequestResponsePact deleteDocument(PactDslWithProvider builder) throws JsonProcessingException {
+    private V4Pact deleteDocument(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
                 .given("A request to delete a document from cdam api")
                 .uponReceiving("a request to delete a document from cdam api with valid authorization")
@@ -51,7 +51,7 @@ public class DocumentDeleteConsumerTest {
                 .matchQuery("permanent", "true")
                 .willRespondWith()
                 .status(HttpStatus.SC_OK)
-                .toPact();
+                .toPact(V4Pact.class);
     }
 
     @Test

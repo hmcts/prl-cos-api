@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.prl.clients.roleassignment;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +60,7 @@ public class AmRoleAssignmentApiTest {
     private static final String S2S = "token";
 
     @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForRoleAssignment(PactDslWithProvider builder) throws Exception {
+    public V4Pact generatePactFragmentForRoleAssignment(PactDslWithProvider builder) throws Exception {
 
         RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest().build();
         String roleAssignmentResponseBody = "response/role-assignment.json";
@@ -76,11 +76,11 @@ public class AmRoleAssignmentApiTest {
                 .willRespondWith()
                 .status(201)
                 .body(ResourceLoader.loadJson(roleAssignmentResponseBody),APPLICATION_JSON)
-                .toPact();
+                .toPact(V4Pact.class);
     }
 
     @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForRoleAssignmentBasedOffId(PactDslWithProvider builder) throws Exception {
+    public V4Pact generatePactFragmentForRoleAssignmentBasedOffId(PactDslWithProvider builder) throws Exception {
         String roleAssignmentResponseBody = "response/role-assignment-service-response.json";
 
         return builder
@@ -92,7 +92,7 @@ public class AmRoleAssignmentApiTest {
             .willRespondWith()
             .status(200)
             .body(ResourceLoader.loadJson(roleAssignmentResponseBody),APPLICATION_JSON)
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

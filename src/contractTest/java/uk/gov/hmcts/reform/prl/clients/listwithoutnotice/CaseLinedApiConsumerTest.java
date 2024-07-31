@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.clients.listwithoutnotice;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +64,7 @@ public class CaseLinedApiConsumerTest {
 
 
     @Pact(provider = "hearingApiClient", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForCaseLinked(PactDslWithProvider builder) throws Exception {
+    public V4Pact generatePactFragmentForCaseLinked(PactDslWithProvider builder) throws Exception {
 
         caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().caseReference("1677767515750127").build();
         // @formatter:off
@@ -80,7 +80,7 @@ public class CaseLinedApiConsumerTest {
             .willRespondWith()
             .status(200)
             .body(ResourceLoader.loadJson(caseLinkedResponseBodyResponseBody),"application/json")
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

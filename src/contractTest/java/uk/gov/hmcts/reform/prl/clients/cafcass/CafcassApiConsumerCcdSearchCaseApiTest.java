@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -85,7 +85,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
     }
 
     @Pact(provider = CAFCASS_SEARCH_CASE_PROVIDER, consumer = CAFCASS_PACT_CONSUMER_NAME)
-    public RequestResponsePact executeGetSearchCases(PactDslWithProvider builder) {
+    public V4Pact executeGetSearchCases(PactDslWithProvider builder) {
         return
                 builder
                         .given("Search Cases exist in the datetime range for CafCass in CCD Store")
@@ -99,7 +99,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                         .willRespondWith()
                         .body(buildSearchCaseResponseDsl())
                         .status(HttpStatus.OK.value())
-                        .toPact();
+                        .toPact(V4Pact.class);
 
     }
 
