@@ -251,8 +251,8 @@ public class RestrictedCaseAccessService {
             if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
                 caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
             } else if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-                // caseDataUpdated.put("errors", "No one have access to this case right now, "
-                //    + "Please provide access to the people with right permissions");
+                caseDataUpdated.put("errors", "No one have access to this case right now, "
+                    + "Please provide access to the people with right permissions");
             }
         }
         log.info("** retrieveAssignedUserRoles done");
