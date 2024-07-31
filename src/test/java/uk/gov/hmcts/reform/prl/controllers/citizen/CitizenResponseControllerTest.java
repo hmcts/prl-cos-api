@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,18 +41,14 @@ public class CitizenResponseControllerTest {
     CaseData caseData;
 
 
-    public static final String authToken = "Bearer TestAuthToken";
+    private String authToken = "Bearer TestAuthToken";
 
-    public static final String s2sToken = "s2s AuthToken";
+    private String s2sToken = "s2s AuthToken";
 
-    public static final String caseId = "1673970714366224";
+    private String caseId = "1673970714366224";
 
-    public static final String partyId = "a5dbc39d-6322-4abc-821a-45206b88253f";
+    private String partyId = "a5dbc39d-6322-4abc-821a-45206b88253f";
 
-    @Before
-    public void setup() {
-
-    }
 
     @Test
     public void testGenerateC7DraftDocument() throws Exception {

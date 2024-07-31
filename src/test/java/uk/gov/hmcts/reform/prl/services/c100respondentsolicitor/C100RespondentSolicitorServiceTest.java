@@ -2384,10 +2384,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void testPopulateDataMapNoSolOrgForVersion() {
-        Map<String,Object> objectMap = new HashMap<>();
-        CallbackRequest callbackRequest1 = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().data(objectMap).build())
-            .build();
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
@@ -2451,7 +2447,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void testPopulateDataMapOriginatedFromCitizen() {
-        Map<String,Object> objectMap = new HashMap<>();
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
