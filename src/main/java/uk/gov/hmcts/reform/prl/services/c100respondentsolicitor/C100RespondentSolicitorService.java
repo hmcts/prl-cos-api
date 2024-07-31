@@ -1282,8 +1282,8 @@ public class C100RespondentSolicitorService {
         }
         if (null != response.getResponseToAllegationsOfHarm()
             && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
-            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
-                .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
+            dataMap.put("isRespondToAllegationOfHarm", getValueForYesOrNoEnum(response.getResponseToAllegationsOfHarm()
+                .getResponseToAllegationsOfHarmYesOrNoResponse()));
         }
     }
 
@@ -1420,6 +1420,18 @@ public class C100RespondentSolicitorService {
                     .updateChildAbusesForDocmosis(allegationsOfHarmData));
             dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
 
+        }
+    }
+
+    public void populateAohDataMapForWelsh(Map<String, Object> dataMap) {
+        if (dataMap.containsKey(RESP_CHILD_ABUSES_DOCMOSIS)) {
+            List<Element<RespChildAbuseBehaviour>> childAbuses = objectMapper.convertValue(dataMap.get(
+                RESP_CHILD_ABUSES_DOCMOSIS), new TypeReference<List<Element<RespChildAbuseBehaviour>>>() {});
+            List<Map<String, Object>> childAbusesList = new ArrayList<>();
+            for (Element<RespChildAbuseBehaviour> el : childAbuses) {
+                childAbusesList.add(objectMapper.convertValue(el, Map.class));
+            }
+            dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS, childAbusesList);
         }
     }
 
