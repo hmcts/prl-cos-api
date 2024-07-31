@@ -1045,4 +1045,7 @@ public class PrlAppsConstants {
     public static final String SOS_PENDING = "PENDING";
     public static final String SOS_COMPLETED = "COMPLETED";
     public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
+    //Flag to enable citizen DA journey
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
+
 }
