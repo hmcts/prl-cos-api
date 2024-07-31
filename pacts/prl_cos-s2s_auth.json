@@ -1,0 +1,67 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request for a token",
+      "key": "712cc234",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "microservice with valid credentials"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "microservice": "prl_cos_api"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "method": "POST",
+        "path": "/lease"
+      },
+      "response": {
+        "body": {
+          "content": "someMicroServiceToken",
+          "contentType": "text/plain",
+          "contentTypeHint": "DEFAULT",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "text/plain"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "s2s_auth"
+  }
+}

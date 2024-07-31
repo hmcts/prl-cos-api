@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.clients.bundle;
 
-import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.dsl.PactBuilder;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.V4Pact;
@@ -69,8 +69,8 @@ public class CreateBundleConsumerTest {
 
     private final String validResponseBody = "bundle/ValidResponseBody.json";
 
-    @Pact(provider = "createBundleApi", consumer = "prl_cos")
-    private V4Pact generateCreateBundleResponse(PactDslWithProvider builder) throws Exception {
+    @Pact(provider = "em_newBundle", consumer = "prl_cos")
+    private V4Pact generateCreateBundleResponse(PactBuilder builder) throws Exception {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
             .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.applicantPositionStatements).build());
@@ -79,6 +79,7 @@ public class CreateBundleConsumerTest {
                     .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())
                 .build()).build());
         return builder
+                .usingLegacyDsl()
             .given("A request to create a bundle in Bundling api")
             .uponReceiving("a request to create a bundle in bundling api with valid authorization")
             .method("POST")

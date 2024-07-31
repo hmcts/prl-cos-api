@@ -56,7 +56,7 @@ public class IdamApiConsumerTest {
         Thread.sleep(4000);
     }
 
-    @Pact(provider = "Idam_api", consumer = "prl_cos")
+    @Pact(provider = "idamApi_oidc", consumer = "prl_cos")
     public V4Pact executeGetUserInfo(PactDslWithProvider builder) {
 
         Map<String, Object> params = new HashMap<>();

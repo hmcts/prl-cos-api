@@ -59,7 +59,7 @@ public class CommonRefDataConsumerTest {
 
 
 
-    @Pact(provider = "commonDataRefApi", consumer = "prl_cos")
+    @Pact(provider = "commonData_Ref_Api", consumer = "prl_cos")
     public V4Pact generatePactFragmentForCategoryId(PactDslWithProvider builder) throws Exception {
         // @formatter:off
         return builder

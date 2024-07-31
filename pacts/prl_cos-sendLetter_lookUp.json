@@ -1,0 +1,88 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A request for send letter",
+      "key": "9af47ff",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "SendLetter"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Content-Type": [
+            "application/vnd.uk.gov.hmcts.letter-service.in.letter.v2+json"
+          ],
+          "ServiceAuthorization": [
+            "test"
+          ]
+        },
+        "matchingRules": {
+          "query": {
+            "isAsync": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "true"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/letters",
+        "query": {
+          "isAsync": [
+            "true"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "letter_id": "24ab9066-a0d9-409e-862d-164ff6eba545"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "sendLetter_lookUp"
+  }
+}

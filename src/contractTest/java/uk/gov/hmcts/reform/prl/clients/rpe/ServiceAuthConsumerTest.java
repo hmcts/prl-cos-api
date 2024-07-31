@@ -70,7 +70,7 @@ public class ServiceAuthConsumerTest {
         // jsonPayload.put("oneTimePassword", "784467");
     }
 
-    @Pact(consumer = "prl_cos_api")
+    @Pact(consumer = "prl_cos",provider = "s2s_auth")
     public V4Pact executeLease(PactDslWithProvider builder) throws JsonProcessingException {
 
         return builder.given("microservice with valid credentials")

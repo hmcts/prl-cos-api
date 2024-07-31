@@ -39,7 +39,7 @@ public class DocumentDeleteConsumerTest {
     @Autowired
     CaseDocumentClientApi caseDocumentClientApi;
 
-    @Pact(provider = "case-document-am-client-api", consumer = "prl_cos")
+    @Pact(provider = "case_document_am_client_api", consumer = "prl_cos")
     private V4Pact deleteDocument(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
                 .given("A request to delete a document from cdam api")

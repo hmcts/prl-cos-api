@@ -55,7 +55,7 @@ public class DocumentUploadConsumerTest {
     @Autowired
     CaseDocumentClientApi caseDocumentClientApi;
 
-    @Pact(provider = "case-document-am-client-api", consumer = "prl_cos")
+    @Pact(provider = "case_document_am_client_api", consumer = "prl_cos")
     private V4Pact uploadDocument(PactDslWithProvider builder) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

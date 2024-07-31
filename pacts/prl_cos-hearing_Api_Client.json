@@ -1,0 +1,75 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A Request for Case Linked",
+      "key": "a877191d",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Case Linked"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "caseReference": "1677767515750127",
+            "hearingId": null
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "POST",
+        "path": "/serviceLinkedCases"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "caseName": "Case_Flag_9_Dec_6",
+              "caseReference": "1670601355422736",
+              "reasonsForLink": [
+                "CLRC011",
+                "CLRC006"
+              ]
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "hearing_Api_Client"
+  }
+}

@@ -470,7 +470,6 @@ dependencies {
 
   contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  //contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
   contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   //contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
@@ -655,32 +654,30 @@ task contract(type: Test, description: 'Runs the consumer Pact tests.', group: '
 
 task runAndPublishConsumerPactTests(type: Test){
   logger.lifecycle("Runs pact Tests")
-  dependsOn(contract)
-  useJUnitPlatform()
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
   finalizedBy(pactPublish)
 }
 
-//runAndPublishConsumerPactTests.dependsOn contract
-
-//runAndPublishConsumerPactTests.finalizedBy pactPublish
-
 project.ext {
-  pactVersion = getCheckedOutGitCommitHash()
-}
-
-def getCheckedOutGitCommitHash() {
-  'git rev-parse --verify --short HEAD'.execute().text.trim()
+    pactVersion = getCheckedOutGitCommitHash()
 }
 
 pact {
-  publish {
-    pactDirectory = 'pacts'
-    pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
-    tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
-    version = project.pactVersion
-  }
+    publish {
+        pactDirectory = 'pacts'
+        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+        tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
+        version = project.pactVersion
+    }
+}
+
+runAndPublishConsumerPactTests.dependsOn contract
+
+runAndPublishConsumerPactTests.finalizedBy pactPublish
+
+def getCheckedOutGitCommitHash() {
+  'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
 task loadEnvSecrets() {

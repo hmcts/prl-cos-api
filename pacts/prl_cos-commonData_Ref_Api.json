@@ -1,0 +1,511 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A Request for Common Data API",
+      "key": "ad91ed57",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Common Data"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "GET",
+        "path": "/refdata/commondata/lov/categories/hearingType",
+        "query": {
+          "isChildRequired": [
+            "N"
+          ],
+          "serviceId": [
+            "ABA5"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "list_of_values": [
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-BRE",
+                "lov_order": 4,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Torri Amodau",
+                "value_en": "Breach"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FOF",
+                "lov_order": 12,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Canfod y Ffeithiau",
+                "value_en": "Finding of Fact"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRF",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Apwyntiad cyntaf rhwymedi ariannol",
+                "value_en": "Financial remedy first appointment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRD",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cyfarwyddiadau rhwymedi ariannol",
+                "value_en": "Financial remedy directions"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRI",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn interim rhwymedi ariannol",
+                "value_en": "Financial remedy interim order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRR",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Rhwymedi ariannol datrys anghydfod ariannol",
+                "value_en": "Financial remedy financial dispute resolution"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FHR",
+                "lov_order": 13,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Cyntaf",
+                "value_en": "First Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FFH",
+                "lov_order": 14,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Llawn/Terfynol",
+                "value_en": "Full/Final hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-SGA",
+                "lov_order": 24,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Apwyntiad Neilltuo Diogelwch",
+                "value_en": "Safeguarding Gatekeeping Appointment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-SCF",
+                "lov_order": 25,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "",
+                "value_en": "Settlement Conference"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-JMT",
+                "lov_order": 19,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Dyfarniad",
+                "value_en": "Judgment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FCM",
+                "lov_order": 15,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Rheoli Achos Pellach",
+                "value_en": "Further Case Management Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-ALL",
+                "lov_order": 1,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Dyrannu",
+                "value_en": "Allocation"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-APP",
+                "lov_order": 3,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cais",
+                "value_en": "Application"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-APL",
+                "lov_order": 2,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Ap\u00EAl",
+                "value_en": "Appeal"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-REV",
+                "lov_order": 23,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Adolygiad",
+                "value_en": "Review"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-NEH",
+                "lov_order": 20,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "",
+                "value_en": "Neutral Evaluation Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-IRH",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Datrys Materion",
+                "value_en": "Issues Resolution Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-ISO",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn Goruchwylio Interim",
+                "value_en": "Interim Supervision Order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-ICO",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn Gofal Interim",
+                "value_en": "Interim Care Order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-HRA",
+                "lov_order": 18,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cais dan y Ddeddf Hawliau Dynol",
+                "value_en": "Human Rights Act Application"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-DRA",
+                "lov_order": 11,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Apwyntiad Datrys Anghydfod",
+                "value_en": "Dispute Resolution Appointment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-DIR",
+                "lov_order": 10,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cyfarwyddiadau (Cyntaf/Pellach)",
+                "value_en": "Directions (First/Further)"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-PRE",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Rhagarweiniol (REMO)",
+                "value_en": "Preliminary (REMO)"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-GRH",
+                "lov_order": 17,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "",
+                "value_en": "Ground Rules Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CHR",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Dathlu",
+                "value_en": "Celebration hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-2GA",
+                "lov_order": 16,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "",
+                "value_en": "2nd Gatekeeping Appointment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-PHR",
+                "lov_order": 22,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Adolygiad Cyn Gwrandawiad",
+                "value_en": "Pre Hearing Review"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-COM",
+                "lov_order": 7,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Traddodi",
+                "value_en": "Committal"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CON",
+                "lov_order": 8,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cymodi",
+                "value_en": "Conciliation"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-COS",
+                "lov_order": 9,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Costau",
+                "value_en": "Costs"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-PER",
+                "lov_order": 21,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "",
+                "value_en": "Permission Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CMC",
+                "lov_order": 5,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cynhadledd Rheoli Achos",
+                "value_en": "Case Management Conference"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CMH",
+                "lov_order": 6,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Rheoli Achos",
+                "value_en": "Case Management Hearing"
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "commonData_Ref_Api"
+  }
+}
