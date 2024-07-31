@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -211,6 +213,13 @@ public class CitizenResponseServiceTest {
 
         when(documentGenService.generateSingleDocument(authToken, caseData, C8_RESP_FINAL_HINT, false, returnedMap))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
+
+        Map<String, Object> allegationsOfHarmDataMap = Map.of(
+            "respAohYesOrNo", "Yes"
+        );
+
+        when(objectMapper.convertValue(Mockito.any(RespondentAllegationsOfHarmData.class),
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);

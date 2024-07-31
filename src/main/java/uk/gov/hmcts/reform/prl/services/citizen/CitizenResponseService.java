@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -190,8 +191,8 @@ public class CitizenResponseService {
                         caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
                     }
 
-
                     checkPreviousProceedings(responseDocs, response);
+
                     generateC1A(authorisation, response, documentLanguage, responseDocs, dbCaseData, dataMap);
 
                     caseDataMapToBeUpdated.putAll(addCitizenDocumentsToTheQuarantineList(
@@ -318,6 +319,8 @@ public class CitizenResponseService {
                              Map<String, Object> dataMap) throws Exception {
         if (isNotEmpty(response.getRespondentAllegationsOfHarmData())
                 && Yes.equals(response.getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            //Reset data map again with RespondentAllegationsOfHarmData to fix the Welsh translation issue
+            dataMap.putAll(objectMapper.convertValue(response.getRespondentAllegationsOfHarmData(),new TypeReference<Map<String, Object>>() {}));
             if (documentLanguage.isGenEng()) {
                 responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)), "en");
             }
@@ -483,6 +486,7 @@ public class CitizenResponseService {
                            .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                            .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                            .uploaderRole(PrlAppsConstants.CITIZEN)
+                           .fileName(element.getValue().getDocumentFileName())
                            .documentLanguage(language)
                            .isConfidential(Yes)
                            .build())
@@ -507,6 +511,7 @@ public class CitizenResponseService {
                                .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                                .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                                .uploaderRole(PrlAppsConstants.CITIZEN)
+                               .fileName(document.getDocumentFileName())
                                .documentLanguage(language)
                                .isConfidential(Yes)
                                .build())

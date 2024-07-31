@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -34,8 +32,6 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
-
-    private final ObjectMapper objectMapper;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -90,9 +86,8 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
 
-        String copyOfDataMap = objectMapper.writeValueAsString(dataMap);
-        Map<String, Object> welshDataMap = objectMapper.convertValue(copyOfDataMap, new TypeReference<Map<String, Object>>() {});
-
+        Map<String, Object> welshDataMap = new HashMap<>();
+        welshDataMap.putAll(dataMap);
         log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));
         welshDataMap.forEach((k, v) -> {
