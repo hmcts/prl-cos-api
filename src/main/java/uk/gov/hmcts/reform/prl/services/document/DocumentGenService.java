@@ -993,6 +993,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 template = getC7CitizenDraftTemplate(isWelsh);
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                template = getC1ACitizenDraftTemplate(isWelsh);
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
                 break;
@@ -1047,6 +1050,10 @@ public class DocumentGenService {
 
     private String getC7CitizenDraftTemplate(boolean isWelsh) {
         return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
+    }
+
+    private String getC1ACitizenDraftTemplate(boolean isWelsh) {
+        return !isWelsh ? citizenC1aFinalResponseTemplate : citizenC1aFinalResponseWelshTemplate;
     }
 
     private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
