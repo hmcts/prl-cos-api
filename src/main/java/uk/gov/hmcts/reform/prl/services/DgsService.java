@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,12 +35,16 @@ public class DgsService {
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
 
+    private final ObjectMapper objectMapper;
+
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
+        log.info("teamplate name " + templateName);
+        log.info("dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -84,19 +90,27 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
 
-        dataMap.forEach((k, v) -> {
+        String copyOfDataMap = objectMapper.writeValueAsString(dataMap);
+        Map<String, Object> welshDataMap = objectMapper.convertValue(copyOfDataMap, new TypeReference<Map<String, Object>>() {});
+
+        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
+        log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));
+        welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseTypeOfApplication)
                 );
-                dataMap.put(k, updatedWelshObj);
+                welshDataMap.put(k, updatedWelshObj);
             }
         });
-
+        log.info("generateWelshDocument : welshDataMap -> respDomesticBehaviours " + welshDataMap.get("respDomesticBehaviours"));
+        log.info("generateWelshDocument : welshDataMap -> consentToTheApplication " + welshDataMap.get("consentToTheApplication"));
+        log.info("generateWelshDocument : dataMap -> respDomesticBehaviours " + dataMap.get("respDomesticBehaviours"));
+        log.info("generateWelshDocument : dataMap -> consentToTheApplication " + dataMap.get("consentToTheApplication"));
         return generateDocument(authorisation, caseId, templateName,
-                                dataMap
+                                welshDataMap
         );
     }
 
