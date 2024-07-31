@@ -24,8 +24,4 @@ public class CreatePaymentRequest {
     String hwfRefNumber;
     @Schema(name = "Fee type code fetched from /feeCode API", required = true)
     FeeType feeType;
-    @Schema(name = "Type of awp in case of awp payment", example = "C1, C2, D89, FP25 etc.")
-    String awpType;
-    @Schema(name = "Party type", example = "applicant or respondent")
-    String partyType;
 }
