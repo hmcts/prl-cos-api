@@ -48,7 +48,7 @@ def versions = [
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '5.1.7',
-  sendLetterClient             : '4.0.2',
+  sendLetterClient             : '4.0.4',
   serenity                     : '4.0.28',
   serenityCucumber             : '4.1.20',
   serviceTokenGenerator        : '3.1.4',
@@ -335,12 +335,12 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.3.0'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.14.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.1'
+  implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
