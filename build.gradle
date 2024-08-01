@@ -48,7 +48,7 @@ def versions = [
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '5.1.7',
-  sendLetterClient             : '4.0.2',
+  sendLetterClient             : '4.0.4',
   serenity                     : '4.0.28',
   serenityCucumber             : '4.1.20',
   serviceTokenGenerator        : '3.1.4',
