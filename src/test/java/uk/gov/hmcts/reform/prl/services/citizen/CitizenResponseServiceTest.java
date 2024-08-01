@@ -49,6 +49,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
@@ -225,5 +226,17 @@ public class CitizenResponseServiceTest {
             citizenUpdatedCaseData);
         Assert.assertNotNull(returnedCaseDetails);
         Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
+    }
+
+    @Test
+    public void testGenerateAndReturnDraftC1A() throws Exception {
+        when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C1A_DRAFT_HINT, false, new HashMap<>()))
+            .thenReturn(Document.builder().documentFileName("testDoc").build());
+
+        Document document = citizenResponseService.generateAndReturnDraftC1A(caseId, uuid, authToken, false);
+        Assert.assertNotNull(document);
+        Assert.assertEquals("testDoc", document.getDocumentFileName());
     }
 }

@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -92,6 +93,19 @@ public class CitizenResponseService {
                 DOCUMENT_C7_DRAFT_HINT,
                 isWelsh,
                 updateCurrentRespondent(caseData, partyId)
+        );
+    }
+
+    public Document generateAndReturnDraftC1A(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("Inside generateAndReturnDraftC1A");
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C1A_DRAFT_HINT,
+            isWelsh,
+            updateCurrentRespondent(caseData, partyId)
         );
     }
 
@@ -176,7 +190,7 @@ public class CitizenResponseService {
                                     citizenUpdatedCaseData.getPartyDetails(),
                                     party.getValue(),
                                     CaseEvent.REVIEW_AND_SUBMIT,dbCaseData.getNewChildDetails());
-                                updatedPartyDetails = generateRespondentC1aResponseDocument(
+                                generateRespondentC1aResponseDocument(
                                     updatedPartyDetails,
                                     documentLanguage,
                                     dataMap,
@@ -228,7 +242,7 @@ public class CitizenResponseService {
         }
     }
 
-    private PartyDetails generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
+    private void generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
                                                                DocumentLanguage documentLanguage,
                                                                Map<String, Object> dataMap,
                                                                CaseData caseData, String authorisation,
@@ -274,17 +288,6 @@ public class CitizenResponseService {
                     respondentC1aResponseDocuments.put(c1aFinalResponseWelDocument, WELSH);
                 }
                 log.info("generated respondent C1A response documents");
-                updatedPartyDetails = updatedPartyDetails.toBuilder()
-                    .response(updatedPartyDetails.getResponse().toBuilder()
-                                  .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-                                                                   .toBuilder()
-                                                                   .responseToAllegationsOfHarmDocument(isNotEmpty(
-                                                                       c1aFinalResponseEngDocument) ? c1aFinalResponseEngDocument : null)
-                                                                   .responseToAllegationsOfHarmWelshDocument(isNotEmpty(
-                                                                       c1aFinalResponseWelDocument) ? c1aFinalResponseWelDocument : null)
-                                                                   .build())
-                                  .build())
-                    .build();
 
             } catch (Exception e) {
                 log.info(
@@ -295,7 +298,6 @@ public class CitizenResponseService {
                 dataMap.remove(DYNAMIC_FILE_NAME);
             }
         }
-        return updatedPartyDetails;
     }
 
     private void generateC7Response(String authorisation,

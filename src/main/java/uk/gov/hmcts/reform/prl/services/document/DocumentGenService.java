@@ -84,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -865,6 +866,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 fileName = getC7DraftFileName(isWelsh);
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                fileName = getC1ADraftFileName(isWelsh);
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
                 break;
@@ -910,6 +914,10 @@ public class DocumentGenService {
 
     private String getC7DraftFileName(boolean isWelsh) {
         return !isWelsh ? docC7DraftFilename : docC7DraftWelshFilename;
+    }
+
+    private String getC1ADraftFileName(boolean isWelsh) {
+        return !isWelsh ? c100C1aDraftFilename : c100C1aDraftWelshFilename;
     }
 
     private String findDraftFilename(boolean isWelsh, String caseTypeOfApp) {
@@ -985,6 +993,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 template = getC7CitizenDraftTemplate(isWelsh);
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                template = getC1ACitizenDraftTemplate(isWelsh);
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
                 break;
@@ -1039,6 +1050,10 @@ public class DocumentGenService {
 
     private String getC7CitizenDraftTemplate(boolean isWelsh) {
         return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
+    }
+
+    private String getC1ACitizenDraftTemplate(boolean isWelsh) {
+        return !isWelsh ? citizenC1aFinalResponseTemplate : citizenC1aFinalResponseWelshTemplate;
     }
 
     private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
