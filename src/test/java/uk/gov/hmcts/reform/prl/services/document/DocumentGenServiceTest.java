@@ -3171,7 +3171,7 @@ public class DocumentGenServiceTest {
     public void testCitizenDocumentC1aDraftHintWelsh() {
         ReflectionTestUtils.setField(
             documentGenService,
-            "citizenC1aFinalResponseWelshTemplate",
+            "solicitorC1ADraftWelshTemplate",
             "citizen_c1a_wel"
         );
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
@@ -3184,7 +3184,7 @@ public class DocumentGenServiceTest {
     public void testCitizenDocumentC1aDraftHintEnglish() {
         ReflectionTestUtils.setField(
             documentGenService,
-            "citizenC1aFinalResponseTemplate",
+            "solicitorC1ADraftTemplate",
             "citizen_c1a_wel"
         );
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);

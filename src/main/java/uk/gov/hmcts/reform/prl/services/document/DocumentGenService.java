@@ -1053,7 +1053,7 @@ public class DocumentGenService {
     }
 
     private String getC1ACitizenDraftTemplate(boolean isWelsh) {
-        return !isWelsh ? citizenC1aFinalResponseTemplate : citizenC1aFinalResponseWelshTemplate;
+        return !isWelsh ? solicitorC1ADraftTemplate : solicitorC1ADraftWelshTemplate;
     }
 
     private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
