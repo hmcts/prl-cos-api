@@ -36,6 +36,11 @@ public enum DaRespondentOtherApplicationType {
     D89_COURT_BAILIFF(
         "D89_COURT_BAILIFF",
         "D89 - Request for personal service by a court bailiff"
+    ),
+    @JsonProperty("FC600_COMMITTAL_APPLICATION")
+    FC600_COMMITTAL_APPLICATION(
+        "FC600_COMMITTAL_APPLICATION",
+        "FC600 - Committal applicationt"
     );
     private final String id;
     private final String displayedValue;
