@@ -285,7 +285,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,"clientContext", callbackRequest);
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1519,7 +1519,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,"clientContext", callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
