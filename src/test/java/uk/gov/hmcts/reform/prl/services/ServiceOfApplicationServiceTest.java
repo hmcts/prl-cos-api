@@ -91,6 +91,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -659,8 +661,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -699,8 +701,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -739,8 +741,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -779,8 +781,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap);
     }
 
     @Test
@@ -858,6 +860,12 @@ public class ServiceOfApplicationServiceTest {
             CaseData caseData = CaseData.builder().id(12345L)
                 .applicants(parties)
                 .respondents(parties)
+<<<<<<< HEAD
+=======
+                .applicantsFL401(parties.get(0).getValue())
+                .respondentsFL401(parties.get(0).getValue())
+                .caseInvites(caseInviteList)
+>>>>>>> c139bef487208fa80f87945bca0c4aa7e9831722
                 .caseTypeOfApplication(caseType)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
                 .othersToNotify(parties)
@@ -2241,7 +2249,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -2345,7 +2353,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -2391,7 +2399,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -2936,7 +2944,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -3662,7 +3670,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -3701,7 +3709,6 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
@@ -3745,7 +3752,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -4072,6 +4079,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(Yes)
             .isConfidential(Yes).soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
@@ -4287,7 +4295,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
@@ -4531,6 +4539,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+<<<<<<< HEAD
     public void testSendNotificationDaCitizenNonPersonalService() {
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
             .soaServeToRespondentOptions(No)
@@ -4642,4 +4651,100 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
     }
+=======
+    public void testGetRe7CoverLettersEnglishWelsh() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe7CoverLettersEnglishOnly() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(false).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(1, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe7CoverLettersWelshOnly() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(false)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(1, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe8CoverLettersEnglishWelsh() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE8_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
+    }
+
+    @Test
+    public void testGetCoverLettersEnglishWelshWithoutAccessCode() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, false);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
+    }
+
+>>>>>>> c139bef487208fa80f87945bca0c4aa7e9831722
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.dto.cafcass;
+package uk.gov.hmcts.reform.prl.models.dto.notification;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,18 +6,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.util.List;
 
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(toBuilder = true)
-public class HearingDetails {
+public class DocumentsNotification {
 
-    private DynamicList hearingTypes;
-    private DynamicList confirmedHearingDates;
+    private NotificationDetails notification;
+    private List<Element<Document>> documents;
 
 }

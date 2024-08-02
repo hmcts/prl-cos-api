@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
@@ -44,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -66,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -76,9 +82,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNull;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF3_PERS_SERV_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -89,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -100,6 +109,7 @@ public class CaseServiceTest {
     public static final String eventId = "1234567891234567";
 
     public static final String accessCode = "123456";
+    private static final Logger log = LoggerFactory.getLogger(CaseServiceTest.class);
 
     @InjectMocks
     private CaseService caseService;
@@ -131,9 +141,6 @@ public class CaseServiceTest {
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private CaseData caseData;
-    private CaseData caseData2;
-
-    private CaseData caseData3;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
@@ -149,6 +156,9 @@ public class CaseServiceTest {
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
 
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList1;
+
+    private CaseData citizenCaseData;
+    private QuarantineLegalDoc quarantineLegalDoc;
 
     @Before
     public void setup() {
@@ -168,25 +178,6 @@ public class CaseServiceTest {
                                                                          .partyId(testUuid)
                                                                          .accessCode("123").build()).build()))
             .build();
-
-        caseData2 = CaseData.builder()
-            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                                     .value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(No)
-                                                                         .partyId(testUuid)
-                                                                         .accessCode("123").build()).build()))
-            .build();
-
-        caseData3 = CaseData.builder()
-            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .respondentsFL401(partyDetails)
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(No)
-                                                                         .accessCode("123").build()).build()))
-            .build();
-
-
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
@@ -194,6 +185,7 @@ public class CaseServiceTest {
             .state("SUBMITTED_PAID")
             .build();
         userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
+
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
@@ -205,7 +197,7 @@ public class CaseServiceTest {
                                         .solicitorRepresented(Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
@@ -275,6 +267,57 @@ public class CaseServiceTest {
 
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
         finalServedApplicationDetailsList1 = List.of(element(servedApplicationDetailsEmailOnly));
+
+        Document document = Document.builder().documentFileName("test").build();
+        quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .miamCertificateDocument(Document.builder().build())
+            .documentParty("applicant")
+            .categoryId("miamCertificate")
+            .uploadedBy("test")
+            .uploaderRole(CITIZEN)
+            .uploadedByIdamId("00000000-0000-0000-0000-000000000000")
+            .documentUploadedDate(LocalDateTime.now())
+            .build();
+
+        citizenCaseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                    .value(partyDetails).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                                     .value(partyDetails).build()))
+            .finalDocument(document)
+            .finalWelshDocument(document)
+            .c1ADocument(document)
+            .c1AWelshDocument(document)
+            .dateSubmitted(LocalDateTime.now().format(DateTimeFormatter.ofPattern(YYYY_MM_DD)))
+            .existingProceedings(List.of(element(ProceedingDetails.builder().uploadRelevantOrder(document).build())))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .legalProfUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+                                 .cafcassUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+                                 .courtStaffUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+                                 .citizenUploadedDocListDocTab(List.of(element(quarantineLegalDoc)))
+                                 .confidentialDocuments(List.of(element(quarantineLegalDoc)))
+                                 .restrictedDocuments(List.of(element(quarantineLegalDoc)))
+                                 .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(List.of(element(quarantineLegalDoc)))
+                                           .build())
+            .state(State.DECISION_OUTCOME)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .build();
+
+        //Given
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+        Map<String, Object> map = new HashMap<>();
+        map.put("miamCertificateDocument", quarantineLegalDoc);
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(objectMapper.convertValue(quarantineLegalDoc, Map.class)).thenReturn(map);
+        when(objectMapper.convertValue(map.get("miamCertificateDocument"), Document.class))
+            .thenReturn(quarantineLegalDoc.getMiamCertificateDocument());
     }
 
     @Test
@@ -553,105 +596,54 @@ public class CaseServiceTest {
 
     @Test
     public void testGetCitizenDocuments() {
-        //Given
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .miamCertificateDocument(Document.builder().build())
-            .documentParty("applicant")
-            .categoryId("miamCertificate")
-            .uploadedBy("test")
-            .uploaderRole(CITIZEN)
-            .uploadedByIdamId("00000000-0000-0000-0000-000000000000")
-            .documentUploadedDate(LocalDateTime.now())
-            .build();
-        caseData = caseData.toBuilder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .legalProfUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
-                                 .cafcassUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
-                                 .courtStaffUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
-                                 .citizenUploadedDocListDocTab(List.of(element(quarantineLegalDoc)))
-                                 .confidentialDocuments(List.of(element(quarantineLegalDoc)))
-                                 .restrictedDocuments(List.of(element(quarantineLegalDoc)))
-                                 .build())
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .citizenQuarantineDocsList(List.of(element(quarantineLegalDoc)))
-                                           .build())
-            .state(State.DECISION_OUTCOME)
-            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
-            .build();
-        userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
-            .roles(List.of(Roles.CITIZEN.getValue())).build();
-        Map<String, Object> map = new HashMap<>();
-        map.put("miamCertificateDocument", quarantineLegalDoc);
-
-        //When
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-        when(objectMapper.convertValue(quarantineLegalDoc, Map.class)).thenReturn(map);
-        when(objectMapper.convertValue(map.get("miamCertificateDocument"), Document.class))
-            .thenReturn(quarantineLegalDoc.getMiamCertificateDocument());
-
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertFalse(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
-        assertEquals(7, citizenDocumentsManagement.getCitizenDocuments().size());
+        assertFalse(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertFalse(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
+        assertEquals(11, citizenDocumentsManagement.getApplicantDocuments().size());
     }
 
     @Test
     public void testEmptyCitizenDocumentsWhenNoDocs() {
         //Given
-        caseData = caseData.toBuilder().state(State.DECISION_OUTCOME).build();
-        userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
-            .roles(List.of(Roles.CITIZEN.getValue())).build();
-
-        //When
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        citizenCaseData = CaseData.builder().state(State.DECISION_OUTCOME).build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
     }
 
     @Test
     public void testFilterNonAccessibleCitizenDocuments() {
         //Given
-        QuarantineLegalDoc cafcassDoc = QuarantineLegalDoc.builder()
-            .uploaderRole(CAFCASS)
-            .build();
         QuarantineLegalDoc otherPartyDoc = QuarantineLegalDoc.builder()
             .uploaderRole(CITIZEN)
             .uploadedByIdamId("00000000-0000-0000-0000-000000000001")
             .build();
-        caseData = caseData.toBuilder()
-            .reviewDocuments(ReviewDocuments.builder()
+        citizenCaseData = citizenCaseData.toBuilder()
+            .reviewDocuments(citizenCaseData.getReviewDocuments().toBuilder()
                                  .confidentialDocuments(List.of(element(otherPartyDoc)))
-                                 .restrictedDocuments(List.of(element(cafcassDoc)))
                                  .build())
             .documentManagementDetails(DocumentManagementDetails.builder()
                                            .citizenQuarantineDocsList(List.of(element(otherPartyDoc)))
                                            .build())
             .state(State.DECISION_OUTCOME)
             .build();
-        userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
-            .roles(List.of(Roles.CITIZEN.getValue()))
-            .build();
-
-        //When
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
     }
 
     @Test
@@ -701,30 +693,33 @@ public class CaseServiceTest {
     @Test
     public void testGetCitizenRespondentOrdersC100() {
         //Given
+        UUID partyId = UUID.randomUUID();
         ServedParties servedParties = ServedParties.builder()
-            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyId(partyId.toString())
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
                                    .servedParties(List.of(element(servedParties)))
+                                   .serveOnRespondent(Yes)
+                                   .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
             .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
             .build();
         partyDetails = partyDetails.toBuilder()
             .user(User.builder()
-                      .idamId("00000000-0000-0000-0000-000000000000").build())
+                      .idamId(partyId.toString()).build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
-            .respondents(List.of(element(testUuid, partyDetails)))
+            .respondents(List.of(element(partyId, partyDetails)))
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
+            .id(partyId.toString())
             .roles(List.of(Roles.CITIZEN.getValue())).build();
 
         //When
@@ -737,13 +732,26 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenOrders().stream().findFirst().get().getPartyId());
+        Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
+            Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
+        //assertEquals(false, notifications.get(CAN6_VIEW_RESPONSE_APPLICANT));
+        //assertEquals(false, notifications.get(CAN5_SOA_RESPONDENT));
+        //assertEquals(false, notifications.get(CAN10_FM5));
+        assertEquals(true, notifications.get(CRNF3_PERS_SERV_APPLICANT));
+        //assertEquals(false, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
+        //assertEquals(false, notifications.get(CAN7_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN9_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
     @Test
     public void testGetCitizenApplicantOrdersFL401() {
+        UUID partyId = UUID.randomUUID();
+
         //Given
         ServedParties servedParties = ServedParties.builder()
-            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyId(partyId.toString())
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
             .orderDocument(Document.builder().build())
@@ -754,22 +762,24 @@ public class CaseServiceTest {
             .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
             .build();
         partyDetails = partyDetails.toBuilder()
-            .partyId(testUuid)
+            .partyId(partyId)
             .user(User.builder()
-                      .idamId("00000000-0000-0000-0000-000000000000").build())
+                      .idamId(partyId.toString()).build())
             .build();
+        finalServedApplicationDetailsList.get(0).getValue().getBulkPrintDetails().get(0).getValue().setPartyIds(partyId.toString());
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
                 List.of(element(Document.builder().documentBinaryUrl(
                     "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
+            .id(partyId.toString())
             .roles(List.of(Roles.CITIZEN.getValue())).build();
 
         //When
@@ -782,6 +792,15 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenOrders().stream().findFirst().get().getPartyId());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenApplicationPacks().stream().findFirst().get().getPartyId());
+        Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
+            Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
+        //assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
+        //assertEquals(false, notifications.get(CAN10_FM5));
+        assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
+        //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
+        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
     @Test

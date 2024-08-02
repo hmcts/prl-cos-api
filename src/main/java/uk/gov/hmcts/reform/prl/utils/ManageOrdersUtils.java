@@ -19,12 +19,16 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +40,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
@@ -48,6 +53,8 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameL
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class ManageOrdersUtils {
@@ -399,6 +406,24 @@ public class ManageOrdersUtils {
             isOrderEdited = true;//default true for edit returned order
         }
         return isOrderEdited;
+    }
+
+    public static List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
+        return nullSafeCollection(parties).stream()
+            .map(applicant -> element(ServedParties.builder()
+                                          .partyId(String.valueOf(applicant.getId()))
+                                          .partyName(applicant.getValue().getLabelForDynamicList())
+                                          .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+                                          .build()))
+            .toList();
+    }
+
+    public static Element<ServedParties> getServedParty(PartyDetails party) {
+        return element(ServedParties.builder()
+                           .partyId(String.valueOf(party.getPartyId()))
+                           .partyName(party.getLabelForDynamicList())
+                           .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+                           .build());
     }
 }
 
