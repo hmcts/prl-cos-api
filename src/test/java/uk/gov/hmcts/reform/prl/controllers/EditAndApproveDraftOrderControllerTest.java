@@ -122,9 +122,11 @@ public class EditAndApproveDraftOrderControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    public static Map<String, Object> clientContext = new HashMap<>();
 
     @Before
     public void setUp() {
+        clientContext.put("test", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -283,7 +285,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,clientContext, callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1517,7 +1519,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,clientContext, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
