@@ -123,11 +123,10 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER) Map<String, Object> clientContext,
+        @RequestHeader(PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("*****clientContext****{}", clientContext);
-        log.info("*****only client context****{}", clientContext.get("client-context"));
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
