@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
@@ -410,7 +413,7 @@ public class ManageOrdersUtils {
             .map(applicant -> element(ServedParties.builder()
                                           .partyId(String.valueOf(applicant.getId()))
                                           .partyName(applicant.getValue().getLabelForDynamicList())
-                                          .servedDateTime(LocalDateTime.now())
+                                          .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
                                           .build()))
             .toList();
     }
@@ -419,7 +422,7 @@ public class ManageOrdersUtils {
         return element(ServedParties.builder()
                            .partyId(String.valueOf(party.getPartyId()))
                            .partyName(party.getLabelForDynamicList())
-                           .servedDateTime(LocalDateTime.now())
+                           .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
                            .build());
     }
 }
