@@ -100,12 +100,16 @@ public class CitizenResponseService {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Inside generateAndReturnDraftC1A");
+        Map<String, Object> dataMap = updateCurrentRespondent(caseData, partyId);
+        if (isWelsh) {
+            c100RespondentSolicitorService.populateAohDataMapForWelsh(dataMap);
+        }
         return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             DOCUMENT_C1A_DRAFT_HINT,
             isWelsh,
-            updateCurrentRespondent(caseData, partyId)
+            dataMap
         );
     }
 
