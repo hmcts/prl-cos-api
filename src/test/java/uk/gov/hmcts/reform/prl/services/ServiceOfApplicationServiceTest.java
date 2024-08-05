@@ -4271,7 +4271,7 @@ public class ServiceOfApplicationServiceTest {
                 updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
             );
             assertEquals(
-                "Court - court admin",
+                "Court",
                 updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
             );
         }
