@@ -1006,6 +1006,7 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
     public static final String SOA_CAFCASS_CYMRU_SERVED_OPTIONS = "soaCafcassCymruServedOptions";
 
     public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
@@ -1028,5 +1029,23 @@ public class PrlAppsConstants {
     public static final String SOA_BY_POST = "By post";
 
     //Citizen dashboard notifications
-    public static final String CAN_10_FM5 = "CAN_10";
+    public static final String CAN10_FM5 = "CAN10_FM5";
+    public static final String CAN4_SOA_PERS_NONPERS_APPLICANT = "CAN4_SOA_PERS_NONPERS_APPLICANT";
+    public static final String CAN5_SOA_RESPONDENT = "CAN5_SOA_RESPONDENT";
+    public static final String CAN8_SOS_PERSONAL_APPLICANT = "CAN8_SOS_PERSONAL_APPLICANT";
+    public static final String CAN7_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT";
+    public static final String CAN9_SOA_PERSONAL_APPLICANT = "CAN9_SOA_PERSONAL_APPLICANT";
+    public static final String CAN6_VIEW_RESPONSE_APPLICANT = "CAN6_VIEW_RESPONSE_APPLICANT";
+    public static final String CAN6A_VIEW_RESPONSE_C1A_APPLICANT = "CAN6A_VIEW_C1A_RESPONSE_APPLICANT";
+    public static final String CAN6B_VIEW_RESPONSE_C1AR_APPLICANT = "CAN6B_VIEW_C1AR_RESPONSE_APPLICANT";
+    public static final String CRNF2_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
+    public static final String CRNF3_PERS_SERV_APPLICANT = "CRNF3_PERS_SERV_APPLICANT";
+
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
+    //Flag to enable citizen DA journey
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
+
 }

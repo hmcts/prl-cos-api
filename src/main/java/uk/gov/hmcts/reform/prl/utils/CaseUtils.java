@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -169,12 +171,10 @@ public class CaseUtils {
     }
 
     /*
-    Below method checks for Both if the case is created by
-    citizen or the main applicant in the case is not represented.
+    Below method checks for Both if the case is a citizen case
+    or the main applicant in the case is not represented.
     * **/
-    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
-        log.info("case created by {}", caseData.getCaseCreatedBy());
-        log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
+    public static boolean isCitizenCase(CaseData caseData) {
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
             0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
@@ -507,6 +507,18 @@ public class CaseUtils {
             .collect(Collectors.joining(","));
     }
 
+    public static CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
+                .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
+                ).findFirst();
+            if (caseInvite.isPresent()) {
+                return caseInvite.map(Element::getValue).orElse(null);
+            }
+        }
+        return null;
+    }
+
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
         log.info("Sate from callbackRequest " + callbackRequest.getCaseDetails().getState());
         State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
@@ -676,6 +688,10 @@ public class CaseUtils {
 
     public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
         return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
+    }
+
+    public static String getPartyIdListAsString(List<Element<PartyDetails>> parties) {
+        return String.join(",", parties.stream().map(Element::getId).map(UUID::toString).toList());
     }
 
     public static boolean isCaseWithoutNotice(CaseData caseData) {
@@ -853,6 +869,13 @@ public class CaseUtils {
             return respondent1.getDateOfBirth();
         }
         return null;
+    }
+
+    public static Set<String> getStringsSplitByDelimiter(String partyIds,
+                                                         String delimiter) {
+        return null != partyIds
+            ? Arrays.stream(partyIds.trim().split(delimiter)).map(String::trim).collect(Collectors.toSet())
+            : Collections.emptySet();
     }
 
     public static String getCurrentDate() {
