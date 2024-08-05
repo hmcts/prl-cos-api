@@ -4266,14 +4266,26 @@ public class ServiceOfApplicationServiceTest {
                 "solicitorResp test",
                 updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
             );
-            assertEquals(
-                "By email and post",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
-            );
-            assertEquals(
-                "Court",
-                updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-            );
+            if (caseType.equalsIgnoreCase("C100")) {
+                assertEquals(
+                    "By email and post",
+                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                );
+                assertEquals(
+                    "Court",
+                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                );
+            } else {
+                assertEquals(
+                    "By email",
+                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+                );
+                assertEquals(
+                    "Court",
+                    updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+                );
+            }
+
         }
     }
 
