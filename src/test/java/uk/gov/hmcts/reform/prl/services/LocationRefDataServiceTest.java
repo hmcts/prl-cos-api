@@ -302,4 +302,16 @@ public class LocationRefDataServiceTest {
         CaseManagementLocation caseManagementLocation = locationRefDataService.getDefaultCourtForCA("test");
         assertEquals(defaultCaseManagementLocation, caseManagementLocation);
     }
+
+    @Test
+    public void returnNullWhenCourtVenueForCaIsNotConfigured() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of())
+                            .build());
+        CaseManagementLocation caseManagementLocation = locationRefDataService.getDefaultCourtForCA("test");
+        assertEquals("CTSC Stoke", caseManagementLocation.getBaseLocationName());
+        assertEquals(MIDLANDS, caseManagementLocation.getRegionName());
+        assertEquals("2", caseManagementLocation.getRegion());
+    }
 }

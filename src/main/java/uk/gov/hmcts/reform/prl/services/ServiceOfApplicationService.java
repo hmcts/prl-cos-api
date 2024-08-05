@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -63,7 +64,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -118,6 +118,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
@@ -133,6 +134,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
@@ -284,6 +286,7 @@ public class ServiceOfApplicationService {
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
     private final CaseInviteManager caseInviteManager;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1237,9 +1240,12 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
-        caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+
+        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+            caseData = caseInviteManager.sendAccessCodeNotificationEmail(caseData);
+            //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        }
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
         }
@@ -1379,36 +1385,61 @@ public class ServiceOfApplicationService {
                 if (null != caseData.getRespondentC8Document()) {
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentAc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentBc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentCc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentDc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentEc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                 }
-                docs.add(caseData.getC8Document());
+                if (null != caseData.getC8Document()) {
+                    docs.add(caseData.getC8Document());
+                }
+                if (null != caseData.getC8WelshDocument()) {
+                    docs.add(caseData.getC8WelshDocument());
+                }
             }
             return docs;
         }
@@ -2169,6 +2200,7 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION)))) {
             caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                                String.valueOf(caseData.getId())));
+            caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         caseDataUpdated.put(
@@ -2337,14 +2369,17 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        }
         return dataMap;
     }
 
     private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
         String code = null;
         String isLinked = null;
-        if (null != caseInvite) {
+        if (null != caseInvite && launchDarklyClient.isFeatureEnabled(
+            ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             code = caseInvite.getAccessCode();
             isLinked = caseInvite.getHasLinked();
         }
@@ -2377,7 +2412,7 @@ public class ServiceOfApplicationService {
         return null;
     }
 
-    private List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
+    public List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites();
         if (CollectionUtils.isEmpty(caseInvites)) {
             caseInvites =  new ArrayList<>();
@@ -2434,8 +2469,9 @@ public class ServiceOfApplicationService {
             if (CollectionUtils.isNotEmpty(docsForLa)) {
                 caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
-                    .packCreatedDate(LocalDateTime.now().toString())
-                        .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
+                    .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                    .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
                     .build());
             }
         } else {
