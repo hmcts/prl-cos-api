@@ -185,23 +185,6 @@ public class CaseServiceTest {
             .state("SUBMITTED_PAID")
             .build();
         userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
-
-        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .partyDetails(PartyDetails.builder()
-                              .firstName("Test")
-                              .lastName("User")
-                              .user(User.builder()
-                                        .email("test@gmail.com")
-                                        .idamId("123")
-                                        .solicitorRepresented(Yes)
-                                        .build())
-                              .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed(List.of("123", "234", "1234"))
-                                                    .build())
-                              .build())
-            .partyType(PartyEnum.applicant)
-            .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
         when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
