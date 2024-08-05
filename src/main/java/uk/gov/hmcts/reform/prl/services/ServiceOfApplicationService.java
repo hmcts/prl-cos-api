@@ -3260,7 +3260,7 @@ public class ServiceOfApplicationService {
                         log.info("Applicant is not represented");
                         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                             sendNotificationsToCitizenRespondentsC100(authorization,
-                                                                      respondentList,
+                                                                      commonRespondentsList,
                                                                       caseData,
                                                                       bulkPrintDetails,
                                                                       removeCoverLettersFromThePacks(respondentDocs),
