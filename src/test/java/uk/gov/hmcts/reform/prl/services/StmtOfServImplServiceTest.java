@@ -14,14 +14,18 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -35,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +76,9 @@ public class StmtOfServImplServiceTest {
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Mock
     private AllTabServiceImpl allTabService;
 
     @Mock
@@ -90,7 +98,7 @@ public class StmtOfServImplServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
 
         PartyDetails respondent = PartyDetails.builder()
             .lastName("TestLast")
@@ -107,6 +115,8 @@ public class StmtOfServImplServiceTest {
             .listItems(List.of(dynamicListElement))
             .value(dynamicListElement)
             .build();
+        when(serviceOfApplicationPostService.getCoverSheets(Mockito.any(), Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Document.builder().build()));
     }
 
     @Test
@@ -218,7 +228,7 @@ public class StmtOfServImplServiceTest {
 
         DynamicList dynamicList = DynamicList.builder()
             .listItems(List.of(DynamicListElement.builder().code(TEST_UUID).label("").build()))
-            .value(DynamicListElement.builder().code(TEST_UUID).label("").build())
+            .value(DynamicListElement.builder().code(TEST_UUID).label("All respondents").build())
             .build();
 
         StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
@@ -269,6 +279,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
+        when(manageDocumentsService.getLoggedInUserType(Mockito.anyString())).thenReturn(List.of(PrlAppsConstants.SOLICITOR_ROLE));
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
@@ -308,6 +319,11 @@ public class StmtOfServImplServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
+            .orderCollection(Arrays.asList(element(UUID.fromString(TEST_UUID), OrderDetails.builder()
+                .sosStatus("PENDING")
+                .serveOrderDetails(ServeOrderDetails.builder()
+                                       .servedParties(Arrays.asList(element(ServedParties.builder().build()))).build())
+                .build())))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -330,6 +346,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(manageDocumentsService.getLoggedInUserType(Mockito.anyString())).thenReturn(List.of(PrlAppsConstants.CITIZEN_ROLE));
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
@@ -401,7 +418,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(false);
-
+        when(manageDocumentsService.getLoggedInUserType(Mockito.anyString())).thenReturn(List.of(PrlAppsConstants.COURT_ADMIN_ROLE));
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
