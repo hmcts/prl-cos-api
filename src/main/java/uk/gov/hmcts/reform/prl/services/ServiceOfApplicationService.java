@@ -3188,20 +3188,23 @@ public class ServiceOfApplicationService {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         List<Element<Document>> packDocs = new ArrayList<>();
-        if (CaseUtils.isCitizenCase(caseData)) {
-            selectedPartyIds.forEach(partyId -> {
-                Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
-                party.ifPresent(element -> packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
-                    authorization,
-                    caseData,
-                    element,
-                    Templates.PRL_LET_ENG_AP6
-                ))));
+
+        selectedPartyIds.forEach(partyId -> {
+            Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
+            party.ifPresent(element -> {
+                if (CaseUtils.hasLegalRepresentation(element.getValue())) {
+                    packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
+                } else {
+                    packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData,
+                        element,
+                        Templates.PRL_LET_ENG_AP6
+                    )));
+                    packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
+                }
             });
-            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
-        } else {
-            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
-        }
+        });
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
