@@ -1489,14 +1489,14 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order,serveRecipientName);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
+            .getPersonallyServeRespondentsOptions();
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderDA(caseData.getManageOrders()));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
-
+        servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
         if (null != serveRecipientName
             && null != servingRespondentsOptions) {
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
@@ -1574,7 +1574,7 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderCA(caseData.getManageOrders()));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
@@ -1592,19 +1592,13 @@ public class ManageOrderService {
         );
     }
 
-    private String getWhoIsResponsibleToServeOrderCA(ManageOrders manageOrders) {
+    private String getWhoIsResponsibleToServeOrder(ManageOrders manageOrders) {
         if (Yes.equals(manageOrders.getServeToRespondentOptions())) {
             return NO.equals(manageOrders.getDisplayLegalRepOption())
                 ? manageOrders.getServingOptionsForNonLegalRep().getId()
-                : manageOrders.getServingRespondentsOptionsCA().getId();
+                : manageOrders.getPersonallyServeRespondentsOptions().getId();
         }
         return null;
-    }
-
-    private String getWhoIsResponsibleToServeOrderDA(ManageOrders manageOrders) {
-        return NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId()
-            : manageOrders.getServingRespondentsOptionsDA().getId();
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
@@ -1626,9 +1620,8 @@ public class ManageOrderService {
                 ));
             }
             //personal service
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA = caseData
-                .getManageOrders().getServingRespondentsOptionsCA();
-            updatePersonalServedParties(servingRespondentsOptionsCA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update all applicants party ids in case of personal service
             if (Yes.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
                 servedParties.addAll(ManageOrdersUtils.getServedParties(caseData.getApplicants()));
@@ -1636,8 +1629,8 @@ public class ManageOrderService {
         }
         //FL401 - personal service
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders().getServingRespondentsOptionsDA();
-            updatePersonalServedParties(servingRespondentsOptionsDA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
             servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
         }
@@ -1669,13 +1662,9 @@ public class ManageOrderService {
     }
 
     private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
-        if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCA() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCA();
-        }
-        return servingRespondentsOptions;
+        return caseData.getManageOrders().getPersonallyServeRespondentsOptions() != null ? caseData.getManageOrders()
+                .getPersonallyServeRespondentsOptions() : null;
+
     }
 
     private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
@@ -1738,7 +1727,7 @@ public class ManageOrderService {
         String serveRecipientName = null;
         String whoIsResponsibleToServe = null;
         YesOrNo multipleOrdersServed = null;
-
+        log.info("Serve order details {} serve on respondent {}", servedOrderDetails, serveOnRespondent);
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
         }
