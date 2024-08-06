@@ -1853,11 +1853,10 @@ public class ServiceOfApplicationService {
         log.info("bulk print details {}", bulkPrintDetails);
     }
 
-    private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
+    private void sendNotificationsToCitizenRespondentsC100(String authorization,
                                                               List<DynamicMultiselectListElement> selectedRespondents,
                                                           CaseData caseData,  List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                          List<Document> docs, boolean isStaticDocs) {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+                                                          List<Document> docs, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         log.info("Sending notification to respondent");
         selectedRespondents.forEach(respondent -> {
             Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
@@ -1883,13 +1882,12 @@ public class ServiceOfApplicationService {
                     Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                 selectedRespondent, Templates.PRL_LET_ENG_RE5);
                     sendPostWithAccessCodeLetterToParty(caseData, authorization,
-                                                        isStaticDocs ? getNotificationPack(caseData, PrlAppsConstants.S, docs) : docs,
+                                                        docs,
                                                         bulkPrintDetails, selectedRespondent, coverLetter,
                                                         SERVED_PARTY_RESPONDENT);
                 }
             }
         });
-        return emailNotificationDetails;
     }
 
     private EmailNotificationDetails sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
@@ -3321,7 +3319,7 @@ public class ServiceOfApplicationService {
                                                                       caseData,
                                                                       bulkPrintDetails,
                                                                       removeCoverLettersFromThePacks(respondentDocs),
-                                                                      false
+                                                                      emailNotificationDetails
                             );
                         } else {
                             handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
