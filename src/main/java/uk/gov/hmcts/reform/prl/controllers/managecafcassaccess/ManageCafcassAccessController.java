@@ -36,6 +36,10 @@ public class ManageCafcassAccessController {
 
     public static final String CAFCASS_NOT_ALLOWED_HEADER = "# Cafcass couldn't access this case";
 
+    private static final String CONFIRMATION_BODY = """
+
+         """;
+
     private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/manage-cafcass-access/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -58,10 +62,10 @@ public class ManageCafcassAccessController {
             );
             if (YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())) {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_ALLOWED_HEADER).confirmationBody("\n\n").build());
+                    CAFCASS_ALLOWED_HEADER).confirmationBody(CONFIRMATION_BODY).build());
             } else {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody("\n\n").build());
+                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody(CONFIRMATION_BODY).build());
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
