@@ -37,9 +37,7 @@ public class ManageCafcassAccessController {
     public static final String CAFCASS_NOT_ALLOWED_HEADER = "# Cafcass couldn't access this case";
 
     private static final String CONFIRMATION_BODY = """
-
-         \n
-
+         ### \n\n\n
          """;
 
     private final ObjectMapper objectMapper;
