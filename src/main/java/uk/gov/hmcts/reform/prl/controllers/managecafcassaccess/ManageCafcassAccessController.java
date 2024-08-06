@@ -38,6 +38,8 @@ public class ManageCafcassAccessController {
 
     private static final String CONFIRMATION_BODY = """
 
+         \n
+
          """;
 
     private final ObjectMapper objectMapper;
