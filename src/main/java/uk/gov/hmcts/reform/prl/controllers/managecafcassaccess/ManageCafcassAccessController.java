@@ -58,10 +58,10 @@ public class ManageCafcassAccessController {
             );
             if (YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())) {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_ALLOWED_HEADER).confirmationBody("\n").build());
+                    CAFCASS_ALLOWED_HEADER).confirmationBody("\n\n").build());
             } else {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody("\n").build());
+                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody("\n\n").build());
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
