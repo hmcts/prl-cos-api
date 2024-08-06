@@ -119,6 +119,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -145,11 +147,14 @@ public class CaseService {
     public static final DateTimeFormatter DATE_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(YYYY_MM_DD);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
     public static final String COVER_LETTER_PREFIX = "cover_letter";
-    public static final String IS_NEW = "IS_NEW";
-    public static final String IS_FINAL = "IS_FINAL";
-    public static final String IS_MULTIPLE = "IS_MULTIPLE";
-    public static final String IS_PERSONAL = "IS_PERSONAL";
-    public static final String PARTY_NAMES = "PARTY_NAMES";
+    public static final String IS_NEW = "isNew";
+    public static final String IS_FINAL = "isFinal";
+    public static final String IS_MULTIPLE = "isMultiple";
+    public static final String IS_PERSONAL = "isPersonal";
+    public static final String PARTY_NAMES = "partyNames";
+    public static final String ORDER_TYPE_ID = "orderTypeId";
+    public static final String OCCUPATION_ORDER = "occupation";
+    public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -829,7 +834,8 @@ public class CaseService {
             .partyId(idamId)
             .partyType(partyIdAndType.get(PARTY_TYPE))
             .partyName(partyIdAndType.get(PARTY_NAME))
-            .orderType(order.getOrderTypeId())
+            .orderType(order.getOrderTypeId()) //orderTypeId holds display value
+            .orderTypeId(getOrderTypeId(order)) //orderType holds enum id
             .uploadedBy(order.getOtherDetails().getCreatedBy())
             .createdDate(getOrderCreatedDate(order))
             .madeDate(getOrderMadeDate(order))
@@ -847,6 +853,26 @@ public class CaseService {
                             && YesOrNo.Yes.equals(order.getServeOrderDetails().getMultipleOrdersServed()))
             .isSosCompleted(SOS_COMPLETED.equals(order.getSosStatus()))
             .build();
+    }
+
+    private String getOrderTypeId(OrderDetails order) {
+        if (OCCUPATION_ORDER.equals(order.getOrderType())) {
+            if (isPowerOfArrestSelected(order)) {
+                return OCCUPATION_ORDER.concat(UNDERSCORE).concat(POWER_OF_ARREST_ORDER);
+            }
+            return order.getOrderType();
+        }
+        return order.getOrderType();
+    }
+
+    private boolean isPowerOfArrestSelected(OrderDetails order) {
+        return null != order.getFl404CustomFields()
+            && (YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest1())
+            || YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest2())
+            || YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest3())
+            || YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest4())
+            || YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest5())
+            || YES.equals(order.getFl404CustomFields().getFl404bIsPowerOfArrest6()));
     }
 
     private boolean isPersonalService(OrderDetails order) {
@@ -1025,18 +1051,18 @@ public class CaseService {
 
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
-            notifMap.put(IS_PERSONAL, true);
-            if (citizenOrders.get(0).isSosCompleted()) {
-                //CA - CAN3, DA - DN6
-                citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
-            } else {
+            if (!citizenOrders.get(0).isSosCompleted()) {
                 //CRNF3
+                notifMap.put(IS_PERSONAL, true);
+                notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
             }
         } else {
             //personal service by Court admin/bailiff & non-personal service
             notifMap.put(IS_PERSONAL, false);
+            notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
             if (citizenOrders.get(0).isSosCompleted()) {
+                //Once SOS is completed for all respondents
                 //CA - CAN3, DA - DN6
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
             } else {
@@ -1594,13 +1620,7 @@ public class CaseService {
                         .show(true)
                         .build();
                     if (null != notifMap && !notifMap.isEmpty()) {
-                        citizenNotification = citizenNotification.toBuilder()
-                            .isNew(ObjectUtils.isNotEmpty(notifMap.get(IS_NEW)) ? (Boolean) notifMap.get(IS_NEW) : false)
-                            .isFinal(ObjectUtils.isNotEmpty(notifMap.get(IS_FINAL)) ? (Boolean) notifMap.get(IS_FINAL) : false)
-                            .isMultiple(ObjectUtils.isNotEmpty(notifMap.get(IS_MULTIPLE)) ? (Boolean) notifMap.get(IS_MULTIPLE) : false)
-                            .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) ? (Boolean) notifMap.get(IS_PERSONAL) : false)
-                            .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
-                            .build();
+                        return getCitizenNotification(citizenNotification, notifMap);
                     }
                     return citizenNotification;
                 }).toList();
@@ -1616,5 +1636,17 @@ public class CaseService {
             return getStringsSplitByDelimiter(notification, COMMA);
         }
         return Collections.emptySet();
+    }
+
+    private CitizenNotification getCitizenNotification(CitizenNotification citizenNotification,
+                                                       Map<String, Object> notifMap) {
+        return citizenNotification.toBuilder()
+            .isNew(ObjectUtils.isNotEmpty(notifMap.get(IS_NEW)) && (Boolean) notifMap.get(IS_NEW))
+            .isFinal(ObjectUtils.isNotEmpty(notifMap.get(IS_FINAL)) && (Boolean) notifMap.get(IS_FINAL))
+            .isMultiple(ObjectUtils.isNotEmpty(notifMap.get(IS_MULTIPLE)) && (Boolean) notifMap.get(IS_MULTIPLE))
+            .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) && (Boolean) notifMap.get(IS_PERSONAL))
+            .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
+            .orderTypeId(ObjectUtils.isNotEmpty(notifMap.get(ORDER_TYPE_ID)) ? (String) notifMap.get(ORDER_TYPE_ID) : null)
+            .build();
     }
 }

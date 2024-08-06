@@ -2323,6 +2323,8 @@ public class ManageOrderService {
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
+                           //PRL-6046 - persist FL404 data
+                           .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                            .build());
     }
 

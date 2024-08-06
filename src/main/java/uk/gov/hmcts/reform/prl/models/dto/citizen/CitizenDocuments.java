@@ -39,6 +39,7 @@ public class CitizenDocuments {
     private boolean isSosCompleted;
 
     private String orderType;
+    private String orderTypeId;
     private LocalDate createdDate;
     private LocalDate madeDate;
     private LocalDateTime servedDateTime;
