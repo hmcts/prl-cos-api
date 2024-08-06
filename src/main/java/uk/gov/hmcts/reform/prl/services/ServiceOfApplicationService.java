@@ -2116,7 +2116,6 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail",
             "soaCafcassCymruServedOptions",
             "soaCafcassEmailId",
-            "soaCafcassServedOptions",
             PROCEED_TO_SERVING,
             MISSING_ADDRESS_WARNING_TEXT,
             SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
