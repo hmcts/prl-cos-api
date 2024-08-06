@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managecafcassaccess;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -29,9 +33,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class ManageCafcassAccessController {
     private final AuthorisationService authorisationService;
 
-    public static final String CONFIRMATION_HEADER = "# Case is exposed to Cafcass now";
+    public static final String CAFCASS_ALLOWED_HEADER = "# Cafcass could access this case";
 
+    public static final String CAFCASS_NOT_ALLOWED_HEADER = "# Cafcass couldn't access this case";
 
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/manage-cafcass-access/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Submitted Callback to display confirmation message "
@@ -47,8 +53,17 @@ public class ManageCafcassAccessController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER).build());
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())) {
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CAFCASS_ALLOWED_HEADER).confirmationBody(EMPTY_SPACE_STRING).build());
+            } else {
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody(EMPTY_SPACE_STRING).build());
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
