@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.enums;
 public enum ServeOrderFieldsEnum {
 
     serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
-    isCafcass("isCafcass"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     serveOrderDynamicList("serveOrderDynamicList"),
     serveToRespondentOptions("serveToRespondentOptions"),
