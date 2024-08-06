@@ -10,7 +10,6 @@ public enum ServeOrderFieldsEnum {
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     recipientsOptions("recipientsOptions"),
     otherParties("otherParties"),
-    cafcassServedOptions("cafcassServedOptions"),
     cafcassCymruServedOptions("cafcassCymruServedOptions"),
     cafcassCymruEmail("cafcassCymruEmail"),
     cafcassEmailId("cafcassEmailId"),

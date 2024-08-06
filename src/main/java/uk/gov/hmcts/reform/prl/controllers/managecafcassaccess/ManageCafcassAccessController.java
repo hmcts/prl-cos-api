@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -59,10 +58,10 @@ public class ManageCafcassAccessController {
             );
             if (YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())) {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_ALLOWED_HEADER).confirmationBody(EMPTY_SPACE_STRING).build());
+                    CAFCASS_ALLOWED_HEADER).confirmationBody("\n").build());
             } else {
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody(EMPTY_SPACE_STRING).build());
+                    CAFCASS_NOT_ALLOWED_HEADER).confirmationBody("\n").build());
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
