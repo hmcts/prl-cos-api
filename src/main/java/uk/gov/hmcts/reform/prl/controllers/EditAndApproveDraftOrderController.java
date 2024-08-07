@@ -339,7 +339,7 @@ public class EditAndApproveDraftOrderController {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), "draftOrderId");
 
