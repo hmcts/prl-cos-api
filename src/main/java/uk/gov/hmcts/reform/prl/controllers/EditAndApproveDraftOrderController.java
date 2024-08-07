@@ -174,7 +174,9 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("*****clientContext in about to submit****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
@@ -192,7 +194,7 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType);
+                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType, null);
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData);
@@ -238,12 +240,14 @@ public class EditAndApproveDraftOrderController {
     }
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
-                                     Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
+                                     Map<String, Object> caseDataUpdated,
+                                     CaseData caseData, String loggedInUserType, String draftOrderId) {
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
             callbackRequest.getEventId(),
-            loggedInUserType
+            loggedInUserType,
+            draftOrderId
         );
 
         caseDataUpdated.put(

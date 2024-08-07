@@ -4414,7 +4414,8 @@ public class ManageOrderServiceTest {
             caseData,
             caseDataUpdated,
             Event.EDIT_AND_APPROVE_ORDER.getId(),
-            "JUDGE"
+            "JUDGE",
+            null
         );
         assertEquals(
             HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
@@ -4457,7 +4458,7 @@ public class ManageOrderServiceTest {
         manageOrderService.setHearingOptionDetailsForTask(caseData,
                                                           caseDataUpdated,
                                                           Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "JUDGE");
+                                                          "JUDGE", null);
         assertEquals(
             HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
             caseDataUpdated.get("hearingOptionSelected")
@@ -4498,7 +4499,7 @@ public class ManageOrderServiceTest {
         manageOrderService.setHearingOptionDetailsForTask(caseData,
                                                           caseDataUpdated,
                                                           Event.MANAGE_ORDERS.getId(),
-                                                          "JUDGE");
+                                                          "JUDGE", null);
         assertEquals(
             HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
             caseDataUpdated.get("hearingOptionSelected")
@@ -5296,7 +5297,8 @@ public class ManageOrderServiceTest {
             caseData,
             caseDataUpdated,
             Event.EDIT_AND_APPROVE_ORDER.getId(),
-            "JUDGE"
+            "JUDGE",
+            null
         );
         assertEquals(
             HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
@@ -5350,7 +5352,7 @@ public class ManageOrderServiceTest {
         manageOrderService.setHearingOptionDetailsForTask(caseData,
                                                           caseDataUpdated,
                                                           Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "JUDGE");
+                                                          "JUDGE", null);
         assertEquals(
             "multipleOptionSelected",
             caseDataUpdated.get("hearingOptionSelected")
@@ -5393,7 +5395,7 @@ public class ManageOrderServiceTest {
         manageOrderService.setHearingOptionDetailsForTask(caseData,
                                                           caseDataUpdated,
                                                           Event.MANAGE_ORDERS.getId(),
-                                                          "JUDGE");
+                                                          "JUDGE", null);
         assertEquals(
             "multipleOptionSelected",
             caseDataUpdated.get("hearingOptionSelected")

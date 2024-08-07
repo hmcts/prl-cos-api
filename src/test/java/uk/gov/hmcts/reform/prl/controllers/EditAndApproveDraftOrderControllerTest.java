@@ -942,7 +942,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1007,7 +1007,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1077,7 +1077,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1141,7 +1141,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
         Assert.assertNotNull(response);
 
     }
@@ -1580,8 +1580,12 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(
+            () -> editAndApproveDraftOrderController
+                .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest),
+            RuntimeException.class,
+            "Invalid Client"
+        );
     }
 
     @Test
