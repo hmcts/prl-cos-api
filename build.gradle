@@ -642,6 +642,19 @@ run {
   }
 }
 
+project.ext {
+  pactVersion = getCheckedOutGitCommitHash()
+}
+
+pact {
+  publish {
+    pactDirectory = 'pacts'
+    pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+    tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
+    version = project.pactVersion
+  }
+}
+
 task contract(type: Test, description: 'Runs the consumer Pact tests.', group: 'Delivery pipeline') {
   useJUnitPlatform()
 
@@ -654,28 +667,13 @@ task contract(type: Test, description: 'Runs the consumer Pact tests.', group: '
 }
 
 task runAndPublishConsumerPactTests(type: Test){
+  dependsOn(contract)
   logger.lifecycle("Runs pact Tests")
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
   finalizedBy(pactPublish)
 }
 
-project.ext {
-    pactVersion = getCheckedOutGitCommitHash()
-}
-
-pact {
-    publish {
-        pactDirectory = 'pacts'
-        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
-        tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
-        version = project.pactVersion
-    }
-}
-
-runAndPublishConsumerPactTests.dependsOn contract
-
-runAndPublishConsumerPactTests.finalizedBy pactPublish
 
 def getCheckedOutGitCommitHash() {
   'git rev-parse --verify --short HEAD'.execute().text.trim()
