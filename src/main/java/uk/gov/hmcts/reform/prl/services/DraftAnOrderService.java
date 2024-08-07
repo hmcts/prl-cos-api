@@ -661,7 +661,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder;
-        if (caseData.getApplicantCaseName().equalsIgnoreCase("C100 WA LINKING")) {
+        if (null != authorization) {
             log.info("***inside the logic***");
             selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
         } else {
