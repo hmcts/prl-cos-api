@@ -944,7 +944,7 @@ public class DraftAnOrderServiceTest {
 
 
     @Ignore
-    @TestDraftAnOrderServiceTest
+    @Test
     public void testPopulateDraftOrderDocument() {
         DraftOrder draftOrder = DraftOrder.builder()
             .judgeNotes("test")
