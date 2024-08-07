@@ -289,7 +289,6 @@ public class DraftAnOrderService {
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
-        caseDataMap.put("isCallFromTaskTab", No);
         return caseDataMap;
     }
 
@@ -659,21 +658,18 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, boolean isCallFromTaskTab, String draftOrderId) {
+    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder;
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        if (isCallFromTaskTab) {
-            selectedOrder = caseData.getDraftOrderCollection().get(0).getValue();
-            //draftOrderId to be replaced above
-            caseDataMap.put("isCallFromTaskTab", Yes);
+        if (null != draftOrderId) {
+            selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
         } else {
             selectedOrder = getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
             );
-            caseDataMap.put("isCallFromTaskTab", No);
         }
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {

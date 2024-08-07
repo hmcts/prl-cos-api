@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
@@ -93,11 +94,6 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateDraftOrderDocument(
-                        caseData, authorisation, true, "draft id which is passed from task tab")).build();
-            }
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -132,9 +128,17 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderDocument(
-                    caseData, authorisation, false, null)).build();
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            if (null != waMapper) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(draftAnOrderService.populateDraftOrderDocument(
+                        caseData, authorisation, CaseUtils.getDraftOrderId(waMapper))).build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(draftAnOrderService.populateDraftOrderDocument(
+                        caseData, authorisation, null)).build();
+            }
+
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

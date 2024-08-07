@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -38,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -46,6 +49,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -848,6 +852,42 @@ public class CaseUtils {
             ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
         if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
             return respondent1.getDateOfBirth();
+        }
+        return null;
+    }
+
+    public static WaMapper getWaMapper(String clientContext) {
+        byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+        String decodedString = new String(decodedBytes);
+        log.info("******Client-Context****{}", decodedString);
+        try {
+            WaMapper cc = new ObjectMapper().readValue(decodedString, WaMapper.class);
+            return cc;
+        } catch (JsonProcessingException ex) {
+            log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+        }
+        return null;
+    }
+
+    public static String getDraftOrderId(WaMapper waMapper) {
+        String draftOrderId = null;
+        if (null != waMapper) {
+            //TODO:
+            //Add the logic to fetch draft order id from the wa mapper
+        }
+        return draftOrderId;
+    }
+
+    public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, String draftOrderId) {
+        if (null != draftOrderCollection) {
+            draftOrderCollection.get(0);
+            /*return draftOrderCollection.stream()
+                .filter(element -> element.getId().equals(draftOrderId))
+                .map(Element::getValue)
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));*/
         }
         return null;
     }
