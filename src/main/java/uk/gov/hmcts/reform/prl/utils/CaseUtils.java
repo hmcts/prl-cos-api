@@ -882,7 +882,7 @@ public class CaseUtils {
 
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, String draftOrderId) {
         if (null != draftOrderCollection) {
-            draftOrderCollection.get(0);
+            return draftOrderCollection.get(0).getValue();
             /*return draftOrderCollection.stream()
                 .filter(element -> element.getId().equals(draftOrderId))
                 .map(Element::getValue)
