@@ -745,7 +745,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(authToken, s2sToken, callbackRequest);
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -811,7 +811,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateCommonFields(authToken, s2sToken, callbackRequest);
+                .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -876,7 +876,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(authToken, s2sToken, callbackRequest);
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1722,7 +1722,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateCommonFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1848,7 +1848,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(authToken,s2sToken,callbackRequest);
+            .populateCommonFields(authToken,s2sToken,"clcx",callbackRequest);
 
         Assert.assertNotNull(response);
         Map<String, Object> updatedCaseDataMap = response.getData();

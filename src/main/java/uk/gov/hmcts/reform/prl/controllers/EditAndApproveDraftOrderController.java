@@ -129,7 +129,8 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            if (null != waMapper) {
+            if (null != waMapper && Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateDraftOrderDocument(
                         caseData, authorisation, CaseUtils.getDraftOrderId(waMapper))).build();
@@ -326,6 +327,7 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateCommonFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             DraftOrder selectedOrder;
@@ -337,8 +339,12 @@ public class EditAndApproveDraftOrderController {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            if (caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")) {
-                selectedOrder = caseData.getDraftOrderCollection().get(0).getValue();
+
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            if (null != waMapper && Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), "draftOrderId");
+
             } else {
                 selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
                     caseData.getDraftOrderCollection(),
