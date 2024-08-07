@@ -334,23 +334,21 @@ public class StmtOfServImplService {
     }
 
     private List<DynamicListElement> getRespondentsList(CaseData caseData) {
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
         List<DynamicListElement> respondentListItems = new ArrayList<>();
-        IncrementalInteger i = new IncrementalInteger(1);
-        if (respondents != null) {
-            respondents.forEach(respondent -> respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
-                              .label(respondent.getValue().getFirstName() + " "
-                                         + respondent.getValue().getLastName()
-                                         + " (Respondent " + i.getAndIncrement() + ")").build()));
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            caseData.getRespondents()
+                .forEach(respondent ->
+                             respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
+                                                         .label(respondent.getValue().getLabelForDynamicList()
+                                                                    + " (Respondent " + i.getAndIncrement() + ")").build()));
             respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
-        } else if (caseData.getRespondentsFL401() != null) {
-            String name = caseData.getRespondentsFL401().getFirstName() + " "
-                + caseData.getRespondentsFL401().getLastName()
-                + " (Respondent)";
-
-            respondentListItems.add(DynamicListElement.builder().code(name).label(name).build());
+        } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            String name = caseData.getRespondentsFL401().getLabelForDynamicList() + " (Respondent)";
+            respondentListItems.add(DynamicListElement.builder()
+                                        .code(caseData.getRespondentsFL401().getPartyId().toString())
+                                        .label(name).build());
         }
-
         return respondentListItems;
     }
 

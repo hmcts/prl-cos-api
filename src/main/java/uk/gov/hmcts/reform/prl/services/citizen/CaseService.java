@@ -1022,7 +1022,7 @@ public class CaseService {
 
         //PRL-5688 - Orders notifications
         if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders())) {
-            addOrderNotifications(caseData, citizenDocumentsManagement.getCitizenOrders(), citizenNotifications);
+            addOrderNotifications(caseData, citizenDocumentsManagement.getCitizenOrders(), citizenNotifications, partyIdAndType.get(PARTY_TYPE));
         }
 
         //PRL-5431 - SOA & SOS notifications
@@ -1042,7 +1042,8 @@ public class CaseService {
 
     private void addOrderNotifications(CaseData caseData,
                                        List<CitizenDocuments> citizenOrders,
-                                       List<CitizenNotification> citizenNotifications) {
+                                       List<CitizenNotification> citizenNotifications,
+                                       String partyType) {
         List<CitizenDocuments> multipleOrdersServed = getMultipleOrdersServed(citizenOrders);
         Map<String, Object> notifMap = new HashMap<>();
         notifMap.put(IS_NEW, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isNew));
@@ -1051,7 +1052,8 @@ public class CaseService {
 
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
-            if (!citizenOrders.get(0).isSosCompleted()) {
+            if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
+                && !citizenOrders.get(0).isSosCompleted()) {
                 //CRNF3
                 notifMap.put(IS_PERSONAL, true);
                 notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
@@ -1061,7 +1063,8 @@ public class CaseService {
             //personal service by Court admin/bailiff & non-personal service
             notifMap.put(IS_PERSONAL, false);
             notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
-            if (citizenOrders.get(0).isSosCompleted()) {
+            if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
+                && citizenOrders.get(0).isSosCompleted()) {
                 //Once SOS is completed for all respondents
                 //CA - CAN3, DA - DN6
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_SOS_CA_CB_APPLICANT, notifMap));
@@ -1071,7 +1074,8 @@ public class CaseService {
             }
         }
         //Any order where SOS is not completed
-        if (isAnyOrderPersonalServicePendingSos(citizenOrders)) {
+        if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
+            && isAnyOrderPersonalServicePendingSos(citizenOrders)) {
             notifMap.put(IS_PERSONAL, true);
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }

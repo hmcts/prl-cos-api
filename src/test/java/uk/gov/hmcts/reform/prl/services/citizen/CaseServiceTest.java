@@ -730,6 +730,7 @@ public class CaseServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
+            .applicants(List.of(element(testUuid, partyDetails)))
             .respondents(List.of(element(testUuid, partyDetails)))
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
@@ -744,7 +745,7 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        assertEquals(CA_SOA_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
@@ -783,7 +784,7 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder().build())
+            .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .orderCollection(List.of(element(orderDetails)))
             .state(State.DECISION_OUTCOME)
@@ -800,7 +801,7 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        assertEquals(DA_SOA_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test
@@ -845,7 +846,7 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder().build())
+            .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .orderCollection(List.of(element(orderDetails)))
             .state(State.DECISION_OUTCOME)
