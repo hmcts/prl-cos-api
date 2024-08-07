@@ -250,9 +250,15 @@ public class EditAndApproveDraftOrderController {
             draftOrderId
         );
 
-        caseDataUpdated.put(
+        //Todo Shashi, disbale and get the draft order name from draft order collection id
+        /*caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())
+        );*/
+        DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+        caseDataUpdated.put(
+            WA_ORDER_NAME_JUDGE_APPROVED,
+            selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
