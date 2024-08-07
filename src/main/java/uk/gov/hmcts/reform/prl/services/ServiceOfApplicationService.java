@@ -586,7 +586,7 @@ public class ServiceOfApplicationService {
                                        Templates.PRL_LET_ENG_AP1);
         }
 
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+        caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
             .partyIds(List.of(element(String.valueOf(caseData.getRespondentsFL401().getPartyId()))))
             .servedBy(UNREPRESENTED_APPLICANT)
