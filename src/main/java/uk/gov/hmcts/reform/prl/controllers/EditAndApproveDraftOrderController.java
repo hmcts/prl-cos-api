@@ -308,8 +308,7 @@ public class EditAndApproveDraftOrderController {
                     CaseUtils.getDraftOrderId(waMapper)
                 );
 
-            }
-            else{
+            } else {
                 selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
                     caseData.getDraftOrderCollection(),
                     dynamicList
