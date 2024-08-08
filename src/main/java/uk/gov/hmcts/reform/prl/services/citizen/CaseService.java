@@ -1461,7 +1461,7 @@ public class CaseService {
                      CitizenDocuments.builder()
                          .categoryId(ANY_OTHER_DOC)
                          .document(sos.getStmtOfServiceDocument())
-                         .uploadedDate(sos.getServedDateTimeOption())
+                         .uploadedDate(sos.getSubmittedDateTime())
                          .build()
             ).toList();
     }
@@ -1532,7 +1532,7 @@ public class CaseService {
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication()))
             && caseData.getStatementOfService().getStmtOfServiceForApplication().stream()
             .anyMatch(stmtOfSerParty ->
-                          isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption()));
+                          isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getSubmittedDateTime()));
     }
 
     private boolean isAnyOrderServedPostLatestResp(List<CitizenDocuments> citizenDocuments,
@@ -1635,7 +1635,7 @@ public class CaseService {
     private Set<String> getNotificationIds(String caseTypeOfApplication,
                                            NotificationNames notificationName) {
         String notification = notificationsConfig.getNotifications().get(caseTypeOfApplication).get(notificationName);
-        log.info("Retrieved notification ids {} for notification name {} & {} case type", notification, caseTypeOfApplication, notificationName);
+        log.info("Retrieved notification ids {} for notification name {} & {} case type", notification, notificationName, caseTypeOfApplication);
         if (null != notification) {
             return getStringsSplitByDelimiter(notification, COMMA);
         }

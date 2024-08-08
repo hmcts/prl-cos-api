@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
@@ -314,8 +315,11 @@ public class StmtOfServImplService {
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
             .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
-            .servedDateTimeOption(recipient.getServedDateTimeOption())
+            .partiesServedDateTime(null != recipient.getServedDateTimeOption()
+                                       ? recipient.getServedDateTimeOption().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN))
+                                       : null)
             .uploadedBy(getSosUploadedBy(authorisation))
+            .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .build();
     }
 
@@ -535,8 +539,8 @@ public class StmtOfServImplService {
             }
         }
         stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
-                                                  .citizenPartiesServedDate(sosObject.getPartiesServedDate())
-                                                  .citizenPartiesServedList(String.join(",", partiesServed))
+                                                  .partiesServedDateTime(sosObject.getPartiesServedDate())
+                                                  .selectedPartyName(String.join(",", partiesServed))
                                                     .stmtOfServiceDocument(Document.builder()
                                                                                .documentFileName(sosObject.getCitizenSosDocs()
                                                                                                      .getDocumentFileName())
@@ -548,6 +552,8 @@ public class StmtOfServImplService {
                                                                                                       .getDocumentBinaryUrl())
                                                                                .build())
                                                     .selectedPartyId(String.join(",", partiesList))
+                                                    .uploadedBy(SosUploadedByEnum.APPLICANT_LIP)
+                                                    .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
                                                   .build()));
 
         log.info("Statement of service list :: {}", stmtOfServiceforApplication);
