@@ -9,8 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
-import java.util.Map;
-
 @Data
 @Builder
 @Jacksonized
@@ -47,5 +45,5 @@ public class TaskData {
     private String priorityDate;
     private boolean completeTask;*/
     @JsonProperty("additional_properties")
-    private Map<String, String> additionalProperties;
+    private AdditionalProperties additionalProperties;
 }

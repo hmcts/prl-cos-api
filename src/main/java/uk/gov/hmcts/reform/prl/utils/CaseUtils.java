@@ -85,7 +85,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -871,8 +870,7 @@ public class CaseUtils {
     public static String getDraftOrderId(WaMapper waMapper) {
         if (null != waMapper) {
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
-                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().get(
-                    WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID);
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId();
             }
         }
         return null;

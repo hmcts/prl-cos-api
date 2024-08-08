@@ -15,8 +15,6 @@ import lombok.extern.jackson.Jacksonized;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AdditionalProperties {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("value")
-    private String value;
+    @JsonProperty("orderId")
+    private String orderId;
 }
