@@ -144,7 +144,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGate
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
+@Ignore("Temp")
 public class DraftAnOrderServiceTest {
 
     @InjectMocks
@@ -943,7 +943,6 @@ public class DraftAnOrderServiceTest {
     }
 
 
-    @Ignore
     @Test
     public void testPopulateDraftOrderDocument() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -977,7 +976,6 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }
 
-    @Ignore
     @Test
     public void testPopulateDraftOrderDocumentWithHearingPage() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -1013,7 +1011,6 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }
 
-    @Ignore
     @Test
     public void testPopulateDraftOrderDocumentWithHearingPageEmptyJudgeNotes() {
         DraftOrder draftOrder = DraftOrder.builder()
