@@ -2091,6 +2091,7 @@ public class DraftAnOrderService {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
+            //Todo Client-context
             DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData, selectedOrder));
         } else {
@@ -2152,7 +2153,6 @@ public class DraftAnOrderService {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, DRAFT_AN_ORDER.getId()));
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)
             && isHearingPageNeeded(
@@ -2203,6 +2203,7 @@ public class DraftAnOrderService {
 
     public String getDraftOrderNameForWA(CaseData caseData, String eventId) {
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
+            //Todo This block of code is not getting executed?
             return getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
@@ -2480,6 +2481,7 @@ public class DraftAnOrderService {
                         .getRejectedOrdersDynamicList()
                 );
             } else {
+                //Todo Client context check for edit and approve?
                 draftOrder = getSelectedDraftOrderDetails(
                     caseData.getDraftOrderCollection(),
                     caseData.getDraftOrdersDynamicList()
@@ -2542,6 +2544,7 @@ public class DraftAnOrderService {
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
+            //Todo Client context check for edit and approve?
             DraftOrder draftOrder = getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
