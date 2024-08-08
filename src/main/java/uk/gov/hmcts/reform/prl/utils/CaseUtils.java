@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -77,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -673,6 +675,21 @@ public class CaseUtils {
 
     public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
         return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
+    }
+
+    public static List<String> getPartyIdList(String caseTypeOfApplication,
+                                              List<Element<PartyDetails>> parties,
+                                              PartyDetails fl401Party) {
+        //FL401
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return null != fl401Party
+                ? List.of(fl401Party.getPartyId().toString())
+                : Collections.emptyList();
+        }
+        //C100
+        return CollectionUtils.isNotEmpty(parties)
+            ? parties.stream().map(Element::getId).map(Objects::toString).map(String::trim).toList()
+            : Collections.emptyList();
     }
 
     public static String getPartyIdListAsString(List<Element<PartyDetails>> parties) {
