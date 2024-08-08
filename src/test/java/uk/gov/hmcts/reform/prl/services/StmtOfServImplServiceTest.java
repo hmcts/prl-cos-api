@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -280,11 +281,11 @@ public class StmtOfServImplServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
         when(manageDocumentsService.getLoggedInUserType(Mockito.anyString())).thenReturn(List.of(PrlAppsConstants.SOLICITOR_ROLE));
-
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(Mockito.any(), Mockito.anyString(), Mockito.any(),
+                                                                         Mockito.any(), Mockito.anyString()))
+            .thenReturn(BulkPrintDetails.builder().bulkPrintId(TEST_UUID).build());
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
-
         assertNotNull(updatedCaseData);
-
     }
 
     @Test
@@ -553,7 +554,9 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
         when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
-
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(Mockito.any(), Mockito.anyString(), Mockito.any(),
+                                                                         Mockito.any(), Mockito.anyString()))
+            .thenReturn(BulkPrintDetails.builder().bulkPrintId(TEST_UUID).build());
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
