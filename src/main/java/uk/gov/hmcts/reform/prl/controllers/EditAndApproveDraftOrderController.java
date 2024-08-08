@@ -129,8 +129,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            //Todo shashi to add admin and judges event check
-            if (null != waMapper && Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            if (null != waMapper && Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateDraftOrderDocument(
@@ -195,7 +194,9 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType, null);
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                String draftOrderId = CaseUtils.getDraftOrderId(waMapper);
+                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType, draftOrderId);
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData);
@@ -251,11 +252,6 @@ public class EditAndApproveDraftOrderController {
             draftOrderId
         );
 
-        //Todo Shashi, disbale and get the draft order name from draft order collection id
-        /*caseDataUpdated.put(
-            WA_ORDER_NAME_JUDGE_APPROVED,
-            draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())
-        );*/
         DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
@@ -278,7 +274,9 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrderCustomFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("*****clientContext in judge-or-admin-populate-draft-order-custom-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -302,10 +300,21 @@ public class EditAndApproveDraftOrderController {
                 }
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-                caseData.getDraftOrderCollection(),
-                dynamicList
-            );
+            DraftOrder selectedOrder;
+            if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
+                    caseData.getDraftOrderCollection(),
+                    CaseUtils.getDraftOrderId(waMapper)
+                );
+
+            }
+            else{
+                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    dynamicList
+                );
+            }
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
@@ -340,6 +349,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("*****clientContext in judge-or-admin-populate-draft-order-common-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             DraftOrder selectedOrder;
             CaseData caseData = objectMapper.convertValue(
@@ -352,7 +362,11 @@ public class EditAndApproveDraftOrderController {
             }
             if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), "draftOrderId");
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
+                    caseData.getDraftOrderCollection(),
+                    CaseUtils.getDraftOrderId(waMapper)
+                );
 
             } else {
                 selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
@@ -399,8 +413,10 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateSdoOtherFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("*****clientContext in pre-populate-standard-direction-order-other-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -420,8 +436,14 @@ public class EditAndApproveDraftOrderController {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .data(caseDataUpdated).build();
                 }
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
+                    .data(draftAnOrderService.populateStandardDirectionOrder(
+                        authorisation,
+                        caseData,
+                        true,
+                        CaseUtils.getDraftOrderId(waMapper)
+                    )).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -474,7 +496,9 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader("Authorization")
         @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("*****clientContext in /edit-and-approve/submitted****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent

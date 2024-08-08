@@ -2916,12 +2916,8 @@ public class ManageOrderService {
             }
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
-        } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
-            //TOdo Shashi add != null for field draftOrderId
+        } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId()) && null != draftOrderId) {
             boolean isSdoOrder = false;
-            /*Object dynamicList = caseData.getDraftOrdersDynamicList();
-            DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                         dynamicList);*/
             DraftOrder selectedDraftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
             List<Element<HearingData>> sdoHearings = new ArrayList<>();
             if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
@@ -3124,7 +3120,7 @@ public class ManageOrderService {
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
-            //check with Shashi if these needed individually?
+            //check if these needed individually?
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);

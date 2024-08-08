@@ -85,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -859,12 +860,8 @@ public class CaseUtils {
     public static WaMapper getWaMapper(String clientContext) {
         byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
         String decodedString = new String(decodedBytes);
-        log.info("******Client-Context****{}", decodedString);
         try {
-            WaMapper cc = new ObjectMapper().readValue(decodedString, WaMapper.class);
-            return cc;
-        } catch (JsonProcessingException ex) {
-            log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            return new ObjectMapper().readValue(decodedString, WaMapper.class);
         } catch (Exception ex) {
             log.error("Exception while parsing the Client-Context {}", ex.getMessage());
         }
@@ -872,22 +869,22 @@ public class CaseUtils {
     }
 
     public static String getDraftOrderId(WaMapper waMapper) {
-        String draftOrderId = null;
         if (null != waMapper) {
-            //TODO:
-            //Add the logic to fetch draft order id from the wa mapper
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().get(
+                    WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID);
+            }
         }
-        return draftOrderId;
+        return null;
     }
 
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, String draftOrderId) {
         if (null != draftOrderCollection) {
-            return draftOrderCollection.get(0).getValue();
-            /*return draftOrderCollection.stream()
+            return draftOrderCollection.stream()
                 .filter(element -> element.getId().equals(draftOrderId))
                 .map(Element::getValue)
                 .findFirst()
-                .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));*/
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
         }
         return null;
     }

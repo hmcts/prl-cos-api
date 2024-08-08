@@ -405,10 +405,12 @@ public class DraftAnOrderService {
         caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
         StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
+            //Setting null to draftOrderId as it needs to be set with real value only in judges approval journey from client context header
             Map<String, Object> standardDirectionOrderMap = populateStandardDirectionOrder(
                 authorisation,
                 caseData,
-                false
+                false,
+                null
             );
             standardDirectionOrder = objectMapper.convertValue(standardDirectionOrderMap, StandardDirectionOrder.class);
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
@@ -661,16 +663,14 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder;
-        selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
-        /*if (null != authorization) {
-            log.info("***inside the logic***");
+        if (null != draftOrderId) {
             selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
         } else {
             selectedOrder = getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
             );
-        }*/
+        }
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
@@ -784,12 +784,18 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder) {
+    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder, String draftOrderId) {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(
-            caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList()
-        );
+        DraftOrder selectedOrder;
+        if (null != draftOrderId) {
+            selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+
+        } else {
+            selectedOrder = getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getDraftOrdersDynamicList()
+            );
+        }
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder = null;
             try {

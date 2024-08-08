@@ -1032,4 +1032,5 @@ public class PrlAppsConstants {
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
     public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
+    public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
 }

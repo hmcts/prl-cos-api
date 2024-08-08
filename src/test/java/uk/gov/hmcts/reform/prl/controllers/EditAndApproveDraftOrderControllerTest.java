@@ -456,7 +456,7 @@ public class EditAndApproveDraftOrderControllerTest {
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -514,7 +514,7 @@ public class EditAndApproveDraftOrderControllerTest {
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -572,7 +572,7 @@ public class EditAndApproveDraftOrderControllerTest {
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -631,7 +631,7 @@ public class EditAndApproveDraftOrderControllerTest {
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -679,7 +679,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1205,7 +1205,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(authToken, s2sToken, callbackRequest);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
 
     }
@@ -1272,7 +1272,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(authToken, s2sToken, callbackRequest);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
 
     }
@@ -1346,7 +1346,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(authToken, s2sToken, callbackRequest);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
 
     }
@@ -1643,7 +1643,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
+            .handleEditAndApproveSubmitted(authToken,s2sToken,"clcx",callbackRequest);
         assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
     }
 
@@ -1659,7 +1659,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+            .handleEditAndApproveSubmitted(authToken, s2sToken, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1693,7 +1693,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
+            .handleEditAndApproveSubmitted(authToken,s2sToken,"clcx", callbackRequest);
         assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
     }
 
@@ -1713,7 +1713,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken,"clcx",  callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1780,7 +1780,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
 
         Assert.assertNotNull(response);
         Map<String, Object> updatedCaseDataMap = response.getData();
@@ -1813,7 +1813,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(null);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
 
         Assert.assertNotNull(response);
     }

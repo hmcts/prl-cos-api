@@ -2246,7 +2246,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder(
             "test-token",
             caseData,
-            true
+            true,
+            null
         );
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
@@ -2350,7 +2351,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder(
             "test-token",
             caseData,
-            true
+            true,
+            null
         );
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
@@ -2454,7 +2456,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder(
             "test-token",
             caseData,
-            false
+            false,
+            null
         );
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
@@ -2533,7 +2536,7 @@ public class DraftAnOrderServiceTest {
         )).thenReturn(DynamicList.builder().build());
 
         assertExpectedException(() -> {
-            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false);
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false, null);
         }, ManageOrderRuntimeException.class, "Failed to update SDO order details");
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
@@ -3248,7 +3251,7 @@ public class DraftAnOrderServiceTest {
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenThrow(JsonProcessingException.class);
 
         assertExpectedException(() -> {
-            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, true);
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, true, null);
         }, UnsupportedOperationException.class, "Could not find order");
     }
 
