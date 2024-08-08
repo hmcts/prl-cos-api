@@ -1006,6 +1006,7 @@ public class ServiceOfApplicationService {
             String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
             List<Document> docs = new ArrayList<>();
             boolean sendEmail = true;
+            Document coverLetter = null;
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
@@ -1015,17 +1016,19 @@ public class ServiceOfApplicationService {
                     sendEmail = false;
                 } else {
                     if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                        docs.add(generateCoverLetterBasedOnCaseAccess(
+                        coverLetter = generateCoverLetterBasedOnCaseAccess(
                             authorization,
-                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
+                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4);
                     } else {
-                        docs.add(generateCoverLetterBasedOnCaseAccess(
+                        coverLetter = generateCoverLetterBasedOnCaseAccess(
                             authorization,
-                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
+                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1);
                     }
+                    docs.add(coverLetter);
                 }
             }
-            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
+            List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
+            docs.addAll(packDocs);
             if (sendEmail) {
                 try {
                     log.info(
@@ -1047,20 +1050,11 @@ public class ServiceOfApplicationService {
                     throw new RuntimeException(e);
                 }
             } else {
-                Document coverLetter;
-                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
-                                                                       PRL_LET_ENG_FL401_RE4);
-                } else {
-                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
-                                                                       PRL_LET_ENG_FL401_RE1);
-                }
                 sendPostWithAccessCodeLetterToParty(caseData,
-                                                    authorization, docs,
+                                                    authorization, packDocs,
                                                     bulkPrintDetails, respondentFl401.get(0),
                                                     coverLetter, servedParty);
             }
-
         }
     }
 
@@ -1073,19 +1067,22 @@ public class ServiceOfApplicationService {
             String servedParty = applicantFl401.get(0).getValue().getLabelForDynamicList();
             List<Document> docs = new ArrayList<>();
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            Document coverLetter = null;
             boolean sendEmail = true;
             if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
             } else {
-                docs.add(generateCoverLetterBasedOnCaseAccess(
+                coverLetter = generateCoverLetterBasedOnCaseAccess(
                     authorization,
-                    caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
+                    caseData, applicantFl401.get(0), PRL_LET_ENG_AP2);
+                docs.add(coverLetter);
                 if (!ContactPreferences.email.equals(applicantFl401.get(0).getValue().getContactPreferences())) {
                     sendEmail = false;
                 }
             }
-            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
+            List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
+            docs.addAll(packDocs);
             if (sendEmail) {
                 try {
                     log.info(
@@ -1106,11 +1103,8 @@ public class ServiceOfApplicationService {
                     throw new RuntimeException(e);
                 }
             } else {
-                Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization,
-                                                                            caseData, applicantFl401.get(0),
-                                                                            PRL_LET_ENG_AP2);
                 sendPostWithAccessCodeLetterToParty(caseData,
-                                                    authorization, docs,
+                                                    authorization, packDocs,
                                                     bulkPrintDetails, applicantFl401.get(0),
                                                     coverLetter, servedParty);
             }
