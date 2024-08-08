@@ -1140,9 +1140,7 @@ public class CaseService {
             //SOA Applicant - personal(court admin/court bailiff) OR non-personal service
             if (SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
                 && CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
-                && !isSosCompletedPostSoa(caseData)
-                && (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
-                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))) {
+                && !isSosCompletedPostSoa(caseData)) {
                 //CA - CAN4, DA - DN1
                 Map<String, Object> notifMap = new HashMap<>();
                 notifMap.put(IS_PERSONAL, citizenAppPack.isPersonalService());
@@ -1568,7 +1566,6 @@ public class CaseService {
             caseData.getRespondents(),
             caseData.getRespondentsFL401()
         );
-        log.info("Respondent partyIds for SOS check {}", partyIds);
         return (null != caseData.getStatementOfService())
             && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
             .anyMatch(stmtOfSerParty -> new HashSet<>(getStringsSplitByDelimiter(
