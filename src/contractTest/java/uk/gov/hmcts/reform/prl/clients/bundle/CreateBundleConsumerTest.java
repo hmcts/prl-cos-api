@@ -69,7 +69,7 @@ public class CreateBundleConsumerTest {
 
     private final String validResponseBody = "bundle/ValidResponseBody.json";
 
-    @Pact(provider = "em_newBundle", consumer = "prl_cos")
+    @Pact(provider = "createBundleApi", consumer = "prl_cos")
     private V4Pact generateCreateBundleResponse(PactBuilder builder) throws Exception {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())

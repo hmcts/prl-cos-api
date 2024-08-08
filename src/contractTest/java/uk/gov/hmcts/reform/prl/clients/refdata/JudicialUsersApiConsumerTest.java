@@ -62,7 +62,7 @@ public class JudicialUsersApiConsumerTest {
 
     private JudicialUsersApiRequest judicialUsersApiRequest;
 
-    @Pact(provider = "judicial_User_Details_Api", consumer = "prl_cos")
+    @Pact(provider = ")", consumer = "prl_cos")
     public V4Pact generatePactFragmentForAllocateJudge(PactDslWithProvider builder) throws Exception {
         String[] personalCodes = new String[2];
         personalCodes[0] = "49933940";

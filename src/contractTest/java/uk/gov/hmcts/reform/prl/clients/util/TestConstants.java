@@ -13,6 +13,6 @@ public class TestConstants {
     public static final String CAFCASS_TEST_AUTH_TOKEN = "AuthorisationToken";
     public static final String CAFCASS_SERVICE_AUTHORISATION_HEADER = "Serviceauthorisation";
     public static final String CCD_STORE_SEARCH_CASE_ENDPOINT = "/searchCases";
-    public static final String CAFCASS_SEARCH_CASE_PROVIDER = "ccd_data_store";
+    public static final String CAFCASS_SEARCH_CASE_PROVIDER = "ccd_data";
 
 }

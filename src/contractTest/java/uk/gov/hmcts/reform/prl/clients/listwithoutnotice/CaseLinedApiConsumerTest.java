@@ -63,7 +63,7 @@ public class CaseLinedApiConsumerTest {
 
 
 
-    @Pact(provider = "hearing_Api_Client", consumer = "prl_cos")
+    @Pact(provider = "hearingApiClient", consumer = "prl_cos")
     public V4Pact generatePactFragmentForCaseLinked(PactDslWithProvider builder) throws Exception {
 
         caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().caseReference("1677767515750127").build();

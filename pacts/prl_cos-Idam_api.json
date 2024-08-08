@@ -1,157 +1,150 @@
 {
-  "provider": {
-    "name": "Idam_api"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
-      "description": "a request to generate solicitor details",
-      "request": {
-        "method": "GET",
-        "path": "/details",
-        "headers": {
-          "Authorization": "TestServiceAuthToken",
-          "Content-Type": "application/json"
-        }
-      },
-      "response": {
-        "status": 200
-      },
+      "description": "IDAM returns user info to the client",
+      "key": "94b1304f",
+      "pending": false,
       "providerStates": [
         {
-          "name": "A request to get solicitor name"
+          "name": "I have obtained an access_token as a user",
+          "params": {
+            "client_id": "pact",
+            "client_secret": "pactsecret",
+            "password": "generic",
+            "redirect_uri": "http://www.dummy-pact-service.com/callback",
+            "scope": "openid profile roles",
+            "username": "prl_aat_solicitor@mailinator.com"
+          }
         }
-      ]
-    },
-    {
-      "description": "IDAM returns user info to the client",
+      ],
       "request": {
-        "method": "GET",
-        "path": "/o/userinfo",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
-        },
         "generators": {
           "header": {
             "Authorization": {
-              "type": "ProviderState",
+              "dataType": "STRING",
               "expression": "Bearer ${access_token}",
-              "dataType": "STRING"
+              "type": "ProviderState"
             }
           }
-        }
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "GET",
+        "path": "/o/userinfo"
       },
       "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
         "body": {
-          "sub": "prl_aat_solicitor@mailinator.com",
-          "uid": "33dff5a7-3b6f-45f1-b5e7-5f9be1ede355",
-          "roles": [
-            "caseworker-privatelaw-solicitor"
-          ],
-          "name": "John Smith",
-          "given_name": "John",
-          "family_name": "Smith"
+          "content": {
+            "family_name": "Smith",
+            "given_name": "John",
+            "name": "John Smith",
+            "roles": [
+              "caseworker-privatelaw-solicitor"
+            ],
+            "sub": "prl_aat_solicitor@mailinator.com",
+            "uid": "33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
         },
         "matchingRules": {
           "body": {
-            "$.sub": {
+            "$.family_name": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
-            "$.uid": {
+            "$.given_name": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
             },
             "$.roles": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type",
                   "min": 1
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.roles[*]": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
-            "$.name": {
+            "$.sub": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
-            "$.given_name": {
+            "$.uid": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
-            },
-            "$.family_name": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
+              ]
             }
           },
           "header": {
             "Content-Type": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "regex",
                   "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           }
-        }
+        },
+        "status": 200
       },
-      "providerStates": [
-        {
-          "name": "I have obtained an access_token as a user",
-          "params": {
-            "password": "generic",
-            "scope": "openid profile roles",
-            "redirect_uri": "http://www.dummy-pact-service.com/callback",
-            "client_secret": "pactsecret",
-            "client_id": "pact",
-            "username": "prl_aat_solicitor@mailinator.com"
-          }
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "Idam_api"
   }
 }

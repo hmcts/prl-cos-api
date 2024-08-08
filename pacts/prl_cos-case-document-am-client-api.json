@@ -1,95 +1,117 @@
 {
-  "provider": {
-    "name": "case-document-am-client-api"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "a request to delete a document from cdam api with valid authorization",
+      "key": "a7831085",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "A request to delete a document from cdam api"
+        }
+      ],
       "request": {
-        "method": "DELETE",
-        "path": "/cases/documents/4f854707-91bf-4fa0-98ec-893ae0025cae",
         "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
-        },
-        "query": {
-          "permanent": [
-            "true"
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
           ]
         },
         "matchingRules": {
           "query": {
             "permanent": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "regex",
                   "regex": "true"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           }
+        },
+        "method": "DELETE",
+        "path": "/cases/documents/4f854707-91bf-4fa0-98ec-893ae0025cae",
+        "query": {
+          "permanent": [
+            "true"
+          ]
         }
       },
       "response": {
         "status": 200
       },
-      "providerStates": [
-        {
-          "name": "A request to delete a document from cdam api"
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     },
     {
       "description": "a request to upload a document on cdam api with valid authorization",
-      "request": {
-        "method": "POST",
-        "path": "/cases/documents",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
-        }
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "documents": [
-            {
-              "classification": "RESTRICTED",
-              "size": 0,
-              "mimeType": null,
-              "originalDocumentName": "Test.pdf",
-              "createdOn": null,
-              "modifiedOn": null,
-              "createdBy": null,
-              "lastModifiedBy": null,
-              "ttl": null,
-              "hashToken": null,
-              "metadata": null,
-              "_links": null
-            }
-          ]
-        }
-      },
+      "key": "93f02b09",
+      "pending": false,
       "providerStates": [
         {
           "name": "A request to upload a document on cdam api"
         }
-      ]
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "POST",
+        "path": "/cases/documents"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "documents": [
+              {
+                "_links": null,
+                "classification": "RESTRICTED",
+                "createdBy": null,
+                "createdOn": null,
+                "hashToken": null,
+                "lastModifiedBy": null,
+                "metadata": null,
+                "mimeType": null,
+                "modifiedOn": null,
+                "originalDocumentName": "Test.pdf",
+                "size": 0,
+                "ttl": null
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "case-document-am-client-api"
   }
 }

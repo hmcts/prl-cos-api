@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 )
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {
 
-    @Pact(provider = "referenceData_organisational_Internal", consumer = "prl_cos")
+    @Pact(provider = "referenceData_organisationalInternal", consumer = "prl_cos")
     public V4Pact generatePactFragmentForGetOrganisationById(PactDslWithProvider builder) {
         // @formatter:off
         return builder

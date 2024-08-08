@@ -72,7 +72,7 @@ public class PaymentApiConsumerTest {
         Executor.closeIdleConnections();
     }
 
-    @Pact(provider = "payment-api", consumer = "prl_cos")
+    @Pact(provider = "payment_api", consumer = "prl_cos")
     private V4Pact createPayment(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to create a payment in payments api")
@@ -89,7 +89,7 @@ public class PaymentApiConsumerTest {
             .toPact(V4Pact.class);
     }
 
-    @Pact(provider = "payment-api", consumer = "prl_cos")
+    @Pact(provider = "payment_api", consumer = "prl_cos")
     private V4Pact getPaymentStatus(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to retrieve the payment status")

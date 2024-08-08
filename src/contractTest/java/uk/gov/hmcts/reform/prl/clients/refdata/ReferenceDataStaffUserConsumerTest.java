@@ -63,7 +63,7 @@ public class ReferenceDataStaffUserConsumerTest {
 
     private final String validResponseBody = "gatekeeping/StaffDetailsResponseBody.json";
 
-    @Pact(provider = "staffResponseDetails_Api", consumer = "prl_cos")
+    @Pact(provider = "staffResponseDetailsApi", consumer = "prl_cos")
     public V4Pact generateStaffUsers(PactDslWithProvider builder) throws Exception {
         // @formatter:off
         return builder

@@ -47,7 +47,7 @@ public class CcdApiConsumerTest {
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
-    @Pact(provider = "ccd_data", consumer = "prl_cos")
+    @Pact(provider = "ccd", consumer = "prl_cos")
     private V4Pact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to create a case in CCD")

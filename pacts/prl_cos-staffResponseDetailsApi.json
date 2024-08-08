@@ -1,120 +1,134 @@
 {
-  "provider": {
-    "name": "staffResponseDetailsApi"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "A Request to get staff details",
+      "key": "51bfbc9e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Staff User details for given servicename"
+        }
+      ],
       "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer some-access-token"
+          ],
+          "ServiceAuthorization": [
+            "someServiceAuthToken"
+          ]
+        },
         "method": "GET",
         "path": "/refdata/internal/staff/usersByServiceName",
-        "headers": {
-          "Authorization": "Bearer some-access-token",
-          "ServiceAuthorization": "someServiceAuthToken"
-        },
         "query": {
           "ccd_service_names": [
             "PRIVATELAW"
+          ],
+          "page_number": [
+            "0"
+          ],
+          "page_size": [
+            "250"
           ],
           "sort_column": [
             "lastName"
           ],
           "sort_direction": [
             "ASC"
-          ],
-          "page_size": [
-            "250"
-          ],
-          "page_number": [
-            "0"
           ]
         }
       },
       "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "body": [
-          {
-            "ccd_service_name": "PRIVATELAW",
-            "staff_profile": {
-              "id": "05550b1a-d716-42e7-9980-807cc602f026",
-              "first_name": "Jay",
-              "last_name": "Rama",
-              "region_id": 5,
-              "user_type": "Future Operations",
-              "suspended": "false",
-              "case_allocator": "Y",
-              "task_supervisor": "Y",
-              "staff_admin": "N",
-              "created_time": "2022-01-05T10:15:03.216105",
-              "last_updated_time": "2022-01-05T10:15:03.216105",
-              "email_id": "crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",
-              "region": "North west",
-              "base_location": [
-                {
-                  "created_time": "2022-01-05T10:32:34.582052",
-                  "last_updated_time": "2022-01-05T10:32:34.582052",
-                  "location_id": 218723,
-                  "location": "BARKINGSIDE  MAGISTRATES COURT",
-                  "is_primary": true
-                },
-                {
-                  "created_time": "2022-01-05T10:32:34.582071",
-                  "last_updated_time": "2022-01-05T10:32:34.582071",
-                  "location_id": 271588,
-                  "location": "AMERSHAM LAW COURTS",
-                  "is_primary": false
-                }
-              ],
-              "user_type_id": 2,
-              "role": [
-                {
-                  "role_id": "7",
-                  "created_time": "2022-01-05T10:32:34.597694",
-                  "last_updated_time": "2022-01-05T10:32:34.597695",
-                  "role": "National Business Centre Listing Team",
-                  "is_primary": true
-                }
-              ],
-              "skills": [
+        "body": {
+          "content": [
+            {
+              "ccd_service_name": "PRIVATELAW",
+              "staff_profile": {
+                "base_location": [
+                  {
+                    "created_time": "2022-01-05T10:32:34.582052",
+                    "is_primary": true,
+                    "last_updated_time": "2022-01-05T10:32:34.582052",
+                    "location": "BARKINGSIDE  MAGISTRATES COURT",
+                    "location_id": 218723
+                  },
+                  {
+                    "created_time": "2022-01-05T10:32:34.582071",
+                    "is_primary": false,
+                    "last_updated_time": "2022-01-05T10:32:34.582071",
+                    "location": "AMERSHAM LAW COURTS",
+                    "location_id": 271588
+                  }
+                ],
+                "case_allocator": "Y",
+                "created_time": "2022-01-05T10:15:03.216105",
+                "email_id": "crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",
+                "first_name": "Jay",
+                "id": "05550b1a-d716-42e7-9980-807cc602f026",
+                "last_name": "Rama",
+                "last_updated_time": "2022-01-05T10:15:03.216105",
+                "region": "North west",
+                "region_id": 5,
+                "role": [
+                  {
+                    "created_time": "2022-01-05T10:32:34.597694",
+                    "is_primary": true,
+                    "last_updated_time": "2022-01-05T10:32:34.597695",
+                    "role": "National Business Centre Listing Team",
+                    "role_id": "7"
+                  }
+                ],
+                "skills": [
 
-              ],
-              "work_area": [
-                {
-                  "service_code": "ABA3",
-                  "area_of_work": "Family Public Law",
-                  "created_time": "2022-01-05T10:32:34.617412",
-                  "last_updated_time": "2022-01-05T10:32:34.617412"
-                },
-                {
-                  "service_code": "ABA5",
-                  "area_of_work": "Family Private Law",
-                  "created_time": "2022-01-05T10:32:34.617391",
-                  "last_updated_time": "2022-01-05T10:32:34.617392"
-                }
-              ]
+                ],
+                "staff_admin": "N",
+                "suspended": "false",
+                "task_supervisor": "Y",
+                "user_type": "Future Operations",
+                "user_type_id": 2,
+                "work_area": [
+                  {
+                    "area_of_work": "Family Public Law",
+                    "created_time": "2022-01-05T10:32:34.617412",
+                    "last_updated_time": "2022-01-05T10:32:34.617412",
+                    "service_code": "ABA3"
+                  },
+                  {
+                    "area_of_work": "Family Private Law",
+                    "created_time": "2022-01-05T10:32:34.617391",
+                    "last_updated_time": "2022-01-05T10:32:34.617392",
+                    "service_code": "ABA5"
+                  }
+                ]
+              }
             }
-          }
-        ]
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
       },
-      "providerStates": [
-        {
-          "name": "Staff User details for given servicename"
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "staffResponseDetailsApi"
   }
 }
