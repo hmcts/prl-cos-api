@@ -2240,6 +2240,7 @@ public class ServiceOfApplicationServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .caseInvites(caseInviteList)
             .otherPartyInTheCaseRevised(Collections.singletonList(element(person1)))
+            .isCafcass(No)
             .build();
 
         List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()

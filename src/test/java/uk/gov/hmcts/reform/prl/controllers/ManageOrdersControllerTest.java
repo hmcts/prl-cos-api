@@ -2292,6 +2292,7 @@ public class ManageOrdersControllerTest {
             .children(List.of(element(Child.builder().firstName("ch").build())))
             .courtName("testcourt")
             .caseTypeOfApplication("C100")
+            .isCafcass(Yes)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
             .build();
