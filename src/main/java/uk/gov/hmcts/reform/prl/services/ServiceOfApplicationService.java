@@ -1179,7 +1179,7 @@ public class ServiceOfApplicationService {
         });
     }
 
-    private List<Document> removeCoverLettersFromThePacks(List<Document> documents) {
+    public List<Document> removeCoverLettersFromThePacks(List<Document> documents) {
         return documents.stream().filter(document -> !document.getDocumentFileName().contains("cover_letter")).toList();
     }
 

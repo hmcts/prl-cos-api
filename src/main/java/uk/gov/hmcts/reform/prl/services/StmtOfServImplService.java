@@ -74,9 +74,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ENABL
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.*;
 
 @Service
 @Slf4j
@@ -366,14 +364,16 @@ public class StmtOfServImplService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        log.info("Cover letter map {}", coverLettersMap);
+        List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument()
+                                                           .stream()
+                                                           .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                                                           .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue()
+                                                                                                                   .getDocumentFileName()))
+                                                           .toList());
+        log.info("Pack Docs {}", docs);
+        serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs));
         if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            unServedRespondentPack = unServedRespondentPack.toBuilder()
-                .packDocument(unServedRespondentPack.getPackDocument()
-                                  .stream()
-                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
-                                      SOA_FL415_FILENAME)).toList())
-                .build();
-            List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument());
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
             if (null != coverLettersMap.get(partyId)) {
                 docs.addAll(coverLettersMap.get(partyId));
@@ -385,13 +385,6 @@ public class StmtOfServImplService {
                 bulkPrintDetails.add(element(getBulkPrintDetailsForaParty(docs, partyId)));
             }
         } else {
-            unServedRespondentPack = unServedRespondentPack.toBuilder()
-                .packDocument(unServedRespondentPack.getPackDocument()
-                                  .stream()
-                                  .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-                                  .toList())
-                .build();
-            List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument());
             for (int i = 0; i < caseData.getRespondents().size(); i++) {
                 String partyId = String.valueOf(caseData.getRespondents().get(i).getId());
                 if (null != coverLettersMap.get(partyId)) {
