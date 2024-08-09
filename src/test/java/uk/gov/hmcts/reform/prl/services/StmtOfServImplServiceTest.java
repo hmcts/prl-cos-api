@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -219,7 +218,6 @@ public class StmtOfServImplServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testToHandleSosAboutToSubmitForC100WhileServingApplicationPack() {
 
@@ -357,7 +355,6 @@ public class StmtOfServImplServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testToHandleSosAboutToSubmitForFL401WhileServingApplicationPack() {
 
@@ -400,6 +397,7 @@ public class StmtOfServImplServiceTest {
             .respondentsFL401(PartyDetails.builder()
                                   .firstName("testFl401")
                                   .lastName("lastFl401")
+                                  .partyId(UUID.fromString(TEST_UUID))
                                   .build())
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
@@ -492,7 +490,6 @@ public class StmtOfServImplServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testToHandleSosAboutToSubmitForC100Scenario2WhileServingApplicationPack() {
 

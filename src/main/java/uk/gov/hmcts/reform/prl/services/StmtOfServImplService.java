@@ -373,9 +373,11 @@ public class StmtOfServImplService {
                                   .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
                                       SOA_FL415_FILENAME)).toList())
                 .build();
-            List<Element<Document>> docs = unServedRespondentPack.getPackDocument();
+            List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument());
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
-            docs.addAll(coverLettersMap.get(partyId));
+            if (null != coverLettersMap.get(partyId)) {
+                docs.addAll(coverLettersMap.get(partyId));
+            }
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
@@ -389,10 +391,12 @@ public class StmtOfServImplService {
                                   .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
                                   .toList())
                 .build();
-            List<Element<Document>> docs = unServedRespondentPack.getPackDocument();
+            List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument());
             for (int i = 0; i < caseData.getRespondents().size(); i++) {
                 String partyId = String.valueOf(caseData.getRespondents().get(i).getId());
-                docs.addAll(coverLettersMap.get(partyId));
+                if (null != coverLettersMap.get(partyId)) {
+                    docs.addAll(coverLettersMap.get(partyId));
+                }
                 if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                     emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
                 } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
