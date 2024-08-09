@@ -365,7 +365,6 @@ public class StmtOfServImplService {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        log.info("Cover letter map {}", coverLettersMap);
         List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument()
                                                            .stream()
                                                            .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
@@ -391,13 +390,15 @@ public class StmtOfServImplService {
                 if (null != coverLettersMap.get(partyId)) {
                     docs.addAll(coverLettersMap.get(partyId));
                 }
-                log.info("Docs after adding cover letter {}", docs);
+                log.info("Docs after adding cover letter {} {}", partyId, docs);
+                log.info("Cover letter map {}", coverLettersMap.get(partyId));
                 if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                     emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
                 } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
                     .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                     bulkPrintDetails.add(element(getBulkPrintDetailsForaParty(docs, partyId)));
                 }
+                docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
             }
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
