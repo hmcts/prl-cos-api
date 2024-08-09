@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -880,7 +881,7 @@ public class CaseUtils {
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, String draftOrderId) {
         if (null != draftOrderCollection) {
             return draftOrderCollection.stream()
-                .filter(element -> element.getId().equals(draftOrderId))
+                .filter(element -> Objects.equals(element.getId(), draftOrderId))
                 .map(Element::getValue)
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
