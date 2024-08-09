@@ -197,6 +197,7 @@ public class StmtOfServImplServiceTest {
             .respondentsFL401(PartyDetails.builder()
                                   .firstName("testFl401")
                                   .lastName("lastFl401")
+                                  .partyId(UUID.randomUUID())
                                   .build())
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceAddRecipient(listOfSos)

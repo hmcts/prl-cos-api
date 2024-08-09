@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Builder(toBuilder = true)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FL404 {
 
     private final String fl404bCourtName;
