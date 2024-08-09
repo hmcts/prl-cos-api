@@ -259,9 +259,8 @@ public class CaseDataService {
 
         List<Should> shoulds = new ArrayList<>();
         for (String caseType : caseTypeList) {
-            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType)
-                                                   .cafcassServedOptions(YesOrNo.Yes)
-                                                   .build()).build());
+            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
+            shoulds.add(Should.builder().match(Match.builder().cafcassServedOptions(YesOrNo.Yes).build()).build());
         }
         return shoulds;
     }
