@@ -2453,7 +2453,8 @@ public class DraftAnOrderService {
         return caseData;
     }
 
-    public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest, String clientContext) throws Exception {
+    public Map<String, Object> handleDocumentGeneration(String authorisation,
+                                                        CallbackRequest callbackRequest, String clientContext) throws Exception {
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2481,9 +2482,12 @@ public class DraftAnOrderService {
                     caseData.getManageOrders()
                         .getRejectedOrdersDynamicList()
                 );
-            } else if(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+            } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                draftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), CaseUtils.getDraftOrderId(waMapper));
+                draftOrder = CaseUtils.getDraftOrderFromCollectionId(
+                    caseData.getDraftOrderCollection(),
+                    CaseUtils.getDraftOrderId(waMapper)
+                );
             }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
