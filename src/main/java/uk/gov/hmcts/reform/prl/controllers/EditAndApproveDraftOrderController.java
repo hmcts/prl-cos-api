@@ -88,7 +88,9 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("*****clientContext in /populate-draft-order-dropdown****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),

@@ -868,7 +868,9 @@ public class CaseUtils {
 
     public static String getDraftOrderId(WaMapper waMapper) {
         if (null != waMapper) {
+            log.info("***Inside getDraftOrderId {}", waMapper);
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                log.info("***draftOrderId {}", waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId());
                 return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId();
             }
         }
