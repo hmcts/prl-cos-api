@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -237,7 +238,7 @@ public class CaseDataService {
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
         Filter filter = Filter.builder().range(range).build();
         Must must = Must.builder().stateFilter(stateFilter).build();
-        Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(1).must(must).build();
+        Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(2).must(must).build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
     }
@@ -258,7 +259,9 @@ public class CaseDataService {
 
         List<Should> shoulds = new ArrayList<>();
         for (String caseType : caseTypeList) {
-            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
+            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType)
+                                                   .cafcassServedOptions(YesOrNo.Yes)
+                                                   .build()).build());
         }
         return shoulds;
     }
