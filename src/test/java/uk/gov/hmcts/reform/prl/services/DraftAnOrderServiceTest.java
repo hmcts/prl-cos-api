@@ -5188,7 +5188,7 @@ public class DraftAnOrderServiceTest {
             .eventId(Event.DRAFT_AN_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test
@@ -5217,7 +5217,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
             TEST_UUID));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test
@@ -5244,7 +5244,7 @@ public class DraftAnOrderServiceTest {
             .eventId(Event.DRAFT_AN_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
 
@@ -5285,7 +5285,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test
@@ -5360,7 +5360,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test
@@ -5408,7 +5408,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test
@@ -5458,7 +5458,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
     }
 
     @Test

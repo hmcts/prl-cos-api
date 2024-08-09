@@ -69,6 +69,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -2452,7 +2453,7 @@ public class DraftAnOrderService {
         return caseData;
     }
 
-    public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest, String clientContext) throws Exception {
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2480,12 +2481,9 @@ public class DraftAnOrderService {
                     caseData.getManageOrders()
                         .getRejectedOrdersDynamicList()
                 );
-            } else {
-                //Todo Client context check for edit and approve?
-                draftOrder = getSelectedDraftOrderDetails(
-                    caseData.getDraftOrderCollection(),
-                    caseData.getDraftOrdersDynamicList()
-                );
+            } else if(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                draftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), CaseUtils.getDraftOrderId(waMapper));
             }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
