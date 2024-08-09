@@ -124,7 +124,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("*****clientContext****{}", clientContext);
+        log.info("*****clientContext in about to start****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -513,11 +513,11 @@ public class EditAndApproveDraftOrderController {
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
-                    DraftOrder draftOrder = draftAnOrderService
-                        .getSelectedDraftOrderDetails(
-                            caseData.getDraftOrderCollection(),
-                            caseData.getDraftOrdersDynamicList()
-                        );
+                    WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                    DraftOrder draftOrder = CaseUtils.getDraftOrderFromCollectionId(
+                        caseData.getDraftOrderCollection(),
+                        CaseUtils.getDraftOrderId(waMapper)
+                    );
                     manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(
                         callbackRequest.getCaseDetails(),
                         draftOrder
