@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_C
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
 @Slf4j
@@ -372,7 +373,7 @@ public class StmtOfServImplService {
                                                                                                                    .getDocumentFileName()))
                                                            .toList());
         log.info("Pack Docs {}", docs);
-        serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs));
+        docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
             if (null != coverLettersMap.get(partyId)) {
@@ -390,6 +391,7 @@ public class StmtOfServImplService {
                 if (null != coverLettersMap.get(partyId)) {
                     docs.addAll(coverLettersMap.get(partyId));
                 }
+                log.info("Docs after adding cover letter {}", docs);
                 if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                     emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
                 } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
