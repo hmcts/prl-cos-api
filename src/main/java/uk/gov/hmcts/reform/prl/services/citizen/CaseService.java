@@ -146,7 +146,6 @@ public class CaseService {
     public static final DateTimeFormatter DATE_FORMATTER_D_MMM_YYYY = DateTimeFormatter.ofPattern(D_MMM_YYYY);
     public static final DateTimeFormatter DATE_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(YYYY_MM_DD);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
-    public static final String COVER_LETTER_PREFIX = "cover_letter";
     public static final String IS_NEW = "isNew";
     public static final String IS_FINAL = "isFinal";
     public static final String IS_MULTIPLE = "isMultiple";
@@ -581,17 +580,12 @@ public class CaseService {
                     ))
                     .applicantSoaPack(
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? emailNotificationDetails.getDocs().stream()
-                            .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
-                            .toList() : null
+                            ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
+                            : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? emailNotificationDetails.getDocs().stream()
-                            .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
-                                .toList()
+                            ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
                     .wasCafcassServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
@@ -639,17 +633,12 @@ public class CaseService {
                     ))
                     .applicantSoaPack(
                         SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? bulkPrintDetails.getPrintDocs().stream()
-                            .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
-                            .toList() : null
+                            ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
+                            : null
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? bulkPrintDetails.getPrintDocs().stream()
-                            .map(Element::getValue)
-                            .filter(document -> !document.getDocumentFileName().contains(COVER_LETTER_PREFIX))
-                                .toList()
+                            ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
                             : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
                     .build()
@@ -1140,6 +1129,7 @@ public class CaseService {
             //SOA Applicant - personal(court admin/court bailiff) OR non-personal service
             if (SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
                 && CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
+                && !UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())
                 && !isSosCompletedPostSoa(caseData)) {
                 //CA - CAN4, DA - DN1
                 Map<String, Object> notifMap = new HashMap<>();
