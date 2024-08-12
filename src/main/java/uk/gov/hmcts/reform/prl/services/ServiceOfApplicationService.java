@@ -1130,7 +1130,7 @@ public class ServiceOfApplicationService {
                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                     List<DynamicMultiselectListElement> selectedRespondents,
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
-        log.info("Sending notification to respondent solicitor");
+        log.info("Sending notification to respondent or solicitor");
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
@@ -1846,43 +1846,6 @@ public class ServiceOfApplicationService {
         });
         log.info("email notification details {}", emailNotificationDetails);
         log.info("bulk print details {}", bulkPrintDetails);
-    }
-
-    private void sendNotificationsToCitizenRespondentsC100(String authorization,
-                                                              List<DynamicMultiselectListElement> selectedRespondents,
-                                                          CaseData caseData,  List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                          List<Document> docs, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        log.info("Sending notification to respondent");
-        selectedRespondents.forEach(respondent -> {
-            Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
-            if (selectedParty.isPresent()) {
-                Element<PartyDetails> selectedRespondent = selectedParty.get();
-                if (CaseUtils.hasLegalRepresentation(selectedRespondent.getValue())) {
-                    log.info("Respondent is represented");
-                    try {
-                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                        dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
-                        dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
-                        populateLanguageMap(caseData, dynamicData);
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                             .sendEmailUsingTemplateWithAttachments(authorization,
-                                                selectedRespondent.getValue().getSolicitorEmail(), docs,
-                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
-                                                dynamicData, SERVED_PARTY_RESPONDENT)));
-                    } catch (Exception e) {
-                        log.error("Failed to send email to respondent solicitor {}", e.getMessage());
-                    }
-                } else {
-                    log.info("Access to be granted");
-                    Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                selectedRespondent, Templates.PRL_LET_ENG_RE5);
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization,
-                                                        docs,
-                                                        bulkPrintDetails, selectedRespondent, coverLetter,
-                                                        SERVED_PARTY_RESPONDENT);
-                }
-            }
-        });
     }
 
     private EmailNotificationDetails sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
@@ -3306,48 +3269,25 @@ public class ServiceOfApplicationService {
                         partyIds);
 
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
-                    if (CaseUtils.isCitizenCase(caseData)) {
-                        log.info("Applicant is not represented");
-                        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                            sendNotificationsToCitizenRespondentsC100(authorization,
-                                                                      respondentList,
-                                                                      caseData,
-                                                                      bulkPrintDetails,
-                                                                      removeCoverLettersFromThePacks(respondentDocs),
-                                                                      emailNotificationDetails
-                            );
-                        } else {
-                            handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
-                                caseData,
-                                authorization,
-                                emailNotificationDetails,
-                                bulkPrintDetails,
-                                removeCoverLettersFromThePacks(respondentDocs)
-                            );
-                        }
+                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                        sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
+                                                                           authorization,
+                                                                           emailNotificationDetails,
+                                                                           bulkPrintDetails,
+                                                                           respondentList,
+                                                                           respondentDocs,
+                                                                           respondentDocs
+                        );
                     } else {
-                        // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                            sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
-                                                                               authorization,
-                                                                               emailNotificationDetails,
-                                                                               bulkPrintDetails,
-                                                                               respondentList,
-                                                                               respondentDocs,
-                                                                               respondentDocs
-                            );
-                        } else {
-                            handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
-                                caseData,
-                                authorization,
-                                emailNotificationDetails,
-                                bulkPrintDetails,
-                                removeCoverLettersFromThePacks(respondentDocs)
-                            );
-                        }
-
+                        log.info("Applicant is not represented");
+                        handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
+                            caseData,
+                            authorization,
+                            emailNotificationDetails,
+                            bulkPrintDetails,
+                            removeCoverLettersFromThePacks(respondentDocs)
+                        );
                     }
-
                 }
             }
         }
