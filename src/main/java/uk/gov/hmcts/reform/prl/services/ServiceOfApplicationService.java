@@ -3322,7 +3322,7 @@ public class ServiceOfApplicationService {
                                 authorization,
                                 emailNotificationDetails,
                                 bulkPrintDetails,
-                                respondentDocs
+                                removeCoverLettersFromThePacks(respondentDocs)
                             );
                         }
                     } else {
@@ -3342,7 +3342,7 @@ public class ServiceOfApplicationService {
                                 authorization,
                                 emailNotificationDetails,
                                 bulkPrintDetails,
-                                respondentDocs
+                                removeCoverLettersFromThePacks(respondentDocs)
                             );
                         }
 
