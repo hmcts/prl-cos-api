@@ -3327,14 +3327,25 @@ public class ServiceOfApplicationService {
                         }
                     } else {
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                        sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
-                                                                           authorization,
-                                                                           emailNotificationDetails,
-                                                                           bulkPrintDetails,
-                                                                           respondentList,
-                                                                           respondentDocs,
-                                                                           respondentDocs
-                        );
+                        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                            sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
+                                                                               authorization,
+                                                                               emailNotificationDetails,
+                                                                               bulkPrintDetails,
+                                                                               respondentList,
+                                                                               respondentDocs,
+                                                                               respondentDocs
+                            );
+                        } else {
+                            handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
+                                caseData,
+                                authorization,
+                                emailNotificationDetails,
+                                bulkPrintDetails,
+                                respondentDocs
+                            );
+                        }
+
                     }
 
                 }
@@ -3386,6 +3397,7 @@ public class ServiceOfApplicationService {
                                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                            List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                            List<Document> respondentDocs) {
+        log.info("Da non personal service to respondent");
         String template = PRL_LET_ENG_FL401_RE1;
         if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
             template = PRL_LET_ENG_FL401_RE4;
