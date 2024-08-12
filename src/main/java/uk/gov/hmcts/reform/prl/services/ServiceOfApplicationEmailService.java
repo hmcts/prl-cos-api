@@ -46,8 +46,6 @@ public class ServiceOfApplicationEmailService {
 
     private final SendgridService sendgridService;
 
-    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
         sendGovNotifyEmail(
             LanguagePreference.english,
@@ -60,7 +58,8 @@ public class ServiceOfApplicationEmailService {
             .servedParty(servedParty)
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                           .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)))).build();
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseData caseData) {
@@ -93,7 +92,8 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                   .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                     .build();
             }
         } catch (IOException e) {
@@ -127,7 +127,8 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                   .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)))).build();
             }
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
