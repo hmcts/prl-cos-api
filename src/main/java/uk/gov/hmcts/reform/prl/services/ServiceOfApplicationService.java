@@ -105,7 +105,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUME
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
