@@ -808,4 +808,5 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonUnwrapped
     private RemoveDraftOrderFields removeDraftOrderFields;
+
 }
