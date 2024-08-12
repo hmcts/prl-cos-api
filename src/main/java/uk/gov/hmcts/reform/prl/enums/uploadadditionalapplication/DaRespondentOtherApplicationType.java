@@ -17,6 +17,11 @@ public enum DaRespondentOtherApplicationType {
         "FL403_EXTEND_AN_ORDER",
         "FL403 - Application to vary, discharge or extend an order"
     ),
+    @JsonProperty("EX740_CROSS_EXAMINATION_VICTIM")
+    EX740_CROSS_EXAMINATION_VICTIM(
+            "EX740_CROSS_EXAMINATION_VICTIM",
+            "EX740 - Application to prohibit cross examination (victim)"
+    ),
     @JsonProperty("EX741_CROSS_EXAMINATION_PERPETRATOR")
     EX741_CROSS_EXAMINATION_PERPETRATOR(
         "EX741_CROSS_EXAMINATION_PERPETRATOR",
