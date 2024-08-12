@@ -360,8 +360,8 @@ public class StmtOfServImplService {
         return respondentListItems;
     }
 
-    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization, Map<String,
-        List<Element<Document>>> coverLettersMap) {
+    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization,
+                                                                                Map<String, List<Element<Document>>> coverLettersMap) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -376,7 +376,7 @@ public class StmtOfServImplService {
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
             if (null != coverLettersMap.get(partyId)) {
-                docs.addAll(coverLettersMap.get(partyId));
+                docs.addAll(0, coverLettersMap.get(partyId));
             }
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
@@ -388,7 +388,7 @@ public class StmtOfServImplService {
             for (int i = 0; i < caseData.getRespondents().size(); i++) {
                 String partyId = String.valueOf(caseData.getRespondents().get(i).getId());
                 if (null != coverLettersMap.get(partyId)) {
-                    docs.addAll(coverLettersMap.get(partyId));
+                    docs.addAll(0, coverLettersMap.get(partyId));
                 }
                 log.info("Docs after adding cover letter {} {}", partyId, docs);
                 log.info("Cover letter map {}", coverLettersMap.get(partyId));
