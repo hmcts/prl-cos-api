@@ -1029,31 +1029,46 @@ public class ServiceOfApplicationService {
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             docs.addAll(packDocs);
             if (sendEmail) {
-                try {
-                    log.info(
-                        "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
-                        caseData.getId()
-                    );
-                    dynamicData.put("name", servedParty);
-                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                    populateLanguageMap(caseData, dynamicData);
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailUsingTemplateWithAttachments(
-                                                                 authorization, emailAddress,
-                                                                 docs,
-                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                                                                 dynamicData,
-                                                                 servedParty
-                                                             )));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                sendEmailDaNonPersonalService(
+                    caseData,
+                    authorization,
+                    emailNotificationDetails,
+                    emailAddress,
+                    servedParty,
+                    docs,
+                    dynamicData
+                );
             } else {
                 sendPostWithAccessCodeLetterToParty(caseData,
                                                     authorization, packDocs,
                                                     bulkPrintDetails, respondentFl401.get(0),
                                                     coverLetter, servedParty);
             }
+        }
+    }
+
+    private void sendEmailDaNonPersonalService(CaseData caseData, String authorization,
+                                               List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                               String emailAddress, String servedParty, List<Document> docs,
+                                               Map<String, Object> dynamicData) {
+        try {
+            log.info(
+                "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
+                caseData.getId()
+            );
+            dynamicData.put("name", servedParty);
+            dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+            populateLanguageMap(caseData, dynamicData);
+            emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                     .sendEmailUsingTemplateWithAttachments(
+                                                         authorization, emailAddress,
+                                                         docs,
+                                                         SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                         dynamicData,
+                                                         servedParty
+                                                     )));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -3278,14 +3293,29 @@ public class ServiceOfApplicationService {
                                                                            respondentDocs
                         );
                     } else {
-                        log.info("Applicant is not represented");
-                        handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
-                            caseData,
-                            authorization,
-                            emailNotificationDetails,
-                            bulkPrintDetails,
-                            removeCoverLettersFromThePacks(respondentDocs)
-                        );
+                        if (CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())) {
+                            log.info("respondent is represented -> serving notification to solicitor");
+                            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                            sendEmailDaNonPersonalService(
+                                caseData,
+                                authorization,
+                                emailNotificationDetails,
+                                caseData.getRespondentsFL401().getSolicitorEmail(),
+                                caseData.getRespondentsFL401().getRepresentativeFullName(),
+                                removeCoverLettersFromThePacks(respondentDocs),
+                                dynamicData
+                            );
+                        } else {
+                            log.info("respondent is not represented");
+                            handleDaNonPersonalServiceRespondentOnConfCheckSuccessful(
+                                caseData,
+                                authorization,
+                                emailNotificationDetails,
+                                bulkPrintDetails,
+                                removeCoverLettersFromThePacks(respondentDocs)
+                            );
+                        }
+
                     }
                 }
             }
