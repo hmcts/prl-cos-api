@@ -4269,7 +4269,7 @@ public class ServiceOfApplicationServiceTest {
             );
             if (caseType.equalsIgnoreCase("C100")) {
                 assertEquals(
-                    "By email and post",
+                    "By email",
                     updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
                 );
                 assertEquals(
