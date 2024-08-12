@@ -431,6 +431,7 @@ public class ServiceOfApplicationService {
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
+            log.info("*** Handling notifications for DA Non personal service ***");
             handleNotificationDaNonPersonalService(caseData, authorization, emailNotificationDetails, bulkPrintDetails,
                                                    staticDocs
             );
@@ -1012,20 +1013,19 @@ public class ServiceOfApplicationService {
                 emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
+                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4);
+                } else {
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1);
+                }
                 if (!ContactPreferences.email.equals(respondentFl401.get(0).getValue().getContactPreferences())) {
                     sendEmail = false;
-                } else {
-                    if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                        coverLetter = generateCoverLetterBasedOnCaseAccess(
-                            authorization,
-                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4);
-                    } else {
-                        coverLetter = generateCoverLetterBasedOnCaseAccess(
-                            authorization,
-                            caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1);
-                    }
-                    docs.add(coverLetter);
                 }
+                docs.add(coverLetter);
             }
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             docs.addAll(packDocs);
