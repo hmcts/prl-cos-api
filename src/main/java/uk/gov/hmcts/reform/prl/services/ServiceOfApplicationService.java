@@ -453,7 +453,7 @@ public class ServiceOfApplicationService {
                                                             List<Element<BulkPrintDetails>> bulkPrintDetails, String whoIsResponsibleForServing,
                                                             List<Document> staticDocs) {
         if (CaseUtils.isCitizenCase(caseData)) {
-            log.info("Case created by citizen");
+            log.info("Handling Personal service for DA Citizen case");
             whoIsResponsibleForServing = handlePersonalServiceNotificationsDaCitizenOptions(
                 caseData,
                 authorization,
@@ -463,6 +463,7 @@ public class ServiceOfApplicationService {
                 staticDocs
             );
         } else {
+            log.info("Handling Personal service for DA Represented case");
             whoIsResponsibleForServing = handleNotificationsDaPersonalServiceSolicitorOptions(
                 caseData,
                 authorization,
