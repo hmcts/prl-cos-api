@@ -3122,11 +3122,10 @@ public class ServiceOfApplicationService {
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         List<Document> packcDocs = new ArrayList<>();
-        if (!CaseUtils.hasLegalRepresentation(caseData.getApplicantsFL401()))
-        {
-            packcDocs.add(generateCoverLetterBasedOnCaseAccess(
-            authorization,
-            caseData, element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()), PRL_LET_ENG_AP2));
+        if (!CaseUtils.hasLegalRepresentation(caseData.getApplicantsFL401())) {
+            packcDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                               element(caseData.getApplicantsFL401().getPartyId(),
+                                                                       caseData.getApplicantsFL401()), PRL_LET_ENG_AP2));
         }
         packcDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs));
         final SoaPack unServedApplicantPack = SoaPack.builder()
