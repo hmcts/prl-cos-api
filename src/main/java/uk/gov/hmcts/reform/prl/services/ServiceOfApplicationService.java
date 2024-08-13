@@ -3121,7 +3121,13 @@ public class ServiceOfApplicationService {
             .personalServiceBy(personalServiceBy)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
-        List<Document> packcDocs = getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs);
+        List<Document> packcDocs = new ArrayList<>();
+        if (!CaseUtils.hasLegalRepresentation(caseData.getApplicantsFL401())) {
+            packcDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                               element(caseData.getApplicantsFL401().getPartyId(),
+                                                                       caseData.getApplicantsFL401()), PRL_LET_ENG_AP2));
+        }
+        packcDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs));
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packcDocs))
             .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
@@ -3212,23 +3218,28 @@ public class ServiceOfApplicationService {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         List<Element<Document>> packDocs = new ArrayList<>();
-
-        selectedPartyIds.forEach(partyId -> {
+        boolean mainApplicant = true;
+        for (String partyId : selectedPartyIds) {
             Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
-            party.ifPresent(element -> {
-                if (CaseUtils.hasLegalRepresentation(element.getValue())) {
-                    packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
-                } else {
+            if (party.isPresent()) {
+                if (!CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                     packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
                         authorization,
                         caseData,
-                        element,
+                        party.get(),
                         Templates.PRL_LET_ENG_AP6
                     )));
-                    packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
                 }
-            });
-        });
+                if (mainApplicant) {
+                    if (CaseUtils.hasLegalRepresentation(party.get().getValue())) {
+                        packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
+                    } else {
+                        packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
+                    }
+                }
+                mainApplicant = false;
+            }
+        }
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
