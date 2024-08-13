@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
     @Lazy
-    private EventsChecker eventsChecker;
+    private final EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
