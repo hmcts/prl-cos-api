@@ -459,12 +459,12 @@ public class StmtOfServImplService {
             = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
-        if (null != updatedCaseDataMap.get(UNSERVED_CITIZEN_RESPONDENT_PACK)
-            && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument())) {
-            List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
-            updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
-            updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            if (YesOrNo.No.equals(sosObject.getIsOrder())) {
+        if (YesOrNo.No.equals(sosObject.getIsOrder())) {
+            if (null != updatedCaseDataMap.get(UNSERVED_CITIZEN_RESPONDENT_PACK)
+                && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument())) {
+                List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
+                updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
+                updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
                 updateFinalListOfServedApplications(
                     authorisation,
                     startAllTabsUpdateDataContent.authorisation(),
@@ -472,10 +472,17 @@ public class StmtOfServImplService {
                     sosObject.getPartiesServed(),
                     updatedCaseDataMap
                 );
-                updatedCaseDataMap.put(UNSERVED_CITIZEN_RESPONDENT_PACK,
-                                       updateUnserVedCitizenRespondentPack(sosObject.getPartiesServed(), updatedCaseData.getServiceOfApplication()
-                                           .getUnservedCitizenRespondentPack()));
+                updatedCaseDataMap.put(
+                    UNSERVED_CITIZEN_RESPONDENT_PACK,
+                    updateUnserVedCitizenRespondentPack(
+                        sosObject.getPartiesServed(),
+                        updatedCaseData.getServiceOfApplication()
+                            .getUnservedCitizenRespondentPack()
+                    )
+                );
             }
+        } else if (YesOrNo.Yes.equals(sosObject.getIsOrder())) {
+            handleSosForOrders(authorisation, updatedCaseData, updatedCaseDataMap);
         }
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
