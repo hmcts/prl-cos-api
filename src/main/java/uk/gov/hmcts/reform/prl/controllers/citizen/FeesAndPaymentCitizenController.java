@@ -32,7 +32,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Tag(name = "fees-and-payment-controller")
 @RestController
 @RequestMapping("/fees-and-payment-apis")
@@ -40,13 +40,9 @@ public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String LOGGERMESSAGE = "Invalid Client";
 
-    @Autowired
     private AuthorisationService authorisationService;
-
-    @Autowired
     private FeeService feeService;
 
-    @Autowired
     private PaymentRequestService paymentRequestService;
 
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
