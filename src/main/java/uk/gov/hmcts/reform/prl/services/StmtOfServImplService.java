@@ -534,6 +534,8 @@ public class StmtOfServImplService {
                                                                                 .printDocs(unwrapElements(packDocs).stream()
                                                                                                .map(ElementUtils::element)
                                                                                                .toList())
+                                                                                .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(
+                                                                                    ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                                                                 .partyIds(String.join(",", partiesList))
                                                                                 .build()))).build()));
         updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
