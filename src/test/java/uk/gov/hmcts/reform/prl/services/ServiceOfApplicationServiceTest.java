@@ -2991,6 +2991,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -4268,7 +4269,7 @@ public class ServiceOfApplicationServiceTest {
             );
             if (caseType.equalsIgnoreCase("C100")) {
                 assertEquals(
-                    "By email and post",
+                    "By email",
                     updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
                 );
                 assertEquals(
@@ -4648,23 +4649,10 @@ public class ServiceOfApplicationServiceTest {
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIdsSoa)
-                                                                 .personalServiceBy(unrepresentedApplicant.toString())
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIdsSoa)
-                                                                  .personalServiceBy(unrepresentedApplicant.toString())
-                                                                  .build())
                                       .applicationServedYesNo(Yes)
-                                      .unServedLaPack(SoaPack.builder()
-                                                          .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
-                                                          .partyIds(partyIdsSoa)
-                                                          .packDocument(List.of(element(Document.builder().build())))
-                                                          .build())
                                       .build())
-            .finalDocument(Document.builder().build())
-            .finalWelshDocument(Document.builder().build())
+            .finalDocument(Document.builder().documentFileName(testString).build())
+            .finalWelshDocument(Document.builder().documentFileName(testString).build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
