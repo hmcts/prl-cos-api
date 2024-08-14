@@ -1247,7 +1247,7 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
-            return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
+            return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
         }
         return processNonConfidentialSoa(
             authorisation,
@@ -1336,22 +1336,21 @@ public class ServiceOfApplicationService {
                       .confirmationBody(confirmationBody).build());
     }
 
-    private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, CallbackRequest callbackRequest,
+    private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, Map<String, Object> caseDataMap,
                                                                                     CaseData caseData,
                                                                                     StartAllTabsUpdateDataContent updatedCaseDataContent) {
-        Map<String, Object> caseDataMap;
-        caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
-                            ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
-                            : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+            generatePacksForConfidentialCheckC100(authorisation, caseData, caseDataMap);
+        } else {
+            generatePacksForConfidentialCheckFl401(authorisation, caseData, caseDataMap);
+        }
         cleanUpSoaSelections(caseDataMap);
-
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
                 updatedCaseDataContent.authorisation(),
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                String.valueOf(caseData.getId()),
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
                 caseDataMap
@@ -2430,10 +2429,8 @@ public class ServiceOfApplicationService {
         return caseInvites;
     }
 
-    public Map<String, Object> generatePacksForConfidentialCheckC100(CaseDetails caseDetails, String authorization) {
+    public void generatePacksForConfidentialCheckC100(String authorization, CaseData caseData, Map<String, Object> caseDataMap) {
         log.info("Inside generatePacks for confidential check C100 method");
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
             .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
@@ -2442,22 +2439,22 @@ public class ServiceOfApplicationService {
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
-            c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataMap, caseData, dateCreated, c100StaticDocs);
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            buildPacksConfidentialCheckC100Personal(authorization, caseDataMap, caseData, dateCreated, c100StaticDocs);
         }
         //serving other people in the case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            buildUnservedOthersPack(authorization, caseDataMap, caseData, dateCreated, c100StaticDocs);
         } else {
-            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
+            caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         }
 
         //generate packs for Cafcass cymru
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && StringUtils.isNotEmpty(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())) {
-            caseDataUpdated.put(UNSERVED_CAFCASS_CYMRU_PACK, SoaPack.builder()
+            caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, SoaPack.builder()
                     .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())))
                 .build());
         }
@@ -2467,7 +2464,7 @@ public class ServiceOfApplicationService {
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
             if (CollectionUtils.isNotEmpty(docsForLa)) {
-                caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
                     .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                                          .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
@@ -2475,9 +2472,8 @@ public class ServiceOfApplicationService {
                     .build());
             }
         } else {
-            caseDataUpdated.put(UNSERVED_LA_PACK, null);
+            caseDataMap.put(UNSERVED_LA_PACK, null);
         }
-        return caseDataUpdated;
     }
 
     private void buildPacksConfidentialCheckC100Personal(String authorization,
@@ -2663,10 +2659,8 @@ public class ServiceOfApplicationService {
         return c100StaticDocs;
     }
 
-    public Map<String, Object> generatePacksForConfidentialCheckFl401(CaseDetails caseDetails, String authorization) {
+    public void generatePacksForConfidentialCheckFl401(String authorization, CaseData caseData, Map<String, Object> caseDataUpdated) {
         log.info("Inside generatePacksForConfidentialCheck FL401 Method");
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = new HashMap<>();
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
             .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
@@ -2693,7 +2687,6 @@ public class ServiceOfApplicationService {
             getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
             getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
         }
-        return caseDataUpdated;
     }
 
     private void getPacksForConfidentialCheckDaCourtAdminAndBailiff(CaseData caseData, Map<String, Object> caseDataUpdated,
