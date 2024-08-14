@@ -40,10 +40,11 @@ public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String LOGGERMESSAGE = "Invalid Client";
 
-    private AuthorisationService authorisationService;
-    private FeeService feeService;
+    private final AuthorisationService authorisationService;
 
-    private PaymentRequestService paymentRequestService;
+    private final FeeService feeService;
+
+    private final PaymentRequestService paymentRequestService;
 
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
