@@ -496,7 +496,8 @@ public class StmtOfServImplService {
         );
     }
 
-    private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap, CaseData updatedCaseData, String authorisation) {
+    private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap,
+                                                          CaseData updatedCaseData, String authorisation) {
         List<Element<PartyDetails>> partiesServed;
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
             partiesServed = updatedCaseData.getRespondents().stream()
