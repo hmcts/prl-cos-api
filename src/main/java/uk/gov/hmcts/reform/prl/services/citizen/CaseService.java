@@ -1043,10 +1043,11 @@ public class CaseService {
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
             notifMap.put(IS_PERSONAL, true);
-            if (!citizenOrders.get(0).isSosCompleted()) {
+            if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
+                && !citizenOrders.get(0).isSosCompleted()) {
                 //CRNF3 Applicant before SOS
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
-            } else {
+            } else if (SERVED_PARTY_RESPONDENT.equals(partyType)) { // respondent party type check
                 //CRNF2 Respondent after SOS
                 citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_APPLICANT_RESPONDENT, notifMap));
             }
@@ -1064,17 +1065,20 @@ public class CaseService {
             }
         }
         //Any order where SOS is not completed
-        if (SERVED_PARTY_APPLICANT.equals(partyType) // applicant party type check
-            && isAnyOrderPersonalServicePendingSos(citizenOrders)) {
+        CitizenDocuments order = findPersonalServiceLipOrderPendingSos(citizenOrders);
+        if (SERVED_PARTY_APPLICANT.equals(partyType) && null != order) {
             notifMap.put(IS_PERSONAL, true);
+            notifMap.put(ORDER_TYPE_ID, order.getOrderTypeId());
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }
     }
 
-    private boolean isAnyOrderPersonalServicePendingSos(List<CitizenDocuments> citizenOrders) {
+    private CitizenDocuments findPersonalServiceLipOrderPendingSos(List<CitizenDocuments> citizenOrders) {
         return citizenOrders.stream()
             .skip(1) //skip first order as it's already handled
-            .anyMatch(order -> order.isPersonalService() && !order.isSosCompleted());
+            .filter(order -> order.isPersonalService() && !order.isSosCompleted())
+            .findFirst()
+            .orElse(null);
     }
 
     private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {
