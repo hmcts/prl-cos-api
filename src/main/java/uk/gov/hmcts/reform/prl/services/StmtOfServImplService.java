@@ -485,7 +485,7 @@ public class StmtOfServImplService {
                 );
             }
         } else if (YesOrNo.Yes.equals(sosObject.getIsOrder())) {
-            updateSosAndOrderCollectionForCitizenSos(sosObject, updatedCaseDataMap, updatedCaseData);
+            updateSosAndOrderCollectionForCitizenSos(sosObject, updatedCaseDataMap, updatedCaseData, authorisation);
         }
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -496,7 +496,7 @@ public class StmtOfServImplService {
         );
     }
 
-    private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap, CaseData updatedCaseData) {
+    private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap, CaseData updatedCaseData, String authorisation) {
         List<Element<PartyDetails>> partiesServed;
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
             partiesServed = updatedCaseData.getRespondents().stream()
@@ -512,6 +512,8 @@ public class StmtOfServImplService {
         sosRecipients.add(element(StmtOfServiceAddRecipient.builder()
             .stmtOfServiceDocument(sosObject.getCitizenSosDocs())
             .selectedPartyId(String.join(COMMA, sosObject.getPartiesServed()))
+                                      .uploadedBy(getSosUploadedBy(authorisation))
+                                      .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .partiesServedDateTime(sosObject.getPartiesServedDate())
             .build()));
         //Add all existing sos recipients & update into case data
@@ -520,7 +522,7 @@ public class StmtOfServImplService {
         }
         updatedCaseDataMap.put("stmtOfServiceForOrder", sosRecipients);
         //PRL-6122
-        updatedCaseDataMap.put(ORDER_COLLECTION, updatedCaseData.getDraftOrderCollection());
+        updatedCaseDataMap.put(ORDER_COLLECTION, updatedCaseData.getOrderCollection());
     }
 
     private SoaPack updateUnserVedCitizenRespondentPack(List<String> partiesServed, SoaPack unservedCitizenRespondentPack) {
