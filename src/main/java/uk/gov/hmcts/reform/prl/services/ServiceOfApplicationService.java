@@ -202,6 +202,7 @@ public class ServiceOfApplicationService {
     public static final String IS_C8_CHECK_APPROVED = "isC8CheckApproved";
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+    public static final String SEND_GRID_TEMPLATE = "sendGridTemplate";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -1007,10 +1008,12 @@ public class ServiceOfApplicationService {
             boolean sendEmail = true;
             Document coverLetter = null;
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
+                dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP);
                 if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
                     coverLetter = generateCoverLetterBasedOnCaseAccess(
                         authorization,
@@ -1058,11 +1061,14 @@ public class ServiceOfApplicationService {
             dynamicData.put("name", servedParty);
             dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
             populateLanguageMap(caseData, dynamicData);
+            SendgridEmailTemplateNames sendgridEmailTemplateName = (SendgridEmailTemplateNames) dynamicData.get(
+                SEND_GRID_TEMPLATE);
+            dynamicData.remove(SEND_GRID_TEMPLATE);
             emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                      .sendEmailUsingTemplateWithAttachments(
                                                          authorization, emailAddress,
                                                          docs,
-                                                         SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                         sendgridEmailTemplateName,
                                                          dynamicData,
                                                          servedParty
                                                      )));
@@ -1082,10 +1088,12 @@ public class ServiceOfApplicationService {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             Document coverLetter = null;
             boolean sendEmail = true;
+            SendgridEmailTemplateNames sendgridEmailTemplateName = SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB;
             if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
             } else {
+                sendgridEmailTemplateName = SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP;
                 coverLetter = generateCoverLetterBasedOnCaseAccess(
                     authorization,
                     caseData, applicantFl401.get(0), PRL_LET_ENG_AP2);
@@ -1108,7 +1116,7 @@ public class ServiceOfApplicationService {
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, emailAddress,
                                                                  docs,
-                                                                 SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                                 sendgridEmailTemplateName,
                                                                  dynamicData,
                                                                  servedParty
                                                              )));
@@ -3306,6 +3314,7 @@ public class ServiceOfApplicationService {
                         if (CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())) {
                             log.info("respondent is represented -> serving notification to solicitor");
                             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                            dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
                             sendEmailDaNonPersonalService(
                                 caseData,
                                 authorization,
@@ -3598,7 +3607,6 @@ public class ServiceOfApplicationService {
                             bulkPrintDetails,
                             removeCoverLettersFromThePacks(packDocs));
                 }
-
             }
         } else {
             log.info("Sending notification to applicant solicitor");
