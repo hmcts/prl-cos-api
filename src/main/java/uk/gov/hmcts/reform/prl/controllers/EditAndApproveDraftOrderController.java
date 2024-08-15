@@ -130,17 +130,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            if (null != waMapper && Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateDraftOrderDocument(
-                        caseData, authorisation, CaseUtils.getDraftOrderId(waMapper))).build();
-            } else {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateDraftOrderDocument(
-                        caseData, authorisation, null)).build();
-            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(draftAnOrderService.populateDraftOrderDocument(
+                    caseData, authorisation, clientContext, callbackRequest.getEventId())).build();
 
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -198,10 +190,17 @@ public class EditAndApproveDraftOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
                 String draftOrderId = CaseUtils.getDraftOrderId(waMapper);
-                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType, draftOrderId);
+                editAndApproveOrder(
+                    authorisation,
+                    callbackRequest,
+                    caseDataUpdated,
+                    caseData,
+                    loggedInUserType,
+                    draftOrderId
+                );
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData);
+                editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -213,8 +212,13 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    private void editAndReturnOrder(String authorisation, CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, CaseData caseData) {
-        caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
+    private void editAndReturnOrder(String authorisation, CallbackRequest callbackRequest,
+                                    Map<String, Object> caseDataUpdated, CaseData caseData, String clientContext) {
+        caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(
+            caseData,
+            authorisation,
+            clientContext
+        ));
         if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
             Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
                 .getSolicitorOrdersHearingDetails()
@@ -254,7 +258,10 @@ public class EditAndApproveDraftOrderController {
             draftOrderId
         );
 
-        DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+        DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
+            caseData.getDraftOrderCollection(),
+            draftOrderId
+        );
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
@@ -302,25 +309,19 @@ public class EditAndApproveDraftOrderController {
                 }
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            DraftOrder selectedOrder;
-            if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(callbackRequest.getEventId())) {
-                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
-                    caseData.getDraftOrderCollection(),
-                    CaseUtils.getDraftOrderId(waMapper)
-                );
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                dynamicList,
+                clientContext,
+                callbackRequest.getEventId()
+            );
 
-            } else {
-                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-                    caseData.getDraftOrderCollection(),
-                    dynamicList
-                );
-            }
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
                     callbackRequest,
-                    caseData
+                    caseData,
+                    clientContext
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -361,20 +362,12 @@ public class EditAndApproveDraftOrderController {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            if (Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
-                    caseData.getDraftOrderCollection(),
-                    CaseUtils.getDraftOrderId(waMapper)
-                );
+            selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                dynamicList,
+                clientContext, callbackRequest.getEventId()
+            );
 
-            } else {
-                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-                    caseData.getDraftOrderCollection(),
-                    dynamicList
-                );
-            }
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
                 caseData,
@@ -437,13 +430,13 @@ public class EditAndApproveDraftOrderController {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .data(caseDataUpdated).build();
                 }
-                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateStandardDirectionOrder(
                         authorisation,
                         caseData,
                         true,
-                        CaseUtils.getDraftOrderId(waMapper)
+                        clientContext,
+                        callbackRequest.getEventId()
                     )).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder()

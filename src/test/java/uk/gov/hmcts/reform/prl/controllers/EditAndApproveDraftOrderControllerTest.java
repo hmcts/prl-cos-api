@@ -140,7 +140,10 @@ public class EditAndApproveDraftOrderControllerTest {
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.anyString(),
+                                                              Mockito.anyString()
+        )).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
@@ -452,7 +455,10 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
-                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
+                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                               Mockito.anyString(),
+                                               Mockito.anyString()
+                 ))
             .thenReturn(DraftOrder.builder().orderType(
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -510,7 +516,10 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_RETURNED_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
-                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
+                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                               Mockito.anyString(),
+                                               Mockito.anyString()
+                 ))
             .thenReturn(DraftOrder.builder().orderType(
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -568,7 +577,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
-                .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
+                .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(DraftOrder.builder().orderType(
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -627,7 +636,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
-                .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
+                .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(DraftOrder.builder().orderType(
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -1681,7 +1690,10 @@ public class EditAndApproveDraftOrderControllerTest {
             objectMapper
         )).thenReturn(CaseData.builder().build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.anyString(),
+                                                              Mockito.anyString()
+        )).thenReturn(DraftOrder.builder().build());
         CaseData caseData = CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
@@ -1778,7 +1790,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.anyString(),
+                                                              Mockito.anyString()
+        )).thenReturn(draftOrder);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
@@ -1811,7 +1826,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(null);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.anyString(),
+                                                              Mockito.anyString()
+        )).thenReturn(null);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
@@ -1849,7 +1867,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.anyString(),
+                                                              Mockito.anyString()
+        )).thenReturn(draftOrder);
         when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController

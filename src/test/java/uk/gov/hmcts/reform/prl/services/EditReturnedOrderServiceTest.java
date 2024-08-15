@@ -83,7 +83,7 @@ public class EditReturnedOrderServiceTest {
                                                                                      .build());
         Mockito.when(elementUtils.getDynamicListSelectedValue(Mockito.any(),Mockito.any()))
             .thenReturn(UUID.fromString(PrlAppsConstants.TEST_UUID));
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DraftOrder.builder()
                             .orderType(CreateSelectOrderOptionsEnum.generalForm)
                             .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
@@ -236,11 +236,11 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any(), Mockito.any(), Mockito.anyString()))
             .thenReturn(draftOrder);
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
-        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
+        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken, null);
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
     }
 
@@ -255,7 +255,7 @@ public class EditReturnedOrderServiceTest {
         draftOrderCollection.add(Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
                                      .value(draftOrder)
                                      .build());
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any(), Mockito.any(),Mockito.anyString()))
             .thenReturn(draftOrder);
         CaseData caseData = CaseData.builder()
             .draftOrderCollection(draftOrderCollection)
@@ -269,14 +269,19 @@ public class EditReturnedOrderServiceTest {
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
-        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
+        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken, null);
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
     }
 
     @Test
     public void testpopulateInstructionsAndFieldsForLegalRep() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .instructionsToLegalRepresentative("u")
+                              .build()).build();
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder()
-            .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder().build()).build()).build();
+            .value(draftOrder).build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
         CaseData caseData = CaseData.builder()
@@ -296,7 +301,13 @@ public class EditReturnedOrderServiceTest {
                              .data(caseDataMap)
                              .build())
             .build();
-        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authToken, callbackRequest);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
+                                                              Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(
+            authToken,
+            callbackRequest,
+            null
+        );
         Assert.assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
         Assert.assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
     }
@@ -320,7 +331,7 @@ public class EditReturnedOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
-            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest);
+            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null);
         Assert.assertTrue(response.getErrors().size() > 0);
     }
 }

@@ -131,7 +131,7 @@ public class EditReturnedOrderService {
         return caseDataMap;
     }
 
-    public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
+    public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String clientContext) {
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         caseDataMap.put(
@@ -143,14 +143,14 @@ public class EditReturnedOrderService {
         );
         caseDataMap.put(
             WA_ORDER_NAME_SOLICITOR_CREATED,
-            draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId())
+            draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId(), clientContext)
         );
         log.info("****order collection id****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
         log.info("****orderNameSolresubmitted****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
         DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(
             caseData.getDraftOrderCollection(),
-            caseData.getManageOrders().getRejectedOrdersDynamicList()
-        );
+            caseData.getManageOrders().getRejectedOrdersDynamicList(),
+                clientContext, Event.EDIT_RETURNED_ORDER.getId());
         if (ManageOrdersOptionsEnum.uploadAnOrder.toString().equalsIgnoreCase(draftOrder.getOrderSelectionType())) {
             DraftOrder updatedOrder = updateUploadedDraftOrderDetails(caseData, draftOrder);
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -199,7 +199,9 @@ public class EditReturnedOrderService {
             .build();
     }
 
-    public AboutToStartOrSubmitCallbackResponse populateInstructionsAndFieldsForLegalRep(String authorisation, CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse populateInstructionsAndFieldsForLegalRep(String authorisation,
+                                                                                         CallbackRequest callbackRequest,
+                                                                                         String clientContext) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -208,7 +210,8 @@ public class EditReturnedOrderService {
             && !caseData.getDraftOrderCollection().isEmpty()) {
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                         caseData.getManageOrders()
-                                                                                            .getRejectedOrdersDynamicList());
+                                                                                            .getRejectedOrdersDynamicList(),
+                                                                                        clientContext, callbackRequest.getEventId());
             Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder);
             caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
             return AboutToStartOrSubmitCallbackResponse.builder()
