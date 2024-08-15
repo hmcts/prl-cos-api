@@ -52,7 +52,6 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -347,13 +346,11 @@ public class ListOnNoticeControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        doNothing().when(listOnNoticeService)
-            .sendNotification(Mockito.any(),Mockito.anyString());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
-        verify(listOnNoticeService,times(1)).sendNotification(Mockito.any(),Mockito.any());
+        verify(listOnNoticeService,times(1)).cleanUpListOnNoticeFields(Mockito.any());
     }
 
 }
