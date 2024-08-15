@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -160,7 +161,7 @@ public class FeeService {
                 // For AWP types other than C2
                 String key = (feeRequest.getCaseType() + "_" + feeRequest.getApplicationType() + "_" + feeRequest.getPartyType()).toUpperCase();
                 feeType = applicationToFeeMapForCitizen.get(key);
-                if (feeRequest.getApplicationType().equals(FL403.name())
+                if (FL403.name().equals(feeRequest.getApplicationType())
                     && "respondent".equals(feeRequest.getPartyType())
                     && isFl403ApplicationAlreadyPresent(caseData)) {
                     feeType = FL403_EXTEND_AN_ORDER;
@@ -177,8 +178,9 @@ public class FeeService {
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
                 if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
-                    && OtherApplicationType.FL403_EXTEND_AN_ORDER.equals(
-                    additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())) {
+                    && OtherApplicationType.FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER.equals(
+                        additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())
+                    && PartyEnum.respondent.equals(additionalApplicationsBundle.getValue().getPartyType())) {
                     fl403ApplicationAlreadyPresent = true;
                     break;
                 }

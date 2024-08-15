@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -282,10 +283,16 @@ public class FeeServiceTest {
             .caseType("FL401").build();
 
         CaseData caseData1 = CaseData.builder()
-            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
-                                                              .otherApplicationsBundle(OtherApplicationsBundle.builder().applicationType(
-                                                                  OtherApplicationType.FL403_EXTEND_AN_ORDER).build())
-                                                              .build()))).build();
+            .additionalApplicationsBundle(List.of(element(
+                AdditionalApplicationsBundle.builder()
+                    .partyType(PartyEnum.respondent)
+                    .otherApplicationsBundle(
+                        OtherApplicationsBundle.builder()
+                            .applicationType(OtherApplicationType
+                                                 .FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER)
+                            .build())
+                    .build())))
+            .build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.FL403_EXTEND_AN_ORDER)).thenReturn(feeParameters);
 
