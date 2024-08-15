@@ -877,10 +877,10 @@ public class CaseUtils {
         return null;
     }
 
-    public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, String draftOrderId) {
+    public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
         if (null != draftOrderCollection) {
             return draftOrderCollection.stream()
-                .filter(element -> element.getId().toString().equals(draftOrderId))
+                .filter(element -> element.getId().equals(draftOrderId))
                 .map(Element::getValue)
                 .findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));

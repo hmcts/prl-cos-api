@@ -1055,11 +1055,7 @@ public class DraftAnOrderService {
             orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
         }
         log.info("******orderId from getSelectedDraftOrderDetails {}", orderId);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+        return CaseUtils.getDraftOrderFromCollectionId(draftOrderCollection, orderId);
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {

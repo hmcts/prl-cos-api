@@ -188,15 +188,13 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                String draftOrderId = CaseUtils.getDraftOrderId(waMapper);
                 editAndApproveOrder(
                     authorisation,
                     callbackRequest,
                     caseDataUpdated,
                     caseData,
                     loggedInUserType,
-                    draftOrderId
+                    clientContext
                 );
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -249,7 +247,15 @@ public class EditAndApproveDraftOrderController {
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
-                                     CaseData caseData, String loggedInUserType, String draftOrderId) {
+                                     CaseData caseData, String loggedInUserType, String clientContext) {
+        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+            caseData.getDraftOrderCollection(),
+            caseData.getDraftOrdersDynamicList(),
+            clientContext,
+            callbackRequest.getEventId()
+        );
+        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+        String draftOrderId = CaseUtils.getDraftOrderId(waMapper);
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -258,10 +264,6 @@ public class EditAndApproveDraftOrderController {
             draftOrderId
         );
 
-        DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
-            caseData.getDraftOrderCollection(),
-            draftOrderId
-        );
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
@@ -506,11 +508,10 @@ public class EditAndApproveDraftOrderController {
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
-                    WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-                    DraftOrder draftOrder = CaseUtils.getDraftOrderFromCollectionId(
-                        caseData.getDraftOrderCollection(),
-                        CaseUtils.getDraftOrderId(waMapper)
-                    );
+                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                             caseData.getDraftOrdersDynamicList(),
+                                                                                             clientContext,
+                                                                                             callbackRequest.getEventId());
                     manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(
                         callbackRequest.getCaseDetails(),
                         draftOrder

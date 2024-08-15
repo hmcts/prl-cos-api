@@ -2918,7 +2918,8 @@ public class ManageOrderService {
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId()) && null != draftOrderId) {
             boolean isSdoOrder = false;
-            DraftOrder selectedDraftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+            DraftOrder selectedDraftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(),
+                                                                                    UUID.fromString(draftOrderId));
             List<Element<HearingData>> sdoHearings = new ArrayList<>();
             if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
                 isSdoOrder = true;
