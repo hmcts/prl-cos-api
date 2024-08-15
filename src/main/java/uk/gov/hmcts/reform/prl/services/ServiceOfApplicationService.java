@@ -200,8 +200,6 @@ public class ServiceOfApplicationService {
 
     public static final String IS_C8_CHECK_NEEDED = "isC8CheckNeeded";
     public static final String IS_C8_CHECK_APPROVED = "isC8CheckApproved";
-
-    private static final String DATE_CREATED = CaseUtils.getCurrentDate();
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
 
@@ -417,7 +415,7 @@ public class ServiceOfApplicationService {
 
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(DATE_CREATED)
+            .servedAt(CaseUtils.getCurrentDate())
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
@@ -732,7 +730,7 @@ public class ServiceOfApplicationService {
             .partyIds(List.of(element(String.valueOf(caseData.getRespondentsFL401().getPartyId()))))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build());
         return UNREPRESENTED_APPLICANT;
     }
@@ -809,7 +807,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -858,7 +856,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -1220,7 +1218,7 @@ public class ServiceOfApplicationService {
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build());
         } else {
             log.info("personal service - court bailiff/court admin");
@@ -1346,7 +1344,7 @@ public class ServiceOfApplicationService {
             .servedParty(SERVED_PARTY_APPLICANT)
             .docs(wrapElements(packsWithCoverLetter))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-            .timeStamp(DATE_CREATED)
+            .timeStamp(CaseUtils.getCurrentDate())
             .build();
     }
 
@@ -1411,7 +1409,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().toString())
             .build();
     }
@@ -2792,7 +2790,7 @@ public class ServiceOfApplicationService {
             if (CollectionUtils.isNotEmpty(docsForLa)) {
                 caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
-                    .packCreatedDate(DATE_CREATED)
+                    .packCreatedDate(CaseUtils.getCurrentDate())
                     .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
                     .build());
             }
@@ -2831,7 +2829,7 @@ public class ServiceOfApplicationService {
                 .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2839,7 +2837,7 @@ public class ServiceOfApplicationService {
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
@@ -2851,7 +2849,7 @@ public class ServiceOfApplicationService {
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build());
         } else if (SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
@@ -2883,7 +2881,7 @@ public class ServiceOfApplicationService {
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2893,7 +2891,7 @@ public class ServiceOfApplicationService {
                           : wrapElements(caseData.getApplicants().get(0).getId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -2925,7 +2923,7 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
     }
 
@@ -3047,7 +3045,7 @@ public class ServiceOfApplicationService {
                 .packDocument(wrapElements(docs))
                 .partyIds(wrapElements(partyId))
                 .servedBy(userService.getUserDetails(authorization).getFullName())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
         }
@@ -3068,7 +3066,7 @@ public class ServiceOfApplicationService {
                 .packDocument(wrapElements(docs))
                 .partyIds(wrapElements(partyId))
                 .servedBy(userService.getUserDetails(authorization).getFullName())
-                .packCreatedDate(DATE_CREATED)
+                .packCreatedDate(CaseUtils.getCurrentDate())
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         }
@@ -3092,7 +3090,7 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -3100,7 +3098,7 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -3117,7 +3115,7 @@ public class ServiceOfApplicationService {
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -3132,7 +3130,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packcDocs))
             .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
@@ -3148,7 +3146,7 @@ public class ServiceOfApplicationService {
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(wrapElements(packADocs))
             .partyIds(wrapElements(partyId))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
@@ -3165,7 +3163,7 @@ public class ServiceOfApplicationService {
                 wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         return caseDataUpdated;
@@ -3185,7 +3183,7 @@ public class ServiceOfApplicationService {
         final SoaPack unServedOthersPack = SoaPack.builder().packDocument(wrapElements(packNDocs))
             .partyIds(wrapElements(othersPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
 
         caseDataUpdated.put(UNSERVED_OTHERS_PACK, unServedOthersPack);
@@ -3208,7 +3206,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(finalDocs))
             .partyIds(wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
     }
@@ -3243,7 +3241,7 @@ public class ServiceOfApplicationService {
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(DATE_CREATED)
+            .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -3363,7 +3361,7 @@ public class ServiceOfApplicationService {
         finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
             emailNotificationDetails)
                                                           .servedBy(userService.getUserDetails(authorization).getFullName())
-                                                          .servedAt(DATE_CREATED)
+                                                          .servedAt(CaseUtils.getCurrentDate())
                                                           .modeOfService(CaseUtils.getModeOfService(
                                                               emailNotificationDetails,
                                                               bulkPrintDetails
@@ -3673,7 +3671,7 @@ public class ServiceOfApplicationService {
         log.info("Reject reason list empty, adding first reject reason");
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication().getRejectionReason())
-            .dateRejected(DATE_CREATED)
+            .dateRejected(CaseUtils.getCurrentDate())
             .build();
 
         confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
