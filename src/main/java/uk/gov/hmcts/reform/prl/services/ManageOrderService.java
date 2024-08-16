@@ -143,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_REVIEW_REQUIRED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
@@ -1203,7 +1204,7 @@ public class ManageOrderService {
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = null;
+        Element<DraftOrder> draftOrderElement;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
@@ -1219,8 +1220,8 @@ public class ManageOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderList
-        );
+        caseData = caseData.toBuilder().draftOrderCollection(draftOrderList).build();
+        return Map.of("draftOrderCollection", caseData.getDraftOrderCollection());
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
@@ -3023,15 +3024,6 @@ public class ManageOrderService {
         return sdoHearingsList;
     }
 
-    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
-    }
-
     public String isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
         String whoApprovedTheOrder = null;
         String isOrderApproved = NO;
@@ -3234,6 +3226,12 @@ public class ManageOrderService {
                 judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
                 waFieldsMap.put(WA_ORDER_NAME_ADMIN_CREATED, orderNameForWA);
+                if (!AmendOrderCheckEnum.noCheck
+                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                    && CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
+                    waFieldsMap.put(WA_ORDER_COLLECTION_ID, caseData.getDraftOrderCollection().get(0).getId());
+                }
+
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
             }
