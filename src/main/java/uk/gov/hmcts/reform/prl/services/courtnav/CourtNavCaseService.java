@@ -186,7 +186,7 @@ public class CourtNavCaseService {
             .documentHash(uploadedDocument.hashToken)
             .documentFileName(fileName).build();
 
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+        return QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .categoryId("applicantStatements")
             .categoryName("Applicant's statements")
@@ -197,8 +197,6 @@ public class CourtNavCaseService {
             .courtNavQuarantineDocument(courtNavDocument)
             .documentParty(partyName)
             .build();
-
-        return quarantineLegalDoc;
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {

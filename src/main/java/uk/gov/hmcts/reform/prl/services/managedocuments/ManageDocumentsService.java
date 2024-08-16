@@ -565,16 +565,28 @@ public class ManageDocumentsService {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
+        updateQuarantineDocsBasedOnRole(caseDataUpdated, quarantineDocs, userRole, isDocumentTab);
+    }
+
+    private static void updateQuarantineDocsBasedOnRole(Map<String, Object> caseDataUpdated,
+                                                        List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                                        String userRole, boolean isDocumentTab) {
         switch (userRole) {
             case SOLICITOR ->
-                caseDataUpdated.put(isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
-                                    quarantineDocs);
+                caseDataUpdated.put(
+                    isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
+                    quarantineDocs
+                );
             case CAFCASS ->
-                caseDataUpdated.put(isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
-                                    quarantineDocs);
+                caseDataUpdated.put(
+                    isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
+                    quarantineDocs
+                );
             case COURT_STAFF ->
-                caseDataUpdated.put(isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
-                                    quarantineDocs);
+                caseDataUpdated.put(
+                    isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
+                    quarantineDocs
+                );
             case COURT_ADMIN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
@@ -586,11 +598,15 @@ public class ManageDocumentsService {
                 }
             }
             case COURTNAV ->
-                caseDataUpdated.put(isDocumentTab ? "courtNavUploadedDocListDocTab" : "courtNavQuarantineDocumentList",
-                                    quarantineDocs);
+                caseDataUpdated.put(
+                    isDocumentTab ? "courtNavUploadedDocListDocTab" : "courtNavQuarantineDocumentList",
+                    quarantineDocs
+                );
             case CITIZEN ->
-                caseDataUpdated.put(isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
-                                    quarantineDocs);
+                caseDataUpdated.put(
+                    isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
+                    quarantineDocs
+                );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }

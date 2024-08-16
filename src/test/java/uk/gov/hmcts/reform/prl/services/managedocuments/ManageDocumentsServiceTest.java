@@ -1827,7 +1827,7 @@ public class ManageDocumentsServiceTest {
                                             .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build())
             .build();
 
-        uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
+        document1 = manageDocumentsService
             .getQuarantineDocumentForUploader("CourtNav", quarantineLegalDoc
             );
 
@@ -2098,7 +2098,7 @@ public class ManageDocumentsServiceTest {
             .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocTab)
             .build();
 
-        List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList = new ArrayList<>();
+        courtNavQuarantineDocumentList = new ArrayList<>();
         courtNavQuarantineDocumentList.add(element(quarantineLegalDoc));
 
         CaseData caseData = CaseData.builder()
@@ -2134,7 +2134,7 @@ public class ManageDocumentsServiceTest {
             .bulkScannedDocListDocTab(bulkScannedDocListDocTab)
             .build();
 
-        List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList = new ArrayList<>();
+        courtNavQuarantineDocumentList = new ArrayList<>();
         courtNavQuarantineDocumentList.add(element(quarantineLegalDoc));
 
         CaseData caseData = CaseData.builder()
