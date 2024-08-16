@@ -23,10 +23,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -35,21 +32,16 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -179,41 +171,6 @@ public class CourtNavCaseService {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
-    }
-
-    private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
-                                                    CaseData tempCaseData, Document document) {
-        String partyName = tempCaseData.getApplicantCaseName() != null
-            ? tempCaseData.getApplicantCaseName() : COURTNAV;
-        uk.gov.hmcts.reform.prl.models.documents.Document courtNavDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentUrl(document.links.self.href)
-            .documentBinaryUrl(document.links.binary.href)
-            .documentHash(document.hashToken)
-            .documentFileName(fileName).build();
-
-        List<Element<UploadedDocuments>> uploadedDocumentsList;
-        Element<UploadedDocuments> uploadedDocsElement =
-            element(UploadedDocuments.builder().dateCreated(LocalDate.now())
-                        .documentType(typeOfDocument)
-                        .uploadedBy(COURTNAV)
-                        .documentDetails(DocumentDetails.builder().documentName(fileName)
-                                             .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant(NA_COURTNAV)
-                        .parentDocumentType(NA_COURTNAV)
-                        .citizenDocument(courtNavDoc).build());
-        if (tempCaseData.getCourtNavUploadedDocs() != null) {
-            uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
-            uploadedDocumentsList.add(uploadedDocsElement);
-        } else {
-            uploadedDocumentsList = new ArrayList<>();
-            uploadedDocumentsList.add(uploadedDocsElement);
-        }
-
-
-        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList)
-            .build();
-
-        return tempCaseData;
     }
 
     private QuarantineLegalDoc getCourtNavQuarantineDocument(String fileName,

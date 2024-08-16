@@ -77,7 +77,6 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("/review-documents/mid-event callbackRequest " + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);

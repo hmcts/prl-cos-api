@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -35,7 +37,9 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +210,20 @@ public class CourtNavCaseServiceTest {
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentFormatIsRequested() {
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
+                                           "1234567891234567"
+        );
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldThrowExceptionForNumberOfAttchmentsSize() {
+        List<Element<UploadedDocuments>> courtNavUploadedDocs = new ArrayList<>();
+        UploadedDocuments uploadedDocuments = UploadedDocuments.builder().build();
+        courtNavUploadedDocs.add(ElementUtils.element(uploadedDocuments));
+        caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").documentManagementDetails(
+                DocumentManagementDetails.builder().build())
+            .numberOfAttachments("1").courtNavUploadedDocs(courtNavUploadedDocs).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
         );
     }
