@@ -604,6 +604,7 @@ public class ManageOrderService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
+    private final DocumentSealingService documentSealingService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1172,7 +1173,7 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            orderCollection = serveOrder(caseData, orderCollection);
+            orderCollection = serveOrder(caseData, orderCollection, authorisation);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
         Map<String, Object> orderMap = new HashMap<>();
@@ -1449,17 +1450,27 @@ public class ManageOrderService {
         return status;
     }
 
-    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
+    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders, String authorisation) {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
+                    OrderDetails orderDetails = order.getValue();
+                    Element<OrderDetails> sealedOrder = order;
+                    if (orderDetails.getIsOrderUploaded().equals(Yes)) {
+                        sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value((order.getValue().toBuilder()
+                            .orderDocument(documentSealingService.sealDocument(order.getValue().getOrderDocument(), caseData, authorisation))
+                            .orderDocumentWelsh(documentSealingService
+                                                    .sealDocument(order.getValue().getOrderDocumentWelsh(), caseData, authorisation))
+                            .build())).build();
+                    }
+
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        servedC100Order(caseData, orders, order);
+                        servedC100Order(caseData, orders, sealedOrder);
                     } else {
-                        servedFL401Order(caseData, orders, order);
+                        servedFL401Order(caseData, orders, sealedOrder);
                     }
                 });
         }

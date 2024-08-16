@@ -1415,7 +1415,7 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    private boolean checkFileFormat(String fileName) {
+    public boolean checkFileFormat(String fileName) {
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
@@ -1432,21 +1432,7 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
-            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
-                authorisation,
-                authTokenGenerator.generate(),
-                document.getDocumentBinaryUrl()
-            );
-            byte[] docInBytes = Optional.ofNullable(responseEntity)
-                .map(ResponseEntity::getBody)
-                .map(resource -> {
-                    try {
-                        return resource.getInputStream().readAllBytes();
-                    } catch (IOException e) {
-                        throw new InvalidResourceException("Doc name " + filename, e);
-                    }
-                })
-                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+            byte[] docInBytes = getDocInBytes(authorisation, document, filename);
 
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
@@ -1464,6 +1450,25 @@ public class DocumentGenService {
 
         }
         return document;
+    }
+
+    public byte[] getDocInBytes(String authorisation, Document document, String filename) {
+        ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+            authorisation,
+            authTokenGenerator.generate(),
+            document.getDocumentBinaryUrl()
+        );
+
+        return Optional.ofNullable(responseEntity)
+            .map(ResponseEntity::getBody)
+            .map(resource -> {
+                try {
+                    return resource.getInputStream().readAllBytes();
+                } catch (IOException e) {
+                    throw new InvalidResourceException("Doc name " + filename, e);
+                }
+            })
+            .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
     }
 
     public DocumentResponse generateAndUploadDocument(String authorisation,

@@ -197,6 +197,9 @@ public class ManageOrderServiceTest {
     @Mock
     private RefDataUserService refDataUserService;
 
+    @Mock
+    private DocumentSealingService documentSealingService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -3679,6 +3682,28 @@ public class ManageOrderServiceTest {
             .code("1234")
             .label("test label").build();
         elements.add(element);
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
@@ -3709,25 +3734,8 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
-        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                          .builder()
-                                                                                          .orderDocument(Document
-                                                                                                             .builder()
-                                                                                                             .build())
-                                                                                          .dateCreated(now)
-                                                                                          .orderTypeId(TEST_UUID)
-                                                                                          .otherDetails(
-                                                                                              OtherOrderDetails.builder().build())
-                                                                                          .build()).build();
-        List<Element<OrderDetails>> orderList = new ArrayList<>();
-        orderList.add(orders);
-
-        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
-        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
-            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
-            .build();
-        Element<PartyDetails> partyDetailsElement = element(details);
-        partyDetails.add(partyDetailsElement);
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3749,7 +3757,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList, "testAuth"));
 
     }
 
@@ -3906,6 +3914,7 @@ public class ManageOrderServiceTest {
                 .builder()
                 .build())
             .dateCreated(now)
+            .isOrderUploaded(YesOrNo.No)
             .orderTypeId("00000000-0000-0000-0000-000000000000")
             .otherDetails(
                 OtherOrderDetails.builder().build())
@@ -3929,7 +3938,10 @@ public class ManageOrderServiceTest {
             .applicantsFL401(PartyDetails.builder().build())
             .build();
 
-        List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+
+        List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList, "testAuth");
         assertNotNull(listOfOrders);
     }
 
@@ -3985,6 +3997,7 @@ public class ManageOrderServiceTest {
                                                                                                              .build())
                                                                                           .dateCreated(now)
                                                                                           .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -3997,6 +4010,8 @@ public class ManageOrderServiceTest {
             .representativeLastName("repLastName")
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
             .build();
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4018,7 +4033,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList, "testAuth"));
 
     }
 
@@ -5176,6 +5191,7 @@ public class ManageOrderServiceTest {
                                                                                                              .build())
                                                                                           .dateCreated(now)
                                                                                           .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .serveOrderDetails(
@@ -5242,9 +5258,11 @@ public class ManageOrderServiceTest {
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
+        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList, "testAuth");
         assertNotNull(orderDetails);
         assertNotNull(orderDetails.get(0));
         assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());
