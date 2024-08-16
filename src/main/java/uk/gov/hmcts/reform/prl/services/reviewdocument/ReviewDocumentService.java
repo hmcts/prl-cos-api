@@ -308,13 +308,7 @@ public class ReviewDocumentService {
 
             }
             //courtnav uploaded docs
-            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList()) {
-                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
-                                                        caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList(),
-                                                        uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
-                                                        COURTNAV, COURTNAV_QUARANTINE_DOCUMENT_LIST);
-
-            }
+            isDocumentFound = processCourtNavDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
             //Bulk scan
             processBulkScanDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
         }
@@ -345,6 +339,17 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
+        }
+        return isDocumentFound;
+    }
+
+    private boolean processCourtNavDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
+        if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList()) {
+            isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                    caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList(),
+                                                    uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
+                                                    COURTNAV, COURTNAV_QUARANTINE_DOCUMENT_LIST);
+
         }
         return isDocumentFound;
     }
