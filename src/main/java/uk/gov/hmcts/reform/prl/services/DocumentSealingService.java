@@ -43,7 +43,8 @@ public class DocumentSealingService {
     private final DocumentGenService documentGenService;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
-        byte[] seal = readBytes(caseData.getCourtSeal());
+        //byte[] seal = readBytes(caseData.getCourtSeal());
+        byte[] seal = readBytes("/familycourtseal.png");
         String filename = document.getDocumentFileName();
 
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
