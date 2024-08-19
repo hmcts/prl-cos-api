@@ -85,13 +85,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -150,6 +150,7 @@ public class SendAndReplyServiceTest {
     DynamicList dynamicList;
     CaseData caseData;
     CaseData caseDataWithAddedMessage;
+    Map<String, Object> caseDataMap;
 
     @Mock
     private HearingDataService hearingDataService;
@@ -294,6 +295,8 @@ public class SendAndReplyServiceTest {
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
             .build();
+
+        caseDataMap = new HashMap<>();
     }
 
     @Test
@@ -935,7 +938,7 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -977,7 +980,7 @@ public class SendAndReplyServiceTest {
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
 
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1026,7 +1029,7 @@ public class SendAndReplyServiceTest {
             .id(1234L)
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1080,7 +1083,7 @@ public class SendAndReplyServiceTest {
             .id(1234L)
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1168,9 +1171,11 @@ public class SendAndReplyServiceTest {
                     .messageReplyDynamicList(dynamicList)
                     .messages(ListUtils.union(listOfOpenMessages, listOfClosedMessages))
                     .build())
+            .sendOrReplyDto(SendOrReplyDto.builder().build())
             .build();
+        doNothing().when(roleAssignmentService).removeRoleAssignment(anyString());
 
-        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData, caseDataMap);
 
         assertEquals(3,closeMessages.size());
     }
@@ -1202,7 +1207,7 @@ public class SendAndReplyServiceTest {
                 .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
             .build();
 
-        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData6);
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData6, caseDataMap);
 
         assertEquals(1,closeMessages.size());
     }
@@ -1236,7 +1241,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
     }
@@ -1305,7 +1310,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth, caseDataMap);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
     }
@@ -1339,7 +1344,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap);
 
         assertEquals(2,msgList.get(0).getValue().getReplyHistory().size());
     }

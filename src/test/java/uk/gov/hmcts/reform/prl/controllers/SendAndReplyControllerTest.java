@@ -512,13 +512,13 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
         when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,SEND))
             .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).addMessage(caseData, auth);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -561,11 +561,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).addMessage(caseData, auth);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -641,7 +641,7 @@ public class SendAndReplyControllerTest {
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(caseDataAfterClosed);
+        verify(sendAndReplyService).closeMessage(caseDataAfterClosed, caseDataMap);
     }
 
     @Test
@@ -688,11 +688,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth)).thenReturn(messagesWithHistory);
+        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap)).thenReturn(messagesWithHistory);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth);
+        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -717,11 +717,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
+        when(sendAndReplyService.closeMessage(caseData, caseDataMap)).thenReturn(listOfClosedMessages);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(caseData);
+        verify(sendAndReplyService).closeMessage(caseData, caseDataMap);
     }
 
     @Test
