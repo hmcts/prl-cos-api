@@ -35,10 +35,10 @@ public class DocumentSealingService {
 
     private static final float POINTS_PER_INCH = 72;
     private static final float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
-    private static final int SEAL_HEIGHT = mm2pt(252);
-    private static final int SEAL_WIDTH = mm2pt(269);
-    private static final int MARGIN_TOP = mm2pt(175);
-    private static final int MARGIN_RIGHT = mm2pt(190);
+    private static final long SEAL_HEIGHT = mm2pt(25.2);
+    private static final long SEAL_WIDTH = mm2pt(26.9);
+    private static final long MARGIN_TOP = mm2pt(17.5);
+    private static final long MARGIN_RIGHT = mm2pt(19.0);
     private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
     private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
     private static final String COURT_SEAL_BILINGUAL = "/familycourtseal-bilingual.png";
@@ -122,7 +122,7 @@ public class DocumentSealingService {
         }
     }
 
-    private static int mm2pt(int mm) {
+    private static long mm2pt(double mm) {
         return Math.round(POINTS_PER_MM * mm);
     }
 
