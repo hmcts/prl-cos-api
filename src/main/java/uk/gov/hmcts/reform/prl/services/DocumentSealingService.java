@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -41,6 +42,7 @@ public class DocumentSealingService {
 
     private final DgsApiClient dgsApiClient;
     private final DocumentGenService documentGenService;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
         //byte[] seal = readBytes(caseData.getCourtSeal());
@@ -49,15 +51,20 @@ public class DocumentSealingService {
         String filename = document.getDocumentFileName();
 
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
-            byte[] pdfDoc = documentGenService.getDocInBytes(
-                authorisation,
-                document,
-                filename
-            );
+            Document pdfDoc = documentGenService.convertToPdf(authorisation, document);
             log.info("document as pdf: {}", pdfDoc);
+
+            String s2sToken = authTokenGenerator.generate();
+            byte[] downloadedPdf = documentGenService.getDocumentBytes(
+                pdfDoc.getDocumentUrl(),
+                authorisation,
+                s2sToken
+            );
+
+            log.info("downloaded document after conversion to pdf: {}", downloadedPdf);
             log.info("court seal: {}", seal);
 
-            byte[] sealedDocument = addSealToDocument(pdfDoc, seal);
+            byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
             log.info("sealed document binary: {}", sealedDocument);
 
             Map<String, Object> tempCaseDetails = new HashMap<>();
