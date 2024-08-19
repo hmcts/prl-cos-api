@@ -49,43 +49,42 @@ public class DocumentSealingService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
-        byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
         log.info("document before modification: {}", document);
-
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
-            Document pdfDoc = documentGenService.convertToPdf(authorisation, document);
-            log.info("document as pdf: {}", pdfDoc);
-
-            String s2sToken = authTokenGenerator.generate();
-            byte[] downloadedPdf = documentGenService.getDocumentBytes(
-                pdfDoc.getDocumentUrl(),
-                authorisation,
-                s2sToken
-            );
-
-            log.info("downloaded document after conversion to pdf: {}", downloadedPdf);
-            log.info("court seal: {}", seal);
-
-            byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
-            log.info("sealed document binary: {}", sealedDocument);
-
-            Map<String, Object> tempCaseDetails = new HashMap<>();
-            tempCaseDetails.put("fileName", sealedDocument);
-            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-                document.getDocumentFileName(),
-                authorisation, GenerateDocumentRequest
-                    .builder().template(DUMMY).values(tempCaseDetails).build()
-            );
-            log.info("generated document: {}", generatedDocumentInfo);
-
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName(generatedDocumentInfo.getDocName())
-                .build();
+            document = documentGenService.convertToPdf(authorisation, document);
         }
 
-        return document;
+        log.info("document as pdf: {}", document);
+
+        String s2sToken = authTokenGenerator.generate();
+        byte[] downloadedPdf = documentGenService.getDocumentBytes(
+            document.getDocumentUrl(),
+            authorisation,
+            s2sToken
+        );
+        byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
+
+        log.info("downloaded document after conversion to pdf: {}", downloadedPdf);
+        log.info("court seal: {}", seal);
+
+        byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
+        log.info("sealed document binary: {}", sealedDocument);
+
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        tempCaseDetails.put("fileName", sealedDocument);
+        GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+            document.getDocumentFileName(),
+            authorisation, GenerateDocumentRequest
+                .builder().template(DUMMY).values(tempCaseDetails).build()
+        );
+        log.info("generated document: {}", generatedDocumentInfo);
+
+        return Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentFileName(generatedDocumentInfo.getDocName())
+            .build();
+
     }
 
     private byte[] addSealToDocument(byte[] binaries, byte[] seal) {
