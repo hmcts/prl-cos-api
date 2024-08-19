@@ -1391,6 +1391,9 @@ public class SendAndReplyService {
             List<Document> docs = new ArrayList<>();
             if (null != partyDetails && null != partyDetails.getAddress()
                 && null != partyDetails.getAddress().getAddressLine1()) {
+                log.info("Post triggered for party {} to postal address {}",
+                         partyDetails.getEmail() + partyDetails.getLastName(),
+                         partyDetails.getAddress().getAddressLine1());
 
                 List<Document> attachedDocs = getExternalMessageSelectedDocumentList(caseData, authorization, message);
 
@@ -1417,6 +1420,9 @@ public class SendAndReplyService {
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
+        log.info("Email triggered for party {} to email address {}",
+                 partyDetails.getEmail() + partyDetails.getLastName(),
+                 emailAddress);
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
