@@ -276,7 +276,8 @@ public class EditAndApproveDraftOrderController {
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
-            callbackRequest.getEventId()
+            callbackRequest.getEventId(),
+            draftOrderId
         ));
 
     }

@@ -1061,16 +1061,18 @@ public class DraftAnOrderService {
         return CaseUtils.getDraftOrderFromCollectionId(draftOrderCollection, orderId);
     }
 
-    public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {
+    public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId, String draftOrderId) {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        UUID selectedOrderId;
-        if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
-            selectedOrderId = elementUtils.getDynamicListSelectedValue(
-                caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper);
-        } else {
-            selectedOrderId = elementUtils.getDynamicListSelectedValue(
-                caseData.getDraftOrdersDynamicList(), objectMapper);
+        UUID selectedOrderId = UUID.fromString(draftOrderId);
+        if (StringUtils.isEmpty(draftOrderId)) {
+            if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+                selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                    caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper);
+            } else {
+                selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                    caseData.getDraftOrdersDynamicList(), objectMapper);
+            }
         }
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             if (e.getId().equals(selectedOrderId)) {
@@ -2070,7 +2072,7 @@ public class DraftAnOrderService {
                 );
             }
         } else if (WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
-            caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
+            caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId, null));
         }
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         //PRL-4216 - save server order additional documents if any

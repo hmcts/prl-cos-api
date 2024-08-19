@@ -238,7 +238,7 @@ public class EditReturnedOrderServiceTest {
             .build();
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any(), Mockito.any(), Mockito.anyString()))
             .thenReturn(draftOrder);
-        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(caseDataMap);
         Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken, null);
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
@@ -267,7 +267,7 @@ public class EditReturnedOrderServiceTest {
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
-        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(caseDataMap);
         Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken, null);
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));

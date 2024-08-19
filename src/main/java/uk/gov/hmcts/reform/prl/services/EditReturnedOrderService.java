@@ -173,7 +173,8 @@ public class EditReturnedOrderService {
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(
                 caseData,
                 authorisation,
-                Event.EDIT_RETURNED_ORDER.getId()
+                Event.EDIT_RETURNED_ORDER.getId(),
+                null
             ));
         }
         caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftOrder.getLabelForOrdersDynamicList());

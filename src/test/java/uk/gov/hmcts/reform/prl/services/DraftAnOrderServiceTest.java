@@ -1308,7 +1308,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
-            Event.EDIT_AND_APPROVE_ORDER.getId()
+            Event.EDIT_AND_APPROVE_ORDER.getId(),
+            null
         );
 
         assertEquals(
@@ -1364,6 +1365,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
+            null,
             null
         );
 
@@ -1413,6 +1415,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
+            null,
             null
         );
 
@@ -1470,6 +1473,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
+            null,
             null
         );
 
@@ -1533,6 +1537,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
+            null,
             null
         );
 
@@ -4265,7 +4270,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
-            Event.EDIT_AND_APPROVE_ORDER.getId()
+            Event.EDIT_AND_APPROVE_ORDER.getId(),
+            null
         );
 
         assertEquals(
@@ -5278,7 +5284,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
-            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+            null
         );
 
         assertNotNull(caseDataMap);
@@ -5333,7 +5340,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
-            EDIT_AND_APPROVE_ORDER.getId()
+            EDIT_AND_APPROVE_ORDER.getId(),
+            null
         );
 
         assertNotNull(caseDataMap);
@@ -5380,7 +5388,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
-            EDIT_RETURNED_ORDER.getId()
+            EDIT_RETURNED_ORDER.getId(),
+            null
         );
 
         assertNotNull(caseDataMap);
