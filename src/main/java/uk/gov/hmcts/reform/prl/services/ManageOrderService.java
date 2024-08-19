@@ -2903,10 +2903,6 @@ public class ManageOrderService {
         if (null != amendOrderCheckEnum) {
             judgeLaManagerReviewRequired = amendOrderCheckEnum.toString();
         }
-        if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
-            //workaround for client context
-            draftOrderId = caseData.getDraftOrderCollection().get(0).getId().toString();
-        }
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
 
         if (eventId.equals(MANAGE_ORDERS.getId())) {

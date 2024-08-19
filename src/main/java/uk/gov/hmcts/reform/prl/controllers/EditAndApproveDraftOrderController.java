@@ -248,14 +248,14 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
                                      CaseData caseData, String loggedInUserType, String clientContext) {
-        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-            caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList(),
-            clientContext,
-            callbackRequest.getEventId()
-        );
-        WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-        String draftOrderId = CaseUtils.getDraftOrderId(waMapper);
+        String draftOrderId;
+        if (clientContext != null) {
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            draftOrderId = CaseUtils.getDraftOrderId(waMapper);
+        } else {
+            //workaround for client context
+            draftOrderId = caseData.getDraftOrderCollection().get(0).getId().toString();
+        }
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -263,7 +263,12 @@ public class EditAndApproveDraftOrderController {
             loggedInUserType,
             draftOrderId
         );
-
+        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+            caseData.getDraftOrderCollection(),
+            caseData.getDraftOrdersDynamicList(),
+            clientContext,
+            callbackRequest.getEventId()
+        );
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
