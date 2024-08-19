@@ -1413,7 +1413,8 @@ public class SendAndReplyService {
     }
 
     private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
-        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.isNotEmpty(
+            partyDetails.getSolicitorEmail());
     }
 
 
