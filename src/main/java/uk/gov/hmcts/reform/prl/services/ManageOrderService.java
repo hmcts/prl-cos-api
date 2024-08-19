@@ -1460,12 +1460,14 @@ public class ManageOrderService {
                     OrderDetails orderDetails = order.getValue();
                     Element<OrderDetails> sealedOrder = order;
                     if (orderDetails.getIsOrderUploaded().equals(Yes)) {
+                        log.info("order document: {}", order.getValue().getOrderDocument());
                         sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value((order.getValue().toBuilder()
                             .orderDocument(documentSealingService.sealDocument(order.getValue().getOrderDocument(), caseData, authorisation))
                             .orderDocumentWelsh(documentSealingService
                                                     .sealDocument(order.getValue().getOrderDocumentWelsh(), caseData, authorisation))
                             .build())).build();
                     }
+                    log.info("sealed order: {}", sealedOrder);
 
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, sealedOrder);
