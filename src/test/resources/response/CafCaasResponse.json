@@ -11,6 +11,58 @@
     "case_data" : {
       "dateSubmitted" : "2023-01-20",
       "caseTypeOfApplication" : "C100",
+      "cafcassUploadedDocs": [
+        {
+          "id": "a5dbc39d-6322-4abc-821a-45206b88253f",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 19:11:46 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        },
+        {
+          "id": "c05a93db-7494-41a5-bfe4-767dbc42e7d4",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 23:46:00 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        }
+      ],
       "draftConsentOrderFile" : {
         "document_filename" : "dummy.pdf",
         "document_id" : "053ecf20-3337-4b31-a3e4-00b5672c73a4"
@@ -32,7 +84,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "8d412aa9-2cac-4ea7-82de-31eec32a0c0d",
@@ -45,7 +102,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {
@@ -455,7 +517,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -476,7 +546,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -497,7 +575,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -520,7 +606,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -542,7 +636,16 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         }
       ],
@@ -1844,7 +1947,12 @@
           "applicantsRelationshipToChild" : "father",
           "respondentsRelationshipToChild" : "father",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "lll"
+          "parentalResponsibilityDetails" : "lll",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "applicants" : [ {
@@ -2042,7 +2150,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "b118cf82-81de-45e4-ab05-d0a93597e953",
@@ -2055,7 +2168,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {
@@ -2216,7 +2334,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "23f8d903-e423-4bb7-84e4-0d5d455e4408",
@@ -2229,7 +2352,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {

@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -231,6 +233,87 @@ public class TaskListServiceTest {
         assertThat(expectedTasks).isEqualTo(actualTasks);
     }
 
+    @Test
+    public void getTasksShouldReturnListOfRespondentSolicitorFinishedTasks() {
+        Document document = Document.builder()
+            .documentUrl("https:google.com")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .c1ADocument(document)
+            .build();
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<RespondentTask> expectedTasks = List.of(
+            RespondentTask.builder().event(CONSENT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RESPOND_ALLEGATION_OF_HARM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.FINISHED).build()
+        );
+        when(respondentEventsChecker.isFinished(any(), any(), anyBoolean())).thenReturn(true);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant, caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfRespondentSolicitorInProgressTasks() {
+        Document document = Document.builder()
+            .documentUrl("https:google.com")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .c1ADocument(document)
+            .build();
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<RespondentTask> expectedTasks = List.of(
+            RespondentTask.builder().event(CONSENT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RESPOND_ALLEGATION_OF_HARM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.IN_PROGRESS).build()
+        );
+
+        when(respondentEventsChecker.isFinished(any(), any(), anyBoolean())).thenReturn(false);
+        when(respondentEventsChecker.isStarted(any(), any(), anyBoolean())).thenReturn(true);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant, caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
 
     @Test
     public void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
@@ -825,10 +908,10 @@ public class TaskListServiceTest {
             Task.builder().event(CASE_NAME).build(),
             Task.builder().event(TYPE_OF_APPLICATION).build(),
             Task.builder().event(HEARING_URGENCY).build(),
-            Task.builder().event(CHILD_DETAILS_REVISED).build(),
             Task.builder().event(APPLICANT_DETAILS).build(),
             Task.builder().event(RESPONDENT_DETAILS).build(),
             Task.builder().event(OTHER_PEOPLE_IN_THE_CASE_REVISED).build(),
+            Task.builder().event(CHILD_DETAILS_REVISED).build(),
             Task.builder().event(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION).build(),
             Task.builder().event(CHILDREN_AND_APPLICANTS).state(CANNOT_START_YET).build(),
             Task.builder().event(CHILDREN_AND_RESPONDENTS).state(CANNOT_START_YET).build(),
