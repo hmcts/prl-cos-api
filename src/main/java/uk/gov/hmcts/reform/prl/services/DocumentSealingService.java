@@ -35,20 +35,22 @@ public class DocumentSealingService {
 
     private static final float POINTS_PER_INCH = 72;
     private static final float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
-    private static final int SEAL_HEIGHT = mm2pt(25);
-    private static final int SEAL_WIDTH = mm2pt(25);
-    private static final int MARGIN_TOP = mm2pt(30);
-    private static final int MARGIN_RIGHT = mm2pt(30);
+    private static final int SEAL_HEIGHT = mm2pt(252);
+    private static final int SEAL_WIDTH = mm2pt(269);
+    private static final int MARGIN_TOP = mm2pt(175);
+    private static final int MARGIN_RIGHT = mm2pt(190);
+    private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
+    private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
+    private static final String COURT_SEAL_BILINGUAL = "/familycourtseal-bilingual.png";
+    private static final String COURT_SEAL = "/familycourtseal.png";
 
     private final DgsApiClient dgsApiClient;
     private final DocumentGenService documentGenService;
     private final AuthTokenGenerator authTokenGenerator;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
-        //byte[] seal = readBytes(caseData.getCourtSeal());
+        byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
         log.info("document before modification: {}", document);
-        byte[] seal = readBytes("/familycourtseal.png");
-        String filename = document.getDocumentFileName();
 
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
             Document pdfDoc = documentGenService.convertToPdf(authorisation, document);
@@ -122,5 +124,21 @@ public class DocumentSealingService {
 
     private static int mm2pt(int mm) {
         return Math.round(POINTS_PER_MM * mm);
+    }
+
+    private static String getCourtSealImage(String seal) {
+        String courtSeal = "";
+        switch (seal) {
+            case USER_IMAGE_COURT_SEAL_BILINGUAL:
+                courtSeal = COURT_SEAL_BILINGUAL;
+                break;
+            case USER_IMAGE_COURT_SEAL:
+                courtSeal = COURT_SEAL;
+                break;
+            default:
+                break;
+        }
+
+        return courtSeal;
     }
 }

@@ -1459,12 +1459,16 @@ public class ManageOrderService {
                 .forEach(order -> {
                     OrderDetails orderDetails = order.getValue();
                     Element<OrderDetails> sealedOrder = order;
+                    Document orderDocument = order.getValue().getOrderDocument();
+                    Document orderDocumentWelsh = order.getValue().getOrderDocumentWelsh();
+
                     if (orderDetails.getIsOrderUploaded().equals(Yes)) {
-                        log.info("order document: {}", order.getValue().getOrderDocument());
+                        log.info("order document: {}", orderDocument);
                         sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value((order.getValue().toBuilder()
-                            .orderDocument(documentSealingService.sealDocument(order.getValue().getOrderDocument(), caseData, authorisation))
-                            //.orderDocumentWelsh(documentSealingService
-                            //                        .sealDocument(order.getValue().getOrderDocumentWelsh(), caseData, authorisation))
+                            .orderDocument(Objects.nonNull(orderDocument)
+                                                    ? documentSealingService.sealDocument(orderDocument, caseData, authorisation) : null)
+                            .orderDocumentWelsh(Objects.nonNull(orderDocumentWelsh)
+                                                    ? documentSealingService.sealDocument(orderDocumentWelsh, caseData, authorisation) : null)
                             .build())).build();
                     }
                     log.info("sealed order: {}", sealedOrder);
