@@ -1377,10 +1377,7 @@ public class SendAndReplyService {
         log.info("contact preference  for party {}",partyDetails.getContactPreferences());
         log.info("actual contact preference {}",contactPreferences);
 
-        if (Objects.nonNull(partyDetails)) {
-            contactPreferences.equals(partyDetails.getContactPreferences());
-        }
-        return false;
+        return contactPreferences.equals(partyDetails.getContactPreferences());
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
