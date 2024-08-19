@@ -1374,6 +1374,9 @@ public class SendAndReplyService {
     }
 
     private boolean isContactPreferenceMatched(PartyDetails partyDetails, ContactPreferences contactPreferences) {
+        log.info("contact preference  for party {}",partyDetails.getContactPreferences());
+        log.info("actual contact preference {}",contactPreferences);
+
         if (Objects.nonNull(partyDetails)) {
             contactPreferences.equals(partyDetails.getContactPreferences());
         }
