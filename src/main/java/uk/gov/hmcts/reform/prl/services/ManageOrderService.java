@@ -1463,8 +1463,8 @@ public class ManageOrderService {
                         log.info("order document: {}", order.getValue().getOrderDocument());
                         sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value((order.getValue().toBuilder()
                             .orderDocument(documentSealingService.sealDocument(order.getValue().getOrderDocument(), caseData, authorisation))
-                            .orderDocumentWelsh(documentSealingService
-                                                    .sealDocument(order.getValue().getOrderDocumentWelsh(), caseData, authorisation))
+                            //.orderDocumentWelsh(documentSealingService
+                            //                        .sealDocument(order.getValue().getOrderDocumentWelsh(), caseData, authorisation))
                             .build())).build();
                     }
                     log.info("sealed order: {}", sealedOrder);
