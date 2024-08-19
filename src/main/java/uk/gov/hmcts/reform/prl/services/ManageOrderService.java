@@ -1469,6 +1469,7 @@ public class ManageOrderService {
                     }
                     log.info("sealed order: {}", sealedOrder);
 
+                    orders.set(orders.indexOf(order), sealedOrder);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, sealedOrder);
                     } else {
