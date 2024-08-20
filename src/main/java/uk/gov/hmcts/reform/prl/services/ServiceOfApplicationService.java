@@ -1002,7 +1002,7 @@ public class ServiceOfApplicationService {
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                           List<Document> staticDocs, List<Element<PartyDetails>> respondentFl401) {
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
-            String emailAddress = respondentFl401.get(0).getValue().getEmail();
+            String emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
             String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
             List<Document> docs = new ArrayList<>();
             boolean sendEmail = true;
@@ -1010,10 +1010,8 @@ public class ServiceOfApplicationService {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
-                emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
-                dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP);
                 if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
                     coverLetter = generateCoverLetterBasedOnCaseAccess(
                         authorization,
@@ -1023,9 +1021,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1);
                 }
-                if (!ContactPreferences.email.equals(respondentFl401.get(0).getValue().getContactPreferences())) {
-                    sendEmail = false;
-                }
+                sendEmail = false;
                 docs.add(coverLetter);
             }
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
