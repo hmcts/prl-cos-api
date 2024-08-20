@@ -310,8 +310,8 @@ public class SendAndReplyService {
                     .toList();
             log.info("Allocated judge details for role assignment id {}", allocatedJudgeDetails);
 
-            //If only one entry means, all messages are closed except current closed message.
-            if (allocatedJudgeDetails.size() == 1) {
+            //Empty means all messages are closed except current closed message
+            if (allocatedJudgeDetails.isEmpty()) {
                 //Remove role assignment
                 roleAssignmentService.removeRoleAssignment(allocatedJudgeElement.getValue().getRoleAssignmentId());
             }
