@@ -57,11 +57,17 @@ public class DocumentSealingService {
         log.info("document as pdf: {}", document);
 
         String s2sToken = authTokenGenerator.generate();
-        byte[] downloadedPdf = documentGenService.getDocumentBytes(
+        /*byte[] downloadedPdf = documentGenService.getDocumentBytes(
             document.getDocumentUrl(),
             authorisation,
             s2sToken
-        );
+        );*/
+        byte[] downloadedPdf = documentGenService
+            .getDocumentBytes(
+                document.getDocumentUrl(),
+                authorisation,
+                s2sToken
+            );
         byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
 
         log.info("downloaded document after conversion to pdf: {}", downloadedPdf);
