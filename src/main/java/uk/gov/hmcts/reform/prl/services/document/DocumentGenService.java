@@ -1453,9 +1453,11 @@ public class DocumentGenService {
     }
 
     public byte[] getDocInBytes(String authorisation, Document document, String filename) {
+        String s2stoken = authTokenGenerator.generate();
+        log.info("s2s token to retrieve bytestream: {}", s2stoken);
         ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
             authorisation,
-            authTokenGenerator.generate(),
+            s2stoken,
             document.getDocumentBinaryUrl()
         );
 
