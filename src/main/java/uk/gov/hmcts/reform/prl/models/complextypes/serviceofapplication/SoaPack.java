@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder(toBuilder = true)
@@ -22,4 +23,6 @@ public class SoaPack {
     private final String packCreatedDate;
 
     private final String personalServiceBy;
+
+    private final Map<String, List<Document>> coverLetterMap;
 }
