@@ -318,6 +318,8 @@ public class DocumentGenService {
 
     private final DgsApiClient dgsApiClient;
 
+    private final DocumentGenService documentGenService;
+
     private final AuthTokenGenerator authTokenGenerator;
     private final UserService userService;
     private final ManageDocumentsService manageDocumentsService;
@@ -1432,8 +1434,15 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
-            byte[] docInBytes = getDocInBytes(authorisation, document, filename);
-
+            //byte[] docInBytes = getDocInBytes(authorisation, document, filename);
+            String s2stoken = authTokenGenerator.generate();
+            log.info("s2s token to retrieve bytestream: {}", s2stoken);
+            byte[] docInBytes = documentGenService
+                .getDocumentBytes(
+                    document.getDocumentUrl(),
+                    authorisation,
+                    s2stoken
+                );
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
