@@ -988,7 +988,7 @@ public class ManageOrderService {
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
-                                   .orderDocument(caseData.getUploadOrderDoc())
+                                   .orderDocument(documentSealingService.sealDocument(caseData.getUploadOrderDoc(), caseData, authorisation))
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
@@ -1032,6 +1032,7 @@ public class ManageOrderService {
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
                                    .isOrderUploaded(Yes)
+                                   .isOrderDocumentSealed(Yes)
                                    .build()));
         return newOrderDetails;
     }
@@ -1459,7 +1460,7 @@ public class ManageOrderService {
                 .forEach(order -> {
                     OrderDetails orderDetails = order.getValue();
                     Element<OrderDetails> sealedOrder = order;
-                    Document orderDocument = order.getValue().getOrderDocument();
+                    /*Document orderDocument = order.getValue().getOrderDocument();
                     Document orderDocumentWelsh = order.getValue().getOrderDocumentWelsh();
 
                     if (orderDetails.getIsOrderUploaded().equals(Yes)) {
@@ -1471,7 +1472,7 @@ public class ManageOrderService {
                                                     ? documentSealingService.sealDocument(orderDocumentWelsh, caseData, authorisation) : null)
                             .build())).build();
                     }
-                    log.info("sealed order: {}", sealedOrder);
+                    log.info("sealed order: {}", sealedOrder);*/
 
                     orders.set(orders.indexOf(order), sealedOrder);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {

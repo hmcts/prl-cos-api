@@ -207,6 +207,7 @@ public class DraftAnOrderService {
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
     private final RoleAssignmentService roleAssignmentService;
+    private final DocumentSealingService documentSealingService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private static final String ORDER_NAME = "orderName";
@@ -466,7 +467,8 @@ public class DraftAnOrderService {
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
-                .orderDocument(draftOrder.getOrderDocument())
+                .orderDocument(documentSealingService.sealDocument(draftOrder.getOrderDocument(), caseData, auth))
+                .isOrderDocumentSealed(Yes)
                 .build();
         } else {
             caseData = updateCaseDataForDocmosis(caseData, draftOrder);
