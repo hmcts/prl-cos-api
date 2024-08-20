@@ -724,7 +724,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCitizenServingRespondentsOptionsCA(unrepresentedApplicant)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
@@ -2376,7 +2376,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -4109,7 +4109,7 @@ public class ServiceOfApplicationServiceTest {
             .respondents(parties)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
