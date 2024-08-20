@@ -878,7 +878,7 @@ public class CaseUtils {
     }
 
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
-        if (null != draftOrderCollection) {
+        if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
             return draftOrderCollection.stream()
                 .filter(element -> element.getId().equals(draftOrderId))
                 .map(Element::getValue)

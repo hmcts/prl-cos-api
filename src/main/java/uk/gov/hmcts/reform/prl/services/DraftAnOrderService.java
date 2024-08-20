@@ -2173,15 +2173,7 @@ public class DraftAnOrderService {
     }
 
     public String getDraftOrderNameForWA(CaseData caseData, String eventId, String clientContext) {
-        if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
-            //Todo This block of code is not getting executed?
-            return getSelectedDraftOrderDetails(
-                caseData.getDraftOrderCollection(),
-                caseData.getDraftOrdersDynamicList(),
-                clientContext, eventId
-            )
-                .getLabelForOrdersDynamicList();
-        } else if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
+        if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
             if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
                 return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue(),
                                                                    LocalDateTime.now()
