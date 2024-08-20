@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -263,11 +264,9 @@ public class EditAndApproveDraftOrderController {
             loggedInUserType,
             draftOrderId
         );
-        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+        DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
             caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList(),
-            clientContext,
-            callbackRequest.getEventId()
+            UUID.fromString(draftOrderId)
         );
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
