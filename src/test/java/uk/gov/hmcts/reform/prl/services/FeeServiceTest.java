@@ -316,7 +316,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("24/04/2022").build();
+            .hearingDate("First Hearing - 24/04/2022").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
@@ -340,7 +340,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("27/12/2023").build();
+            .hearingDate("First Hearing - 27/12/2023").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
@@ -364,7 +364,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("27/10/2023").build();
+            .hearingDate("First Hearing - 27/10/2023").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITHOUT_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()

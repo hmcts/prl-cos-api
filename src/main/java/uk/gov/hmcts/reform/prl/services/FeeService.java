@@ -107,10 +107,11 @@ public class FeeService {
 
     private boolean checkIsHearingDate14DaysAway(String hearingDate, String applicationReason) {
         boolean isHearingDate14DaysAway = false;
-        if (onlyApplyingForAnAdjournment(applicationReason)) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (onlyApplyingForAnAdjournment(applicationReason)
+            && isNotBlank(hearingDate)) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
             LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
-                hearingDate,
+                hearingDate.split("-")[1].trim(),
                 formatter
             ).atStartOfDay();
             isHearingDate14DaysAway = (Duration.between(
