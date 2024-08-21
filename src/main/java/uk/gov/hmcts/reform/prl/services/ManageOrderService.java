@@ -1333,15 +1333,6 @@ public class ManageOrderService {
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build();
     }
 
-    public String getApplicant(CaseData caseData) {
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
-                                 caseData.getApplicantsFL401().getLastName()
-            );
-        }
-        return null;
-    }
-
     public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
         if (null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
