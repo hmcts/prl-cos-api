@@ -1050,9 +1050,6 @@ public class DraftAnOrderService {
             log.info(" Getting order id from client context");
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
             orderId = UUID.fromString(CaseUtils.getDraftOrderId(waMapper));
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
-            //workaround for client context
-            orderId = draftOrderCollection.get(0).getId();
         } else {
             log.info(" Getting order id from dynamic list");
             orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);

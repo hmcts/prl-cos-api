@@ -249,13 +249,10 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
                                      CaseData caseData, String loggedInUserType, String clientContext) {
-        String draftOrderId;
+        String draftOrderId = null;
         if (clientContext != null) {
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
             draftOrderId = CaseUtils.getDraftOrderId(waMapper);
-        } else {
-            //workaround for client context
-            draftOrderId = caseData.getDraftOrderCollection().get(0).getId().toString();
         }
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
