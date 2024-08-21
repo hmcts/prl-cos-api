@@ -111,7 +111,7 @@ public class FeeService {
             && isNotBlank(hearingDate)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
             LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
-                hearingDate.split("-")[1].trim(),
+                hearingDate.split("--")[1].trim(),
                 formatter
             ).atStartOfDay();
             isHearingDate14DaysAway = (Duration.between(
