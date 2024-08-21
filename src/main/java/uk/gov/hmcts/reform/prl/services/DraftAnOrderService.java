@@ -1061,7 +1061,7 @@ public class DraftAnOrderService {
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId, String draftOrderId) {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        UUID selectedOrderId = UUID.fromString(draftOrderId);
+        UUID selectedOrderId;
         if (StringUtils.isEmpty(draftOrderId)) {
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
                 selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -1070,6 +1070,8 @@ public class DraftAnOrderService {
                 selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
             }
+        } else {
+            selectedOrderId = UUID.fromString(draftOrderId);
         }
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             if (e.getId().equals(selectedOrderId)) {
