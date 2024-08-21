@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.clients;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -26,5 +27,11 @@ public interface DgsApiClient {
         @PathVariable("fileName") String fileName,
         @RequestHeader("Authorization") String authorization,
         @RequestBody GenerateDocumentRequest documentRequest
+    );
+
+    @PostMapping(value = "/version/1/downloadDocument/{documentBinaryUrl}", consumes = "application/json")
+    ResponseEntity<byte[]> downloadDocument(
+        @PathVariable("documentBinaryUrl") String documentBinaryUrl,
+        @RequestHeader("Authorization") String authorization
     );
 }

@@ -1452,7 +1452,9 @@ public class DocumentGenService {
             log.info("s2s token to retrieve bytestream: {}", s2stoken);
             byte[] docInBytes = new byte[0];
             try {
-                docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
+                docInBytes = dgsApiClient.downloadDocument(document.getDocumentBinaryUrl(),
+                                                           authorisation).getBody();
+                //docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
