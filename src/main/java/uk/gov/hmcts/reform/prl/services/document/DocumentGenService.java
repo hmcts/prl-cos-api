@@ -334,7 +334,7 @@ public class DocumentGenService {
     private final CaseService caseService;
     private final ObjectMapper objectMapper;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     private static final String USER_ROLES = "user-roles";
     private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
