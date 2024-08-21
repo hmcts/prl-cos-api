@@ -32,9 +32,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class ManageCafcassAccessController {
     private final AuthorisationService authorisationService;
 
-    public static final String CAFCASS_ALLOWED_HEADER = "# Cafcass could access this case";
+    public static final String CAFCASS_ALLOWED_HEADER = "# Cafcass can access this case";
 
-    public static final String CAFCASS_NOT_ALLOWED_HEADER = "# Cafcass couldn't access this case";
+    public static final String CAFCASS_NOT_ALLOWED_HEADER = "# Cafcass access revoked";
 
     private static final String CONFIRMATION_BODY = """
          ### \n\n\n
