@@ -318,8 +318,6 @@ public class DocumentGenService {
 
     private final DgsApiClient dgsApiClient;
 
-    private final DocumentGenService documentGenService;
-
     private final AuthTokenGenerator authTokenGenerator;
     private final UserService userService;
     private final ManageDocumentsService manageDocumentsService;
@@ -1437,8 +1435,7 @@ public class DocumentGenService {
             //byte[] docInBytes = getDocInBytes(authorisation, document, filename);
             String s2stoken = authTokenGenerator.generate();
             log.info("s2s token to retrieve bytestream: {}", s2stoken);
-            byte[] docInBytes = documentGenService
-                .getDocumentBytes(
+            byte[] docInBytes = getDocumentBytes(
                     document.getDocumentUrl(),
                     authorisation,
                     s2stoken
