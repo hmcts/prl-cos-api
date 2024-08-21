@@ -3672,7 +3672,7 @@ public class ServiceOfApplicationService {
                                            bulkPrintDetails,
                                            element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
                                            caseData.getServiceOfApplication().getUnServedApplicantPack().getCoverLetterMap()
-                                                        .get(caseData.getApplicantsFL401().getPartyId()).get(0),
+                                                        .get(String.valueOf(caseData.getApplicantsFL401().getPartyId())).get(0),
                                                     SERVED_PARTY_APPLICANT);
             }
         }

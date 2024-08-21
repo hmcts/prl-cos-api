@@ -204,6 +204,8 @@ public class ServiceOfApplicationServiceTest {
 
     List<Element<String>> partyIdsSoa;
 
+    Map<String, List<Document>> coverletterMap;
+
     @Before
     public void setup() throws Exception {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
@@ -222,6 +224,8 @@ public class ServiceOfApplicationServiceTest {
             .caseInviteEmail(testString)
             .hasLinked(testString)
             .build();
+        coverletterMap = new HashMap<>();
+        coverletterMap.put(TEST_UUID, List.of(Document.builder().build()));
         caseInvite1 = CaseInvite.builder()
             .caseInviteEmail("inviteemail@test.com")
             .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
@@ -249,6 +253,7 @@ public class ServiceOfApplicationServiceTest {
                                        .partyIds(partyIdsSoa)
                                        .packDocument(List.of(element(Document.builder()
                                                                          .documentFileName("").build())))
+                                       .coverLetterMap(coverletterMap)
                                        .build())
             .unServedRespondentPack(SoaPack.builder()
                                         .partyIds(partyIdsSoa)
@@ -548,6 +553,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .coverLetterMap(coverletterMap)
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .packDocument(List.of(element(Document.builder()
@@ -639,6 +645,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
+                                                                 .coverLetterMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder().build())
@@ -2593,6 +2600,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
+                                                                 .coverLetterMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
@@ -2639,6 +2647,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
+                                                                 .coverLetterMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
@@ -2720,6 +2729,7 @@ public class ServiceOfApplicationServiceTest {
                                           .unServedApplicantPack(SoaPack.builder()
                                                                      .partyIds(partyIds)
                                                                      .personalServiceBy("courtAdmin")
+                                                                     .coverLetterMap(coverletterMap)
                                                                      .build())
                                           .unServedRespondentPack(SoaPack.builder()
                                                                       .partyIds(partyIds)
@@ -3621,6 +3631,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIdsSoa)
+                                                                 .coverLetterMap(coverletterMap)
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIdsSoa)
@@ -4239,6 +4250,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     .build()))
                                           .unServedApplicantPack(SoaPack.builder()
                                                                      .personalServiceBy("courtAdmin")
+                                                                     .coverLetterMap(coverletterMap)
                                                                      .partyIds(partyIds).build())
                                           .unServedRespondentPack(SoaPack.builder()
                                                                       .partyIds(partyIds)
