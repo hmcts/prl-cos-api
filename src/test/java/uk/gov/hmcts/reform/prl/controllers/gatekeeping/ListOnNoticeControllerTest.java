@@ -162,7 +162,7 @@ public class ListOnNoticeControllerTest {
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
         when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
             .thenReturn(allocatedJudge);
@@ -202,7 +202,7 @@ public class ListOnNoticeControllerTest {
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
@@ -229,7 +229,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -262,7 +262,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -295,7 +295,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
