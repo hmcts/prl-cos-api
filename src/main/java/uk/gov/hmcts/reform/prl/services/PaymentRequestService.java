@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,8 +104,7 @@ public class PaymentRequestService {
                 CITIZEN_CASE_UPDATE.getValue()
             );
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (null == caseData) {
             log.info(
                 "Retrieved caseData is null for caseId {}, please provide a valid caseId",
@@ -120,13 +120,15 @@ public class PaymentRequestService {
         createPaymentRequest = createPaymentRequest.toBuilder()
             .applicantCaseName(caseData.getApplicantCaseName()).build();
 
-        if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
-            log.info("*** Citizen C100 case payment ***");
-            paymentResponse = handleC100Payment(authorization,
-                                                caseData,
-                                                caseDataMap,
-                                                createPaymentRequest,
-                                                feeResponse);
+        if (isApplicationNotAwp(createPaymentRequest)) {
+            log.info("*** Citizen C100 and other applications case payment ***");
+            paymentResponse = createPayment(
+                authorization,
+                createPaymentRequest,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getPaymentReferenceNumber(),
+                feeResponse
+            );
         } else {
             log.info("*** Citizen awp payment ***");
             paymentResponse = handleCitizenAwpPayment(authorization,
@@ -135,6 +137,9 @@ public class PaymentRequestService {
                                                       createPaymentRequest,
                                                       feeResponse);
         }
+        //update service request & payment request reference
+        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
 
         //update case
         allTabService.submitAllTabsUpdate(
@@ -272,26 +277,6 @@ public class PaymentRequestService {
             );
     }
 
-    private PaymentResponse handleC100Payment(String authorization,
-                                              CaseData caseData,
-                                              Map<String, Object> caseDataMap,
-                                              CreatePaymentRequest createPaymentRequest,
-                                              FeeResponse feeResponse) {
-        paymentResponse = createPayment(
-            authorization,
-            createPaymentRequest,
-            caseData.getPaymentServiceRequestReferenceNumber(),
-            caseData.getPaymentReferenceNumber(),
-            feeResponse
-        );
-
-        //update service request & payment request reference
-        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-
-        return paymentResponse;
-    }
-
     private PaymentResponse handleCitizenAwpPayment(String authorization,
                                                     CaseData caseData,
                                                     Map<String, Object> caseDataMap,
@@ -386,4 +371,7 @@ public class PaymentRequestService {
             );
     }
 
+    private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
+        return FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType());
+    }
 }
