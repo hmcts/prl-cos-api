@@ -129,6 +129,9 @@ public class PaymentRequestService {
                 caseData.getPaymentReferenceNumber(),
                 feeResponse
             );
+            //update service request & payment request reference
+            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
         } else {
             log.info("*** Citizen awp payment ***");
             paymentResponse = handleCitizenAwpPayment(authorization,
@@ -137,9 +140,6 @@ public class PaymentRequestService {
                                                       createPaymentRequest,
                                                       feeResponse);
         }
-        //update service request & payment request reference
-        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
 
         //update case
         allTabService.submitAllTabsUpdate(
