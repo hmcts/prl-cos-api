@@ -106,6 +106,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class SendAndReplyService {
 
     public static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
+    public static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -1245,43 +1246,63 @@ public class SendAndReplyService {
                 allocatedJudgeForSendAndReply,
                 judgeIdamId
             );
-            log.info("Existing allocated judge details - {}, for the Judge idam id {}", allocatedJudgeForSendAndReplyOptional, judgeIdamId);
-            if (allocatedJudgeForSendAndReplyOptional.isPresent()) {
+            log.info(
+                "Allocate judge -> existing allocated judge details for the Judge idam id {} - {}",
+                judgeIdamId, allocatedJudgeForSendAndReplyOptional
+            );
+            if (allocatedJudgeForSendAndReplyOptional.isPresent()
+                && !checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
+                allocatedJudgeForSendAndReply,
+                judgeIdamId,
+                newMessage.getMessageIdentifier()
+            )) {
                 //Check if the Judge is already allocated to this message
-                if (!checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-                    allocatedJudgeForSendAndReply,
-                    judgeIdamId,
+                log.info(
+                    "Allocate judge -> case is already allocated to judge as part of another message, "
+                        + "add judge details to send & reply list for new message {}",
                     newMessage.getMessageIdentifier()
-                )) {
-                    log.info("Adding Allocated judge details as it's is not present for given Judge idam id {}, & message identifier {}",
-                             judgeIdamId, newMessage.getMessageIdentifier());
+                );
+                allocatedJudgeForSendAndReply
+                    .add(element(AllocatedJudgeForSendAndReply.builder()
+                                     .judgeIdamId(judgeIdamId)
+                                     .roleAssignmentId(
+                                         allocatedJudgeForSendAndReplyOptional.get().getRoleAssignmentId())
+                                     .messageIdentifier(newMessage.getMessageIdentifier())
+                                     .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
+                                     .build()));
+            } else {
+                RoleAssignmentResponse roleAssignmentResponse = checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(
+                    caseData.getId()), judgeIdamId);
+                if (null != roleAssignmentResponse) {
+                    log.info(
+                        "Allocate judge -> case is already allocated to judge manually, add judge details to send & reply list");
                     allocatedJudgeForSendAndReply
                         .add(element(AllocatedJudgeForSendAndReply.builder()
                                          .judgeIdamId(judgeIdamId)
-                                         .roleAssignmentId(
-                                             allocatedJudgeForSendAndReplyOptional.get().getRoleAssignmentId())
+                                         .roleAssignmentId(roleAssignmentResponse.getId())
                                          .messageIdentifier(newMessage.getMessageIdentifier())
-                                         .status("ALLOCATED_AS_PART_OF_SEND_AND_REPLY")
+                                         .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
+                                         .build()));
+
+                } else {
+                    log.info(
+                        "Allocate judge -> case is not allocated to judge, create new role assignment & add judge details to send & reply list");
+                    //Allocate Judge to this message
+                    allocatedJudgeForSendAndReply
+                        .add(element(AllocatedJudgeForSendAndReply
+                                         .builder()
+                                         .roleAssignmentId(createRoleAssignmentAndRetrieveId(
+                                             authorisation,
+                                             caseData.getId(),
+                                             judgeIdamId
+                                         ))
+                                         .judgeIdamId(judgeIdamId)
+                                         .messageIdentifier(newMessage.getMessageIdentifier())
+                                         .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
                                          .build()));
                 }
-
-            } else if (!checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(caseData.getId()), judgeIdamId)) {
-                log.info("Case is not allocated to Judge, create new role assignment & add allocated judge details");
-                //Allocate Judge to this message
-                allocatedJudgeForSendAndReply
-                    .add(element(AllocatedJudgeForSendAndReply
-                                     .builder()
-                                     .roleAssignmentId(createRoleAssignmentAndRetrieveId(
-                                         authorisation,
-                                         caseData.getId(),
-                                         judgeIdamId
-                                     ))
-                                     .judgeIdamId(judgeIdamId)
-                                     .messageIdentifier(newMessage.getMessageIdentifier())
-                                     .status("ALLOCATED_AS_PART_OF_SEND_AND_REPLY")
-                                     .build()));
             }
-            log.info("Allocated judge details after the update {}", allocatedJudgeForSendAndReply);
+            log.info("Allocate judge -> allocated judge details {}", allocatedJudgeForSendAndReply);
             caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReply);
         }
     }
@@ -1334,18 +1355,17 @@ public class SendAndReplyService {
     }
 
 
-    private boolean checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
+    private RoleAssignmentResponse checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
         List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
             judgeIdamId
         );
-        Optional<RoleAssignmentResponse> filteredRoleAssignmentForThisCase = roleAssignmentResponseList.stream()
+        return roleAssignmentResponseList.stream()
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
                 ALLOCATE_JUDGE_ROLE))
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
                 String.valueOf(caseId)))
-            .findFirst();
-
-        return filteredRoleAssignmentForThisCase.isPresent();
+            .findFirst()
+            .orElse(null);
     }
 
     public String fetchAdditionalApplicationCodeIfExist(CaseData caseData, SendOrReply sendOrReply) {
