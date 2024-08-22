@@ -22,7 +22,7 @@ public class Match {
     @JsonProperty("data.fm5RemindersSent")
     private String fm5RemindersSent;
 
-    @JsonProperty("data.c100HwfRequestedForAdditionalApplications")
-    private String c100HwfRequestedForAdditionalApplications;
+    @JsonProperty("data.hwfRequestedForAdditionalApplications")
+    private String hwfRequestedForAdditionalApplications;
 
 }

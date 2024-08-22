@@ -78,7 +78,7 @@ public class CitizenAwpMapper {
         additionalApplicationsBundles.add(element(additionalApplicationsBundle));
 
         return caseData.toBuilder()
-            .c100HwfRequestedForAdditionalApplications(setC100HwfRequestedForAdditionalApplicationsFlag(
+            .hwfRequestedForAdditionalApplications(setHwfRequestedForAdditionalApplicationsFlag(
                 caseData,
                 citizenAwpRequest
             ))
@@ -86,9 +86,9 @@ public class CitizenAwpMapper {
             .build();
     }
 
-    private YesOrNo setC100HwfRequestedForAdditionalApplicationsFlag(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
-        if (YesOrNo.Yes.equals(caseData.getC100HwfRequestedForAdditionalApplications())) {
-            return caseData.getC100HwfRequestedForAdditionalApplications();
+    private YesOrNo setHwfRequestedForAdditionalApplicationsFlag(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
+        if (YesOrNo.Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
+            return caseData.getHwfRequestedForAdditionalApplications();
         } else if (YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
             && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())) {
             return YesOrNo.Yes;
