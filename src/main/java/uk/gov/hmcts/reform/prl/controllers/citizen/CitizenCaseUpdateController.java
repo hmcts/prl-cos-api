@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.C100AwpProcessHwfPaymentService;
+import uk.gov.hmcts.reform.prl.services.AwpProcessHwfPaymentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -47,7 +47,7 @@ public class CitizenCaseUpdateController {
     private static final String INVALID_CLIENT = "Invalid Client";
     private final CaseService caseService;
 
-    private final C100AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
+    private final AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
 
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
