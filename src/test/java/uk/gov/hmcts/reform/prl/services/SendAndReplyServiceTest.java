@@ -1642,7 +1642,7 @@ public class SendAndReplyServiceTest {
         dynamicData.put("disposition", "attachment");
         dynamicData.put("name", "Abc Xyz");
         dynamicData.put("documentSize", 0);
-        dynamicData.put("messageAbout", "an application");
+        dynamicData.put("messageAbout", "APPLICATION");
         dynamicData.put("caseName", caseData.getApplicantCaseName());
         return dynamicData;
     }
