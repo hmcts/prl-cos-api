@@ -988,7 +988,9 @@ public class ManageOrderService {
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
-                                   .orderDocument(documentSealingService.sealDocument(caseData.getUploadOrderDoc(), caseData, authorisation))
+                                   .orderDocument(isOrderSealed(caseData.getOrderCollection(), caseData.getUploadOrderDoc().getDocumentUrl())
+                                                      ? documentSealingService.sealDocument(caseData.getUploadOrderDoc(), caseData, authorisation)
+                                                      : caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
@@ -1036,6 +1038,18 @@ public class ManageOrderService {
                                    .build()));
         return newOrderDetails;
     }
+
+    private boolean isOrderSealed(List<Element<OrderDetails>> orders, String documentUrl) {
+        log.info("documentUrl to check: {}", documentUrl);
+        orders.stream().forEach(order -> log.info("order document url: {}", order.getValue().getOrderDocument().getDocumentUrl()));
+
+        return orders.stream()
+            .filter(order -> documentUrl.equals(order.getValue().getOrderDocument().getDocumentUrl())
+                && order.getValue().getIsOrderDocumentSealed().equals(
+                Yes)).collect(Collectors.toList()).isEmpty();
+    }
+
+
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
         return ServeOrderDetails.builder()

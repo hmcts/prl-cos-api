@@ -4711,6 +4711,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4733,6 +4734,10 @@ public class ManageOrderServiceTest {
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
+            .uploadOrderDoc(Document
+                                .builder().documentUrl("/")
+                                .build())
+            .orderCollection(orderList)
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
             "test token",
