@@ -1611,7 +1611,7 @@ public class SendAndReplyService {
         String messageAbout = "";
         // get Message About
         if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
-            messageAbout = message.getMessageAbout().getDisplayedValue().toLowerCase();
+            messageAbout = String.valueOf(message.getMessageAbout());
         }
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
