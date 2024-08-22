@@ -37,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
@@ -883,5 +885,24 @@ public class CaseUtils {
     public static String getCurrentDate() {
         return DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
             .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
+    }
+
+    public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
+                                                                                     CreatePaymentRequest createPaymentRequest) {
+        if (isNotEmpty(citizenAwpPayments)) {
+            return citizenAwpPayments.stream()
+                .filter(awpPaymentElement ->
+                            isCitizenAwpPaymentPresent(awpPaymentElement.getValue(), createPaymentRequest))
+                .findFirst();
+        }
+        return Optional.empty();
+    }
+
+    public static boolean isCitizenAwpPaymentPresent(CitizenAwpPayment citizenAwpPayment,
+                                                     CreatePaymentRequest createPaymentRequest) {
+        return citizenAwpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
+            && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
+            && null != createPaymentRequest.getFeeType()
+            && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
 }

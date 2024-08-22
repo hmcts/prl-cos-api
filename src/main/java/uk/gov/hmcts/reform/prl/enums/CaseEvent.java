@@ -56,7 +56,9 @@ public enum CaseEvent {
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
     CITIZEN_RESPONSE_TO_AOH("citizenResponseToAoH"),
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
-    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
+    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
+
+    C100_HWF_PROCESS_AWP_STATUS_UPDATE("c100ProcessHwfUpdateAwpStatus");
 
     private final String value;
 
