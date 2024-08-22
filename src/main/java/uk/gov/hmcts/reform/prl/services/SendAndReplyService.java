@@ -1039,12 +1039,10 @@ public class SendAndReplyService {
             caseData.getSendOrReplyMessage().getReplyMessageObject(),
             authorization
         );
-        allocateJudgeIfMessageSentToJudge(authorization, caseData, replyMessage, caseDataMap);
 
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
-
         //append history
-        return caseData.getSendOrReplyMessage()
+        List<Element<Message>> messages = caseData.getSendOrReplyMessage()
             .getMessages().stream()
             .map(messageElement -> {
                 if (messageElement.getId().equals(replyMessageId)) {
@@ -1076,6 +1074,10 @@ public class SendAndReplyService {
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .toList();
+        log.info("Reply message {}", replyMessage);
+        allocateJudgeIfMessageSentToJudge(authorization, caseData, replyMessage, caseDataMap);
+
+        return messages;
     }
 
     private MessageHistory buildReplyMessageHistory(Message message) {
