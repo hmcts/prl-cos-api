@@ -283,39 +283,34 @@ public class SendAndReplyService {
                                                                  Map<String, Object> caseDataMap,
                                                                  Message closingMessage) {
         log.info("*** Inside removeAllocatedJudgeIfAddedAsPartOfSendAndReply ***");
+        log.info("Remove judge -> Closed message identifier {}", closingMessage.getMessageIdentifier());
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReplyList = caseData
             .getSendOrReplyDto().getAllocatedJudgeForSendAndReply();
-        log.info("Existing allocated judge details {}", allocatedJudgeForSendAndReplyList);
+        log.info("Remove judge -> Existing allocated judge details {}", allocatedJudgeForSendAndReplyList);
 
         //Get allocated judge details for the closed message if any
-        Optional<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeOptional =
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeDetailsForClosedMessage =
             nullSafeCollection(allocatedJudgeForSendAndReplyList).stream()
                 .filter(allocatedJudgeForSendAndReplyElement ->
                             allocatedJudgeForSendAndReplyElement.getValue().getMessageIdentifier().equals(
                                 closingMessage.getMessageIdentifier()))
-                .findFirst();
-        log.info("Allocated judge {}, found for message identifier {}", allocatedJudgeOptional, closingMessage.getMessageIdentifier());
+                .toList();
+        log.info("Remove judge -> Allocated judge details for closed message {}", allocatedJudgeDetailsForClosedMessage);
 
-        if (allocatedJudgeOptional.isPresent()) {
-            Element<AllocatedJudgeForSendAndReply> allocatedJudgeElement = allocatedJudgeOptional.get();
-            //Remove details for the closed message
-            allocatedJudgeForSendAndReplyList.remove(allocatedJudgeElement);
+        if (isNotEmpty(allocatedJudgeDetailsForClosedMessage)) {
+            //Remove allocated judge details for the closed message
+            allocatedJudgeForSendAndReplyList.removeAll(allocatedJudgeDetailsForClosedMessage);
             caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReplyList);
 
-            //If all messages are closed then remove the judge role allocation
-            List<AllocatedJudgeForSendAndReply> allocatedJudgeDetails =
-                allocatedJudgeForSendAndReplyList.stream()
-                    .map(Element::getValue)
-                    .filter(allocatedJudge -> allocatedJudge.getRoleAssignmentId().equals(
-                        allocatedJudgeElement.getValue().getRoleAssignmentId()))
-                    .toList();
-            log.info("Allocated judge details for role assignment id {}", allocatedJudgeDetails);
-
-            //Empty means all messages are closed except current closed message
-            if (allocatedJudgeDetails.isEmpty()) {
-                //Remove role assignment
-                roleAssignmentService.removeRoleAssignment(allocatedJudgeElement.getValue().getRoleAssignmentId());
-            }
+            //Remove the all judge role allocations for the closed message
+            allocatedJudgeDetailsForClosedMessage.stream()
+                .map(Element::getValue)
+                .forEach(allocatedJudgeElement -> {
+                    //Remove role assignment
+                    log.info("Remove judge -> remove role assignment for {}", allocatedJudgeElement.getRoleAssignmentId());
+                    roleAssignmentService.removeRoleAssignment(allocatedJudgeElement.getRoleAssignmentId());
+                });
+            log.info("Remove judge -> Allocated judge details after removal {}", allocatedJudgeForSendAndReplyList);
         }
     }
 
@@ -771,9 +766,7 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
-            .messageIdentifier(SEND.equals(caseData.getChooseSendOrReply())
-                                   ? String.valueOf(UUID.randomUUID())
-                                   : message.getMessageIdentifier())
+            .messageIdentifier(SEND.equals(caseData.getChooseSendOrReply()) ? String.valueOf(UUID.randomUUID()) : null)
             .build();
     }
 
@@ -1075,6 +1068,7 @@ public class SendAndReplyService {
                     replyMessage.setSelectedFutureHearingCode(StringUtils.stripToNull(message.getSelectedFutureHearingCode()));
                     replyMessage.setJudicialOrMagistrateTierCode(StringUtils.stripToNull(message.getJudicialOrMagistrateTierCode()));
                     replyMessage.setSelectedSubmittedDocumentCode(StringUtils.stripToNull(message.getSelectedSubmittedDocumentCode()));
+                    replyMessage.setMessageIdentifier(message.getMessageIdentifier());
 
                     return element(messageElement.getId(), replyMessage);
                 }
