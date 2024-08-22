@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 
+import java.util.UUID;
+
 @FeignClient(
     name = "prl-dgs-api",
     url = "${prl-dgs-api.url}",
@@ -29,9 +31,9 @@ public interface DgsApiClient {
         @RequestBody GenerateDocumentRequest documentRequest
     );
 
-    @PostMapping(value = "/version/1/downloadDocument/{documentBinaryUrl}", consumes = "application/json")
+    @PostMapping(value = "/version/1/downloadDocument/{documentId}", consumes = "application/json")
     ResponseEntity<byte[]> downloadDocument(
-        @PathVariable("documentBinaryUrl") String documentBinaryUrl,
+        @PathVariable("documentId") UUID documentId,
         @RequestHeader("Authorization") String authorization
     );
 }

@@ -66,7 +66,8 @@ public class DocumentSealingService {
         byte[] downloadedPdf = new byte[0];
         try {
             //downloadedPdf = documentGenService.downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
-            downloadedPdf = dgsApiClient.downloadDocument(document.getDocumentBinaryUrl(), authorisation).getBody();
+            downloadedPdf = dgsApiClient.downloadDocument(
+                documentGenService.getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()), authorisation).getBody();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

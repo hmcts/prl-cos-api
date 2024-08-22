@@ -74,6 +74,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -1452,7 +1453,7 @@ public class DocumentGenService {
             log.info("s2s token to retrieve bytestream: {}", s2stoken);
             byte[] docInBytes = new byte[0];
             try {
-                docInBytes = dgsApiClient.downloadDocument(document.getDocumentBinaryUrl(),
+                docInBytes = dgsApiClient.downloadDocument(getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()),
                                                            authorisation).getBody();
                 //docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
             } catch (Exception e) {
@@ -1502,6 +1503,12 @@ public class DocumentGenService {
 
         log.info("File download status : {} ", response.getStatusCode());
         return response;
+    }
+
+    //temp
+    public UUID getDocumentIdFromSelfHref(String selfHref) {
+        selfHref = selfHref.replace("/binary", "");
+        return UUID.fromString(selfHref.substring(selfHref.length() - 36));
     }
 
     public byte[] getDocInBytes(String authorisation, Document document, String filename) {
