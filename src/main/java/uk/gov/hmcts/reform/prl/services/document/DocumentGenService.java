@@ -1448,14 +1448,40 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
+            byte[] docInBytes = getDocInBytes(authorisation, document, filename);
+            String s2stoken = authTokenGenerator.generate();
+            log.info("s2s token to retrieve bytestream: {}", s2stoken);
+
+            log.info("Downloaded document as bytes to convert to pdf: {}", docInBytes);
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", docInBytes);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                    .builder().template(DUMMY).values(tempCaseDetails).build()
+            );
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
+    }
+
+    public Document convertToPdfFromDmStore(String authorisation, Document document) {
+        String filename = document.getDocumentFileName();
+        if (checkFileFormat(document.getDocumentFileName())) {
             //byte[] docInBytes = getDocInBytes(authorisation, document, filename);
             String s2stoken = authTokenGenerator.generate();
             log.info("s2s token to retrieve bytestream: {}", s2stoken);
             byte[] docInBytes = new byte[0];
             try {
-                docInBytes = dgsApiClient.downloadDocument(getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()),
-                                                           authorisation).getBody();
-                //docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
+                //docInBytes = dgsApiClient.downloadDocument(getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()),
+                //                                          authorisation).getBody();
+                docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
