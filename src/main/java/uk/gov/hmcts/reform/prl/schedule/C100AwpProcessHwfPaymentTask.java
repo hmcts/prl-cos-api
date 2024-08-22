@@ -26,10 +26,10 @@ public class C100AwpProcessHwfPaymentTask implements Runnable {
      */
     @Override
     public void run() {
-        log.info("*** Process Citizen C100 additional applications with HWF task is started ***");
-        //Invoke C100 Awp process Hwf payment service to evaluate & update application status
+        log.info("*** Process Citizen additional applications with HWF task is started ***");
+        //Invoke Awp process Hwf payment service to evaluate & update application status
         awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
 
-        log.info("*** Process Citizen C100 additional applications with HWF task is completed ***");
+        log.info("*** Process Citizen additional applications with HWF task is completed ***");
     }
 }
