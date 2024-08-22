@@ -99,7 +99,7 @@ public class AllocateJudgeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -144,7 +144,7 @@ public class AllocateJudgeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .judgeEmail("testEmail")
             .legalAdviserList(legalAdviserList)
             .build();
@@ -188,7 +188,7 @@ public class AllocateJudgeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -221,7 +221,7 @@ public class AllocateJudgeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
