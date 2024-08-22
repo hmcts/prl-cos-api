@@ -1608,11 +1608,6 @@ public class SendAndReplyService {
         if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
             documentSize = allSelectedDocuments.size();
         }
-        String messageAbout = "";
-        // get Message About
-        if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
-            messageAbout = String.valueOf(message.getMessageAbout());
-        }
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
         dynamicData.put("dashBoardLink", dashboardLink);
@@ -1623,7 +1618,8 @@ public class SendAndReplyService {
         String receiverFullName = getReceiverFullName(partyDetails);
         dynamicData.put("name", receiverFullName);
         dynamicData.put("documentSize", documentSize);
-        dynamicData.put("messageAbout", messageAbout);
+        log.info("message about {}", message.getMessageAbout());
+        dynamicData.put("messageAbout", String.valueOf(message.getMessageAbout()));
         return dynamicData;
     }
 
