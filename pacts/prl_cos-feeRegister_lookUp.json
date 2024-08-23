@@ -1,0 +1,177 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A request for PRL Fees",
+      "key": "d981af67",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Fees exist for PRL"
+        }
+      ],
+      "request": {
+        "matchingRules": {
+          "query": {
+            "channel": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "default"
+                }
+              ]
+            },
+            "event": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "miscellaneous"
+                }
+              ]
+            },
+            "jurisdiction1": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "family"
+                }
+              ]
+            },
+            "jurisdiction2": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "family court"
+                }
+              ]
+            },
+            "keyword": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "ChildArrangement"
+                }
+              ]
+            },
+            "service": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "private law"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/fees-register/fees/lookup",
+        "query": {
+          "channel": [
+            "default"
+          ],
+          "event": [
+            "miscellaneous"
+          ],
+          "jurisdiction1": [
+            "family"
+          ],
+          "jurisdiction2": [
+            "family court"
+          ],
+          "keyword": [
+            "ChildArrangement"
+          ],
+          "service": [
+            "private law"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "code": "FEE0336",
+            "description": "Section 8 orders (section 10(1) or (2))",
+            "fee_amount": 232.0,
+            "version": 2
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.code": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.description": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.fee_amount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "feeRegister_lookUp"
+  }
+}

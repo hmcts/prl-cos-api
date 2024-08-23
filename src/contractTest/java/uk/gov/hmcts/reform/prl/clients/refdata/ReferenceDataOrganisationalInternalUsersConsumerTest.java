@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.clients.refdata;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {
 
     @Pact(provider = "referenceData_organisationalInternal", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForGetOrganisationById(PactDslWithProvider builder) {
+    public V4Pact generatePactFragmentForGetOrganisationById(PactDslWithProvider builder) {
         // @formatter:off
         return builder
             .given("Organisation exists for given Id")
@@ -46,7 +46,7 @@ public class ReferenceDataOrganisationalInternalUsersConsumerTest extends Refere
             .willRespondWith()
             .body(buildOrganisationResponseDsl())
             .status(HttpStatus.SC_OK)
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

@@ -1,20 +1,28 @@
 {
-  "provider": {
-    "name": "referenceData_organisationalInternal"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "A Request to get organisation by Id",
+      "key": "b5c8ccdc",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Organisation exists for given Id"
+        }
+      ],
       "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer some-access-token"
+          ],
+          "ServiceAuthorization": [
+            "someServiceAuthToken"
+          ]
+        },
         "method": "GET",
         "path": "/refdata/internal/v1/organisations",
-        "headers": {
-          "Authorization": "Bearer some-access-token",
-          "ServiceAuthorization": "someServiceAuthToken"
-        },
         "query": {
           "id": [
             "orgId"
@@ -22,37 +30,92 @@
         }
       },
       "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
         "body": {
-          "contactInformation": [
-            {
-              "country": "UK",
-              "addressLine1": "addressLine1",
-              "addressLine2": "addressLine2",
-              "postCode": "SM12SX"
-            }
-          ],
-          "companyNumber": "companyNumber",
-          "sraId": "sraId",
-          "name": "theKCompany",
-          "sraRegulated": true,
-          "organisationIdentifier": "someOrganisationIdentifier",
-          "status": "ACTIVE"
+          "content": {
+            "companyNumber": "companyNumber",
+            "contactInformation": [
+              {
+                "addressLine1": "addressLine1",
+                "addressLine2": "addressLine2",
+                "country": "UK",
+                "postCode": "SM12SX"
+              }
+            ],
+            "name": "theKCompany",
+            "organisationIdentifier": "someOrganisationIdentifier",
+            "sraId": "sraId",
+            "sraRegulated": true,
+            "status": "ACTIVE"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
         },
         "matchingRules": {
           "body": {
-            "$.name": {
+            "$.companyNumber": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
+            },
+            "$.contactInformation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.contactInformation[*].addressLine1": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.contactInformation[*].addressLine2": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.contactInformation[*].country": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.contactInformation[*].postCode": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
             },
             "$.organisationIdentifier": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
@@ -60,109 +123,60 @@
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
-            },
-            "$.companyNumber": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.sraId": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.sraRegulated": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.status": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
-            },
-            "$.contactInformation": {
-              "matchers": [
-                {
-                  "match": "type",
-                  "min": 1
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.contactInformation[*].addressLine1": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.contactInformation[*].addressLine2": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.contactInformation[*].country": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.contactInformation[*].postCode": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
+              ]
             }
           },
           "header": {
             "Content-Type": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "regex",
                   "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           }
-        }
+        },
+        "status": 200
       },
-      "providerStates": [
-        {
-          "name": "Organisation exists for given Id"
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "referenceData_organisationalInternal"
   }
 }

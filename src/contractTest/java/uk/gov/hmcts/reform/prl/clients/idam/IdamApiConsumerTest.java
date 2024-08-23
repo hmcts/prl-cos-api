@@ -5,13 +5,13 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactDirectory;
 import com.google.common.collect.Lists;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -39,8 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "Idam_api", port = "5000")
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
+@PactDirectory("pacts")
 public class IdamApiConsumerTest {
 
     public static final String TOKEN_REGEXP = "[a-zA-Z0-9._-]+";
@@ -57,7 +57,7 @@ public class IdamApiConsumerTest {
     }
 
     @Pact(provider = "Idam_api", consumer = "prl_cos")
-    public RequestResponsePact executeGetUserInfo(PactDslWithProvider builder) {
+    public V4Pact executeGetUserInfo(PactDslWithProvider builder) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("redirect_uri", "http://www.dummy-pact-service.com/callback");
@@ -76,7 +76,7 @@ public class IdamApiConsumerTest {
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(createUserInfoResponse())
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test

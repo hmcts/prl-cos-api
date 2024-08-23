@@ -3,7 +3,10 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34") {
+      exclude group: "org.codehaus.groovy", module: "groovy"
+    }
+
   }
 }
 
@@ -44,7 +47,7 @@ def versions = [
   junit                        : '5.10.3',
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.34',
-  pact                         : '4.1.11',
+  pact                         : '4.6.11',
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '5.1.7',
@@ -184,6 +187,9 @@ allprojects {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
+
+      dependency group: 'org.apache.groovy', name: 'groovy', version: '4.0.22'
+
     }
   }
 }
@@ -464,10 +470,9 @@ dependencies {
 
   contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
   contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  //contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
@@ -637,6 +642,19 @@ run {
   }
 }
 
+project.ext {
+  pactVersion = getCheckedOutGitCommitHash()
+}
+
+pact {
+  publish {
+    pactDirectory = 'pacts'
+    pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+    tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
+    version = project.pactVersion
+  }
+}
+
 task contract(type: Test, description: 'Runs the consumer Pact tests.', group: 'Delivery pipeline') {
   useJUnitPlatform()
 
@@ -649,30 +667,16 @@ task contract(type: Test, description: 'Runs the consumer Pact tests.', group: '
 }
 
 task runAndPublishConsumerPactTests(type: Test){
+  dependsOn(contract)
   logger.lifecycle("Runs pact Tests")
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
+  finalizedBy(pactPublish)
 }
 
-runAndPublishConsumerPactTests.dependsOn contract
-
-runAndPublishConsumerPactTests.finalizedBy pactPublish
-
-project.ext {
-  pactVersion = getCheckedOutGitCommitHash()
-}
 
 def getCheckedOutGitCommitHash() {
   'git rev-parse --verify --short HEAD'.execute().text.trim()
-}
-
-pact {
-  publish {
-    pactDirectory = 'pacts'
-    pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
-    tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
-    version = project.pactVersion
-  }
 }
 
 task loadEnvSecrets() {

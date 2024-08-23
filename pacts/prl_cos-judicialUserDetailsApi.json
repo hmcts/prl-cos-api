@@ -1,162 +1,182 @@
 {
-  "provider": {
-    "name": "judicialUserDetailsApi"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "A Request for allocating judge",
-      "request": {
-        "method": "POST",
-        "path": "/refdata/judicial/users",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "ccdServiceName": null,
-          "personal_code": [
-            "49933940",
-            null
-          ]
-        }
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "body": [
-          {
-            "sidam_id": null,
-            "object_id": "162318ec-0d19-4ac6-8fd9-11640a03b504-test2",
-            "known_as": "Ved",
-            "surname": "Prakasscs",
-            "full_name": "Ved Prakasscs",
-            "post_nominals": "Mr",
-            "email_id": "49933940EMP-@ejudiciary.net",
-            "personal_code": "49933940",
-            "appointments": [
-              {
-                "base_location_id": "1032",
-                "epimms_id": "",
-                "court_name": "Social Entitlement",
-                "cft_region_id": null,
-                "cft_region": null,
-                "location_id": null,
-                "location": null,
-                "is_principal_appointment": "true",
-                "appointment": "Tribunal Judge",
-                "appointment_type": "Salaried",
-                "service_code": "BBA3",
-                "roles": [
-
-                ],
-                "start_date": "2021-06-01",
-                "end_date": null
-              }
-            ],
-            "authorisations": [
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "03 - Disability Living Allowance",
-                "ticket_code": "365",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2018-08-22T00:00",
-                "end_date": "2021-05-31T00:00"
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "First Tier - Social Entitlement",
-                "ticket_code": "376",
-                "service_codes": [
-
-                ],
-                "start_date": "2018-08-22T00:00",
-                "end_date": null
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "Social Security and Child Support",
-                "ticket_code": "357",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2018-08-22T00:00",
-                "end_date": "2021-05-31T00:00"
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "04 - Incapacity Benefit Employment Support",
-                "ticket_code": "366",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2019-06-17T00:00",
-                "end_date": "2035-04-21T00:00"
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "01 - Social Security",
-                "ticket_code": "364",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2022-08-31T00:00",
-                "end_date": "2040-04-21T00:00"
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "03 - Disability Living Allowance",
-                "ticket_code": "365",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2019-06-17T00:00",
-                "end_date": "2035-04-21T00:00"
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "First Tier - Social Entitlement",
-                "ticket_code": "376",
-                "service_codes": [
-
-                ],
-                "start_date": "2019-01-25T00:00",
-                "end_date": null
-              },
-              {
-                "jurisdiction": "Authorisation Tribunals",
-                "ticket_description": "Social Security and Child Support",
-                "ticket_code": "357",
-                "service_codes": [
-                  "BBA3"
-                ],
-                "start_date": "2019-01-25T00:00",
-                "end_date": null
-              }
-            ]
-          }
-        ]
-      },
+      "key": "f4a2c067",
+      "pending": false,
       "providerStates": [
         {
           "name": "Allocating Judge"
         }
-      ]
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "ccdServiceName": null,
+            "personal_code": [
+              "49933940",
+              null
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "POST",
+        "path": "/refdata/judicial/users"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "appointments": [
+                {
+                  "appointment": "Tribunal Judge",
+                  "appointment_type": "Salaried",
+                  "base_location_id": "1032",
+                  "cft_region": null,
+                  "cft_region_id": null,
+                  "court_name": "Social Entitlement",
+                  "end_date": null,
+                  "epimms_id": "",
+                  "is_principal_appointment": "true",
+                  "location": null,
+                  "location_id": null,
+                  "roles": [
+
+                  ],
+                  "service_code": "BBA3",
+                  "start_date": "2021-06-01"
+                }
+              ],
+              "authorisations": [
+                {
+                  "end_date": "2021-05-31T00:00",
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2018-08-22T00:00",
+                  "ticket_code": "365",
+                  "ticket_description": "03 - Disability Living Allowance"
+                },
+                {
+                  "end_date": null,
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+
+                  ],
+                  "start_date": "2018-08-22T00:00",
+                  "ticket_code": "376",
+                  "ticket_description": "First Tier - Social Entitlement"
+                },
+                {
+                  "end_date": "2021-05-31T00:00",
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2018-08-22T00:00",
+                  "ticket_code": "357",
+                  "ticket_description": "Social Security and Child Support"
+                },
+                {
+                  "end_date": "2035-04-21T00:00",
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2019-06-17T00:00",
+                  "ticket_code": "366",
+                  "ticket_description": "04 - Incapacity Benefit Employment Support"
+                },
+                {
+                  "end_date": "2040-04-21T00:00",
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2022-08-31T00:00",
+                  "ticket_code": "364",
+                  "ticket_description": "01 - Social Security"
+                },
+                {
+                  "end_date": "2035-04-21T00:00",
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2019-06-17T00:00",
+                  "ticket_code": "365",
+                  "ticket_description": "03 - Disability Living Allowance"
+                },
+                {
+                  "end_date": null,
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+
+                  ],
+                  "start_date": "2019-01-25T00:00",
+                  "ticket_code": "376",
+                  "ticket_description": "First Tier - Social Entitlement"
+                },
+                {
+                  "end_date": null,
+                  "jurisdiction": "Authorisation Tribunals",
+                  "service_codes": [
+                    "BBA3"
+                  ],
+                  "start_date": "2019-01-25T00:00",
+                  "ticket_code": "357",
+                  "ticket_description": "Social Security and Child Support"
+                }
+              ],
+              "email_id": "49933940EMP-@ejudiciary.net",
+              "full_name": "Ved Prakasscs",
+              "known_as": "Ved",
+              "object_id": "162318ec-0d19-4ac6-8fd9-11640a03b504-test2",
+              "personal_code": "49933940",
+              "post_nominals": "Mr",
+              "sidam_id": null,
+              "surname": "Prakasscs"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "judicialUserDetailsApi"
   }
 }

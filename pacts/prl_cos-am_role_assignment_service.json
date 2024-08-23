@@ -1,0 +1,210 @@
+{
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A Request to assign a new role",
+      "key": "ae18b834",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Role Assignment With Actor Id"
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-correlation-id": [
+            "someXCorrelationId"
+          ]
+        },
+        "method": "GET",
+        "path": "/am/role-assignments/actors/3"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "roleAssignmentServiceResponse": [
+              {
+                "roleAssignmentResponse": {
+                  "requestedRoles": [
+                    {
+                      "actorId": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                      "actorIdType": "IDAM",
+                      "attributes": {
+                        "contractType": "SALARIED",
+                        "jurisdiction": "divorce",
+                        "region": "south-east"
+                      },
+                      "beginTime": "2021-01-01T00:00:00Z",
+                      "classification": "PUBLIC",
+                      "created": "2021-01-28T18:16:49.100155Z",
+                      "endTime": "2023-01-01T00:00:00Z",
+                      "grantType": "STANDARD",
+                      "id": "3ccabbf2-71fa-4c5d-af39-5675d25e9fcc",
+                      "log": "Create requested with replace: false\nCreate approved : judicial_organisational_role_mapping_service_create\nApproved : validate_role_assignment_against_patterns",
+                      "notes": [
+                        {
+                          "comment": "Need Access to case number 1234567890123456 for a month",
+                          "time": "2020-01-01T00:00Z",
+                          "userId": "003352d0-e699-48bc-b6f5-5810411e60ag"
+                        },
+                        {
+                          "comment": "Access granted for 6 months",
+                          "time": "2020-01-02T00:00Z",
+                          "userId": "52aa3810-af1f-11ea-b3de-0242ac130004"
+                        }
+                      ],
+                      "process": "businessProcess1",
+                      "readOnly": false,
+                      "reference": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                      "roleCategory": "JUDICIAL",
+                      "roleName": "judge",
+                      "roleType": "ORGANISATION",
+                      "status": "LIVE"
+                    }
+                  ],
+                  "roleRequest": {
+                    "assignerId": "37d4eab7-e14c-404e-8cd1-55cd06b2fc06",
+                    "authenticatedUserId": "37d4eab7-e14c-404e-8cd1-55cd06b2fc06",
+                    "correlationId": "003352d0-e699-48bc-b6f5-5810411e60af",
+                    "created": "2021-01-28T18:16:49.100121Z",
+                    "id": "0c6f56f5-4457-485e-a0de-828e6dfa1e33",
+                    "log": "Request has been approved",
+                    "process": "businessProcess1",
+                    "reference": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                    "replaceExisting": false,
+                    "requestType": "CREATE",
+                    "status": "APPROVED"
+                  }
+                }
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "A Request to assign a new role",
+      "key": "b9ce9934",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "Role Assignment"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "requestedRoles": null,
+            "roleRequest": null
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ],
+          "content-type": [
+            "application/json"
+          ],
+          "x-correlation-id": [
+            "someXCorrelationId"
+          ]
+        },
+        "method": "POST",
+        "path": "/am/role-assignments"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "roleAssignmentResponse": {
+              "requestedRoles": [
+                {
+                  "actorId": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                  "actorIdType": "IDAM",
+                  "attributes": {
+                    "contractType": "SALARIED",
+                    "jurisdiction": "divorce",
+                    "region": "south-east"
+                  },
+                  "beginTime": "2021-01-01T00:00:00Z",
+                  "classification": "PUBLIC",
+                  "created": "2021-01-28T18:16:49.100155Z",
+                  "endTime": "2023-01-01T00:00:00Z",
+                  "grantType": "STANDARD",
+                  "id": "3ccabbf2-71fa-4c5d-af39-5675d25e9fcc",
+                  "log": "Create requested with replace: false\nCreate approved : judicial_organisational_role_mapping_service_create\nApproved : validate_role_assignment_against_patterns",
+                  "notes": [
+                    {
+                      "comment": "Need Access to case number 1234567890123456 for a month",
+                      "time": "2020-01-01T00:00Z",
+                      "userId": "003352d0-e699-48bc-b6f5-5810411e60ag"
+                    },
+                    {
+                      "comment": "Access granted for 6 months",
+                      "time": "2020-01-02T00:00Z",
+                      "userId": "52aa3810-af1f-11ea-b3de-0242ac130004"
+                    }
+                  ],
+                  "process": "businessProcess1",
+                  "readOnly": false,
+                  "reference": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                  "roleCategory": "JUDICIAL",
+                  "roleName": "judge",
+                  "roleType": "ORGANISATION",
+                  "status": "LIVE"
+                }
+              ],
+              "roleRequest": {
+                "assignerId": "37d4eab7-e14c-404e-8cd1-55cd06b2fc06",
+                "authenticatedUserId": "37d4eab7-e14c-404e-8cd1-55cd06b2fc06",
+                "correlationId": "003352d0-e699-48bc-b6f5-5810411e60af",
+                "created": "2021-01-28T18:16:49.100121Z",
+                "id": "0c6f56f5-4457-485e-a0de-828e6dfa1e33",
+                "log": "Request has been approved",
+                "process": "businessProcess1",
+                "reference": "cf07ea33-31c0-4442-b2df-e2032d21b496",
+                "replaceExisting": false,
+                "requestType": "CREATE",
+                "status": "APPROVED"
+              }
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 201
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "am_role_assignment_service"
+  }
+}

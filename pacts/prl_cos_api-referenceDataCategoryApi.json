@@ -1,35 +1,32 @@
 {
   "consumer": {
-    "name": "prl_cos"
+    "name": "prl_cos_api"
   },
   "interactions": [
     {
-      "description": "A Request for Common Data API",
-      "key": "ad91ed57",
+      "description": "A Request to get list of values for a given service id and category id",
+      "key": "5258ff0e",
       "pending": false,
       "providerStates": [
         {
-          "name": "Common Data"
+          "name": "case hearing/hearings exist for a case "
         }
       ],
       "request": {
         "headers": {
           "Authorization": [
-            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+            "Bearer some-access-token"
           ],
           "Content-Type": [
             "application/json"
           ],
           "ServiceAuthorization": [
-            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+            "someServiceAuthToken"
           ]
         },
         "method": "GET",
-        "path": "/refdata/commondata/lov/categories/hearingType",
+        "path": "/refdata/commondata/lov/categories/HearingType",
         "query": {
-          "isChildRequired": [
-            "N"
-          ],
           "serviceId": [
             "ABA5"
           ]
@@ -64,58 +61,6 @@
                 "parent_key": "",
                 "value_cy": "Canfod y Ffeithiau",
                 "value_en": "Finding of Fact"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-FRF",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Apwyntiad cyntaf rhwymedi ariannol",
-                "value_en": "Financial remedy first appointment"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-FRD",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Cyfarwyddiadau rhwymedi ariannol",
-                "value_en": "Financial remedy directions"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-FRI",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Gorchymyn interim rhwymedi ariannol",
-                "value_en": "Financial remedy interim order"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-FRR",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Rhwymedi ariannol datrys anghydfod ariannol",
-                "value_en": "Financial remedy financial dispute resolution"
               },
               {
                 "active_flag": "Y",
@@ -266,45 +211,6 @@
                 "child_nodes": null,
                 "hint_text_cy": "",
                 "hint_text_en": "",
-                "key": "ABA5-IRH",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Gwrandawiad Datrys Materion",
-                "value_en": "Issues Resolution Hearing"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-ISO",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Gorchymyn Goruchwylio Interim",
-                "value_en": "Interim Supervision Order"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-ICO",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Gorchymyn Gofal Interim",
-                "value_en": "Interim Care Order"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
                 "key": "ABA5-HRA",
                 "lov_order": 18,
                 "parent_category": "",
@@ -344,19 +250,6 @@
                 "child_nodes": null,
                 "hint_text_cy": "",
                 "hint_text_en": "",
-                "key": "ABA5-PRE",
-                "lov_order": null,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Rhagarweiniol (REMO)",
-                "value_en": "Preliminary (REMO)"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
                 "key": "ABA5-GRH",
                 "lov_order": 17,
                 "parent_category": "",
@@ -370,12 +263,12 @@
                 "child_nodes": null,
                 "hint_text_cy": "",
                 "hint_text_en": "",
-                "key": "ABA5-CHR",
-                "lov_order": null,
+                "key": "ABA5-2GA",
+                "lov_order": 16,
                 "parent_category": "",
                 "parent_key": "",
-                "value_cy": "Gwrandawiad Dathlu",
-                "value_en": "Celebration hearing"
+                "value_cy": "",
+                "value_en": "2nd Gatekeeping Appointment"
               },
               {
                 "active_flag": "Y",
@@ -383,12 +276,155 @@
                 "child_nodes": null,
                 "hint_text_cy": "",
                 "hint_text_en": "",
-                "key": "ABA5-2GA",
-                "lov_order": 16,
+                "key": "ABA5-PER",
+                "lov_order": 21,
                 "parent_category": "",
                 "parent_key": "",
                 "value_cy": "",
-                "value_en": "2nd Gatekeeping Appointment"
+                "value_en": "Permission Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CMC",
+                "lov_order": 5,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cynhadledd Rheoli Achos",
+                "value_en": "Case Management Conference"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRF",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Apwyntiad cyntaf rhwymedi ariannol",
+                "value_en": "Financial remedy first appointment"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRD",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Cyfarwyddiadau rhwymedi ariannol",
+                "value_en": "Financial remedy directions"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRI",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn interim rhwymedi ariannol",
+                "value_en": "Financial remedy interim order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-FRR",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Rhwymedi ariannol datrys anghydfod ariannol",
+                "value_en": "Financial remedy financial dispute resolution"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-IRH",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Datrys Materion",
+                "value_en": "Issues Resolution Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-ISO",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn Goruchwylio Interim",
+                "value_en": "Interim Supervision Order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-ICO",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gorchymyn Gofal Interim",
+                "value_en": "Interim Care Order"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-PRE",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Rhagarweiniol (REMO)",
+                "value_en": "Preliminary (REMO)"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CMH",
+                "lov_order": 6,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Rheoli Achos",
+                "value_en": "Case Management Hearing"
+              },
+              {
+                "active_flag": "Y",
+                "category_key": "HearingType",
+                "child_nodes": null,
+                "hint_text_cy": "",
+                "hint_text_en": "",
+                "key": "ABA5-CHR",
+                "lov_order": null,
+                "parent_category": "",
+                "parent_key": "",
+                "value_cy": "Gwrandawiad Dathlu",
+                "value_en": "Celebration hearing"
               },
               {
                 "active_flag": "Y",
@@ -441,45 +477,6 @@
                 "parent_key": "",
                 "value_cy": "Costau",
                 "value_en": "Costs"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-PER",
-                "lov_order": 21,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "",
-                "value_en": "Permission Hearing"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-CMC",
-                "lov_order": 5,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Cynhadledd Rheoli Achos",
-                "value_en": "Case Management Conference"
-              },
-              {
-                "active_flag": "Y",
-                "category_key": "HearingType",
-                "child_nodes": null,
-                "hint_text_cy": "",
-                "hint_text_en": "",
-                "key": "ABA5-CMH",
-                "lov_order": 6,
-                "parent_category": "",
-                "parent_key": "",
-                "value_cy": "Gwrandawiad Rheoli Achos",
-                "value_en": "Case Management Hearing"
               }
             ]
           },
@@ -506,6 +503,6 @@
     }
   },
   "provider": {
-    "name": "commonDataRefApi"
+    "name": "referenceDataCategoryApi"
   }
 }

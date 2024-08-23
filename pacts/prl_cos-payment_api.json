@@ -1,147 +1,167 @@
 {
-  "provider": {
-    "name": "payment_api"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "a request to create a payment in payments api with valid authorization",
-      "request": {
-        "method": "POST",
-        "path": "/service-request/2022-1662375472431/card-payments",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "amount": 100,
-          "currency": "GBP",
-          "language": "ENGLISH",
-          "return-url": "https://localhost"
+      "key": "84043aa1",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "A request to create a payment in payments api"
         }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "amount": 100,
+            "currency": "GBP",
+            "language": "ENGLISH",
+            "return-url": "https://localhost"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "POST",
+        "path": "/service-request/2022-1662375472431/card-payments"
       },
       "response": {
-        "status": 201,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
         "body": {
-          "date_created": "2022-09-05T11:09:04.308+00:00",
-          "external_reference": "csfopuk3a6r0e405cqtl9ef5br",
-          "next_url": "https://www.payments.service.gov.uk/secure/3790460a-5932-4364-bba1-75390b4ec758",
-          "payment_reference": "RC-1662-3761-4393-1823",
-          "status": "Initiated"
+          "content": {
+            "date_created": "2022-09-05T11:09:04.308+00:00",
+            "external_reference": "csfopuk3a6r0e405cqtl9ef5br",
+            "next_url": "https://www.payments.service.gov.uk/secure/3790460a-5932-4364-bba1-75390b4ec758",
+            "payment_reference": "RC-1662-3761-4393-1823",
+            "status": "Initiated"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
         },
         "matchingRules": {
           "body": {
-            "$.payment_reference": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
             "$.date_created": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.external_reference": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.next_url": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
+            },
+            "$.payment_reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
             },
             "$.status": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           },
           "header": {
             "Content-Type": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "regex",
                   "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           }
-        }
+        },
+        "status": 201
       },
-      "providerStates": [
-        {
-          "name": "A request to create a payment in payments api"
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     },
     {
       "description": "a request to retieve the payment status in payments api with valid authorization",
-      "request": {
-        "method": "GET",
-        "path": "/card-payments/RC-1662-3761-4393-1823",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "Content-Type": "application/json"
+      "key": "82fc7c0d",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "A request to retrieve the payment status"
         }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "GET",
+        "path": "/card-payments/RC-1662-3761-4393-1823"
       },
       "response": {
-        "status": 201,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
         "body": {
-          "reference": "RC-1662-3761-4393-1823",
-          "232": "232",
-          "1647959867368635": "1647959867368635",
-          "external_reference": "csfopuk3a6r0e405cqtl9ef5br",
-          "online": "online",
-          "payment_reference": "RC-1662-3761-4393-1823",
-          "card": "card",
-          "status": "Initiated"
+          "content": {
+            "1647959867368635": "1647959867368635",
+            "232": "232",
+            "card": "card",
+            "external_reference": "csfopuk3a6r0e405cqtl9ef5br",
+            "online": "online",
+            "payment_reference": "RC-1662-3761-4393-1823",
+            "reference": "RC-1662-3761-4393-1823",
+            "status": "Initiated"
+          },
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ]
         },
         "matchingRules": {
           "body": {
-            "$.232": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.reference": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
             "$.1647959867368635": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
@@ -149,76 +169,92 @@
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
-            "$.online": {
+            "$.232": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.card": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             },
             "$.external_reference": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
+            },
+            "$.online": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
             },
             "$.payment_reference": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
+            },
+            "$.reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
             },
             "$.status": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "type"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           },
           "header": {
             "Content-Type": {
+              "combine": "AND",
               "matchers": [
                 {
                   "match": "regex",
                   "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
                 }
-              ],
-              "combine": "AND"
+              ]
             }
           }
-        }
+        },
+        "status": 201
       },
-      "providerStates": [
-        {
-          "name": "A request to retrieve the payment status"
-        }
-      ]
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "payment_api"
   }
 }

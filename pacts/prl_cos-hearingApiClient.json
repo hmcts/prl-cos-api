@@ -1,55 +1,75 @@
 {
-  "provider": {
-    "name": "hearingApiClient"
-  },
   "consumer": {
     "name": "prl_cos"
   },
   "interactions": [
     {
       "description": "A Request for Case Linked",
-      "request": {
-        "method": "POST",
-        "path": "/serviceLinkedCases",
-        "headers": {
-          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "caseReference": "1677767515750127",
-          "hearingId": null
-        }
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "body": [
-          {
-            "caseReference": "1670601355422736",
-            "caseName": "Case_Flag_9_Dec_6",
-            "reasonsForLink": [
-              "CLRC011",
-              "CLRC006"
-            ]
-          }
-        ]
-      },
+      "key": "a877191d",
+      "pending": false,
       "providerStates": [
         {
           "name": "Case Linked"
         }
-      ]
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "caseReference": "1677767515750127",
+            "hearingId": null
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "ServiceAuthorization": [
+            "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+          ]
+        },
+        "method": "POST",
+        "path": "/serviceLinkedCases"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "caseName": "Case_Flag_9_Dec_6",
+              "caseReference": "1670601355422736",
+              "reasonsForLink": [
+                "CLRC011",
+                "CLRC006"
+              ]
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
-    "pactSpecification": {
-      "version": "3.0.0"
-    },
     "pact-jvm": {
-      "version": "4.1.11"
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
     }
+  },
+  "provider": {
+    "name": "hearingApiClient"
   }
 }

@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,7 +73,7 @@ public class PaymentApiConsumerTest {
     }
 
     @Pact(provider = "payment_api", consumer = "prl_cos")
-    private RequestResponsePact createPayment(PactDslWithProvider builder) throws JsonProcessingException {
+    private V4Pact createPayment(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to create a payment in payments api")
             .uponReceiving("a request to create a payment in payments api with valid authorization")
@@ -86,11 +86,11 @@ public class PaymentApiConsumerTest {
             .willRespondWith()
             .status(HttpStatus.SC_CREATED)
             .body(paymentResponse())
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Pact(provider = "payment_api", consumer = "prl_cos")
-    private RequestResponsePact getPaymentStatus(PactDslWithProvider builder) throws JsonProcessingException {
+    private V4Pact getPaymentStatus(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to retrieve the payment status")
             .uponReceiving("a request to retieve the payment status in payments api with valid authorization")
@@ -102,7 +102,7 @@ public class PaymentApiConsumerTest {
             .willRespondWith()
             .status(HttpStatus.SC_CREATED)
             .body(paymentStatusResponse())
-            .toPact();
+            .toPact(V4Pact.class);
     }
 
     @Test
