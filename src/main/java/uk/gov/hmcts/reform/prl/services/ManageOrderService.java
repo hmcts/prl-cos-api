@@ -988,9 +988,7 @@ public class ManageOrderService {
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
-                                   .orderDocument(isOrderSealed(caseData.getOrderCollection(), caseData.getUploadOrderDoc().getDocumentUrl())
-                                                      ? documentSealingService.sealDocument(caseData.getUploadOrderDoc(), caseData, authorisation)
-                                                      : caseData.getUploadOrderDoc())
+                                   .orderDocument(caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
@@ -1034,22 +1032,10 @@ public class ManageOrderService {
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
                                    .isOrderUploaded(Yes)
-                                   .isOrderDocumentSealed(Yes)
+                                   .doesOrderDocumentNeedSeal(Yes)
                                    .build()));
         return newOrderDetails;
     }
-
-    private boolean isOrderSealed(List<Element<OrderDetails>> orders, String documentUrl) {
-        log.info("documentUrl to check: {}", documentUrl);
-        orders.stream().forEach(order -> log.info("order document url: {}", order.getValue().getOrderDocument().getDocumentUrl()));
-
-        return orders.stream()
-            .filter(order -> documentUrl.equals(order.getValue().getOrderDocument().getDocumentUrl())
-                && order.getValue().getIsOrderDocumentSealed().equals(
-                Yes)).collect(Collectors.toList()).isEmpty();
-    }
-
-
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
         return ServeOrderDetails.builder()
@@ -3234,6 +3220,31 @@ public class ManageOrderService {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
             caseDataUpdated.put(field.getValue(), null);
         }
+    }
+
+    public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
+            .forEach(order -> {
+                OrderDetails orderDetails = order.getValue();
+                log.info("order that needs sealed: {}", orderDetails);
+                orderDetails.toBuilder().orderDocument(documentSealingService.sealDocument(
+                    orderDetails.getOrderDocument(),
+                    caseData,
+                    authorisation
+                ));
+                Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(orderDetails.toBuilder().orderDocument(
+                    documentSealingService.sealDocument(
+                        orderDetails.getOrderDocument(),
+                        caseData,
+                        authorisation
+                    )).doesOrderDocumentNeedSeal(No).build()).build();
+
+                log.info("sealed order: {}", sealedOrder.getValue());
+                orders.set(orders.indexOf(order), sealedOrder);
+            });
+
+        caseDataUpdated.put(ORDER_COLLECTION, orders);
     }
 
     public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId) {

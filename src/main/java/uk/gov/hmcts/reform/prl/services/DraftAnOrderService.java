@@ -468,7 +468,7 @@ public class DraftAnOrderService {
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(documentSealingService.sealDocument(draftOrder.getOrderDocument(), caseData, auth))
-                .isOrderDocumentSealed(Yes)
+                .doesOrderDocumentNeedSeal(No)
                 .build();
         } else {
             caseData = updateCaseDataForDocmosis(caseData, draftOrder);

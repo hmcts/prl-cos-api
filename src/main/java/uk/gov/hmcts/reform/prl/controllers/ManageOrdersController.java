@@ -198,6 +198,9 @@ public class ManageOrdersController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
+            log.info("adding seal from submitted callback");
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
