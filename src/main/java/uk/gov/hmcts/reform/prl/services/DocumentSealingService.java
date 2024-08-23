@@ -37,7 +37,7 @@ public class DocumentSealingService {
     private static final float POINTS_PER_MM = 1 / (10 * 2.54f) * POINTS_PER_INCH;
     private static final long SEAL_HEIGHT = mm2pt(25);
     private static final long SEAL_WIDTH = mm2pt(25);
-    private static final long MARGIN_TOP = mm2pt(10);
+    private static final long MARGIN_TOP = mm2pt(17.5);
     private static final long MARGIN_RIGHT = mm2pt(19.0);
     private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
     private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
