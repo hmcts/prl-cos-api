@@ -1174,7 +1174,7 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            orderCollection = serveOrder(caseData, orderCollection, authorisation);
+            orderCollection = serveOrder(caseData, orderCollection);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
         Map<String, Object> orderMap = new HashMap<>();
@@ -1451,34 +1451,17 @@ public class ManageOrderService {
         return status;
     }
 
-    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders, String authorisation) {
+    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
-                    OrderDetails orderDetails = order.getValue();
-                    Element<OrderDetails> sealedOrder = order;
-                    /*Document orderDocument = order.getValue().getOrderDocument();
-                    Document orderDocumentWelsh = order.getValue().getOrderDocumentWelsh();
-
-                    if (orderDetails.getIsOrderUploaded().equals(Yes)) {
-                        log.info("order document: {}", orderDocument);
-                        sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value((order.getValue().toBuilder()
-                            .orderDocument(Objects.nonNull(orderDocument)
-                                                    ? documentSealingService.sealDocument(orderDocument, caseData, authorisation) : null)
-                            .orderDocumentWelsh(Objects.nonNull(orderDocumentWelsh)
-                                                    ? documentSealingService.sealDocument(orderDocumentWelsh, caseData, authorisation) : null)
-                            .build())).build();
-                    }
-                    log.info("sealed order: {}", sealedOrder);*/
-
-                    orders.set(orders.indexOf(order), sealedOrder);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        servedC100Order(caseData, orders, sealedOrder);
+                        servedC100Order(caseData, orders, order);
                     } else {
-                        servedFL401Order(caseData, orders, sealedOrder);
+                        servedFL401Order(caseData, orders, order);
                     }
                 });
         }

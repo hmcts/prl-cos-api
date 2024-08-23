@@ -2872,7 +2872,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(hearingElementList);
 
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(manageOrderService.serveOrder(Mockito.any(), Mockito.any(), Mockito.anyString())).thenReturn(orderDetailsList);
+        when(manageOrderService.serveOrder(Mockito.any(), Mockito.any())).thenReturn(orderDetailsList);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             s2sToken,

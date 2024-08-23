@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -9,13 +8,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -59,8 +53,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -74,9 +66,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -92,7 +82,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -334,12 +323,6 @@ public class DocumentGenService {
     private final ManageDocumentsService manageDocumentsService;
     private final CaseService caseService;
     private final ObjectMapper objectMapper;
-
-    private final RestTemplate restTemplate;
-
-    private static final String USER_ROLES = "user-roles";
-    private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
-
     private final Time dateTime;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
@@ -1469,72 +1452,6 @@ public class DocumentGenService {
 
         }
         return document;
-    }
-
-    public Document convertToPdfFromDmStore(String authorisation, Document document) {
-        String filename = document.getDocumentFileName();
-        if (checkFileFormat(document.getDocumentFileName())) {
-            //byte[] docInBytes = getDocInBytes(authorisation, document, filename);
-            String s2stoken = authTokenGenerator.generate();
-            log.info("s2s token to retrieve bytestream: {}", s2stoken);
-            byte[] docInBytes = new byte[0];
-            try {
-                //docInBytes = dgsApiClient.downloadDocument(getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()),
-                //                                          authorisation).getBody();
-                docInBytes = downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            log.info("Downloaded document as bytes to convert to pdf: {}", docInBytes);
-            Map<String, Object> tempCaseDetails = new HashMap<>();
-            tempCaseDetails.put("fileName", docInBytes);
-            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-                document.getDocumentFileName(),
-                authorisation, GenerateDocumentRequest
-                    .builder().template(DUMMY).values(tempCaseDetails).build()
-            );
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName(generatedDocumentInfo.getDocName())
-                .build();
-
-
-        }
-        return document;
-    }
-
-    public ResponseEntity<byte[]> downloadFromDmStore(@NonNull final String binaryFileUrl) throws Exception {
-
-        log.info("DmStore Download file: {}", binaryFileUrl);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(SERVICE_AUTHORIZATION, authTokenGenerator.generate());
-        headers.set(USER_ROLES, COURT_ADMIN_ROLE);
-        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
-        String url;
-        try {
-            url = "http://dm-store-aat.service.core-compute-aat.internal" + new URI(binaryFileUrl).getPath();
-        } catch (URISyntaxException e) {
-            log.error("Failed to rewrite the url for document for {}, error message {}", binaryFileUrl, e.getMessage());
-            throw new Exception(format("Failed to rewrite the url for document for %s and error %s",
-                                                 binaryFileUrl, e.getMessage()));
-        }
-
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, byte[].class);
-        if (response.getStatusCode() != HttpStatus.OK) {
-            log.error("Failed to get bytes from document store for document {} ", binaryFileUrl);
-            throw new RuntimeException(format("Unexpected code from DM store: %s ", response.getStatusCode()));
-        }
-
-        log.info("File download status : {} ", response.getStatusCode());
-        return response;
-    }
-
-    //temp
-    public UUID getDocumentIdFromSelfHref(String selfHref) {
-        selfHref = selfHref.replace("/binary", "");
-        return UUID.fromString(selfHref.substring(selfHref.length() - 36));
     }
 
     public byte[] getDocInBytes(String authorisation, Document document, String filename) {

@@ -63,7 +63,7 @@ public class AmendOrderService {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String currentUserFullName = userDetails.getFullName();
-        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, currentUserFullName, authorisation);
+        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, currentUserFullName);
 
     }
 
@@ -74,7 +74,7 @@ public class AmendOrderService {
 
     private Map<String, Object> updateAmendedOrderDetails(CaseData caseData,
                                                           uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                          String loggedInUserType, String currentUserFullName, String authorisation) {
+                                                          String loggedInUserType, String currentUserFullName) {
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
@@ -116,7 +116,7 @@ public class AmendOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                updatedOrders =  manageOrderService.serveOrder(caseData, orders, authorisation);
+                updatedOrders =  manageOrderService.serveOrder(caseData, orders);
             } else {
                 updatedOrders = orders;
             }

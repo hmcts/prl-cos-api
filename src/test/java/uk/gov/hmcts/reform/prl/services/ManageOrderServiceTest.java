@@ -3757,7 +3757,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.serveOrder(caseData,orderList, "testAuth"));
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
 
     }
 
@@ -3941,7 +3941,7 @@ public class ManageOrderServiceTest {
         when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Document.builder().build());
 
-        List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList, "testAuth");
+        List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);
         assertNotNull(listOfOrders);
     }
 
@@ -4033,7 +4033,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.serveOrder(caseData,orderList, "testAuth"));
+        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
 
     }
 
@@ -5267,7 +5267,7 @@ public class ManageOrderServiceTest {
             .thenReturn(Document.builder().build());
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList, "testAuth");
+        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
         assertNotNull(orderDetails);
         assertNotNull(orderDetails.get(0));
         assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());

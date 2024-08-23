@@ -2038,7 +2038,7 @@ public class DraftAnOrderService {
                 List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
                 caseDataUpdated.put(
                     ORDER_COLLECTION,
-                    manageOrderService.serveOrder(modifiedCaseData, orderCollection, authorisation)
+                    manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
             }
         } else if (WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {

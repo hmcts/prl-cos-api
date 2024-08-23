@@ -262,7 +262,7 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(
                     ORDER_COLLECTION,
-                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection(), authorisation)
+                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
                 );
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);

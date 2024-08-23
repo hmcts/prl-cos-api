@@ -63,15 +63,6 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        //byte[] downloadedPdf = new byte[0];
-        //try {
-        //    downloadedPdf = documentGenService.downloadFromDmStore(document.getDocumentBinaryUrl()).getBody();
-        //    downloadedPdf = dgsApiClient.downloadDocument(
-        //        documentGenService.getDocumentIdFromSelfHref(document.getDocumentBinaryUrl()), authorisation).getBody();
-        //} catch (Exception e) {
-        //    throw new RuntimeException(e);
-        //}
-
         log.info("Downloaded pdf document as bytes: {}", downloadedPdf);
         byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
 
