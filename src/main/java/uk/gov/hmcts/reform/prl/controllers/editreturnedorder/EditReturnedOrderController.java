@@ -36,6 +36,7 @@ public class EditReturnedOrderController {
     private final EditReturnedOrderService editReturnedOrderService;
     private final AuthorisationService authorisationService;
     private final AllTabServiceImpl allTabService;
+    private final ManageOrderService manageOrderService;
 
     private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -84,6 +85,7 @@ public class EditReturnedOrderController {
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            manageOrderService.addSealToOrders(authorisation, startAllTabsUpdateDataContent.caseData(), caseDataUpdated);
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),

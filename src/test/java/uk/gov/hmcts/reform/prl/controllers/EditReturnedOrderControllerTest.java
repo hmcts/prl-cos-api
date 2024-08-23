@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
@@ -61,6 +62,9 @@ public class EditReturnedOrderControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private ManageOrderService manageOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
