@@ -3224,7 +3224,8 @@ public class ManageOrderService {
 
     public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
-        orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
+        orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal() != null
+                && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
             .forEach(order -> {
                 OrderDetails orderDetails = order.getValue();
                 log.info("order that needs sealed: {}", orderDetails);
