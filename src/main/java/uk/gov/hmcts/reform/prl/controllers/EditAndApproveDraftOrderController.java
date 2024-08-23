@@ -416,11 +416,11 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            log.info("Edit and serve order submitted callback");
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            log.info("Edit and serve order submitted callback");
-            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);

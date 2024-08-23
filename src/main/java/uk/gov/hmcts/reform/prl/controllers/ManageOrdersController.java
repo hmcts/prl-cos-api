@@ -194,12 +194,12 @@ public class ManageOrdersController {
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
+            log.info("adding seal from submitted callback");
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-
-            log.info("adding seal from submitted callback");
-            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
