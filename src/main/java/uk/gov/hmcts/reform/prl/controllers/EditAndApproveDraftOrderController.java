@@ -419,6 +419,8 @@ public class EditAndApproveDraftOrderController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
+            log.info("Edit and serve order submitted callback");
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);

@@ -3229,11 +3229,7 @@ public class ManageOrderService {
             .forEach(order -> {
                 OrderDetails orderDetails = order.getValue();
                 log.info("order that needs sealed: {}", orderDetails);
-                orderDetails.toBuilder().orderDocument(documentSealingService.sealDocument(
-                    orderDetails.getOrderDocument(),
-                    caseData,
-                    authorisation
-                ));
+
                 Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(orderDetails.toBuilder().orderDocument(
                     documentSealingService.sealDocument(
                         orderDetails.getOrderDocument(),
