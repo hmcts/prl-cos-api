@@ -306,15 +306,19 @@ public class SendAndReplyService {
             allocatedJudgeDetailsForClosedMessage.stream()
                 .map(Element::getValue)
                 .forEach(allocatedJudgeClosed -> {
-                    //Remove allocation if no other message is allocated to the same judge
-                    allocatedJudgeForSendAndReplyList.stream()
-                        .map(Element::getValue)
-                        .filter(allocatedJudgeOpen -> !allocatedJudgeOpen.getRoleAssignmentId().equals(allocatedJudgeClosed.getRoleAssignmentId()))
-                        .forEach(allocatedJudge -> {
-                            //Remove role assignment
-                            log.info("Remove judge -> remove role assignment for {}", allocatedJudge.getRoleAssignmentId());
-                            roleAssignmentService.removeRoleAssignment(allocatedJudge.getRoleAssignmentId());
-                        });
+                    if (allocatedJudgeForSendAndReplyList.isEmpty()) {
+                        //Remove allocation if there are none of messages are allocated
+                        roleAssignmentService.removeRoleAssignment(allocatedJudgeClosed.getRoleAssignmentId());
+                    } else {
+                        //Remove allocation if no other message is allocated to the same judge
+                        allocatedJudgeForSendAndReplyList.stream()
+                            .map(Element::getValue)
+                            .filter(allocatedJudgeOpen -> !allocatedJudgeOpen.getRoleAssignmentId().equals(
+                                allocatedJudgeClosed.getRoleAssignmentId()))
+                            .forEach(allocatedJudge ->
+                                         roleAssignmentService.removeRoleAssignment(allocatedJudge.getRoleAssignmentId())
+                            );
+                    }
                 });
             log.info("Remove judge -> Allocated judge details after removal {}", allocatedJudgeForSendAndReplyList);
         }
