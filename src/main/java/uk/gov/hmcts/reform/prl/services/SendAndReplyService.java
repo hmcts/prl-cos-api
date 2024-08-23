@@ -298,17 +298,23 @@ public class SendAndReplyService {
         log.info("Remove judge -> Allocated judge details for closed message {}", allocatedJudgeDetailsForClosedMessage);
 
         if (isNotEmpty(allocatedJudgeDetailsForClosedMessage)) {
-            //Remove allocated judge details for the closed message
+            //Remove allocated judge details from caseData for the closed message
             allocatedJudgeForSendAndReplyList.removeAll(allocatedJudgeDetailsForClosedMessage);
             caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReplyList);
 
-            //Remove the all judge role allocations for the closed message
+            //Remove the judge role allocations for the closed message
             allocatedJudgeDetailsForClosedMessage.stream()
                 .map(Element::getValue)
-                .forEach(allocatedJudgeElement -> {
-                    //Remove role assignment
-                    log.info("Remove judge -> remove role assignment for {}", allocatedJudgeElement.getRoleAssignmentId());
-                    roleAssignmentService.removeRoleAssignment(allocatedJudgeElement.getRoleAssignmentId());
+                .forEach(allocatedJudgeClosed -> {
+                    //Remove allocation if no other message is allocated to the same judge
+                    allocatedJudgeForSendAndReplyList.stream()
+                        .map(Element::getValue)
+                        .filter(allocatedJudgeOpen -> !allocatedJudgeOpen.getRoleAssignmentId().equals(allocatedJudgeClosed.getRoleAssignmentId()))
+                        .forEach(allocatedJudge -> {
+                            //Remove role assignment
+                            log.info("Remove judge -> remove role assignment for {}", allocatedJudge.getRoleAssignmentId());
+                            roleAssignmentService.removeRoleAssignment(allocatedJudge.getRoleAssignmentId());
+                        });
                 });
             log.info("Remove judge -> Allocated judge details after removal {}", allocatedJudgeForSendAndReplyList);
         }
