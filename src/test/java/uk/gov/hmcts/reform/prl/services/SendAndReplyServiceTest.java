@@ -1288,9 +1288,9 @@ public class SendAndReplyServiceTest {
             .sendMessageObject(message)
             .replyMessageObject(
                 Message.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                    .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                     .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+                    .sendReplyJudgeName(judicialUser)
                     .messageAbout(MessageAboutEnum.APPLICATION)
                     .messageContent("Reply Message Content")
                     .submittedDocumentsList(dynamicList)
