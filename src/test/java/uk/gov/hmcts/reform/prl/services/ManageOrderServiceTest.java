@@ -5427,4 +5427,144 @@ public class ManageOrderServiceTest {
         assertNull(caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
+    @Test
+    public void testAddSealToOrdersShouldSealDocumentAndAddToCollection() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .doesOrderDocumentNeedSeal(YesOrNo.Yes)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        Document sealedOrderDocument = Document.builder().documentFileName("sealedOrderDocument.pdf").build();
+        Element<OrderDetails> expectedOrder = Element.<OrderDetails>builder().id(uuid)
+            .value(OrderDetails
+                       .builder()
+                       .orderDocument(Document
+                                          .builder()
+                                          .build())
+                       .dateCreated(now)
+                       .orderTypeId(TEST_UUID)
+                       .doesOrderDocumentNeedSeal(YesOrNo.No)
+                       .orderDocument(sealedOrderDocument)
+                       .build()).build();
+        List<Element<OrderDetails>> expectedOrderList = new ArrayList<>();
+        expectedOrderList.add(expectedOrder);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        when(documentSealingService.sealDocument(any(), any(), any())).thenReturn(sealedOrderDocument);
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(expectedOrderList, updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenNoOrders() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertNull(updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenDocumentAlreadyHasSeal() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .doesOrderDocumentNeedSeal(YesOrNo.No)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(orderList, updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenDocumentShouldNotBeSealed() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(orderList, updatedCaseData.get("orderCollection"));
+    }
+
 }
