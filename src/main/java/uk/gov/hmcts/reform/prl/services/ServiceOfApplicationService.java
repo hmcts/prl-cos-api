@@ -1429,7 +1429,7 @@ public class ServiceOfApplicationService {
                         applicant,
                         CaseUtils.getCoverLettersForParty(applicant.getId(),
                                                           caseData.getServiceOfApplication()
-                                                              .getUnServedRespondentPack()
+                                                              .getUnServedApplicantPack()
                                                               .getCoverLettersMap()).get(0),
                         SERVED_PARTY_APPLICANT
                     );
