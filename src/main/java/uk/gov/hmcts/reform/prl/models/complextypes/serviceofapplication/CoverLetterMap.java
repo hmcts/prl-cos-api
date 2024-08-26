@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -15,4 +16,9 @@ import java.util.List;
 public class CoverLetterMap {
     @JsonProperty("coverLetters")
     private List<Element<Document>> coverLetters;
+
+    @JsonCreator
+    public CoverLetterMap(List<Element<Document>> coverLetters) {
+        this.coverLetters = coverLetters;
+    }
 }
