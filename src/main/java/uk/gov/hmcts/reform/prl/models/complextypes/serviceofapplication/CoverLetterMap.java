@@ -11,17 +11,6 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SoaPack {
-
-    private final List<Element<Document>> packDocument;
-
-    private final List<Element<String>> partyIds;
-
-    private final String servedBy;
-
-    private final String packCreatedDate;
-
-    private final String personalServiceBy;
-
-    private final List<Element<CoverLetterMap>> coverLetters;
+public class CoverLetterMap {
+    private List<Element<Document>> coverLetters;
 }

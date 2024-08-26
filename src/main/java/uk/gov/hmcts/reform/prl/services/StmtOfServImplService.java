@@ -371,9 +371,10 @@ public class StmtOfServImplService {
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
-            if (null != caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLetterMap()) {
-                docs.addAll(0, wrapElements(caseData.getServiceOfApplication().getUnServedRespondentPack()
-                                                .getCoverLetterMap().get(partyId)));
+            if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLetters())) {
+                docs.addAll(0, wrapElements(CaseUtils.getCoverLettersForParty(UUID.fromString(partyId),
+                                                                              caseData.getServiceOfApplication()
+                                                                                  .getUnServedRespondentPack().getCoverLetters())));
             }
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
@@ -409,9 +410,10 @@ public class StmtOfServImplService {
                                                                  List<Element<Document>> docs) {
         for (int i = 0; i < caseData.getRespondents().size(); i++) {
             String partyId = String.valueOf(caseData.getRespondents().get(i).getId());
-            if (null != caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLetterMap()) {
-                docs.addAll(0, wrapElements(caseData.getServiceOfApplication().getUnServedRespondentPack()
-                                                .getCoverLetterMap().get(partyId)));
+            if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLetters())) {
+                docs.addAll(0, wrapElements(CaseUtils.getCoverLettersForParty(UUID.fromString(partyId),
+                                                                              caseData.getServiceOfApplication().getUnServedRespondentPack()
+                                                .getCoverLetters())));
             }
             log.info("Docs after adding cover letter {} {}", partyId, docs);
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {

@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -95,6 +96,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 public class CaseUtils {
@@ -883,5 +885,37 @@ public class CaseUtils {
     public static String getCurrentDate() {
         return DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
             .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
+    }
+
+    public static List<Document> getCoverLettersForParty(UUID partyId, List<Element<CoverLetterMap>> coverLetters) {
+        for (Element<CoverLetterMap> coverLetterMapElement: coverLetters) {
+            if (partyId.equals(coverLetterMapElement.getId())) {
+                return getCoverLettersFrom(coverLetterMapElement.getValue().getCoverLetters());
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    private static List<Document> getCoverLettersFrom(List<Element<Document>> coverLettermap) {
+        return coverLettermap.stream().map(Element::getValue).toList();
+    }
+
+    public static void mapCoverLetterToTheParty(UUID partyId, List<Element<CoverLetterMap>> coverLettersMap, List<Document> coverLetters) {
+        boolean partyIdExists = false;
+        for (Element<CoverLetterMap> coverLetterMapElement: coverLettersMap) {
+            if (partyId.equals(coverLetterMapElement.getId())) {
+                partyIdExists = true;
+                if (CollectionUtils.isNotEmpty(coverLetterMapElement.getValue().getCoverLetters())) {
+                    coverLetterMapElement.getValue().getCoverLetters().addAll(wrapElements(coverLetters));
+                } else {
+                    coverLetterMapElement.getValue().setCoverLetters(wrapElements(coverLetters));
+                }
+            }
+        }
+        if (!partyIdExists) {
+            coverLettersMap.add(element(partyId, CoverLetterMap.builder()
+                                    .coverLetters(wrapElements(coverLetters))
+                                    .build()));
+        }
     }
 }
