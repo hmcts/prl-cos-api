@@ -431,7 +431,9 @@ public class CaseUtils {
             || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
             && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedLaPack() != null
-            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
+            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedCafcassCymruPack() != null
+            && caseData.getServiceOfApplication().getUnServedCafcassCymruPack().getServedPartyEmail() != null))) {
             arePacksPresent = true;
         }
         return arePacksPresent;
