@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class C100AwpProcessHwfPaymentServiceTest {
+public class AwpProcessHwfPaymentServiceTest {
 
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
@@ -50,7 +50,7 @@ public class C100AwpProcessHwfPaymentServiceTest {
 
 
     @InjectMocks
-    private C100AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
+    private AwpProcessHwfPaymentService awpProcessHwfPaymentService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -176,7 +176,7 @@ public class C100AwpProcessHwfPaymentServiceTest {
     @Test
     public void testCheckHwfPaymentStatusAndUpdateApplicationStatus() {
 
-        c100AwpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
+        awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
         verify(paymentRequestService, times(3))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
 
@@ -191,7 +191,7 @@ public class C100AwpProcessHwfPaymentServiceTest {
         when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        c100AwpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
+        awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
 
         //verify
         verify(paymentRequestService, times(0))

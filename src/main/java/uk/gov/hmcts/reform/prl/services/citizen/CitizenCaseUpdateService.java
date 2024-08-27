@@ -305,7 +305,7 @@ public class CitizenCaseUpdateService {
         //Update latest awp data after mapping into caseData
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
         caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
-        caseDataMapToBeUpdated.put("c100HwfRequestedForAdditionalApplications", updatedCaseData.getC100HwfRequestedForAdditionalApplications());
+        caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
 
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),

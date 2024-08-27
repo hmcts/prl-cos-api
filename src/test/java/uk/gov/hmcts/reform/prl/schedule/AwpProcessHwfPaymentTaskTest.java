@@ -5,25 +5,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.prl.services.C100AwpProcessHwfPaymentService;
+import uk.gov.hmcts.reform.prl.services.AwpProcessHwfPaymentService;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(SpringExtension.class)
-class C100AwpProcessHwfPaymentTaskTest {
+class AwpProcessHwfPaymentTaskTest {
 
     @InjectMocks
-    C100AwpProcessHwfPaymentTask c100AwpProcessHwfPaymentTask;
+    AwpProcessHwfPaymentTask awpProcessHwfPaymentTask;
 
     @Mock
-    C100AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
+    AwpProcessHwfPaymentService awpProcessHwfPaymentService;
 
     @Test
     void runTaskWithHearingAwayDays() {
-        c100AwpProcessHwfPaymentTask.run();
+        awpProcessHwfPaymentTask.run();
 
-        verify(c100AwpProcessHwfPaymentService, times(1)).checkHwfPaymentStatusAndUpdateApplicationStatus();
+        verify(awpProcessHwfPaymentService, times(1)).checkHwfPaymentStatusAndUpdateApplicationStatus();
     }
 }

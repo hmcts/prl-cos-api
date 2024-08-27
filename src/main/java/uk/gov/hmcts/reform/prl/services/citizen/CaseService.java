@@ -76,6 +76,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -146,6 +147,8 @@ public class CaseService {
     public static final DateTimeFormatter DATE_FORMATTER_D_MMM_YYYY = DateTimeFormatter.ofPattern(D_MMM_YYYY);
     public static final DateTimeFormatter DATE_FORMATTER_YYYY_MM_DD = DateTimeFormatter.ofPattern(YYYY_MM_DD);
     public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+    public static final DateTimeFormatter DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM =
+        DateTimeFormatter.ofPattern("d-MMM-yyyy hh:mm:ss a", Locale.ENGLISH);
     public static final String IS_NEW = "isNew";
     public static final String IS_FINAL = "isFinal";
     public static final String IS_MULTIPLE = "isMultiple";
