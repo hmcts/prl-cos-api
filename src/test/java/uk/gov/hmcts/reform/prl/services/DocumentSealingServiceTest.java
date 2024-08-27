@@ -87,7 +87,7 @@ public class DocumentSealingServiceTest {
 
         verify(dgsApiClient).convertDocToPdf(eq(newFileName), eq("testAuth"), actualDocumentRequest.capture());
         assertThat(actualSealedDocumentReference).isEqualTo(sealedDocument);
-        assertThat(actualDocumentRequest.getValue().getValues().get("fileName")).isNotEqualTo(inputDocumentBinaries);
+        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getValues().get("fileName"));
         mockResourceReader.close();
     }
 
@@ -127,7 +127,7 @@ public class DocumentSealingServiceTest {
 
         verify(dgsApiClient).convertDocToPdf(eq(newFileName), eq("testAuth"), actualDocumentRequest.capture());
         assertThat(actualSealedDocumentReference).isEqualTo(sealedDocument);
-        assertThat(actualDocumentRequest.getValue().getValues().get("fileName")).isNotEqualTo(inputDocumentBinaries);
+        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getValues().get("fileName"));
         mockResourceReader.close();
     }
 
