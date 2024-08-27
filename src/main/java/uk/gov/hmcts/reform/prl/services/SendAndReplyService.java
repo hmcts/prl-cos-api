@@ -1316,9 +1316,11 @@ public class SendAndReplyService {
     }
 
     private String getSendReplyJudgeIdamId(CaseData caseData) {
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
+        if (SEND.equals(caseData.getChooseSendOrReply())
+            && null != caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName()) {
             return caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId();
-        } else if (REPLY.equals(caseData.getChooseSendOrReply())) {
+        } else if (REPLY.equals(caseData.getChooseSendOrReply())
+            && null != caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName()) {
             return caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
         }
         return null;
