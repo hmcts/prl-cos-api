@@ -905,6 +905,10 @@ public class WelshLangMapper {
             "Pryderon amddiffyn plant"
         );
 
+        welshMap.put("Behaviour is not ongoing", "Nid yw’r ymddygiad yn parhau");
+
+        welshMap.put("Behaviour is ongoing", "Mae’r ymddygiad yn parhau");
+
         return welshMap;
     }
 
