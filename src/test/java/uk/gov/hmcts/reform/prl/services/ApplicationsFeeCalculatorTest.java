@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOthe
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
+import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -28,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +40,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -52,6 +59,9 @@ public class ApplicationsFeeCalculatorTest {
     private ApplicationsFeeCalculator applicationsFeeCalculator;
     @Mock
     private FeeService feeService;
+
+    @Captor
+    private ArgumentCaptor<List<FeeType>> actualFeeTypes;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -485,6 +495,63 @@ public class ApplicationsFeeCalculatorTest {
         assertNotNull(stringObjectMap);
         assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
         assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFeeForDaApplicantFP25() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder)
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.FP25_WITNESS_SUMMONS)
+                                                  .build())
+            .representedPartyType(DA_APPLICANT)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.ZERO).build());
+
+        Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        assertEquals(Collections.emptyMap(), stringObjectMap);
+        verify(feeService).getFeesDataForAdditionalApplications(actualFeeTypes.capture());
+        assertEquals(Collections.emptyList(), actualFeeTypes.getValue());
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFeeForDaRespondentFP25() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicationsApplyingFor(
+                AdditionalApplicationTypeEnum.otherOrder)
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.FP25_WITNESS_SUMMONS)
+                                                  .build())
+            .representedPartyType(DA_RESPONDENT)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+
+        Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        ArrayList<FeeType> expectedFeeTypes = new ArrayList<>();
+        expectedFeeTypes.add(FeeType.FP25_WITNESS_SUMMONS);
+
+        assertNotNull(stringObjectMap);
+        assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+        assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+        verify(feeService).getFeesDataForAdditionalApplications(actualFeeTypes.capture());
+        assertEquals(expectedFeeTypes, actualFeeTypes.getValue());
     }
 
     @Test
