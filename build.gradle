@@ -378,7 +378,7 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
     force = true
   }
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.108.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.112.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
