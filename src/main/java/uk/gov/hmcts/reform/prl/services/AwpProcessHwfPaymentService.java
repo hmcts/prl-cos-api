@@ -103,6 +103,7 @@ public class AwpProcessHwfPaymentService {
         if (isNotEmpty(processedApplicationIds)) {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             for (UUID processedApplicationId : processedApplicationIds) {
+                log.info("Updating AwP payment & application status for application id " + processedApplicationId);
                 caseData.getAdditionalApplicationsBundle().stream().filter(additionalApplicationsBundleElement ->
                                                                                additionalApplicationsBundleElement.getId().equals(
                                                                                    processedApplicationId))
@@ -134,13 +135,12 @@ public class AwpProcessHwfPaymentService {
                         );
                     });
             }
-
+            log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(
                 caseDetails.getId().toString(),
                 HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
             );
-
             caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
             caseDataUpdated.put(
                 "hwfRequestedForAdditionalApplications",
@@ -170,13 +170,18 @@ public class AwpProcessHwfPaymentService {
                         systemUserService.getSysUserToken(),
                         payment.getPaymentServiceRequestReferenceNumber()
                     );
-                if (!PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
+                log.info("Payment status {} for AwP Id{}",
+                         serviceRequestReferenceStatusResponse.getServiceRequestStatus(),
+                         additionalApplicationsBundleElement.getId()
+                );
+                if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                     processedApplicationIds.add(additionalApplicationsBundleElement.getId());
                 } else {
                     allCitizenAwpWithHwfHasBeenProcessed = YesOrNo.No;
                 }
             }
         }
+        log.info("All AwP HwF Payment completed Application Ids " + processedApplicationIds);
         return allCitizenAwpWithHwfHasBeenProcessed;
     }
 
