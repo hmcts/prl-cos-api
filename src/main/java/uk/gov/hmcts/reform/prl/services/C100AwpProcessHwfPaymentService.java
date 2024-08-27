@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_AWP_STATUS_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_HWF_PROCESS_AWP_STATUS_UPDATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -68,7 +68,7 @@ public class C100AwpProcessHwfPaymentService {
     public void checkHwfPaymentStatusAndUpdateApplicationStatus() {
         long startTime = System.currentTimeMillis();
         log.info("inside checkHwfPaymentStatus");
-        //Fetch all pending cases with Help with fees
+        //Fetch all C100 pending cases with Help with fees
         List<CaseDetails> caseDetailsList = retrieveCasesWithAwpHelpWithFeesInPendingState();
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
@@ -138,13 +138,13 @@ public class C100AwpProcessHwfPaymentService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(
                 caseDetails.getId().toString(),
-                HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
+                C100_HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
             );
 
             caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
             caseDataUpdated.put(
-                "hwfRequestedForAdditionalApplications",
-                YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplications()
+                "c100HwfRequestedForAdditionalApplications",
+                YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getC100HwfRequestedForAdditionalApplications()
             );
 
             //Save case data
@@ -222,7 +222,12 @@ public class C100AwpProcessHwfPaymentService {
         List<Should> shoulds = List.of(
             Should.builder()
                 .match(Match.builder()
-                           .hwfRequestedForAdditionalApplications("Yes")
+                           .caseTypeOfApplication("C100")
+                           .build())
+                .build(),
+            Should.builder()
+                .match(Match.builder()
+                           .c100HwfRequestedForAdditionalApplications("Yes")
                            .build())
                 .build()
         );
@@ -233,7 +238,7 @@ public class C100AwpProcessHwfPaymentService {
 
         Bool finalFilter = Bool.builder()
             .should(shoulds)
-            .minimumShouldMatch(1)
+            .minimumShouldMatch(2)
             .filter(filter)
             .build();
 

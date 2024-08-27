@@ -58,7 +58,7 @@ public enum CaseEvent {
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
 
-    HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus");
+    C100_HWF_PROCESS_AWP_STATUS_UPDATE("c100ProcessHwfUpdateAwpStatus");
 
     private final String value;
 
