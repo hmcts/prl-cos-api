@@ -103,6 +103,7 @@ public class AwpProcessHwfPaymentService {
         if (isNotEmpty(processedApplicationIds)) {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             for (UUID processedApplicationId : processedApplicationIds) {
+                log.info("All AwP HwF Payment completed Application Ids " + processedApplicationIds);
                 caseData.getAdditionalApplicationsBundle().stream().filter(additionalApplicationsBundleElement ->
                                                                                additionalApplicationsBundleElement.getId().equals(
                                                                                    processedApplicationId))
