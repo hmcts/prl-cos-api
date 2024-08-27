@@ -54,7 +54,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AwpProcessHwfPaymentService {
+public class C100AwpProcessHwfPaymentService {
 
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator authTokenGenerator;

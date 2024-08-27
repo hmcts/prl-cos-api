@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class AwpProcessHwfPaymentServiceTest {
+public class C100AwpProcessHwfPaymentServiceTest {
 
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
@@ -50,7 +50,7 @@ public class AwpProcessHwfPaymentServiceTest {
 
 
     @InjectMocks
-    private AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
+    private C100AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
 
     @Mock
     ObjectMapper objectMapper;

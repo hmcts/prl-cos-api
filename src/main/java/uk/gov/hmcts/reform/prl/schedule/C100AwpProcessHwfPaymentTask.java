@@ -4,14 +4,14 @@ package uk.gov.hmcts.reform.prl.schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.services.AwpProcessHwfPaymentService;
+import uk.gov.hmcts.reform.prl.services.C100AwpProcessHwfPaymentService;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class C100AwpProcessHwfPaymentTask implements Runnable {
 
-    private final AwpProcessHwfPaymentService awpProcessHwfPaymentService;
+    private final C100AwpProcessHwfPaymentService c100AwpProcessHwfPaymentService;
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -28,7 +28,7 @@ public class C100AwpProcessHwfPaymentTask implements Runnable {
     public void run() {
         log.info("*** Process Citizen C100 additional applications with HWF task is started ***");
         //Invoke C100 Awp process Hwf payment service to evaluate & update application status
-        awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
+        c100AwpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
 
         log.info("*** Process Citizen C100 additional applications with HWF task is completed ***");
     }
