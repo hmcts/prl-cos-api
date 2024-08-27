@@ -1431,11 +1431,21 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
-            byte[] docInBytes = getDocInBytes(authorisation, document, filename);
-            String s2stoken = authTokenGenerator.generate();
-            log.info("s2s token to retrieve bytestream: {}", s2stoken);
-
-            log.info("Downloaded document as bytes to convert to pdf: {}", docInBytes);
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            byte[] docInBytes = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name " + filename, e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
@@ -1452,27 +1462,6 @@ public class DocumentGenService {
 
         }
         return document;
-    }
-
-    public byte[] getDocInBytes(String authorisation, Document document, String filename) {
-        String s2stoken = authTokenGenerator.generate();
-        log.info("s2s token to retrieve bytestream: {}", s2stoken);
-        ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
-            authorisation,
-            s2stoken,
-            document.getDocumentBinaryUrl()
-        );
-
-        return Optional.ofNullable(responseEntity)
-            .map(ResponseEntity::getBody)
-            .map(resource -> {
-                try {
-                    return resource.getInputStream().readAllBytes();
-                } catch (IOException e) {
-                    throw new InvalidResourceException("Doc name " + filename, e);
-                }
-            })
-            .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
     }
 
     public DocumentResponse generateAndUploadDocument(String authorisation,
