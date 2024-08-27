@@ -1281,7 +1281,8 @@ public class SendAndReplyService {
                         caseData.getId()), judgeIdamId);
                     if (null != roleAssignmentResponse) {
                         log.info(
-                            "Allocate judge -> case is already allocated to judge manually, no entry into caseData & no need remove allocation later");
+                            "Allocate judge -> case is already allocated to judge manually,"
+                                + " no entry into caseData & no need remove allocation later");
                     } else {
                         log.info(
                             "Allocate judge -> case is not allocated to judge, create new role assignment & add judge details to send & reply list");
