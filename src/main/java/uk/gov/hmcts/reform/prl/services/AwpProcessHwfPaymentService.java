@@ -134,7 +134,7 @@ public class AwpProcessHwfPaymentService {
                         );
                     });
             }
-
+            log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(
                 caseDetails.getId().toString(),
@@ -170,13 +170,18 @@ public class AwpProcessHwfPaymentService {
                         systemUserService.getSysUserToken(),
                         payment.getPaymentServiceRequestReferenceNumber()
                     );
-                if (!PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
+                log.info("Payment status {} for AwP Id{}",
+                         serviceRequestReferenceStatusResponse.getServiceRequestStatus(),
+                         additionalApplicationsBundleElement.getId()
+                );
+                if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                     processedApplicationIds.add(additionalApplicationsBundleElement.getId());
                 } else {
                     allCitizenAwpWithHwfHasBeenProcessed = YesOrNo.No;
                 }
             }
         }
+        log.info("All AwP HwF Payment completed Application Ids " + processedApplicationIds);
         return allCitizenAwpWithHwfHasBeenProcessed;
     }
 

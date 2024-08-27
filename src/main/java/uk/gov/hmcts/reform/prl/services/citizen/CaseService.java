@@ -1425,7 +1425,7 @@ public class CaseService {
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
                          .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
-                                                           DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
+                                                           DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                          .build()
             ).toList();
     }
