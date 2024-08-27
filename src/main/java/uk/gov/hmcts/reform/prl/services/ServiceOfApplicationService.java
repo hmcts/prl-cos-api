@@ -849,10 +849,12 @@ public class ServiceOfApplicationService {
 
     private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
                                                       Map<String, Object> caseDataMap, String personalServiceBy) {
+        List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
-            staticDocs
+            staticDocs,
+            coverLetterMap
         );
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packdDocs))
@@ -860,6 +862,7 @@ public class ServiceOfApplicationService {
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
+            .coverLettersMap(coverLetterMap)
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
@@ -877,14 +880,16 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(CaseData caseData, String authorization,
-                                                                                       List<Document> staticDocs) {
+                                                                                       List<Document> staticDocs,
+                                                                                       List<Element<CoverLetterMap>> coverLetterMap) {
         List<Document> packdDocs = new ArrayList<>();
-        packdDocs.addAll(getCoverLetterForDaCourtAdminAndBailiffPersonalService(caseData, authorization));
+        packdDocs.addAll(getCoverLetterForDaCourtAdminAndBailiffPersonalService(caseData, authorization, coverLetterMap));
         packdDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.D, staticDocs));
         return packdDocs;
     }
 
-    private List<Document> getCoverLetterForDaCourtAdminAndBailiffPersonalService(CaseData caseData, String authorization) {
+    private List<Document> getCoverLetterForDaCourtAdminAndBailiffPersonalService(CaseData caseData, String authorization,
+                                                                                  List<Element<CoverLetterMap>> coverLetterMap) {
         List<Document> reLetters = new ArrayList<>();
         Element<PartyDetails> respondent = Element.<PartyDetails>builder()
             .id(caseData.getRespondentsFL401().getPartyId())
@@ -901,6 +906,7 @@ public class ServiceOfApplicationService {
                                                    PRL_LET_ENG_FL401_RE1
             ));
         }
+        coverLetterMap.add(element(respondent.getId(), CoverLetterMap.builder().coverLetters(wrapElements(reLetters)).build()));
         return reLetters;
     }
 
@@ -3260,11 +3266,15 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (CollectionUtils.isNotEmpty(applicantFl401)) {
             List<Document> docs = new ArrayList<>();
+            List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             String partyId = String.valueOf(applicantFl401.get(0).getValue().getSolicitorPartyId());
             if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 log.info("applicant lip");
                 partyId = String.valueOf(applicantFl401.get(0).getId());
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP2));
+                Document coverletter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP2);
+                docs.add(coverletter);
+                coverLetterMap.add(element(UUID.fromString(partyId), CoverLetterMap.builder()
+                    .coverLetters(List.of(element(coverletter))).build()));
             }
             docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, fl401StaticDocs));
             final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -3272,20 +3282,26 @@ public class ServiceOfApplicationService {
                 .partyIds(wrapElements(partyId))
                 .servedBy(userService.getUserDetails(authorization).getFullName())
                 .packCreatedDate(CaseUtils.getCurrentDate())
+                .coverLettersMap(coverLetterMap)
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
         }
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
             String partyId = String.valueOf(respondentFl401.get(0).getValue().getSolicitorPartyId());
             List<Document> docs = new ArrayList<>();
+            List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 log.info("respondent lip");
                 partyId = String.valueOf(respondentFl401.get(0).getId());
+                Document coverLetter;
                 if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                    docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4);
                 } else {
-                    docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1);
                 }
+                docs.add(coverLetter);
+                coverLetterMap.add(element(UUID.fromString(partyId), CoverLetterMap.builder()
+                    .coverLetters(List.of(element(coverLetter))).build()));
             }
             docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, fl401StaticDocs));
             final SoaPack unServedRespondentPack = SoaPack.builder()
@@ -3293,6 +3309,7 @@ public class ServiceOfApplicationService {
                 .partyIds(wrapElements(partyId))
                 .servedBy(userService.getUserDetails(authorization).getFullName())
                 .packCreatedDate(CaseUtils.getCurrentDate())
+                .coverLettersMap(coverLetterMap)
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         }
@@ -3305,25 +3322,32 @@ public class ServiceOfApplicationService {
         List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
         Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
         Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
-        packEDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+        Document applicantCoverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1);
+        packEDocs.add(applicantCoverLetter);
+        Document respondentCoverLetter;
         List<Document> packFDocs = getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
         if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-            packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2));
+            respondentCoverLetter = generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2);
         } else {
-            packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3));
+            respondentCoverLetter = generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3);
         }
+        packFDocs.add(respondentCoverLetter);
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packFDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
             .packCreatedDate(CaseUtils.getCurrentDate())
+            .coverLettersMap(List.of(element(applicant.getId(), CoverLetterMap.builder()
+                                                 .coverLetters(List.of(element(applicantCoverLetter))).build())))
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataUpdated.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packEDocs))
             .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+            .coverLettersMap(List.of(element(respondent.getId(), CoverLetterMap.builder()
+                .coverLetters(List.of(element(respondentCoverLetter))).build())))
             .packCreatedDate(CaseUtils.getCurrentDate())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
@@ -3333,23 +3357,31 @@ public class ServiceOfApplicationService {
                                                                     List<Document> fl401StaticDocs,
                                                                     String authorization, String personalServiceBy) {
         log.info("serving Fl401 court admin or court bailiff with confidential check");
+        List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
-            fl401StaticDocs
+            fl401StaticDocs,
+            coverLetterMap
         );
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
+            .coverLettersMap(coverLetterMap)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         List<Document> packcDocs = new ArrayList<>();
+        List<Element<CoverLetterMap>> applicantCoverLetters = new ArrayList<>();
         if (!CaseUtils.hasLegalRepresentation(caseData.getApplicantsFL401())) {
-            packcDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                               element(caseData.getApplicantsFL401().getPartyId(),
-                                                                       caseData.getApplicantsFL401()), PRL_LET_ENG_AP2));
+            Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                 element(caseData.getApplicantsFL401().getPartyId(),
+                                                         caseData.getApplicantsFL401()), PRL_LET_ENG_AP2);
+            applicantCoverLetters.add(element(caseData.getApplicantsFL401().getPartyId(), CoverLetterMap.builder()
+                .coverLetters(List.of(element(coverLetter)))
+                .build()));
+            packcDocs.add(coverLetter);
         }
         packcDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs));
         final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -3358,6 +3390,7 @@ public class ServiceOfApplicationService {
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(CaseUtils.getCurrentDate())
             .personalServiceBy(personalServiceBy)
+            .coverLettersMap(applicantCoverLetters)
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -3384,12 +3417,16 @@ public class ServiceOfApplicationService {
             .value(caseData.getRespondentsFL401())
             .build();
         getCoverLetterForDaApplicantSolicitor(caseData, authorization, reLetters, respondent);
+        List<Element<CoverLetterMap>> coverletterMap = new ArrayList<>();
+        coverletterMap.add(element(respondent.getId(), CoverLetterMap.builder()
+            .coverLetters(wrapElements(reLetters)).build()));
         reLetters.addAll(packBDocs);
         final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(wrapElements(reLetters)).partyIds(
                 wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .packCreatedDate(CaseUtils.getCurrentDate())
+            .coverLettersMap(coverletterMap)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         return caseDataUpdated;
