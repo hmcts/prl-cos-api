@@ -1246,7 +1246,6 @@ public class SendAndReplyService {
             String judgeIdamId = getSendReplyJudgeIdamId(caseData);
 
             if (isNotBlank(judgeIdamId)) {
-
                 //Check if the Judge is already allocated to any of the message
                 Optional<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyOptional = retreiveExistingJudgeAllocationFromSendAndReply(
                     allocatedJudgeForSendAndReply,
@@ -1282,15 +1281,7 @@ public class SendAndReplyService {
                         caseData.getId()), judgeIdamId);
                     if (null != roleAssignmentResponse) {
                         log.info(
-                            "Allocate judge -> case is already allocated to judge manually, add judge details to send & reply list");
-                        allocatedJudgeForSendAndReply
-                            .add(element(AllocatedJudgeForSendAndReply.builder()
-                                             .judgeIdamId(judgeIdamId)
-                                             .roleAssignmentId(roleAssignmentResponse.getId())
-                                             .messageIdentifier(newMessage.getMessageIdentifier())
-                                             .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
-                                             .build()));
-
+                            "Allocate judge -> case is already allocated to judge manually, no entry into caseData & no need remove allocation later");
                     } else {
                         log.info(
                             "Allocate judge -> case is not allocated to judge, create new role assignment & add judge details to send & reply list");
