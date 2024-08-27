@@ -218,14 +218,22 @@ public class ApplicationsFeeCalculator {
             return CA_APPLICANT.equals(representedPartyType)
                 ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
         } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
-                ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
+            return getFC600FeeType(representedPartyType);
         } else if (FP25_WITNESS_SUMMONS.equalsIgnoreCase(applicationType)) {
-            return !DA_APPLICANT.equals(representedPartyType)
-                ? Optional.of(FeeType.FP25_WITNESS_SUMMONS) : Optional.empty();
+            return getFP25FeeType(representedPartyType);
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Optional<FeeType> getFC600FeeType(String representedPartyType) {
+        return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
+            ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
+    }
+
+    private static Optional<FeeType> getFP25FeeType(String representedPartyType) {
+        return !DA_APPLICANT.equals(representedPartyType)
+            ? Optional.of(FeeType.FP25_WITNESS_SUMMONS) : Optional.empty();
     }
 
 }
