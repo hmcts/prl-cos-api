@@ -2263,6 +2263,51 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testGetSelectedOrderIdForUploadDomesticAbuseOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.blankOrder)
+            .build();
+        assertEquals("blankOrder", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadFcOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .fcOrders(FcOrdersEnum.summonToAppearToCourt)
+            .build();
+        assertEquals("summonToAppearToCourt", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadOtherOrdersOption() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .otherOrdersOption(OtherOrdersOptionEnum.other)
+            .nameOfOrder("test")
+            .build();
+        assertEquals("other : test", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUpload() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertEquals("", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadforChildArrOrder() {
+        CaseData caseData = CaseData.builder()
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertEquals("blankOrderOrDirections", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
     public void testPopulateDraftOrderForJudge() throws Exception {
         when(userService.getUserDetails(Mockito.anyString()))
             .thenReturn(UserDetails.builder().roles(List.of(Roles.JUDGE.getValue())).build());
@@ -3549,6 +3594,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testSetFieldsForWaTaskForJudgeCreateOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3572,6 +3618,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3595,6 +3642,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testSetFieldsForWaTaskForUploadOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -3878,6 +3926,7 @@ public class ManageOrderServiceTest {
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other)).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .applicantsFL401(PartyDetails.builder().build())
             .build();
 
         List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);

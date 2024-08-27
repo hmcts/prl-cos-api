@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class NoticeOfChangeEvent {
     private final CaseData caseData;
     private final String solicitorEmailAddress;
@@ -19,5 +19,6 @@ public class NoticeOfChangeEvent {
     private final int representedPartyIndex;
     private final SolicitorRole.Representing representing;
     private final String typeOfEvent;
+    //As part of clean up accessCode field usage was removed
     private final String accessCode;
 }

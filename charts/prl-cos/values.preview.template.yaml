@@ -1,35 +1,65 @@
 java:
+  devmemoryRequests: 2048Mi
+  devcpuRequests: 2000m
+  devmemoryLimits: 4096Mi
+  devcpuLimits: 4000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
     prl:
       secrets:
-        - prl-cos-idam-client-secret
-        - microservicekey-prl-cos-api
-        - system-update-user-username
-        - system-update-user-password
-        - notification-client-api-key
-        - test-genericpassword
-        - launchDarkly-sdk-key
-        - send-grid-api-key
-        - rpa-notify-to-email
-        - rpa-notify-from-email
-        - AppInsightsInstrumentationKey
-        - southampton-court-email-address
-        - idam-solicitor-username
-        - idam-solicitor-password
-        - courtnav-functional-test-user
-        - courtnav-functional-test-pwd
-        - filtered-court-ids
-        - da-filtered-court-ids
-        - ca-default-court-epimms-id
-        - postcode-lookup-token
-        - prl-rd-api-system-username
-        - prl-rd-api-system-user-password
-        - welsh-court-mapping
-        - app-insights-connection-string
-        - judge-testuser-one
-        - judge-testpassword
+        - name: prl-cos-idam-client-secret
+          alias: IDAM_CLIENT_SECRET
+        - name: microservicekey-prl-cos-api
+          alias: IDAM_S2S_AUTH_TOTP_SECRET
+        - name: system-update-user-username
+          alias: SYSTEM_UPDATE_USER_USERNAME
+        - name: system-update-user-password
+          alias: PRL_SYSTEM_UPDATE_PASSWORD
+        - name: notification-client-api-key
+          alias: UK_GOV_NOTIFY_API_KEY
+        - name: test-genericpassword
+          alias: PRL_GENERIC_PASSWORD
+        - name: launchDarkly-sdk-key
+          alias: LAUNCH_DARKLY_SDK_KEY
+        - name: send-grid-api-key
+          alias: SEND_GRID_API_KEY
+        - name: rpa-notify-to-email
+          alias: RPA_NOTIFY_TO_EMAIL
+        - name: rpa-notify-from-email
+          alias: RPA_NOTIFY_FROM_EMAIL
+        - name: AppInsightsInstrumentationKey
+          alias: APP_INSIGHTS_INSTRUMENTATION_KEY
+        - name: southampton-court-email-address
+          alias: SOUTHAMPTON_COURT_EMAIL_ADDRESS
+        - name: idam-solicitor-username
+          alias: IDAM_SOLICITOR_USERNAME
+        - name: idam-solicitor-password
+          alias: IDAM_SOLICITOR_PASSWORD
+        - name: filtered-court-ids
+          alias: COURT_IDS_TO_FILTER
+        - name: da-filtered-court-ids
+          alias: DA_COURT_IDS_TO_FILTER
+        - name: ca-default-court-epimms-id
+          alias: CA_DEFAULT_COURT_EPIMMS_ID
+        - name: postcode-lookup-token
+          alias: POST_CODE_LOOKUP_KEY
+        - name: prl-rd-api-system-username
+          alias: PRL_IDAM_REFDATA_USERNAME
+        - name: prl-rd-api-system-user-password
+          alias: PRL_IDAM_REFDATA_PASSWORD
+        - name: welsh-court-mapping
+          alias: WELSH_COURT_MAPPING
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: courtnav-functional-test-user
+          alias: COURTNAV_USERNAME
+        - name: courtnav-functional-test-pwd
+          alias: COURTNAV_PASSWORD
+        - name: judge-testuser-one
+          alias:  JUDGE_USER_NAME
+        - name: judge-testpassword
+          alias: JUDGE_PASSWORD
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -40,11 +70,11 @@ java:
     IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2254-ccd-data-store-api
     CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2254-cdam
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2254-aac-manage-case-assignment
     BUNDLE_URL: http://prl-ccd-definitions-pr-2254-em-ccdorc
+    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
@@ -53,7 +83,7 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PRL_DGS_API_URL:  http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
