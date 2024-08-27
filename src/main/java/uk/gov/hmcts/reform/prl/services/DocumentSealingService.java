@@ -49,12 +49,9 @@ public class DocumentSealingService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
-        log.info("document before modification: {}", document);
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
             document = documentGenService.convertToPdf(authorisation, document);
         }
-
-        log.info("document as pdf: {}", document);
 
         String s2sToken = authTokenGenerator.generate();
         byte[] downloadedPdf = documentGenService.getDocumentBytes(
@@ -63,14 +60,8 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        log.info("Downloaded pdf document as bytes: {}", downloadedPdf);
         byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
-
-        log.info("downloaded document after conversion to pdf: {}", downloadedPdf);
-        log.info("court seal: {}", seal);
-
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
-        log.info("sealed document binary: {}", sealedDocument);
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put("fileName", sealedDocument);
@@ -79,7 +70,6 @@ public class DocumentSealingService {
             authorisation, GenerateDocumentRequest
                 .builder().template(DUMMY).values(tempCaseDetails).build()
         );
-        log.info("generated document: {}", generatedDocumentInfo);
 
         return Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
@@ -94,8 +84,6 @@ public class DocumentSealingService {
             final PDPage firstPage = document.getPage(0);
             final PDRectangle pageSize = firstPage.getTrimBox();
 
-            log.info("PDDocument before adding seal: {}", document);
-
             try (PDPageContentStream pdfStream = new PDPageContentStream(document, firstPage, APPEND, true, true)) {
                 final PDImageXObject courtSealImage = createFromByteArray(document, seal, null);
                 pdfStream.drawImage(
@@ -107,7 +95,6 @@ public class DocumentSealingService {
                 );
             }
 
-            log.info("PDDocument after adding seal: {}", document);
             return getBinary(document);
         } catch (IllegalStateException ise) {
             throw ise;

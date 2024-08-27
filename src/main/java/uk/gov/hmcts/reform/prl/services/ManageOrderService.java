@@ -3212,7 +3212,6 @@ public class ManageOrderService {
                     && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
                 .forEach(order -> {
                     OrderDetails orderDetails = order.getValue();
-                    log.info("order that needs sealed: {}", orderDetails);
 
                     Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(
                         orderDetails.toBuilder().orderDocument(
@@ -3222,7 +3221,6 @@ public class ManageOrderService {
                                 authorisation
                             )).doesOrderDocumentNeedSeal(No).build()).build();
 
-                    log.info("sealed order: {}", sealedOrder.getValue());
                     orders.set(orders.indexOf(order), sealedOrder);
                 });
 
