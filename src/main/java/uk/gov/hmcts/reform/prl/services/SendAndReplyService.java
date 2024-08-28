@@ -1186,7 +1186,7 @@ public class SendAndReplyService {
     public void closeAwPTask(CaseData caseData) {
         if (SEND.equals(caseData.getChooseSendOrReply())
             && caseData.getSendOrReplyMessage() != null
-            && caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
+            && doesThisMessageCloseAwpTasks(caseData)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(
                 String.valueOf(caseData.getId()),
@@ -1200,6 +1200,13 @@ public class SendAndReplyService {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 startAllTabsUpdateDataContent.caseDataMap()
             );
+            log.info("close AWP task event triggered");
         }
+    }
+
+    private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
+        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
+        return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
+            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 }
