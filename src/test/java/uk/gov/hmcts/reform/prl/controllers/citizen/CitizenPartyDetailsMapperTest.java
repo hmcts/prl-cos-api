@@ -400,6 +400,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .applicantPcqId("123")
+            .c100RebuildHelpWithFeesDetails(TestUtil.readFileFrom("classpath:c100-rebuild/hwf.json"))
             .build();
         caseData = CaseData.builder()
             .id(1234567891234567L)
