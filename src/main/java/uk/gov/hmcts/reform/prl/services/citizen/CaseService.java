@@ -1421,6 +1421,8 @@ public class CaseService {
                      CitizenDocuments.builder()
                          .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
                          .partyType(awp.getPartyType().getDisplayedValue())
+                         .partyName(awp.getAuthor())
+                         .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
                          .document(document)
