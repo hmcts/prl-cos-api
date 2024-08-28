@@ -1461,8 +1461,10 @@ public class ManageOrderService {
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                        log.info("Serving C100 order");
                         servedC100Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     } else {
+                        log.info("Serving Fl401 order");
                         servedFL401Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     }
                 });
@@ -1487,10 +1489,15 @@ public class ManageOrderService {
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
+        String recipients = null;
+        if (No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            recipients = getRecipients(caseData);
+        }
         List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order,serveRecipientName);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getPersonallyServeRespondentsOptions();
         Map<String, Object> servedOrderDetails = new HashMap<>();
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
@@ -1502,7 +1509,7 @@ public class ManageOrderService {
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                 .applicantLegalRepresentative.getDisplayedValue() + ")");
         }
-
+        log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
