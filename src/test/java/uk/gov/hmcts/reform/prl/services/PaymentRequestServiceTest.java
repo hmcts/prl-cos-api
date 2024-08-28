@@ -131,7 +131,7 @@ public class PaymentRequestServiceTest {
                              .build())
             .build();
 
-        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(
+        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).returnUrl(
             null).build();
 
         paymentResponse = PaymentResponse.builder()
@@ -445,7 +445,7 @@ public class PaymentRequestServiceTest {
                              .build())
             .build();
 
-        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(
+        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).returnUrl(
             null).build();
 
         paymentResponse = PaymentResponse.builder()
@@ -543,7 +543,6 @@ public class PaymentRequestServiceTest {
             .build();
 
         createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID)
-            .applicantCaseName(APPLICANT_NAME)
             .returnUrl(null)
             .hwfRefNumber("HWF123")
             .build();
@@ -642,7 +641,7 @@ public class PaymentRequestServiceTest {
                              .build())
             .build();
 
-        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(
+        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).returnUrl(
             null).build();
 
         paymentResponse = PaymentResponse.builder()

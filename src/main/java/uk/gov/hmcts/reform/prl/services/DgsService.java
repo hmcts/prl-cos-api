@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
 import java.util.HashMap;
@@ -83,19 +84,20 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
 
-        dataMap.forEach((k, v) -> {
+        Map<String, Object> welshDataMap = new HashMap<>();
+        welshDataMap.putAll(dataMap);
+        welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseTypeOfApplication)
                 );
-                dataMap.put(k, updatedWelshObj);
+                welshDataMap.put(k, updatedWelshObj);
             }
         });
-
         return generateDocument(authorisation, caseId, templateName,
-                                dataMap
+                                welshDataMap
         );
     }
 
@@ -176,6 +178,39 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
+    public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
+                                                         DocumentRequest documentRequest,
+                                                         String prlCitizenUploadTemplate) throws DocumentGenerationException {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        String caseId = documentRequest.getCaseId();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseId(caseId)
+            .caseData(CaseData.builder()
+                          .id(Long.parseLong(caseId))
+                          .citizenUploadedStatement(documentRequest.getFreeTextStatements())
+                          .build())
+            .build();
+        tempCaseDetails.put(
+            CASE_DETAILS_STRING,
+            AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
+        );
+
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation,
+                                              GenerateDocumentRequest.builder()
+                                                  .template(prlCitizenUploadTemplate)
+                                                  .values(tempCaseDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
+        return generatedDocumentInfo;
+    }
 
     public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
                                                              String templateName, String caseId) throws Exception {
