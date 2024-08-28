@@ -1,6 +1,7 @@
 buildscript {
   repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
   }
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
@@ -404,7 +405,7 @@ dependencies {
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.3.2'
-  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.0'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.3.2'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.3.2'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
@@ -613,7 +614,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java'
-
 ]
 
 sonarqube {

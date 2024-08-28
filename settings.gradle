@@ -1,8 +1,26 @@
+
 pluginManagement {
   repositories {
+    maven { url 'https://repo.spring.io/release' }
+    mavenCentral()
     gradlePluginPortal()
     maven {
       url "https://jitpack.io"
+    }
+  }
+}
+
+include 'consumers'
+include 'dao'
+include 'producers'
+include 'services'
+
+dependencyResolutionManagement {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+      url 'https://jitpack.io'
     }
   }
 }
