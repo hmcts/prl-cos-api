@@ -29,7 +29,7 @@ public enum FeeType {
     public static final Map<String, FeeType> applicationToFeeMapForCitizen = Map.ofEntries(
         Map.entry("C100_FP25_APPLICANT", FP25_WITNESS_SUMMONS),
         Map.entry("C100_FP25_RESPONDENT", FP25_WITNESS_SUMMONS),
-        Map.entry("FL401_FP25_APPLICANT", FP25_WITNESS_SUMMONS),
+        Map.entry("FL401_FP25_APPLICANT", NO_FEE),//Changed as part of PRL-6181
         Map.entry("FL401_FP25_RESPONDENT", FP25_WITNESS_SUMMONS),
 
         Map.entry("C100_N161_APPLICANT", N161_APPELLANT_NOTICE_CA),
