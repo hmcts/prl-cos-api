@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -67,6 +69,7 @@ public class CitizenCaseUpdateService {
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final CitizenAwpMapper citizenAwpMapper;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -298,5 +301,36 @@ public class CitizenCaseUpdateService {
             startAllTabsUpdateDataContent.userDetails()
         );
         return ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
+    }
+
+    public CaseDetails saveCitizenAwpApplication(String authorisation,
+                                                 String caseId,
+                                                 CitizenAwpRequest citizenAwpRequest) {
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                authorisation
+            );
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
+        //Map awp citizen data fields into solicitor fields
+        CaseData updatedCaseData = citizenAwpMapper.map(caseData, citizenAwpRequest);
+
+        Map<String, Object> caseDataMapToBeUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        //Update latest awp data after mapping into caseData
+        caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
+        caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
+        caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
+
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
+        );
     }
 }

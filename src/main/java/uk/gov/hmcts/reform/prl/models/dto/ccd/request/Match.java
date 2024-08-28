@@ -29,4 +29,7 @@ public class Match {
     private String helpWithFees;
 
 
+    @JsonProperty("data.hwfRequestedForAdditionalApplicationsFlag")
+    private String hwfRequestedForAdditionalApplicationsFlag;
+
 }
