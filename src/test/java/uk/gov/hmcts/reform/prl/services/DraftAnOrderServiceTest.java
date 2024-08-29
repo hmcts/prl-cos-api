@@ -189,6 +189,9 @@ public class DraftAnOrderServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private DocumentSealingService documentSealingService;
+
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
     private List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
@@ -714,6 +717,8 @@ public class DraftAnOrderServiceTest {
             .serveOrderData(ServeOrderData.builder()
                                 .doYouWantToServeOrder(Yes).build())
             .build();
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
