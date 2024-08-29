@@ -215,8 +215,7 @@ public class ApplicationsFeeCalculator {
             return PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
                 ? Optional.of(FeeType.D89_BAILIFF_CA) : Optional.empty();
         } else if (C79_CHILD_ORDER.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType)
-                ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
+            return getFeeTypeForC79BasedOnRepresentedPartyType(representedPartyType);
         } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
             return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
                 || DA_RESPONDENT.equals(representedPartyType)
@@ -224,6 +223,11 @@ public class ApplicationsFeeCalculator {
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Optional<FeeType> getFeeTypeForC79BasedOnRepresentedPartyType(String representedPartyType) {
+        return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
+                ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
     }
 
 }
