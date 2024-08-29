@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
@@ -217,7 +218,8 @@ public class ApplicationsFeeCalculator {
             return CA_APPLICANT.equals(representedPartyType)
                 ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
         } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
+            return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
+                || DA_RESPONDENT.equals(representedPartyType)
                 ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
         } else {
             return Optional.empty();
