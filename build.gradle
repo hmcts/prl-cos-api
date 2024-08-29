@@ -48,7 +48,7 @@ def versions = [
   pact                         : '4.1.11',
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
-  reformsJavaLogging           : '6.1.6',
+  reformsJavaLogging           : '5.1.7',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.0.28',
   serenityCucumber             : '4.1.20',
@@ -320,7 +320,7 @@ dependencies {
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.7'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformsJavaLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: '6.0.1'
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
