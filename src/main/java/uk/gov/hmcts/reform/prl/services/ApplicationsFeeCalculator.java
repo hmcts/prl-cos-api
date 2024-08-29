@@ -217,7 +217,8 @@ public class ApplicationsFeeCalculator {
         } else if (C79_CHILD_ORDER.equalsIgnoreCase(applicationType)) {
             return getFeeTypeForC79BasedOnRepresentedPartyType(representedPartyType);
         } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
+            return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
+                || DA_RESPONDENT.equals(representedPartyType)
                 ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
         } else {
             return Optional.empty();
