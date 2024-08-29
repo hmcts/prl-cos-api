@@ -48,7 +48,7 @@ def versions = [
   pact                         : '4.1.11',
   pitest                       : '1.16.1',
   puppyCrawl                   : '8.45.1',
-  reformsJavaLogging           : '6.0.1',
+  reformsJavaLogging           : '6.1.6',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.0.28',
   serenityCucumber             : '4.1.20',
