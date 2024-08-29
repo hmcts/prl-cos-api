@@ -336,7 +336,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.1'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
