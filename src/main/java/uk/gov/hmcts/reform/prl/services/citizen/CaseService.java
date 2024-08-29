@@ -1460,6 +1460,7 @@ public class CaseService {
                          .categoryId(ANY_OTHER_DOC)
                          .document(sos.getStmtOfServiceDocument())
                          .uploadedDate(sos.getSubmittedDateTime())
+                         .uploadedBy(sos.getUploadedBy().getDisplayedValue())
                          .build()
             ).toList();
     }
@@ -1494,6 +1495,7 @@ public class CaseService {
                     .uploadedDate(LocalDateTime.of(LocalDate.parse(addDoc.getUploadedDateTime().split(",")[0],
                                                                    DATE_FORMATTER_D_MMM_YYYY),
                                                    LocalTime.of(0, 0)))
+                    .uploadedBy(addDoc.getUploadedBy())
                     .build())
                 .toList())
             .flatMap(Collection::stream)
