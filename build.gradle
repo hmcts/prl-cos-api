@@ -320,13 +320,23 @@ dependencies {
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.7'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformsJavaLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformsJavaLogging
+  implementation 'com.github.hmcts.java-logging:logging:6.0.1'
+  //implementation 'com.github.hmcts.java-logging:logging-appinsights:6.1.6'
+  //implementation 'com.github.hmcts.java-logging:logging-httpcomponents:5.1.5'
+  //implementation 'com.github.hmcts.java-logging:logging-spring:5.1.5'
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-httpcomponents', version: versions.reformLogging
+
+  //implementation group: 'com.github.hmcts.java-logging', name: 'logging-httpcomponents', version: '5.1.7'
+  //implementation group: 'com.github.hmcts.java-logging', name: 'logging-spring', version: '5.1.7'
+
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-httpcomponents', version: versions.reformsJavaLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-httpcomponents', version: versions.reformsJavaLogging
   //implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformsJavaLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.23.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.23.1'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
