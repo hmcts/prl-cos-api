@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -433,7 +434,9 @@ public class CaseUtils {
             || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
             && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedLaPack() != null
-            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
+            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedCafcassCymruPack() != null
+            && caseData.getServiceOfApplication().getUnServedCafcassCymruPack().getServedPartyEmail() != null))) {
             arePacksPresent = true;
         }
         return arePacksPresent;
@@ -886,5 +889,33 @@ public class CaseUtils {
                 .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
         }
         return null;
+    }
+  
+    public static String formatAddress(Address address) {
+        if (ObjectUtils.isNotEmpty(address)) {
+            List<String> addressLines = new ArrayList<>();
+            getAddressLines(address, addressLines);
+            return String.join("\n", addressLines);
+        } else {
+            return EMPTY_STRING;
+        }
+    }
+
+    private static void getAddressLines(Address address, List<String> addressLines) {
+        if (address.getAddressLine1() != null && StringUtils.isNotEmpty(address.getAddressLine1().trim())) {
+            addressLines.add(address.getAddressLine1());
+        }
+        if (address.getAddressLine2() != null && StringUtils.isNotEmpty(address.getAddressLine2().trim())) {
+            addressLines.add(address.getAddressLine2());
+        }
+        if (address.getAddressLine3() != null && StringUtils.isNotEmpty(address.getAddressLine3().trim())) {
+            addressLines.add(address.getAddressLine3());
+        }
+        if (address.getPostTown() != null && StringUtils.isNotEmpty(address.getPostTown().trim())) {
+            addressLines.add(address.getPostTown());
+        }
+        if (address.getPostCode() != null && StringUtils.isNotEmpty(address.getPostCode().trim())) {
+            addressLines.add(address.getPostCode());
+        }
     }
 }
