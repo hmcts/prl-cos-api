@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestPropertySource(properties = {"core_case_data.api.url=http://localhost:5001"})
 @PactFolder("pacts")
 @SpringBootTest
-//@ImportAutoConfiguration({FeignAutoConfiguration.class})
+@ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class CcdApiConsumerTest {
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
