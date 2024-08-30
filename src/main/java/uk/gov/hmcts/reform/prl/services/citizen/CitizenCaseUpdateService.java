@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
@@ -163,6 +164,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+
+        caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
 
@@ -187,6 +191,19 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
+        caseDataToSubmit = caseDataToSubmit.toBuilder()
+            .helpWithFeesNumber(isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
+                                    && YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+                                    ? citizenUpdatedCaseData.getHelpWithFeesNumber() : null)
+            .paymentServiceRequestReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber())
+                                                      ? citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber() : null)
+            .paymentReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentReferenceNumber())
+                                        ? citizenUpdatedCaseData.getPaymentReferenceNumber() : null)
+            .build();
+        return caseDataToSubmit;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
@@ -305,7 +322,7 @@ public class CitizenCaseUpdateService {
         //Update latest awp data after mapping into caseData
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
         caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
-        caseDataMapToBeUpdated.put("c100HwfRequestedForAdditionalApplications", updatedCaseData.getC100HwfRequestedForAdditionalApplications());
+        caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
 
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
