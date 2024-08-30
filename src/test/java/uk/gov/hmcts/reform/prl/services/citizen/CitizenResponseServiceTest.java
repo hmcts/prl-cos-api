@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -47,6 +49,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
@@ -138,10 +141,10 @@ public class CitizenResponseServiceTest {
     public void testGenerateDraftC7() throws Exception {
         when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false))
+        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false, new HashMap<>()))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
-        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken);
+        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken, false);
         Assert.assertNotNull(document);
         Assert.assertEquals("testDoc", document.getDocumentFileName());
     }
@@ -188,7 +191,7 @@ public class CitizenResponseServiceTest {
 
         Map<String, Object> returnedMap = new HashMap<>();
         returnedMap.put("isConfidentialDataPresent", "yes");
-        when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(returnedMap);
+        when(c100RespondentSolicitorService.populateDataMap(any(), any(), anyString())).thenReturn(returnedMap);
         when(citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(any(), any(), any(), any())).thenReturn(PartyDetails
             .builder()
             .response(Response
@@ -212,9 +215,28 @@ public class CitizenResponseServiceTest {
         when(documentGenService.generateSingleDocument(authToken, caseData, C8_RESP_FINAL_HINT, false, returnedMap))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
+        Map<String, Object> allegationsOfHarmDataMap = Map.of(
+            "respAohYesOrNo", "Yes"
+        );
+
+        when(objectMapper.convertValue(Mockito.any(RespondentAllegationsOfHarmData.class),
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);
         Assert.assertNotNull(returnedCaseDetails);
         Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
+    }
+
+    @Test
+    public void testGenerateAndReturnDraftC1A() throws Exception {
+        when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C1A_DRAFT_HINT, false, new HashMap<>()))
+            .thenReturn(Document.builder().documentFileName("testDoc").build());
+
+        Document document = citizenResponseService.generateAndReturnDraftC1A(caseId, uuid, authToken, false);
+        Assert.assertNotNull(document);
+        Assert.assertEquals("testDoc", document.getDocumentFileName());
     }
 }

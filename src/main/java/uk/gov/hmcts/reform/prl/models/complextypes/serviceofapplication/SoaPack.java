@@ -26,4 +26,6 @@ public class SoaPack {
 
     @JsonProperty("coverLettersMap")
     private final List<Element<CoverLetterMap>> coverLettersMap;
+
+    private final String servedPartyEmail;
 }

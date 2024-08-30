@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -74,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHelpWithFeesElementsMapper.updateHelpWithFeesDetailsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
@@ -234,7 +236,9 @@ public class CitizenPartyDetailsMapper {
             dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         }
-        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Document);
+        c100RespondentSolicitorService.populateConfidentialAndMiscDataMap(updatedPartyElement, dataMapForC8Document,
+                                                                          CITIZEN
+        );
 
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
@@ -818,6 +822,8 @@ public class CitizenPartyDetailsMapper {
                                                     c100C100RebuildSafetyConcernsElements,
                                                     c100RebuildChildDetailsElements);
         }
+
+        updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
 

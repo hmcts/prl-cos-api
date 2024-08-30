@@ -66,5 +66,5 @@ public class BaseCaseData {
     @JsonUnwrapped
     private DocumentsNotifications documentsNotifications;
 
-    private YesOrNo c100HwfRequestedForAdditionalApplications;
+    private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
 }
