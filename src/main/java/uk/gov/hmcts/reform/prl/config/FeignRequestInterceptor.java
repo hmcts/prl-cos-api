@@ -2,28 +2,25 @@ package uk.gov.hmcts.reform.prl.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import org.slf4j.MDC;
+import uk.gov.hmcts.reform.logging.HttpHeaders;
+import uk.gov.hmcts.reform.logging.MdcFields;
+import uk.gov.hmcts.reform.logging.tracing.RequestIdGenerator;
 
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class FeignRequestInterceptor implements RequestInterceptor {
 
     private Supplier<String> nextRequestId;
 
-    public static final String REQUEST_ID = "Request-Id";
-    public static final String ROOT_REQUEST_ID = "Root-Request-Id";
-    public static final String ORIGIN_REQUEST_ID = "Origin-Request-Id";
-
     @Override
     public void apply(RequestTemplate template) {
-        template.header(REQUEST_ID, nextRequestId.get());
-        template.header(ROOT_REQUEST_ID, MDC.get("rootRequestId"));
-        template.header(ORIGIN_REQUEST_ID, MDC.get("requestId"));
+        template.header(HttpHeaders.REQUEST_ID, nextRequestId.get());
+        template.header(HttpHeaders.ROOT_REQUEST_ID, MdcFields.getRootRequestId());
+        template.header(HttpHeaders.ORIGIN_REQUEST_ID, MdcFields.getRequestId());
     }
 
     public FeignRequestInterceptor() {
-        this(UUID.randomUUID()::toString);
+        this(RequestIdGenerator::next);
     }
 
     private FeignRequestInterceptor(Supplier<String> nextRequestId) {
