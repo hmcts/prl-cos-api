@@ -307,12 +307,25 @@ public class CitizenCaseUpdateService {
                                                  String caseId,
                                                  CitizenAwpRequest citizenAwpRequest) {
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificUserEvent(
-                caseId,
-                CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                authorisation
-            );
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = null;
+        //PRL-4023, PRL-4024 WA - trigger events based on help with fees opted
+        if (null != citizenAwpRequest
+            && Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && null != citizenAwpRequest.getHwfReferenceNumber()) {
+            startAllTabsUpdateDataContent =
+                allTabService.getStartUpdateForSpecificUserEvent(
+                    caseId,
+                    CaseEvent.CITIZEN_AWP_HWF_CREATE.getValue(),
+                    authorisation
+                );
+        } else {
+            startAllTabsUpdateDataContent =
+                allTabService.getStartUpdateForSpecificUserEvent(
+                    caseId,
+                    CaseEvent.CITIZEN_AWP_CREATE.getValue(),
+                    authorisation
+                );
+        }
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
         //Map awp citizen data fields into solicitor fields

@@ -53,7 +53,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -401,7 +400,7 @@ public class CitizenCaseUpdateServiceTest {
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder().build())))
             .citizenAwpPayments(Collections.emptyList())
             .build();
-        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CITIZEN_CASE_UPDATE.getValue(), authToken))
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(citizenAwpMapper.map(caseData, CitizenAwpRequest.builder().build())).thenReturn(updatedCaseData);
         when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
