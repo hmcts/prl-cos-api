@@ -605,6 +605,7 @@ public class ManageOrderService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
+    private final DocumentSealingService documentSealingService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1032,6 +1033,7 @@ public class ManageOrderService {
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
                                    .isOrderUploaded(Yes)
+                                   .doesOrderDocumentNeedSeal(Yes)
                                    .build()));
         return newOrderDetails;
     }
@@ -3183,6 +3185,29 @@ public class ManageOrderService {
     public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
             caseDataUpdated.put(field.getValue(), null);
+        }
+    }
+
+    public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        if (orders != null) {
+            orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal() != null
+                    && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
+                .forEach(order -> {
+                    OrderDetails orderDetails = order.getValue();
+
+                    Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(
+                        orderDetails.toBuilder().orderDocument(
+                            documentSealingService.sealDocument(
+                                orderDetails.getOrderDocument(),
+                                caseData,
+                                authorisation
+                            )).doesOrderDocumentNeedSeal(No).build()).build();
+
+                    orders.set(orders.indexOf(order), sealedOrder);
+                });
+
+            caseDataUpdated.put(ORDER_COLLECTION, orders);
         }
     }
 

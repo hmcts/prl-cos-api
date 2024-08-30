@@ -435,7 +435,8 @@ public class CitizenRespondentAohElementsMapper {
     private String buildBehavioursStartDateAndLength(AbuseDto abuseDto) {
 
         if (ObjectUtils.isNotEmpty(abuseDto.getBehaviourStartDate()) && ObjectUtils.isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
-            return abuseDto.getBehaviourStartDate() + HYPHEN_SEPARATOR + isBehaviourOngoing(abuseDto);
+            //Fix for PRL-6141
+            return abuseDto.getBehaviourStartDate();
         } else if (ObjectUtils.isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
             return isBehaviourOngoing(abuseDto);
         }
