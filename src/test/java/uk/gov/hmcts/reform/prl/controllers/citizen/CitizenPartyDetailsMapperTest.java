@@ -30,10 +30,12 @@ import uk.gov.hmcts.reform.prl.utils.TestUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -110,7 +112,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
@@ -152,7 +154,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
@@ -183,7 +185,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.respondent)
@@ -207,7 +209,8 @@ public class CitizenPartyDetailsMapperTest {
 
             .c100RebuildData(c100RebuildData)
             .build();
-        doNothing().when(c100RespondentSolicitorService).checkIfConfidentialDataPresent(any(), any());
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
+                                                                                            anyString());
         when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(),any())).thenReturn(true);
         Map<String, Object> updatedCaseData = new HashMap<>();
         Element<PartyDetails> respondent = null;
@@ -232,7 +235,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.respondent)
@@ -397,6 +400,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .applicantPcqId("123")
+            .c100RebuildHelpWithFeesDetails(TestUtil.readFileFrom("classpath:c100-rebuild/hwf.json"))
             .build();
         caseData = CaseData.builder()
             .id(1234567891234567L)

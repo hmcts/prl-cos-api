@@ -25,15 +25,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formateLocalDateTime;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
+
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM;
+
 
 @Service
 @Slf4j
@@ -132,15 +132,16 @@ public class HelpWithFeesService {
         if (null != caseData) {
             if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
-                    formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
-                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                    String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
-                    caseData.getHelpWithFeesNumber(),
-                    caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                    caseData.getCaseSubmittedTimeStamp()));
+                                              CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(), DATE_TIME_OF_SUBMISSION_FORMAT));
+                caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                                                                       String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                                                                       caseData.getHelpWithFeesNumber(),
+                                                                       caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
+                                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)));
                 caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
-                    .code(UUID.fromString(TEST_UUID))
-                    .label(dynamicElement).build())).build());
+                                                                                      .code(dynamicElement)
+                                                                                      .label(dynamicElement).build())).build());
                 caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             } else {
                 List<Element<AdditionalApplicationsBundle>> additionalApplications

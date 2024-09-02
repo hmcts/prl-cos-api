@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -65,10 +66,17 @@ public class OrderDetails {
     private final DynamicMultiSelectList childOption;
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
+    private final YesOrNo doesOrderDocumentNeedSeal;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
     private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;
+
+    //PENDING - personal, COMPLETED - after sos is done for all respondents, NOT_REQUIRED - non-personal
+    private String sosStatus;
+
+    //PRL-6046 - persist FL404 order data fields
+    private FL404 fl404CustomFields;
 
     @JsonIgnore
     public String getLabelForDynamicList() {

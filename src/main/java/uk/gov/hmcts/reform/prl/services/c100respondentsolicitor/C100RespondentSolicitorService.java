@@ -15,8 +15,19 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -38,6 +49,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -62,11 +75,13 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -74,12 +89,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESP_CHILD_ABUSES_DOCMOSIS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -90,8 +108,21 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.docsprint;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.largeprintdocs;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum.signlanguage;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.commhelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.docsformat;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.hearingcomfort;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.hearingsupport;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.nosupport;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.travellinghelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -110,6 +141,7 @@ public class C100RespondentSolicitorService {
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
     public static final String TASK_LIST_VERSION = "taskListVersion";
+    private static final String COLON = ";";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -128,6 +160,9 @@ public class C100RespondentSolicitorService {
 
 
         You can contact your local court at\s""";
+
+    private static final String OPEN_BRACKET = "(";
+    private static final String CLOSE_BRACKET = ")";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -921,7 +956,7 @@ public class C100RespondentSolicitorService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent, SOLICITOR);
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (documentLanguage.isGenEng()) {
@@ -1046,11 +1081,14 @@ public class C100RespondentSolicitorService {
         return List.of(c8Key);
     }
 
-    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest, Element<PartyDetails> solicitorRepresentedRespondent) {
+    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest,
+                                               Element<PartyDetails> solicitorRepresentedRespondent,
+                                               String requestOriginatedFrom) {
+        log.info("requestOriginatedFrom::" + requestOriginatedFrom);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
-        dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
+        dataMap.put(ISSUE_DATE_FIELD, callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
         dataMap.put(COURT_SEAL_FIELD,
                     callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
                         : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
@@ -1063,9 +1101,8 @@ public class C100RespondentSolicitorService {
                 TASK_LIST_VERSION))))) {
             List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest
                 .getCaseDetails().getData().get(
-                    "newChildDetails");
+                    NEW_CHILDREN);
             dataMap.put(CHILDREN, listOfChildren);
-
         } else {
             List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
                 CHILDREN);
@@ -1074,29 +1111,36 @@ public class C100RespondentSolicitorService {
         }
 
         if (solicitorRepresentedRespondent == null) {
+            log.info("solicitorRepresentedRespondent:: Its null");
             Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
             if (solicitorRole.isPresent()) {
+                log.info("solicitorRole found:: Its not null");
                 solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
                     callbackRequest,
                     solicitorRole.get()
                 );
             }
         }
-        checkIfConfidentialDataPresent(solicitorRepresentedRespondent, dataMap);
+        populateConfidentialAndMiscDataMap(solicitorRepresentedRespondent, dataMap, requestOriginatedFrom);
         return dataMap;
     }
 
-    public void checkIfConfidentialDataPresent(Element<PartyDetails> solicitorRepresentedRespondent,
-                                                Map<String, Object> dataMap) {
+    public void populateConfidentialAndMiscDataMap(Element<PartyDetails> solicitorRepresentedRespondent,
+                                                   Map<String, Object> dataMap, String requestOriginatedFrom) {
         boolean isConfidentialDataPresent = false;
+        log.info("inside checkIfConfidentialDataPresent");
         if (null != solicitorRepresentedRespondent
             && null != solicitorRepresentedRespondent.getValue()) {
+            log.info("inside checkIfConfidentialDataPresent - 1");
             if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
+                log.info("inside checkIfConfidentialDataPresent - 2");
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
-            dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+            if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+                dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+            }
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
-
+            log.info("response found");
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
                     && isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate())
                     && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentiality());
@@ -1120,34 +1164,53 @@ public class C100RespondentSolicitorService {
                     isConfidentialSetByCitizen,
                 dataMap,
                 isConfidentialDataPresent,
-                    response
+                    response,
+                requestOriginatedFrom
             );
+            log.info("inside checkIfConfidentialDataPresent - 3");
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
-            populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
+            populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response, requestOriginatedFrom);
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
+            log.info("All done");
         }
     }
 
-    private void populateMiscellaneousDetails(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap, Response response) {
+    private void populateMiscellaneousDetails(Element<PartyDetails> solicitorRepresentedRespondent,
+                                              Map<String, Object> dataMap,
+                                              Response response,
+                                              String requestOriginatedFrom) {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
-        List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
-        dataMap.put("respondentsExistingProceedings", proceedingsList);
+
         populateAohDataMap(response, dataMap);
         populateRespondToAohDataMap(response, dataMap);
-        dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
+        //citizen current or previous proceeding data
+        if (null != response.getCurrentOrPreviousProceedings()) {
+            dataMap.put(
+                "haveChildrenBeenInvolvedInCourtCase",
+                getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase())
+            );
+            dataMap.put(
+                "courtOrderMadeForProtection",
+                getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection())
+            );
+            dataMap.put("proceedingsList", response.getCurrentOrPreviousProceedings().getProceedingsList());
+        }
+        dataMap.put("signedBy", solicitorRepresentedRespondent.getValue().getLabelForDynamicList());
+        dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        dataMap.put(
+            "consentToTheApplication",
+            getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
+        );
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
         dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
         dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put(
-            "currentOrPastProceedingsForChildren",
-            response.getCurrentOrPastProceedingsForChildren() != null ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
-        );
+
         if (response.getCitizenInternationalElements() != null) {
             dataMap.put(
                 "reasonForChild",
@@ -1185,15 +1248,43 @@ public class C100RespondentSolicitorService {
             );
         }
         dataMap.put(
-                "solicitorRepresented",
-                solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+            "solicitorRepresented",
+            null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
-        dataMap.put("attendingTheCourt", response.getAttendToCourt());
+
+        log.info("Almost here");
+        if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            log.info("found citizen as a source");
+            populateCitizenAttendingTheHearingDataMap(response, dataMap);
+            if (response.getCurrentOrPreviousProceedings() != null) {
+                List<Element<Proceedings>> proceedingsList
+                    = response.getCurrentOrPreviousProceedings().getProceedingsList();
+                dataMap.put("currentOrPreviousProceedings", proceedingsList);
+                dataMap.put(
+                    "haveChildrenBeenInvolvedInCourtCase",
+                    getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase())
+                );
+                dataMap.put(
+                    "courtOrderMadeForProtection",
+                    getValueForYesOrNoEnum(response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection())
+                );
+            }
+        } else {
+            dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
+            dataMap.put("respondentsExistingProceedings", proceedingsList);
+            dataMap.put(
+                "currentOrPastProceedingsForChildren",
+                response.getCurrentOrPastProceedingsForChildren() != null
+                    ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
+            );
+        }
         if (null != response.getResponseToAllegationsOfHarm()
             && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
-            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
-                .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
+            dataMap.put("isRespondToAllegationOfHarm", getValueForYesOrNoEnum(response.getResponseToAllegationsOfHarm()
+                .getResponseToAllegationsOfHarmYesOrNoResponse()));
         }
     }
 
@@ -1205,11 +1296,11 @@ public class C100RespondentSolicitorService {
         if (null != response.getCitizenDetails().getFirstName() && null != response.getCitizenDetails()
                 .getLastName()) {
             dataMap.put("fullName", response.getCitizenDetails()
-                    .getFirstName() + " " + response.getCitizenDetails()
+                    .getFirstName() + EMPTY_SPACE_STRING + response.getCitizenDetails()
                     .getLastName());
         } else {
             dataMap.put("fullName", solicitorRepresentedRespondent.getValue()
-                    .getFirstName() + " " + solicitorRepresentedRespondent.getValue()
+                    .getFirstName() + EMPTY_SPACE_STRING + solicitorRepresentedRespondent.getValue()
                     .getLastName());
         }
         if (null != response.getCitizenDetails().getDateOfBirth()) {
@@ -1219,6 +1310,9 @@ public class C100RespondentSolicitorService {
         }
         if (null != solicitorRepresentedRespondent.getValue().getGender()) {
             dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        }
+        if (null != solicitorRepresentedRespondent.getValue().getAddressLivedLessThan5YearsDetails()) {
+            dataMap.put("addressHistory", solicitorRepresentedRespondent.getValue().getAddressLivedLessThan5YearsDetails());
         }
     }
 
@@ -1296,17 +1390,26 @@ public class C100RespondentSolicitorService {
                                                           boolean isConfidentialSetByCitizen,
                                                           Map<String, Object> dataMap,
                                                           boolean isConfidentialDataPresent,
-                                                          Response response) {
+                                                          Response response,
+                                                          String requestOriginatedFrom) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.address))) {
             dataMap.put(ADDRESS, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getAddress()) {
-            dataMap.put(ADDRESS, response.getCitizenDetails().getAddress().getAddressLine1());
-        } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
-            dataMap.put(ADDRESS, solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        } else if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
+            } else if (null != response.getCitizenDetails().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
+            }
+        } else {
+            if (null != response.getCitizenDetails().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
+            } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
+                dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
+            }
         }
         return isConfidentialDataPresent;
     }
@@ -1318,6 +1421,290 @@ public class C100RespondentSolicitorService {
                     .updateChildAbusesForDocmosis(allegationsOfHarmData));
             dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
 
+        }
+    }
+
+    public void populateAohDataMapForWelsh(Map<String, Object> dataMap) {
+        if (dataMap.containsKey(RESP_CHILD_ABUSES_DOCMOSIS)) {
+            List<Element<RespChildAbuseBehaviour>> childAbuses = objectMapper.convertValue(dataMap.get(
+                RESP_CHILD_ABUSES_DOCMOSIS), new TypeReference<List<Element<RespChildAbuseBehaviour>>>() {});
+            List<Map<String, Object>> childAbusesList = new ArrayList<>();
+            for (Element<RespChildAbuseBehaviour> el : childAbuses) {
+                childAbusesList.add(objectMapper.convertValue(el, Map.class));
+            }
+            dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS, childAbusesList);
+        }
+    }
+
+    private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
+        log.info("Inside populateCitizenAttendingTheHearingDataMap");
+        if (response.getSupportYouNeed() != null) {
+            log.info("response.getSupportYouNeed() is not null");
+            List<AttendingToCourtEnum> attendingToCourtEnumList = response.getSupportYouNeed().getAttendingToCourt();
+            if (attendingToCourtEnumList != null && !attendingToCourtEnumList.isEmpty()) {
+                log.info("attendingToCourtEnumList processed");
+                if (attendingToCourtEnumList.contains(AttendingToCourtEnum.videohearings)) {
+                    log.info("hearingsByVideo processed");
+                    dataMap.put("hearingsByVideo", "Yes");
+                }
+                if (attendingToCourtEnumList.contains(AttendingToCourtEnum.phonehearings)) {
+                    log.info("hearingsByPhone processed");
+                    dataMap.put("hearingsByPhone", "Yes");
+                }
+            }
+
+            AttendToCourt attendToCourt = AttendToCourt.builder().build();
+            List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
+            if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
+                attendToCourt = attendToCourt.toBuilder()
+                    .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
+                    .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
+                    .build();
+                log.info("languageRequirementsEnums processed");
+            }
+
+            List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
+            if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
+                log.info("safetyArrangementsEnumList processed");
+                attendToCourt = attendToCourt.toBuilder()
+                    .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
+                    .respondentSpecialArrangementDetails(
+                        buildSpecialArrangementList(
+                            safetyArrangementsEnumList,
+                            response.getSupportYouNeed().getSafetyArrangementsDetails()
+                        ))
+                    .build();
+            }
+
+            List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
+            if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
+                log.info("reasonableAdjustmentsEnumList processed");
+                attendToCourt = attendToCourt.toBuilder()
+                    .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
+                    .disabilityNeeds(
+                        buildDisabilityNeeds(
+                            response.getSupportYouNeed(), dataMap
+                        ))
+                    .build();
+            }
+
+            dataMap.put("attendingTheCourt", attendToCourt);
+        }
+    }
+
+    private static YesOrNo buildIsWelshNeeded(List<LanguageRequirementsEnum> languageRequirementsEnums) {
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.speakwelsh)
+            || (languageRequirementsEnums.contains(LanguageRequirementsEnum.readandwritewelsh))) {
+            return YesOrNo.Yes;
+        }
+        return YesOrNo.No;
+    }
+
+    private static List<RespondentWelshNeedsListEnum> buildRespondentWelshNeedsList(List<LanguageRequirementsEnum> languageRequirementsEnums) {
+        List<RespondentWelshNeedsListEnum> respondentWelshNeedsListEnums = new ArrayList<>();
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.speakwelsh)) {
+            respondentWelshNeedsListEnums.add(RespondentWelshNeedsListEnum.speakWelsh);
+        }
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.readandwritewelsh)) {
+            respondentWelshNeedsListEnums.add(RespondentWelshNeedsListEnum.readAndWriteWelsh);
+        }
+
+        return respondentWelshNeedsListEnums;
+    }
+
+    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList, String otherSubField) {
+        String specialArrangement = safetyArrangementsEnumList.stream().map(element -> SafetyArrangementsEnum.valueOf(element.getId())
+            .getDisplayedValue()).collect(Collectors.joining(COMMA_SEPARATOR));
+        if (StringUtils.isNotEmpty(otherSubField)) {
+            return specialArrangement + OPEN_BRACKET + otherSubField + CLOSE_BRACKET;
+        }
+        return specialArrangement;
+    }
+
+    private static YesOrNo buildSpecialArrangementRequired(List<SafetyArrangementsEnum> safetyArrangementsEnumList) {
+        Optional<SafetyArrangementsEnum> safetyArrangementsEnum
+            = safetyArrangementsEnumList
+            .stream()
+            .filter(x -> x.getId().equalsIgnoreCase(noSafetyrequirements.getId()))
+            .findFirst();
+        return safetyArrangementsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
+    }
+
+    private static YesOrNo buildHaveAnyDisability(List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums) {
+        Optional<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnum
+            = reasonableAdjustmentsEnums
+            .stream()
+            .filter(x -> x.getId().equalsIgnoreCase(nosupport.getId()))
+            .findFirst();
+        return reasonableAdjustmentsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
+    }
+
+    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap) {
+        List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums = supportYouNeed.getReasonableAdjustments();
+        StringBuilder adjustmentRequired = new StringBuilder();
+        String documentInformation;
+        String communicationHelpDetails;
+        String extraSupportDetails;
+        String feelComfortableSupportDetails;
+        String helpTravellingMovingBuildingSupportDetails;
+        if (reasonableAdjustmentsEnums.contains(nosupport)) {
+            return nosupport.getDisplayedValue();
+        }
+        if (reasonableAdjustmentsEnums.contains(docsformat)) {
+            documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed);
+            if (!documentInformation.isEmpty()) {
+                dataMap.put("documentsInAlternativeFormatNeeded", YES);
+                dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
+                adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
+            }
+        }
+        if (reasonableAdjustmentsEnums.contains(commhelp)) {
+            communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed);
+            if (!communicationHelpDetails.isEmpty()) {
+                dataMap.put("helpInCommunicationNeeded", YES);
+                dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
+                    .append(communicationHelpDetails);
+            }
+        }
+        if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
+            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
+            if (!extraSupportDetails.isEmpty()) {
+                dataMap.put("extraSupportNeeded", YES);
+                dataMap.put("extraSupportDetails", extraSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
+                    .append(extraSupportDetails);
+            }
+        }
+        if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
+            feelComfortableSupportDetails = buildFeelComfortableSupport(supportYouNeed.getCourtComfort(), supportYouNeed);
+            if (!feelComfortableSupportDetails.isEmpty()) {
+                dataMap.put("feelComfortableNeeed", YES);
+                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
+                    .append(feelComfortableSupportDetails);
+            }
+        }
+        if (reasonableAdjustmentsEnums.contains(travellinghelp)) {
+            helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(supportYouNeed.getTravellingToCourt(),
+                                                                                                       supportYouNeed);
+            if (!helpTravellingMovingBuildingSupportDetails.isEmpty()) {
+                dataMap.put("helpNeededTravellingToNeeded", YES);
+                dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
+                    .append(helpTravellingMovingBuildingSupportDetails);
+            }
+        }
+        return String.valueOf(adjustmentRequired);
+    }
+
+    private static String buildHelpTravellingMovingBuildingSupport(List<TravellingToCourtEnum> travellingToCourtEnums,
+                                                                   ReasonableAdjustmentsSupport support) {
+        return travellingToCourtEnums.stream()
+            .map(element -> buildTravellingCourtElement(element,
+                                                        support.getParkingDetails(),
+                                                        support.getDifferentChairDetails(),
+                                                        support.getTravellingOtherDetails()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildTravellingCourtElement(TravellingToCourtEnum element, String parkingSpaceSubField,
+                                                      String differentTypeChairSubField, String travellingCourtOtherSubField) {
+        if (TravellingToCourtEnum.parkingspace.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.parkingspace.getDisplayedValue() + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
+        } else if (TravellingToCourtEnum.differentchair.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.differentchair.getDisplayedValue() + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
+        } else if (TravellingToCourtEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.other.getDisplayedValue() + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
+        } else {
+            return element.getDisplayedValue();
+        }
+    }
+
+    private static String buildFeelComfortableSupport(List<CourtComfortEnum> courtComfortEnums, ReasonableAdjustmentsSupport support) {
+        return courtComfortEnums.stream()
+            .map(element -> buildFeelComfortableElement(element,
+                                                        support.getLightingDetails(),
+                                                        support.getOtherProvideDetails()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildFeelComfortableElement(CourtComfortEnum element, String appropriateLightingSubField,
+                                                      String feelComfortableOtherSubField) {
+        if (CourtComfortEnum.appropriatelighting.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtComfortEnum.appropriatelighting.getDisplayedValue() + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
+        } else if (CourtComfortEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtComfortEnum.other.getDisplayedValue() + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
+        } else {
+            return element.getDisplayedValue();
+        }
+    }
+
+    private static String buildExtraSupport(List<CourtHearingEnum> courtHearingEnums, ReasonableAdjustmentsSupport support) {
+        return courtHearingEnums.stream()
+            .map(element -> buildSupportCourtElement(element,
+                                                     support.getSupportWorkerDetails(),
+                                                     support.getFamilyProviderDetails(),
+                                                     support.getTherapyDetails(),
+                                                     support.getCommunicationSupportOther()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildSupportCourtElement(CourtHearingEnum element, String supportWorkerCarerSubField,
+                                                   String friendFamilyMemberSubField, String therapyAnimalSubField,
+                                                   String supportCourtOtherSubField) {
+        if (CourtHearingEnum.supportworker.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.supportworker.getDisplayedValue() + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.familymember.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.familymember.getDisplayedValue() + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.animal.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.animal.getDisplayedValue() + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.other.getDisplayedValue() + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
+        } else {
+            return element.getDisplayedValue();
+        }
+    }
+
+    private static String buildCommunicationHelp(List<HelpCommunicationEnum> communicationHelp, ReasonableAdjustmentsSupport
+        support) {
+        return communicationHelp.stream()
+            .map(element -> buildCommunicationHelpElement(element,
+                                                          support.getSignLanguageDetails(),
+                                                          support.getDescribeOtherNeed()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildCommunicationHelpElement(HelpCommunicationEnum element, String signLanguageInterpreterDetails,
+                                                        String communicationHelpOtherDetails) {
+        if (signlanguage.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return signlanguage.getDisplayedValue() + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
+        } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return HelpCommunicationEnum.other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
+        } else {
+            return element.getDisplayedValue();
+        }
+    }
+
+    private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed) {
+        return documentInformation.stream()
+            .map(element -> buildDocumentInformationElement(element,
+                                                            supportYouNeed.getDocsDetails(),
+                                                            supportYouNeed.getLargePrintDetails(),
+                                                            supportYouNeed.getOtherDetails()))
+            .collect(Collectors.joining(COMMA_SEPARATOR));
+    }
+
+    private static String buildDocumentInformationElement(DocsSupportEnum element, String specifiedColorDocumentsDetails,
+                                                          String largePrintDocumentsDetails, String otherDetails) {
+        if (docsprint.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return docsprint.getDisplayedValue() + OPEN_BRACKET + specifiedColorDocumentsDetails + CLOSE_BRACKET;
+        } else if (largeprintdocs.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return largeprintdocs.getDisplayedValue() + OPEN_BRACKET + largePrintDocumentsDetails + CLOSE_BRACKET;
+        } else if (other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
+        } else {
+            return element.getDisplayedValue();
         }
     }
 
@@ -1375,7 +1762,7 @@ public class C100RespondentSolicitorService {
             }
 
         }
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent, SOLICITOR);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             Document document = documentGenService.generateSingleDocument(
@@ -1494,6 +1881,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .solicitorRepresentedPartyName(partyName)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyId(partyId)
             .document(c7doc)
                 .build();
@@ -1511,6 +1899,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(c1aDoc)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();
@@ -1527,6 +1916,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(document)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();

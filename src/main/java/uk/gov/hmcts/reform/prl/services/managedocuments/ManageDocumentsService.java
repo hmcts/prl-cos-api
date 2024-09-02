@@ -308,6 +308,7 @@ public class ManageDocumentsService {
             .isRestricted(quarantineLegalDoc.getIsRestricted())
             .restrictedDetails(quarantineLegalDoc.getRestrictedDetails())
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
+            .solicitorRepresentedPartyName(quarantineLegalDoc.getSolicitorRepresentedPartyName())
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .uploaderRole(quarantineLegalDoc.getUploaderRole())
             //PRL-5006 - bulk scan fields
@@ -344,7 +345,9 @@ public class ManageDocumentsService {
 
     public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         //Setting this flag for WA task
-        if (quarantineLegalDoc.getIsConfidential() != null || quarantineLegalDoc.getIsRestricted() != null) {
+        if (userRole.equals(CITIZEN)
+            || quarantineLegalDoc.getIsConfidential() != null
+            || quarantineLegalDoc.getIsRestricted() != null) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
@@ -453,6 +456,7 @@ public class ManageDocumentsService {
             .isRestricted(quarantineLegalDoc.getIsRestricted())
             .notes(quarantineLegalDoc.getRestrictedDetails())
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
+            .solicitorRepresentedPartyName(quarantineLegalDoc.getSolicitorRepresentedPartyName())
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .build();
     }

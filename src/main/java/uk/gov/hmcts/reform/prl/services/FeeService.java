@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -106,10 +107,11 @@ public class FeeService {
 
     private boolean checkIsHearingDate14DaysAway(String hearingDate, String applicationReason) {
         boolean isHearingDate14DaysAway = false;
-        if (onlyApplyingForAnAdjournment(applicationReason)) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        if (onlyApplyingForAnAdjournment(applicationReason)
+            && isNotBlank(hearingDate)) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
             LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
-                hearingDate,
+                hearingDate.split("--")[1].trim(),
                 formatter
             ).atStartOfDay();
             isHearingDate14DaysAway = (Duration.between(
@@ -160,7 +162,7 @@ public class FeeService {
                 // For AWP types other than C2
                 String key = (feeRequest.getCaseType() + "_" + feeRequest.getApplicationType() + "_" + feeRequest.getPartyType()).toUpperCase();
                 feeType = applicationToFeeMapForCitizen.get(key);
-                if (feeRequest.getApplicationType().equals(FL403.name())
+                if (FL403.name().equals(feeRequest.getApplicationType())
                     && "respondent".equals(feeRequest.getPartyType())
                     && isFl403ApplicationAlreadyPresent(caseData)) {
                     feeType = FL403_EXTEND_AN_ORDER;
@@ -177,8 +179,9 @@ public class FeeService {
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
                 if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
-                    && OtherApplicationType.FL403_EXTEND_AN_ORDER.equals(
-                    additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())) {
+                    && OtherApplicationType.FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER.equals(
+                        additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())
+                    && PartyEnum.respondent.equals(additionalApplicationsBundle.getValue().getPartyType())) {
                     fl403ApplicationAlreadyPresent = true;
                     break;
                 }
@@ -245,7 +248,9 @@ public class FeeService {
 
         if (NO_FEE.equals(feeType)) {
             return FeeResponseForCitizen.builder()
-                .amount(ZERO_AMOUNT).build();
+                .amount(ZERO_AMOUNT)
+                .feeType(feeType.toString())
+                .build();
         } else {
             feeResponse = fetchFeeDetails(feeType);
 
