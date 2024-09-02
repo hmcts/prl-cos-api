@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -448,7 +447,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, response.getBody().getConfirmationHeader());
     }
 
-    @Ignore
     @Test
     public void testConfidentialyCheckSuccessForNonPersonalService() {
 
@@ -475,7 +473,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIRMATION_HEADER_NON_PERSONAL, confirmationBody);
     }
 
-    @Ignore
     @Test
     public void testConfidentialyCheckFailed() {
 
@@ -525,7 +522,6 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testsendNotificationsForUnServedPacks() {
         caseDataSoa = caseDataSoa.toBuilder().id(12345L)
@@ -1420,7 +1416,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401Solicitor() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -2809,7 +2804,6 @@ public class ServiceOfApplicationServiceTest {
         }
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() throws IOException {
 
@@ -3391,7 +3385,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401Senario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3599,7 +3592,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3653,7 +3645,6 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testsendNotificationsForUnServedResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
@@ -3829,7 +3820,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
-    @Ignore
     @Test
     public void testsendNotificationsForUnServedApplicantResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
@@ -4225,7 +4215,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(NO, resultMap.get("isOccupationOrderSelected"));
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() throws IOException {
 

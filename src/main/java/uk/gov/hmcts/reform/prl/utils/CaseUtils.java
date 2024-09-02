@@ -105,8 +105,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseUtils {
 
     public static final String EUROPE_LONDON = "Europe/London";
-    public static final String APPLICANTS = "applicants";
-    public static final String RESPONDENTS = "respondents";
 
     private CaseUtils() {
 
@@ -953,6 +951,7 @@ public class CaseUtils {
                                     .build()));
         }
     }
+
 
     public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
                                                                                      CreatePaymentRequest createPaymentRequest) {
