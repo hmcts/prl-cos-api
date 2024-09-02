@@ -19,11 +19,9 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 
 @Service
@@ -77,9 +75,9 @@ public class HelpWithFeesService {
                                                                        String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                                                                        caseData.getHelpWithFeesNumber(),
                                                                        caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       caseData.getCaseSubmittedTimeStamp()));
+                                                                       CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp())));
         caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
-                                                                                      .code(UUID.fromString(TEST_UUID))
+                                                                                      .code(dynamicElement)
                                                                                       .label(dynamicElement).build())).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
