@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -55,6 +56,7 @@ public class HelpWithFeesServiceTest {
             .id(123L)
             .applicantCaseName("test")
             .helpWithFeesNumber("123")
+            .helpWithFees(YesOrNo.Yes)
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
                                             .firstName("firstName")

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -20,19 +22,20 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
-
-
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @Service
@@ -84,40 +87,32 @@ public class HelpWithFeesService {
                 = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                 : new ArrayList<>();
 
-            AdditionalApplicationsBundle additionalApplicationsBundle;
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
-                if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
-                    additionalApplicationsBundle = chosenAdditionalApplication
-                        .getValue()
-                        .toBuilder()
-                        .otherApplicationsBundle(chosenAdditionalApplication
-                            .getValue()
-                            .getOtherApplicationsBundle()
-                            .toBuilder()
-                            .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
-                            .build())
-                        .build();
-                } else {
-                    additionalApplicationsBundle = chosenAdditionalApplication
-                        .getValue()
-                        .toBuilder()
-                        .otherApplicationsBundle(chosenAdditionalApplication
-                            .getValue()
-                            .getOtherApplicationsBundle()
-                            .toBuilder()
-                            .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
-                            .build())
-                        .build();
-                }
-
-                for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
-                    if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
-                        additionalApplications.remove(additionalApplicationsBundleElement);
-                        additionalApplications.add(element(additionalApplicationsBundle));
-                        break;
-                    }
-                }
-
+                AdditionalApplicationsBundle additionalApplicationsBundle = chosenAdditionalApplication.getValue()
+                    .toBuilder()
+                    .payment(chosenAdditionalApplication.getValue().getPayment().toBuilder()
+                                 .status(PaymentStatus.PAID.getDisplayedValue())
+                                 .build()
+                    )
+                    .c2DocumentBundle(ObjectUtils.isNotEmpty(chosenAdditionalApplication.getValue().getC2DocumentBundle())
+                                          ? chosenAdditionalApplication.getValue().getC2DocumentBundle().toBuilder()
+                        .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                        .build() : chosenAdditionalApplication.getValue().getC2DocumentBundle())
+                    .otherApplicationsBundle(ObjectUtils.isNotEmpty(chosenAdditionalApplication
+                                                                        .getValue().getOtherApplicationsBundle())
+                                                 ? chosenAdditionalApplication.getValue()
+                        .getOtherApplicationsBundle().toBuilder()
+                        .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                        .build() : chosenAdditionalApplication.getValue().getOtherApplicationsBundle())
+                    .build();
+                additionalApplications.set(
+                    caseData.getAdditionalApplicationsBundle().indexOf(
+                        chosenAdditionalApplication),
+                    element(
+                        chosenAdditionalApplication.getId(),
+                        additionalApplicationsBundle
+                    )
+                );
                 caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
                 caseDataUpdated.put("isTheCaseInDraftState", YesOrNo.No);
             }
@@ -130,10 +125,11 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (null != caseData) {
-            if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
+            if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue()) && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
-                                              CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(), DATE_TIME_OF_SUBMISSION_FORMAT));
-                caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                                                      CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
+                                                                                      DATE_TIME_OF_SUBMISSION_FORMAT));
+                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
                                                                        String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                                                                        caseData.getHelpWithFeesNumber(),
                                                                        caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
@@ -152,11 +148,7 @@ public class HelpWithFeesService {
                 additionalApplications.forEach(additionalApplication -> {
                     if (null != additionalApplication.getValue().getPayment()
                         && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()
-                        && (null != additionalApplication.getValue().getC2DocumentBundle()
-                        && additionalApplication.getValue().getC2DocumentBundle().getApplicationStatus().equalsIgnoreCase("Pending on payment"))
-                        || (null != additionalApplication.getValue().getOtherApplicationsBundle()
-                        && additionalApplication.getValue().getOtherApplicationsBundle()
-                        .getApplicationStatus().equalsIgnoreCase("Pending on payment"))) {
+                        && PaymentStatus.HWF.getDisplayedValue().equals(additionalApplication.getValue().getPayment().getStatus())) {
                         additionalApplicationsWithHwf
                             .add(DynamicListElement
                                 .builder()
