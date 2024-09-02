@@ -85,6 +85,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -678,6 +679,7 @@ public class FL401ApplicationMapper {
             .respondentLivedWithApplicant(respondent.isRespondentLivesWithApplicant() ? YesOrNo.Yes : YesOrNo.No)
             .applicantContactInstructions(null)
             .applicantPreferredContact(null)
+            .partyId(UUID.randomUUID())
             .build();
     }
 
@@ -712,6 +714,7 @@ public class FL401ApplicationMapper {
             .solicitorAddress(null != applicant.getLegalRepresentativeAddress()
                                   ? getAddress(applicant.getLegalRepresentativeAddress()) : null)
             .dxNumber(applicant.getLegalRepresentativeDx())
+            .partyId(UUID.randomUUID())
             .build();
     }
 }
