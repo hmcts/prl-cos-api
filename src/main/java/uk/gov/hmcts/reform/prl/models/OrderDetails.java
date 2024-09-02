@@ -66,6 +66,7 @@ public class OrderDetails {
     private final DynamicMultiSelectList childOption;
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
+    private final YesOrNo doesOrderDocumentNeedSeal;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
