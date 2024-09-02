@@ -447,14 +447,14 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
-      prl_c7_draft_filename: C7_Draft_Document.pdf
-      prl_c7_draft_template_wel: FL-PRL-GOR-WEL-C7R.docx
-      prl_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
-      prl_c7_final_template_eng: FL-PRL-GOR-ENG-C7R-Final.docx
-      prl_c7_final_filename_eng: C7_Document.pdf
-      prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
-      prl_c7_final_filename_wel: Final_C7_response_Welsh.pdf
+      prl_lip_c7_draft_template: FL-PRL-GOR-ENG-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename: C7_Draft_Document.pdf
+      prl_lip_c7_draft_template_wel: FL-PRL-GOR-WEL-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
+      prl_lip_c7_final_template_eng: FL-PRL-GOR-ENG-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_eng: C7_Document.pdf
+      prl_lip_c7_final_template_wel: FL-PRL-GOR-WEL-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_wel: Final_C7_response_Welsh.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx

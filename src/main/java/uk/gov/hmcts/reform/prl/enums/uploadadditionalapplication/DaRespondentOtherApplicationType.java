@@ -17,6 +17,11 @@ public enum DaRespondentOtherApplicationType {
         "FL403_EXTEND_AN_ORDER",
         "FL403 - Application to vary, discharge or extend an order"
     ),
+    @JsonProperty("EX740_CROSS_EXAMINATION_VICTIM")
+    EX740_CROSS_EXAMINATION_VICTIM(
+            "EX740_CROSS_EXAMINATION_VICTIM",
+            "EX740 - Application to prohibit cross examination (victim)"
+    ),
     @JsonProperty("EX741_CROSS_EXAMINATION_PERPETRATOR")
     EX741_CROSS_EXAMINATION_PERPETRATOR(
         "EX741_CROSS_EXAMINATION_PERPETRATOR",
@@ -36,6 +41,11 @@ public enum DaRespondentOtherApplicationType {
     D89_COURT_BAILIFF(
         "D89_COURT_BAILIFF",
         "D89 - Request for personal service by a court bailiff"
+    ),
+    @JsonProperty("FC600_COMMITTAL_APPLICATION")
+    FC600_COMMITTAL_APPLICATION(
+        "FC600_COMMITTAL_APPLICATION",
+        "FC600 - Committal applicationt"
     );
     private final String id;
     private final String displayedValue;
