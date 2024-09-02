@@ -93,7 +93,8 @@ public class RemoveDraftOrderController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
-            caseDataUpdated.put(REMOVED_DRAFT_ORDER_TEXT, caseData.getRemoveDraftOrderText());
+            caseDataUpdated.put(REMOVED_DRAFT_ORDER_TEXT, null != caseData.getRemoveDraftOrderFields()
+                ? caseData.getRemoveDraftOrderFields().getRemoveDraftOrderText() : null);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
