@@ -281,8 +281,6 @@ public class ServiceOfApplicationService {
         ### What happens next
         The person arranging personal service will be notified
         """;
-    private List<Element<PartyDetails>> commonApplicantsList = new ArrayList<>();
-    private List<Element<PartyDetails>> commonRespondentsList = new ArrayList<>();
     private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
 
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -1717,7 +1715,6 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        setApplicantsAndRespondents(caseData);
 
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
@@ -1735,12 +1732,6 @@ public class ServiceOfApplicationService {
             startAllTabsUpdateDataContent,
             String.valueOf(callbackRequest.getCaseDetails().getId())
         );
-    }
-
-    private void setApplicantsAndRespondents(CaseData caseData) {
-        Map<String,List<Element<PartyDetails>>> partiesMap = CaseUtils.getPartiesMap(caseData);
-        commonApplicantsList = partiesMap.get(APPLICANTS);
-        commonRespondentsList = partiesMap.get(RESPONDENTS);
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -3919,7 +3910,6 @@ public class ServiceOfApplicationService {
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        setApplicantsAndRespondents(caseData);
         final ResponseEntity<SubmittedCallbackResponse> response;
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null

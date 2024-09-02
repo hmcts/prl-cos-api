@@ -230,19 +230,6 @@ public class CaseUtils {
         return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.isNotEmpty(partyDetails.getSolicitorEmail());
     }
 
-    public static Map<String, List<Element<PartyDetails>>> getPartiesMap(CaseData caseData) {
-        Map<String, List<Element<PartyDetails>>> partiesMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            partiesMap.put(APPLICANTS, caseData.getApplicants());
-            partiesMap.put(RESPONDENTS, caseData.getRespondents());
-
-        } else {
-            partiesMap.put(APPLICANTS, Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401())));
-            partiesMap.put(RESPONDENTS, Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401())));
-        }
-        return  partiesMap;
-    }
-
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
         Map<String, String> applicantMap = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -966,7 +953,7 @@ public class CaseUtils {
                                     .build()));
         }
     }
-  
+
     public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
                                                                                      CreatePaymentRequest createPaymentRequest) {
         if (isNotEmpty(citizenAwpPayments)) {
