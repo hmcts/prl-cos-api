@@ -1547,7 +1547,6 @@ public class DocumentGenService {
 
                 moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,
-                    updatedCaseData,
                     updatedCaseDataMap
                 );
             }
@@ -1565,19 +1564,19 @@ public class DocumentGenService {
         return null;
     }
 
-    private Map<String, Object> moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                                    CaseData caseData,
-                                                                    Map<String, Object> caseDataUpdated) {
+    private void moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+                                                     Map<String, Object> caseDataMap) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+            //PRL-6208 - fixed document missing issue for multiple docs
+            CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
             //invoke common manage docs
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 quarantineLegalDoc,
                 caseData,
-                caseDataUpdated,
+                caseDataMap,
                 CITIZEN
             );
         }
-        return caseDataUpdated;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,

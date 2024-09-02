@@ -641,6 +641,8 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
+            //PRL-6046 - persist FL404 data
+            .fl404CustomFields(draftOrder.getFl404CustomFields())
             .build();
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -61,4 +62,9 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
+
+    @JsonUnwrapped
+    private DocumentsNotifications documentsNotifications;
+
+    private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
 }

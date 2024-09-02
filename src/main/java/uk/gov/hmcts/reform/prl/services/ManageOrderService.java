@@ -89,6 +89,8 @@ import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
@@ -134,6 +137,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_NOT_REQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
@@ -166,7 +171,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.res
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -193,9 +197,9 @@ public class ManageOrderService {
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
-
+    public static final String WHO_IS_RESPONSIBLE_TO_SERVE = "whoIsResponsibleToServe";
+    public static final String IS_MULTIPLE_ORDERS_SERVED = "multipleOrdersServed";
     public static final String RECIPIENTS_OPTIONS = "recipientsOptions";
-
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
@@ -637,9 +641,9 @@ public class ManageOrderService {
     }
 
     private void populateOtherServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
+        setRecipientsOptions(caseData, headerMap);
+        setOtherParties(caseData, headerMap);
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
-            setRecipientsOptions(caseData, headerMap);
-            setOtherParties(caseData, headerMap);
             if (caseData.getIsCafcass() != null) {
                 headerMap.put(
                     PrlAppsConstants.IS_CAFCASS,
@@ -1459,16 +1463,19 @@ public class ManageOrderService {
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        servedC100Order(caseData, orders, order);
+                        log.info("Serving C100 order");
+                        servedC100Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     } else {
-                        servedFL401Order(caseData, orders, order);
+                        log.info("Serving Fl401 order");
+                        servedFL401Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     }
                 });
         }
         return orders;
     }
 
-    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order,
+                                  boolean isMultipleOrdersServed) {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
@@ -1484,20 +1491,27 @@ public class ManageOrderService {
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
+        String recipients = null;
+        if (No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            recipients = getRecipients(caseData);
+        }
         List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order,serveRecipientName);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
+            .getPersonallyServeRespondentsOptions();
         Map<String, Object> servedOrderDetails = new HashMap<>();
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
+        servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
+        servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
         if (null != serveRecipientName
             && null != servingRespondentsOptions) {
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                 .applicantLegalRepresentative.getDisplayedValue() + ")");
         }
-
+        log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
@@ -1518,7 +1532,7 @@ public class ManageOrderService {
         return servedParties;
     }
 
-    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order, boolean isMultipleOrdersServed) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
         String serveRecipientName = null;
@@ -1569,6 +1583,8 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
+        servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions) {
@@ -1583,6 +1599,15 @@ public class ManageOrderService {
             postalInformation,
             emailInformation
         );
+    }
+
+    private String getWhoIsResponsibleToServeOrder(ManageOrders manageOrders) {
+        if (Yes.equals(manageOrders.getServeToRespondentOptions())) {
+            return NO.equals(manageOrders.getDisplayLegalRepOption())
+                ? manageOrders.getServingOptionsForNonLegalRep().getId()
+                : manageOrders.getPersonallyServeRespondentsOptions().getId();
+        }
+        return null;
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
@@ -1604,45 +1629,27 @@ public class ManageOrderService {
                 ));
             }
             //personal service
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA = caseData
-                .getManageOrders().getServingRespondentsOptionsCA();
-            updatePersonalServedParties(servingRespondentsOptionsCA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update all applicants party ids in case of personal service
             if (Yes.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
-                servedParties.addAll(getServedParties(caseData.getApplicants()));
+                servedParties.addAll(ManageOrdersUtils.getServedParties(caseData.getApplicants()));
             }
         }
         //FL401 - personal service
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders().getServingRespondentsOptionsDA();
-            updatePersonalServedParties(servingRespondentsOptionsDA, servedParties, representativeName);
+            updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
+                                        servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
-            servedParties.add(getServedParty(caseData.getApplicantsFL401()));
+            servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
         }
 
         return servedParties;
     }
 
-    private List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
-        return nullSafeCollection(parties).stream()
-            .map(applicant -> element(ServedParties.builder()
-                                          .partyId(String.valueOf(applicant.getId()))
-                                          .partyName(applicant.getValue().getLabelForDynamicList())
-                                          .servedDateTime(LocalDateTime.now())
-                                          .build()))
-            .toList();
-    }
-
-    private Element<ServedParties> getServedParty(PartyDetails party) {
-        return element(ServedParties.builder()
-                           .partyId(String.valueOf(party.getPartyId()))
-                           .partyName(party.getLabelForDynamicList())
-                           .servedDateTime(LocalDateTime.now())
-                           .build());
-    }
-
     private void updatePersonalServedParties(SoaSolicitorServingRespondentsEnum servingRespondentsOptions,
                                              List<Element<ServedParties>> servedParties, String representativeName) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         if (null != servingRespondentsOptions) {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                 .equals(servingRespondentsOptions)) {
@@ -1650,27 +1657,23 @@ public class ManageOrderService {
                                               .partyId("11111111-1111-1111-1111-111111111111")//adding some default value
                                               .partyName(representativeName + " (" + servingRespondentsOptions
                                                   .getDisplayedValue() + ")")
-                                              .servedDateTime(LocalDateTime.now())
+                                              .servedDateTime(zonedDateTime.toLocalDateTime())
                                               .build()));
 
             } else {
                 servedParties.add(element(ServedParties.builder()
                                               .partyId("00000000-0000-0000-0000-000000000000")//adding some default value
                                               .partyName(servingRespondentsOptions.getDisplayedValue())
-                                              .servedDateTime(LocalDateTime.now())
+                                              .servedDateTime(zonedDateTime.toLocalDateTime())
                                               .build()));
             }
         }
     }
 
     private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
-        if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCA() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCA();
-        }
-        return servingRespondentsOptions;
+        return caseData.getManageOrders().getPersonallyServeRespondentsOptions() != null ? caseData.getManageOrders()
+                .getPersonallyServeRespondentsOptions() : null;
+
     }
 
     private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
@@ -1731,7 +1734,9 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
         String serveRecipientName = null;
-
+        String whoIsResponsibleToServe = null;
+        YesOrNo multipleOrdersServed = null;
+        log.info("Serve order details {} serve on respondent {}", servedOrderDetails, serveOnRespondent);
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
         }
@@ -1763,6 +1768,13 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
             serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
         }
+        if (servedOrderDetails.containsKey(WHO_IS_RESPONSIBLE_TO_SERVE)) {
+            whoIsResponsibleToServe = (String) servedOrderDetails.get(WHO_IS_RESPONSIBLE_TO_SERVE);
+        }
+        if (servedOrderDetails.containsKey(IS_MULTIPLE_ORDERS_SERVED)) {
+            multipleOrdersServed = (boolean) servedOrderDetails.get(IS_MULTIPLE_ORDERS_SERVED) ? Yes : No;
+        }
+
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
@@ -1802,11 +1814,15 @@ public class ManageOrderService {
             .servedParties(servedParties)
             .servingRecipientName(serveRecipientName)
             .courtPersonalService(courtPersonalService)
+            .whoIsResponsibleToServe(whoIsResponsibleToServe)
+            .multipleOrdersServed(multipleOrdersServed)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
             .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
             .serveOrderDetails(serveOrderDetails)
+            //Revisit for FL401 orders
+            .sosStatus(Yes.equals(serveOnRespondent) ? SOS_PENDING : SOS_NOT_REQUIRED)
             .build();
 
         orders.set(orders.indexOf(order), element(order.getId(), amended));
@@ -2316,6 +2332,8 @@ public class ManageOrderService {
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
+                           //PRL-6046 - persist FL404 data
+                           .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                            .build());
     }
 
