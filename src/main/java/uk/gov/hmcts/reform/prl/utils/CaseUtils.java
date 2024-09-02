@@ -951,7 +951,7 @@ public class CaseUtils {
                                     .build()));
         }
     }
-  
+
     public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
                                                                                      CreatePaymentRequest createPaymentRequest) {
         if (isNotEmpty(citizenAwpPayments)) {
