@@ -23,6 +23,8 @@ import java.util.Map;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM;
 
 @Service
 @Slf4j
@@ -70,12 +72,13 @@ public class HelpWithFeesService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String dynamicElement = String.format("Child arrangements application C100 - %s",
-                                              CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
+                                              CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(), DATE_TIME_OF_SUBMISSION_FORMAT));
         caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
                                                                        String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                                                                        caseData.getHelpWithFeesNumber(),
                                                                        caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp())));
+                                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
+                                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)));
         caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
                                                                                       .code(dynamicElement)
                                                                                       .label(dynamicElement).build())).build());
