@@ -190,22 +190,27 @@ public class HelpWithFeesService {
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
+        if (!caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
+            Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
 
-        Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
-
-        if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
-            if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
-                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                    AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
-                    chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
-                    chosenAdditionalApplication.getValue().getAuthor(),
-                    chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()));
-            } else {
-                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
-                    chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
-                    chosenAdditionalApplication.getValue().getAuthor(),
-                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()));
+            if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
+                if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
+                    caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
+                        HWF_APPLICATION_DYNAMIC_DATA,
+                        AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
+                        chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
+                        chosenAdditionalApplication.getValue().getAuthor(),
+                        chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()
+                    ));
+                } else {
+                    caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
+                        HWF_APPLICATION_DYNAMIC_DATA,
+                        chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
+                        chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
+                        chosenAdditionalApplication.getValue().getAuthor(),
+                        chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()
+                    ));
+                }
             }
         }
 
