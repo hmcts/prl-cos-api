@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum DocsSupportEnum {
 
     @JsonProperty("docsprint")
-    docsprint("docsprint","I need documents printed in a particular colour or font"),
+    docsprint("docsprint","Documents in a specified colour"),
     @JsonProperty("docsreadformat")
     docsreadformat("docsreadformat","Documents in an easy read format"),
     @JsonProperty("brailledocs")

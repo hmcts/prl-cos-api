@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 
 @ConditionalOnProperty(prefix = "payments", name = "api.url")
 @FeignClient(name = "payments", url = "${payments.api.url}")
@@ -38,5 +39,12 @@ public interface PaymentApi {
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @PathVariable("reference") String paymentReference
+    );
+
+    @GetMapping(value = "/payment-groups/{payment-group-reference}", consumes = "application/json")
+    ServiceRequestReferenceStatusResponse fetchPaymentGroupReferenceStatus(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @PathVariable("payment-group-reference") String serviceRequestReference
     );
 }

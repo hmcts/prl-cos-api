@@ -128,6 +128,8 @@ public class PrlAppsConstants {
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
     public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
+
+    public static final String DOCUMENT_C1A_DRAFT_HINT = "DOCUMENT_C1A_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
@@ -1027,19 +1029,6 @@ public class PrlAppsConstants {
     public static final String SOA_BY_EMAIL = "By email";
     public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
     public static final String SOA_BY_POST = "By post";
-
-    //Citizen dashboard notifications
-    public static final String CAN10_FM5 = "CAN10_FM5";
-    public static final String CAN4_SOA_PERS_NONPERS_APPLICANT = "CAN4_SOA_PERS_NONPERS_APPLICANT";
-    public static final String CAN5_SOA_RESPONDENT = "CAN5_SOA_RESPONDENT";
-    public static final String CAN8_SOS_PERSONAL_APPLICANT = "CAN8_SOS_PERSONAL_APPLICANT";
-    public static final String CAN7_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT";
-    public static final String CAN9_SOA_PERSONAL_APPLICANT = "CAN9_SOA_PERSONAL_APPLICANT";
-    public static final String CAN6_VIEW_RESPONSE_APPLICANT = "CAN6_VIEW_RESPONSE_APPLICANT";
-    public static final String CAN6A_VIEW_RESPONSE_C1A_APPLICANT = "CAN6A_VIEW_C1A_RESPONSE_APPLICANT";
-    public static final String CAN6B_VIEW_RESPONSE_C1AR_APPLICANT = "CAN6B_VIEW_C1AR_RESPONSE_APPLICANT";
-    public static final String CRNF2_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
-    public static final String CRNF3_PERS_SERV_APPLICANT = "CRNF3_PERS_SERV_APPLICANT";
 
     //Order SOS statuses
     public static final String SOS_PENDING = "PENDING";

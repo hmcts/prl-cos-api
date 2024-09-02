@@ -608,8 +608,7 @@ public class ManageOrderService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
-
-    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+    private final DocumentSealingService documentSealingService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1037,6 +1036,7 @@ public class ManageOrderService {
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
                                    .isOrderUploaded(Yes)
+                                   .doesOrderDocumentNeedSeal(Yes)
                                    .build()));
         return newOrderDetails;
     }
@@ -1463,8 +1463,10 @@ public class ManageOrderService {
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                        log.info("Serving C100 order");
                         servedC100Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     } else {
+                        log.info("Serving Fl401 order");
                         servedFL401Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     }
                 });
@@ -1489,10 +1491,15 @@ public class ManageOrderService {
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
+        String recipients = null;
+        if (No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            recipients = getRecipients(caseData);
+        }
         List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order,serveRecipientName);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getPersonallyServeRespondentsOptions();
         Map<String, Object> servedOrderDetails = new HashMap<>();
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
@@ -1504,7 +1511,7 @@ public class ManageOrderService {
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                 .applicantLegalRepresentative.getDisplayedValue() + ")");
         }
-
+        log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
@@ -1642,6 +1649,7 @@ public class ManageOrderService {
 
     private void updatePersonalServedParties(SoaSolicitorServingRespondentsEnum servingRespondentsOptions,
                                              List<Element<ServedParties>> servedParties, String representativeName) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         if (null != servingRespondentsOptions) {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                 .equals(servingRespondentsOptions)) {
@@ -2324,6 +2332,8 @@ public class ManageOrderService {
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
+                           //PRL-6046 - persist FL404 data
+                           .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                            .build());
     }
 
@@ -3210,6 +3220,29 @@ public class ManageOrderService {
     public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
             caseDataUpdated.put(field.getValue(), null);
+        }
+    }
+
+    public void addSealToOrders(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        if (orders != null) {
+            orders.stream().filter(order -> order.getValue().getDoesOrderDocumentNeedSeal() != null
+                    && order.getValue().getDoesOrderDocumentNeedSeal().equals(Yes))
+                .forEach(order -> {
+                    OrderDetails orderDetails = order.getValue();
+
+                    Element<OrderDetails> sealedOrder = Element.<OrderDetails>builder().id(order.getId()).value(
+                        orderDetails.toBuilder().orderDocument(
+                            documentSealingService.sealDocument(
+                                orderDetails.getOrderDocument(),
+                                caseData,
+                                authorisation
+                            )).doesOrderDocumentNeedSeal(No).build()).build();
+
+                    orders.set(orders.indexOf(order), sealedOrder);
+                });
+
+            caseDataUpdated.put(ORDER_COLLECTION, orders);
         }
     }
 
