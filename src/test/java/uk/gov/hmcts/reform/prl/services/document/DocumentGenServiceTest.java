@@ -3202,7 +3202,7 @@ public class DocumentGenServiceTest {
         assertEquals("citizen_c1a_wel", template);
     }
 
-    @Te
+    @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
