@@ -66,7 +66,7 @@ public class HelpWithFeesController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(helpWithFeesService
-                .setCaseStatus(callbackRequest)).build();
+                .setCaseStatus(callbackRequest, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
@@ -31,8 +33,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_HWF_CASE_NOTE_SHORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HWF_APP_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_THE_CASE_IN_DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -43,11 +51,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144", "java:S5665","java:S1172","java:S6541"})
 public class HelpWithFeesService {
-    public static final String POST = "post";
-    public static final String COURT = "Court";
-    public static final String ENG = "eng";
-    public static final String WEL = "wel";
-    public static final String AUTHORIZATION = "authorization";
 
     public static final String APPLICATION_UPDATED = "# Application updated";
     public static final String HWF_APPLICATION_DYNAMIC_DATA_LABEL = "hwfApplicationDynamicData";
@@ -64,8 +67,12 @@ public class HelpWithFeesService {
        Applicant: %s \n
        Application submitted date: %s \n
         """;
+    public static final String URGENT_HELP_WITH_FEES = "Urgent help with fees";
 
     private final ObjectMapper objectMapper;
+
+    private final AddCaseNoteService addCaseNoteService;
+    private final UserService userService;
 
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted() {
         return ok(SubmittedCallbackResponse.builder()
@@ -73,21 +80,21 @@ public class HelpWithFeesService {
                       .confirmationBody(CONFIRMATION_BODY).build());
     }
 
-    public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest) {
+    public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (callbackRequest.getCaseDetails().getState().equalsIgnoreCase((State.SUBMITTED_NOT_PAID.getValue()))) {
-            caseDataUpdated.put("caseStatus", CaseStatus.builder()
+            caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
-            caseDataUpdated.put("isTheCaseInDraftState", YesOrNo.Yes);
+            caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.Yes);
         } else {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
                 = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                 : new ArrayList<>();
 
-            if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
+            if (ObjectUtils.isNotEmpty(chosenAdditionalApplication) && ObjectUtils.isNotEmpty(chosenAdditionalApplication.getValue())) {
                 AdditionalApplicationsBundle additionalApplicationsBundle = chosenAdditionalApplication.getValue()
                     .toBuilder()
                     .payment(chosenAdditionalApplication.getValue().getPayment().toBuilder()
@@ -113,10 +120,25 @@ public class HelpWithFeesService {
                         additionalApplicationsBundle
                     )
                 );
-                caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
-                caseDataUpdated.put("isTheCaseInDraftState", YesOrNo.No);
+                caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
+                caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No);
             }
         }
+        if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
+            && null != caseData.getProcessUrgentHelpWithFees().getAddHwfCaseNoteShort()
+            && StringUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees().getAddHwfCaseNoteShort().trim())) {
+            CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                URGENT_HELP_WITH_FEES,
+                caseData.getProcessUrgentHelpWithFees().getAddHwfCaseNoteShort().trim(),
+                userService.getUserDetails(authorisation)
+            );
+            caseDataUpdated.put(
+                CASE_NOTES,
+                addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+            );
+        }
+        caseDataUpdated.put(HWF_APP_LIST, null);
+        caseDataUpdated.put(ADD_HWF_CASE_NOTE_SHORT, null);
         return caseDataUpdated;
     }
 
@@ -125,20 +147,13 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (null != caseData) {
-            if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue()) && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
+            if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState()) && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT));
-                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                                                                       String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
-                                                                       caseData.getHelpWithFeesNumber(),
-                                                                       caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
-                                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)));
-                caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
+                caseDataUpdated.put(HWF_APP_LIST, DynamicList.builder().listItems(List.of(DynamicListElement.builder()
                                                                                       .code(dynamicElement)
                                                                                       .label(dynamicElement).build())).build());
-                caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             } else {
                 List<Element<AdditionalApplicationsBundle>> additionalApplications
                     = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
@@ -146,8 +161,8 @@ public class HelpWithFeesService {
                 List<DynamicListElement> additionalApplicationsWithHwf = new ArrayList<>();
 
                 additionalApplications.forEach(additionalApplication -> {
-                    if (null != additionalApplication.getValue().getPayment()
-                        && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()
+                    if (ObjectUtils.isNotEmpty(additionalApplication.getValue().getPayment())
+                        && StringUtils.isNotEmpty(additionalApplication.getValue().getPayment().getHwfReferenceNumber())
                         && PaymentStatus.HWF.getDisplayedValue().equals(additionalApplication.getValue().getPayment().getStatus())) {
                         additionalApplicationsWithHwf
                             .add(DynamicListElement
@@ -163,23 +178,23 @@ public class HelpWithFeesService {
                         .value(DynamicListElement.EMPTY)
                         .listItems(additionalApplicationsWithHwf)
                         .build();
-                    caseDataUpdated.put("hwfAppList", dynamicList);
+                    caseDataUpdated.put(HWF_APP_LIST, dynamicList);
                 }
             }
         }
-
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
 
     private String getApplicationWithinProceedingsType(Element<AdditionalApplicationsBundle> additionalApplication) {
         String applicationWithinProceedingsType = null;
-
-        if (null != additionalApplication.getValue().getC2DocumentBundle()) {
-            String time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
+        String time;
+        if (ObjectUtils.isNotEmpty(additionalApplication.getValue().getC2DocumentBundle())) {
+            time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
             applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " - " + time;
-        } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()
-            && null != additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType()) {
-            String time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
+        } else if (ObjectUtils.isNotEmpty(additionalApplication.getValue().getOtherApplicationsBundle())
+            && ObjectUtils.isNotEmpty(additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType())) {
+            time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
             applicationWithinProceedingsType = additionalApplication.getValue()
                 .getOtherApplicationsBundle().getApplicationType().getDisplayedValue() + " - " + time;
         }
@@ -190,17 +205,31 @@ public class HelpWithFeesService {
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        if (!caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
+        if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())) {
+            caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL,
+                                String.format(
+                                    HWF_APPLICATION_DYNAMIC_DATA,
+                                    String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                                    caseData.getHelpWithFeesNumber(),
+                                    caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                                    CommonUtils.formatLocalDateTime(
+                                        caseData.getCaseSubmittedTimeStamp(),
+                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM
+                                    )
+                                )
+            );
+        } else {
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
 
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
-                if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
+                if (ObjectUtils.isNotEmpty(chosenAdditionalApplication.getValue().getC2DocumentBundle())) {
                     caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
                         HWF_APPLICATION_DYNAMIC_DATA,
                         AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()
+                        CommonUtils.formatLocalDateTime(chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime(),
+                                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)
                     ));
                 } else {
                     caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
@@ -208,7 +237,8 @@ public class HelpWithFeesService {
                         chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()
+                        CommonUtils.formatLocalDateTime(chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime(),
+                                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)
                     ));
                 }
             }
@@ -220,12 +250,11 @@ public class HelpWithFeesService {
     private Element<AdditionalApplicationsBundle> getChosenAdditionalApplication(CaseData caseData) {
         AtomicReference<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new AtomicReference<>();
 
-        if (null != caseData.getFm5ReminderNotificationDetails()
-            && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees()
-            && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList()) {
-            DynamicList listOfAdditionalApplications = caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList();
+        if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
+            && ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees().getHwfAppList())) {
+            DynamicList listOfAdditionalApplications = caseData.getProcessUrgentHelpWithFees().getHwfAppList();
 
-            if (null != listOfAdditionalApplications) {
+            if (ObjectUtils.isNotEmpty(listOfAdditionalApplications)) {
                 List<Element<AdditionalApplicationsBundle>> additionalApplications
                     = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                     : new ArrayList<>();

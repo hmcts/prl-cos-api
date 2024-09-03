@@ -93,7 +93,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);
         CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
         assertEquals("Submitted", caseStatus.getState());
@@ -112,7 +112,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);
     }
 
@@ -131,7 +131,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(),"testAuth");
         assertNotNull(response);
     }
 
@@ -139,11 +139,7 @@ public class HelpWithFeesServiceTest {
     public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsNull() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
-            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
-                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
-                    .builder()
-                    .build())
-                .build())
+            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())
             .build();
 
         caseDetails = caseDetails.toBuilder()
@@ -153,7 +149,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);
     }
 
@@ -161,13 +157,7 @@ public class HelpWithFeesServiceTest {
     public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmpty() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
-            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
-                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
-                    .builder().hwfAppList(DynamicList
-                        .builder()
-                        .build())
-                    .build())
-                .build())
+            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())
             .build();
 
         caseDetails = caseDetails.toBuilder()
@@ -177,7 +167,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);
     }
 
@@ -186,13 +176,7 @@ public class HelpWithFeesServiceTest {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder().build())))
-            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
-                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
-                    .builder().hwfAppList(DynamicList
-                        .builder()
-                        .build())
-                    .build())
-                .build())
+            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())
             .build();
 
         caseDetails = caseDetails.toBuilder()
@@ -202,7 +186,7 @@ public class HelpWithFeesServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);
     }
 

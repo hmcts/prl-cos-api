@@ -63,7 +63,7 @@ public class HelpWithFeesControllerTest {
     public void test_HelpWithFeesAboutToSubmit() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        verify(helpWithFeesService, times(1)).setCaseStatus(callbackRequest);
+        verify(helpWithFeesService, times(1)).setCaseStatus(callbackRequest, AUTH_TOKEN);
     }
 
     @Test(expected = RuntimeException.class)
