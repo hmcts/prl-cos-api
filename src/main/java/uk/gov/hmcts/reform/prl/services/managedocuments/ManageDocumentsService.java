@@ -426,7 +426,7 @@ public class ManageDocumentsService {
                 }
 
             } else {
-                throw new IllegalStateException("Failed to move document to confidential tab please retry");
+                log.info("since the document name starts with confidential so its not renamed");
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to move document to confidential tab please retry", e);
