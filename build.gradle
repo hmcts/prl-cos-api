@@ -45,7 +45,7 @@ def versions = [
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.34',
   pact                         : '4.1.11',
-  pitest                       : '1.16.1',
+  pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '5.1.7',
   sendLetterClient             : '4.0.4',
@@ -316,7 +316,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
-  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.7'
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.8'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
