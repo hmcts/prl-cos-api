@@ -50,17 +50,6 @@ public class DocumentUtils {
         return null;
     }
 
-    public static Document toResponseCoveLetterDocument(GeneratedDocumentInfo generatedDocumentInfo) {
-        if (null != generatedDocumentInfo) {
-            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName("cover-letter.pdf")
-                .build();
-        }
-        return null;
-    }
-
     public static Document toPrlDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
         if (null != document) {
             return Document.builder()

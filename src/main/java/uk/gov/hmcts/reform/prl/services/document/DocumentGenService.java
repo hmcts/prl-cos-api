@@ -301,19 +301,6 @@ public class DocumentGenService {
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
 
-    @Value("${document.templates.common.doc_letter_ap_13_eng_template}")
-    protected String ap13EngTemplate;
-    @Value("${document.templates.common.doc_letter_ap_13_welsh_template}")
-    protected String ap13WelshTemplate;
-    @Value("${document.templates.common.doc_letter_ap_14_eng_template}")
-    protected String ap14EngTemplate;
-    @Value("${document.templates.common.doc_letter_ap_14_welsh_template}")
-    protected String ap14WelshTemplate;
-    @Value("${document.templates.common.doc_letter_ap_15_eng_template}")
-    protected String ap15EngTemplate;
-    @Value("${document.templates.common.doc_letter_ap_15_welsh_template}")
-    protected String ap15WelshTemplate;
-
     @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
     protected String citizenC1aFinalResponseTemplate;
 

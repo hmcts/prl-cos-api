@@ -196,7 +196,6 @@ public class RemoveDraftOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .removeDraftOrderFields(RemoveDraftOrderFields.builder().build())
             .build();
 
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
