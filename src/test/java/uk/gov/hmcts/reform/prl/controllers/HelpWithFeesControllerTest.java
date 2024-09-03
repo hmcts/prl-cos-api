@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HelpWithFeesService;
 
+import java.util.Arrays;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -84,6 +86,42 @@ public class HelpWithFeesControllerTest {
     public void test_HelpWithFeesHandleSubmittedThrowsException() throws Exception {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verifyNoInteractions(helpWithFeesService);
+    }
+
+    @Test
+    public void test_populateHwfDynamicData() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        helpWithFeesController.populateHwfDynamicData(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verify(helpWithFeesService, times(1)).populateHwfDynamicData(callbackRequest.getCaseDetails());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void test_populateHwfDynamicDataThrowsException() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        helpWithFeesController.populateHwfDynamicData(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verifyNoInteractions(helpWithFeesService);
+    }
+
+    @Test
+    public void test_checkForManagerApproval_1() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verify(helpWithFeesService, times(1)).checkForManagerApproval(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void test_checkForManagerApproval_2() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(helpWithFeesService.checkForManagerApproval(callbackRequest.getCaseDetails())).thenReturn(Arrays.asList("test"));
+        helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verify(helpWithFeesService, times(1)).checkForManagerApproval(callbackRequest.getCaseDetails());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void test_checkForManagerApprovalThrowsException() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        helpWithFeesController.checkForManagerApproval(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verifyNoInteractions(helpWithFeesService);
     }
 

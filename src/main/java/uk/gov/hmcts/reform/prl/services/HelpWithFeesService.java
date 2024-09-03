@@ -270,4 +270,16 @@ public class HelpWithFeesService {
 
         return additionalApplicationsBundle.get();
     }
+
+    public List<String> checkForManagerApproval(CaseDetails caseDetails) {
+        List<String> errorList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
+            && YesOrNo.Yes.equals(caseData.getProcessUrgentHelpWithFees().getOutstandingBalance())
+            && YesOrNo.No.equals(caseData.getProcessUrgentHelpWithFees().getManagerAgreedApplicationBeforePayment())
+        ) {
+            errorList.add("In order to proceed, a manager must agree to process the application");
+        }
+        return errorList;
+    }
 }
