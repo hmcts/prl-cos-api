@@ -19,5 +19,6 @@ public class NoticeOfChangeEvent {
     private final int representedPartyIndex;
     private final SolicitorRole.Representing representing;
     private final String typeOfEvent;
+    //As part of clean up accessCode field usage was removed
     private final String accessCode;
 }

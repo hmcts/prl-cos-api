@@ -56,11 +56,12 @@ public class RemoveDraftOrderService {
 
     public List<Element<DraftOrder>> removeSelectedDraftOrder(CaseData caseData) {
 
-        if (ObjectUtils.isNotEmpty(caseData.getAmendDraftOrderDetails().getRemoveDraftOrdersDynamicList())
+        if ((null != caseData.getRemoveDraftOrderFields()
+            && ObjectUtils.isNotEmpty(caseData.getRemoveDraftOrderFields().getRemoveDraftOrdersDynamicList()))
             && ObjectUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
 
-            UUID orderId = elementUtils.getDynamicListSelectedValue(caseData.getAmendDraftOrderDetails()
-                                                                        .getRemoveDraftOrdersDynamicList(), objectMapper);
+            UUID orderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getRemoveDraftOrderFields().getRemoveDraftOrdersDynamicList(), objectMapper);
             return caseData.getDraftOrderCollection().stream()
                 .filter(element -> !element.getId().equals(orderId)).collect(Collectors.toList());
 

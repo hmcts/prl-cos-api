@@ -217,12 +217,14 @@ public class UploadAdditionalApplicationService {
                 c2DocumentBundle,
                 otherApplicationsBundle
             );
-            paymentServiceResponse = Optional.of(paymentRequestService.createServiceRequestForAdditionalApplications(
-                caseData,
-                authorisation,
-                feeResponse,
-                serviceReferenceResponsibleParty
-            ));
+            //create dummy caseData for payment fields
+            CaseData paymentCaseData = CaseData.builder()
+                .id(caseData.getId())
+                .applicantCaseName(serviceReferenceResponsibleParty)
+                .build();
+            paymentServiceResponse = Optional.of(paymentRequestService.getPaymentServiceResponse(authorisation,
+                                                                                                 paymentCaseData,
+                                                                                                 feeResponse));
         }
         return paymentServiceResponse;
     }
@@ -646,8 +648,8 @@ public class UploadAdditionalApplicationService {
     public Map<String, Object> populateHearingList(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-            AdditionalApplicationTypeEnum.c2Order)) {
+        if (AdditionalApplicationTypeEnum.c2Order.equals(
+            caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
             String s2sToken = authTokenGenerator.generate();
             DynamicList futureHearingList = sendAndReplyService.getFutureHearingDynamicList(
                 authorisation,

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -32,11 +33,10 @@ public class ServiceOfApplication {
     private final YesOrNo soaOtherPeoplePresentInCaseFlag;
 
     @JsonProperty("soaServeToRespondentOptions")
-    private final YesOrNo soaServeToRespondentOptions;
-    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
-    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
-    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
-    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
+    private final YesNoNotApplicable soaServeToRespondentOptions;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptions;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptions;
+
     @JsonProperty("soaRecipientsOptions")
     private final DynamicMultiSelectList soaRecipientsOptions;
     private final DynamicMultiSelectList soaOtherParties;
@@ -52,6 +52,7 @@ public class ServiceOfApplication {
 
     private final SoaPack unServedApplicantPack;
     private final SoaPack unServedRespondentPack;
+    private final SoaPack unservedCitizenRespondentPack;
     private final SoaPack unServedOthersPack;
     private final SoaPack unServedLaPack;
     private final SoaPack unServedCafcassCymruPack;
@@ -68,4 +69,12 @@ public class ServiceOfApplication {
     private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
     @JsonProperty("isConfidential")
     private final YesOrNo isConfidential;
+
+    /*
+    * The below fields are no longer used in the SOA.
+    * */
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
 }

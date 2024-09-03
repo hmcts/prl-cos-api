@@ -57,7 +57,6 @@ public class LinkCitizenCaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
@@ -177,7 +176,7 @@ public class LinkCitizenCaseService {
         String accessCodeStatus = INVALID;
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
             || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && !launchDarklyClient.isFeatureEnabled(CITIZEN_ALLOW_DA_JOURNEY))) {
+            && !launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY))) {
             return accessCodeStatus;
         }
         List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()

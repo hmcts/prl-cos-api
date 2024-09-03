@@ -427,14 +427,14 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
-      prl_c7_draft_filename: C7_Draft_Document.pdf
-      prl_c7_draft_template_wel: FL-PRL-GOR-WEL-C7R.docx
-      prl_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
-      prl_c7_final_template_eng: FL-PRL-GOR-ENG-C7R-Final.docx
-      prl_c7_final_filename_eng: C7_Document.pdf
-      prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
-      prl_c7_final_filename_wel: Final_C7_response_Welsh.pdf
+      prl_lip_c7_draft_template: FL-PRL-GOR-ENG-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename: C7_Draft_Document.pdf
+      prl_lip_c7_draft_template_wel: FL-PRL-GOR-WEL-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
+      prl_lip_c7_final_template_eng: FL-PRL-GOR-ENG-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_eng: C7_Document.pdf
+      prl_lip_c7_final_template_wel: FL-PRL-GOR-WEL-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_wel: Final_C7_response_Welsh.pdf
       prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
@@ -529,12 +529,6 @@ document:
       doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
-      doc_letter_ap_13_eng_template: PRL-LET-ENG-C100-AP13.docx
-      doc_letter_ap_13_welsh_template: PRL-LET-WEL-C100-AP13.docx
-      doc_letter_ap_14_eng_template: PRL-LET-ENG-C100-AP14.docx
-      doc_letter_ap_14_welsh_template: PRL-LET-WEL-C100-AP14.docx
-      doc_letter_ap_15_eng_template: PRL-LET-ENG-C100-AP15.docx
-      doc_letter_ap_15_welsh_template: PRL-LET-WEL-C100-AP15.docx
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf

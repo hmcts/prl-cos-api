@@ -49,6 +49,9 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
@@ -58,9 +61,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A13_LETTER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A14_LETTER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A15_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -383,21 +383,21 @@ public class ReviewDocumentService {
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
-                    DOCUMENT_A13_LETTER
+                    AP13_HINT
                 );
             } else if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
                 generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
-                    DOCUMENT_A14_LETTER
+                    AP14_HINT
                 );
             } else if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
                 generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
-                    DOCUMENT_A15_LETTER
+                    AP15_HINT
                 );
             }
         }
@@ -405,7 +405,8 @@ public class ReviewDocumentService {
 
     private void generateAndSendPostNotification(CaseData caseData,
                                                  Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
-                                                 String respondentName, String documentLetter) {
+                                                 String respondentName,
+                                                 String templateHint) {
         caseData.getApplicants().stream()
             .filter(applicant -> (applicant.getValue().getContactPreferences() == null
                 || ContactPreferences.post.equals(applicant.getValue().getContactPreferences())))
@@ -419,8 +420,10 @@ public class ReviewDocumentService {
                                                                                 applicant.getValue().getLabelForDynamicList(),
                                                                                 respondentName);
                     responseDocuments.addAll(serviceOfApplicationService.getCoverLetters(systemUserService.getSysUserToken(),
-                                                                                         caseData, applicant, documentLetter,
-                                                                                         dataMap, false));
+                                                                                         caseData,
+                                                                                         applicant,
+                                                                                         templateHint,
+                                                                                         false));
                     // Add coversheet and send it to bulk print
                     UUID bulkPrintId = sendResponseDocumentViaPost(caseData, applicant.getValue().getAddress(),
                                                                    applicant.getValue().getLabelForDynamicList(),

@@ -18,8 +18,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AmendDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RemoveDraftOrderFields;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
@@ -156,9 +156,8 @@ public class RemoveDraftOrderServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .draftOrderCollection(draftOrderCollection)
-            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
-                                        .removeDraftOrdersDynamicList(dynamicList)
-                                        .build())
+            .removeDraftOrderFields(RemoveDraftOrderFields.builder()
+                                        .removeDraftOrdersDynamicList(dynamicList).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
@@ -197,8 +196,7 @@ public class RemoveDraftOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
-                                        .build())
+            .removeDraftOrderFields(RemoveDraftOrderFields.builder().build())
             .build();
 
         List<Element<DraftOrder>> returnDraftOrder = removeDraftOrderService.removeSelectedDraftOrder(caseData);
@@ -225,9 +223,8 @@ public class RemoveDraftOrderServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
-            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
-                                        .removeDraftOrdersDynamicList(dynamicList)
-                                        .build())
+            .removeDraftOrderFields(RemoveDraftOrderFields.builder()
+                                        .removeDraftOrdersDynamicList(dynamicList).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
