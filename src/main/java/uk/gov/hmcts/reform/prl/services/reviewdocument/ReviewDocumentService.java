@@ -169,9 +169,6 @@ public class ReviewDocumentService {
         "<h3 class='govuk-heading-s'>Delivery date</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
-    public static final String THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION =
-        "There is a failure in sending email to solicitor on {} with exception {}";
-
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
@@ -463,6 +460,7 @@ public class ReviewDocumentService {
             String respondentName = getNameOfRespondent(quarantineLegalDocElement, quarantineDocsListToBeModified);
 
             if (RESPONDENT_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
+                log.info("*** Sending respondent C7 response documents to applicants ***");
                 //C7 response
                 sendNotificationToApplicants(caseData,
                                              C7_NOTIFICATION_APPLICANT,
@@ -471,6 +469,7 @@ public class ReviewDocumentService {
                                              null,
                                              respondentName);
             } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
+                log.info("*** Sending respondent C1A documents to applicants/solicitor ***");
                 //C1A
                 sendNotificationToApplicants(caseData,
                                              C1A_NOTIFICATION_APPLICANT,
@@ -479,6 +478,7 @@ public class ReviewDocumentService {
                                              C1A_NOTIFICATION_APPLICANT_SOLICITOR,
                                              respondentName);
             } else if (RESPONDENT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
+                log.info("*** Sending respondent response to C1A documents to applicants/solicitor ***");
                 //C1A response
                 sendNotificationToApplicants(caseData,
                                              C1A_RESPONSE_NOTIFICATION_APPLICANT,
@@ -511,6 +511,7 @@ public class ReviewDocumentService {
                                      partyData.getSolicitorEmail(),
                                      solicitorSendgridTemplate);
             } else {
+
                 if (CommonUtils.isNotEmpty(partyData.getEmail())
                     && ContactPreferences.email.equals(partyData.getContactPreferences())) {
                     if (hasDashboardAccess(element(partyData))) {
@@ -569,7 +570,7 @@ public class ReviewDocumentService {
                     systemUserService.getSysUserToken(),
                     responseDocuments
                 );
-                log.info("Response documents are sent to applicant {}, via post {}", applicant.getId(), bulkPrintId);
+                log.info("Respondent response documents are sent to applicant {}, via post {}", applicant.getId(), bulkPrintId);
             } catch (Exception e) {
                 log.error("Failed to send response documents to applicant {}", applicant.getId(), e);
             }
@@ -640,8 +641,7 @@ public class ReviewDocumentService {
                     .build()
             );
         } catch (IOException e) {
-            log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                      emailAddress, e.getMessage(), e);
+            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
         }
     }
 
@@ -658,7 +658,7 @@ public class ReviewDocumentService {
                                              Address address,
                                              String name,
                                              String authorisation,
-                                             List<Document> responseDocument) throws Exception {
+                                             List<Document> responseDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover sheet
         List<Document> coverSheets = serviceOfApplicationPostService.getCoverSheets(
@@ -673,7 +673,7 @@ public class ReviewDocumentService {
         }
 
         //cover should be the first doc in the list, append all order docs
-        documents.addAll(responseDocument);
+        documents.addAll(responseDocuments);
 
         return bulkPrintService.send(
             String.valueOf(caseData.getId()),
