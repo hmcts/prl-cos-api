@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -90,8 +91,6 @@ public class AmendOrderService {
                         .orderDocument(amendedDocument)
                         .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
-                        .orderType(order.getValue().getOrderType())
-                        .typeOfOrder(order.getValue().getTypeOfOrder())
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
                                           .createdBy(order.getValue().getOtherDetails().getCreatedBy())
@@ -117,7 +116,7 @@ public class AmendOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                updatedOrders =  manageOrderService.serveOrder(caseData,orders);
+                updatedOrders =  manageOrderService.serveOrder(caseData, orders);
             } else {
                 updatedOrders = orders;
             }
@@ -156,11 +155,13 @@ public class AmendOrderService {
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
 
-        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
+        String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
+            null);
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
+            .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(orderType))
             .orderTypeId(orderType)
             .orderDocument(amendedDocument)
             .orderSelectionType(orderSelectionType)

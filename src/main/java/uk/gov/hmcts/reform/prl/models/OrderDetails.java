@@ -63,9 +63,9 @@ public class OrderDetails {
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
+    private final YesOrNo doesOrderDocumentNeedSeal;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
@@ -76,7 +76,7 @@ public class OrderDetails {
 
         return String.format(
             "%s - %s",
-            this.orderType,
+            this.orderTypeId,
             this.getOtherDetails().getOrderCreatedDate()
         );
     }

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.launchdarkly;
 
-import com.launchdarkly.sdk.LDUser;
+import com.launchdarkly.sdk.LDContext;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class LaunchDarklyClientTest {
     private LDClientInterface ldClient;
 
     @Mock
-    private LDUser ldUser;
+    private LDContext ldContext;
 
     private LaunchDarklyClient launchDarklyClient;
 
@@ -41,13 +41,13 @@ public class LaunchDarklyClientTest {
 
     @Test
     public void testFeatureEnabled() {
-        when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDUser.class), anyBoolean())).thenReturn(true);
-        assertTrue(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldUser));
+        when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDContext.class), anyBoolean())).thenReturn(true);
+        assertTrue(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldContext));
     }
 
     @Test
     public void testFeatureDisabled() {
-        when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDUser.class), anyBoolean())).thenReturn(false);
-        assertFalse(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldUser));
+        when(ldClient.boolVariation(eq(FAKE_FEATURE), any(LDContext.class), anyBoolean())).thenReturn(false);
+        assertFalse(launchDarklyClient.isFeatureEnabled(FAKE_FEATURE, ldContext));
     }
 }

@@ -47,48 +47,54 @@ public class AllocatedJudgeService {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
-            if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
-                if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
-                    && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
-                    String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
-                    List<JudicialUsersApiResponse> judgeDetails =
-                        refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                            .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
-                    if (null != judgeDetails && !judgeDetails.isEmpty()) {
-                        allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
-                        allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
-                        allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
-                        allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.get(0).getAppointments())
-                                                              ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
-                                                              : null);
-                    }
-                } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
-                    allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
-                }
-                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-            }
+            buildAllocatedJudgeOrLegalAdvisor(caseDataUpdated, legalAdviserList, refDataUserService, allocatedJudgeBuilder);
         }
         return allocatedJudgeBuilder.build();
+    }
+
+    private static void buildAllocatedJudgeOrLegalAdvisor(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+                                                          RefDataUserService refDataUserService,
+                                                          AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder) {
+        if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
+            if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
+                && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
+                allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
+                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
+                List<JudicialUsersApiResponse> judgeDetails =
+                    refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                        .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
+                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
+                allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
+                if (null != judgeDetails && !judgeDetails.isEmpty()) {
+                    allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
+                    allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
+                    allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.get(0).getAppointments())
+                                                          ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
+                                                          : null);
+                }
+            } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+                allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
+                allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
+            }
+            allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
+        }
     }
 
     private TierOfJudiciaryEnum getTierOfJudiciary(String tierOfJudiciary) {
         TierOfJudiciaryEnum tierOfJudiciaryEnum = null;
         switch (tierOfJudiciary) {
             case DISTRICT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.DISTRICT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.districtJudge;
                 break;
             case MAGISTRATES:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.MAGISTRATES;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.magistrates;
                 break;
             case CIRCUIT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.CIRCUIT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.circuitJudge;
                 break;
             case HIGHCOURT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.HIGHCOURT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.highCourtJudge;
                 break;
             default:
                 break;

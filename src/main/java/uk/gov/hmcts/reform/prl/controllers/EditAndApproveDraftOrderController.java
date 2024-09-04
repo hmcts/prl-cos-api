@@ -43,13 +43,13 @@ import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -179,57 +179,10 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                if (Event.EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId())) {
-                    caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
-                        .getDraftOrderNameForWA(caseData, true));
-                }
-
-                manageOrderService.setHearingOptionDetailsForTask(
-                    caseData,
-                    caseDataUpdated,
-                    callbackRequest.getEventId(),
-                    loggedInUserType
-                );
-
-                caseDataUpdated.put(
-                    WA_ORDER_NAME_JUDGE_APPROVED,
-                    draftAnOrderService.getDraftOrderNameForWA(caseData, true)
-                );
-                caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
-                    caseData,
-                    authorisation,
-                    callbackRequest.getEventId()
-                ));
+                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType);
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
-                if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-                    Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
-                        .getSolicitorOrdersHearingDetails()
-                        .stream()
-                        .filter(
-                            e -> e.getValue().getHearingJudgeNameAndEmail() != null
-                        )
-                        .findFirst();
-
-                    JudicialUser judicialUser = null;
-                    if (hearingDataElement.isPresent()) {
-                        judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
-                    }
-
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judicialUser(judicialUser)
-                        .build();
-                    roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        callbackRequest.getCaseDetails(),
-                        roleAssignmentDto,
-                        DRAFT_AN_ORDER.getName(),
-                        false,
-                        HEARING_JUDGE_ROLE
-                    );
-                }
+                editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData);
 
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -239,6 +192,56 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void editAndReturnOrder(String authorisation, CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, CaseData caseData) {
+        caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
+        if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+            Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
+                .getSolicitorOrdersHearingDetails()
+                .stream()
+                .filter(
+                    e -> e.getValue().getHearingJudgeNameAndEmail() != null
+                )
+                .findFirst();
+
+            JudicialUser judicialUser = null;
+            if (hearingDataElement.isPresent()) {
+                judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
+            }
+
+            RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                .judicialUser(judicialUser)
+                .build();
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                roleAssignmentDto,
+                DRAFT_AN_ORDER.getName(),
+                false,
+                HEARING_JUDGE_ROLE
+            );
+        }
+    }
+
+    private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
+                                     Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
+        manageOrderService.setHearingOptionDetailsForTask(
+            caseData,
+            caseDataUpdated,
+            callbackRequest.getEventId(),
+            loggedInUserType
+        );
+
+        caseDataUpdated.put(
+            WA_ORDER_NAME_JUDGE_APPROVED,
+            draftAnOrderService.getApprovedDraftOrderNameForWA(caseData)
+        );
+        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            authorisation,
+            callbackRequest.getEventId()
+        ));
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
@@ -371,8 +374,19 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
                 && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())
+                    && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
+                    draftAnOrderService.populateStandardDirectionOrderDefaultFields(
+                        authorisation,
+                        caseData,
+                        caseDataUpdated
+                    );
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDataUpdated).build();
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
             } else {
@@ -402,14 +416,15 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            caseDataUpdated.put(STATE, caseData.getState());
+            CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
+                startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
@@ -460,7 +475,7 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
+                startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),

@@ -10,7 +10,9 @@ public class DocumentLanguage {
     @Builder.Default
     private boolean isGenEng = true;
     @Builder.Default
-    private boolean isGenWelsh = false;
+    public boolean isGenWelsh = false;
 
-
+    public boolean isGenWelsh() {
+        return this.isGenWelsh;
+    }
 }

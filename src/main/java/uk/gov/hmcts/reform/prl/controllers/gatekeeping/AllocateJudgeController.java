@@ -113,7 +113,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-
+            caseDataUpdated.put("allocatedJudge",allocatedJudge);
             if (allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded().equals(YesOrNo.Yes)) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judgeEmail(allocatedJudge.getJudgeEmail())

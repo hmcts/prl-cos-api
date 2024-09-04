@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -24,10 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_DOCUMENT_UPLOAD_EVENT_ID;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCaseDataWithUploadedDocs;
 
 @Slf4j
 @Service
@@ -81,12 +82,19 @@ public class CafcassUploadDocService {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
             String.valueOf(
                 caseId),
-            CAFCASS_DOCUMENT_UPLOAD_EVENT_ID
+            CaseEvent.CAFCASS_ENGLAND_DOCUMENT_UPLOAD.getValue()
         );
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataUpdated.put("cafcassUploadedDocs", getCaseDataWithUploadedDocs(
+            caseId,
+            document.getOriginalFilename(),
+            typeOfDocument,
+            tempCaseData,
+            uploadResponse.getDocuments().get(0)
+        ).getCafcassUploadedDocs());
 
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(caseId),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),

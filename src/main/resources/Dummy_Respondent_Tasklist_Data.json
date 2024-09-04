@@ -2,14 +2,14 @@
   "miam": {
     "attendedMiam": "No",
     "willingToAttendMiam": "No",
-    "reasonNotAttendingMiam": "Don't want to attend"
+    "reasonNotAttendingMiam": "MIAM will not help in this case"
   },
   "consent": {
-    "noConsentReason": "I do not give my consent",
-    "courtOrderDetails": "I really ned permission from the courts",
+    "noConsentReason": null,
+    "courtOrderDetails": "Testing - Provide details of the court order in place",
     "permissionFromCourt": "Yes",
-    "applicationReceivedDate": "2023-01-01",
-    "consentToTheApplication": "No"
+    "applicationReceivedDate": "2024-02-27",
+    "consentToTheApplication": "Yes"
   },
   "citizenFlags": {
     "isApplicationViewed": null,
@@ -20,7 +20,7 @@
     "isStatementOfServiceProvided": null
   },
   "attendToCourt": {
-    "disabilityNeeds": "A wheelchair user",
+    "disabilityNeeds": "Grandparents",
     "haveAnyDisability": "Yes",
     "respondentWelshNeeds": "Yes",
     "respondentWelshNeedsList": [
@@ -29,46 +29,46 @@
     ],
     "respondentInterpreterNeeds": [
       {
-        "id": "fd341020-30b5-4547-b16d-76cecf47ee5a",
+        "id": "aafea867-5905-4e1d-bdd8-c1a2f529526f",
         "value": {
           "party": [
-            "applicant",
-            "respondent",
-            "other"
+            "respondent"
           ],
-          "relationName": "godfather",
-          "requiredLanguage": "German",
-          "respondentOtherAssistance": "sign language"
+          "relationName": "Mother",
+          "requiredLanguage": "Welsh",
+          "respondentOtherAssistance": "British sign language"
         }
       }
     ],
     "respondentIntermediaryNeeds": "Yes",
     "isRespondentNeededInterpreter": "Yes",
     "respondentSpecialArrangements": "Yes",
-    "respondentIntermediaryNeedDetails": "yes we do",
-    "respondentSpecialArrangementDetails": "A screen to separate us"
+    "respondentIntermediaryNeedDetails": "Intermediary will be helpful",
+    "respondentSpecialArrangementDetails": "Separate toilet"
   },
   "citizenDetails": {
     "address": {
       "County": "",
       "Country": "United Kingdom",
-      "PostCode": "LS12 5QN",
-      "PostTown": "Leeds",
-      "AddressLine1": "12 Bawn Drive",
-      "AddressLine2": "",
+      "PostCode": "SA1 1DW",
+      "PostTown": "Swansea",
+      "AddressLine1": "Heaven",
+      "AddressLine2": "7 Castle Square",
       "AddressLine3": ""
     },
     "contact": {
-      "email": "dummyemail@gmail.com",
-      "phoneNumber": "8489348934"
+      "email": "respondent1@example.com",
+      "phoneNumber": "07405123456"
     },
     "lastName": "Richards",
     "firstName": "Mary",
     "dateOfBirth": "1985-02-15",
     "placeOfBirth": "London",
-    "previousName": "Davidson",
+    "previousName": null,
     "addressHistory": {
-      "previousAddressHistory": [],
+      "previousAddressHistory": [
+
+      ],
       "isAtAddressLessThan5Years": "Yes"
     }
   },
@@ -288,23 +288,22 @@
     "confidentiality": "Yes",
     "confidentialityList": [
       "address",
-      "phoneNumber",
-      "email"
+      "phoneNumber"
     ],
     "otherPeopleKnowYourContactDetails": "yes"
   },
   "c7ResponseSubmitted": null,
   "legalRepresentation": null,
   "c1AResponseSubmitted": null,
-  "respAohOtherConcerns": "Yes",
+  "respAohOtherConcerns": "No",
   "respChildSexualAbuse": {
     "respAbuseNatureDescription": null,
     "respBehavioursStartDateAndLength": null,
     "respBehavioursApplicantSoughtHelp": null,
     "respBehavioursApplicantHelpSoughtWho": null
   },
-  "respOrdersOccupation": "Yes",
-  "respOrdersRestraining": "Yes",
+  "respOrdersOccupation": "No",
+  "respOrdersRestraining": "No",
   "respAohChildAbuseYesNo": "Yes",
   "respChildPhysicalAbuse": {
     "respAbuseNatureDescription": null,
@@ -314,13 +313,13 @@
   },
   "respDomesticBehaviours": [
     {
-      "id": "5108c197-abdf-4b6a-8a25-9bf792082fb6",
+      "id": "44da1552-2ec8-40e3-813a-33a3d7c5a796",
       "value": {
-        "respTypeOfAbuse": "TypeOfAbuseEnum_value_1",
-        "respAbuseNatureDescription": "very bad person",
-        "respBehavioursStartDateAndLength": "very long time ago",
-        "respBehavioursApplicantSoughtHelp": "Yes",
-        "respBehavioursApplicantHelpSoughtWho": "domestic abuse charity"
+        "respTypeOfAbuse": "TypeOfAbuseEnum_value_2",
+        "respAbuseNatureDescription": "test",
+        "respBehavioursStartDateAndLength": "test",
+        "respBehavioursApplicantSoughtHelp": "No",
+        "respBehavioursApplicantHelpSoughtWho": null
       }
     }
   ],
@@ -336,132 +335,140 @@
     "respBehavioursApplicantSoughtHelp": null,
     "respBehavioursApplicantHelpSoughtWho": null
   },
-  "respChildrenLocationNow": "unkown",
+  "respChildrenLocationNow": null,
   "respChildPassportDetails": {
-    "respChildPassportPossession": [
-      "mother",
-      "father",
-      "otherPerson"
-    ],
-    "respChildHasMultiplePassports": "Yes",
-    "respChildPassportPossessionOtherDetails": "grandma"
+    "respChildPassportPossession": null,
+    "respChildHasMultiplePassports": null,
+    "respChildPassportPossessionOtherDetails": null
   },
-  "respOrdersNonMolestation": "Yes",
+  "respOrdersNonMolestation": "No",
   "respAohDomesticAbuseYesNo": "Yes",
-  "respChildAbductionReasons": "foreign passport",
-  "respOrdersOtherInjunctive": "Yes",
-  "respAgreeChildOtherContact": "Yes",
-  "respAohChildAbductionYesNo": "Yes",
-  "respAohSubstanceAbuseYesNo": "Yes",
-  "respAohOtherConcernsDetails": "Very unsafe",
+  "respChildAbductionReasons": null,
+  "respOrdersOtherInjunctive": "No",
+  "respAgreeChildOtherContact": "No",
+  "respAohChildAbductionYesNo": "No",
+  "respAohSubstanceAbuseYesNo": "No",
+  "respAohOtherConcernsDetails": null,
   "respChildPsychologicalAbuse": {
-    "respAbuseNatureDescription": "very bad behaviour",
-    "respBehavioursStartDateAndLength": "very long time ago",
-    "respBehavioursApplicantSoughtHelp": "Yes",
-    "respBehavioursApplicantHelpSoughtWho": "child abuse charity"
+    "respAbuseNatureDescription": "test",
+    "respBehavioursStartDateAndLength": "test",
+    "respBehavioursApplicantSoughtHelp": "No",
+    "respBehavioursApplicantHelpSoughtWho": null
   },
-  "respOrdersOccupationCurrent": "Yes",
-  "respOrdersOccupationEndDate": "2023-02-01",
+  "respOrdersOccupationCurrent": null,
+  "respOrdersOccupationEndDate": null,
   "citizenInternationalElements": {
     "childrenLiveOutsideOfEnWl": "Yes",
-    "parentsAnyOneLiveOutsideEnWl": "Yes",
+    "parentsAnyOneLiveOutsideEnWl": null,
     "anotherPersonOrderOutsideEnWl": "Yes",
     "anotherCountryAskedInformation": "Yes",
-    "childrenLiveOutsideOfEnWlDetails": "yes i do",
-    "parentsAnyOneLiveOutsideEnWlDetails": "yes i do",
-    "anotherPersonOrderOutsideEnWlDetails": "yes i do",
-    "anotherCountryAskedInformationDetaails": "yes i do"
+    "childrenLiveOutsideOfEnWlDetails": "testing - Do you have any reason to believe that any child, parent or potentially significant adult in the child's life may be habitually resident in another state",
+    "parentsAnyOneLiveOutsideEnWlDetails": null,
+    "anotherPersonOrderOutsideEnWlDetails": "testing - Do you have any reason to believe that there may be an issue as to jurisdiction",
+    "anotherCountryAskedInformationDetaails": "testing - Has a request been made or should a request be made to a Central Authority or other competent authority in a foreign state or a consular authority in England and Wales"
   },
   "currentOrPreviousProceedings": {
-    "proceedingsList": [],
+    "proceedingsList": [
+
+    ],
     "courtOrderMadeForProtection": null,
     "haveChildrenBeenInvolvedInCourtCase": null
   },
-  "respAgreeChildSupervisedTime": "Yes",
-  "respAohSubstanceAbuseDetails": "Lots of bad drugs",
+  "respAgreeChildSupervisedTime": "No",
+  "respAohSubstanceAbuseDetails": null,
   "respOrdersOccupationDocument": null,
-  "respOrdersRestrainingCurrent": "Yes",
-  "respOrdersRestrainingEndDate": "2023-02-01",
-  "respOrdersUndertakingInPlace": "Yes",
-  "respPreviousAbductionThreats": "Yes",
-  "detailsOfReferralOrAssessment": null,
-  "respAbductionChildHasPassport": "Yes",
-  "respOrdersOccupationCourtName": "court of sodor",
+  "respOrdersRestrainingCurrent": null,
+  "respOrdersRestrainingEndDate": null,
+  "respOrdersUndertakingInPlace": "No",
+  "respPreviousAbductionThreats": null,
+  "detailsOfReferralOrAssessment": "testing - Provide details of any referral to or assessment by the Adult Learning Disability team, and/or any adult health service, where known, together with the outcome",
+  "respAbductionChildHasPassport": null,
+  "respOrdersOccupationCourtName": null,
   "respOrdersRestrainingDocument": null,
   "respondentExistingProceedings": [
     {
-      "id": "4b58852b-54bf-4951-a198-cf8b6447011d",
+      "id": "cedd3230-90f6-4261-a924-2e316432182a",
       "value": {
-        "dateEnded": "2023-01-01",
-        "caseNumber": "123445",
-        "dateStarted": "2022-01-01",
-        "nameOfCourt": "court of sodor",
-        "nameOfJudge": "judge test",
+        "dateEnded": null,
+        "caseNumber": "12321312",
+        "dateStarted": null,
+        "nameOfCourt": null,
+        "nameOfJudge": "DJ Judge",
         "typeOfOrder": [
-          "emergencyProtectionOrder",
-          "supervisionOrder",
-          "careOrder",
-          "childAbduction",
-          "familyLaw1996Part4",
-          "contactOrResidenceOrder",
-          "contactOrResidenceOrderWithAdoption",
-          "orderRelatingToChildMaintainance",
-          "childArrangementsOrder",
-          "otherOrder"
+          "careOrder"
         ],
-        "nameAndOffice": "dave wrexham",
-        "nameOfGuardian": "dave",
-        "otherTypeOfOrder": "a lot of orders",
-        "uploadRelevantOrder": null,
-        "nameOfChildrenInvolved": "timothy \njessica",
+        "nameAndOffice": null,
+        "nameOfGuardian": null,
+        "otherTypeOfOrder": null,
+        "uploadRelevantOrder": {
+          "category_id": null,
+          "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/520ad1ee-6bf4-43df-9e98-91468c41a4fa",
+          "document_filename": "Special arrangements letter.pdf",
+          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/520ad1ee-6bf4-43df-9e98-91468c41a4fa/binary",
+          "document_creation_date": null
+        },
+        "nameOfChildrenInvolved": null,
         "previousOrOngoingProceedings": "ongoing"
       }
     }
   ],
-  "respAgreeChildUnsupervisedTime": "Yes",
-  "respOrdersOccupationCaseNumber": "12345",
-  "respOrdersOccupationDateIssued": "2023-01-01",
-  "respOrdersRestrainingCourtName": "court of sodor",
-  "respOrdersNonMolestationCurrent": "Yes",
-  "respOrdersNonMolestationEndDate": "2023-01-01",
-  "respOrdersRestrainingCaseNumber": "12345",
-  "respOrdersRestrainingDateIssued": "2022-02-01",
-  "respAohOtherConcernsCourtActions": "protect the children",
+  "respAgreeChildUnsupervisedTime": "No",
+  "respOrdersOccupationCaseNumber": null,
+  "respOrdersOccupationDateIssued": null,
+  "respOrdersRestrainingCourtName": null,
+  "respOrdersNonMolestationCurrent": null,
+  "respOrdersNonMolestationEndDate": null,
+  "respOrdersRestrainingCaseNumber": null,
+  "respOrdersRestrainingDateIssued": null,
+  "respAohOtherConcernsCourtActions": "Test",
   "respOrdersNonMolestationDocument": null,
-  "respOrdersOtherInjunctiveCurrent": "Yes",
-  "respOrdersOtherInjunctiveEndDate": "2023-02-01",
+  "respOrdersOtherInjunctiveCurrent": null,
+  "respOrdersOtherInjunctiveEndDate": null,
   "respAllChildrenAreRiskSexualAbuse": null,
-  "respOrdersNonMolestationCourtName": "court of sodor",
+  "respOrdersNonMolestationCourtName": null,
   "respOrdersOtherInjunctiveDocument": null,
   "respOrdersForcedMarriageProtection": "Yes",
-  "respOrdersNonMolestationCaseNumber": "12345",
-  "respOrdersNonMolestationDateIssued": "2022-01-01",
-  "respOrdersOtherInjunctiveCourtName": "court of sodor",
+  "respOrdersNonMolestationCaseNumber": null,
+  "respOrdersNonMolestationDateIssued": null,
+  "respOrdersOtherInjunctiveCourtName": null,
   "currentOrPastProceedingsForChildren": "yes",
-  "respAbductionPassportOfficeNotified": "Yes",
+  "respAbductionPassportOfficeNotified": null,
   "respAllChildrenAreRiskPhysicalAbuse": null,
-  "respOrdersOtherInjunctiveCaseNumber": "12345",
-  "respOrdersOtherInjunctiveDateIssued": "2022-01-01",
-  "respOrdersUndertakingInPlaceCurrent": "Yes",
-  "respOrdersUndertakingInPlaceEndDate": "2023-02-01",
-  "respPreviousAbductionThreatsDetails": "yes many",
+  "respOrdersOtherInjunctiveCaseNumber": null,
+  "respOrdersOtherInjunctiveDateIssued": null,
+  "respOrdersUndertakingInPlaceCurrent": null,
+  "respOrdersUndertakingInPlaceEndDate": null,
+  "respPreviousAbductionThreatsDetails": null,
   "respWhichChildrenAreRiskSexualAbuse": null,
+  "responseToAllegationsOfHarmDocument": {
+    "category_id": null,
+    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f275c0f-76ed-499f-b70b-f9136cd89e01",
+    "document_filename": "Respondents response.pdf",
+    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7f275c0f-76ed-499f-b70b-f9136cd89e01/binary",
+    "document_creation_date": null
+  },
   "factorsAffectingAbilityToParticipate": "Yes",
   "respAllChildrenAreRiskEmotionalAbuse": null,
   "respAllChildrenAreRiskFinancialAbuse": null,
   "respOrdersUndertakingInPlaceDocument": null,
-  "respOrdersUndertakingInPlaceCourtName": "court of sodor",
+  "respOrdersUndertakingInPlaceCourtName": null,
   "respWhichChildrenAreRiskPhysicalAbuse": null,
-  "giveDetailsAffectingLitigationCapacity": null,
-  "respAbductionPreviousPoliceInvolvement": "Yes",
-  "respOrdersUndertakingInPlaceCaseNumber": "12345",
-  "respOrdersUndertakingInPlaceDateIssued": "2023-01-01",
+  "giveDetailsAffectingLitigationCapacity": "testing - Give details of any factors affecting litigation capacity",
+  "respAbductionPreviousPoliceInvolvement": null,
+  "respOrdersUndertakingInPlaceCaseNumber": null,
+  "respOrdersUndertakingInPlaceDateIssued": null,
   "respWhichChildrenAreRiskEmotionalAbuse": null,
   "respWhichChildrenAreRiskFinancialAbuse": null,
   "respAllChildrenAreRiskPsychologicalAbuse": "No",
-  "respOrdersForcedMarriageProtectionCurrent": "Yes",
-  "respOrdersForcedMarriageProtectionEndDate": "2023-02-01",
-  "respOrdersForcedMarriageProtectionDocument": null,
+  "respOrdersForcedMarriageProtectionCurrent": "No",
+  "respOrdersForcedMarriageProtectionEndDate": "2003-01-12",
+  "respOrdersForcedMarriageProtectionDocument": {
+    "category_id": null,
+    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/75fbba23-7c7b-4ea1-86cb-7e7429aab362",
+    "document_filename": "Special arrangements letter.pdf",
+    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/75fbba23-7c7b-4ea1-86cb-7e7429aab362/binary",
+    "document_creation_date": null
+  },
   "respWhichChildrenAreRiskPsychologicalAbuse": {
     "value": [
       {
@@ -502,4 +509,9 @@
   "respOrdersForcedMarriageProtectionDateIssued": "2023-01-01",
   "respAbductionPreviousPoliceInvolvementDetails": "yes the police",
   "provideDetailsForFactorsAffectingAbilityToParticipate": "yes a lot of factors"
+  "respOrdersForcedMarriageProtectionCourtName": "test",
+  "respOrdersForcedMarriageProtectionCaseNumber": "12312312321312312312321",
+  "respOrdersForcedMarriageProtectionDateIssued": "1999-01-12",
+  "respAbductionPreviousPoliceInvolvementDetails": null,
+  "provideDetailsForFactorsAffectingAbilityToParticipate": "testing - Are you aware of any other factors which may affect the ability of the person concerned to take part in the proceedings?"
 }

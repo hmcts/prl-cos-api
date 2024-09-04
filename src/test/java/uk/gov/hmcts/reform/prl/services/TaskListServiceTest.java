@@ -9,12 +9,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -30,6 +33,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
@@ -44,11 +49,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
+import static uk.gov.hmcts.reform.prl.enums.Event.AMEND_MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -69,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
@@ -116,6 +126,18 @@ public class TaskListServiceTest {
     @Mock
     EventService eventPublisher;
 
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    RoleAssignmentApi roleAssignmentApi;
+
+    @Mock
+    RoleAssignmentServiceResponse roleAssignmentServiceResponse;
+
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Mock
@@ -129,6 +151,16 @@ public class TaskListServiceTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
+    }
 
     @Test
     public void getTasksShouldReturnListOfTasks() {
@@ -201,6 +233,87 @@ public class TaskListServiceTest {
         assertThat(expectedTasks).isEqualTo(actualTasks);
     }
 
+    @Test
+    public void getTasksShouldReturnListOfRespondentSolicitorFinishedTasks() {
+        Document document = Document.builder()
+            .documentUrl("https:google.com")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .c1ADocument(document)
+            .build();
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<RespondentTask> expectedTasks = List.of(
+            RespondentTask.builder().event(CONSENT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RESPOND_ALLEGATION_OF_HARM).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.FINISHED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.FINISHED).build()
+        );
+        when(respondentEventsChecker.isFinished(any(), any(), anyBoolean())).thenReturn(true);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant, caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfRespondentSolicitorInProgressTasks() {
+        Document document = Document.builder()
+            .documentUrl("https:google.com")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .c1ADocument(document)
+            .build();
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<RespondentTask> expectedTasks = List.of(
+            RespondentTask.builder().event(CONSENT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RESPOND_ALLEGATION_OF_HARM).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.IN_PROGRESS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.IN_PROGRESS).build()
+        );
+
+        when(respondentEventsChecker.isFinished(any(), any(), anyBoolean())).thenReturn(false);
+        when(respondentEventsChecker.isStarted(any(), any(), anyBoolean())).thenReturn(true);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant, caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
 
     @Test
     public void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
@@ -587,12 +700,17 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "senior-tribunal-caseworker");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -621,6 +739,11 @@ public class TaskListServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "ctsc");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
@@ -637,7 +760,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
@@ -655,10 +778,14 @@ public class TaskListServiceTest {
                 .state(State.SUBMITTED_PAID)
                 .build();
 
-
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-solicitor");
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         //when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -674,7 +801,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
@@ -696,6 +823,11 @@ public class TaskListServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "judge");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -712,12 +844,93 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
         Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
         Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
         Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void updateTaskListForAmendMiamWhenCaseIsInIssuedState() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.CASE_ISSUED)
+            .build();
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> documentMap = new HashMap<>();
+        stringObjectMap.putAll(documentMap);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "ctsc");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
+        when(userService.getUserDetails(authToken))
+            .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .state("CASE_ISSUED")
+                             .build())
+            .eventId(AMEND_MIAM_POLICY_UPGRADE.getId())
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
+            .updateTaskList(callbackRequest, authToken);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfTasksVersion3Relations() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .consentOrder(YesOrNo.Yes)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .build();
+
+        List<Task> expectedTasks = List.of(
+            Task.builder().event(CASE_NAME).build(),
+            Task.builder().event(TYPE_OF_APPLICATION).build(),
+            Task.builder().event(HEARING_URGENCY).build(),
+            Task.builder().event(APPLICANT_DETAILS).build(),
+            Task.builder().event(RESPONDENT_DETAILS).build(),
+            Task.builder().event(OTHER_PEOPLE_IN_THE_CASE_REVISED).build(),
+            Task.builder().event(CHILD_DETAILS_REVISED).build(),
+            Task.builder().event(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION).build(),
+            Task.builder().event(CHILDREN_AND_APPLICANTS).state(CANNOT_START_YET).build(),
+            Task.builder().event(CHILDREN_AND_RESPONDENTS).state(CANNOT_START_YET).build(),
+            Task.builder().event(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION).state(CANNOT_START_YET).build(),
+            Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).build(),
+            Task.builder().event(MIAM_POLICY_UPGRADE).build(),
+            Task.builder().event(OTHER_PROCEEDINGS).build(),
+            Task.builder().event(ATTENDING_THE_HEARING).build(),
+            Task.builder().event(INTERNATIONAL_ELEMENT).build(),
+            Task.builder().event(LITIGATION_CAPACITY).build(),
+            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).build(),
+            Task.builder().event(VIEW_PDF_DOCUMENT).build(),
+            Task.builder().event(SUBMIT_AND_PAY).build(),
+            Task.builder().event(SUBMIT).build());
+        when(eventsChecker.getDefaultState(CHILDREN_AND_APPLICANTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_RESPONDENTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,caseData)).thenReturn(CANNOT_START_YET);
+        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
     }
 }

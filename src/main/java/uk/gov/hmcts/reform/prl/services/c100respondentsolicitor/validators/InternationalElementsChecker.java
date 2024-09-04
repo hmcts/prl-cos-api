@@ -26,7 +26,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
         boolean isStarted = false;
         isStarted = response.filter(value -> ofNullable(value.getCitizenInternationalElements())
@@ -47,7 +47,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
