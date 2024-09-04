@@ -324,7 +324,6 @@ public class DocumentGenService {
     private final ManageDocumentsService manageDocumentsService;
     private final CaseService caseService;
     private final ObjectMapper objectMapper;
-
     private final Time dateTime;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
@@ -1430,7 +1429,7 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    private boolean checkFileFormat(String fileName) {
+    public boolean checkFileFormat(String fileName) {
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
@@ -1462,7 +1461,6 @@ public class DocumentGenService {
                     }
                 })
                 .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
-
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
@@ -1549,7 +1547,6 @@ public class DocumentGenService {
 
                 moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,
-                    updatedCaseData,
                     updatedCaseDataMap
                 );
             }
@@ -1567,19 +1564,19 @@ public class DocumentGenService {
         return null;
     }
 
-    private Map<String, Object> moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                                    CaseData caseData,
-                                                                    Map<String, Object> caseDataUpdated) {
+    private void moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+                                                     Map<String, Object> caseDataMap) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+            //PRL-6208 - fixed document missing issue for multiple docs
+            CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
             //invoke common manage docs
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 quarantineLegalDoc,
                 caseData,
-                caseDataUpdated,
+                caseDataMap,
                 CITIZEN
             );
         }
-        return caseDataUpdated;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,

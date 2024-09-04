@@ -59,7 +59,10 @@ public enum CaseEvent {
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
 
     HWF_PROCESS_CASE_UPDATE("hwfProcessCaseUpdate"),
-    HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus");
+    HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
+
+    CITIZEN_AWP_CREATE("citizenAwpCreate"),
+    CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate");
 
     private final String value;
 
