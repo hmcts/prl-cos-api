@@ -242,8 +242,7 @@ public class HelpWithFeesService {
                         AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        CommonUtils.formatLocalDateTime(chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime(),
-                                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)
+                        chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()
                     ));
                 } else {
                     caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
@@ -251,8 +250,7 @@ public class HelpWithFeesService {
                         chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        CommonUtils.formatLocalDateTime(chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime(),
-                                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM)
+                        chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()
                     ));
                 }
             }
