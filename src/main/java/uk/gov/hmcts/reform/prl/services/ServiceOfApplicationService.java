@@ -83,10 +83,16 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP1;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP13;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP14;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP15;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE1;
@@ -95,6 +101,9 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_AP13;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_AP14;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_AP15;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_RE7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
@@ -4095,6 +4104,9 @@ public class ServiceOfApplicationService {
         return switch (templateHint) {
             case RE7_HINT -> getRe7Template(isWelsh);
             case RE8_HINT -> getRe8Template(isWelsh);
+            case AP13_HINT -> getAp13Template(isWelsh);
+            case AP14_HINT -> getAp14Template(isWelsh);
+            case AP15_HINT -> getAp15Template(isWelsh);
 
             default -> "";
         };
@@ -4106,6 +4118,18 @@ public class ServiceOfApplicationService {
 
     private String getRe8Template(boolean isWelsh) {
         return isWelsh ? PRL_LET_WEL_FL401_RE8 : PRL_LET_ENG_FL401_RE8;
+    }
+
+    private String getAp13Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_ENG_C100_AP13 : PRL_LET_WEL_C100_AP13;
+    }
+
+    private String getAp14Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_ENG_C100_AP14 : PRL_LET_WEL_C100_AP14;
+    }
+
+    private String getAp15Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_ENG_C100_AP15 : PRL_LET_WEL_C100_AP15;
     }
 
     /**
