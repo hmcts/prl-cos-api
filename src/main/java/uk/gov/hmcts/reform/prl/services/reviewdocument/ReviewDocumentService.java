@@ -505,7 +505,6 @@ public class ReviewDocumentService {
 
             if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())
                 && null != solicitorSendgridTemplate) {
-                dynamicData.put(NAME, partyData.getRepresentativeFullName());
                 sendEmailViaSendGrid(authTokenGenerator.generate(),
                                      responseDocument,
                                      dynamicData,
@@ -587,8 +586,6 @@ public class ReviewDocumentService {
         dynamicData.put("solicitorName", applicant.getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(ENG, documentLanguage.isGenEng());
-        dynamicData.put(WEL, documentLanguage.isGenWelsh());
         dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
         dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
         dynamicData.put("respondentName",  null == respondentName ? (documentLanguage.isGenWelsh()
