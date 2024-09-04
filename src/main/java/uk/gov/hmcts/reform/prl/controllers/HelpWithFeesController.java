@@ -127,6 +127,7 @@ public class HelpWithFeesController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("called mid event populateHwfDynamicData");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(helpWithFeesService
                 .populateHwfDynamicData(callbackRequest.getCaseDetails())).build();

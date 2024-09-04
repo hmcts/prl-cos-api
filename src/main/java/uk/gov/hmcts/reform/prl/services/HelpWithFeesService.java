@@ -203,9 +203,12 @@ public class HelpWithFeesService {
     }
 
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
+        log.info("inside populateHwfDynamicData");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
+        log.info("case state :" + caseDetails.getState());
         if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())) {
+            log.info("populate data for C100 application");
             caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL,
                                 String.format(
                                     HWF_APPLICATION_DYNAMIC_DATA,
@@ -219,6 +222,7 @@ public class HelpWithFeesService {
                                 )
             );
         } else {
+            log.info("populate data for additional application");
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
 
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
@@ -243,7 +247,7 @@ public class HelpWithFeesService {
                 }
             }
         }
-
+        log.info("HWF_APPLICATION_DYNAMIC_DATA_LABEL => " + caseDataUpdated.get(HWF_APPLICATION_DYNAMIC_DATA_LABEL));
         return caseDataUpdated;
     }
 
