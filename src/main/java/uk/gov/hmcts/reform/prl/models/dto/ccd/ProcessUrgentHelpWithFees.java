@@ -17,4 +17,5 @@ public class ProcessUrgentHelpWithFees {
     private String addHwfCaseNoteShort;
     private YesOrNo outstandingBalance;
     private YesOrNo managerAgreedApplicationBeforePayment;
+    private YesOrNo isTheCaseInDraftState;
 }
