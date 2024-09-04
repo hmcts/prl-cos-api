@@ -3804,7 +3804,6 @@ public class ServiceOfApplicationService {
                                           Element<PartyDetails> party,
                                           String templateHint,
                                           boolean isAccessCodeNeeded) {
-        List<Document> coverLetters = new ArrayList<>();
         CaseInvite caseInvite = null;
         if (isAccessCodeNeeded
             && !CaseUtils.hasDashboardAccess(party)
@@ -3812,6 +3811,18 @@ public class ServiceOfApplicationService {
             caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+
+        return getCoverLetters(authorization,
+                               caseData,
+                               templateHint,
+                               dataMap);
+    }
+
+    public List<Document> getCoverLetters(String authorization,
+                                          CaseData caseData,
+                                          String templateHint,
+                                          Map<String, Object> dataMap) {
+        List<Document> coverLetters = new ArrayList<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         //English
         if (documentLanguage.isGenEng()) {
