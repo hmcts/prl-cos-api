@@ -67,4 +67,10 @@ public class BaseCaseData {
     private DocumentsNotifications documentsNotifications;
 
     private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
+
+    /**
+     * Process urgent help with fees.
+     */
+    @JsonUnwrapped
+    private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
 }
