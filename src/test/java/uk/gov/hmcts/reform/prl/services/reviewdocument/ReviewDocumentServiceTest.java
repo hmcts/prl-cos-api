@@ -1186,24 +1186,25 @@ public class ReviewDocumentServiceTest {
     public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C7Application() throws IOException {
         testSendEmailProcessForApplicantsWhenRespondentSubmitApplication("respondentApplication",
                                                                          EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
-                                                                         SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT,
-                                                                         SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT);
+                                                                         SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+                                                                         SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT);
     }
 
     @Test
     public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C1AApplication() throws IOException {
         testSendEmailProcessForApplicantsWhenRespondentSubmitApplication("respondentC1AApplication",
                                                                          EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-                                                                         SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT,
+                                                                         SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
                                                                          SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR);
     }
 
     @Test
     public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C1AResponse() throws IOException {
         testSendEmailProcessForApplicantsWhenRespondentSubmitApplication("respondentC1AResponse",
-                             EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,
-                             SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM,
-                             SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR);
+                             EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
+                             SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
+                             SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR
+        );
     }
 
     public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(String category, EmailTemplateNames emailTemplate,
