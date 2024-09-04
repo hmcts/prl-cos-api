@@ -1,6 +1,9 @@
 buildscript {
   repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io' }
   }
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
@@ -47,11 +50,11 @@ def versions = [
   pact                         : '4.1.11',
   pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
-  reformsJavaLogging           : '5.1.7',
+  reformsJavaLogging           : '5.1.5',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.0.28',
   serenityCucumber             : '4.1.20',
-  serviceTokenGenerator        : '3.1.4',
+  serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.13',
   springSecurityRsa            : '1.1.5',
@@ -142,16 +145,16 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-        dependencySet(group: 'io.netty', version: '4.1.112.Final') {
-            entry 'netty-buffer'
-            entry 'netty-codec'
-            entry 'netty-codec-http'
-            entry 'netty-common'
-            entry 'netty-handler'
-            entry 'netty-resolver'
-            entry 'netty-transport'
-        }
+      // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+      dependencySet(group: 'io.netty', version: '4.1.111.Final') {
+        entry 'netty-buffer'
+        entry 'netty-codec'
+        entry 'netty-codec-http'
+        entry 'netty-common'
+        entry 'netty-handler'
+        entry 'netty-resolver'
+        entry 'netty-transport'
+      }
 
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
@@ -289,7 +292,7 @@ dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
 
-    implementation 'org.testng:testng:7.10.2'
+  implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
@@ -318,20 +321,20 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.8'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
+  implementation 'com.github.hmcts.java-logging:logging:6.1.6'
+  implementation 'com.github.hmcts.java-logging:logging-appinsights:6.1.6'
+  //implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformsJavaLogging
+
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.23.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.23.1'
-  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+  implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
   implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.0.1'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
@@ -342,7 +345,6 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -389,13 +391,14 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.7'){
     force = true
   }
+  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
 
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'
@@ -404,7 +407,7 @@ dependencies {
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.3.2'
-  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.0'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.3.2'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.3.2'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
@@ -440,7 +443,7 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-  integrationTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
+  integrationTestImplementation(group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'
@@ -454,7 +457,7 @@ dependencies {
   functionalTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   functionalTestImplementation group: 'org.springframework', name: 'spring-context-support'
   functionalTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  functionalTestImplementation (group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
+  functionalTestImplementation (group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'
@@ -613,7 +616,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java'
-
 ]
 
 sonarqube {
