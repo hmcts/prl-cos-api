@@ -134,8 +134,6 @@ public class HelpWithFeesServiceTest {
     public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
-            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
-                .build())
             .build();
 
         caseDetails = caseDetails.toBuilder()
@@ -208,7 +206,7 @@ public class HelpWithFeesServiceTest {
 
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getValue())
-            .data(new HashMap<>())
+            .data(casedata.toMap(new ObjectMapper()))
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);

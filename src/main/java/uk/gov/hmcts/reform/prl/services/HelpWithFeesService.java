@@ -74,6 +74,9 @@ public class HelpWithFeesService {
     private final AddCaseNoteService addCaseNoteService;
     private final UserService userService;
 
+    protected static final String[] HWF_TEMP_FIELDS = {HWF_APP_LIST,ADD_HWF_CASE_NOTE_SHORT,HWF_APPLICATION_DYNAMIC_DATA_LABEL};
+
+
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted() {
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(APPLICATION_UPDATED)
@@ -137,9 +140,16 @@ public class HelpWithFeesService {
                 addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
             );
         }
-        caseDataUpdated.put(HWF_APP_LIST, null);
-        caseDataUpdated.put(ADD_HWF_CASE_NOTE_SHORT, null);
+        cleanup(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private static void cleanup(Map<String, Object> caseDataUpdated) {
+        for (String field : HWF_TEMP_FIELDS) {
+            if (caseDataUpdated.containsKey(field)) {
+                caseDataUpdated.remove(field);
+            }
+        }
     }
 
     public Map<String, Object> handleAboutToStart(CaseDetails caseDetails) {
