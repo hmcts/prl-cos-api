@@ -545,7 +545,7 @@ public class ServiceOfApplicationService {
         if (CollectionUtils.isNotEmpty(selectedApplicants)) {
             selectedApplicants.forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
-                    List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
+                    List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.Q, staticDocs);
                     sendNotificationCaNonPersonalApplicantCitizen(
                         caseData,
                         authorization,
@@ -2406,6 +2406,7 @@ public class ServiceOfApplicationService {
                             C1A_BLANK_DOCUMENT_FILENAME) || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_WELSH_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C7_BLANK_DOCUMENT_FILENAME)).toList());
         return docs;
@@ -3478,7 +3479,6 @@ public class ServiceOfApplicationService {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         List<Element<Document>> packDocs = new ArrayList<>();
-        boolean mainApplicant = true;
         List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
         for (String partyId : selectedPartyIds) {
             Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
@@ -3494,14 +3494,7 @@ public class ServiceOfApplicationService {
                     packDocs.add(element(coverLetters.get(0)));
                     CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
                 }
-                if (mainApplicant) {
-                    if (CaseUtils.hasLegalRepresentation(party.get().getValue())) {
-                        packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
-                    } else {
-                        packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
-                    }
-                }
-                mainApplicant = false;
+                packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
             }
         }
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
