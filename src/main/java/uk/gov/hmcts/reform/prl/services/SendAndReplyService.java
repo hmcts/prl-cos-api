@@ -811,10 +811,7 @@ public class SendAndReplyService {
     }
 
     private String getMessageSentTO(CaseData caseData, Message message) {
-        return String.valueOf(
-            (REPLY.equals(caseData.getChooseSendOrReply())
-                ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
-                : message.getInternalMessageWhoToSendTo().getDisplayedValue()));
+        return message.getInternalMessageWhoToSendTo().getDisplayedValue();
     }
 
     private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
