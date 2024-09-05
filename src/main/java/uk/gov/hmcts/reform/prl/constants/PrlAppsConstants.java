@@ -1035,4 +1035,16 @@ public class PrlAppsConstants {
 
     public static final String COURTNAV_USER = "courtnav";
 
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
+    //Flag to enable citizen DA journey
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
+
+    public static final String HWF_APP_LIST = "hwfAppList";
+    public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
+
+    public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
 }

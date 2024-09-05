@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -41,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
@@ -66,6 +69,7 @@ public class CitizenCaseUpdateService {
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final CitizenAwpMapper citizenAwpMapper;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -160,6 +164,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+
+        caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
 
@@ -184,6 +191,19 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
+        caseDataToSubmit = caseDataToSubmit.toBuilder()
+            .helpWithFeesNumber(isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
+                                    && YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+                                    ? citizenUpdatedCaseData.getHelpWithFeesNumber() : null)
+            .paymentServiceRequestReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber())
+                                                      ? citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber() : null)
+            .paymentReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentReferenceNumber())
+                                        ? citizenUpdatedCaseData.getPaymentReferenceNumber() : null)
+            .build();
+        return caseDataToSubmit;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
@@ -281,5 +301,49 @@ public class CitizenCaseUpdateService {
             startAllTabsUpdateDataContent.userDetails()
         );
         return ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
+    }
+
+    public CaseDetails saveCitizenAwpApplication(String authorisation,
+                                                 String caseId,
+                                                 CitizenAwpRequest citizenAwpRequest) {
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = null;
+        //PRL-4023, PRL-4024 WA - trigger events based on help with fees opted
+        if (null != citizenAwpRequest
+            && Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && null != citizenAwpRequest.getHwfReferenceNumber()) {
+            startAllTabsUpdateDataContent =
+                allTabService.getStartUpdateForSpecificUserEvent(
+                    caseId,
+                    CaseEvent.CITIZEN_AWP_HWF_CREATE.getValue(),
+                    authorisation
+                );
+        } else {
+            startAllTabsUpdateDataContent =
+                allTabService.getStartUpdateForSpecificUserEvent(
+                    caseId,
+                    CaseEvent.CITIZEN_AWP_CREATE.getValue(),
+                    authorisation
+                );
+        }
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
+        //Map awp citizen data fields into solicitor fields
+        CaseData updatedCaseData = citizenAwpMapper.map(caseData, citizenAwpRequest);
+
+        Map<String, Object> caseDataMapToBeUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        //Update latest awp data after mapping into caseData
+        caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
+        caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
+        caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
+
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
+        );
     }
 }

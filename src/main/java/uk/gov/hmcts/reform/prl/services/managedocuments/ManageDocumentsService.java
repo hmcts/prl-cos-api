@@ -310,6 +310,7 @@ public class ManageDocumentsService {
             .isRestricted(quarantineLegalDoc.getIsRestricted())
             .restrictedDetails(quarantineLegalDoc.getRestrictedDetails())
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
+            .solicitorRepresentedPartyName(quarantineLegalDoc.getSolicitorRepresentedPartyName())
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .uploaderRole(quarantineLegalDoc.getUploaderRole())
             //PRL-5006 - bulk scan fields
@@ -458,6 +459,7 @@ public class ManageDocumentsService {
             .isRestricted(quarantineLegalDoc.getIsRestricted())
             .notes(quarantineLegalDoc.getRestrictedDetails())
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
+            .solicitorRepresentedPartyName(quarantineLegalDoc.getSolicitorRepresentedPartyName())
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .build();
     }
