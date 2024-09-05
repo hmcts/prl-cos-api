@@ -882,9 +882,6 @@ public class C100RespondentSolicitorService {
                     representedRespondent.getValue().getResponse()
                         .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
                     "respondentC1AResponse", "Respondent C1A response"));
-                    representedRespondent.getValue().getLabelForDynamicList(),
-                    String.valueOf(representedRespondent.getId())
-                ));
             }
             updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
             log.info("quarantine legal doc list {} ", quarantineLegalDocList);
@@ -1005,8 +1002,6 @@ public class C100RespondentSolicitorService {
             .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
-        quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c7FinalDocument,
-                                                               "respondentApplication", "Respondent Application"));
 
         if (documentLanguage.isGenEng()) {
             Document c7FinalDocument = documentGenService.generateSingleDocument(
@@ -1016,12 +1011,8 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c1aFinalDocument,
-                                                                "respondentC1AApplication","Respondent C1A Application"));
-            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7FinalDocument,
-                                                               representedRespondent.getValue().getLabelForDynamicList(),
-                                                               String.valueOf(representedRespondent.getId())
-            ));
+            quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c7FinalDocument,
+                                                                   "respondentApplication", "Respondent Application"));
         }
 
         if (representedRespondent.getValue().getResponse() != null
@@ -1035,10 +1026,8 @@ public class C100RespondentSolicitorService {
                     false,
                     dataMap
                 );
-                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument,
-                                                                    representedRespondent.getValue().getLabelForDynamicList(),
-                                                                    String.valueOf(representedRespondent.getId())
-                ));
+                quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c1aFinalDocument,
+                                                                       "respondentC1AApplication","Respondent C1A Application"));
             }
 
             if (documentLanguage.isGenWelsh()) {
@@ -1968,21 +1957,5 @@ public class C100RespondentSolicitorService {
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();
-    }
-
-    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document, String partyName, String partyId) {
-        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-        return QuarantineLegalDoc.builder()
-            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .categoryId("respondentC1AResponse")
-            .categoryName("Respondent C1A response")
-            .isConfidential(Yes)
-            .fileName(document.getDocumentFileName())
-            .uploadedBy(userDetails.getFullName())
-            .uploaderRole(loggedInUserType)
-            .document(document)
-            .solicitorRepresentedPartyName(partyName)
-            .solicitorRepresentedPartyId(partyId)
-            .build();
     }
 }
