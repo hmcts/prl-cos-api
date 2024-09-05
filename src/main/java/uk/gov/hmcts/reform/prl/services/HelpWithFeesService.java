@@ -90,7 +90,7 @@ public class HelpWithFeesService {
             caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
-            caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.Yes);
+            caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.Yes.getDisplayedValue());
         } else {
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
@@ -124,7 +124,7 @@ public class HelpWithFeesService {
                     )
                 );
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
-                caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No);
+                caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No.getDisplayedValue());
             }
         }
         if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
