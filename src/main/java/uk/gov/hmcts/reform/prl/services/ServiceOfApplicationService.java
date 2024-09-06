@@ -2358,9 +2358,10 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
-        return soaSelectedOrders.stream().filter(d -> !(SOA_C6A_OTHER_PARTIES_ORDER.equalsIgnoreCase(d.getDocumentFileName())
+        return CollectionUtils.isNotEmpty(soaSelectedOrders)
+            ? soaSelectedOrders.stream().filter(d -> !(SOA_C6A_OTHER_PARTIES_ORDER.equalsIgnoreCase(d.getDocumentFileName())
                 || SOA_C6A_OTHER_PARTIES_ORDER_WELSH.equalsIgnoreCase(d.getDocumentFileName())))
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
@@ -2573,6 +2574,9 @@ public class ServiceOfApplicationService {
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         List<Document> selectedOrders = new ArrayList<>();
+        log.info("SOA Screen 1 {}", caseData.getServiceOfApplicationScreen1());
+        log.info("orders  {}", caseData.getOrderCollection());
+
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
@@ -2593,6 +2597,7 @@ public class ServiceOfApplicationService {
                                        }));
             return selectedOrders;
         }
+        log.info("Selected orders {}", selectedOrders);
         return Collections.emptyList();
 
     }
