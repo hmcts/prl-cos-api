@@ -609,7 +609,7 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
 
-    public static final String COURTNAV = "COURTNAV";
+    public static final String COURTNAV = "CourtNav";
     public static final String NA_COURTNAV = "NA_COURTNAV";
 
     public static final String DISTRICT_JUDGE = "districtJudge";
@@ -1029,6 +1029,11 @@ public class PrlAppsConstants {
     public static final String SOA_BY_EMAIL = "By email";
     public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
     public static final String SOA_BY_POST = "By post";
+
+    //Citizen dashboard notifications
+    public static final String CAN_10_FM5 = "CAN_10";
+
+    public static final String COURTNAV_USER = "courtnav";
 
     //Order SOS statuses
     public static final String SOS_PENDING = "PENDING";

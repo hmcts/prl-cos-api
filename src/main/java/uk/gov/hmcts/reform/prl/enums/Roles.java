@@ -8,7 +8,8 @@ public enum Roles {
     COURT_ADMIN("COURT_ADMIN","caseworker-privatelaw-courtadmin"),
     CITIZEN("CITIZEN","citizen"),
     BULK_SCAN("BULK_SCAN","caseworker-privatelaw-bulkscan"),
-    SYSTEM_UPDATE("SYSTEM_UPDATE","caseworker-privatelaw-systemupdate");
+    SYSTEM_UPDATE("SYSTEM_UPDATE","caseworker-privatelaw-systemupdate"),
+    COURTNAV("COURTNAV","courtnav"),;
 
     private final String id;
     private final String value;
