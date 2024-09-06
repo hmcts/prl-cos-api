@@ -2595,9 +2595,9 @@ public class ServiceOfApplicationService {
                                                selectedOrders.add(o.getValue().getOrderDocumentWelsh());
                                            }
                                        }));
+            log.info("Selected orders {}", selectedOrders);
             return selectedOrders;
         }
-        log.info("Selected orders {}", selectedOrders);
         return Collections.emptyList();
 
     }
