@@ -286,7 +286,7 @@ dependencyCheck {
 ext['snakeyaml.version'] = '2.2'
 
 dependencies {
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
 
     implementation 'org.testng:testng:7.10.2'
@@ -334,7 +334,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.14.3'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.1'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
@@ -489,7 +489,7 @@ dependencies {
 
   integrationTestImplementation(sourceSets.test.output)
   testImplementation 'com.github.hmcts:fortify-client:1.4.4:all'
-  testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.4'
+  testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
   implementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
