@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -12,20 +13,12 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SoaPack {
+public class CoverLetterMap {
+    @JsonProperty("coverLetters")
+    private List<Element<Document>> coverLetters;
 
-    private final List<Element<Document>> packDocument;
-
-    private final List<Element<String>> partyIds;
-
-    private final String servedBy;
-
-    private final String packCreatedDate;
-
-    private final String personalServiceBy;
-
-    @JsonProperty("coverLettersMap")
-    private final List<Element<CoverLetterMap>> coverLettersMap;
-
-    private final String servedPartyEmail;
+    @JsonCreator
+    public CoverLetterMap(List<Element<Document>> coverLetters) {
+        this.coverLetters = coverLetters;
+    }
 }

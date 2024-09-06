@@ -45,7 +45,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -148,7 +147,6 @@ public class StmtOfServImplService {
                                               Map<String, Object> caseDataMap) {
         log.info("SOS for Application packs");
         List<Element<StmtOfServiceAddRecipient>> sosRecipients = new ArrayList<>();
-        Map<String,List<Element<Document>>> coverLettersMap = new HashMap<>();
         //Get all sos recipients
         caseData.getStatementOfService().getStmtOfServiceAddRecipient()
             .stream()
@@ -159,7 +157,7 @@ public class StmtOfServImplService {
                 //PRL-5979 - Send cover letter with access code to respondents
                 caseDataMap.put(
                     ACCESS_CODE_NOTIFICATIONS,
-                    sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient, coverLettersMap)
+                    sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient)
                 );
 
                 sosRecipients.add(element(sosRecipient.toBuilder()
@@ -184,8 +182,7 @@ public class StmtOfServImplService {
             //update served application details for respondents
             finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksPersonalService(
                 caseData,
-                authorisation,
-                coverLettersMap
+                authorisation
             )));
             caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
             caseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
@@ -360,8 +357,7 @@ public class StmtOfServImplService {
         return respondentListItems;
     }
 
-    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization,
-                                                                                Map<String, List<Element<Document>>> coverLettersMap) {
+    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -375,8 +371,10 @@ public class StmtOfServImplService {
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
-            if (null != coverLettersMap.get(partyId)) {
-                docs.addAll(0, coverLettersMap.get(partyId));
+            if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLettersMap())) {
+                docs.addAll(0, wrapElements(CaseUtils.getCoverLettersForParty(UUID.fromString(partyId),
+                                                                              caseData.getServiceOfApplication()
+                                                                                  .getUnServedRespondentPack().getCoverLettersMap())));
             }
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
@@ -387,7 +385,6 @@ public class StmtOfServImplService {
         } else {
             checkAndServeRespondentPacksC100PersonalService(
                 caseData,
-                coverLettersMap,
                 unServedRespondentPack,
                 emailNotificationDetails,
                 bulkPrintDetails,
@@ -407,18 +404,18 @@ public class StmtOfServImplService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private void checkAndServeRespondentPacksC100PersonalService(CaseData caseData, Map<String, List<Element<Document>>> coverLettersMap,
-                                                                 SoaPack unServedRespondentPack,
+    private void checkAndServeRespondentPacksC100PersonalService(CaseData caseData, SoaPack unServedRespondentPack,
                                                                  List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                  List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                  List<Element<Document>> docs) {
         for (int i = 0; i < caseData.getRespondents().size(); i++) {
             String partyId = String.valueOf(caseData.getRespondents().get(i).getId());
-            if (null != coverLettersMap.get(partyId)) {
-                docs.addAll(0, coverLettersMap.get(partyId));
+            if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack().getCoverLettersMap())) {
+                docs.addAll(0, wrapElements(CaseUtils.getCoverLettersForParty(UUID.fromString(partyId),
+                                                                              caseData.getServiceOfApplication().getUnServedRespondentPack()
+                                                .getCoverLettersMap())));
             }
             log.info("Docs after adding cover letter {} {}", partyId, docs);
-            log.info("Cover letter map {}", coverLettersMap.get(partyId));
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
@@ -629,13 +626,12 @@ public class StmtOfServImplService {
 
     private List<Element<DocumentsNotification>> sendAccessCodesToRespondentsByCourtLegalRep(String authorization,
                                                                                              CaseData caseData,
-                                                                                             StmtOfServiceAddRecipient recipient,
-                                                                                             Map<String, List<Element<Document>>> coverLettersMap) {
+                                                                                             StmtOfServiceAddRecipient recipient) {
         List<Element<DocumentsNotification>> documentsNotifications = getExistingAccessCodeNotifications(caseData);
         //PRL-5979 - Send cover letter with access code to respondent only if LD flag is enabled
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-                sendAccessCodesToC100RespondentsByCourtLegalRep(authorization, caseData, recipient, coverLettersMap, documentsNotifications);
+                sendAccessCodesToC100RespondentsByCourtLegalRep(authorization, caseData, recipient, documentsNotifications);
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 //send to respondent
                 documentsNotifications.add(sendAccessCodeCoverLetter(
@@ -653,45 +649,27 @@ public class StmtOfServImplService {
     }
 
     private void sendAccessCodesToC100RespondentsByCourtLegalRep(String authorization, CaseData caseData, StmtOfServiceAddRecipient recipient,
-                                                                 Map<String, List<Element<Document>>> coverLettersMap,
                                                                  List<Element<DocumentsNotification>> documentsNotifications) {
         if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
             //send to all respondents
             documentsNotifications.addAll(caseData.getRespondents().stream()
-                                              .map(respondent -> {
-                                                  Element<DocumentsNotification> documentsNotificationElement = sendAccessCodeCoverLetter(
+                                              .map(respondent -> sendAccessCodeCoverLetter(
                                                       authorization,
                                                       caseData,
                                                       respondent,
                                                       true
-                                                  );
-                                                  if (null != documentsNotificationElement) {
-                                                      coverLettersMap.put(String.valueOf(respondent.getId()),
-                                                                          documentsNotificationElement.getValue().getDocuments());
-                                                  }
-                                                  return documentsNotificationElement;
-                                              }).toList());
+                                                  )).toList());
         } else {
             //send to selected respondent
             documentsNotifications.addAll(caseData.getRespondents().stream()
                                               .filter(respondent -> respondent.getId().toString().equals(
                                                   recipient.getRespondentDynamicList().getValue().getCode()))
-                                              .map(respondent -> {
-                                                  Element<DocumentsNotification> documentsNotificationElement = sendAccessCodeCoverLetter(
+                                              .map(respondent -> sendAccessCodeCoverLetter(
                                                       authorization,
                                                       caseData,
                                                       respondent,
                                                       true
-                                                  );
-                                                  if (null != documentsNotificationElement) {
-
-                                                      coverLettersMap.put(
-                                                          String.valueOf(respondent.getId()),
-                                                          documentsNotificationElement.getValue().getDocuments()
-                                                      );
-                                                  }
-                                                  return documentsNotificationElement;
-                                              }).toList());
+                                                  )).toList());
         }
     }
 

@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -205,6 +206,8 @@ public class ServiceOfApplicationServiceTest {
 
     List<Element<String>> partyIdsSoa;
 
+    List<Element<CoverLetterMap>> coverletterMap;
+
     @Before
     public void setup() throws Exception {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
@@ -223,6 +226,10 @@ public class ServiceOfApplicationServiceTest {
             .caseInviteEmail(testString)
             .hasLinked(testString)
             .build();
+        coverletterMap = new ArrayList<>();
+        coverletterMap.add(element(UUID.fromString(TEST_UUID), CoverLetterMap.builder()
+            .coverLetters(List.of(element(Document.builder().build())))
+            .build()));
         caseInvite1 = CaseInvite.builder()
             .caseInviteEmail("inviteemail@test.com")
             .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
@@ -250,6 +257,7 @@ public class ServiceOfApplicationServiceTest {
                                        .partyIds(partyIdsSoa)
                                        .packDocument(List.of(element(Document.builder()
                                                                          .documentFileName("").build())))
+                                       .coverLettersMap(coverletterMap)
                                        .build())
             .unServedRespondentPack(SoaPack.builder()
                                         .partyIds(partyIdsSoa)
@@ -328,16 +336,6 @@ public class ServiceOfApplicationServiceTest {
             .build();
         Element<PartyDetails> respondent = element(partyDetails);
         Element<PartyDetails> applicant = element(partyDetails);
-
-        DynamicMultiselectListElement dynamicMultiselectListElementApplicant = DynamicMultiselectListElement.builder()
-            .code(applicant.getId().toString())
-            .label(applicant.getValue().getRepresentativeFirstName() + " "
-                       + applicant.getValue().getRepresentativeLastName())
-            .build();
-        DynamicMultiSelectList dynamicMultiSelectListApplicant = DynamicMultiSelectList.builder()
-            .listItems(List.of(dynamicMultiselectListElementApplicant))
-            .value(List.of(dynamicMultiselectListElementApplicant))
-            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -366,7 +364,7 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
-                                                  dynamicMultiSelectListApplicant.getValue(),
+                                                  Arrays.asList(applicant),
                                                   List.of(Document.builder().build()), "Applicant");
         assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
@@ -381,16 +379,6 @@ public class ServiceOfApplicationServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> applicant = element(partyDetails);
-
-        DynamicMultiselectListElement dynamicMultiselectListElementApplicant = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID)
-            .label(applicant.getValue().getRepresentativeFirstName() + " "
-                       + applicant.getValue().getRepresentativeLastName())
-            .build();
-        DynamicMultiSelectList dynamicMultiSelectListApplicant = DynamicMultiSelectList.builder()
-            .listItems(List.of(dynamicMultiselectListElementApplicant))
-            .value(List.of(dynamicMultiselectListElementApplicant))
-            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -419,7 +407,7 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
-                                                  dynamicMultiSelectListApplicant.getValue(),
+                                                  Arrays.asList(applicant),
                                                   List.of(Document.builder().build()), "Applicant");
         assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
@@ -549,6 +537,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .coverLettersMap(coverletterMap)
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .packDocument(List.of(element(Document.builder()
@@ -640,6 +629,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
+                                                                 .coverLettersMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder().build())
@@ -2642,6 +2632,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
+                                                                 .coverLettersMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
@@ -2688,6 +2679,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
+                                                                 .coverLettersMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
@@ -2769,6 +2761,7 @@ public class ServiceOfApplicationServiceTest {
                                           .unServedApplicantPack(SoaPack.builder()
                                                                      .partyIds(partyIds)
                                                                      .personalServiceBy("courtAdmin")
+                                                                     .coverLettersMap(coverletterMap)
                                                                      .build())
                                           .unServedRespondentPack(SoaPack.builder()
                                                                       .partyIds(partyIds)
@@ -3670,6 +3663,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIdsSoa)
+                                                                 .coverLettersMap(coverletterMap)
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIdsSoa)
@@ -4227,6 +4221,7 @@ public class ServiceOfApplicationServiceTest {
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
             PartyDetails partyDetails1 = PartyDetails.builder()
+                .partyId(testUuid)
                 .solicitorOrg(Organisation.builder().organisationName("test").build())
                 .user(User.builder()
                           .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
@@ -4235,6 +4230,7 @@ public class ServiceOfApplicationServiceTest {
                 .build();
 
             PartyDetails partyDetails2 = PartyDetails.builder()
+                .partyId(testUuid)
                 .solicitorOrg(Organisation.builder().organisationName("test").build())
                 .contactPreferences(ContactPreferences.email)
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4288,6 +4284,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     .build()))
                                           .unServedApplicantPack(SoaPack.builder()
                                                                      .personalServiceBy("courtAdmin")
+                                                                     .coverLettersMap(coverletterMap)
                                                                      .partyIds(partyIds).build())
                                           .unServedRespondentPack(SoaPack.builder()
                                                                       .partyIds(partyIds)
