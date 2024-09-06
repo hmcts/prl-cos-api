@@ -56,8 +56,8 @@ public class ResetAccessCodeControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Before
     public void init() {
@@ -116,7 +116,7 @@ public class ResetAccessCodeControllerTest {
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
-            .resetAccessCode(authToken,s2sToken,callbackRequest);
+            .resetAccessCode(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertTrue(response.getData().containsKey("caseInvites"));
     }
 
@@ -130,10 +130,10 @@ public class ResetAccessCodeControllerTest {
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
             resetAccessCodeController
-                .resetAccessCode(authToken,s2sToken,callbackRequest);
+                .resetAccessCode(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
