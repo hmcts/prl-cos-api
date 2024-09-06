@@ -26,9 +26,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,12 +40,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_HWF_CASE_NO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS_AM_PM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HWF_APP_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_THE_CASE_IN_DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -59,7 +63,7 @@ public class HelpWithFeesService {
         You’ve updated the applicant’s help with fees record. You can now process the family application.
         \n
         If the applicant needs to make a payment. You or someone else at the court
-        needs to contact the applicant or their legal representative. to arrange a payment.
+        needs to contact the applicant or their legal representative, to arrange a payment.
         """;
     public static final String HWF_APPLICATION_DYNAMIC_DATA = """
        Application: %s \n
@@ -146,9 +150,7 @@ public class HelpWithFeesService {
 
     private static void cleanup(Map<String, Object> caseDataUpdated) {
         for (String field : HWF_TEMP_FIELDS) {
-            if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
-            }
+            caseDataUpdated.remove(field);
         }
     }
 
@@ -222,12 +224,12 @@ public class HelpWithFeesService {
             caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL,
                                 String.format(
                                     HWF_APPLICATION_DYNAMIC_DATA,
-                                    String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                                    String.format("%s, %s", caseData.getApplicantCaseName(), caseData.getId()),
                                     caseData.getHelpWithFeesNumber(),
                                     caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
                                     CommonUtils.formatLocalDateTime(
                                         caseData.getCaseSubmittedTimeStamp(),
-                                        DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM
+                                        DD_MMM_YYYY_HH_MM_SS
                                     )
                                 )
             );
@@ -242,7 +244,7 @@ public class HelpWithFeesService {
                         AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()
+                        getAwpUploadedDateTime(chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime())
                     ));
                 } else {
                     caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(
@@ -250,13 +252,20 @@ public class HelpWithFeesService {
                         chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
                         chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
                         chosenAdditionalApplication.getValue().getAuthor(),
-                        chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()
+                        getAwpUploadedDateTime(chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime())
                     ));
                 }
             }
         }
         log.info("HWF_APPLICATION_DYNAMIC_DATA_LABEL => " + caseDataUpdated.get(HWF_APPLICATION_DYNAMIC_DATA_LABEL));
         return caseDataUpdated;
+    }
+
+    private String getAwpUploadedDateTime(String dateTime) {
+        LocalDateTime localDateTime = LocalDateTime.parse(
+            dateTime, DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS_AM_PM, Locale.ENGLISH));
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS, Locale.ENGLISH);
+        return localDateTime.format(dateTimeFormat);
     }
 
     private Element<AdditionalApplicationsBundle> getChosenAdditionalApplication(CaseData caseData) {

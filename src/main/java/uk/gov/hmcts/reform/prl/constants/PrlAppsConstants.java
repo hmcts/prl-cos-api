@@ -901,6 +901,7 @@ public class PrlAppsConstants {
 
     public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
     public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
+    public static final String DD_MMM_YYYY_HH_MM_SS_AM_PM = "d-MMM-yyyy hh:mm:ss a";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";

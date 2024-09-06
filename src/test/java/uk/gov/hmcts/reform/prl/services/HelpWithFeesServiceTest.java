@@ -298,7 +298,8 @@ public class HelpWithFeesServiceTest {
             .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplications = new ArrayList<>();
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
-            .c2DocumentBundle(C2DocumentBundle.builder().build())
+            .c2DocumentBundle(C2DocumentBundle.builder()
+                                  .uploadedDateTime("04-Sep-2024 01:38:33 PM").build())
             .payment(Payment.builder().status(PaymentStatus.HWF.getDisplayedValue()).hwfReferenceNumber("HWF-1BC-AF").build())
             .build();
         additionalApplications.add(element(applicationId,additionalApplicationsBundle));
@@ -327,6 +328,7 @@ public class HelpWithFeesServiceTest {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicationType(OtherApplicationType.C1_CHILD_ORDER)
+                                         .uploadedDateTime("04-Sep-2024 01:38:33 PM")
                                          .build())
             .payment(Payment.builder().status(PaymentStatus.HWF.getDisplayedValue()).hwfReferenceNumber("HWF-1BC-AF").build())
             .build();
