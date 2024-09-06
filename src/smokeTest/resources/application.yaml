@@ -531,6 +531,8 @@ document:
       doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
+      doc_send_reply_message_template: PRL-DOCUMENT-ENG-SEND-REPLY-MESSAGE.docx
+      doc_send_reply_message_welsh_template: PRL-WEL-DOCUMENT-SEND-REPLY-MESSAGE.docx
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
