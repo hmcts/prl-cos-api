@@ -735,7 +735,7 @@ public class ServiceOfApplicationService {
                                        applicant,
                                        Templates.PRL_LET_ENG_AP1);
         }
-        packFdocs = packFdocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
             .toList();
         caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
@@ -3130,7 +3130,7 @@ public class ServiceOfApplicationService {
             authorization,
             fl401StaticDocs
         );
-        packdDocs = packdDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        packdDocs = packdDocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
             .toList();
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
