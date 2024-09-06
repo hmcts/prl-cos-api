@@ -695,18 +695,18 @@ public class ServiceOfApplicationService {
                                                              List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                              List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                              Map<String, Object> caseDataMap,
-                                                             List<Document> c100StaticDocs) {
+                                                             List<Document> fl401StaticDocs) {
         Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
         Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
         List<Document> docs = new ArrayList<>();
-        List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
+        List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
         List<Document> packFdocs = new ArrayList<>();
         if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
             packFdocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2));
         } else {
             packFdocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3));
         }
-        packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs));
+        packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs));
         removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
             Map<String, String> fieldsMap = new HashMap<>();
@@ -727,7 +727,8 @@ public class ServiceOfApplicationService {
                                        applicant,
                                        Templates.PRL_LET_ENG_AP1);
         }
-
+        packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+            .toList();
         caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
             .partyIds(List.of(element(String.valueOf(caseData.getRespondentsFL401().getPartyId()))))
@@ -851,6 +852,8 @@ public class ServiceOfApplicationService {
     private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
                                                       Map<String, Object> caseDataMap, String personalServiceBy) {
         List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
+        staticDocs = staticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+            .toList();
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
@@ -3312,12 +3315,15 @@ public class ServiceOfApplicationService {
     private void generatePacksForConfidentialCheckDaApplicantLip(String authorization, CaseData caseData,
                                                                  Map<String, Object> caseDataUpdated,
                                                                  List<Document> fl401StaticDocs) {
-        List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
         Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
         Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
         Document applicantCoverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1);
+        List<Document> packEDocs = new ArrayList<>();
         packEDocs.add(applicantCoverLetter);
         Document respondentCoverLetter;
+        packEDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs));
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+            .toList();
         List<Document> packFDocs = getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
         if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
             respondentCoverLetter = generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2);
@@ -3357,6 +3363,8 @@ public class ServiceOfApplicationService {
             fl401StaticDocs,
             coverLetterMap
         );
+        packdDocs = packdDocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+            .toList();
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
@@ -3402,7 +3410,8 @@ public class ServiceOfApplicationService {
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
-
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+            .toList();
         List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, fl401StaticDocs);
         List<Document> reLetters = new ArrayList<>();
         Element<PartyDetails> respondent = Element.<PartyDetails>builder()
