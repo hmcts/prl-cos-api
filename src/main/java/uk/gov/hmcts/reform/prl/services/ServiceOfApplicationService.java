@@ -2165,19 +2165,19 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
-        return soaSelectedOrders.stream().filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER) || d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER_WELSH))).collect(Collectors.toList());
+        return soaSelectedOrders.stream().filter(d -> !(SOA_C6A_OTHER_PARTIES_ORDER.equalsIgnoreCase(d.getDocumentFileName())
+                || SOA_C6A_OTHER_PARTIES_ORDER_WELSH.equalsIgnoreCase(d.getDocumentFileName())))
+            .collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
-                            || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME)
-                            || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_WELSH_FILENAME)
-                            || d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME)))
+                        .filter(d -> !(SOA_NOTICE_SAFETY.equalsIgnoreCase(d.getDocumentFileName())
+                            || C1A_BLANK_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())
+                            || C1A_BLANK_DOCUMENT_WELSH_FILENAME.equalsIgnoreCase(d.getDocumentFileName())
+                            || C7_BLANK_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())))
                         .toList());
         docs.addAll(getSoaSelectedOrders(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -2304,13 +2304,9 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
-        log.info("after witness docs {}", docs);
         docs.addAll(staticDocs);
-        log.info("static docs {}", staticDocs);
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        log.info("after non c6 docs {}", staticDocs);
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        log.info("after uploaded docs {}", docs);
         return docs;
     }
 
