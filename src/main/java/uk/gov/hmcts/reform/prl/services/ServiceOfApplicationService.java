@@ -2588,10 +2588,10 @@ public class ServiceOfApplicationService {
                                        .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                                        .findFirst()
                                        .ifPresent(o -> {
-                                           if (documentLanguage.isGenEng()) {
+                                           if (documentLanguage.isGenEng() && null != o.getValue().getOrderDocument()) {
                                                selectedOrders.add(o.getValue().getOrderDocument());
                                            }
-                                           if (documentLanguage.isGenWelsh()) {
+                                           if (documentLanguage.isGenWelsh() && null != o.getValue().getOrderDocumentWelsh()) {
                                                selectedOrders.add(o.getValue().getOrderDocumentWelsh());
                                            }
                                        }));
