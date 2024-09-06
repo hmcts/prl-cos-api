@@ -489,7 +489,7 @@ dependencies {
 
   integrationTestImplementation(sourceSets.test.output)
   testImplementation 'com.github.hmcts:fortify-client:1.4.4:all'
-  testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.4'
+  testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
   implementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
