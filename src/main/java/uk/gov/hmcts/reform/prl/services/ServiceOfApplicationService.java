@@ -534,11 +534,11 @@ public class ServiceOfApplicationService {
     private void sendNotificationsSoaC100NonPersonal(CaseData caseData, String authorization,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> staticDocs) {
-        List<Element<PartyDetails>> selectedApplicants = getSelectedApplicantsOrRespondentsElements(
+        List<Element<PartyDetails>> selectedApplicants = getSelectedPartyElements(
             caseData.getApplicants(),
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
         );
-        List<Element<PartyDetails>> selectedRespondents = getSelectedApplicantsOrRespondentsElements(
+        List<Element<PartyDetails>> selectedRespondents = getSelectedPartyElements(
             caseData.getRespondents(),
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
         );
@@ -1000,9 +1000,9 @@ public class ServiceOfApplicationService {
         List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
                                                                             caseData.getRespondentsFL401()));
 
-        applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
+        applicantFl401 = getSelectedPartyElements(applicantFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
+        respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
         sendNotificationsDaNonPersonalApplicant(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, applicantFl401);
         sendNotificationsDaNonPersonalRespondent(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, respondentFl401);
@@ -1135,7 +1135,7 @@ public class ServiceOfApplicationService {
                                           List<Document> c100StaticDocs) {
         log.info("serving other people in case");
 
-        List<Element<PartyDetails>> othersToNotify = getSelectedApplicantsOrRespondentsElements(
+        List<Element<PartyDetails>> othersToNotify = getSelectedPartyElements(
             CaseUtils.getOthersToNotifyInCase(caseData),
             caseData.getServiceOfApplication().getSoaOtherParties().getValue());
         List<Document> packNDocs = getNotificationPack(caseData, PrlAppsConstants.N, c100StaticDocs);
@@ -2145,10 +2145,11 @@ public class ServiceOfApplicationService {
             Collectors.toList());
     }
 
-    private List<Element<PartyDetails>> getSelectedApplicantsOrRespondentsElements(List<Element<PartyDetails>> applicantsOrRespondents,
-                                                                                   List<DynamicMultiselectListElement> value) {
-        return applicantsOrRespondents.stream().filter(element -> value.stream().anyMatch(party -> element.getId().toString().equals(
-            party.getCode()))).toList();
+    private List<Element<PartyDetails>> getSelectedPartyElements(List<Element<PartyDetails>> parties,
+                                                                                   List<DynamicMultiselectListElement> selectedParties) {
+        return CollectionUtils.isNotEmpty(parties) ? parties.stream()
+            .filter(element -> selectedParties.stream().anyMatch(party -> element.getId().toString().equals(
+            party.getCode()))).toList() : Collections.emptyList();
     }
 
     public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
@@ -3251,9 +3252,9 @@ public class ServiceOfApplicationService {
         List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
                                                                             caseData.getRespondentsFL401()));
 
-        applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
+        applicantFl401 = getSelectedPartyElements(applicantFl401, caseData.getServiceOfApplication()
                                                                                                         .getSoaRecipientsOptions().getValue());
-        respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
+        respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
         fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
             .toList();
@@ -3800,7 +3801,7 @@ public class ServiceOfApplicationService {
 
         bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(
             caseData,
-            authorization, getSelectedApplicantsOrRespondentsElements(CaseUtils.getOthersToNotifyInCase(caseData), otherPartyList),
+            authorization, getSelectedPartyElements(CaseUtils.getOthersToNotifyInCase(caseData), otherPartyList),
             unwrapElements(unServedOthersPack.getPackDocument()),
             PrlAppsConstants.SERVED_PARTY_OTHER
         ));
@@ -3810,12 +3811,14 @@ public class ServiceOfApplicationService {
                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                           SoaPack unServedApplicantPack,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        List<Element<PartyDetails>> applicantList = getSelectedApplicantsOrRespondentsElements(
-            caseData.getApplicants(),
-            createPartyDynamicMultiSelectListElement(unServedApplicantPack.getPartyIds())
-        );
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             applicantList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()));
+        } else {
+            applicantList = getSelectedPartyElements(
+                caseData.getApplicants(),
+                createPartyDynamicMultiSelectListElement(unServedApplicantPack.getPartyIds())
+            );
         }
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (SoaCitizenServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(
