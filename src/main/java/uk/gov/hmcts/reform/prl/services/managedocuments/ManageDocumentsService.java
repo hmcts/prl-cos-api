@@ -302,6 +302,7 @@ public class ManageDocumentsService {
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
+            .documentType(quarantineLegalDoc.getDocumentType())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
