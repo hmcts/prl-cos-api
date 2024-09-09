@@ -44,6 +44,8 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_HWF_REF_NUMBER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
@@ -336,6 +338,9 @@ public class CitizenCaseUpdateService {
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
         caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
         caseDataMapToBeUpdated.put("hwfRequestedForAdditionalApplicationsFlag", updatedCaseData.getHwfRequestedForAdditionalApplicationsFlag());
+        //WA fields
+        caseDataMapToBeUpdated.put(AWP_WA_TASK_NAME, updatedCaseData.getAwpWaTaskName());
+        caseDataMapToBeUpdated.put(AWP_HWF_REF_NUMBER, updatedCaseData.getAwpHwfRefNo());
 
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),

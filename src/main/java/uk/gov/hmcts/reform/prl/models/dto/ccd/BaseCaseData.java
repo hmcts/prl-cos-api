@@ -67,6 +67,8 @@ public class BaseCaseData {
     private DocumentsNotifications documentsNotifications;
 
     private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
+    private String awpWaTaskName;
+    private String awpHwfRefNo;
 
     /**
      * Process urgent help with fees.
