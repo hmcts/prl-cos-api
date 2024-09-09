@@ -3611,7 +3611,9 @@ public class ServiceOfApplicationService {
                                                                                 List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                                 List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                                 SoaPack unServedRespondentPack) {
-        if (ObjectUtils.isNotEmpty(unServedRespondentPack) && null == unServedRespondentPack.getPersonalServiceBy()) {
+        if (ObjectUtils.isNotEmpty(unServedRespondentPack)
+            && null == unServedRespondentPack.getPersonalServiceBy()
+            && CollectionUtils.isNotEmpty(unServedRespondentPack.getPackDocument())) {
             final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
             final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                 partyIds);

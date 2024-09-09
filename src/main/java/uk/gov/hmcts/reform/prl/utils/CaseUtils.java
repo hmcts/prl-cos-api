@@ -921,16 +921,20 @@ public class CaseUtils {
     }
 
     public static List<Document> getCoverLettersForParty(UUID partyId, List<Element<CoverLetterMap>> coverLetters) {
+        if (CollectionUtils.isEmpty(coverLetters)) {
+            return Collections.emptyList();
+        }
         for (Element<CoverLetterMap> coverLetterMapElement: coverLetters) {
             if (partyId.equals(coverLetterMapElement.getId())) {
                 return getCoverLettersFrom(coverLetterMapElement.getValue().getCoverLetters());
             }
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     private static List<Document> getCoverLettersFrom(List<Element<Document>> coverLettermap) {
-        return coverLettermap.stream().map(Element::getValue).toList();
+        return CollectionUtils.isNotEmpty(coverLettermap) ? coverLettermap.stream().map(Element::getValue).toList()
+            : Collections.emptyList();
     }
 
     public static void mapCoverLetterToTheParty(UUID partyId, List<Element<CoverLetterMap>> coverLettersMap, List<Document> coverLetters) {
