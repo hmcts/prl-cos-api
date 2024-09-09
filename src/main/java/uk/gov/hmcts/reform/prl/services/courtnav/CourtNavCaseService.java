@@ -107,7 +107,8 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-            int alreadyUploadedCourtNavDocSize = tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size();
+            int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
+                ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
             if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
                 for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
                     if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
