@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -90,6 +91,9 @@ public class CourtNavCaseServiceTest {
 
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    @Mock
+    private NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @Mock
     SystemUserService systemUserService;
