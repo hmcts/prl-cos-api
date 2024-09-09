@@ -3811,7 +3811,7 @@ public class ServiceOfApplicationService {
                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                           SoaPack unServedApplicantPack,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        List<Element<PartyDetails>> applicantList;
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             applicantList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()));
         } else {
