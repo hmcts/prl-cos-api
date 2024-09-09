@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -32,28 +33,47 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_STATMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_LA_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES_FACTS_AND_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_DISCLOSURES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
@@ -277,10 +297,11 @@ public class BundleCreateRequestMapper {
             allDocuments.addAll(legalProfUploadDocList);
         }
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        List<QuarantineLegalDoc>  allDocs = ElementUtils.unwrapElements(allDocuments);
+        List<QuarantineLegalDoc> allDocs = ElementUtils.unwrapElements(allDocuments);
         for (QuarantineLegalDoc doc : allDocs) {
-            if (null != mapBundlingRequestDocumentForOtherDocs(doc)) {
-                otherBundlingDocuments.add(mapBundlingRequestDocumentForOtherDocs(doc));
+            BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
+            if (null != otherDoc) {
+                otherBundlingDocuments.add(otherDoc);
             }
         }
         return ElementUtils.wrapElements(otherBundlingDocuments);
@@ -311,8 +332,7 @@ public class BundleCreateRequestMapper {
         BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
         switch (docType) {
             case YOUR_POSITION_STATEMENTS:
-                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
-                    BundlingDocGroupEnum.applicantPositionStatements;
+                bundlingDocGroupEnum =  BundlingDocGroupEnum.positionStatements;
                 break;
             case YOUR_WITNESS_STATEMENTS:
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentWitnessStatements :
@@ -325,11 +345,6 @@ public class BundleCreateRequestMapper {
             case OTHER_WITNESS_STATEMENTS:
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 break;
-            case MAIL_SCREENSHOTS_MEDIA_FILES:
-                bundlingDocGroupEnum =
-                    PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles :
-                        BundlingDocGroupEnum.applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles;
-                break;
             case MEDICAL_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
                 break;
@@ -337,10 +352,10 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
                 break;
             case PATERNITY_TEST_REPORTS:
-                bundlingDocGroupEnum = BundlingDocGroupEnum.expertDNAReports;
+                bundlingDocGroupEnum = BundlingDocGroupEnum.dnaReports;
                 break;
             case DRUG_AND_ALCOHOL_TESTS:
-                bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
+                bundlingDocGroupEnum = BundlingDocGroupEnum.reportsForDrugAndAlcoholTest;
                 break;
             case POLICE_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
@@ -361,69 +376,198 @@ public class BundleCreateRequestMapper {
     }
 
     private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(QuarantineLegalDoc doc) {
-        BundlingDocGroupEnum bundlingDocGroupEnumForOtherDocs = null;
         BundlingRequestDocument bundlingRequestDocument = null;
         log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
-        String isApplicant = doc.getDocumentParty()
-            .equalsIgnoreCase("Applicant") ? "Yes" : "No";
         String docType = doc.getCategoryName();
         switch (docType) {
             case POSITION_STATEMENTS:
-                bundlingDocGroupEnumForOtherDocs = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
-                    BundlingDocGroupEnum.applicantPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getPositionStatementsDocument())
                     .documentFileName(doc.getPositionStatementsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.positionStatements).build();
                 break;
             case OTHER_WITNESS_STATEMENTS_DOCUMENT:
-                bundlingDocGroupEnumForOtherDocs =  BundlingDocGroupEnum.otherWitnessStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getOtherWitnessStatementsDocument())
                     .documentFileName(doc.getOtherWitnessStatementsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.otherWitnessStatements).build();
                 break;
             case MEDICAL_REPORTS:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.expertMedicalReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalReportsDocument())
                     .documentFileName(doc.getMedicalReportsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.expertMedicalReports).build();
                 break;
             case MEDICAL_RECORDS_DOCUMENT:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.expertMedicalRecords;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalRecordsDocument())
                     .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.expertMedicalRecords).build();
                 break;
             case DRUG_AND_ALCOHOL_TESTS_DOCUMENT:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getDrugAndAlcoholTestDocument())
                     .documentFileName(doc.getDrugAndAlcoholTestDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.reportsForDrugAndAlcoholTest).build();
                 break;
             case POLICE_REPORT_DOCUMENT:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.policeReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getPoliceReportDocument())
                     .documentFileName(doc.getPoliceReportDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.policeReports).build();
+                break;
+            case DNA_REPORTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getDnaReportsExpertReportDocument())
+                    .documentFileName(doc.getDnaReportsExpertReportDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.dnaReports).build();
+                break;
+            case RESULTS_OF_HAIR_STRAND_BLOOD_TESTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getResultsOfHairStrandBloodTestsDocument())
+                    .documentFileName(doc.getResultsOfHairStrandBloodTestsDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.resultsOfHairStrandBloodTests).build();
+                break;
+            case POLICE_DISCLOSURES:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getPoliceDisclosuresDocument())
+                    .documentFileName(doc.getPoliceDisclosuresDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.policeDisclosures).build();
                 break;
             case APPLICANTS_STATEMENTS:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getApplicantStatementsDocument())
                     .documentFileName(doc.getApplicantStatementsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.applicantWitnessStatements).build();
                 break;
             case RESPONDENTS_STATEMENTS:
-                bundlingDocGroupEnumForOtherDocs = BundlingDocGroupEnum.respondentPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentStatementsDocument())
                     .documentFileName(doc.getRespondentStatementsDocument().getDocumentFileName())
-                    .documentGroup(bundlingDocGroupEnumForOtherDocs).build();
+                    .documentGroup(BundlingDocGroupEnum.respondentWitnessStatements).build();
+                break;
+            case APPLICANT_C1A_RESPONSE:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getApplicantC1AResponseDocument())
+                    .documentFileName(doc.getApplicantC1AResponseDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.applicantC1AResponse).build();
+                break;
+            case RESPONDENT_APPLCATION:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getRespondentApplicationDocument())
+                    .documentFileName(doc.getRespondentApplicationDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.respondentApplication).build();
+                break;
+            case RESPONDENT_C1A_APPLCATION:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getRespondentC1AApplicationDocument())
+                    .documentFileName(doc.getRespondentC1AApplicationDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.respondentC1AApplication).build();
+                break;
+            case RESPONDENT_C1A_RESPONSE:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getRespondentC1AResponseDocument())
+                    .documentFileName(doc.getRespondentC1AResponseDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.respondentC1AResponse).build();
+                break;
+            case CASE_SUMMARY:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getCaseSummaryDocument())
+                    .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.caseSummary).build();
+                break;
+            case TRANSCRIPTS_OF_JUDGEMENTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getTranscriptsOfJudgementsDocument())
+                    .documentFileName(doc.getTranscriptsOfJudgementsDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.transcriptsOfJudgements).build();
+                break;
+            case MAGISTRATES_FACTS_AND_REASONS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getMagistratesFactsAndReasonsDocument())
+                    .documentFileName(doc.getMagistratesFactsAndReasonsDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.magistratesFactsAndReasons).build();
+                break;
+            case SAFEGUARDING_LETTER:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getSafeguardingLetterDocument())
+                    .documentFileName(doc.getSafeguardingLetterDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.safeguardingLetter).build();
+                break;
+            case SECTION_7_REPORT:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getSection7ReportDocument())
+                    .documentFileName(doc.getSection7ReportDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.section7Report).build();
+                break;
+            case SIXTEENA_RISK_ASSESSMENT:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getSixteenARiskAssessmentDocument())
+                    .documentFileName(doc.getSixteenARiskAssessmentDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.sixteenARiskAssessment).build();
+                break;
+            case GUARDIAN_REPORT:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getGuardianReportDocument())
+                    .documentFileName(doc.getGuardianReportDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.guardianReport).build();
+                break;
+            case SPECIAL_GUARDIANSHIP_REPORT:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getSpecialGuardianshipReportDocument())
+                    .documentFileName(doc.getSpecialGuardianshipReportDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.specialGuardianshipReport).build();
+                break;
+            case SECTION_37_REPORT:
+                if (doc.getSection37ReportDocument() != null) {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getSection37ReportDocument())
+                        .documentFileName(doc.getSection37ReportDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.cafcassSection37Report).build();
+                } else {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getSec37ReportDocument())
+                        .documentFileName(doc.getSec37ReportDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.laSection37Report).build();
+                }
+                break;
+            case CAFCASS_LA_OTHER_DOCUMENTS:
+                if (doc.getOtherDocsDocument() != null) {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getOtherDocsDocument())
+                        .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build();
+                } else {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getLocalAuthorityOtherDocDocument())
+                        .documentFileName(doc.getLocalAuthorityOtherDocDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.laOtherDocuments).build();
+                }
+                break;
+            case MIAM_CERTIFICATE:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getMiamCertificateDocument())
+                    .documentFileName(doc.getMiamCertificateDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.applicantMiamCertificate).build();
+                break;
+            case PREVIOUS_ORDERS:
+                if (doc.getPreviousOrdersSubmittedWithApplicationDocument() != null) {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getPreviousOrdersSubmittedWithApplicationDocument())
+                        .documentFileName(doc.getPreviousOrdersSubmittedWithApplicationDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication).build();
+                } else {
+                    bundlingRequestDocument = BundlingRequestDocument.builder()
+                        .documentLink(doc.getOrdersFromOtherProceedingsDocument())
+                        .documentFileName(doc.getOrdersFromOtherProceedingsDocument().getDocumentFileName())
+                        .documentGroup(BundlingDocGroupEnum.respondentPreviousOrdersSubmittedWithApplication).build();
+                }
+                break;
+            case ANY_OTHER_DOCUMENTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getAnyOtherDocDocument())
+                    .documentFileName(doc.getAnyOtherDocDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.anyOtherDocuments).build();
                 break;
             default:
                 break;

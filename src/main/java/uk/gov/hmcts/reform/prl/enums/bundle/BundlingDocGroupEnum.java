@@ -47,11 +47,8 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("approvedOrders")
     approvedOrders("approvedOrders", "approvedOrders"),
 
-    @JsonProperty("applicantPositionStatements")
-    applicantPositionStatements("applicantPositionStatements", "applicantPositionStatements"),
-
-    @JsonProperty("respondentPositionStatements")
-    respondentPositionStatements("respondentPositionStatements", "respondentPositionStatements"),
+    @JsonProperty("positionStatements")
+    positionStatements("positionStatements", "positionStatements"),
 
     @JsonProperty("applicantWitnessStatements")
     applicantWitnessStatements("applicantWitnessStatements", "applicantWitnessStatements"),
@@ -82,14 +79,20 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("expertMedicalRecords")
     expertMedicalRecords("expertMedicalRecords", "expertMedicalRecords"),
 
-    @JsonProperty("expertDNAReports")
-    expertDNAReports("expertDNAReports", "expertDNAReports"),
+    @JsonProperty("dnaReports")
+    dnaReports("dnaReports", "dnaReports"),
 
-    @JsonProperty("expertReportsForDrugAndAlcholTest")
-    expertReportsForDrugAndAlcholTest("expertReportsForDrugAndAlcholTest", "expertReportsForDrugAndAlcholTest"),
+    @JsonProperty("reportsForDrugAndAlcoholTest")
+    reportsForDrugAndAlcoholTest("reportsForDrugAndAlcoholTest", "reportsForDrugAndAlcoholTest"),
+
+    @JsonProperty("resultsOfHairStrandBloodTests")
+    resultsOfHairStrandBloodTests("resultsOfHairStrandBloodTests", "resultsOfHairStrandBloodTests"),
 
     @JsonProperty("policeReports")
     policeReports("policeReports", "policeReports"),
+
+    @JsonProperty("policeDisclosures")
+    policeDisclosures("policeDisclosures", "policeDisclosures"),
 
     @JsonProperty("expertReportsUploadedByCourtAdmin")
     expertReportsUploadedByCourtAdmin("expertReportsUploadedByCourtAdmin", "expertReportsUploadedByCourtAdmin"),
@@ -106,6 +109,51 @@ public enum BundlingDocGroupEnum {
 
     @JsonProperty("c7Documents")
     c7Documents("c7Documents", "c7Documents"),
+
+    @JsonProperty("caseSummary")
+    caseSummary("caseSummary", "caseSummary"),
+
+    @JsonProperty("transcriptsOfJudgements")
+    transcriptsOfJudgements("transcriptsOfJudgements", "transcriptsOfJudgements"),
+
+    @JsonProperty("magistratesFactsAndReasons")
+    magistratesFactsAndReasons("magistratesFactsAndReasons", "magistratesFactsAndReasons"),
+
+    @JsonProperty("safeguardingLetter")
+    safeguardingLetter("safeguardingLetter", "safeguardingLetter"),
+
+    @JsonProperty("section7Report")
+    section7Report("section7Report", "section7Report"),
+
+    @JsonProperty("cafcassSection37Report")
+    cafcassSection37Report("cafcassSection37Report", "cafcassSection37Report"),
+
+    @JsonProperty("sixteenARiskAssessment")
+    sixteenARiskAssessment("sixteenARiskAssessment", "sixteenARiskAssessment"),
+
+    @JsonProperty("guardianReport")
+    guardianReport("guardianReport", "guardianReport"),
+
+    @JsonProperty("specialGuardianshipReport")
+    specialGuardianshipReport("specialGuardianshipReport", "specialGuardianshipReport"),
+
+    @JsonProperty("cafcassOtherDocuments")
+    cafcassOtherDocuments("cafcassOtherDocuments", "cafcassOtherDocuments"),
+
+    @JsonProperty("laSection37Report")
+    laSection37Report("laSection37Report", "laSection37Report"),
+
+    @JsonProperty("laOtherDocuments")
+    laOtherDocuments("laOtherDocuments", "laOtherDocuments"),
+
+    @JsonProperty("respondentPreviousOrdersSubmittedWithApplication")
+    respondentPreviousOrdersSubmittedWithApplication(
+        "respondentPreviousOrdersSubmittedWithApplication",
+        "respondentPreviousOrdersSubmittedWithApplication"
+    ),
+
+    @JsonProperty("anyOtherDocuments")
+    anyOtherDocuments("anyOtherDocuments", "anyOtherDocuments"),
 
     @JsonProperty("notRequiredGroup")
     notRequiredGroup("notRequiredGroup", "notRequiredGroup");
