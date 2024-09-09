@@ -3525,7 +3525,7 @@ public class ServiceOfApplicationService {
         // send notification for others
         final SoaPack unServedOthersPack = caseData.getServiceOfApplication().getUnServedOthersPack();
 
-        if (unServedOthersPack != null) {
+        if (ObjectUtils.isNotEmpty(unServedOthersPack) && CollectionUtils.isNotEmpty(unServedOthersPack.getPartyIds())) {
             sendNotificationForOthersPack(caseData, authorization, bulkPrintDetails, unServedOthersPack);
         }
 
