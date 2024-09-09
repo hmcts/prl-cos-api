@@ -437,7 +437,7 @@ public class ReviewDocumentService {
 
         }
         return isDocumentFound;
-      
+
     }
 
     private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
@@ -853,6 +853,7 @@ public class ReviewDocumentService {
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 String.valueOf(
