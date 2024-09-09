@@ -3684,7 +3684,7 @@ public class ServiceOfApplicationService {
                 respondent,
                 CaseUtils.getCoverLettersForParty(respondent.getId(),
                                                   caseData.getServiceOfApplication()
-                                                      .getUnServedApplicantPack()
+                                                      .getUnServedRespondentPack()
                                                       .getCoverLettersMap()).get(0),
                 respondent.getValue().getLabelForDynamicList()
             );
