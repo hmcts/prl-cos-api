@@ -28,16 +28,17 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +50,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseServiceTest {
@@ -149,7 +152,18 @@ public class CourtNavCaseServiceTest {
 
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
-        Document document = testDocument();
+        QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        courtNavUploadedDocListDocs.add(element(courtNavDocument));
+        QuarantineLegalDoc courtNavRestrictedDocument = QuarantineLegalDoc.builder().uploadedBy(COURTNAV).build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedRestrictedDocsList =  new ArrayList<>();
+        courtNavUploadedRestrictedDocsList.add(element(courtNavRestrictedDocument));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
+            .restrictedDocuments(courtNavUploadedRestrictedDocsList)
+            .build();
+
+        caseData = caseData.toBuilder().reviewDocuments(reviewDocuments).build();
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(eventToken)
@@ -158,6 +172,7 @@ public class CourtNavCaseServiceTest {
                        .build())
             .data(caseData.toMap(objectMapper))
             .build();
+        Document document = testDocument();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
@@ -218,10 +233,21 @@ public class CourtNavCaseServiceTest {
     public void shouldThrowExceptionForNumberOfAttchmentsSize() {
         List<Element<UploadedDocuments>> courtNavUploadedDocs = new ArrayList<>();
         UploadedDocuments uploadedDocuments = UploadedDocuments.builder().build();
-        courtNavUploadedDocs.add(ElementUtils.element(uploadedDocuments));
+        courtNavUploadedDocs.add(element(uploadedDocuments));
+        QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        courtNavUploadedDocListDocs.add(element(courtNavDocument));
+        QuarantineLegalDoc courtNavRestrictedDocument = QuarantineLegalDoc.builder().uploadedBy(COURTNAV).build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedRestrictedDocsList =  new ArrayList<>();
+        courtNavUploadedRestrictedDocsList.add(element(courtNavRestrictedDocument));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
+            .restrictedDocuments(courtNavUploadedRestrictedDocsList)
+            .build();
+
         caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").documentManagementDetails(
                 DocumentManagementDetails.builder().build())
-            .numberOfAttachments("1").courtNavUploadedDocs(courtNavUploadedDocs).build();
+            .numberOfAttachments("2").reviewDocuments(reviewDocuments).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"

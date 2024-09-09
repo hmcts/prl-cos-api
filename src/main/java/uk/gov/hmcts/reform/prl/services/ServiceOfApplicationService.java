@@ -2450,15 +2450,17 @@ public class ServiceOfApplicationService {
             witnessStatements.addAll(ElementUtils.unwrapElements(
                 caseData.getFl401UploadWitnessDocuments()));
         }
-        if (!CollectionUtils.isEmpty(caseData.getCourtNavUploadedDocs())) {
-            caseData.getCourtNavUploadedDocs().stream()
+        if (YesOrNo.Yes.equals(caseData.getIsCourtNavCase())
+            && !CollectionUtils.isEmpty(caseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())) {
+            caseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().stream()
                 .map(Element::getValue)
                 .forEach(
                     document -> {
                         if ("WITNESS_STATEMENT".equalsIgnoreCase(document.getDocumentType())) {
-                            witnessStatements.add(document.getCitizenDocument());
+                            witnessStatements.add(document.getApplicantStatementsDocument());
                         }
                     });
+
         }
         return witnessStatements;
     }
