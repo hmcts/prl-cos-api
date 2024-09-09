@@ -383,7 +383,7 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.7'){
     force = true
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.7'){
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.8'){
     force = true
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
