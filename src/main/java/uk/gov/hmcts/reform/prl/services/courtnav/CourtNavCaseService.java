@@ -37,12 +37,14 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 
 @Slf4j
 @Service
@@ -121,7 +123,7 @@ public class CourtNavCaseService {
             );
             log.info("Document uploaded successfully through caseDocumentClient");
 
-            Map<String, Object> caseDataMap = tempCaseData.toMap(objectMapper);
+            Map<String, Object> fields = new HashMap<>();
 
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
@@ -133,23 +135,28 @@ public class CourtNavCaseService {
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 courtNavQuarantineLegalDoc,
                 tempCaseData,
-                caseDataMap,
+                fields,
                 COURTNAV
             );
 
             manageDocumentsService.setFlagsForWaTask(
                 tempCaseData,
-                caseDataMap,
+                fields,
                 COURTNAV,
                 courtNavQuarantineLegalDoc
             );
+
+            //Changes to generate one WA task for courtnav upload document
+            if (!fields.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
+                fields.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+            }
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(caseDataMap).build();
+                .data(fields).build();
 
             coreCaseDataService.submitUpdate(
                 authorisation,
