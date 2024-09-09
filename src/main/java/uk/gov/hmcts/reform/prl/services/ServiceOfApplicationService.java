@@ -2461,7 +2461,8 @@ public class ServiceOfApplicationService {
                                 witnessStatements.add(document.getApplicantStatementsDocument());
                             }
                         });
-            } else if (!CollectionUtils.isEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
+            }
+            if (!CollectionUtils.isEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
                 caseData.getReviewDocuments().getRestrictedDocuments().stream()
                     .map(Element::getValue)
                     .forEach(

@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -56,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
@@ -97,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
@@ -4804,5 +4807,56 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(coverLetters);
         assertFalse(coverLetters.isEmpty());
         assertEquals(2, coverLetters.size());
+    }
+
+    @Test
+    public void testSendNotificationCouertNavDaPersonalCourtAdminPost() {
+        QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().documentType("WITNESS_STATEMENT").build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        courtNavUploadedDocListDocs.add(element(courtNavDocument));
+        QuarantineLegalDoc courtNavRestrictedDocument = QuarantineLegalDoc.builder().documentType("WITNESS_STATEMENT")
+            .uploadedBy(COURTNAV).build();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedRestrictedDocsList =  new ArrayList<>();
+        courtNavUploadedRestrictedDocsList.add(element(courtNavRestrictedDocument));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
+            .restrictedDocuments(courtNavUploadedRestrictedDocsList)
+            .build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.post)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .isCourtNavCase(Yes)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
+                                      .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .reviewDocuments(reviewDocuments)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
+                                                                            Mockito.anyString());
     }
 }
