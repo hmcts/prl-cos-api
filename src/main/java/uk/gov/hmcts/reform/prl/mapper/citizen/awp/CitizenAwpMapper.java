@@ -89,7 +89,7 @@ public class CitizenAwpMapper {
             .build();
     }
 
-    private String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle) {
+    public static String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle) {
         //PRL-4023 - postfix to awp task name
         if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
             return "C2";

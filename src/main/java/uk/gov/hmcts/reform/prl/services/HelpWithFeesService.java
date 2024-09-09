@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_HWF_CASE_NOTE_SHORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HWF_APP_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_THE_CASE_IN_DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper.getAwpTaskName;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.DATE_TIME_OF_SUBMISSION_FORMAT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -129,6 +131,8 @@ public class HelpWithFeesService {
                 );
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
                 caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No.getDisplayedValue());
+                //WA fields
+                caseDataUpdated.put(AWP_WA_TASK_NAME, getAwpTaskName(additionalApplicationsBundle));
             }
         }
         if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
