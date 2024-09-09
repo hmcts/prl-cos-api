@@ -37,7 +37,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +121,7 @@ public class CourtNavCaseService {
             );
             log.info("Document uploaded successfully through caseDocumentClient");
 
-            Map<String, Object> fields = new HashMap<>();
+            Map<String, Object> caseDataMap = tempCaseData.toMap(objectMapper);
 
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
@@ -134,13 +133,13 @@ public class CourtNavCaseService {
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 courtNavQuarantineLegalDoc,
                 tempCaseData,
-                fields,
+                caseDataMap,
                 COURTNAV
             );
 
             manageDocumentsService.setFlagsForWaTask(
                 tempCaseData,
-                fields,
+                caseDataMap,
                 COURTNAV,
                 courtNavQuarantineLegalDoc
             );
@@ -150,7 +149,7 @@ public class CourtNavCaseService {
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(fields).build();
+                .data(caseDataMap).build();
 
             coreCaseDataService.submitUpdate(
                 authorisation,
