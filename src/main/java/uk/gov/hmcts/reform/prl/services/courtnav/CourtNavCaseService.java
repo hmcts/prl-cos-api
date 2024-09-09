@@ -107,15 +107,7 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-            int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
-                ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
-            if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
-                for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
-                    if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
-                        alreadyUploadedCourtNavDocSize++;
-                    }
-                }
-            }
+            int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
             if (tempCaseData.getNumberOfAttachments() != null
                 && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
@@ -173,6 +165,23 @@ public class CourtNavCaseService {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
+        int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
+            ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
+        if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
+            for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
+                if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
+                    alreadyUploadedCourtNavDocSize++;
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(tempCaseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
+            alreadyUploadedCourtNavDocSize = alreadyUploadedCourtNavDocSize
+                + tempCaseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().size();
+        }
+        return alreadyUploadedCourtNavDocSize;
     }
 
     public StartEventResponse checkIfCasePresent(String caseId, String authorisation, EventRequestData eventRequestData) {
