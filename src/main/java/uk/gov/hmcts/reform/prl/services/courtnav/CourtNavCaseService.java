@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -105,9 +107,16 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-            if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
-                && Integer.parseInt(tempCaseData.getNumberOfAttachments())
-                <= tempCaseData.getCourtNavUploadedDocs().size()) {
+            int alreadyUploadedCourtNavDocSize = tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size();
+            if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
+                for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
+                    if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
+                        alreadyUploadedCourtNavDocSize++;
+                    }
+                }
+            }
+            if (tempCaseData.getNumberOfAttachments() != null
+                && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
@@ -125,7 +134,8 @@ public class CourtNavCaseService {
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
                 tempCaseData,
-                uploadResponse.getDocuments().get(0)
+                uploadResponse.getDocuments().get(0),
+                typeOfDocument
             );
 
             manageDocumentsService.moveDocumentsToQuarantineTab(
@@ -175,7 +185,8 @@ public class CourtNavCaseService {
 
     private QuarantineLegalDoc getCourtNavQuarantineDocument(String fileName,
                                                              CaseData caseData,
-                                                             Document uploadedDocument) {
+                                                             Document uploadedDocument,
+                                                             String typeOfDocument) {
 
         String partyName = caseData.getApplicantsFL401() != null
             ? caseData.getApplicantsFL401().getLabelForDynamicList() : COURTNAV;
@@ -188,6 +199,7 @@ public class CourtNavCaseService {
 
         return QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .documentType(typeOfDocument)
             .categoryId("applicantStatements")
             .categoryName("Applicant's statements")
             .isConfidential(Yes)

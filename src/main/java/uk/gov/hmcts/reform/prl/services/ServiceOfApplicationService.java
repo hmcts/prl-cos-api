@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUME
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
@@ -2450,15 +2451,27 @@ public class ServiceOfApplicationService {
             witnessStatements.addAll(ElementUtils.unwrapElements(
                 caseData.getFl401UploadWitnessDocuments()));
         }
-        if (!CollectionUtils.isEmpty(caseData.getCourtNavUploadedDocs())) {
-            caseData.getCourtNavUploadedDocs().stream()
-                .map(Element::getValue)
-                .forEach(
-                    document -> {
-                        if ("WITNESS_STATEMENT".equalsIgnoreCase(document.getDocumentType())) {
-                            witnessStatements.add(document.getCitizenDocument());
-                        }
-                    });
+        if (YesOrNo.Yes.equals(caseData.getIsCourtNavCase())) {
+            if (!CollectionUtils.isEmpty(caseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())) {
+                caseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().stream()
+                    .map(Element::getValue)
+                    .forEach(
+                        document -> {
+                            if ("WITNESS_STATEMENT".equalsIgnoreCase(document.getDocumentType())) {
+                                witnessStatements.add(document.getApplicantStatementsDocument());
+                            }
+                        });
+            } else if (!CollectionUtils.isEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
+                caseData.getReviewDocuments().getRestrictedDocuments().stream()
+                    .map(Element::getValue)
+                    .forEach(
+                        document -> {
+                            if ("WITNESS_STATEMENT".equalsIgnoreCase(document.getDocumentType())
+                                && COURTNAV.equalsIgnoreCase(document.getUploadedBy())) {
+                                witnessStatements.add(document.getApplicantStatementsDocument());
+                            }
+                        });
+            }
         }
         return witnessStatements;
     }
