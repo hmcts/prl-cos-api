@@ -39,18 +39,38 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_LA_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES_FACTS_AND_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_DISCLOSURES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -59,7 +79,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class BundleCreateRequestMapperTest {
     @InjectMocks
     private BundleCreateRequestMapper bundleCreateRequestMapper;
@@ -150,39 +169,20 @@ public class BundleCreateRequestMapperTest {
                                                    .build())
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Position statements"))
                                                              .build())
-                                     .documentParty(DocumentPartyEnum.APPLICANT)//.documentRestrictCheckbox(new ArrayList<>())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
                                     .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("witness.pdf")
                                                    .build())
                                      .documentCategories(DynamicList.builder()
                                                              .value(DynamicListElement.defaultListItem("Your witness statements")).build())
-                                     .documentParty(DocumentPartyEnum.APPLICANT).build());//.documentRestrictCheckbox(new ArrayList<>()).build());
-        otherManageDocuments.add(ManageDocuments.builder()
-                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("letters.pdf")
-                                                   .build())
-                                     .documentCategories(DynamicList.builder()
-                                                             .value(DynamicListElement.defaultListItem("Letters from school"))
-                                                             .build())
-                                     .documentParty(DocumentPartyEnum.APPLICANT)//.documentRestrictCheckbox(new ArrayList<>())
-                                    .build());
+                                     .documentParty(DocumentPartyEnum.APPLICANT).build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
                                                    .build())
                                      .documentCategories(DynamicList.builder()
                                                              .value(DynamicListElement.defaultListItem("Other witness Statements")).build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
-                                     .build());
-        otherManageDocuments.add(ManageDocuments.builder()
-                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
-                                                   .build())
-                                     .documentCategories(DynamicList.builder()
-                                                             .value(DynamicListElement
-                                                                        .defaultListItem("Emails, screenshots, images and other media files"))
-                                                             .build())
-                                     .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -190,7 +190,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Medical reports"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -198,7 +197,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Medical Records"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -206,7 +204,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Paternity test reports"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -215,7 +212,6 @@ public class BundleCreateRequestMapperTest {
                                                              .value(DynamicListElement.defaultListItem("Drug and alcohol test (toxicology)"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -223,7 +219,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Police report"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -231,7 +226,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Cafcass reports"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -239,7 +233,6 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Expert reports"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
         otherManageDocuments.add(ManageDocuments.builder()
                                      .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
@@ -247,8 +240,8 @@ public class BundleCreateRequestMapperTest {
                                      .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Applicant's statements"))
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
-                                     //.documentRestrictCheckbox(new ArrayList<>())
                                      .build());
+
         QuarantineLegalDoc respStatement = QuarantineLegalDoc.builder()
             .respondentStatementsDocument(Document.builder().documentFileName("respondentStatements").build())
             .documentParty("Respondent").categoryName("Respondent's statements").build();
@@ -290,6 +283,121 @@ public class BundleCreateRequestMapperTest {
             .documentParty("Applicant").categoryName("Position statements").build();
         courtStaffDoc.add(element(positionStmnts));
 
+        QuarantineLegalDoc dnaReports = QuarantineLegalDoc.builder()
+            .dnaReportsExpertReportDocument(Document.builder().documentFileName("DNAReports").build())
+            .documentParty("Applicant").categoryName(DNA_REPORTS).build();
+        courtStaffDoc.add(element(dnaReports));
+
+        QuarantineLegalDoc resultsOfHairStrandBloodTests = QuarantineLegalDoc.builder()
+            .resultsOfHairStrandBloodTestsDocument(Document.builder().documentFileName("resultsOfHairStrandBloodTests").build())
+            .documentParty("Applicant").categoryName(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS).build();
+        courtStaffDoc.add(element(resultsOfHairStrandBloodTests));
+
+        QuarantineLegalDoc policeDisclosures = QuarantineLegalDoc.builder()
+            .policeDisclosuresDocument(Document.builder().documentFileName("policeDisclosures").build())
+            .documentParty("Applicant").categoryName(POLICE_DISCLOSURES).build();
+        courtStaffDoc.add(element(policeDisclosures));
+
+        QuarantineLegalDoc applicantC1AResponse = QuarantineLegalDoc.builder()
+            .applicantC1AResponseDocument(Document.builder().documentFileName("applicantC1AResponse").build())
+            .documentParty("Applicant").categoryName(APPLICANT_C1A_RESPONSE).build();
+        courtStaffDoc.add(element(applicantC1AResponse));
+
+        QuarantineLegalDoc caseSummary = QuarantineLegalDoc.builder()
+            .caseSummaryDocument(Document.builder().documentFileName("caseSummary").build())
+            .documentParty("Court").categoryName(CASE_SUMMARY).build();
+        courtStaffDoc.add(element(caseSummary));
+
+        QuarantineLegalDoc transcriptsOfJudgements = QuarantineLegalDoc.builder()
+            .transcriptsOfJudgementsDocument(Document.builder().documentFileName("transcriptsOfJudgements").build())
+            .documentParty("Court").categoryName(TRANSCRIPTS_OF_JUDGEMENTS).build();
+        courtStaffDoc.add(element(transcriptsOfJudgements));
+
+        QuarantineLegalDoc magistratesFactsAndReasons = QuarantineLegalDoc.builder()
+            .magistratesFactsAndReasonsDocument(Document.builder().documentFileName("magistratesFactsAndReasons").build())
+            .documentParty("Court").categoryName(MAGISTRATES_FACTS_AND_REASONS).build();
+        courtStaffDoc.add(element(magistratesFactsAndReasons));
+
+        QuarantineLegalDoc safeGuardingLetter = QuarantineLegalDoc.builder()
+            .safeguardingLetterDocument(Document.builder().documentFileName("safeGuardingLetter").build())
+            .documentParty("Cafcass Cymru").categoryName(SAFEGUARDING_LETTER).build();
+        courtStaffDoc.add(element(safeGuardingLetter));
+
+        QuarantineLegalDoc section7Report = QuarantineLegalDoc.builder()
+            .section7ReportDocument(Document.builder().documentFileName("section7Report").build())
+            .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).build();
+        courtStaffDoc.add(element(section7Report));
+
+        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
+            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
+            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).build();
+        courtStaffDoc.add(element(sixteenARiskAssessment));
+
+        QuarantineLegalDoc guardianReport = QuarantineLegalDoc.builder()
+            .guardianReportDocument(Document.builder().documentFileName("guardianReport").build())
+            .documentParty("Cafcass Cymru").categoryName(GUARDIAN_REPORT).build();
+        courtStaffDoc.add(element(guardianReport));
+
+        QuarantineLegalDoc specialGuardianshipReport = QuarantineLegalDoc.builder()
+            .specialGuardianshipReportDocument(Document.builder().documentFileName("specialGuardianshipReport").build())
+            .documentParty("Cafcass Cymru").categoryName(SPECIAL_GUARDIANSHIP_REPORT).build();
+        courtStaffDoc.add(element(specialGuardianshipReport));
+
+        QuarantineLegalDoc section37Report = QuarantineLegalDoc.builder()
+            .section37ReportDocument(Document.builder().documentFileName("section37Report").build())
+            .documentParty("Cafcass Cymru").categoryName(SECTION_37_REPORT).build();
+        courtStaffDoc.add(element(section37Report));
+
+        QuarantineLegalDoc cafcassOtherDocuments = QuarantineLegalDoc.builder()
+            .otherDocsDocument(Document.builder().documentFileName("otherDocuments").build())
+            .documentParty("Cafcass Cymru").categoryName(CAFCASS_LA_OTHER_DOCUMENTS).build();
+        courtStaffDoc.add(element(cafcassOtherDocuments));
+
+        QuarantineLegalDoc laSection37Report = QuarantineLegalDoc.builder()
+            .sec37ReportDocument(Document.builder().documentFileName("laSection37Report").build())
+            .documentParty("Local Authority").categoryName(SECTION_37_REPORT).build();
+        courtStaffDoc.add(element(laSection37Report));
+
+        QuarantineLegalDoc laOtherDocuments = QuarantineLegalDoc.builder()
+            .localAuthorityOtherDocDocument(Document.builder().documentFileName("laOtherDocuments").build())
+            .documentParty("Cafcass Cymru").categoryName(CAFCASS_LA_OTHER_DOCUMENTS).build();
+        courtStaffDoc.add(element(laOtherDocuments));
+
+        QuarantineLegalDoc applicantPreviousOrders = QuarantineLegalDoc.builder()
+            .previousOrdersSubmittedWithApplicationDocument(Document.builder().documentFileName(
+                "applicantPreviousOrders").build())
+            .documentParty("Applicant").categoryName(PREVIOUS_ORDERS).build();
+        courtStaffDoc.add(element(applicantPreviousOrders));
+
+        QuarantineLegalDoc respondentPreviousOrders = QuarantineLegalDoc.builder()
+            .ordersFromOtherProceedingsDocument(Document.builder().documentFileName("respondentPreviousOrders").build())
+            .documentParty("Respondent").categoryName(PREVIOUS_ORDERS).build();
+        courtStaffDoc.add(element(respondentPreviousOrders));
+
+        QuarantineLegalDoc anyOtherDocuments = QuarantineLegalDoc.builder()
+            .anyOtherDocDocument(Document.builder().documentFileName("anyOtherDocuments").build())
+            .documentParty("Court").categoryName(ANY_OTHER_DOCUMENTS).build();
+        courtStaffDoc.add(element(anyOtherDocuments));
+
+        QuarantineLegalDoc respondentApplication = QuarantineLegalDoc.builder()
+            .respondentApplicationDocument(Document.builder().documentFileName("respondentApplication").build())
+            .categoryName(RESPONDENT_APPLCATION).build();
+        courtStaffDoc.add(element(respondentApplication));
+
+        QuarantineLegalDoc respondentC1aApplication = QuarantineLegalDoc.builder()
+            .respondentC1AApplicationDocument(Document.builder().documentFileName("respondentC1aApplication").build())
+            .categoryName(RESPONDENT_C1A_APPLCATION).build();
+        courtStaffDoc.add(element(respondentC1aApplication));
+
+        QuarantineLegalDoc respondentC1aResponse = QuarantineLegalDoc.builder()
+            .respondentC1AResponseDocument(Document.builder().documentFileName("respondentC1aResponse").build())
+            .categoryName(RESPONDENT_C1A_RESPONSE).build();
+        courtStaffDoc.add(element(respondentC1aResponse));
+
+        QuarantineLegalDoc miamCertificate = QuarantineLegalDoc.builder()
+            .miamCertificateDocument(Document.builder().documentFileName("miamCertificate").build())
+            .categoryName(MIAM_CERTIFICATE).build();
+        courtStaffDoc.add(element(miamCertificate));
 
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
