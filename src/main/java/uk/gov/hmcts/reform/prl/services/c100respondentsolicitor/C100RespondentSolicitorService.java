@@ -1351,6 +1351,7 @@ public class C100RespondentSolicitorService {
                                                         boolean isConfidentialDataPresent,
                                                         Response response) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())
+            && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvideEmailAddress())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.email))) {
@@ -1372,6 +1373,7 @@ public class C100RespondentSolicitorService {
                                                               boolean isConfidentialDataPresent,
                                                               Response response) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
+            && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvidePhoneNumber())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.phoneNumber))) {
@@ -1393,6 +1395,7 @@ public class C100RespondentSolicitorService {
                                                           Response response,
                                                           String requestOriginatedFrom) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
+                && Yes.equals(solicitorRepresentedRespondent.getValue().getIsCurrentAddressKnown())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.address))) {
