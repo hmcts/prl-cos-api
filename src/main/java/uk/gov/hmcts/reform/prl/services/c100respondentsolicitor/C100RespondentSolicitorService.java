@@ -1136,9 +1136,9 @@ public class C100RespondentSolicitorService {
                 log.info("inside checkIfConfidentialDataPresent - 2");
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
-            if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
-                dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-            }
+
+            dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
             log.info("response found");
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
