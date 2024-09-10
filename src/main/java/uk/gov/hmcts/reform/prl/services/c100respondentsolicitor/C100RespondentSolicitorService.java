@@ -1351,6 +1351,7 @@ public class C100RespondentSolicitorService {
                                                         Map<String, Object> dataMap,
                                                         boolean isConfidentialDataPresent,
                                                         Response response) {
+        log.info("populateEmailConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())
             && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvideEmailAddress())
                 || (isConfidentialSetByCitizen
@@ -1374,6 +1375,7 @@ public class C100RespondentSolicitorService {
                                                               Map<String, Object> dataMap,
                                                               boolean isConfidentialDataPresent,
                                                               Response response) {
+        log.info("populatePhoneNumberConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
             && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvidePhoneNumber())
                 || (isConfidentialSetByCitizen
@@ -1397,6 +1399,7 @@ public class C100RespondentSolicitorService {
                                                           boolean isConfidentialDataPresent,
                                                           Response response,
                                                           String requestOriginatedFrom) {
+        log.info("populateAddressConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
                 && Yes.equals(solicitorRepresentedRespondent.getValue().getIsCurrentAddressKnown())
                 || (isConfidentialSetByCitizen
