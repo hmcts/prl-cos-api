@@ -3538,6 +3538,7 @@ public class ServiceOfApplicationService {
         } else {
             finalServedApplicationDetailsList = new ArrayList<>();
         }
+        //Serving applicants and/or respondents in the case
         String whoIsResponsible = handleNotificationsForApplicantsAndRespondents(caseData, authorization, emailNotificationDetails,
                                                                                  bulkPrintDetails);
         finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
@@ -3557,6 +3558,7 @@ public class ServiceOfApplicationService {
     private String handleNotificationsForApplicantsAndRespondents(CaseData caseData, String authorization,
                                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                   List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        log.info("Confidential check success -> Sending notifications to applicants and/or respondents");
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         String whoIsResponsible = COURT;
@@ -3567,6 +3569,7 @@ public class ServiceOfApplicationService {
                 || (unServedRespondentPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedRespondentPack.getPersonalServiceBy()))) {
+                log.info("Applicant Legal representative handling personal service");
                 EmailNotificationDetails emailNotification = sendNotificationForApplicantLegalRepPersonalService(caseData,
                                                                                                                  authorization,
                                                                                                                  unServedApplicantPack,
@@ -3578,6 +3581,7 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
+                log.info("Applicant Lip handling personal service");
                 whoIsResponsible = sendNotificationsAfterConfCheckPersonalServiceApplicantLip(
                     caseData,
                     authorization,
@@ -3614,6 +3618,7 @@ public class ServiceOfApplicationService {
         if (ObjectUtils.isNotEmpty(unServedRespondentPack)
             && null == unServedRespondentPack.getPersonalServiceBy()
             && CollectionUtils.isNotEmpty(unServedRespondentPack.getPackDocument())) {
+            log.info("Non personal service notifications to the respondents");
             final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
             final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                 partyIds);
@@ -3888,7 +3893,7 @@ public class ServiceOfApplicationService {
                 sendPostWithAccessCodeLetterToParty(
                     caseData,
                     authorization,
-                    packDocs,
+                    removeCoverLettersFromThePacks(packDocs),
                     bulkPrintDetails,
                     element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
                     CaseUtils.getCoverLettersForParty(caseData.getApplicantsFL401().getPartyId(),
