@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
@@ -74,6 +75,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -155,6 +157,9 @@ public class ReviewDocumentServiceTest {
 
     @Mock
     private SendgridService sendgridService;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     private final String authorization = "authToken";
     Element element;
@@ -2091,6 +2096,8 @@ public class ReviewDocumentServiceTest {
                                                                             .isGenWelsh(true)
                                                                             .isGenEng(true)
                                                                             .build());
+        when(serviceOfApplicationService.getCoverLetters(
+            anyString(), any(CaseData.class), anyString(), anyMap())).thenReturn(coverLetterDocs);
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()

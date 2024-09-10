@@ -185,11 +185,10 @@ public class ReviewDocumentService {
     public static final String WEL = "wel";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
-    public static final String NAME = "name";
     private final EmailService emailService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final BulkPrintService bulkPrintService;
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -622,12 +621,13 @@ public class ReviewDocumentService {
                     systemUserService.getSysUserToken(),
                     responseDocuments
                 );
-                log.info("Respondent response documents are sent to applicant {}, via post {}", applicant.getId(), bulkPrintId);
+                log.info("Response documents are sent to applicant {} in the case{} - via post {}", applicant.getId(), caseData.getId(), bulkPrintId);
             } catch (Exception e) {
-                log.error("Failed to send response documents to applicant {}", applicant.getId(), e);
+                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId(), e);
+                throw new RuntimeException(e);
             }
         } else {
-            log.warn("Address is null/empty for applicant {}", applicant.getId());
+            log.warn("Couldn't post response documents - address is null/empty for applicant {} in the case {}", applicant.getId(), caseData.getId());
         }
     }
 
@@ -694,6 +694,7 @@ public class ReviewDocumentService {
             );
         } catch (IOException e) {
             log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
