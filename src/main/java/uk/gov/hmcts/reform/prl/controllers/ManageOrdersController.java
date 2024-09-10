@@ -58,6 +58,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -165,6 +167,11 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseDataUpdated.put(
+                    "isInHearingState",
+                    (PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equals(callbackRequest.getCaseDetails().getState())
+                        || DECISION_OUTCOME.getValue().equals(callbackRequest.getCaseDetails().getState())) ? Yes : No
+                );
                 caseDataUpdated.put(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
                 if (Yes.equals(caseData.getIsCafcass())) {
                     caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
