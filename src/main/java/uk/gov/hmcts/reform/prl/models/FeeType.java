@@ -20,7 +20,6 @@ public enum FeeType {
     NO_FEE;
 
     public static final Map<String, FeeType> applicationToFeeMap = Map.of(
-        "FP25_WITNESS_SUMMONS", FP25_WITNESS_SUMMONS,
         "C1_CHILD_ORDER", CHILD_ARRANGEMENTS_ORDER,
         "C3_CHILD_ORDER", C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD,
         "C4_CHILD_ORDER", C4_WHEREABOUTS_OF_A_MISSING_CHILD
