@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -224,7 +226,18 @@ public class CourtNavCaseService {
                                                                            PartyRole.Representing.DARESPONDENT));
         data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
                                                                            PartyRole.Representing.DAAPPLICANT));
+        data.put("caseFlags", Flags.builder().build());
+        try {
+            log.info("data map we have now ===>" + objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+        try {
+            log.info("Case data converted afterwards ===>" + objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         allTabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,

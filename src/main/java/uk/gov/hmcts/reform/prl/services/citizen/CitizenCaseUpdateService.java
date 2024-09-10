@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -170,10 +171,15 @@ public class CitizenCaseUpdateService {
         allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
-
+        caseDataMapToBeUpdated.put("caseFlags", Flags.builder().build());
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+        try {
+            log.info("data map we have now ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
