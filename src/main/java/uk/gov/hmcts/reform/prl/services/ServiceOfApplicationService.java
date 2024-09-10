@@ -2202,6 +2202,8 @@ public class ServiceOfApplicationService {
                                                                                                String.valueOf(caseData.getId())));
             if (No.equals(caseData.getIsCafcass())) {
                 caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
             }
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
