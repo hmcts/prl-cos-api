@@ -174,7 +174,6 @@ public class CitizenCaseUpdateService {
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
         caseDataMapToBeUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
-        caseDataMapToBeUpdated.put("caseFlags", Flags.builder().build());
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
