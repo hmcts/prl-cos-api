@@ -176,11 +176,6 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        try {
-            log.info("data map we have now ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,

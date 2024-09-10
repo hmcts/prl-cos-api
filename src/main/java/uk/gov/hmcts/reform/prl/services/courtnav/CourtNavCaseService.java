@@ -247,11 +247,6 @@ public class CourtNavCaseService {
         caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
                                                                            PartyRole.Representing.DAAPPLICANT));
         caseDataMap.put("caseFlags", Flags.builder().build());
-        try {
-            log.info("data map we have now ===>" + objectMapper.writeValueAsString(caseDataMap));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),

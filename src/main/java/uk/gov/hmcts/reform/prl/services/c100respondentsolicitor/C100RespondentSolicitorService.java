@@ -939,23 +939,23 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> amendedList = new ArrayList<>();
         if (null != representedRespondent.getValue().getResponse().getRespondentExistingProceedings()) {
             representedRespondent.getValue().getResponse().getRespondentExistingProceedings()
-                .stream().forEach(proceeding ->
-                                      amendedList.add(Element.<RespondentProceedingDetails>builder()
-                                                          .value(RespondentProceedingDetails.builder()
-                                                                     .caseNumber(proceeding.getValue().getCaseNumber())
-                                                                     .dateStarted(proceeding.getValue().getDateStarted())
-                                                                     .dateEnded(proceeding.getValue().getDateEnded())
-                                                                     .nameAndOffice(proceeding.getValue().getNameAndOffice())
-                                                                     .nameOfChildrenInvolved(proceeding.getValue().getNameOfChildrenInvolved())
-                                                                     .nameOfCourt(proceeding.getValue().getNameOfCourt())
-                                                                     .nameOfGuardian(proceeding.getValue().getNameOfGuardian())
-                                                                     .nameOfJudge(proceeding.getValue().getNameOfJudge())
-                                                                     .previousOrOngoingProceedings(proceeding.getValue()
-                                                                                                       .getPreviousOrOngoingProceedings())
-                                                                     .otherTypeOfOrder(proceeding.getValue().getOtherTypeOfOrder())
-                                                                     .typeOfOrder(proceeding.getValue().getTypeOfOrder())
-                                                                     .build())
-                                                          .build()));
+                .forEach(proceeding ->
+                             amendedList.add(Element.<RespondentProceedingDetails>builder()
+                                                 .value(RespondentProceedingDetails.builder()
+                                                            .caseNumber(proceeding.getValue().getCaseNumber())
+                                                            .dateStarted(proceeding.getValue().getDateStarted())
+                                                            .dateEnded(proceeding.getValue().getDateEnded())
+                                                            .nameAndOffice(proceeding.getValue().getNameAndOffice())
+                                                            .nameOfChildrenInvolved(proceeding.getValue().getNameOfChildrenInvolved())
+                                                            .nameOfCourt(proceeding.getValue().getNameOfCourt())
+                                                            .nameOfGuardian(proceeding.getValue().getNameOfGuardian())
+                                                            .nameOfJudge(proceeding.getValue().getNameOfJudge())
+                                                            .previousOrOngoingProceedings(proceeding.getValue()
+                                                                                              .getPreviousOrOngoingProceedings())
+                                                            .otherTypeOfOrder(proceeding.getValue().getOtherTypeOfOrder())
+                                                            .typeOfOrder(proceeding.getValue().getTypeOfOrder())
+                                                            .build())
+                                                 .build()));
         }
 
         return  amendedList;
