@@ -244,6 +244,9 @@ public class UpdatePartyDetailsService {
             .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
             .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
             .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
+            .response(partyDetails.getResponse().toBuilder()
+                          .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                          .build())
             .build();
 
         return partyDetails;
@@ -313,7 +316,11 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
-            PartyDetails updatedPartyDetails = updateRespondentKeepYourDetailsPrivateInformations(respondent.getValue());
+            PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(respondent.getValue().getResponse().toBuilder()
+                                                                                              .keepDetailsPrivate(
+                                                                                                  updateRespondentKeepYourDetailsPrivateInformation(
+                                                                                                      respondent.getValue()))
+                                                                                              .build()).build();
             respondent = element(respondent.getId(), updatedPartyDetails);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
@@ -321,16 +328,16 @@ public class UpdatePartyDetailsService {
                 SOLICITOR
             );
             populateC8Documents(authorisation,
-                        updatedCaseData,
-                        caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
-                        respondentIndex,respondent
+                                updatedCaseData,
+                                caseData,
+                                dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
+                                respondentIndex, respondent
             );
             respondentIndex++;
         }
     }
 
-    private PartyDetails updateRespondentKeepYourDetailsPrivateInformations(PartyDetails respondent) {
+    private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
         List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
         if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
             confidentialityList.add(ConfidentialityListEnum.address);
@@ -341,13 +348,9 @@ public class UpdatePartyDetailsService {
         if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
             confidentialityList.add(ConfidentialityListEnum.email);
         }
-        return respondent.toBuilder()
-            .response(respondent.getResponse().toBuilder()
-                          .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                                                  .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
-                                                  .confidentialityList(confidentialityList)
-                                                  .build())
-                          .build())
+        return KeepDetailsPrivate.builder()
+            .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
+            .confidentialityList(confidentialityList)
             .build();
     }
 
