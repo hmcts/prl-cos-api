@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -311,6 +313,8 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
+            PartyDetails updatedPartyDetails = updateRespondentKeepYourDetailsPrivateInformations(respondent.getValue());
+            respondent = element(respondent.getId(), updatedPartyDetails);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
                 respondent,
@@ -324,6 +328,27 @@ public class UpdatePartyDetailsService {
             );
             respondentIndex++;
         }
+    }
+
+    private PartyDetails updateRespondentKeepYourDetailsPrivateInformations(PartyDetails respondent) {
+        List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
+        if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.address);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.phoneNumber);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.email);
+        }
+        return respondent.toBuilder()
+            .response(respondent.getResponse().toBuilder()
+                          .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                                  .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
+                                                  .confidentialityList(confidentialityList)
+                                                  .build())
+                          .build())
+            .build();
     }
 
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
