@@ -81,7 +81,6 @@ public class AwpProcessHwfPaymentService {
                 );
                 updateProcessedApplicationStatus(
                     caseDetails,
-                    caseData,
                     processedApplicationIds,
                     allCitizenAwpWithHwfHasBeenProcessed
                 );
@@ -97,14 +96,20 @@ public class AwpProcessHwfPaymentService {
     }
 
     private void updateProcessedApplicationStatus(CaseDetails caseDetails,
-                                                  CaseData caseData,
                                                   List<UUID> processedApplicationIds,
                                                   YesOrNo allCitizenAwpWithHwfHasBeenProcessed) {
         if (isNotEmpty(processedApplicationIds)) {
             Map<String, Object> caseDataUpdated = new HashMap<>();
+            int noOfApplicationProcessed = 1;
             for (UUID processedApplicationId : processedApplicationIds) {
                 log.info("Updating AwP payment & application status for application id " + processedApplicationId);
-                caseData.getAdditionalApplicationsBundle().stream().filter(additionalApplicationsBundleElement ->
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(
+                    caseDetails.getId().toString(),
+                    HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
+                );
+                CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
+                dbCaseData.getAdditionalApplicationsBundle().stream().filter(additionalApplicationsBundleElement ->
                                                                                additionalApplicationsBundleElement.getId().equals(
                                                                                    processedApplicationId))
                     .findFirst().ifPresent(additionalApplicationsBundleElement -> {
@@ -125,8 +130,8 @@ public class AwpProcessHwfPaymentService {
                                 .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                                 .build() : additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle())
                             .build();
-                        caseData.getAdditionalApplicationsBundle().set(
-                            caseData.getAdditionalApplicationsBundle().indexOf(
+                        dbCaseData.getAdditionalApplicationsBundle().set(
+                            dbCaseData.getAdditionalApplicationsBundle().indexOf(
                                 additionalApplicationsBundleElement),
                             element(
                                 additionalApplicationsBundleElement.getId(),
@@ -134,29 +139,27 @@ public class AwpProcessHwfPaymentService {
                             )
                         );
                     });
+                caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, dbCaseData.getAdditionalApplicationsBundle());
+                if (processedApplicationIds.size() == noOfApplicationProcessed) {
+                    caseDataUpdated.put(
+                        "hwfRequestedForAdditionalApplicationsFlag",
+                        YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed)
+                            ? YesOrNo.No : dbCaseData.getHwfRequestedForAdditionalApplicationsFlag()
+                    );
+                }
+
+                //Save case data
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseDetails.getId().toString(),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated
+                );
+                log.info("Processed AwP payment & application status for application id " + processedApplicationId);
+                noOfApplicationProcessed++;
             }
             log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartUpdateForSpecificEvent(
-                caseDetails.getId().toString(),
-                HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
-            );
-
-            caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
-            caseDataUpdated.put(
-                "hwfRequestedForAdditionalApplicationsFlag",
-                YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplicationsFlag()
-            );
-
-            //Save case data
-            allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseDetails.getId().toString(),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataUpdated
-            );
-
         }
     }
 
