@@ -233,9 +233,15 @@ public class CourtNavCaseService {
             log.info("error");
         }
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        caseData.to
+
         try {
             log.info("Case data converted afterwards ===>" + objectMapper.writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        caseData = caseData.toBuilder().caseFlags(Flags.builder().build()).build();
+        try {
+            log.info("case data after manual add ===>" + objectMapper.writeValueAsString(caseData));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
