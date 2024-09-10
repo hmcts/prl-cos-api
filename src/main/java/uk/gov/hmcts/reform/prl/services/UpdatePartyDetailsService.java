@@ -422,6 +422,7 @@ public class UpdatePartyDetailsService {
         Document c8FinalDocument;
         Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
+        log.info("getOrCreateC8DocumentList - isConfidentialDataPresent " + dataMap.get(IS_CONFIDENTIAL_DATA_PRESENT));
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if (isDetailsChanged) {
                 String fileName = C_8_OF + partyName
