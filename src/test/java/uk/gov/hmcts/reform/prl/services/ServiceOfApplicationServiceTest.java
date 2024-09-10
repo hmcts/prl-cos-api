@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
@@ -464,7 +465,7 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedApplicantPack(SoaPack.builder().build())
                                       .unServedRespondentPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.Yes)
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -647,7 +648,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .unServedApplicantPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.No)
@@ -683,7 +684,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
@@ -723,7 +724,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCitizenServingRespondentsOptionsCA(unrepresentedApplicant)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
@@ -763,7 +764,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
@@ -879,7 +880,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     .confidentialityCheckRejectReason(
                                                                                         "pack contain confidential info")
                                                                                     .build()))
-                                          .soaServeToRespondentOptions(YesOrNo.No)
+                                          .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                           .soaCitizenServingRespondentsOptionsCA(unrepresentedApplicant)
                                           .soaRecipientsOptions(dynamicMultiSelectList)
                                           .unServedApplicantPack(SoaPack.builder().build())
@@ -958,7 +959,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1049,7 +1050,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
@@ -1142,7 +1143,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
@@ -1221,7 +1222,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1342,7 +1343,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1393,7 +1394,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1440,7 +1441,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1472,7 +1473,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail(null)
@@ -1520,7 +1521,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail(null)
@@ -1571,7 +1572,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1662,7 +1663,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondents(partyElementList)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1733,7 +1734,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1815,7 +1816,7 @@ public class ServiceOfApplicationServiceTest {
             .respondentsFL401(otherPerson)
             .applicantsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1896,7 +1897,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondents(Collections.singletonList(element(person)))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -1977,7 +1978,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondents(Collections.singletonList(element(person)))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2057,7 +2058,7 @@ public class ServiceOfApplicationServiceTest {
             .applicants(Collections.singletonList(element(person)))
             .respondents(Collections.singletonList(element(person)))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2140,7 +2141,7 @@ public class ServiceOfApplicationServiceTest {
             .applicants(Collections.singletonList(element(person)))
             .respondents(Collections.singletonList(element(person)))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2230,7 +2231,7 @@ public class ServiceOfApplicationServiceTest {
             .applicants(Collections.singletonList(element(person)))
             .respondents(Collections.singletonList(element(person)))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2291,7 +2292,7 @@ public class ServiceOfApplicationServiceTest {
                                  .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2325,7 +2326,49 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForNonConfidential() {
+    public void testHandleSoaSubmittedConfidential() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                                 .build())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleSoaSubmittedForNonConfidential() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2333,7 +2376,7 @@ public class ServiceOfApplicationServiceTest {
                                  .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2376,7 +2419,7 @@ public class ServiceOfApplicationServiceTest {
             .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2793,7 +2836,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .c8Document(Document.builder().build())
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -2850,7 +2893,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaCafcassEmailId("cymruemail@test.com")
@@ -2947,7 +2990,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3021,7 +3064,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3095,7 +3138,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3168,7 +3211,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3221,7 +3264,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3272,7 +3315,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3422,7 +3465,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3488,7 +3531,7 @@ public class ServiceOfApplicationServiceTest {
             .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3528,7 +3571,7 @@ public class ServiceOfApplicationServiceTest {
             .respondents(parties)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3630,7 +3673,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
@@ -3698,7 +3741,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(No)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaServeLocalAuthorityYesOrNo(No)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
@@ -3806,7 +3849,7 @@ public class ServiceOfApplicationServiceTest {
         partyDetailsList.add(applicantElement);
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
-            No).build();
+            YesNoNotApplicable.No).build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplication(serviceOfApplication)
@@ -3835,7 +3878,7 @@ public class ServiceOfApplicationServiceTest {
         partyDetailsList.add(applicantElement);
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
-            Yes).soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
+            YesNoNotApplicable.Yes).soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplication(serviceOfApplication)
@@ -4035,7 +4078,7 @@ public class ServiceOfApplicationServiceTest {
             .respondents(parties)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
