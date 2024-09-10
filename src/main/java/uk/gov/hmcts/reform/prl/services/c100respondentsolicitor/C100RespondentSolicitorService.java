@@ -85,6 +85,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
@@ -142,6 +144,8 @@ public class C100RespondentSolicitorService {
     public static final String ADDRESS = "address";
     public static final String TASK_LIST_VERSION = "taskListVersion";
     private static final String COLON = ";";
+    public static final String RESPONDENT_APPLICATION_CATEGORY = "Respondent Application";
+    public static final String RESPONDENT_C1A_APPLICATION_CATEGORY = "Respondent C1A Application";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -475,20 +479,6 @@ public class C100RespondentSolicitorService {
                 .getCurrentOrPastProceedingsForChildren())
                 ? caseData.getRespondentSolicitorData()
                 .getRespondentExistingProceedings() : null;
-        /** Removed to avoid adding the document to case documents respondent docs list - visible to all parties **/
-        //        if (respondentExistingProceedings != null) {
-        //            for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
-        //                if (null != proceedings.getValue()
-        //                        && null != proceedings.getValue().getUploadRelevantOrder()) {
-        //                    buildRespondentDocs(
-        //                            caseData,
-        //                            caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-        //                            solicitor + SOLICITOR,
-        //                            proceedings.getValue().getUploadRelevantOrder()
-        //                    );
-        //                }
-        //            }
-        //        }
 
         return buildResponseForRespondent.toBuilder()
                 .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
@@ -892,15 +882,6 @@ public class C100RespondentSolicitorService {
                     && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument() != null) {
 
-                /** New way of adding docs to quarantine list with a common method **/
-                //                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
-                //                    updatedUserDetails,
-                //                    representedRespondent.getValue().getResponse()
-                //                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
-                //                    representedRespondent.getValue().getLabelForDynamicList(),
-                //                    String.valueOf(representedRespondent.getId())
-                //                ));
-
                 quarantineLegalDocList.add(getQuarantineLegalDocuments(
                     updatedUserDetails,
                     representedRespondent.getValue().getResponse()
@@ -909,16 +890,8 @@ public class C100RespondentSolicitorService {
                     representedRespondent.getValue().getLabelForDynamicList(),
                     String.valueOf(representedRespondent.getId())));
             }
-            /** New way of adding docs to quarantine list with a common method **/
             updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
-            // moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
 
-            /**
-             * After adding the document to the Quarantine List,
-             * will be removing the document from the Response to allegation
-             * of harm object so that no duplicates are present
-             * in the case file view tab
-             */
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                     .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
                                   .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
@@ -1021,7 +994,6 @@ public class C100RespondentSolicitorService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent, SOLICITOR);
-        // UserDetails userDetails = userService.getUserDetails(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
@@ -1041,17 +1013,12 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            //        quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7FinalDocument,
-            //                                                           representedRespondent.getValue().getLabelForDynamicList(),
-            //                                                           String.valueOf(representedRespondent.getId())
-            //        ));
-
 
             quarantineLegalDocList.add(getQuarantineLegalDocuments(
                 updatedUserDetails,
                 c7FinalDocument,
-                "respondentApplication",
-                "Respondent Application",
+                RESPONDENT_APPLICATION,
+                RESPONDENT_APPLICATION_CATEGORY,
                 representedRespondent.getValue().getLabelForDynamicList(),
                 String.valueOf(representedRespondent.getId())
             ));
@@ -1068,15 +1035,11 @@ public class C100RespondentSolicitorService {
                     false,
                     dataMap
                 );
-                //                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument,
-                //                                                                    representedRespondent.getValue().getLabelForDynamicList(),
-                //                                                                    String.valueOf(representedRespondent.getId())
-                //                ));
                 quarantineLegalDocList.add(getQuarantineLegalDocuments(
                     updatedUserDetails,
                     c1aFinalDocument,
-                    "respondentC1AApplication",
-                    "Respondent C1A Application",
+                    RESPONDENT_C1A_APPLICATION,
+                    RESPONDENT_C1A_APPLICATION_CATEGORY,
                     representedRespondent.getValue().getLabelForDynamicList(),
                     String.valueOf(representedRespondent.getId())
                 ));
@@ -1092,15 +1055,11 @@ public class C100RespondentSolicitorService {
                     true,
                     dataMap
                 );
-                //                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh,
-                //                                                                    representedRespondent.getValue().getLabelForDynamicList(),
-                //                                                                    String.valueOf(representedRespondent.getId())
-                //                ));
                 quarantineLegalDocList.add(getQuarantineLegalDocuments(
                     updatedUserDetails,
                     c1aFinalDocumentWelsh,
-                    "respondentC1AApplication",
-                    "Respondent C1A Application",
+                    RESPONDENT_C1A_APPLICATION,
+                    RESPONDENT_C1A_APPLICATION_CATEGORY,
                     representedRespondent.getValue().getLabelForDynamicList(),
                     String.valueOf(representedRespondent.getId())
                 ));
@@ -1115,15 +1074,11 @@ public class C100RespondentSolicitorService {
                 true,
                 dataMap
             );
-            //            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument,
-            //                                                               representedRespondent.getValue().getLabelForDynamicList(),
-            //                                                               String.valueOf(representedRespondent.getId())
-            //            ));
             quarantineLegalDocList.add(getQuarantineLegalDocuments(
                 updatedUserDetails,
                 c7WelshFinalDocument,
-                "respondentApplication",
-                "Respondent Application",
+                RESPONDENT_APPLICATION,
+                RESPONDENT_APPLICATION_CATEGORY,
                 representedRespondent.getValue().getLabelForDynamicList(),
                 String.valueOf(representedRespondent.getId())
             ));
