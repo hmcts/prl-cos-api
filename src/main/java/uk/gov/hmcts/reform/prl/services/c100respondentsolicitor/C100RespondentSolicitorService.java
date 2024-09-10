@@ -1171,7 +1171,6 @@ public class C100RespondentSolicitorService {
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response, requestOriginatedFrom);
-            log.info("populateConfidentialAndMiscDataMap - isConfidentialDataPresent " + isConfidentialDataPresent);
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
@@ -1351,7 +1350,6 @@ public class C100RespondentSolicitorService {
                                                         Map<String, Object> dataMap,
                                                         boolean isConfidentialDataPresent,
                                                         Response response) {
-        log.info("populateEmailConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())
             && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvideEmailAddress())
                 || (isConfidentialSetByCitizen
@@ -1366,7 +1364,6 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put(EMAIL, solicitorRepresentedRespondent.getValue().getEmail());
         }
-        log.info("populateEmailConfidentiality - isConfidentialDataPresent " + isConfidentialDataPresent);
         return isConfidentialDataPresent;
     }
 
@@ -1375,7 +1372,6 @@ public class C100RespondentSolicitorService {
                                                               Map<String, Object> dataMap,
                                                               boolean isConfidentialDataPresent,
                                                               Response response) {
-        log.info("populatePhoneNumberConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
             && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvidePhoneNumber())
                 || (isConfidentialSetByCitizen
@@ -1389,7 +1385,6 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put(PHONE, solicitorRepresentedRespondent.getValue().getPhoneNumber());
         }
-        log.info("populatePhoneNumberConfidentiality - isConfidentialDataPresent " + isConfidentialDataPresent);
         return isConfidentialDataPresent;
     }
 
@@ -1399,7 +1394,6 @@ public class C100RespondentSolicitorService {
                                                           boolean isConfidentialDataPresent,
                                                           Response response,
                                                           String requestOriginatedFrom) {
-        log.info("populateAddressConfidentiality - solicitorRepresentedRespondent " + solicitorRepresentedRespondent);
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
                 && Yes.equals(solicitorRepresentedRespondent.getValue().getIsCurrentAddressKnown())
                 || (isConfidentialSetByCitizen
@@ -1420,7 +1414,6 @@ public class C100RespondentSolicitorService {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
             }
         }
-        log.info("populateAddressConfidentiality - isConfidentialDataPresent " + isConfidentialDataPresent);
         return isConfidentialDataPresent;
     }
 
