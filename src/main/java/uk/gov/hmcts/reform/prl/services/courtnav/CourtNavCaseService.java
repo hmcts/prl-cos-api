@@ -220,31 +220,8 @@ public class CourtNavCaseService {
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
-        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
-        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
-        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
-                                                                           PartyRole.Representing.DARESPONDENT));
-        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
-                                                                           PartyRole.Representing.DAAPPLICANT));
-        data.put("caseFlags", Flags.builder().build());
-        try {
-            log.info("data map we have now ===>" + objectMapper.writeValueAsString(data));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
 
-        try {
-            log.info("Case data converted afterwards ===>" + objectMapper.writeValueAsString(caseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        caseData = caseData.toBuilder().caseFlags(Flags.builder().build()).build();
-        try {
-            log.info("case data after manual add ===>" + objectMapper.writeValueAsString(caseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         allTabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -252,7 +229,35 @@ public class CourtNavCaseService {
             startAllTabsUpdateDataContent.eventRequestData(),
             caseData
         );
-        log.info("**********************Tab refresh and CourtNav case creation complete**************************");
+
+        updateCommonSetUpForNoCAndCaseFlags(caseId);
+        log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
+    }
+
+    public void updateCommonSetUpForNoCAndCaseFlags(String caseId) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DARESPONDENT));
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DAAPPLICANT));
+        caseDataMap.put("caseFlags", Flags.builder().build());
+        try {
+            log.info("data map we have now ===>" + objectMapper.writeValueAsString(caseDataMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+        log.info("Common component setup for NoC and case flags is completed");
     }
 }
 
