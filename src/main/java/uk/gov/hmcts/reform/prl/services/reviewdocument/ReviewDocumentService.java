@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -118,7 +117,6 @@ public class ReviewDocumentService {
     private final DocumentLanguageService documentLanguageService;
     private final SendgridService sendgridService;
 
-    private final AuthTokenGenerator authTokenGenerator;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -185,11 +183,10 @@ public class ReviewDocumentService {
     public static final String WEL = "wel";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
-    public static final String NAME = "name";
     private final EmailService emailService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final BulkPrintService bulkPrintService;
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -510,6 +507,8 @@ public class ReviewDocumentService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo()))) {
             String respondentName = getNameOfRespondent(quarantineLegalDocElement, quarantineDocsListToBeModified);
+            Document responseDocument = manageDocumentsService.getQuarantineDocumentForUploader(
+                quarantineLegalDocElement.getValue().getUploaderRole(), quarantineLegalDocElement.getValue());
 
             if (RESPONDENT_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent C7 response documents to applicants ***");
@@ -519,7 +518,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
                                              AP13_HINT,
                                              null,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent C1A documents to applicants/solicitor ***");
                 //C1A
@@ -528,7 +528,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
                                              AP14_HINT,
                                              C1A_NOTIFICATION_APPLICANT_SOLICITOR,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             } else if (RESPONDENT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent response to C1A documents to applicants/solicitor ***");
                 //C1A response
@@ -537,7 +538,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
                                              AP15_HINT,
                                              C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             }
         }
     }
@@ -547,17 +549,14 @@ public class ReviewDocumentService {
                                               SendgridEmailTemplateNames partySendgridTemplate,
                                               String coverLetterTemplateHint,
                                               SendgridEmailTemplateNames solicitorSendgridTemplate,
-                                              String respondentName) {
+                                              String respondentName,
+                                              Document responseDocument) {
         caseData.getApplicants().forEach(partyDataEle -> {
             PartyDetails partyData = partyDataEle.getValue();
             Map<String, Object> dynamicData = getEmailDynamicData(caseData, partyData, respondentName);
-            Document responseDocument = null != caseData.getReviewDocuments()
-                && null != caseData.getReviewDocuments().getReviewDoc()
-                ? caseData.getReviewDocuments().getReviewDoc() : null;
-
             if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())
                 && null != solicitorSendgridTemplate) {
-                sendEmailViaSendGrid(authTokenGenerator.generate(),
+                sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                      responseDocument,
                                      dynamicData,
                                      partyData.getSolicitorEmail(),
@@ -572,7 +571,7 @@ public class ReviewDocumentService {
                                          respondentName,
                                          partyGovNotifyTemplate);
                     } else {
-                        sendEmailViaSendGrid(authTokenGenerator.generate(),
+                        sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                              responseDocument,
                                              dynamicData,
                                              partyData.getEmail(),
@@ -622,12 +621,13 @@ public class ReviewDocumentService {
                     systemUserService.getSysUserToken(),
                     responseDocuments
                 );
-                log.info("Respondent response documents are sent to applicant {}, via post {}", applicant.getId(), bulkPrintId);
+                log.info("Response documents are sent to applicant {} in the case{} - via post {}", applicant.getId(), caseData.getId(), bulkPrintId);
             } catch (Exception e) {
-                log.error("Failed to send response documents to applicant {}", applicant.getId(), e);
+                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId(), e);
+                throw new RuntimeException(e);
             }
         } else {
-            log.warn("Address is null/empty for applicant {}", applicant.getId());
+            log.warn("Couldn't post response documents - address is null/empty for applicant {} in the case {}", applicant.getId(), caseData.getId());
         }
     }
 
@@ -694,6 +694,7 @@ public class ReviewDocumentService {
             );
         } catch (IOException e) {
             log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
