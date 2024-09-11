@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -731,8 +732,9 @@ public class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
             .isAddressConfidential(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.No)
-            .response(Response.builder().build())
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
             .build();
 
         PartyDetails respondent2 = PartyDetails.builder()
@@ -783,11 +785,12 @@ public class UpdatePartyDetailsServiceTest {
             .firstName("respondent6")
             .lastName("lastname666")
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.Yes)
             .email("resp1@test.com")
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
             .response(Response.builder().build())
             .build();
 
