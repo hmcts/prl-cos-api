@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
@@ -74,6 +75,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -155,6 +157,9 @@ public class ReviewDocumentServiceTest {
 
     @Mock
     private SendgridService sendgridService;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     private final String authorization = "authToken";
     Element element;
@@ -282,6 +287,8 @@ public class ReviewDocumentServiceTest {
             .subtype("test")
             .build();
 
+        when(manageDocumentsService.getQuarantineDocumentForUploader(
+            anyString(), any(QuarantineLegalDoc.class))).thenReturn(caseDoc);
     }
 
     private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
@@ -1340,11 +1347,12 @@ public class ReviewDocumentServiceTest {
             .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now())
             .categoryId(category)
-            .courtStaffQuarantineDocument(document)
+            .citizenQuarantineDocument(document)
             .isConfidential(YesOrNo.Yes)
             .isRestricted(YesOrNo.No)
             .restrictedDetails("test details")
             .solicitorRepresentedPartyName("name")
+            .uploaderRole(CITIZEN)
             .build();
         quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"), quarantineLegalDoc));
         PartyDetails applicant1 = PartyDetails.builder()//dashboard access
@@ -1887,11 +1895,12 @@ public class ReviewDocumentServiceTest {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .categoryId("respondentC1AResponse")
-            .courtStaffQuarantineDocument(document)
+            .citizenQuarantineDocument(document)
             .isConfidential(YesOrNo.Yes)
             .isRestricted(YesOrNo.No)
             .restrictedDetails("test details")
             .uploadedBy("name")
+            .uploaderRole(CITIZEN)
             .build();
         quarantineDocsList.add(element(
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
@@ -1952,11 +1961,12 @@ public class ReviewDocumentServiceTest {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .categoryId(RESPONDENT_APPLICATION)
-            .courtStaffQuarantineDocument(document)
+            .citizenQuarantineDocument(document)
             .isConfidential(YesOrNo.Yes)
             .isRestricted(YesOrNo.No)
             .restrictedDetails("test details")
             .uploadedBy("name")
+            .uploaderRole(CITIZEN)
             .build();
         quarantineDocsList.add(element(
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
@@ -2069,11 +2079,12 @@ public class ReviewDocumentServiceTest {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .categoryId(RESPONDENT_C1A_APPLICATION)
-            .courtStaffQuarantineDocument(document)
+            .citizenQuarantineDocument(document)
             .isConfidential(YesOrNo.Yes)
             .isRestricted(YesOrNo.No)
             .restrictedDetails("test details")
             .uploadedBy("name")
+            .uploaderRole(CITIZEN)
             .build();
         quarantineDocsList.add(element(
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
@@ -2091,6 +2102,8 @@ public class ReviewDocumentServiceTest {
                                                                             .isGenWelsh(true)
                                                                             .isGenEng(true)
                                                                             .build());
+        when(serviceOfApplicationService.getCoverLetters(
+            anyString(), any(CaseData.class), anyString(), anyMap())).thenReturn(coverLetterDocs);
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
