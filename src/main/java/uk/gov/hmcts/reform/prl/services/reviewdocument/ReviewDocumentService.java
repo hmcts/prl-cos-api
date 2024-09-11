@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -118,7 +117,6 @@ public class ReviewDocumentService {
     private final DocumentLanguageService documentLanguageService;
     private final SendgridService sendgridService;
 
-    private final AuthTokenGenerator authTokenGenerator;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -558,7 +556,7 @@ public class ReviewDocumentService {
             Map<String, Object> dynamicData = getEmailDynamicData(caseData, partyData, respondentName);
             if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())
                 && null != solicitorSendgridTemplate) {
-                sendEmailViaSendGrid(authTokenGenerator.generate(),
+                sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                      responseDocument,
                                      dynamicData,
                                      partyData.getSolicitorEmail(),
@@ -573,7 +571,7 @@ public class ReviewDocumentService {
                                          respondentName,
                                          partyGovNotifyTemplate);
                     } else {
-                        sendEmailViaSendGrid(authTokenGenerator.generate(),
+                        sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                              responseDocument,
                                              dynamicData,
                                              partyData.getEmail(),
