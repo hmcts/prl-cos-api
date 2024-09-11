@@ -4135,15 +4135,15 @@ public class ServiceOfApplicationService {
     }
 
     private String getAp13Template(boolean isWelsh) {
-        return isWelsh ? PRL_LET_ENG_C100_AP13 : PRL_LET_WEL_C100_AP13;
+        return isWelsh ? PRL_LET_WEL_C100_AP13 : PRL_LET_ENG_C100_AP13;
     }
 
     private String getAp14Template(boolean isWelsh) {
-        return isWelsh ? PRL_LET_ENG_C100_AP14 : PRL_LET_WEL_C100_AP14;
+        return isWelsh ? PRL_LET_WEL_C100_AP14 : PRL_LET_ENG_C100_AP14;
     }
 
     private String getAp15Template(boolean isWelsh) {
-        return isWelsh ? PRL_LET_ENG_C100_AP15 : PRL_LET_WEL_C100_AP15;
+        return isWelsh ? PRL_LET_WEL_C100_AP15 : PRL_LET_ENG_C100_AP15;
     }
 
     /**
