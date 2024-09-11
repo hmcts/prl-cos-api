@@ -1633,7 +1633,10 @@ public class C100RespondentSolicitorService {
         return String.valueOf(adjustmentRequired);
     }
 
-    private static void buildHearingNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap, List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums, StringBuilder adjustmentRequired) {
+    private static void buildHearingNeeds(ReasonableAdjustmentsSupport supportYouNeed,
+                                          Map<String, Object> dataMap,
+                                          List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums,
+                                          StringBuilder adjustmentRequired) {
         String feelComfortableSupportDetails;
         String extraSupportDetails;
         if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
