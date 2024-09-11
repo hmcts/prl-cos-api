@@ -55,7 +55,7 @@ public class AllocatedJudgeServiceTest {
         stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue());
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.circuitJudge.getDisplayedValue());
 
     }
 
@@ -69,7 +69,7 @@ public class AllocatedJudgeServiceTest {
         stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.DISTRICT_JUDGE.getDisplayedValue());
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.districtJudge.getDisplayedValue());
 
     }
 
@@ -83,7 +83,7 @@ public class AllocatedJudgeServiceTest {
         stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.HIGHCOURT_JUDGE.getDisplayedValue());
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.highCourtJudge.getDisplayedValue());
 
     }
 
@@ -97,7 +97,7 @@ public class AllocatedJudgeServiceTest {
         stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.MAGISTRATES.getDisplayedValue());
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.magistrates.getDisplayedValue());
 
     }
 

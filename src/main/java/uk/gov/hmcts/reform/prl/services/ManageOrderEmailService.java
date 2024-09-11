@@ -483,9 +483,9 @@ public class ManageOrderEmailService {
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
-                log.info("*** CA Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
+                log.info("*** CA Personal service option selected {}",manageOrders.getPersonallyServeRespondentsOptions());
                 String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsCA().getId();
+                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions().getId();
                 handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                        servingRespondentsOptions,
                                                        bulkPrintOrderDetails
@@ -550,13 +550,14 @@ public class ManageOrderEmailService {
 
         } else {
             log.info("*** DA Personal service represented serving option selected {}",
-                     manageOrders.getServingRespondentsOptionsDA());
+                     manageOrders.getPersonallyServeRespondentsOptions());
             log.info(
                 "*** DA Personal service unrepresented serving option selected {}",
                 manageOrders.getServingOptionsForNonLegalRep()
             );
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-                ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
+                ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions()
+                .getId();
 
             handleFL401PersonalServiceNotifications(
                 authorisation,

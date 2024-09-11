@@ -84,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -223,21 +224,21 @@ public class DocumentGenService {
     protected String docCoverSheetFilename;
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
-    @Value("${document.templates.common.prl_c7_draft_template}")
+    @Value("${document.templates.common.prl_lip_c7_draft_template}")
     protected String docC7DraftTemplate;
-    @Value("${document.templates.common.prl_c7_draft_template_wel}")
+    @Value("${document.templates.common.prl_lip_c7_draft_template_wel}")
     protected String docC7DraftWelshTemplate;
-    @Value("${document.templates.common.prl_c7_final_template_eng}")
+    @Value("${document.templates.common.prl_lip_c7_final_template_eng}")
     protected String docC7FinalEngTemplate;
-    @Value("${document.templates.common.prl_c7_final_template_wel}")
+    @Value("${document.templates.common.prl_lip_c7_final_template_wel}")
     protected String docC7FinalWelshTemplate;
-    @Value("${document.templates.common.prl_c7_draft_filename}")
+    @Value("${document.templates.common.prl_lip_c7_draft_filename}")
     protected String docC7DraftFilename;
-    @Value("${document.templates.common.prl_c7_draft_filename_wel}")
+    @Value("${document.templates.common.prl_lip_c7_draft_filename_wel}")
     protected String docC7DraftWelshFilename;
-    @Value("${document.templates.common.prl_c7_final_filename_eng}")
+    @Value("${document.templates.common.prl_lip_c7_final_filename_eng}")
     protected String docC7FinalEngFilename;
-    @Value("${document.templates.common.prl_c7_final_filename_wel}")
+    @Value("${document.templates.common.prl_lip_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftTemplate;
@@ -323,7 +324,6 @@ public class DocumentGenService {
     private final ManageDocumentsService manageDocumentsService;
     private final CaseService caseService;
     private final ObjectMapper objectMapper;
-
     private final Time dateTime;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
@@ -865,6 +865,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 fileName = getC7DraftFileName(isWelsh);
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                fileName = getC1ADraftFileName(isWelsh);
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
                 break;
@@ -910,6 +913,10 @@ public class DocumentGenService {
 
     private String getC7DraftFileName(boolean isWelsh) {
         return !isWelsh ? docC7DraftFilename : docC7DraftWelshFilename;
+    }
+
+    private String getC1ADraftFileName(boolean isWelsh) {
+        return !isWelsh ? c100C1aDraftFilename : c100C1aDraftWelshFilename;
     }
 
     private String findDraftFilename(boolean isWelsh, String caseTypeOfApp) {
@@ -985,6 +992,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 template = getC7CitizenDraftTemplate(isWelsh);
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                template = getC1ACitizenDraftTemplate(isWelsh);
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
                 break;
@@ -1039,6 +1049,10 @@ public class DocumentGenService {
 
     private String getC7CitizenDraftTemplate(boolean isWelsh) {
         return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
+    }
+
+    private String getC1ACitizenDraftTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC1ADraftTemplate : solicitorC1ADraftWelshTemplate;
     }
 
     private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
@@ -1415,7 +1429,7 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    private boolean checkFileFormat(String fileName) {
+    public boolean checkFileFormat(String fileName) {
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
@@ -1447,7 +1461,6 @@ public class DocumentGenService {
                     }
                 })
                 .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
-
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
@@ -1534,7 +1547,6 @@ public class DocumentGenService {
 
                 moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,
-                    updatedCaseData,
                     updatedCaseDataMap
                 );
             }
@@ -1552,19 +1564,19 @@ public class DocumentGenService {
         return null;
     }
 
-    private Map<String, Object> moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                                    CaseData caseData,
-                                                                    Map<String, Object> caseDataUpdated) {
+    private void moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+                                                     Map<String, Object> caseDataMap) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+            //PRL-6208 - fixed document missing issue for multiple docs
+            CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
             //invoke common manage docs
             manageDocumentsService.moveDocumentsToQuarantineTab(
                 quarantineLegalDoc,
                 caseData,
-                caseDataUpdated,
+                caseDataMap,
                 CITIZEN
             );
         }
-        return caseDataUpdated;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,

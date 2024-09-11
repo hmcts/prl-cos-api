@@ -28,6 +28,16 @@ public class Templates {
 
     public static final String PRL_LET_ENG_LIST_WITHOUT_NOTICE = "PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx";
 
+    public static final String PRL_LET_ENG_C100_AP13 = "PRL-LET-ENG-C100-AP13.docx";
+    public static final String PRL_LET_WEL_C100_AP13 = "PRL-LET-WEL-C100-AP13.docx";
+    public static final String PRL_LET_ENG_C100_AP14 = "PRL-LET-ENG-C100-AP14.docx";
+    public static final String PRL_LET_WEL_C100_AP14 = "PRL-LET-WEL-C100-AP14.docx";
+    public static final String PRL_LET_ENG_C100_AP15 = "PRL-LET-ENG-C100-AP15.docx";
+    public static final String PRL_LET_WEL_C100_AP15 = "PRL-LET-WEL-C100-AP15.docx";
+
     public static final String RE7_HINT = "RE7";
     public static final String RE8_HINT = "RE8";
+    public static final String AP13_HINT = "AP13";
+    public static final String AP14_HINT = "AP14";
+    public static final String AP15_HINT = "AP15";
 }

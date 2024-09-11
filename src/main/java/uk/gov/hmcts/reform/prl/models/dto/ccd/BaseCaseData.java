@@ -65,4 +65,14 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private DocumentsNotifications documentsNotifications;
+
+    private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
+    private String awpWaTaskName;
+    private String awpHwfRefNo;
+
+    /**
+     * Process urgent help with fees.
+     */
+    @JsonUnwrapped
+    private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
 }

@@ -267,7 +267,7 @@ public class ListWithoutNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.judge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(

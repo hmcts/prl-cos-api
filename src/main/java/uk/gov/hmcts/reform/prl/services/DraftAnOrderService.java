@@ -467,6 +467,7 @@ public class DraftAnOrderService {
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
+                .doesOrderDocumentNeedSeal(Yes)
                 .build();
         } else {
             caseData = updateCaseDataForDocmosis(caseData, draftOrder);
@@ -640,6 +641,8 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
+            //PRL-6046 - persist FL404 data
+            .fl404CustomFields(draftOrder.getFl404CustomFields())
             .build();
     }
 
