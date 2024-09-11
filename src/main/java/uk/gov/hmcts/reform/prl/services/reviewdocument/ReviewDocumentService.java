@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPON
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C7_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
@@ -517,7 +518,7 @@ public class ReviewDocumentService {
                                              C7_NOTIFICATION_APPLICANT,
                                              SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
                                              AP13_HINT,
-                                             null,
+                                             C7_NOTIFICATION_APPLICANT_SOLICITOR,
                                              respondentName,
                                              responseDocument);
             } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -554,15 +555,14 @@ public class ReviewDocumentService {
         caseData.getApplicants().forEach(partyDataEle -> {
             PartyDetails partyData = partyDataEle.getValue();
             Map<String, Object> dynamicData = getEmailDynamicData(caseData, partyData, respondentName);
-            if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())
-                && null != solicitorSendgridTemplate) {
+            if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())) {
                 sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                      responseDocument,
                                      dynamicData,
                                      partyData.getSolicitorEmail(),
                                      solicitorSendgridTemplate);
+                log.info("Response documents are sent to solicitor via email for applicant {}", partyDataEle.getId());
             } else {
-
                 if (CommonUtils.isNotEmpty(partyData.getEmail())
                     && ContactPreferences.email.equals(partyData.getContactPreferences())) {
                     if (hasDashboardAccess(element(partyData))) {
@@ -570,6 +570,7 @@ public class ReviewDocumentService {
                                          partyData,
                                          respondentName,
                                          partyGovNotifyTemplate);
+                        log.info("Response documents are sent to applicant {} via gov notify email", partyDataEle.getId());
                     } else {
                         sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                              responseDocument,
@@ -577,6 +578,7 @@ public class ReviewDocumentService {
                                              partyData.getEmail(),
                                              partySendgridTemplate);
                     }
+                    log.info("Response documents are sent to applicant {} via email", partyDataEle.getId());
                 } else {
                     //Bulk print
                     generateAndSendPostNotification(caseData,
@@ -621,7 +623,12 @@ public class ReviewDocumentService {
                     systemUserService.getSysUserToken(),
                     responseDocuments
                 );
-                log.info("Response documents are sent to applicant {} in the case{} - via post {}", applicant.getId(), caseData.getId(), bulkPrintId);
+                log.info(
+                    "Response documents are sent to applicant {} in the case {} - via post {}",
+                    applicant.getId(),
+                    caseData.getId(),
+                    bulkPrintId
+                );
             } catch (Exception e) {
                 log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId(), e);
                 throw new RuntimeException(e);
