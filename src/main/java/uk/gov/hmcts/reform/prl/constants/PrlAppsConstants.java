@@ -1036,6 +1036,8 @@ public class PrlAppsConstants {
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
 
+    public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
+  
     public static final String COURTNAV_USER = "courtnav";
 
     //Order SOS statuses
