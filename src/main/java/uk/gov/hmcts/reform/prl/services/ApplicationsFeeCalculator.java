@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
@@ -58,6 +59,7 @@ public class ApplicationsFeeCalculator {
     public static final String D89_COURT_BAILIFF = "D89_COURT_BAILIFF";
     public static final String C79_CHILD_ORDER = "C79_CHILD_ORDER";
     public static final String FC600_COMMITTAL_APPLICATION = "FC600_COMMITTAL_APPLICATION";
+    public static final String FP25_WITNESS_SUMMONS = "FP25_WITNESS_SUMMONS";
 
     private final FeeService feeService;
 
@@ -108,6 +110,7 @@ public class ApplicationsFeeCalculator {
     public List<FeeType> getFeeTypes(CaseData caseData) {
         List<FeeType> feeTypes = new ArrayList<>();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
+
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
@@ -119,7 +122,6 @@ public class ApplicationsFeeCalculator {
         boolean skipC2PaymentForDaApplicant = DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
         boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
             && !c2ApplicationAlreadyPresentForRespondent && applyOrderWithoutGivingNoticeToRespondent;
-
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !skipC2PaymentForDaApplicant && !skipC2PaymentForDaRespondent) {
@@ -135,7 +137,7 @@ public class ApplicationsFeeCalculator {
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
-                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue().equalsIgnoreCase(otherApplicationType)
+                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getId().equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
                     feeTypes.add(FL403_EXTEND_AN_ORDER);
                 }
@@ -161,6 +163,7 @@ public class ApplicationsFeeCalculator {
                 ).atStartOfDay();
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+
             }
         }
         return skipPayments;
@@ -213,14 +216,26 @@ public class ApplicationsFeeCalculator {
             return PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
                 ? Optional.of(FeeType.D89_BAILIFF_CA) : Optional.empty();
         } else if (C79_CHILD_ORDER.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType)
-                ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
+            return getFeeTypeForC79BasedOnRepresentedPartyType(representedPartyType);
         } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
-            return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
+            return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
+                || DA_RESPONDENT.equals(representedPartyType)
                 ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
+        } else if (FP25_WITNESS_SUMMONS.equalsIgnoreCase(applicationType)) {
+            return getFP25FeeType(representedPartyType);
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Optional<FeeType> getFeeTypeForC79BasedOnRepresentedPartyType(String representedPartyType) {
+        return CA_APPLICANT.equals(representedPartyType) || CA_RESPONDENT.equals(representedPartyType)
+                ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
+    }
+
+    private static Optional<FeeType> getFP25FeeType(String representedPartyType) {
+        return !DA_APPLICANT.equals(representedPartyType)
+            ? Optional.of(FeeType.FP25_WITNESS_SUMMONS) : Optional.empty();
     }
 
 }

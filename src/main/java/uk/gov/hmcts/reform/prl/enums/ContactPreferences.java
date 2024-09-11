@@ -12,10 +12,10 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ContactPreferences {
 
-    @JsonProperty("digital")
-    digital("digital", "digital"),
+    @JsonProperty("email")
+    email("email", "Email"),
     @JsonProperty("post")
-    post("post", "post");
+    post("post", "Post");
 
     private final String id;
     private final String displayedValue;
@@ -32,7 +32,7 @@ public enum ContactPreferences {
 
     public static ContactPreferences fromValue(String value) {
         return Arrays.stream(values())
-            .filter(contactPref -> contactPref.getDisplayedValue().equals(value))
+            .filter(contactPref -> contactPref.getDisplayedValue().equalsIgnoreCase(value))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Unknown contact preference: " + value));
     }

@@ -17,25 +17,27 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.PRL_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -60,6 +62,9 @@ public class CafcassUploadDocServiceTest {
 
     @Mock
     private CaseDocumentClient caseDocumentClient;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     @InjectMocks
     CafcassUploadDocService cafcassUploadDocService;
@@ -129,28 +134,20 @@ public class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             Long.valueOf(TEST_CASE_ID)).data(stringObjectMap).build();
 
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
         cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
                                            TEST_CASE_ID
         );
-        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(
-            "Bearer abc",
-            "s2s token",
-            "e3ceb507-0137-43a9-8bd3-85dd23720648",
-            JURISDICTION,
-            PRL_CASE_TYPE,
-            TEST_CASE_ID,
-            "cafcass-document-upload"
-        );
-        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(
+        verify(allTabService, times(1)).submitAllTabsUpdate(
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.anyBoolean(),
-            Mockito.any(CaseDataContent.class)
+            Mockito.any()
         );
     }
 

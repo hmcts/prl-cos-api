@@ -1,0 +1,410 @@
+{
+  "case_details": {
+    "id": "1713172900898977",
+    "state": "Draft",
+    "case_data": {
+      "c8Document": null,
+      "c1ADocument": null,
+      "finalDocument": null,
+      "SearchCriteria": {},
+      "applicantTable": [
+        {
+          "id": "dada3e4b-caf8-404b-842c-a23afed219aa",
+          "value": {
+            "email": null,
+            "gender": null,
+            "address": {},
+            "dxNumber": null,
+            "lastName": null,
+            "firstName": null,
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "solicitorOrg": {},
+            "solicitorEmail": null,
+            "contactPreferences": null,
+            "solicitorReference": null,
+            "isAddressConfidential": null,
+            "representativeLastName": null,
+            "representativeFirstName": null,
+            "canYouProvideEmailAddress": null,
+            "isAtAddressLessThan5Years": null,
+            "isPhoneNumberConfidential": null,
+            "isEmailAddressConfidential": null,
+            "addressLivedLessThan5YearsDetails": null
+          }
+        }
+      ],
+      "soleTraderName": null,
+      "urgencyDetails": {
+        "urgencyStatus": "Not urgent"
+      },
+      "c8WelshDocument": null,
+      "respondentTable": [
+        {
+          "id": "000146d5-c302-4a56-95cf-a03a11305fc0",
+          "value": {
+            "email": null,
+            "gender": null,
+            "address": {},
+            "dxNumber": null,
+            "lastName": null,
+            "firstName": null,
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "solicitorOrg": {},
+            "solicitorEmail": null,
+            "solicitorReference": null,
+            "isPlaceOfBirthKnown": null,
+            "isAddressConfidential": null,
+            "isCurrentAddressKnown": null,
+            "representativeLastName": null,
+            "representativeFirstName": null,
+            "canYouProvidePhoneNumber": null,
+            "canYouProvideEmailAddress": null,
+            "isPhoneNumberConfidential": null,
+            "isEmailAddressConfidential": null,
+            "doTheyHaveLegalRepresentation": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "isAtAddressLessThan5YearsWithDontKnow": null
+          }
+        }
+      ],
+      "taskListVersion": "v3",
+      "allegationOfHarm": {
+        "typesOfHarm": "No Allegations of harm"
+      },
+      "c1AWelshDocument": null,
+      "dateOfSubmission": {
+        "dateOfSubmission": " "
+      },
+      "declarationTable": {
+        "agreedBy": null,
+        "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. null is authorised by the applicant to sign this statement."
+      },
+      "mpuUrgencyReason": "miamPolicyUpgradeUrgencyReason_Value_3",
+      "applicantCaseName": "Test123",
+      "caseSolicitorName": "AAT Solicitor",
+      "childDetailsTable": [
+        {
+          "id": "abbaee64-466a-4521-829e-0f85e6361c27",
+          "value": {
+            "gender": null,
+            "lastName": null,
+            "firstName": null,
+            "dateOfBirth": null,
+            "otherGender": null,
+            "childLiveWith": null,
+            "orderAppliedFor": null,
+            "cafcassOfficerName": null,
+            "cafcassOfficerAdded": null,
+            "cafcassOfficerPhoneNo": null,
+            "personWhoLivesWithChild": [],
+            "cafcassOfficerEmailAddress": null,
+            "applicantsRelationshipToChild": null,
+            "parentalResponsibilityDetails": null,
+            "respondentsRelationshipToChild": null,
+            "otherApplicantsRelationshipToChild": null,
+            "otherRespondentsRelationshipToChild": null
+          }
+        }
+      ],
+      "finalWelshDocument": null,
+      "mpuMediatorDetails": null,
+      "respondentTaskList": "",
+      "selectedCaseTypeID": "C100",
+      "specialArrangement": {
+        "areAnySpecialArrangements": "No"
+      },
+      "confidentialDetails": {
+        "isConfidentialDetailsAvailable": "No"
+      },
+      "hearingUrgencyTable": {
+        "isCaseUrgent": null,
+        "setOutReasonsBelow": null,
+        "caseUrgencyTimeAndReason": null,
+        "effortsMadeWithRespondents": null,
+        "doYouNeedAWithoutNoticeHearing": null,
+        "areRespondentsAwareOfProceedings": null,
+        "reasonsForApplicationWithoutNotice": null,
+        "doYouRequireAHearingWithReducedNotice": null
+      },
+      "mpuExemptionReasons": [
+        "mpuUrgency"
+      ],
+      "respondentTaskListA": "",
+      "respondentTaskListB": "",
+      "respondentTaskListC": "",
+      "respondentTaskListD": "",
+      "respondentTaskListE": "",
+      "caseSolicitorOrgName": "FPRL-test-organisation",
+      "allocatedJudgeDetails": {
+        "lastName": " ",
+        "courtName": " ",
+        "tierOfJudge": "",
+        "emailAddress": " ",
+        "judgePersonalCode": null,
+        "tierOfJudiciaryType": "",
+        "isJudgeOrLegalAdviser": null,
+        "isSpecificJudgeOrLegalAdviserNeeded": null
+      },
+      "caseNameHmctsInternal": "Test123",
+      "caseTypeOfApplication": "C100",
+      "otherProceedingsTable": {
+        "previousOrOngoingProceedings": ""
+      },
+      "applicationTypeDetails": {},
+      "childDetailsExtraTable": {},
+      "miamPolicyUpgradeTable": {
+        "soleTraderName": null,
+        "mpuChildInvolvedInMiam": "No",
+        "mpuApplicantAttendedMiam": "No",
+        "mpuClaimingExemptionMiam": "Yes",
+        "familyMediatorServiceName": null,
+        "mediatorRegistrationNumber": null
+      },
+      "mpuChildInvolvedInMiam": "No",
+      "typeOfApplicationTable": {},
+      "allegationOfHarmRevised": {},
+      "childAndCafcassOfficers": [],
+      "litigationCapacityTable": {
+        "litigationCapacityFactors": null,
+        "litigationCapacityReferrals": null,
+        "litigationCapacityOtherFactors": null,
+        "litigationCapacityOtherFactorsDetails": null
+      },
+      "attendingTheHearingTable": {
+        "isWelshNeeded": null,
+        "adjustmentsRequired": null,
+        "isDisabilityPresent": null,
+        "isInterpreterNeeded": null,
+        "isIntermediaryNeeded": null,
+        "reasonsForIntermediary": null,
+        "specialArrangementsRequired": null,
+        "isSpecialArrangementsRequired": null
+      },
+      "daApplicantExternalFlags": {},
+      "daApplicantInternalFlags": {},
+      "mpuApplicantAttendedMiam": "No",
+      "mpuCertificateByMediator": null,
+      "mpuClaimingExemptionMiam": "Yes",
+      "mpuOtherExemptionReasons": null,
+      "caApplicant1ExternalFlags": {},
+      "caApplicant1InternalFlags": {},
+      "caApplicant2ExternalFlags": {},
+      "caApplicant2InternalFlags": {},
+      "caApplicant3ExternalFlags": {},
+      "caApplicant3InternalFlags": {},
+      "caApplicant4ExternalFlags": {},
+      "caApplicant4InternalFlags": {},
+      "caApplicant5ExternalFlags": {},
+      "caApplicant5InternalFlags": {},
+      "daRespondentExternalFlags": {},
+      "daRespondentInternalFlags": {},
+      "familyMediatorServiceName": null,
+      "internationalElementTable": {
+        "jurisdictionIssue": null,
+        "requestToForeignAuthority": null,
+        "jurisdictionIssueGiveReason": null,
+        "habitualResidentInOtherState": null,
+        "requestToForeignAuthorityGiveReason": null,
+        "habitualResidentInOtherStateGiveReason": null
+      },
+      "mpuDomesticAbuseEvidences": null,
+      "otherPeopleInTheCaseTable": [
+        {
+          "id": "dc017335-fe5d-4d88-88f5-111dc12c7b8a",
+          "value": {
+            "email": null,
+            "gender": null,
+            "address": {},
+            "lastName": null,
+            "firstName": null,
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "isDateOfBirthKnown": null,
+            "isPlaceOfBirthKnown": null,
+            "relationshipToChild": [],
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "canYouProvideEmailAddress": null
+          }
+        }
+      ],
+      "otherProceedingEmptyTable": {
+        "otherProceedingEmptyField": " "
+      },
+      "caOtherParty1ExternalFlags": {},
+      "caOtherParty1InternalFlags": {},
+      "caOtherParty2ExternalFlags": {},
+      "caOtherParty2InternalFlags": {},
+      "caOtherParty3ExternalFlags": {},
+      "caOtherParty3InternalFlags": {},
+      "caOtherParty4ExternalFlags": {},
+      "caOtherParty4InternalFlags": {},
+      "caOtherParty5ExternalFlags": {},
+      "caOtherParty5InternalFlags": {},
+      "caRespondent1ExternalFlags": {},
+      "caRespondent1InternalFlags": {},
+      "caRespondent2ExternalFlags": {},
+      "caRespondent2InternalFlags": {},
+      "caRespondent3ExternalFlags": {},
+      "caRespondent3InternalFlags": {},
+      "caRespondent4ExternalFlags": {},
+      "caRespondent4InternalFlags": {},
+      "caRespondent5ExternalFlags": {},
+      "caRespondent5InternalFlags": {},
+      "mediatorRegistrationNumber": null,
+      "applicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
+      },
+      "childrenConfidentialDetails": [],
+      "allegationsOfHarmOrdersTable": {
+        "occupationOrder": {},
+        "ordersOccupation": null,
+        "restrainingOrder": {},
+        "ordersRestraining": null,
+        "nonMolestationOrder": {},
+        "ordersNonMolestation": null,
+        "otherInjunctiveOrder": {},
+        "ordersOtherInjunctive": null,
+        "undertakingInPlaceOrder": {},
+        "ordersUndertakingInPlace": null,
+        "forcedMarriageProtectionOrder": {},
+        "ordersForcedMarriageProtection": null
+      },
+      "otherProceedingsDetailsTable": [
+        {
+          "id": "9527bebf-f349-48eb-895f-2ad13e4b92e1",
+          "value": {
+            "dateEnded": null,
+            "caseNumber": null,
+            "dateStarted": null,
+            "nameOfCourt": null,
+            "nameOfJudge": null,
+            "typeOfOrder": null,
+            "nameAndOffice": null,
+            "nameOfGuardian": null,
+            "otherTypeOfOrder": null,
+            "nameOfChildrenInvolved": null,
+            "previousOrOngoingProceedings": null
+          }
+        }
+      ],
+      "summaryTabForOrderAppliedFor": {
+        "ordersApplyingFor": null,
+        "typeOfChildArrangementsOrder": null
+      },
+      "applicantsConfidentialDetails": [],
+      "otherProceedingsForSummaryTab": [
+        {
+          "id": "621c13bc-4dfe-438c-a2da-5741534aa82f",
+          "value": {
+            "caseNumber": null,
+            "nameOfCourt": null,
+            "typeOfOrder": null
+          }
+        }
+      ],
+      "respondentConfidentialDetails": [],
+      "allegationsOfHarmOverviewTable": {
+        "allegationsOfHarmYesNo": null,
+        "allegationsOfHarmChildAbuseYesNo": null,
+        "allegationsOfHarmDomesticAbuseYesNo": null,
+        "allegationsOfHarmOtherConcernsYesNo": null,
+        "allegationsOfHarmChildAbductionYesNo": null,
+        "allegationsOfHarmSubstanceAbuseYesNo": null
+      },
+      "welshLanguageRequirementsTable": {
+        "welshLanguageRequirement": null,
+        "welshLanguageRequirementApplication": null,
+        "languageRequirementApplicationNeedWelsh": null,
+        "welshLanguageRequirementApplicationNeedEnglish": null
+      },
+      "miamCertificationDocumentUpload": null,
+      "mpuChildProtectionConcernReason": null,
+      "mpuPreviousMiamAttendanceReason": null,
+      "miamPolicyUpgradeExemptionsTable": {
+        "mpuUrgencyEvidence": "Any delay caused by attending a MIAM would cause a risk of unlawful removal of a child from the United Kingdom, or a risk of unlawful retention of a child who is currently outside England and Wales.",
+        "mpuOtherGroundsEvidence": "",
+        "mpuDomesticAbuseEvidence": "",
+        "mpuChildProtectionEvidence": "",
+        "mpuReasonsForMiamExemption": "Urgency",
+        "mpuPreviousAttendenceEvidence": ""
+      },
+      "mpuDomesticAbuseEvidenceDocument": [],
+      "mpuNoDomesticAbuseEvidenceReason": null,
+      "daApplicantSolicitorExternalFlags": {},
+      "daApplicantSolicitorInternalFlags": {},
+      "caApplicantSolicitor1ExternalFlags": {},
+      "caApplicantSolicitor1InternalFlags": {},
+      "caApplicantSolicitor2ExternalFlags": {},
+      "caApplicantSolicitor2InternalFlags": {},
+      "caApplicantSolicitor3ExternalFlags": {},
+      "caApplicantSolicitor3InternalFlags": {},
+      "caApplicantSolicitor4ExternalFlags": {},
+      "caApplicantSolicitor4InternalFlags": {},
+      "caApplicantSolicitor5ExternalFlags": {},
+      "caApplicantSolicitor5InternalFlags": {},
+      "daRespondentSolicitorExternalFlags": {},
+      "daRespondentSolicitorInternalFlags": {},
+      "mpuIsDomesticAbuseEvidenceProvided": null,
+      "allegationsOfHarmDomesticAbuseTable": {
+        "sexualAbuseVictim": "",
+        "physicalAbuseVictim": "",
+        "emotionalAbuseVictim": "",
+        "financialAbuseVictim": "",
+        "psychologicalAbuseVictim": ""
+      },
+      "allegationsOfHarmOtherConcernsTable": {
+        "agreeChildOtherContact": null,
+        "agreeChildSupervisedTime": null,
+        "agreeChildUnsupervisedTime": null,
+        "allegationsOfHarmOtherConcerns": null,
+        "allegationsOfHarmOtherConcernsDetails": null,
+        "allegationsOfHarmOtherConcernsCourtActions": null
+      },
+      "caRespondentSolicitor1ExternalFlags": {},
+      "caRespondentSolicitor1InternalFlags": {},
+      "caRespondentSolicitor2ExternalFlags": {},
+      "caRespondentSolicitor2InternalFlags": {},
+      "caRespondentSolicitor3ExternalFlags": {},
+      "caRespondentSolicitor3InternalFlags": {},
+      "caRespondentSolicitor4ExternalFlags": {},
+      "caRespondentSolicitor4InternalFlags": {},
+      "caRespondentSolicitor5ExternalFlags": {},
+      "caRespondentSolicitor5InternalFlags": {},
+      "mpuDocFromDisputeResolutionProvider": null,
+      "submitAndPayDownloadApplicationLink": null,
+      "allegationsOfHarmChildAbductionTable": {
+        "childrenLocationNow": null,
+        "previousAbductionThreats": null,
+        "childAtRiskOfAbductionReason": null,
+        "abductionPassportOfficeNotified": null,
+        "previousAbductionThreatsDetails": null,
+        "abductionPreviousPoliceInvolvement": null,
+        "abductionPreviousPoliceInvolvementDetails": null
+      },
+      "mpuApplicantUnableToAttendMiamReason1": null,
+      "mpuApplicantUnableToAttendMiamReason2": null,
+      "c100ConfidentialityStatementDisclaimer": [
+        "confidentialityStatementUnderstood"
+      ],
+      "mpuTypeOfPreviousMiamAttendanceEvidence": null,
+      "submitAndPayDownloadApplicationWelshLink": null
+    }
+  }
+}

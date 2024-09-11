@@ -59,7 +59,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        assertFalse(respondentAllegationsOfHarmChecker.isStarted(partyDetails));
+        assertFalse(respondentAllegationsOfHarmChecker.isStarted(partyDetails, true));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        assertTrue(respondentAllegationsOfHarmChecker.isStarted(partyDetails));
+        assertTrue(respondentAllegationsOfHarmChecker.isStarted(partyDetails, true));
     }
 
 
@@ -83,7 +83,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails);
+        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails, true);
 
         assertFalse(isFinished);
     }
@@ -97,7 +97,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails);
+        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails, true);
 
         assertTrue(isFinished);
     }
@@ -110,7 +110,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isAbusePresent = respondentAllegationsOfHarmChecker.isStarted(partyDetails);
+        boolean isAbusePresent = respondentAllegationsOfHarmChecker.isStarted(partyDetails, true);
 
         assertFalse(isAbusePresent);
     }
@@ -407,14 +407,14 @@ public class RespondentAllegationsOfHarmCheckerTest {
     @Test
     public void whenNoDataIsSectionsFinishedReturnFalse() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
-        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, false, false, false));
+        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, false));
     }
 
     @Test
     public void whenIsSectionsFinishedTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
 
-        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, true, true, true));
+        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, true));
     }
 
     @Test

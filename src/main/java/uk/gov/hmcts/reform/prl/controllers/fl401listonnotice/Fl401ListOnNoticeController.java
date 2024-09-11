@@ -9,12 +9,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -52,30 +54,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(fl401ListOnNoticeService
-                          .prePopulateHearingPageDataForFl401ListOnNotice(authorisation, caseData))
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(path = "/fl401ListOnNotice-document-generation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "List On Notice document generation")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "List on notice document(fl404b) generation is success"),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse generateFl404bDocument(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(fl401ListOnNoticeService.generateFl404bDocument(authorisation, caseData))
+                          .prePopulateHearingPageDataForFl401ListOnNotice(caseData))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -93,7 +72,23 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest.getCaseDetails())).build();
+                .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest.getCaseDetails(), authorisation)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/fl401-send-listOnNotice-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List On Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public ResponseEntity<SubmittedCallbackResponse> sendListOnNoticeNotification(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return fl401ListOnNoticeService.sendNotification(callbackRequest.getCaseDetails().getData(), authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -7,15 +7,17 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class EditReturnedOrderControllerFunctionalTest {
 
     @Autowired
@@ -42,7 +45,9 @@ public class EditReturnedOrderControllerFunctionalTest {
     @MockBean
     private EditReturnedOrderService editReturnedOrderService;
 
-    private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+
+    private static CaseDetails caseDetails;
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -51,6 +56,28 @@ public class EditReturnedOrderControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
+
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+    }
 
     @Test
     public void givenRequestBody_whenAboutToStart_then200Response() throws Exception {
@@ -100,13 +127,14 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_whenSubmittedToResubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
+        String requestBodyRevised = requestBody
+            .replace("1706607610239516", caseDetails.getId().toString());
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/edit-returned-order/submitted");

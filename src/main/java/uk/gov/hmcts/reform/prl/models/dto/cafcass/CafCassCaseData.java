@@ -15,15 +15,29 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuOther;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
 
 @Data
 @AllArgsConstructor
@@ -77,8 +91,7 @@ public class CafCassCaseData {
 
     private String getDocumentId(URL url) {
         String path = url.getPath();
-        String documentId = path.split("/")[path.split("/").length - 1];
-        return documentId;
+        return path.split("/")[path.split("/").length - 1];
     }
 
     private String familymanCaseNumber;
@@ -110,7 +123,7 @@ public class CafCassCaseData {
         try {
             if (otherDocuments != null) {
                 List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
-                    .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).collect(Collectors.toList());
+                    .map(this:: updateElementDocumentId).toList();
                 this.otherDocuments = updatedOtherDocumentList;
             }
         } catch (Exception e) {
@@ -125,8 +138,6 @@ public class CafCassCaseData {
                 && !ObjectUtils.isEmpty(otherDocumentsElement.getValue().getDocumentOther())
                 && StringUtils.hasText(otherDocumentsElement.getValue().getDocumentOther().getDocumentUrl())) {
                 Document documentOther = otherDocumentsElement.getValue().getDocumentOther();
-                URL url = new URL(documentOther.getDocumentUrl());
-                documentOther.setDocumentUrl(getDocumentId(url));
                 otherDocumentsElement.getValue().setDocumentOther(documentOther);
             }
         } catch (Exception e) {
@@ -152,6 +163,41 @@ public class CafCassCaseData {
     private CafCassDocument finalDocument;
 
     private List<OrderTypeEnum> ordersApplyingFor;
+
+    public List<Element<Child>> getChildren() {
+
+        children = new ArrayList<>();
+
+        if (newChildDetails != null) {
+            newChildDetails.stream().forEach(
+                newChildDetail -> {
+                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
+                    children.add(Element.<Child>builder()
+                                     .id(newChildDetail.getId())
+                                     .value(Child.builder()
+                                                .firstName(childDetailsRevised.getFirstName())
+                                                .lastName(childDetailsRevised.getLastName())
+                                                .gender(childDetailsRevised.getGender())
+                                                .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                                .otherGender(childDetailsRevised.getOtherGender())
+                                                .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                                .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                                .whoDoesTheChildLiveWith(childDetailsRevised.getWhoDoesTheChildLiveWith() != null
+                                                                             ? partyIdAndPartyTypeMap
+                                                    .get(childDetailsRevised.getWhoDoesTheChildLiveWith()
+                                                             .getValue().getCode())
+                                                                             : null
+                                                )
+                                                .build())
+                                     .build());
+
+                }
+            );
+        }
+        return children;
+
+
+    }
 
     private List<Element<Child>> children;
 
@@ -199,14 +245,269 @@ public class CafCassCaseData {
         }
     }
 
+    //MIAM policy upgrade changes start
+
+    private YesOrNo mpuChildInvolvedInMiam;
+
+    @Getter(AccessLevel.NONE)
+    private YesOrNo mpuApplicantAttendedMiam;
+
+    public void setMpuApplicantAttendedMiam(YesOrNo mpuApplicantAttendedMiam) {
+        this.applicantAttendedMiam = mpuApplicantAttendedMiam.getDisplayedValue();
+    }
+
+    @Getter(AccessLevel.NONE)
+    private YesOrNo mpuClaimingExemptionMiam;
+
+    public void setMpuClaimingExemptionMiam(YesOrNo mpuClaimingExemptionMiam) {
+        this.claimingExemptionMiam = mpuClaimingExemptionMiam.getDisplayedValue();
+    }
+
+    @Getter(AccessLevel.NONE)
+    private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
+
+
+    public void setMpuExemptionReasons(List<MiamExemptionsChecklistEnum> mpuExemptionReasons) {
+        final String[] childProtectionEvidence = {""};
+        final String[] domesticViolenceEvidence = {""};
+        final String[] reasonsForMiamExemption = {""};
+        final String[] otherGroundsEvidence = {""};
+        final String[] previousAttendenceEvidence = {""};
+        final String[] urgencyEvidence = {""};
+
+        mpuExemptionReasons.stream()
+            .forEach(
+                reasonEnum -> {
+                    if (reasonEnum.equals(mpuDomesticAbuse)) {
+                        domesticViolenceEvidence[0] = mpuDomesticAbuse.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuChildProtectionConcern)) {
+                        childProtectionEvidence[0] = mpuChildProtectionConcern.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuUrgency)) {
+                        urgencyEvidence[0] = mpuUrgency.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuPreviousMiamAttendance)) {
+                        previousAttendenceEvidence[0] = mpuPreviousMiamAttendance.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuOther)) {
+                        otherGroundsEvidence[0] = mpuOther.getDisplayedValue();
+                    }
+                }
+
+            );
+
+
+        this.miamExemptionsTable = MiamExemptions.builder()
+            .childProtectionEvidence(childProtectionEvidence[0])
+            .domesticViolenceEvidence(domesticViolenceEvidence[0])
+            .reasonsForMiamExemption(reasonsForMiamExemption[0])
+            .otherGroundsEvidence(otherGroundsEvidence[0])
+            .previousAttendenceEvidence(previousAttendenceEvidence[0])
+            .urgencyEvidence(urgencyEvidence[0])
+            .build();
+    }
+
+
+    private List<String> miamDomesticAbuseEvidences;
+
+    @Getter(AccessLevel.NONE)
+    private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
+
+
+    public void setMpuDomesticAbuseEvidences(List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences) {
+        List<String> updatedMiamDomesticAbuseTypes = new ArrayList<>();
+        mpuDomesticAbuseEvidences.stream()
+            .forEach(
+                miamDomesticAbuseChecklistEnum -> updatedMiamDomesticAbuseTypes.add(miamDomesticAbuseChecklistEnum.getDisplayedValue())
+            );
+        this.miamDomesticAbuseEvidences = updatedMiamDomesticAbuseTypes;
+    }
+
+
+    private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
+    @Setter(AccessLevel.NONE)
+    private List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument;
+
+    public void setMpuDomesticAbuseEvidenceDocument(List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument) {
+        try {
+            if (mpuDomesticAbuseEvidenceDocument != null) {
+                List<Element<DomesticAbuseEvidenceDocument>> updatedMpuDocumentList = mpuDomesticAbuseEvidenceDocument.stream()
+                    .map(this::updateMpuDocumentId).toList();
+                this.mpuDomesticAbuseEvidenceDocument = updatedMpuDocumentList;
+            }
+        } catch (Exception e) {
+            this.mpuDomesticAbuseEvidenceDocument = mpuDomesticAbuseEvidenceDocument;
+        }
+    }
+
+    private Element<DomesticAbuseEvidenceDocument> updateMpuDocumentId(Element<DomesticAbuseEvidenceDocument> mpuDomesticAbuseEvidenceDocument) {
+        try {
+            if (mpuDomesticAbuseEvidenceDocument != null
+                && !ObjectUtils.isEmpty(mpuDomesticAbuseEvidenceDocument.getValue())
+                && !ObjectUtils.isEmpty(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument())
+                && StringUtils.hasText(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl())) {
+                Document documentOther = mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
+                URL url = new URL(documentOther.getDocumentUrl());
+                documentOther.setDocumentUrl(getDocumentId(url));
+                mpuDomesticAbuseEvidenceDocument.getValue().setDomesticAbuseDocument(documentOther);
+            }
+        } catch (Exception e) {
+            return mpuDomesticAbuseEvidenceDocument;
+        }
+        return mpuDomesticAbuseEvidenceDocument;
+    }
+
+    private String mpuNoDomesticAbuseEvidenceReason;
+
+
+    @Getter(AccessLevel.NONE)
+    private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
+    private String miamUrgencyReason;
+
+    public void setMpuUrgencyReason(MiamUrgencyReasonChecklistEnum mpuUrgencyReason) {
+        this.miamUrgencyReason = mpuUrgencyReason.getDisplayedValue();
+    }
+
+
+
+    @Getter(AccessLevel.NONE)
+    private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
+    private String miamPreviousAttendanceReason;
+
+    public void setMpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason) {
+        this.miamPreviousAttendanceReason = mpuPreviousMiamAttendanceReason.getDisplayedValue();
+    }
+
+
+
+
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument mpuDocFromDisputeResolutionProvider;
+
+
+
+    @Getter(AccessLevel.NONE)
+    private TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence;
+    private String miamTypeOfPreviousAttendanceEvidence;
+
+    public void setMpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence) {
+        this.miamTypeOfPreviousAttendanceEvidence = mpuTypeOfPreviousMiamAttendanceEvidence.getDisplayedValue();
+    }
+
+
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument mpuCertificateByMediator;
+    private String mpuMediatorDetails;
+
+
+
+    @Getter(AccessLevel.NONE)
+    private MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons;
+    private String miamOtherExemptionReasons;
+
+    public void setMpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons) {
+        this.miamOtherExemptionReasons = mpuOtherExemptionReasons.getDisplayedValue();
+    }
+
+
+    private String mpuApplicantUnableToAttendMiamReason1;
+    private String mpuApplicantUnableToAttendMiamReason2;
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument miamCertificationDocumentUpload;
+
+
+
+    @Getter(AccessLevel.NONE)
+    private MiamPolicyUpgradeChildProtectionConcernEnum mpuChildProtectionConcernReason;
+    private String miamChildProtectionConcernReason;
+
+    public void setMpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum mpuChildProtectionConcernReason) {
+        this.miamChildProtectionConcernReason = mpuChildProtectionConcernReason.getDisplayedValue();
+    }
+
+    public void setMiamCertificationDocumentUpload(CafCassDocument miamCertificationDocumentUpload) throws MalformedURLException {
+        if (miamCertificationDocumentUpload != null
+            && StringUtils.hasText(miamCertificationDocumentUpload.getDocumentUrl())) {
+            URL url = new URL(miamCertificationDocumentUpload.getDocumentUrl());
+            miamCertificationDocumentUpload.setDocumentId(getDocumentId(url));
+            miamCertificationDocumentUpload.setDocumentUrl(null);
+        }
+        this.miamCertificationDocumentUpload = miamCertificationDocumentUpload;
+        this.miamCertificationDocumentUpload1 = miamCertificationDocumentUpload;
+    }
+
+    public void setMpuCertificateByMediator(CafCassDocument mpuCertificateByMediator) throws MalformedURLException {
+        if (mpuCertificateByMediator != null
+            && StringUtils.hasText(mpuCertificateByMediator.getDocumentUrl())) {
+            URL url = new URL(mpuCertificateByMediator.getDocumentUrl());
+            mpuCertificateByMediator.setDocumentId(getDocumentId(url));
+            mpuCertificateByMediator.setDocumentUrl(null);
+        }
+        this.mpuCertificateByMediator = mpuCertificateByMediator;
+    }
+
+    public void setMpuDocFromDisputeResolutionProvider(CafCassDocument mpuDocFromDisputeResolutionProvider) throws MalformedURLException {
+        if (mpuDocFromDisputeResolutionProvider != null
+            && StringUtils.hasText(mpuDocFromDisputeResolutionProvider.getDocumentUrl())) {
+            URL url = new URL(mpuDocFromDisputeResolutionProvider.getDocumentUrl());
+            mpuDocFromDisputeResolutionProvider.setDocumentId(getDocumentId(url));
+            mpuDocFromDisputeResolutionProvider.setDocumentUrl(null);
+        }
+        this.mpuDocFromDisputeResolutionProvider = mpuDocFromDisputeResolutionProvider;
+    }
+
+    //Miam upgrade policy changes end
     @Getter(AccessLevel.NONE)
     private Map<String, Object> miamTable;
 
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
+    @Getter(AccessLevel.NONE)
+    private Map<String, WhoDoesTheChildLiveWith> partyIdAndPartyTypeMap;
+
+
+    public void setApplicants(List<Element<ApplicantDetails>> applicants) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+        applicants.stream().forEach(
+            applicantDetailsElement -> partyIdAndPartyTypeMap.put(
+                String.valueOf(applicantDetailsElement.getId()),
+                WhoDoesTheChildLiveWith.builder()
+                    .partyId(String.valueOf(applicantDetailsElement.getId()))
+                    .childAddress(applicantDetailsElement.getValue().getAddress())
+                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
+                                       .concat(" ")
+                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyType(PartyTypeEnum.APPLICANT)
+                    .build()
+
+            )
+        );
+        this.applicants = applicants;
+    }
+
     private List<Element<ApplicantDetails>> applicants;
 
+    public void setRespondents(List<Element<ApplicantDetails>> respondents) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+        respondents.stream().forEach(
+            applicantDetailsElement -> partyIdAndPartyTypeMap.put(
+                String.valueOf(applicantDetailsElement.getId()),
+                WhoDoesTheChildLiveWith.builder()
+                    .partyId(String.valueOf(applicantDetailsElement.getId()))
+                    .childAddress(applicantDetailsElement.getValue().getAddress())
+                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
+                                       .concat(" ")
+                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyType(PartyTypeEnum.RESPONDENT)
+                    .build()
+            )
+        );
+        this.respondents = respondents;
+    }
+
     private List<Element<ApplicantDetails>> respondents;
+
 
     private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
@@ -258,41 +559,15 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;
 
-    @Getter(AccessLevel.NONE)
-    private List<Element<ChildDetailsCafcass>> newChildDetails;
-
-    public void setNewChildDetails(List<Element<ChildDetailsCafcass>> newChildDetails) {
-        if (this.children == null) {
-            this.children = new ArrayList<>();
-        }
-        if (newChildDetails != null) {
-            newChildDetails.stream().forEach(
-                newChildDetail -> {
-                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
-                    this.children.add(Element.<Child>builder()
-                                          .id(newChildDetail.getId())
-                                          .value(Child.builder()
-                                                     .firstName(childDetailsRevised.getFirstName())
-                                                     .lastName(childDetailsRevised.getLastName())
-                                                     .gender(childDetailsRevised.getGender())
-                                                     .dateOfBirth(childDetailsRevised.getDateOfBirth())
-                                                     .otherGender(childDetailsRevised.getOtherGender())
-                                                     .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
-                                                     .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
-                                                     .build())
-                                          .build());
-
-                }
-            );
-        }
-
-        this.newChildDetails = newChildDetails;
-    }
 
     @Getter(AccessLevel.NONE)
     private List<Element<ApplicantDetails>> otherPartyInTheCaseRevised;
 
     public void setOtherPartyInTheCaseRevised(List<Element<ApplicantDetails>> otherPartyInTheCaseRevised) {
+        if (partyIdAndPartyTypeMap == null || partyIdAndPartyTypeMap.size() == 0) {
+            partyIdAndPartyTypeMap = new HashMap<String, WhoDoesTheChildLiveWith>();
+        }
+
         if (this.otherPeopleInTheCaseTable == null) {
             this.otherPeopleInTheCaseTable = new ArrayList<>();
         }
@@ -300,6 +575,18 @@ public class CafCassCaseData {
         if (otherPartyInTheCaseRevised != null) {
             otherPartyInTheCaseRevised.stream().forEach(
                 otherPartyInTheCase -> {
+                    partyIdAndPartyTypeMap.put(
+                        String.valueOf(otherPartyInTheCase.getId()),
+                        WhoDoesTheChildLiveWith.builder()
+                            .partyId(String.valueOf(otherPartyInTheCase.getId()))
+                            .childAddress(otherPartyInTheCase.getValue().getAddress())
+                            .partyFullName(otherPartyInTheCase.getValue().getFirstName()
+                                               .concat(" ")
+                                               .concat(otherPartyInTheCase.getValue().getLastName()))
+                            .partyType(PartyTypeEnum.OTHERPEOPLE)
+                            .build()
+
+                    );
                     ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
                     this.otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
                                                            .id(otherPartyInTheCase.getId())
@@ -336,6 +623,11 @@ public class CafCassCaseData {
         }
         this.otherPartyInTheCaseRevised = otherPartyInTheCaseRevised;
     }
+
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<ChildDetailsCafcass>> newChildDetails;
+
 
     public List<Element<RelationshipToPartiesCafcass>> getChildAndApplicantRelations() {
         List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
@@ -429,5 +721,7 @@ public class CafCassCaseData {
     private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
 
     private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
 
 }

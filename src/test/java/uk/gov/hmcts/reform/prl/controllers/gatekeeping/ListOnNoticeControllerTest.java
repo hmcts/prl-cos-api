@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
@@ -27,12 +30,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -49,7 +52,6 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,6 +75,9 @@ public class ListOnNoticeControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    AllTabServiceImpl allTabService;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
@@ -90,9 +95,6 @@ public class ListOnNoticeControllerTest {
 
     @Mock
     RoleAssignmentService roleAssignmentService;
-
-    @Mock
-    CoreCaseDataService coreCaseDataService;
 
     private CaseData caseData;
 
@@ -160,7 +162,7 @@ public class ListOnNoticeControllerTest {
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
         when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
             .thenReturn(allocatedJudge);
@@ -200,7 +202,7 @@ public class ListOnNoticeControllerTest {
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
@@ -227,7 +229,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -260,7 +262,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -293,7 +295,7 @@ public class ListOnNoticeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -344,10 +346,11 @@ public class ListOnNoticeControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        doNothing().when(listOnNoticeService)
-            .sendNotification(Mockito.any(),Mockito.anyString());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
-        verify(listOnNoticeService,times(1)).sendNotification(Mockito.any(),Mockito.any());
+        verify(listOnNoticeService,times(1)).cleanUpListOnNoticeFields(Mockito.any());
     }
 
 }

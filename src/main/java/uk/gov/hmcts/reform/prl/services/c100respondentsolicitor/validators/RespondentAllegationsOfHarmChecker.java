@@ -36,7 +36,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         return response.filter(value -> ofNullable(value.getRespondentAllegationsOfHarmData())
@@ -46,7 +46,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -71,9 +71,9 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
 
         boolean isFinished;
 
-        if (respAllegationsOfHarmYesNo.isPresent() && respAllegationsOfHarmYesNo.get().equals(Yes)) {
-            boolean respDomesticBehavioursCompleted = true;
-            boolean respChildBehavioursCompleted = true;
+        if (respAllegationsOfHarmYesNo.isPresent() && Yes.equals(respAllegationsOfHarmYesNo.get())) {
+            boolean respDomesticBehavioursCompleted;
+            boolean respChildBehavioursCompleted;
 
             respDomesticBehavioursCompleted =  validateDomesticAbuse(respondentAllegationsOfHarmData);
             if (!respDomesticBehavioursCompleted) {
@@ -104,7 +104,8 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             );
 
             isFinished = isSectionsFinished(respondentAllegationsOfHarmData,
-                    respDomesticBehavioursCompleted,respChildBehavioursCompleted, previousOrders);
+                                            previousOrders
+            );
 
         } else {
             isFinished = respAllegationsOfHarmYesNo.isPresent();
@@ -213,23 +214,11 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     }
 
     public boolean isSectionsFinished(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
-                                      boolean respDomesticBehavioursCompleted,
-                                      boolean respChildBehavioursCompleted,
                                       boolean resPreviousOrders) {
 
-        log.debug("validateOrders  :{} ",validateOrders(respondentAllegationsOfHarmData));
-        log.debug("previousOrders  :{} ",resPreviousOrders);
-        log.debug("domesticBehavioursCompleted  :{} ",respDomesticBehavioursCompleted);
-        log.debug("childBehavioursCompleted  :{} ",respChildBehavioursCompleted);
-        log.debug("validateAbductionSection(caseData)  :{} ",validateAbductionSection(respondentAllegationsOfHarmData));
-        log.debug("validateSubstanceAbuse(caseData)  :{} ",validateSubstanceAbuse(respondentAllegationsOfHarmData));
-        log.debug("validateOtherConcerns(caseData)  :{} ",validateOtherConcerns(respondentAllegationsOfHarmData));
-        log.debug("validateChildContact(caseData)  :{} ",validateChildContact(respondentAllegationsOfHarmData));
         boolean isFinished;
         isFinished =  validateOrders(respondentAllegationsOfHarmData)
                 && resPreviousOrders
-                && respDomesticBehavioursCompleted
-                && respChildBehavioursCompleted
                 && validateAbductionSection(respondentAllegationsOfHarmData)
                 && validateOtherConcerns(respondentAllegationsOfHarmData)
                 && validateSubstanceAbuse(respondentAllegationsOfHarmData)

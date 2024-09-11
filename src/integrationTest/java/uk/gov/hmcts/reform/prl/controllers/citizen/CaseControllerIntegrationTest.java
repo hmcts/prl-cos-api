@@ -43,6 +43,10 @@ public class CaseControllerIntegrationTest {
 
     private final String validateAccessCodeEndpoint = "/validate-access-code";
 
+    private final String retrieveCitizenFlagsEndpoint = "/1234567/retrieve-ra-flags/party-1";
+
+    private final String updateCitizenFlagsEndpoint = "/1234567/c100RequestSupport/party-update-ra";
+
     private final String validBody = "controller/valid-casedata-input.json";
 
     @Autowired
@@ -140,6 +144,31 @@ public class CaseControllerIntegrationTest {
         assertEquals(
             HttpStatus.SC_NOT_FOUND,
             httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testRetrieveCitizenFlagsEndpoint() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + retrieveCitizenFlagsEndpoint);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_OK,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testUpdateCitizenFlagsEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson("controller/valid-ra-update-request.json");
+        HttpPost httpPost = new HttpPost(serviceUrl + updateCitizenFlagsEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
 
 }

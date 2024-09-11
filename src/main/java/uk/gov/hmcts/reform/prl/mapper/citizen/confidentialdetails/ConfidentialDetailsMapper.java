@@ -55,7 +55,7 @@ public class ConfidentialDetailsMapper {
                 .build();
         }
         if (updateTabs) {
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
+            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData.getId()));
         }
         return caseData;
     }

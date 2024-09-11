@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -118,21 +117,22 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse copyManageDocs(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) throws JsonProcessingException {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
+    ) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
+            .build();
     }
 
     @PostMapping("/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
-        Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
+
+        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(
             callbackRequest,
             authorisation
         );
-        //update all tabs
-        manageDocumentsService.updateCaseData(callbackRequest, caseDataUpdated);
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)

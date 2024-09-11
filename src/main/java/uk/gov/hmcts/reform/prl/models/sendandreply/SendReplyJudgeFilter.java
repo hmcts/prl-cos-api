@@ -12,8 +12,6 @@ public class SendReplyJudgeFilter {
         }
 
         JudicialUser judicialUser = (JudicialUser) obj;
-        System.out.println("judicialUser.getIdamId() " + judicialUser.getIdamId());
-        System.out.println("judicialUser.getPersonalCode() " + judicialUser.getPersonalCode());
         if (StringUtils.isEmpty(judicialUser.getIdamId()) || StringUtils.isEmpty(judicialUser.getPersonalCode())) {
             return false;
         }

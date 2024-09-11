@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -102,6 +103,7 @@ public class CaseDataServiceTest {
         listOfHearings.add(hearings);
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -168,6 +170,7 @@ public class CaseDataServiceTest {
         listOfHearings.add(hearings);
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -215,6 +218,7 @@ public class CaseDataServiceTest {
     public void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNoData.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
@@ -258,6 +262,7 @@ public class CaseDataServiceTest {
         listOfHearings.add(hearings);
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);

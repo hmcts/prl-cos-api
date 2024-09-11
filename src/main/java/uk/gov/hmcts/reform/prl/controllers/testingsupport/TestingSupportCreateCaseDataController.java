@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -44,8 +43,6 @@ public class TestingSupportCreateCaseDataController {
     private final CcdCoreCaseDataService coreCaseDataService;
 
     private final AuthTokenGenerator authTokenGenerator;
-
-    private final CourtNavCaseService courtNavCaseService;
 
     @PostMapping(path = "/testing-support/create-ccd-case-data",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

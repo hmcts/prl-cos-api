@@ -61,8 +61,6 @@ public class MigrationController extends AbstractCallbackController {
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                 @Parameter(hidden = true) String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("updating tabs migration data for the case id: {}", caseData.getId());
-        tabService.updateAllTabsIncludingConfTab(caseData);
+        tabService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
     }
 }

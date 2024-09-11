@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -50,10 +50,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtNavCaseService {
 
-    public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
     protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
-    private final CoreCaseDataApi coreCaseDataApi;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -108,7 +106,7 @@ public class CourtNavCaseService {
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
             if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
-                && Integer.valueOf(tempCaseData.getNumberOfAttachments())
+                && Integer.parseInt(tempCaseData.getNumberOfAttachments())
                 <= tempCaseData.getCourtNavUploadedDocs().size()) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -212,39 +210,20 @@ public class CourtNavCaseService {
         }
     }
 
-    public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
-        log.info("**********************Tab refresh started**************************");
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-
-        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
-
-        log.info("Following case event will be triggered {}", caseEvent.getValue());
-
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
-        StartEventResponse startEventResponse = coreCaseDataService.startUpdate(systemAuthorisation,
-                                                                                eventRequestData,
-                                                                                String.valueOf(id),
-                                                                                true
+    public void refreshTabs(String authToken, String caseId) throws Exception {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
+        data.put("id", caseId);
+        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
+        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+        allTabService.mapAndSubmitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseData
         );
-
-        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
-        caseDataMap.put("id", String.valueOf(id));
-        caseDataMap.putAll(documentGenService.generateDocuments(
-            authToken,
-            objectMapper.convertValue(data, CaseData.class)
-        ));
-        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
-        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
-        CaseData latestCaseData = objectMapper.convertValue(caseDataMap, CaseData.class);
-
-        allTabService.updateAllTabsIncludingConfTabRefactored(systemAuthorisation,
-                                                              String.valueOf(id),
-                                                              startEventResponse,
-                                                              eventRequestData,
-                                                              latestCaseData
-        );
-        log.info("**********************Tab refresh and Courtnav case creation complete**************************");
+        log.info("**********************Tab refresh and CourtNav case creation complete**************************");
     }
 }
 

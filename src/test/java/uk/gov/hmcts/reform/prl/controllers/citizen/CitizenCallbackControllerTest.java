@@ -10,7 +10,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
@@ -31,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,13 +70,10 @@ public class CitizenCallbackControllerTest {
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
-    Map<String, Object> caseDataMap;
-    CaseDetails caseDetails;
     CaseData caseData;
-    CallbackRequest callbackRequest;
 
     public static final String authToken = "Bearer TestAuthToken";
-    private String citizenSignUpLink = "https://privatelaw.aat.platform.hmcts.net";
+
 
 
     @Before
@@ -127,42 +122,40 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void updateCitizenApplicationTest() throws Exception {
+    public void updateCitizenApplicationTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        doNothing().when(allTabsService).updateAllTabsIncludingConfTab(any(CaseData.class));
+        when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(any(CaseData.class));
+        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
     }
 
     @Test
-    public void sendNotitficationAfterCaseWithdrawnTest() throws Exception {
-
+    public void sendNotificationAfterCaseWithdrawnTest() {
+        final String citizenSignUpLink = "https://privatelaw.aat.platform.hmcts.net";
         UserDetails userDetails = UserDetails.builder()
             .forename("test")
             .surname("last")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CitizenCaseSubmissionEmail.builder()
+                .caseNumber(String.valueOf(caseData.getId()))
+                .caseLink(citizenSignUpLink)
+                .applicantName(userDetails.getFullName())
+                .build();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        EmailTemplateVars email = CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .caseLink(citizenSignUpLink)
-            .applicantName(userDetails.getFullName())
-            .build();
-
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken, caseData);
         citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
-        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(any(CaseData.class));
+        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(anyString());
     }
 }

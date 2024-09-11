@@ -66,7 +66,7 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -82,20 +82,20 @@ public class KeepDetailsPrivateCheckerTest {
                           .build())
             .build();
 
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent, true);
         Assert.assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent, true);
         Assert.assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
         respondent = null;
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent, true);
         Assert.assertFalse(anyNonEmpty);
     }
 

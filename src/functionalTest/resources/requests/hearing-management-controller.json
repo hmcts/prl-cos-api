@@ -1,6 +1,6 @@
 {
   "hmctsServiceCode": "123456789",
-  "caseRef": "1111111",
+  "caseRef": "123456789",
   "hearingId": "9999999",
   "hearingUpdate": {
     "hearingListingStatus": "test",

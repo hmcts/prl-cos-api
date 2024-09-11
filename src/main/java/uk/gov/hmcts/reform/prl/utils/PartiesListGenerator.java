@@ -41,10 +41,11 @@ public class PartiesListGenerator {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             if (applicants != null && !applicants.isEmpty()) {
-                Map<String, String> applicantSolicitors = applicants.stream().map(Element::getValue).collect(
+                Map<String, String> applicantSolicitors = applicants.stream()
+                    .collect(
                     Collectors.toMap(
-                        PartyDetails::getSolicitorEmail,
-                        i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                        party -> party.getId().toString(),
+                        party -> party.getValue().getRepresentativeFullNameForCaseFlags()
                     ));
 
                 for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
@@ -72,12 +73,11 @@ public class PartiesListGenerator {
             if (respondents != null && !respondents.isEmpty()) {
                 Map<String, String> respondentSolicitors = respondents
                     .stream()
-                    .map(Element::getValue)
-                    .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
+                    .filter(party -> YesNoDontKnow.yes.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
                     .collect(
                         Collectors.toMap(
-                            PartyDetails::getSolicitorEmail,
-                            i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                            party -> party.getId().toString(),
+                            party -> party.getValue().getRepresentativeFullNameForCaseFlags()
                         ));
 
                 for (Map.Entry<String, String> appSols : respondentSolicitors.entrySet()) {

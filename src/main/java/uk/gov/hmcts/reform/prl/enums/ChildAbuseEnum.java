@@ -24,7 +24,7 @@ public enum ChildAbuseEnum {
     emotionalAbuse("emotionalAbuse","Emotional abuse"),
 
     @JsonProperty("financialAbuse")
-    financialAbuse("financialAbuse","Financial  abuse");
+    financialAbuse("financialAbuse","Financial abuse");
 
     private final String id;
     private final String displayedValue;

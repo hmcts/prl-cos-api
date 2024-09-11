@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Service
 @Slf4j
@@ -305,7 +306,8 @@ public class CaseWorkerEmailService {
         String isConfidential = NO;
         if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (!TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) // requires review
+            || (!TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                && !TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())// requires review
                 && caseData
                 .getChildren()
                 .stream()
