@@ -659,30 +659,25 @@ public class ServiceOfApplicationService {
                 ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             List<Document> packCdocs = new ArrayList<>();
             Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
+            packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
             if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP2));
-                packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
                 Map<String, String> fieldsMap = new HashMap<>();
                 fieldsMap.put(AUTHORIZATION, authorization);
-                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
+                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP2);
                 sendEmailToCitizenLipPersonalServiceCaDa(
                     caseData,
                     emailNotificationDetails,
-                    element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                    applicant,
                     packCdocs,
                     SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_PER_CA_CB,
                     fieldsMap,
                     EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV
                 );
             } else {
-                packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
                 sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
                                            bulkPrintDetails,
-                                           element(
-                                               caseData.getApplicantsFL401().getPartyId(),
-                                               caseData.getApplicantsFL401()
-                                           ),
-                                           Templates.PRL_LET_ENG_AP1
+                                           applicant,
+                                           Templates.PRL_LET_ENG_AP2
                 );
             }
             generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
