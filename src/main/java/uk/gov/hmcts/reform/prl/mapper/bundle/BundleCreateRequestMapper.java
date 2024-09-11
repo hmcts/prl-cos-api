@@ -182,21 +182,20 @@ public class BundleCreateRequestMapper {
     private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
 
-        if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
-            if (null != caseData.getFinalWelshDocument()) {
-                applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
-            }
-            if (null != caseData.getC1AWelshDocument()) {
-                applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
-            }
-        } else {
-            if (null != caseData.getFinalDocument()) {
-                applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
-            }
-            if (null != caseData.getC1ADocument()) {
-                applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
-            }
+        if (null != caseData.getFinalDocument()) {
+            applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
         }
+        if (null != caseData.getFinalWelshDocument()) {
+            applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
+        }
+
+        if (null != caseData.getC1ADocument()) {
+            applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
+        }
+        if (null != caseData.getC1AWelshDocument()) {
+            applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
+        }
+
         List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin =
             mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
         if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
@@ -271,6 +270,11 @@ public class BundleCreateRequestMapper {
             Document document = orderDetails.getOrderDocument();
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
                 .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+            Document welshDocument = orderDetails.getOrderDocumentWelsh();
+            if (welshDocument != null) {
+                orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
+                               .documentFileName(welshDocument.getDocumentFileName()).documentLink(welshDocument).build());
+            }
         });
         return ElementUtils.wrapElements(orders);
     }

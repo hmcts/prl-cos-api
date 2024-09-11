@@ -100,7 +100,11 @@ public class BundleCreateRequestMapperTest {
 
         List<OrderDetails> orders = new ArrayList<>();
         orders.add(OrderDetails.builder().orderType("orders")
-            .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Order.pdf").build()).build());
+                       .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "Order.pdf").build())
+                       .orderDocumentWelsh(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                           "welshOrder.pdf").build())
+                       .build());
 
         List<ResponseDocuments> citizenC7uploadedDocs = new ArrayList<>();
         citizenC7uploadedDocs.add(ResponseDocuments.builder()
