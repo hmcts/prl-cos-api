@@ -26,4 +26,14 @@ public class Match {
     @JsonProperty("data.cafcassServedOptions")
     private YesOrNo cafcassServedOptions;
 
+    @JsonProperty("data.caseCreatedBy")
+    private String caseCreatedBy;
+
+    @JsonProperty("data.helpWithFees")
+    private String helpWithFees;
+
+
+    @JsonProperty("data.hwfRequestedForAdditionalApplicationsFlag")
+    private String hwfRequestedForAdditionalApplicationsFlag;
+
 }

@@ -609,7 +609,7 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
 
-    public static final String COURTNAV = "COURTNAV";
+    public static final String COURTNAV = "CourtNav";
     public static final String NA_COURTNAV = "NA_COURTNAV";
 
     public static final String DISTRICT_JUDGE = "districtJudge";
@@ -901,6 +901,7 @@ public class PrlAppsConstants {
 
     public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
     public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
+    public static final String DD_MMM_YYYY_HH_MM_SS_AM_PM = "d-MMM-yyyy hh:mm:ss a";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";
@@ -951,6 +952,7 @@ public class PrlAppsConstants {
 
     public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
     public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+    public static final String AWP_HWF_REF_NUMBER = "awpHwfRefNo";
 
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
@@ -1034,4 +1036,19 @@ public class PrlAppsConstants {
     public static final String CAN_10_FM5 = "CAN_10";
 
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
+  
+    public static final String COURTNAV_USER = "courtnav";
+
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
+    //Flag to enable citizen DA journey
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
+
+    public static final String HWF_APP_LIST = "hwfAppList";
+    public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
+
+    public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
 }
