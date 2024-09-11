@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 
 @Slf4j
 @RestController
@@ -73,31 +72,29 @@ public class HearingManagementService {
             fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
 
-        switch (caseState) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING -> {
-                customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
-                submitUpdate(fields, customFields);
-            }
-            case DECISION_OUTCOME -> {
-                customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
-                submitUpdate(fields, customFields);
-            }
-            default -> {
-                break;
-            }
-        }
-
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
+
         List<String> allowedHmcStatus = List.of(
             LISTED,
-            WAITING_TO_BE_LISTED,
             COMPLETED,
             POSTPONED,
             ADJOURNED,
             CANCELLED
         );
         if (allowedHmcStatus.contains(hmcStatus)) {
-            updateTabsWithLatestData(customFields);
+            switch (caseState) {
+                case PREPARE_FOR_HEARING_CONDUCT_HEARING -> {
+                    customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
+                    submitUpdate(fields, customFields);
+                }
+                case DECISION_OUTCOME -> {
+                    customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
+                    submitUpdate(fields, customFields);
+                }
+                default -> {
+                    break;
+                }
+            }
         }
     }
 

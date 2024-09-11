@@ -41,6 +41,12 @@
       "parentialResponsibility":{
         "statement":"childFN1 childLN1"
       },
+      "mainlyLiveWith":{
+        "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
+        "firstName":"applicantFN1",
+        "lastName":"applicantLN1",
+        "partyType":"applicant"
+      },
       "liveWith":[
         {
           "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
@@ -80,6 +86,12 @@
       },
       "parentialResponsibility":{
         "statement":"childFN2 childLN2"
+      },
+      "mainlyLiveWith":{
+        "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
+        "firstName":"applicantFN1",
+        "lastName":"applicantLN1",
+        "partyType":"applicant"
       },
       "liveWith":[
         {

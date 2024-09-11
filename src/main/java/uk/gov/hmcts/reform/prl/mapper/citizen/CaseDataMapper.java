@@ -50,7 +50,7 @@ public class CaseDataMapper {
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = CaseData.builder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
@@ -99,7 +99,8 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements);
+            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements,
+                                               c100RebuildData.getApplicantPcqId());
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {

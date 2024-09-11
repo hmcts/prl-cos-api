@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Base64.getEncoder;
 
@@ -59,15 +60,17 @@ public class BulkPrintService {
         } catch (NullPointerException e) {
             throw new NullPointerException("Null Pointer exception at bulk print send : " + e);
         } catch (Exception e) {
-            log.info("The bulk print service has failed during convertToPdf: {}", e);
+            log.info("The bulk print service has failed during convertToPdf", e);
         }
-
-        final List<String> stringifiedDocuments = pdfDocuments.stream()
+        long stringifiedDocStartTime = System.currentTimeMillis();
+        final List<String> stringifiedDocuments = pdfDocuments.parallelStream()
             .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .toList();
-        log.info("Sending {} for case {}", letterType, caseId);
+        log.info("*** Time taken to convert docs to stringified array - {}s",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - stringifiedDocStartTime));
 
+        log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(

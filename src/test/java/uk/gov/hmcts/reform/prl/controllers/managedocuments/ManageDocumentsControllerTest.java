@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,7 +36,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -122,7 +120,7 @@ public class ManageDocumentsControllerTest {
         parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
             .stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .collect(Collectors.toList());
+            .toList();
 
         dynamicListElementList = new ArrayList<>();
         CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
@@ -154,7 +152,7 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testCopyManageDocs() throws JsonProcessingException {
+    public void testCopyManageDocs() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -162,8 +160,6 @@ public class ManageDocumentsControllerTest {
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
         verify(manageDocumentsService).copyDocument(callbackRequest, auth);
-        verifyNoMoreInteractions(manageDocumentsService);
-
     }
 
     @Test

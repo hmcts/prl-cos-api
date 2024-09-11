@@ -17,15 +17,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -44,6 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseControllerTest {
@@ -74,6 +78,9 @@ public class CaseControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     private CaseData caseData;
     Address address;
@@ -112,8 +119,8 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
-        assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
+        UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
+        assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
 
     }
 
@@ -169,6 +176,7 @@ public class CaseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
+            .c100RebuildData(C100RebuildData.builder().c100RebuildApplicantDetails("").build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
@@ -238,7 +246,6 @@ public class CaseControllerTest {
     public void testCitizenRetrieveCases() {
 
         List<CaseData> caseDataList = new ArrayList<>();
-
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -400,4 +407,30 @@ public class CaseControllerTest {
         Map<String, String> roles = caseController.fetchIdamAmRoles(
             authToken, emailId);
     }
+
+    @Test
+    public void shouldCreateC100Case() {
+        //Given
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .noOfDaysRemainingToSubmitCase(PrlAppsConstants.CASE_SUBMISSION_THRESHOLD)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
+        //When
+        CaseData actualCaseData = caseController.createCase(authToken, servAuthToken, caseData);
+
+        //Then
+        assertThat(actualCaseData).isEqualTo(caseData);
+    }
+
 }

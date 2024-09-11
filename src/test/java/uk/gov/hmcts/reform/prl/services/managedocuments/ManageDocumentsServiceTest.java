@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -59,7 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -159,6 +157,10 @@ public class ManageDocumentsServiceTest {
 
     List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
 
+    List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
+
+    List<Element<QuarantineLegalDoc>> citizenUploadDocListDocTab;
+
     UserDetails userDetailsSolicitorRole;
 
     UserDetails userDetailsBulScanRole;
@@ -202,7 +204,7 @@ public class ManageDocumentsServiceTest {
         parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
             .stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .collect(Collectors.toList());
+            .toList();
 
         dynamicListElementList = new ArrayList<>();
         CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
@@ -240,8 +242,6 @@ public class ManageDocumentsServiceTest {
             .surname("test")
             .roles(Collections.singletonList(JUDGE_ROLE))
             .build();
-
-
 
         userDetailsCitizenRole = UserDetails.builder()
             .id("678")
@@ -397,6 +397,54 @@ public class ManageDocumentsServiceTest {
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(1,legalProfQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCitizenRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocsListInitial = new ArrayList<>();
+        citizenQuarantineDocsListInitial.add(element(QuarantineLegalDoc.builder().build()));
+        caseDataMapInitial.put("citizenQuarantineDocsList",citizenQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> citizenUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("citizenUploadDocListDocTab",citizenUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        citizenQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("citizenQuarantineDocsList");
+        assertNotNull(citizenQuarantineDocsList);
+        assertEquals(1,citizenQuarantineDocsList.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
@@ -1109,7 +1157,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(UserRoles.CITIZEN.name(), loggedInUserTypeList.get(0));
+        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.get(0));
     }
 
     @Test
@@ -1351,6 +1399,116 @@ public class ManageDocumentsServiceTest {
         List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
+    @Test
+    public void testCopyDocumentMidEventFm5Statement() {
+
+        DynamicList dynamicList1 = DynamicList.builder().value(DynamicListElement.builder()
+                .code("fm5Statements")
+                .label("fm5Statements").build())
+            .listItems(dynamicListElementList).build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList1)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement))
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
+    @Test
+    public void testCopyDocumentMidEventFm5StatementRestricted() {
+
+        DynamicList dynamicList1 = DynamicList.builder().value(DynamicListElement.builder()
+                .code("fm5Statements")
+                .label("fm5Statements").build())
+            .listItems(dynamicListElementList).build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList1)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement))
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        assertNotNull(caseDataMapUpdated);
+        assertEquals("The statement of position on non-court dispute resolution (form FM5)"
+            + " cannot contain confidential information or be restricted.", caseDataMapUpdated.get(1));
+    }
+
+    @Test
+    public void testCopyDocumentMidEventFm5StatementConfidential() {
+
+        DynamicList dynamicList1 = DynamicList.builder().value(DynamicListElement.builder()
+                .code("fm5Statements")
+                .label("fm5Statements").build())
+            .listItems(dynamicListElementList).build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList1)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement))
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        assertNotNull(caseDataMapUpdated);
+        assertEquals("The statement of position on non-court dispute resolution (form FM5) "
+            + "cannot contain confidential information or be restricted.", caseDataMapUpdated.get(0));
     }
 
     @Test
@@ -1596,6 +1754,7 @@ public class ManageDocumentsServiceTest {
         assertEquals(YesOrNo.Yes,restrictedDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
     }
 
+
     @Test
     public void testGetQuarantineDocumentForUploaderCafcass() {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -1608,6 +1767,20 @@ public class ManageDocumentsServiceTest {
         assertNotNull(document1);
         assertEquals(quarantineLegalDoc.getCafcassQuarantineDocument().getDocumentUrl(),document1.getDocumentUrl());
     }
+
+    @Test
+    public void testGetQuarantineDocumentForUploaderCitizen() {
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
+                                           .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build()).build();
+        uk.gov.hmcts.reform.prl.models.documents.Document quarantineDocument = manageDocumentsService
+            .getQuarantineDocumentForUploader("Citizen", quarantineLegalDoc
+            );
+
+        assertNotNull(quarantineDocument);
+        assertEquals(quarantineLegalDoc.getCitizenQuarantineDocument().getDocumentUrl(),quarantineDocument.getDocumentUrl());
+    }
+
 
     @Test
     public void testGetQuarantineDocumentForUploaderBulkScan() {
@@ -1631,6 +1804,169 @@ public class ManageDocumentsServiceTest {
                                               QuarantineLegalDoc.builder().build());
 
         assertNull(document1);
+    }
+
+    @Test
+    public void testUpdateQuarantineDocsCitizenDocumentsTabFalse() {
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test").build())
+            .uploaderRole("Citizen").build();
+
+        List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab = new ArrayList<>();
+        citizenUploadedDocListDocTab.add(element(quarantineLegalDoc));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .citizenUploadedDocListDocTab(citizenUploadedDocListDocTab)
+            .build();
+
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocumentList = new ArrayList<>();
+        citizenQuarantineDocumentList.add(element(quarantineLegalDoc));
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(citizenQuarantineDocumentList)
+                                           .build()).build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,caseData,caseDataMapInitial,"Citizen");
+
+        citizenQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("citizenQuarantineDocsList");
+
+        assertNotNull(citizenQuarantineDocsList);
+        assertEquals(2,citizenQuarantineDocsList.size());
+
+    }
+
+
+    @Test
+    public void testUpdateQuarantineDocsCitizenDocumentsTabTrue() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+            .isConfidential(null)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test").build())
+            .isRestricted(null)
+            .restrictedDetails(null)
+            .categoryId("test")
+            .uploaderRole("Citizen").build();
+
+        List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab = new ArrayList<>();
+        citizenUploadedDocListDocTab.add(element(quarantineLegalDoc));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .citizenUploadedDocListDocTab(citizenUploadedDocListDocTab)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        manageDocumentsService
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen");
+
+        citizenUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("citizenUploadedDocListDocTab");
+
+        assertNotNull(citizenUploadDocListDocTab);
+        assertEquals(2,citizenUploadDocListDocTab.size());
+
+    }
+
+
+    @Test
+    public void testMoveCitizenDocumentsToRespectiveCategoriesNew() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", doc);
+
+        quarantineLegalDocElement = element(quarantineConfidentialDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(caseDocumentClient
+                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(expectedResponse);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.Yes)
+            .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentFileName("testFileName")
+                          .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No).categoryId("test").build();
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
+
+        manageDocumentsService
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCitizenRole, caseData, caseDataMapInitial, "Citizen");
+        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
+
+        assertNotNull(confidentialDocuments);
+        assertEquals(1,confidentialDocuments.size());
+        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCitizenQuarantineDocument().getDocumentFileName());
+
+        assertNotNull(quarantineLegalDoc);
     }
 
 

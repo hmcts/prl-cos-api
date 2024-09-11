@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -26,10 +24,10 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
@@ -40,6 +38,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 
 @Slf4j
 @Service
@@ -67,6 +69,7 @@ public class AllTabServiceImpl implements AllTabsService {
     public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
+            log.info("all tab update triggered");
             return mapAndSubmitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     caseId,
@@ -179,6 +182,29 @@ public class AllTabServiceImpl implements AllTabsService {
         return documentMap;
     }
 
+    public Map<String, Object> getNewMiamPolicyUpgradeDocumentMap(CaseData caseData, Map<String, Object> documentMap) {
+        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+            && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+            && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
+            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
+            documentMap.put(
+                "mpuDomesticAbuseEvidenceDocument",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
+            );
+            documentMap.put(
+                "mpuDocFromDisputeResolutionProvider",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider()
+            );
+            documentMap.put(
+                "mpuCertificateByMediator",
+                caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()
+            );
+        }
+        return documentMap;
+    }
+
     private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
@@ -194,8 +220,7 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(List<Element<CaseInvite>> caseInvites,
-                                         String authorisation,
+    public void updatePartyDetailsForNoc(String authorisation,
                                          String caseId,
                                          StartEventResponse startEventResponse,
                                          EventRequestData eventRequestData,
@@ -210,7 +235,6 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
-            setCaseInvitesIfNeeded(caseInvites, dataMap);
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
@@ -242,15 +266,12 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+
+        getNewMiamPolicyUpgradeDocumentMap(caseData, combinedFieldsMap);
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }
 
-    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
-        if (CollectionUtils.isNotEmpty(caseInvites)) {
-            caseDataUpdatedMap.put("caseInvites", caseInvites);
-        }
-    }
 
     @Override
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,

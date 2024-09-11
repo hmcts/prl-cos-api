@@ -38,5 +38,10 @@ public class Document {
             .build();
     }
 
-
+    public static Document buildFromPrlDocument(uk.gov.hmcts.reform.prl.models.documents.Document cafcassDocument) {
+        return Document.builder()
+            .documentUrl(cafcassDocument.getDocumentUrl())
+            .documentFileName(cafcassDocument.getDocumentFileName())
+            .build();
+    }
 }

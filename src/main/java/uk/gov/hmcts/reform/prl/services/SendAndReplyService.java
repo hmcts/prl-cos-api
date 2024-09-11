@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -71,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
@@ -102,6 +106,7 @@ public class SendAndReplyService {
     private final ElementUtils elementUtils;
 
     private final Time dateTime;
+    private final AllTabServiceImpl allTabService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -537,6 +542,8 @@ public class SendAndReplyService {
                                                       .concat(UNDERSCORE)
                                                       .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .label(otherApplicationLabel
+                                                       .concat(otherApplicationsBundle.getApplicationType().getDisplayedValue())
+                                                       .concat(HYPHEN_SEPARATOR)
                                                        .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .build());
             }
@@ -1174,5 +1181,32 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    public void closeAwPTask(CaseData caseData) {
+        if (SEND.equals(caseData.getChooseSendOrReply())
+            && caseData.getSendOrReplyMessage() != null
+            && doesThisMessageCloseAwpTasks(caseData)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(caseData.getId()),
+                CaseEvent.ALL_AWP_IN_REVIEW.getValue()
+            );
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+            log.info("close AWP task event triggered");
+        }
+    }
+
+    private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
+        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
+        return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
+            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 }
