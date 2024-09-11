@@ -330,6 +330,7 @@ public class ServiceOfApplicationPostServiceTest {
             .applicantCaseName("test")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicant)))
+            .serviceOfApplication(ServiceOfApplication.builder().isConfidential(Yes).build())
             .respondents(List.of(element(PartyDetails.builder()
                                              .solicitorEmail("test@gmail.com")
                                              .representativeLastName("LastName")
