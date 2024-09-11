@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Annex_1_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Annex_1_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
@@ -134,6 +136,24 @@ public class ServiceOfApplicationPostService {
                     PRIVACY_DOCUMENT_FILENAME_WELSH,
                     APPLICATION_PDF_VALUE,
                     DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
+                ));
+            }
+            // Annexture 1 file inclusion
+            log.info("confidential flag {}",caseData.getServiceOfApplication().getIsConfidential());
+            if (documentLanguage.isGenEng()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    Annex_1_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME)
+                ));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    Annex_1_FILENAME_WELSH,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME_WELSH)
                 ));
             }
             //PRL-5360 - Remove mediation voucher & add new President note
