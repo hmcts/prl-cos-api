@@ -117,6 +117,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
@@ -144,6 +145,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -153,6 +155,7 @@ import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARAT
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -1647,6 +1650,13 @@ public class ServiceOfApplicationService {
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
+        //PRL-5335 - WA fields for bundling lip case
+        String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
+        if (null == isAllApplicantsAreLiP) {
+            caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? YES : NO);
+        } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
+            caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
+        }
         return caseDataMap;
     }
 
@@ -2710,6 +2720,7 @@ public class ServiceOfApplicationService {
             }
         }
         caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, CaseUtils.isCitizenCase(caseData) ? "No" : "Yes");
+        caseDataUpdated.put(WA_IS_APPLICANT_REPRESENTED, caseData.getIsApplicantRepresented());
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
@@ -2772,6 +2783,30 @@ public class ServiceOfApplicationService {
         } else {
             return validateRespondentConfidentialDetailsDA(caseData);
         }
+    }
+
+    private boolean isApplicantRepresented(CaseData caseData) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return isCaApplicantRepresented(caseData);
+        } else {
+            return isDaApplicantRepresented(caseData);
+        }
+    }
+
+    public boolean isCaApplicantRepresented(CaseData caseData) {
+        return nullSafeCollection(caseData.getApplicants())
+            .stream()
+            .map(Element::getValue)
+            .anyMatch(CaseUtils::hasLegalRepresentation);
+    }
+
+    private boolean isDaApplicantRepresented(CaseData caseData) {
+        Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
+        if (flApplicants.isPresent()) {
+            PartyDetails partyDetails = flApplicants.get();
+            return CaseUtils.hasLegalRepresentation(partyDetails);
+        }
+        return false;
     }
 
     private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {

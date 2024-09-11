@@ -75,4 +75,7 @@ public class BaseCaseData {
      */
     @JsonUnwrapped
     private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
+
+    @JsonProperty("isApplicantRepresented")
+    private String isApplicantRepresented;
 }

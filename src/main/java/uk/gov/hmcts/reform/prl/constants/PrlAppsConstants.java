@@ -993,6 +993,7 @@ public class PrlAppsConstants {
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+    public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
