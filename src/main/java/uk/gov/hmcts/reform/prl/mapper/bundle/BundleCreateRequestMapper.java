@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_STATEMENTS;
@@ -264,6 +265,8 @@ public class BundleCreateRequestMapper {
         if (existingOrders.isEmpty()) {
             return new ArrayList<>();
         }
+
+        reverse(ordersFromCaseData);
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
