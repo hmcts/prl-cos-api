@@ -1507,9 +1507,9 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendEmailViaSendGridWithAttachedDocsToParty(String authorization, CaseData caseData,
                                                                                  List<Document> packDocs, Element<PartyDetails> party,
                                                                                  SendgridEmailTemplateNames emailTemplate,
-                                                                                 List<Document> packsWithCoverLetter) {
+                                                                                 List<Document> coverLetters) {
+        List<Document> packsWithCoverLetter = new ArrayList<>(coverLetters);
         packsWithCoverLetter.addAll(packDocs);
-
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
@@ -1628,10 +1628,10 @@ public class ServiceOfApplicationService {
             emailNotification = sendEmailViaSendGridWithAttachedDocsToParty(
                 fieldMap.get(AUTHORIZATION),
                 caseData,
-                packDocs,
+                docs,
                 party,
                 emailTemplate,
-                packDocs
+                coverLetters
             );
         }
 
