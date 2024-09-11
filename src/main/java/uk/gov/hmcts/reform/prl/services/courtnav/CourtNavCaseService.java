@@ -220,6 +220,15 @@ public class CourtNavCaseService {
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        data.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DARESPONDENT));
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DAAPPLICANT));
+        data.put("caseFlags", Flags.builder().build());
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
 
         allTabService.mapAndSubmitAllTabsUpdate(
@@ -230,6 +239,8 @@ public class CourtNavCaseService {
             caseData
         );
 
+        // TODO We need to pick this extra transaction as an tech debt.
+        //  In the previous one, case data conversion is removing multiple must to have fields.
         updateCommonSetUpForNoCAndCaseFlags(caseId);
         log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
     }

@@ -1509,31 +1509,41 @@ public class C100RespondentSolicitorService {
                     .build();
             }
 
-            List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
-            if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
-                attendToCourt = attendToCourt.toBuilder()
-                    .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
-                    .respondentSpecialArrangementDetails(
-                        buildSpecialArrangementList(
-                            safetyArrangementsEnumList,
-                            response.getSupportYouNeed().getSafetyArrangementsDetails()
-                        ))
-                    .build();
-            }
+            attendToCourt = buildSafetyArrangementsList(response, attendToCourt);
 
-            List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
-            if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
-                attendToCourt = attendToCourt.toBuilder()
-                    .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
-                    .disabilityNeeds(
-                        buildDisabilityNeeds(
-                            response.getSupportYouNeed(), dataMap
-                        ))
-                    .build();
-            }
+            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt);
 
             dataMap.put("attendingTheCourt", attendToCourt);
         }
+    }
+
+    private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt) {
+        List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
+        if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
+            attendToCourt = attendToCourt.toBuilder()
+                .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
+                .respondentSpecialArrangementDetails(
+                    buildSpecialArrangementList(
+                        safetyArrangementsEnumList,
+                        response.getSupportYouNeed().getSafetyArrangementsDetails()
+                    ))
+                .build();
+        }
+        return attendToCourt;
+    }
+
+    private static AttendToCourt buildReasonableAdjustmentNeeds(Response response, Map<String, Object> dataMap, AttendToCourt attendToCourt) {
+        List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
+        if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
+            attendToCourt = attendToCourt.toBuilder()
+                .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
+                .disabilityNeeds(
+                    buildDisabilityNeeds(
+                        response.getSupportYouNeed(), dataMap
+                    ))
+                .build();
+        }
+        return attendToCourt;
     }
 
     private static YesOrNo buildIsWelshNeeded(List<LanguageRequirementsEnum> languageRequirementsEnums) {
@@ -1588,8 +1598,6 @@ public class C100RespondentSolicitorService {
         StringBuilder adjustmentRequired = new StringBuilder();
         String documentInformation;
         String communicationHelpDetails;
-        String extraSupportDetails;
-        String feelComfortableSupportDetails;
         String helpTravellingMovingBuildingSupportDetails;
         if (reasonableAdjustmentsEnums.contains(nosupport)) {
             return nosupport.getDisplayedValue();
@@ -1611,24 +1619,7 @@ public class C100RespondentSolicitorService {
                     .append(communicationHelpDetails);
             }
         }
-        if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
-            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
-            if (!extraSupportDetails.isEmpty()) {
-                dataMap.put("extraSupportNeeded", YES);
-                dataMap.put("extraSupportDetails", extraSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
-                    .append(extraSupportDetails);
-            }
-        }
-        if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
-            feelComfortableSupportDetails = buildFeelComfortableSupport(supportYouNeed.getCourtComfort(), supportYouNeed);
-            if (!feelComfortableSupportDetails.isEmpty()) {
-                dataMap.put("feelComfortableNeeed", YES);
-                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
-                    .append(feelComfortableSupportDetails);
-            }
-        }
+        buildHearingNeeds(supportYouNeed, dataMap, reasonableAdjustmentsEnums, adjustmentRequired);
         if (reasonableAdjustmentsEnums.contains(travellinghelp)) {
             helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(supportYouNeed.getTravellingToCourt(),
                                                                                                        supportYouNeed);
@@ -1640,6 +1631,32 @@ public class C100RespondentSolicitorService {
             }
         }
         return String.valueOf(adjustmentRequired);
+    }
+
+    private static void buildHearingNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap, List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums, StringBuilder adjustmentRequired) {
+        String feelComfortableSupportDetails;
+        String extraSupportDetails;
+        if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
+            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
+            if (!extraSupportDetails.isEmpty()) {
+                dataMap.put("extraSupportNeeded", YES);
+                dataMap.put("extraSupportDetails", extraSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
+                    .append(extraSupportDetails);
+            }
+        }
+        if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
+            feelComfortableSupportDetails = buildFeelComfortableSupport(
+                supportYouNeed.getCourtComfort(),
+                supportYouNeed
+            );
+            if (!feelComfortableSupportDetails.isEmpty()) {
+                dataMap.put("feelComfortableNeeed", YES);
+                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
+                    .append(feelComfortableSupportDetails);
+            }
+        }
     }
 
     private static String buildHelpTravellingMovingBuildingSupport(List<TravellingToCourtEnum> travellingToCourtEnums,
