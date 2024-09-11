@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -138,23 +140,24 @@ public class ServiceOfApplicationPostService {
                     DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
                 ));
             }
-            // Annexture 1 file inclusion
-            log.info("confidential flag {}",caseData.getServiceOfApplication().getIsConfidential());
-            if (documentLanguage.isGenEng()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    Annex_1_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME)
-                ));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                files.add(new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    Annex_1_FILENAME_WELSH,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME_WELSH)
-                ));
+            // FPET-1056 Annex 1 file inclusion
+            if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+                if (documentLanguage.isGenEng()) {
+                    files.add(new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        Annex_1_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME)
+                    ));
+                }
+                if (documentLanguage.isGenWelsh()) {
+                    files.add(new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        Annex_1_FILENAME_WELSH,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + Annex_1_FILENAME_WELSH)
+                    ));
+                }
             }
             //PRL-5360 - Remove mediation voucher & add new President note
             if (documentLanguage.isGenEng()) {
