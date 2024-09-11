@@ -509,6 +509,8 @@ public class ReviewDocumentService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo()))) {
             String respondentName = getNameOfRespondent(quarantineLegalDocElement, quarantineDocsListToBeModified);
+            Document responseDocument = manageDocumentsService.getQuarantineDocumentForUploader(
+                quarantineLegalDocElement.getValue().getUploaderRole(), quarantineLegalDocElement.getValue());
 
             if (RESPONDENT_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent C7 response documents to applicants ***");
@@ -518,7 +520,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
                                              AP13_HINT,
                                              null,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent C1A documents to applicants/solicitor ***");
                 //C1A
@@ -527,7 +530,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
                                              AP14_HINT,
                                              C1A_NOTIFICATION_APPLICANT_SOLICITOR,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             } else if (RESPONDENT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDocElement.getValue().getCategoryId())) {
                 log.info("*** Sending respondent response to C1A documents to applicants/solicitor ***");
                 //C1A response
@@ -536,7 +540,8 @@ public class ReviewDocumentService {
                                              SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
                                              AP15_HINT,
                                              C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR,
-                                             respondentName);
+                                             respondentName,
+                                             responseDocument);
             }
         }
     }
@@ -546,14 +551,11 @@ public class ReviewDocumentService {
                                               SendgridEmailTemplateNames partySendgridTemplate,
                                               String coverLetterTemplateHint,
                                               SendgridEmailTemplateNames solicitorSendgridTemplate,
-                                              String respondentName) {
+                                              String respondentName,
+                                              Document responseDocument) {
         caseData.getApplicants().forEach(partyDataEle -> {
             PartyDetails partyData = partyDataEle.getValue();
             Map<String, Object> dynamicData = getEmailDynamicData(caseData, partyData, respondentName);
-            Document responseDocument = null != caseData.getReviewDocuments()
-                && null != caseData.getReviewDocuments().getReviewDoc()
-                ? caseData.getReviewDocuments().getReviewDoc() : null;
-
             if (CommonUtils.isNotEmpty(partyData.getSolicitorEmail())
                 && null != solicitorSendgridTemplate) {
                 sendEmailViaSendGrid(authTokenGenerator.generate(),
