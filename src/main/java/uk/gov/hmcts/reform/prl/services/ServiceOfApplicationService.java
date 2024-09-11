@@ -660,7 +660,7 @@ public class ServiceOfApplicationService {
             List<Document> packCdocs = new ArrayList<>();
             Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
             if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+                packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP2));
                 packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
                 Map<String, String> fieldsMap = new HashMap<>();
                 fieldsMap.put(AUTHORIZATION, authorization);
@@ -702,11 +702,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
         List<Document> packFdocs = new ArrayList<>();
-        if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-            packFdocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2));
-        } else {
-            packFdocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3));
-        }
+        packFdocs.add(getRe2OrRe3WithoutAccessCode(caseData, authorization, respondent));
         packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs));
         removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
@@ -924,7 +920,7 @@ public class ServiceOfApplicationService {
                 .id(caseData.getRespondentsFL401().getPartyId())
                 .value(caseData.getRespondentsFL401())
                 .build();
-            getCoverLetterForDaApplicantSolicitor(caseData, authorization, reLetters, respondent);
+            reLetters.add(getRe2OrRe3WithoutAccessCode(caseData, authorization, respondent));
         }
         removeDuplicatesAndGetConsolidatedDocs(packA, packB, reLetters);
         return reLetters;
@@ -949,19 +945,12 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void getCoverLetterForDaApplicantSolicitor(CaseData caseData, String authorization,
-                                                       List<Document> reLetters, Element<PartyDetails> respondent) {
-        boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(
-            caseData);
-
-        if (applyOrderWithoutGivingNoticeToRespondent) {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                                                   PRL_LET_ENG_FL401_RE2
-            ));
+    private Document getRe2OrRe3WithoutAccessCode(CaseData caseData, String authorization,
+                                                  Element<PartyDetails> respondent) {
+        if (CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(caseData)) {
+            return generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2);
         } else {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                                                   PRL_LET_ENG_FL401_RE3
-            ));
+            return generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3);
         }
     }
 
@@ -3312,21 +3301,17 @@ public class ServiceOfApplicationService {
                                                                  Map<String, Object> caseDataUpdated,
                                                                  List<Document> fl401StaticDocs) {
         Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
-        Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
         Document applicantCoverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1);
         List<Document> packEDocs = new ArrayList<>();
         packEDocs.add(applicantCoverLetter);
-        Document respondentCoverLetter;
         packEDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs));
         fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
             .toList();
-        List<Document> packFDocs = getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
-        if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-            respondentCoverLetter = generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2);
-        } else {
-            respondentCoverLetter = generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3);
-        }
+        List<Document> packFDocs = new ArrayList<>();
+        Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
+        Document respondentCoverLetter = getRe2OrRe3WithoutAccessCode(caseData, authorization, respondent);
         packFDocs.add(respondentCoverLetter);
+        packFDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs));
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packFDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
@@ -3414,7 +3399,7 @@ public class ServiceOfApplicationService {
             .id(caseData.getRespondentsFL401().getPartyId())
             .value(caseData.getRespondentsFL401())
             .build();
-        getCoverLetterForDaApplicantSolicitor(caseData, authorization, reLetters, respondent);
+        reLetters.add(getRe2OrRe3WithoutAccessCode(caseData, authorization, respondent));
         List<Element<CoverLetterMap>> coverletterMap = new ArrayList<>();
         coverletterMap.add(element(respondent.getId(), CoverLetterMap.builder()
             .coverLetters(wrapElements(reLetters)).build()));
