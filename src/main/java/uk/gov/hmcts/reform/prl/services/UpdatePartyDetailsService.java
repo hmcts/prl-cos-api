@@ -338,6 +338,12 @@ public class UpdatePartyDetailsService {
     }
 
     private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
+        KeepDetailsPrivate keepDetailsPrivate;
+        if (null != respondent.getResponse() && null != respondent.getResponse().getKeepDetailsPrivate()) {
+            keepDetailsPrivate = respondent.getResponse().getKeepDetailsPrivate();
+        } else {
+            keepDetailsPrivate = KeepDetailsPrivate.builder().build();
+        }
         List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
         if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
             confidentialityList.add(ConfidentialityListEnum.address);
@@ -348,7 +354,7 @@ public class UpdatePartyDetailsService {
         if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
             confidentialityList.add(ConfidentialityListEnum.email);
         }
-        return KeepDetailsPrivate.builder()
+        return keepDetailsPrivate.toBuilder()
             .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
             .confidentialityList(confidentialityList)
             .build();
