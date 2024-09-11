@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
@@ -1135,9 +1136,9 @@ public class C100RespondentSolicitorService {
                 log.info("inside checkIfConfidentialDataPresent - 2");
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
-            if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
-                dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-            }
+
+            dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
             log.info("response found");
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
@@ -1350,6 +1351,7 @@ public class C100RespondentSolicitorService {
                                                         boolean isConfidentialDataPresent,
                                                         Response response) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())
+            && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvideEmailAddress())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.email))) {
@@ -1371,6 +1373,7 @@ public class C100RespondentSolicitorService {
                                                               boolean isConfidentialDataPresent,
                                                               Response response) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
+            && Yes.equals(solicitorRepresentedRespondent.getValue().getCanYouProvidePhoneNumber())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.phoneNumber))) {
@@ -1392,6 +1395,7 @@ public class C100RespondentSolicitorService {
                                                           Response response,
                                                           String requestOriginatedFrom) {
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
+                && Yes.equals(solicitorRepresentedRespondent.getValue().getIsCurrentAddressKnown())
                 || (isConfidentialSetByCitizen
                 && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
                 .contains(ConfidentialityListEnum.address))) {
@@ -1880,6 +1884,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .solicitorRepresentedPartyName(partyName)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyId(partyId)
             .document(c7doc)
                 .build();
@@ -1897,6 +1902,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(c1aDoc)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();
@@ -1913,6 +1919,7 @@ public class C100RespondentSolicitorService {
             .uploadedBy(userDetails.getFullName())
             .uploaderRole(loggedInUserType)
             .document(document)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
             .solicitorRepresentedPartyName(partyName)
             .solicitorRepresentedPartyId(partyId)
                 .build();

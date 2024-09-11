@@ -351,29 +351,28 @@ public class ServiceOfApplicationPostServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@applicant.com")
             .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
-            .respondentsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .build())
-            .build();
-
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
 
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(AUTH, s2sToken, CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
-
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("test@gmail.com")
+                                  .representativeLastName("LastName")
+                                  .representativeFirstName("FirstName")
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .build())
+            .build();
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
 

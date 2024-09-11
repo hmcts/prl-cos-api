@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
@@ -161,6 +162,8 @@ public class ManageDocumentsServiceTest {
 
     List<Element<QuarantineLegalDoc>> citizenUploadDocListDocTab;
 
+    List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList;
+
     UserDetails userDetailsSolicitorRole;
 
     UserDetails userDetailsBulScanRole;
@@ -170,6 +173,9 @@ public class ManageDocumentsServiceTest {
     UserDetails userDetailsCafcassRole;
 
     UserDetails userDetailsCourtAdminRole;
+
+    UserDetails userDetailsCourtNavRole;
+
     UserDetails userDetailsCourtStaffRoleExpectAdmin;
 
     List<String> categoriesToExclude;
@@ -248,6 +254,13 @@ public class ManageDocumentsServiceTest {
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(CITIZEN_ROLE))
+            .build();
+
+        userDetailsCourtNavRole = UserDetails.builder()
+            .id("678")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(COURTNAV_USER))
             .build();
 
         confidentialDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -1807,6 +1820,22 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testGetQuarantineDocumentForUploaderCourtNav() {
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
+                                            .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build())
+            .build();
+
+        document1 = manageDocumentsService
+            .getQuarantineDocumentForUploader("CourtNav", quarantineLegalDoc
+            );
+
+        assertNotNull(document1);
+        assertEquals(quarantineLegalDoc.getCourtNavQuarantineDocument().getDocumentUrl(),document1.getDocumentUrl());
+    }
+
+    @Test
     public void testUpdateQuarantineDocsCitizenDocumentsTabFalse() {
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -1984,6 +2013,143 @@ public class ManageDocumentsServiceTest {
         document.links = links;
         document.originalDocumentName = "Confidential_test.pdf";
         return document;
+    }
+
+    @Test
+    public void testMoveCourtNavDocumentsToRespectiveCategoriesNew() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", doc);
+
+        quarantineLegalDocElement = element(quarantineConfidentialDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(caseDocumentClient
+                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(expectedResponse);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.Yes)
+            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                           .documentFileName("testFileName")
+                                           .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No).categoryId("test").build();
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtNavRole);
+
+        manageDocumentsService
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCourtNavRole, caseData, caseDataMapInitial, "CourtNav");
+        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
+
+        assertNotNull(confidentialDocuments);
+        assertEquals(1,confidentialDocuments.size());
+        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCourtNavQuarantineDocument().getDocumentFileName());
+
+        assertNotNull(quarantineLegalDoc);
+    }
+
+    @Test
+    public void testUpdateQuarantineDocsCourtNavDocumentsTabFalse() {
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test").build())
+            .uploaderRole("CourtNav").build();
+
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocTab = new ArrayList<>();
+        courtNavUploadedDocListDocTab.add(element(quarantineLegalDoc));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocTab)
+            .build();
+
+        courtNavQuarantineDocumentList = new ArrayList<>();
+        courtNavQuarantineDocumentList.add(element(quarantineLegalDoc));
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtNavQuarantineDocumentList(courtNavQuarantineDocumentList)
+                                           .build()).build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,caseData,caseDataMapInitial,"CourtNav");
+
+        courtNavQuarantineDocumentList = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("courtNavQuarantineDocumentList");
+
+        assertNotNull(courtNavQuarantineDocumentList);
+        assertEquals(2,courtNavQuarantineDocumentList.size());
+
+    }
+
+    @Test
+    public void testUpdateQuarantineDocsBulkScanDocumentsTabFalse() {
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+            .url(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test").build())
+            .uploaderRole("CourtNav").build();
+
+        List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab = new ArrayList<>();
+        bulkScannedDocListDocTab.add(element(quarantineLegalDoc));
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .bulkScannedDocListDocTab(bulkScannedDocListDocTab)
+            .build();
+
+        courtNavQuarantineDocumentList = new ArrayList<>();
+        courtNavQuarantineDocumentList.add(element(quarantineLegalDoc));
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build()).build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,caseData,caseDataMapInitial,"Bulk scan");
+
+        courtNavQuarantineDocumentList = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("bulkScannedDocListDocTab");
+
+        assertNull(courtNavQuarantineDocumentList);
+
     }
 }
 
