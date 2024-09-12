@@ -3846,7 +3846,7 @@ public class ServiceOfApplicationService {
                 createPartyDynamicMultiSelectListElement(unServedApplicantPack.getPartyIds())
             );
         }
-        List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
+        List<Document> packDocs = new ArrayList<>(removeCoverLettersFromThePacks(unwrapElements(unServedApplicantPack.getPackDocument())));
         if (SoaCitizenServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(
             unServedApplicantPack.getPersonalServiceBy())
             || SoaCitizenServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(
@@ -3858,7 +3858,7 @@ public class ServiceOfApplicationService {
                                                                      caseData,
                                                                      emailNotificationDetails,
                                                                      bulkPrintDetails,
-                                                                     removeCoverLettersFromThePacks(packDocs)
+                                                                     packDocs
                 );
             } else {
                 notifyFl401ApplicantPersonalServiceCaCbAfterConfCheckSuccessful(caseData, authorization, emailNotificationDetails,
@@ -3872,7 +3872,7 @@ public class ServiceOfApplicationService {
                     applicantList,
                     caseData,
                     bulkPrintDetails,
-                    removeCoverLettersFromThePacks(packDocs))
+                    packDocs)
                 );
             } else {
                 sendNotificationsNonPersonalApplicantFl401(
@@ -3881,7 +3881,7 @@ public class ServiceOfApplicationService {
                         caseData,
                         emailNotificationDetails,
                         bulkPrintDetails,
-                        removeCoverLettersFromThePacks(packDocs));
+                        packDocs);
             }
         }
     }
