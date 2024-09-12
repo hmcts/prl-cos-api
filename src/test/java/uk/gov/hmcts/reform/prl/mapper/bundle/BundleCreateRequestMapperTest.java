@@ -40,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_LA_OTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GUARDIAN_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LA_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES_FACTS_AND_REASONS;
@@ -353,7 +354,7 @@ public class BundleCreateRequestMapperTest {
 
         QuarantineLegalDoc cafcassOtherDocuments = QuarantineLegalDoc.builder()
             .otherDocsDocument(Document.builder().documentFileName("otherDocuments").build())
-            .documentParty("Cafcass Cymru").categoryName(CAFCASS_LA_OTHER_DOCUMENTS).build();
+            .documentParty("Cafcass Cymru").categoryName(CAFCASS_OTHER_DOCUMENTS).build();
         courtStaffDoc.add(element(cafcassOtherDocuments));
 
         QuarantineLegalDoc laSection37Report = QuarantineLegalDoc.builder()
@@ -363,7 +364,7 @@ public class BundleCreateRequestMapperTest {
 
         QuarantineLegalDoc laOtherDocuments = QuarantineLegalDoc.builder()
             .localAuthorityOtherDocDocument(Document.builder().documentFileName("laOtherDocuments").build())
-            .documentParty("Cafcass Cymru").categoryName(CAFCASS_LA_OTHER_DOCUMENTS).build();
+            .documentParty("Cafcass Cymru").categoryName(LA_OTHER_DOCUMENTS).build();
         courtStaffDoc.add(element(laOtherDocuments));
 
         QuarantineLegalDoc applicantPreviousOrders = QuarantineLegalDoc.builder()
