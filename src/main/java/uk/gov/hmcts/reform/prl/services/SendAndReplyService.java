@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.time.LocalDateTime;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
@@ -88,6 +90,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -537,7 +541,7 @@ public class SendAndReplyService {
         } catch (Exception e) {
             log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
         }
-        return Collections.emptyMap();
+        return emptyMap();
     }
 
     /**
@@ -755,7 +759,6 @@ public class SendAndReplyService {
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
-        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
         final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
         return Message.builder()
@@ -789,20 +792,30 @@ public class SendAndReplyService {
                 message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
+            .internalMessageAttachDocs(SEND.equals(caseData.getChooseSendOrReply())
+                                           ? getSendAttachedDocs(caseData, message, authorization) : emptyList())
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
             .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
-            .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
                 authorization,
                 caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
             ))
             .build();
+    }
+
+    private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
+        return MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
+            ? getApplicationDocument(
+            message.getApplicationsList(),
+            caseData,
+            getValueCode(message.getApplicationsList())
+        )
+            : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
     }
 
     private String getInternalOrExternalSentTo(CaseData caseData, Message message) {
@@ -882,6 +895,90 @@ public class SendAndReplyService {
         return null;
     }
 
+    private List<Element<Document>> getApplicationDocument(DynamicList applicationDocumentList,
+                                                           CaseData caseData,
+                                                           String selectedApplicationCode) {
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
+        if (null == applicationDocumentList || null == applicationDocumentList.getValueCode() || null == additionalApplicationElements) {
+            return emptyList();
+        }
+
+        Optional<Element<AdditionalApplicationsBundle>> otherApplicationDocumentsElement = additionalApplicationElements
+            .stream().filter(additionalApplicationsBundleElement -> {
+                OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
+
+                return null != otherApplicationsBundle && null != otherApplicationsBundle.getApplicationStatus()
+                    && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                    && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                                                     .concat(UNDERSCORE)
+                                                     .concat(otherApplicationsBundle.getUploadedDateTime()));
+            }).findFirst();
+
+        if (otherApplicationDocumentsElement.isPresent()) {
+            return getOtherApplicationDocuments(otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle());
+        }
+
+        Optional<Element<AdditionalApplicationsBundle>> c2ApplicationDocumentsElement = additionalApplicationElements
+            .stream().filter(additionalApplicationsBundleElement -> {
+                C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
+
+                return null != c2ApplicationsBundle && null != c2ApplicationsBundle.getApplicationStatus()
+                    && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                    && selectedApplicationCode.equals(AWP_C2_APPLICATION_SNR_CODE
+                                                          .concat(UNDERSCORE)
+                                                          .concat(c2ApplicationsBundle.getUploadedDateTime()));
+            }).findFirst();
+
+        if (c2ApplicationDocumentsElement.isPresent()) {
+            return getC2ApplicationDocuments(c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle());
+        }
+
+        return emptyList();
+    }
+
+    private static List<Element<Document>> getOtherApplicationDocuments(OtherApplicationsBundle otherApplicationsBundle) {
+        List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
+        otherApplicationDocuments.addAll(otherApplicationsBundle.getFinalDocument());
+
+        if (otherApplicationsBundle.getSupportingEvidenceBundle() != null) {
+            otherApplicationDocuments.addAll(
+                otherApplicationsBundle.getSupportingEvidenceBundle().stream()
+                    .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+        }
+
+        if (otherApplicationsBundle.getSupplementsBundle() != null) {
+            otherApplicationDocuments.addAll(
+                otherApplicationsBundle.getSupplementsBundle().stream()
+                    .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+        }
+        return otherApplicationDocuments;
+    }
+
+    private static List<Element<Document>> getC2ApplicationDocuments(C2DocumentBundle c2DocumentBundle) {
+        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
+        c2ApplicationDocuments.addAll(c2DocumentBundle.getFinalDocument());
+
+        if (c2DocumentBundle.getSupportingEvidenceBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getSupportingEvidenceBundle().stream()
+                    .map(supportingDocument -> element(supportingDocument.getValue().getDocument())).toList());
+        }
+
+        if (c2DocumentBundle.getSupplementsBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getSupplementsBundle().stream()
+                    .map(supplementDocument -> element(supplementDocument.getValue().getDocument())).toList());
+        }
+
+        if (c2DocumentBundle.getAdditionalDraftOrdersBundle() != null) {
+            c2ApplicationDocuments.addAll(
+                c2DocumentBundle.getAdditionalDraftOrdersBundle().stream()
+                    .map(draftOrdersDocument -> element(draftOrdersDocument.getValue().getDocument())).toList());
+        }
+        return c2ApplicationDocuments;
+    }
+
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
 
         String[] judgePersonalCode = getPersonalCode(judicialUser);
@@ -916,12 +1013,17 @@ public class SendAndReplyService {
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
-            data.put("messageReplyDynamicList", ElementUtils.asDynamicList(openMessages,
-                                                                           null,
-                                                                           Message::getLabelForReplyDynamicList)
-            );
+            data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
         }
         return data;
+    }
+
+    public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
+        return ElementUtils.asDynamicList(
+            openMessages,
+            null,
+            Message::getLabelForReplyDynamicList
+        );
     }
 
     public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
@@ -948,6 +1050,8 @@ public class SendAndReplyService {
 
         //populate message table
         String messageReply = renderMessageTable(previousMessage.get());
+        //PRL-4411 - consolidate & add docs to display in reply history
+        List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(previousMessage.get());
 
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
@@ -965,6 +1069,7 @@ public class SendAndReplyService {
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
                             .build())
+                    .internalMessageAttachDocsList(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .build())
             .build();
     }
@@ -989,8 +1094,6 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
-            ? ANCHOR_HREF_START + message.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
@@ -1023,8 +1126,6 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
-                    addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
-                        ? ANCHOR_HREF_START + history.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
                         ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
@@ -1165,6 +1266,7 @@ public class SendAndReplyService {
             .senderName(message.getSenderName())
             .senderRole(message.getSenderRole())
             .updatedTime(message.getUpdatedTime())
+            .internalMessageAttachDocs(message.getInternalMessageAttachDocs())
             .build();
     }
 
@@ -1186,54 +1288,7 @@ public class SendAndReplyService {
         Message sendMessageObject = null;
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
-            sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-
-            if (canClearInternalWhoToSendFields(
-                sendMessageObject.getInternalMessageWhoToSendTo(),
-                InternalMessageWhoToSendToEnum.JUDICIARY,
-                sendMessageObject.getJudicialOrMagistrateTierList()
-            )) {
-                sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
-                                                                      .value(DynamicListElement.EMPTY).build());
-                sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
-            }
-
-            if (canClearInternalWhoToSendFields(
-                sendMessageObject.getInternalMessageWhoToSendTo(),
-                InternalMessageWhoToSendToEnum.OTHER,
-                sendMessageObject.getCtscEmailList()
-            )) {
-                sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
-                                                       .value(DynamicListElement.EMPTY).build());
-                sendMessageObject.setRecipientEmailAddresses(null);
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.APPLICATION,
-                sendMessageObject.getApplicationsList()
-            )) {
-                sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
-                                                          .value(DynamicListElement.EMPTY).build());
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.HEARING,
-                sendMessageObject.getFutureHearingsList()
-            )) {
-                sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
-                                                            .value(DynamicListElement.EMPTY).build());
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
-                sendMessageObject.getSubmittedDocumentsList()
-            )) {
-                sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
-                                                                .value(DynamicListElement.EMPTY).build());
-            }
+            sendMessageObject = resetSendMessageDynamicLists(caseData);
         }
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
@@ -1242,7 +1297,7 @@ public class SendAndReplyService {
                 && isNotNull(replyMessageObject.getJudicialOrMagistrateTierList())) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                        .value(DynamicListElement.EMPTY).build());
-                replyMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
+                replyMessageObject.setSendReplyJudgeName(null);
             }
         }
 
@@ -1252,6 +1307,59 @@ public class SendAndReplyService {
                 .replyMessageObject(replyMessageObject)
                 .build()
         ).build();
+    }
+
+    private Message resetSendMessageDynamicLists(CaseData caseData) {
+        Message sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
+
+        if (canClearInternalWhoToSendFields(
+            sendMessageObject.getInternalMessageWhoToSendTo(),
+            InternalMessageWhoToSendToEnum.JUDICIARY,
+            sendMessageObject.getJudicialOrMagistrateTierList()
+        )) {
+            sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
+                                                                  .value(DynamicListElement.EMPTY).build());
+            sendMessageObject.setSendReplyJudgeName(null);
+        }
+
+        if (canClearInternalWhoToSendFields(
+            sendMessageObject.getInternalMessageWhoToSendTo(),
+            InternalMessageWhoToSendToEnum.OTHER,
+            sendMessageObject.getCtscEmailList()
+        )) {
+            sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
+                                                   .value(DynamicListElement.EMPTY).build());
+            sendMessageObject.setRecipientEmailAddresses(null);
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.APPLICATION,
+            sendMessageObject.getApplicationsList()
+        )) {
+            sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
+                                                      .value(DynamicListElement.EMPTY).build());
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.HEARING,
+            sendMessageObject.getFutureHearingsList()
+        )) {
+            sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
+                                                        .value(DynamicListElement.EMPTY).build());
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
+            sendMessageObject.getSubmittedDocumentsList()
+        )) {
+            sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
+                                                            .value(DynamicListElement.EMPTY).build());
+        }
+
+        return sendMessageObject;
     }
 
     private boolean canClearInternalWhoToSendFields(InternalMessageWhoToSendToEnum sendObjectInternalMsgWhoToSendToEnum,
@@ -1308,6 +1416,39 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    private List<Element<SendReplyTempDoc>> getSendReplyTempDocs(Message message) {
+        List<Element<SendReplyTempDoc>> sendReplyTempDocs = new ArrayList<>();
+
+        //document from latest message
+        if (isNotEmpty(message.getInternalMessageAttachDocs())) {
+            message.getInternalMessageAttachDocs().stream()
+                .map(Element::getValue)
+                .forEach(document -> sendReplyTempDocs.add(
+                    element(SendReplyTempDoc.builder()
+                                .attachedTime(message.getUpdatedTime())
+                                .document(document).build())));
+        }
+
+        //documents from message history
+        if (isNotEmpty(message.getReplyHistory())) {
+            message.getReplyHistory().stream()
+                .map(Element::getValue)
+                .forEach(history -> {
+                    LocalDateTime attachedTime = history.getUpdatedTime();
+                    if (isNotEmpty(history.getInternalMessageAttachDocs())) {
+                        history.getInternalMessageAttachDocs().stream()
+                            .map(Element::getValue)
+                            .forEach(document -> sendReplyTempDocs.add(
+                                element(SendReplyTempDoc.builder()
+                                            .attachedTime(attachedTime)
+                                            .document(document).build())));
+                    }
+                });
+        }
+
+        return sendReplyTempDocs;
     }
 
 
@@ -1652,6 +1793,7 @@ public class SendAndReplyService {
             );
             log.info("close AWP task event triggered");
         }
+
     }
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {

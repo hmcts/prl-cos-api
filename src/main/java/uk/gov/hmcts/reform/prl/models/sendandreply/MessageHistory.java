@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,10 +37,11 @@ public class MessageHistory {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
     private String judgeEmail;
-    private String otherApplicationLink;
     private String hearingsLink;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime updatedTime;
     private List<Element<Document>> externalMessageAttachDocs;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<Element<Document>> internalMessageAttachDocs;
 }
