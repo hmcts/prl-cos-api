@@ -575,7 +575,7 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
+    public Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData
                 = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData();
         if (null != respondentAllegationsOfHarmData.getRespOrdersUndertakingInPlaceDocument()) {

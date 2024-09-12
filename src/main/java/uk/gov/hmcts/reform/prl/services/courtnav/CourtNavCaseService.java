@@ -239,8 +239,9 @@ public class CourtNavCaseService {
             caseData
         );
 
-        // TODO We need to pick this extra transaction as an tech debt.
-        //  In the previous one, case data conversion is removing multiple must to have fields.
+        /** Tech debt: need to pick this extra transaction as a tech debt.
+         *  In the previous one, case data conversion is removing multiple must to have fields.
+         **/
         updateCommonSetUpForNoCAndCaseFlags(caseId);
         log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
     }

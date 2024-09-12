@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -2507,5 +2508,194 @@ public class C100RespondentSolicitorServiceTest {
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent2).build();
         assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2, CITIZEN));
+    }
+
+    @Test
+    public void testPopulateDataMapForRACitizen() {
+        respondent2 = PartyDetails.builder()
+            .user(User.builder().build())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .sendSignUpLink("test")
+            .phoneNumber("1234567890")
+            .response(Response.builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName("test")
+                                              .lastName("test")
+                                              .build())
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .permissionFromCourt(Yes)
+                                       .build())
+                          .c7ResponseSubmitted(No)
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .confidentialityList(new ArrayList<>())
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .safetyArrangements(Arrays.asList(
+                                                  SafetyArrangementsEnum.advancedview,
+                                                  SafetyArrangementsEnum.videolinks
+                                              ))
+                                              .safetyArrangementsDetails("test")
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                          .build())
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(No)
+            .solicitorOrg(Organisation.builder().build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
+                "AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorReference("test")
+            .address(Address.builder().addressLine1("").build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent2).build();
+        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2, CITIZEN));
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataWithAoHOrders() {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document undertakingDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("undertakingDocument.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+
+        Document fmpDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("fmpDoc.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+
+        Document nmDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("nmDocument.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+        Document occupationalDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("occupationalDocument.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+        Document injunctionDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("injunctionDocument.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+        Document restrainingDocument = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("restrainingDocument.pdf")
+            .documentCreatedOn(new Date())
+            .build();
+
+        allegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
+            .respOrdersUndertakingInPlaceDocument(undertakingDocument)
+            .respOrdersForcedMarriageProtectionDocument(fmpDocument)
+            .respOrdersNonMolestationDocument(nmDocument)
+            .respOrdersOccupationDocument(occupationalDocument)
+            .respOrdersOtherInjunctiveDocument(injunctionDocument)
+            .respOrdersRestrainingDocument(restrainingDocument)
+            .build();
+
+        respondent = PartyDetails.builder()
+            .response(Response.builder()
+                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
+
+                          .build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondents);
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+        List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+        respondentDocsList.add(respondentDocsElement);
+        caseData = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .respondentNameForResponse("Test respondent")
+                                         .build())
+            .build();
+
+        stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId("SolicitorA")
+            .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
+        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
+        when(systemUserService.getSysUserToken()).thenReturn("");
+
+        when(objectMapper.convertValue(
+            Mockito.<RespondentAllegationsOfHarmData>any(),
+            Mockito.<TypeReference<Map<String, Object>>>any()
+        )).thenReturn(allegationsOfHarmDataMap);
+
+        Response response = respondentSolicitorService.buildAoHResponse(
+            caseData,
+            Response.builder().build(),
+            "Test Solicitor"
+        );
+        assertEquals(caseData.getRespondentDocsList().size(), 6);
     }
 }
