@@ -40,6 +40,7 @@ public class MessageHistory {
     private String hearingsLink;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime updatedTime;
+    private List<Element<Document>> externalMessageAttachDocs;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<Document>> internalMessageAttachDocs;
