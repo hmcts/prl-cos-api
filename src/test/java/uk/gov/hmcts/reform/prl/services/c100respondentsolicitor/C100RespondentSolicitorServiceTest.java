@@ -2511,7 +2511,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDataMapForRACitizen() {
+    public void testPopulateDataMapForRaCitizen() {
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
