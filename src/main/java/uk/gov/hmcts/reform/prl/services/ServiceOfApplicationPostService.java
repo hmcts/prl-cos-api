@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Annex1_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Annex1_FILENAME_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
@@ -132,7 +132,7 @@ public class ServiceOfApplicationPostService {
             );
             // FPET-1056 Annex 1 file inclusion
             if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
-                attachStaticFileToTheDocuments(documentLanguage, files, Annex1_FILENAME, Annex1_FILENAME_WELSH);
+                attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
             }
             //PRL-5360 - Remove mediation voucher & add new President note
             attachStaticFileToTheDocuments(
