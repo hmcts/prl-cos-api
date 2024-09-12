@@ -73,11 +73,11 @@ public enum BundlingDocGroupEnum {
     respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles("respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles",
         "respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles"),
 
-    @JsonProperty("expertMedicalReports")
-    expertMedicalReports("expertMedicalReports", "expertMedicalReports"),
+    @JsonProperty("medicalReports")
+    medicalReports("medicalReports", "medicalReports"),
 
-    @JsonProperty("expertMedicalRecords")
-    expertMedicalRecords("expertMedicalRecords", "expertMedicalRecords"),
+    @JsonProperty("medicalRecords")
+    medicalRecords("medicalRecords", "medicalRecords"),
 
     @JsonProperty("dnaReports")
     dnaReports("dnaReports", "dnaReports"),
@@ -88,8 +88,8 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("resultsOfHairStrandBloodTests")
     resultsOfHairStrandBloodTests("resultsOfHairStrandBloodTests", "resultsOfHairStrandBloodTests"),
 
-    @JsonProperty("policeReports")
-    policeReports("policeReports", "policeReports"),
+    @JsonProperty("policeReport")
+    policeReport("policeReport", "policeReport"),
 
     @JsonProperty("policeDisclosures")
     policeDisclosures("policeDisclosures", "policeDisclosures"),
@@ -116,8 +116,8 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("transcriptsOfJudgements")
     transcriptsOfJudgements("transcriptsOfJudgements", "transcriptsOfJudgements"),
 
-    @JsonProperty("magistratesFactsAndReasons")
-    magistratesFactsAndReasons("magistratesFactsAndReasons", "magistratesFactsAndReasons"),
+    @JsonProperty("magistrateFactAndReasons")
+    magistrateFactAndReasons("magistrateFactAndReasons", "magistrateFactAndReasons"),
 
     @JsonProperty("safeguardingLetter")
     safeguardingLetter("safeguardingLetter", "safeguardingLetter"),

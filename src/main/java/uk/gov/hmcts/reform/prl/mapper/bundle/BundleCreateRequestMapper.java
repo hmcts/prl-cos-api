@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_STAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_STATMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_LA_OTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LA_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES_FACTS_AND_REASONS;
@@ -351,10 +352,10 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 break;
             case MEDICAL_REPORTS:
-                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
+                bundlingDocGroupEnum = BundlingDocGroupEnum.medicalReports;
                 break;
             case MEDICAL_RECORDS:
-                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
+                bundlingDocGroupEnum = BundlingDocGroupEnum.medicalRecords;
                 break;
             case PATERNITY_TEST_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.dnaReports;
@@ -363,7 +364,7 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.reportsForDrugAndAlcoholTest;
                 break;
             case POLICE_REPORTS:
-                bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
+                bundlingDocGroupEnum = BundlingDocGroupEnum.policeReport;
                 break;
             case CAFCASS_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.cafcassReportsUploadedByCourtAdmin;
@@ -401,13 +402,13 @@ public class BundleCreateRequestMapper {
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalReportsDocument())
                     .documentFileName(doc.getMedicalReportsDocument().getDocumentFileName())
-                    .documentGroup(BundlingDocGroupEnum.expertMedicalReports).build();
+                    .documentGroup(BundlingDocGroupEnum.medicalReports).build();
                 break;
             case MEDICAL_RECORDS_DOCUMENT:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalRecordsDocument())
                     .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
-                    .documentGroup(BundlingDocGroupEnum.expertMedicalRecords).build();
+                    .documentGroup(BundlingDocGroupEnum.medicalRecords).build();
                 break;
             case DRUG_AND_ALCOHOL_TESTS_DOCUMENT:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
@@ -419,7 +420,7 @@ public class BundleCreateRequestMapper {
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getPoliceReportDocument())
                     .documentFileName(doc.getPoliceReportDocument().getDocumentFileName())
-                    .documentGroup(BundlingDocGroupEnum.policeReports).build();
+                    .documentGroup(BundlingDocGroupEnum.policeReport).build();
                 break;
             case DNA_REPORTS:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
@@ -491,7 +492,7 @@ public class BundleCreateRequestMapper {
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMagistratesFactsAndReasonsDocument())
                     .documentFileName(doc.getMagistratesFactsAndReasonsDocument().getDocumentFileName())
-                    .documentGroup(BundlingDocGroupEnum.magistratesFactsAndReasons).build();
+                    .documentGroup(BundlingDocGroupEnum.magistrateFactAndReasons).build();
                 break;
             case SAFEGUARDING_LETTER:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
@@ -536,18 +537,17 @@ public class BundleCreateRequestMapper {
                         .documentGroup(BundlingDocGroupEnum.laSection37Report).build();
                 }
                 break;
-            case CAFCASS_LA_OTHER_DOCUMENTS:
-                if (doc.getOtherDocsDocument() != null) {
-                    bundlingRequestDocument = BundlingRequestDocument.builder()
-                        .documentLink(doc.getOtherDocsDocument())
-                        .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
-                        .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build();
-                } else {
-                    bundlingRequestDocument = BundlingRequestDocument.builder()
-                        .documentLink(doc.getLocalAuthorityOtherDocDocument())
-                        .documentFileName(doc.getLocalAuthorityOtherDocDocument().getDocumentFileName())
-                        .documentGroup(BundlingDocGroupEnum.laOtherDocuments).build();
-                }
+            case CAFCASS_OTHER_DOCUMENTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getOtherDocsDocument())
+                    .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build();
+                break;
+            case LA_OTHER_DOCUMENTS:
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(doc.getLocalAuthorityOtherDocDocument())
+                    .documentFileName(doc.getLocalAuthorityOtherDocDocument().getDocumentFileName())
+                    .documentGroup(BundlingDocGroupEnum.laOtherDocuments).build();
                 break;
             case MIAM_CERTIFICATE:
                 bundlingRequestDocument = BundlingRequestDocument.builder()

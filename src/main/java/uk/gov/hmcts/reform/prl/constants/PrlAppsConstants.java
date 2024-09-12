@@ -180,7 +180,7 @@ public class PrlAppsConstants {
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
 
-    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness Statements";
+    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
 
@@ -601,14 +601,15 @@ public class PrlAppsConstants {
     public static final String CASE_SUMMARY = "Case summary";
     public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
-    public static final String SAFEGUARDING_LETTER = "Safeguarding letter";
-    public static final String SECTION_7_REPORT = "Section 7 report";
+    public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
+    public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
     public static final String SECTION_37_REPORT = "Section 37 report";
     public static final String SIXTEENA_RISK_ASSESSMENT = "16a risk assessment";
     public static final String GUARDIAN_REPORT = "Guardian report";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
-    public static final String CAFCASS_LA_OTHER_DOCUMENTS = "Other documents";
-    public static final String MIAM_CERTIFICATE = "MIAM certificate";
+    public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
+    public static final String LA_OTHER_DOCUMENTS = "Local Authority other documents";
+    public static final String MIAM_CERTIFICATE = "MIAM certificate/Exemption";
     public static final String PREVIOUS_ORDERS = "Orders from other proceedings";
     public static final String ANY_OTHER_DOCUMENTS = "Any other documents";
 
