@@ -52,7 +52,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES_FACTS_AND_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
@@ -404,7 +403,7 @@ public class BundleCreateRequestMapper {
                     .documentFileName(doc.getMedicalReportsDocument().getDocumentFileName())
                     .documentGroup(BundlingDocGroupEnum.medicalReports).build();
                 break;
-            case MEDICAL_RECORDS_DOCUMENT:
+            case MEDICAL_RECORDS:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalRecordsDocument())
                     .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
