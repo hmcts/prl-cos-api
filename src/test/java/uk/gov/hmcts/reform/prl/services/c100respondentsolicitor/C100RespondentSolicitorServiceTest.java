@@ -23,9 +23,16 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -54,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -80,6 +88,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2454,6 +2463,11 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void testPopulateDataMapForRaCitizen() {
+        CurrentOrPreviousProceedings currentOrPreviousProceedings = CurrentOrPreviousProceedings.builder()
+            .courtOrderMadeForProtection(Yes)
+            .haveChildrenBeenInvolvedInCourtCase(Yes)
+            .proceedingsList(new ArrayList<>())
+            .build();
         respondent2 = PartyDetails.builder()
             .user(User.builder().build())
             .representativeFirstName("Abc")
@@ -2467,6 +2481,7 @@ public class C100RespondentSolicitorServiceTest {
                           .citizenDetails(CitizenDetails.builder()
                                               .firstName("test")
                                               .lastName("test")
+                                              .dateOfBirth(LocalDate.now())
                                               .build())
                           .consent(Consent.builder()
                                        .consentToTheApplication(No)
@@ -2494,17 +2509,69 @@ public class C100RespondentSolicitorServiceTest {
                                                             .anotherCountryAskedInformation(Yes)
                                                             .anotherCountryAskedInformationDetaails("test")
                                                             .build())
+                          .currentOrPreviousProceedings(currentOrPreviousProceedings)
                           .respondentAllegationsOfHarmData(allegationsOfHarmData)
                           .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(Arrays.asList(
+                                                  ReasonableAdjustmentsEnum.docsformat,
+                                                  ReasonableAdjustmentsEnum.commhelp,
+                                                  ReasonableAdjustmentsEnum.travellinghelp,
+                                                  ReasonableAdjustmentsEnum.hearingsupport,
+                                                  ReasonableAdjustmentsEnum.hearingcomfort
+                                              ))
+                                              .docsSupport(Arrays.asList(
+                                                  DocsSupportEnum.docsReadOut,
+                                                  DocsSupportEnum.docsprint,
+                                                  DocsSupportEnum.largeprintdocs,
+                                                  DocsSupportEnum.other,
+                                                  DocsSupportEnum.brailledocs
+                                              ))
+                                              .helpCommunication(Arrays.asList(
+                                                  HelpCommunicationEnum.signlanguage,
+                                                  HelpCommunicationEnum.courthearing,
+                                                  HelpCommunicationEnum.courtvisit,
+                                                  HelpCommunicationEnum.other
+                                              ))
+                                              .courtHearing(Arrays.asList(
+                                                  CourtHearingEnum.animal,
+                                                  CourtHearingEnum.supportworker,
+                                                  CourtHearingEnum.familymember,
+                                                  CourtHearingEnum.other,
+                                                  CourtHearingEnum.assistance
+                                              ))
+                                              .courtComfort(Arrays.asList(
+                                                  CourtComfortEnum.appropriatelighting,
+                                                  CourtComfortEnum.breaks,
+                                                  CourtComfortEnum.other
+                                              ))
+                                              .travellingToCourt(Arrays.asList(
+                                                  TravellingToCourtEnum.building,
+                                                  TravellingToCourtEnum.differentchair,
+                                                  TravellingToCourtEnum.parkingspace,
+                                                  TravellingToCourtEnum.other
+                                              ))
+                                              .docsDetails("test docs")
+                                              .largePrintDetails("test large print details")
+                                              .otherDetails("test other details")
                                               .safetyArrangements(Arrays.asList(
                                                   SafetyArrangementsEnum.advancedview,
                                                   SafetyArrangementsEnum.videolinks
                                               ))
+                                              .attendingToCourt(List.of(
+                                                  AttendingToCourtEnum.videohearings,
+                                                  AttendingToCourtEnum.phonehearings
+                                              ))
+                                              .languageRequirements(List.of(
+                                                  LanguageRequirementsEnum.speakwelsh,
+                                                  LanguageRequirementsEnum.readandwritewelsh
+                                              ))
                                               .safetyArrangementsDetails("test")
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                                              .build())
                           .build())
             .canYouProvideEmailAddress(Yes)
+            .email("test@test.test")
             .isEmailAddressConfidential(Yes)
+            .addressLivedLessThan5YearsDetails("test address history")
             .isPhoneNumberConfidential(Yes)
             .isAddressConfidential(No)
             .solicitorOrg(Organisation.builder().build())
