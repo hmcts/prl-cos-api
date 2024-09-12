@@ -1560,8 +1560,8 @@ public class ManageOrderService {
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
-        YesOrNo cafcassServedOptions = No;
-        YesOrNo cafcassCymruServedOptions = No;
+        YesOrNo cafcassServedOptions = null;
+        YesOrNo cafcassCymruServedOptions = null;
         String cafCassEmail = null;
         String cafcassCymruEmail = null;
         if (caseData.getManageOrders().getCafcassServedOptions() != null) {
