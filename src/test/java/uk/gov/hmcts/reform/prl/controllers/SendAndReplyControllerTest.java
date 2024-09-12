@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -218,7 +219,7 @@ public class SendAndReplyControllerTest {
         List<Element<Message>> messages = Collections.singletonList(element(Message.builder().build()));
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
-            .openMessages(messages)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages).build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -249,7 +250,9 @@ public class SendAndReplyControllerTest {
     @Test
     public void testHandleAboutToSubmitSendPath() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CaseData caseData = CaseData.builder().id(12345L).chooseSendOrReply(SEND).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendOrReplyDto(SendOrReplyDto.builder().build())
+            .chooseSendOrReply(SEND).build();
         Message message = Message.builder().build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -269,6 +272,7 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(null)
             .selectedCaseTypeID(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyDto(SendOrReplyDto.builder().build())
             .chooseSendOrReply(SEND).build();
         Message message = Message.builder().build();
         Map<String, Object> map = new HashMap<>();
@@ -292,7 +296,7 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .openMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(Collections.singletonList(element(message))).build())
             .build();
         UUID selectedValue = UUID.randomUUID();
 
@@ -316,7 +320,7 @@ public class SendAndReplyControllerTest {
             .messageReply(message)
             .caseTypeOfApplication(null)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .closedMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
             .build();
         UUID selectedValue = UUID.randomUUID();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -341,7 +345,7 @@ public class SendAndReplyControllerTest {
                     .messages(messages)
                     .build())
             .replyMessageDynamicList(DynamicList.builder().build())
-            .closedMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
             .build();
         UUID selectedValue = UUID.randomUUID();
 
@@ -365,7 +369,7 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .closedMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -385,6 +389,7 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .messageReply(message)
+            .sendOrReplyDto(SendOrReplyDto.builder().build())
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
         UUID selectedValue = UUID.randomUUID();
@@ -392,12 +397,12 @@ public class SendAndReplyControllerTest {
         when(elementUtils.getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages()))
+        when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getSendOrReplyDto().getOpenMessages()))
             .thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
+        verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getSendOrReplyDto().getOpenMessages());
     }
 
     @Test
@@ -410,7 +415,7 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .openMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(Collections.singletonList(element(message))).build())
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -428,8 +433,8 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .closedMessages(Collections.emptyList())
-            .openMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(Collections.singletonList(element(message))).closedMessages(
+                Collections.emptyList()).build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -443,18 +448,18 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message newMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 10, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.OPEN)
             .build();
         Message oldMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.OPEN)
             .isReplying(YesOrNo.Yes).build();
 
         Message closedMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.CLOSED)
             .isReplying(YesOrNo.Yes).build();
 
@@ -463,8 +468,7 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(SEND)
             .messageReply(newMessage)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .openMessages((Arrays.asList(element(newMessage), element(oldMessage))))
-            .build();
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages((Arrays.asList(element(newMessage), element(oldMessage)))).build()).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -527,11 +531,11 @@ public class SendAndReplyControllerTest {
                                                                            caseData.getAdditionalApplicationsBundle(),
                                                                            AWP_STATUS_IN_REVIEW)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).addMessage(caseData, auth);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -623,11 +627,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
@@ -635,13 +639,13 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
         when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,SEND))
             .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).addMessage(caseData, auth);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -684,11 +688,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).addMessage(caseData, auth);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -727,11 +731,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
@@ -752,11 +756,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(openMessagesBefore)
@@ -764,7 +768,7 @@ public class SendAndReplyControllerTest {
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(caseDataAfterClosed);
+        verify(sendAndReplyService).closeMessage(caseDataAfterClosed, caseDataMap);
     }
 
     @Test
@@ -793,11 +797,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.Yes)
                     .messages(messages)
@@ -811,11 +815,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth)).thenReturn(messagesWithHistory);
+        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap)).thenReturn(messagesWithHistory);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth);
+        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -840,11 +844,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
+        when(sendAndReplyService.closeMessage(caseData, caseDataMap)).thenReturn(listOfClosedMessages);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(caseData);
+        verify(sendAndReplyService).closeMessage(caseData, caseDataMap);
     }
 
     @Test
@@ -929,12 +933,12 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
-                                           .messageContent("some msg content")
-                                           .build())
+                        .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
+                        .messageContent("some msg content")
+                        .build())
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
                     .build())
@@ -947,12 +951,12 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .sendReplyJudgeName(JudicialUser.builder().build())
-                                           .build())
+                        .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .sendReplyJudgeName(JudicialUser.builder().build())
+                        .build())
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
                     .build())
@@ -980,7 +984,10 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .closedMessages(Collections.singletonList(element(message)))
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                .closedMessages(Collections.singletonList(element(message)))
+                .build())
+
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -990,6 +997,6 @@ public class SendAndReplyControllerTest {
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
-                            response.getErrors().get(0));
+            response.getErrors().get(0));
     }
 }

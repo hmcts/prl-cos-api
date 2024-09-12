@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -149,8 +150,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
 
-                if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-                    closedMessages.addAll(caseData.getClosedMessages());
+                if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+                    closedMessages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
                 }
 
                 messages.removeAll(closedMessages);
@@ -159,7 +160,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
                     caseData.getMessageReply(),
-                    caseData.getOpenMessages()
+                    caseData.getSendOrReplyDto().getOpenMessages()
                 );
             }
 
@@ -169,11 +170,17 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         // sort lists of messages with most recent first
-        if (ofNullable(caseData.getOpenMessages()).isPresent()) {
-            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getOpenMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getOpenMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getClosedMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -190,9 +197,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        List<Element<Message>> messages = caseData.getOpenMessages();
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            messages.addAll(caseData.getClosedMessages());
+        List<Element<Message>> messages = caseData.getSendOrReplyDto().getOpenMessages();
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            messages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
@@ -248,12 +255,20 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
+        try {
+            log.info(
+                "casedata from submitted callback for snr callbackRequest {}",
+                objectMapper.writeValueAsString(callbackRequest)
+            );
+        } catch (JsonProcessingException e) {
+            log.info("Json processing Exception as been thrown");
+        }
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
             String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
                 caseData, SEND
             );
@@ -281,7 +296,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData, caseDataMap));
 
                 // Update status of Additional applications if selected to Closed
                 String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
@@ -304,7 +319,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation, caseDataMap));
             }
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
