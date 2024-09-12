@@ -40,6 +40,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -441,6 +442,58 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsDaRespondentForV3() throws Exception {
+        setUpDa();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123", "234", "1234"))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.respondent)
+            .build();
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("af1").lastName("al1")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("afl11@test.com")
+            .response(Response.builder().build())
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(Arrays.asList(element(applicant1)))
+            .c100RebuildData(c100RebuildData)
+            .build();
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
+                                                                                            anyString()
+        );
+        when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(), any())).thenReturn(true);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            authToken
+        );
+        assertNotNull(citizenUpdatePartyDataContent);
     }
 
 }
