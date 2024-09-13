@@ -269,7 +269,7 @@ public class BundleCreateRequestMapperTest {
 
         QuarantineLegalDoc medicalRecords = QuarantineLegalDoc.builder()
             .medicalRecordsDocument(Document.builder().documentFileName("medicalRecords").build())
-            .documentParty("Applicant").categoryName("Medical Records").build();
+            .documentParty("Applicant").categoryName("Medical records").build();
         courtStaffDoc.add(element(medicalRecords));
 
         QuarantineLegalDoc medicalReports = QuarantineLegalDoc.builder()
@@ -279,7 +279,7 @@ public class BundleCreateRequestMapperTest {
 
         QuarantineLegalDoc witnessStmnts = QuarantineLegalDoc.builder()
             .otherWitnessStatementsDocument(Document.builder().documentFileName("witnessStmnts").build())
-            .documentParty("Applicant").categoryName("Other witness Statements").build();
+            .documentParty("Applicant").categoryName("Other witness statements").build();
         courtStaffDoc.add(element(witnessStmnts));
 
         QuarantineLegalDoc positionStmnts = QuarantineLegalDoc.builder()

@@ -150,6 +150,18 @@ public class BundleCreateRequestMapper {
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
         }
+
+        List<Element<BundlingRequestDocument>> miamCertAndPreviousOrdersUploadedByCourtAdmin =
+            mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
+        if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
+            allOtherDocuments.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
+        }
+
+        List<Element<BundlingRequestDocument>> miamDocuments = mapMiamDetails(caseData.getMiamDetails());
+        if (null != miamDocuments && !miamDocuments.isEmpty()) {
+            allOtherDocuments.addAll(miamDocuments);
+        }
+
         return allOtherDocuments;
 
     }
@@ -196,12 +208,6 @@ public class BundleCreateRequestMapper {
             applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
         }
 
-        List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin =
-            mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
-        if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
-            applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
-        }
-        mapMiamDetails(caseData.getMiamDetails(),applications);
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
         if (!citizenUploadedC7Documents.isEmpty()) {
             applications.addAll(citizenUploadedC7Documents);
@@ -209,17 +215,19 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(applications);
     }
 
-    private void mapMiamDetails(MiamDetails miamDetails, List<BundlingRequestDocument> applications) {
+    private List<Element<BundlingRequestDocument>> mapMiamDetails(MiamDetails miamDetails) {
+        List<BundlingRequestDocument> miamBundlingDocuments = new ArrayList<>();
         if (null != miamDetails) {
             Document miamCertificateUpload = miamDetails.getMiamCertificationDocumentUpload();
             if (null != miamCertificateUpload) {
-                applications.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
+                miamBundlingDocuments.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
             }
             Document miamCertificateUpload1 = miamDetails.getMiamCertificationDocumentUpload1();
             if (null != miamCertificateUpload1) {
-                applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
+                miamBundlingDocuments.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
             }
         }
+        return ElementUtils.wrapElements(miamBundlingDocuments);
     }
 
     private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
@@ -239,11 +247,11 @@ public class BundleCreateRequestMapper {
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
-    private List<BundlingRequestDocument> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
+    private List<Element<BundlingRequestDocument>> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
         if (existingFurtherEvidences.isEmpty()) {
-            return applications;
+            return ElementUtils.wrapElements(applications);
         }
         ElementUtils.unwrapElements(furtherEvidencesFromCaseData).forEach(furtherEvidence -> {
             if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
@@ -256,7 +264,7 @@ public class BundleCreateRequestMapper {
                 }
             }
         });
-        return applications;
+        return ElementUtils.wrapElements(applications);
     }
 
     private List<Element<BundlingRequestDocument>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
