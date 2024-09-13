@@ -3619,7 +3619,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", "test");
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -3643,7 +3643,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", "test");
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
@@ -3668,7 +3668,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", "test");
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));

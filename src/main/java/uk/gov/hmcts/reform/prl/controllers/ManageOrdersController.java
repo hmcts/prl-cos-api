@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -268,10 +269,10 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            String newDraftOrderCollectionId = null;
+            UUID newDraftOrderCollectionId = null;
             if (caseDataUpdated.containsKey("newDraftOrderCollectionId")) {
                 log.info("newDraftOrderCollectionId " + caseDataUpdated.get("newDraftOrderCollectionId"));
-                newDraftOrderCollectionId = (String) caseDataUpdated.get("newDraftOrderCollectionId");
+                newDraftOrderCollectionId = (UUID) caseDataUpdated.get("newDraftOrderCollectionId");
                 caseDataUpdated.remove("newDraftOrderCollectionId");
             }
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,

@@ -3216,7 +3216,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId, String newDraftOrderCollectionId) {
+    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId, UUID newDraftOrderCollectionId) {
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;
@@ -3249,7 +3249,7 @@ public class ManageOrderService {
                 waFieldsMap.put(WA_ORDER_NAME_ADMIN_CREATED, orderNameForWA);
                 if (!AmendOrderCheckEnum.noCheck
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                    && StringUtils.isNotBlank(newDraftOrderCollectionId)) {
+                    && ObjectUtils.isNotEmpty(newDraftOrderCollectionId)) {
                     waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
                 }
 
