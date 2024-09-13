@@ -1063,6 +1063,7 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId;
+        log.info("inside updateDraftOrderCollection eventId {} draftOrderId {} ",eventId, draftOrderId);
         if (StringUtils.isEmpty(draftOrderId)) {
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
                 selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -1074,10 +1075,13 @@ public class DraftAnOrderService {
         } else {
             selectedOrderId = UUID.fromString(draftOrderId);
         }
+        log.info("selectedOrderId " + selectedOrderId);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             if (e.getId().equals(selectedOrderId)) {
                 DraftOrder draftOrder = e.getValue();
+                log.info("draftOrder " + draftOrder);
                 if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
+                    log.info("Edit draft order");
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
@@ -1098,6 +1102,7 @@ public class DraftAnOrderService {
                         defaultHearingOptionToDateReservedWithListAssist(draftOrder);
                     }
                 } else {
+                    log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
                 draftOrderCollection.set(
@@ -1121,6 +1126,7 @@ public class DraftAnOrderService {
             eventId,
             draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
         );
+        log.info("inside getDraftOrderWithUpdatedStatus status {}",status);
         YesOrNo isJudgeApprovalNeeded = draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
         String instructionssToLegalRep = caseData.getManageOrders().getInstructionsToLegalRepresentative();
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
