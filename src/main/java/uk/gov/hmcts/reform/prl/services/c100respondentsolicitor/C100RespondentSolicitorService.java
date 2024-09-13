@@ -1049,6 +1049,7 @@ public class C100RespondentSolicitorService {
                             .partyName(party)
                             .createdBy(createdBy)
                             .dateCreated(LocalDate.now())
+                            .dateTimeCreated(LocalDateTime.now())
                             .citizenDocument(c8FinalDocument)
                             .build()
             );
