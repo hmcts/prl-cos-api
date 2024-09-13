@@ -268,7 +268,16 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
+            String newDraftOrderCollectionId = null;
+            if (caseDataUpdated.containsKey("newDraftOrderCollectionId")) {
+                log.info("newDraftOrderCollectionId " + caseDataUpdated.get("newDraftOrderCollectionId"));
+                newDraftOrderCollectionId = (String) caseDataUpdated.get("newDraftOrderCollectionId");
+                caseDataUpdated.remove("newDraftOrderCollectionId");
+            }
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
+                                                                         caseData,
+                                                                         callbackRequest.getEventId(),
+                                                                         newDraftOrderCollectionId));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);

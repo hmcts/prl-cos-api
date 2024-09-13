@@ -1223,7 +1223,12 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         caseData = caseData.toBuilder().draftOrderCollection(draftOrderList).build();
-        return Map.of("draftOrderCollection", caseData.getDraftOrderCollection());
+        return Map.of(
+            "draftOrderCollection",
+            caseData.getDraftOrderCollection(),
+            "newDraftOrderCollectionId",
+            caseData.getDraftOrderCollection().get(0).getId()
+        );
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
@@ -3211,7 +3216,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId) {
+    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId, String newDraftOrderCollectionId) {
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;
@@ -3244,8 +3249,8 @@ public class ManageOrderService {
                 waFieldsMap.put(WA_ORDER_NAME_ADMIN_CREATED, orderNameForWA);
                 if (!AmendOrderCheckEnum.noCheck
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                    && CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
-                    waFieldsMap.put(WA_ORDER_COLLECTION_ID, caseData.getDraftOrderCollection().get(0).getId());
+                    && StringUtils.isNotBlank(newDraftOrderCollectionId)) {
+                    waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
                 }
 
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
