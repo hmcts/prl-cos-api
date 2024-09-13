@@ -3239,6 +3239,12 @@ public class ManageOrderService {
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser, null);
+            } else if (uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                waFieldsMap.put(
+                    WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED,
+                    null != caseData.getManageOrders().getAmendOrderSelectCheckOptions()
+                        ? caseData.getManageOrders().getAmendOrderSelectCheckOptions().toString() : null
+                );
             }
 
             if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
