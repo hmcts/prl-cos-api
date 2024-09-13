@@ -561,7 +561,11 @@ public class ReviewDocumentService {
                                      dynamicData,
                                      partyData.getSolicitorEmail(),
                                      solicitorSendgridTemplate);
-                log.info("Response documents are sent to solicitor via email for applicant {}", partyDataEle.getId());
+                log.info(
+                    "Response documents are sent to solicitor via email for applicant {}, in the case {}",
+                    partyDataEle.getId(),
+                    caseData.getId()
+                );
             } else {
                 if (CommonUtils.isNotEmpty(partyData.getEmail())
                     && ContactPreferences.email.equals(partyData.getContactPreferences())) {
@@ -570,15 +574,23 @@ public class ReviewDocumentService {
                                          partyData,
                                          respondentName,
                                          partyGovNotifyTemplate);
-                        log.info("Response documents are sent to applicant {} via gov notify email", partyDataEle.getId());
+                        log.info(
+                            "Response documents are sent to applicant {} via gov notify email, in the case {}",
+                            partyDataEle.getId(),
+                            caseData.getId()
+                        );
                     } else {
                         sendEmailViaSendGrid(systemUserService.getSysUserToken(),
                                              responseDocument,
                                              dynamicData,
                                              partyData.getEmail(),
                                              partySendgridTemplate);
+                        log.info(
+                            "Response documents are sent to applicant {} via email, in the case {}",
+                            partyDataEle.getId(),
+                            caseData.getId()
+                        );
                     }
-                    log.info("Response documents are sent to applicant {} via email", partyDataEle.getId());
                 } else {
                     //Bulk print
                     generateAndSendPostNotification(caseData,
