@@ -34,7 +34,14 @@ public enum ServeOrderFieldsEnum {
     emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
     isOrderCompleteToServe("isOrderCompleteToServe"),
     doesOrderClosesCase("doesOrderClosesCase"),
-    draftOrderCollectionId("draftOrderCollectionId");
+    draftOrderCollectionId("draftOrderCollectionId"),
+    orderNameForAdminCreatedOrder("orderNameForAdminCreatedOrder"),
+    orderNameForJudgeCreatedOrder("orderNameForJudgeCreatedOrder"),
+    performingUser("performingUser"),
+    performingAction("performingAction"),
+    judgeLaReviewRequired("judgeLaReviewRequired"),
+    judgeLaManagerReviewRequired("judgeLaManagerReviewRequired"),
+    isHearingTaskNeeded("isHearingTaskNeeded");
 
     private final String value;
 
