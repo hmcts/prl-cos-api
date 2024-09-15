@@ -993,6 +993,7 @@ public class PrlAppsConstants {
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+    public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
@@ -1035,6 +1036,8 @@ public class PrlAppsConstants {
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
 
+    public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
+  
     public static final String COURTNAV_USER = "courtnav";
 
     //Order SOS statuses

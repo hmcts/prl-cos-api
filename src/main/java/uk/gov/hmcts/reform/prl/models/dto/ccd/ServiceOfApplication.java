@@ -40,7 +40,6 @@ public class ServiceOfApplication {
     @JsonProperty("soaRecipientsOptions")
     private final DynamicMultiSelectList soaRecipientsOptions;
     private final DynamicMultiSelectList soaOtherParties;
-    private final YesOrNo soaCafcassServedOptions;
     private final String soaCafcassEmailId;
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
