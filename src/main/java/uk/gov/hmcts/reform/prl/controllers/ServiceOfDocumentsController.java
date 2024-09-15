@@ -17,8 +17,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfDocumentsService;
 
-import java.util.HashMap;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -43,7 +41,7 @@ public class ServiceOfDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(new HashMap<>())//serviceOfDocumentsService.getSoaCaseFieldsMap(authorisation, callbackRequest.getCaseDetails()))
+                .data(serviceOfDocumentsService.aboutToStart(authorisation, callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
