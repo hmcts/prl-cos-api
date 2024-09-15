@@ -306,7 +306,9 @@ public class ReviewDocumentService {
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
                 legalDocElement,
-                legalDocElement.getValue().getUploaderRole()
+                null != legalDocElement.getValue().getUploaderRole()
+                    ? legalDocElement.getValue().getUploaderRole()
+                    : CITIZEN //TEMP FIX TO RESOLVE UPLOADER_ROLE NULL FROM XUI ISSUE
             ));
         }
     }
