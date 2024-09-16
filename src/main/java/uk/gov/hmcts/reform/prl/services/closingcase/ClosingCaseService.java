@@ -73,7 +73,7 @@ public class ClosingCaseService {
     public Map<String, Object> closingCaseForChildren(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        String finalDecisionResolutionDate = caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().toString();
+        String finalDecisionResolutionDate = caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().getFinalDecisionDate().toString();
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren =
             caseData.getClosingCaseOptions().getFinalOutcomeForChildren();
         log.info("finalOutcomeForChildren " + finalOutcomeForChildren);
