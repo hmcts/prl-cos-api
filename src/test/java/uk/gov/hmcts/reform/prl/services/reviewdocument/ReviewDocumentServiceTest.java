@@ -27,8 +27,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -39,16 +37,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
-import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
@@ -60,10 +54,10 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,11 +71,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
@@ -92,7 +83,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
@@ -160,6 +150,9 @@ public class ReviewDocumentServiceTest {
 
     @Mock
     private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private NotificationService notificationService;
 
     private final String authorization = "authToken";
     Element element;
@@ -240,6 +233,7 @@ public class ReviewDocumentServiceTest {
         ReflectionTestUtils.setField(manageDocumentsService, "systemUserService", systemUserService);
         ReflectionTestUtils.setField(manageDocumentsService, "authTokenGenerator", authTokenGenerator);
         ReflectionTestUtils.setField(manageDocumentsService, "caseDocumentClient", caseDocumentClient);
+        ReflectionTestUtils.setField(manageDocumentsService, "notificationService", notificationService);
 
 
         doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(
@@ -289,6 +283,8 @@ public class ReviewDocumentServiceTest {
 
         when(manageDocumentsService.getQuarantineDocumentForUploader(
             anyString(), any(QuarantineLegalDoc.class))).thenReturn(caseDoc);
+
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
     }
 
     private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
@@ -1305,244 +1301,6 @@ public class ReviewDocumentServiceTest {
             citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
         );
         Assert.assertEquals("respondentC1AResponse", citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
-
-    }
-
-    @Test
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C7Application() throws IOException {
-        testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(
-            "respondentApplication",
-            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT
-        );
-    }
-
-    @Test
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C1AApplication() throws IOException {
-        testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(
-            "respondentC1AApplication",
-            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR
-        );
-    }
-
-    @Test
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C1AResponse() throws IOException {
-        testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(
-            "respondentC1AResponse",
-            EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR
-        );
-    }
-
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(String category, EmailTemplateNames emailTemplate,
-                                                                                 SendgridEmailTemplateNames sendGridEmailTemplate,
-                                                                                 SendgridEmailTemplateNames solicitorEmailTemplate)
-        throws IOException {
-        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
-        quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
-            .documentUploadedDate(LocalDateTime.now())
-            .categoryId(category)
-            .citizenQuarantineDocument(document)
-            .isConfidential(YesOrNo.Yes)
-            .isRestricted(YesOrNo.No)
-            .restrictedDetails("test details")
-            .solicitorRepresentedPartyName("name")
-            .uploaderRole(CITIZEN)
-            .build();
-        quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"), quarantineLegalDoc));
-        PartyDetails applicant1 = PartyDetails.builder()//dashboard access
-            .firstName("af1").lastName("al1")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("afl11@test.com")
-            .contactPreferences(ContactPreferences.email)
-            .user(User.builder().idamId("1234").build())
-            .build();
-        PartyDetails applicant2 = PartyDetails.builder()//has solicitor
-            .firstName("af2").lastName("al2")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("asf2").representativeLastName("asl2")
-            .solicitorEmail("asl22@test.com")
-            .build();
-        PartyDetails applicant3 = PartyDetails.builder()
-            .firstName("af3").lastName("al3")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .representativeFirstName("asf3").representativeLastName("asl3")
-            .contactPreferences(ContactPreferences.email)
-            .email("afl31@test.com")
-            .build();
-        PartyDetails applicant4 = PartyDetails.builder()
-            .firstName("af4").lastName("al4")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .representativeFirstName("asf4").representativeLastName("asl4")
-            .email("afl41@test.com")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(123)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicantName("applicant1")
-            .respondentName("respondent1")
-            .solicitorName("solicitor1")
-            .applicantCaseName("applicantCase1")
-            .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4)))
-            .documentManagementDetails(
-                DocumentManagementDetails.builder()
-                    .legalProfQuarantineDocsList(quarantineDocsList)
-                    .build()
-            )
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDoc(Document.builder().build())
-                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
-                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-
-        when(objectMapper.convertValue(any(), (Class<Object>) any())).thenReturn(quarantineCaseDoc);
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
-            true).build());
-
-        reviewDocumentService.processReviewDocument(
-            caseDataMap,
-            caseData,
-            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
-        );
-
-        Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
-
-
-        verify(emailService, times(1)).send(eq("afl11@test.com"),
-                                            eq(emailTemplate), any(),
-                                            eq(LanguagePreference.english)
-        );
-
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
-            eq(sendGridEmailTemplate),
-            anyString(),
-            any(SendgridEmailConfig.class)
-        );
-
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
-            eq(solicitorEmailTemplate),
-            anyString(),
-            any(SendgridEmailConfig.class)
-        );
-
-        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab =
-            (List<Element<QuarantineLegalDoc>>) caseDataMap.get("legalProfUploadDocListDocTab");
-
-        Assert.assertNotNull(caseDataMap.get("legalProfUploadDocListDocTab"));
-        Assert.assertEquals(1, legalProfUploadDocListDocTab.size());
-        Assert.assertEquals(
-            "test.pdf",
-            legalProfUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
-        );
-        Assert.assertEquals(category, legalProfUploadDocListDocTab.get(0).getValue().getCategoryId());
-        Assert.assertEquals("Applicant", legalProfUploadDocListDocTab.get(0).getValue().getDocumentParty());
-
-    }
-
-    @Test
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type() throws IOException {
-        verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentApplication");
-        verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentC1AResponse");
-        verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentC1AResponse");
-
-    }
-
-    public void verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type(String category) throws IOException {
-        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
-        quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
-            .documentUploadedDate(LocalDateTime.now())
-            .categoryId(category)
-            .courtStaffQuarantineDocument(document)
-            .isConfidential(YesOrNo.Yes)
-            .isRestricted(YesOrNo.No)
-            .restrictedDetails("test details")
-            .solicitorRepresentedPartyName("name")
-            .build();
-        quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"), quarantineLegalDoc));
-        PartyDetails applicant1 = PartyDetails.builder()//dashboard access
-            .firstName("af1").lastName("al1")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("afl11@test.com")
-            .contactPreferences(ContactPreferences.email)
-            .user(User.builder().idamId("1234").build())
-            .build();
-        PartyDetails applicant2 = PartyDetails.builder()//has solicitor
-            .firstName("af2").lastName("al2")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("asf2").representativeLastName("asl2")
-            .solicitorEmail("asl22@test.com")
-            .build();
-        PartyDetails applicant3 = PartyDetails.builder()
-            .firstName("af3").lastName("al3")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .representativeFirstName("asf3").representativeLastName("asl3")
-            .contactPreferences(ContactPreferences.email)
-            .email("afl31@test.com")
-            .build();
-        PartyDetails applicant4 = PartyDetails.builder()
-            .firstName("af4").lastName("al4")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .representativeFirstName("asf4").representativeLastName("asl4")
-            .email("afl41@test.com")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(123)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantName("applicant1")
-            .respondentName("respondent1")
-            .solicitorName("solicitor1")
-            .applicantCaseName("applicantCase1")
-            .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4)))
-            .documentManagementDetails(
-                DocumentManagementDetails.builder()
-                    .legalProfQuarantineDocsList(quarantineDocsList)
-                    .build()
-            )
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDoc(Document.builder().build())
-                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
-                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-
-        when(objectMapper.convertValue(any(), (Class<Object>) any())).thenReturn(quarantineCaseDoc);
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
-            true).build());
-
-        reviewDocumentService.processReviewDocument(
-            caseDataMap,
-            caseData,
-            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
-        );
-
-        Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
-
-        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
-            any(),
-            anyString(),
-            any()
-        );
-
-        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab =
-            (List<Element<QuarantineLegalDoc>>) caseDataMap.get("legalProfUploadDocListDocTab");
-        verify(emailService, times(0)).send(any(),
-                                            any(), any(),
-                                            any()
-        );
-
-        Assert.assertNotNull(caseDataMap.get("legalProfUploadDocListDocTab"));
-        Assert.assertEquals(1, legalProfUploadDocListDocTab.size());
-        Assert.assertEquals(
-            "test.pdf",
-            legalProfUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
-        );
-        Assert.assertEquals(category, legalProfUploadDocListDocTab.get(0).getValue().getCategoryId());
-        Assert.assertEquals("Applicant", legalProfUploadDocListDocTab.get(0).getValue().getDocumentParty());
 
     }
 

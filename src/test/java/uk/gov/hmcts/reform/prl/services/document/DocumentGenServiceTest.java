@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -240,6 +241,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     private ManageDocumentsService manageDocumentsService;
+
+    @Mock
+    private NotificationService notificationService;
 
     private Document caseDoc;
     private QuarantineLegalDoc quarantineCaseDoc;
@@ -471,6 +475,7 @@ public class DocumentGenServiceTest {
         ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
         ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
         ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
+        ReflectionTestUtils.setField(manageDocumentsService, "notificationService", notificationService);
 
         doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(), any(), any(), any());
         doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(
@@ -3044,6 +3049,7 @@ public class DocumentGenServiceTest {
             quarantineLegalDoc);
         when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
                                                                  .roles(List.of(Roles.CITIZEN.getValue())).build());
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(
