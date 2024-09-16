@@ -81,7 +81,7 @@ public class ClosingCaseService {
                 || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
                 List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
                 caseData.getNewChildDetails().forEach(child -> {
-                    if (finalOutcomeForChildrenElement.getId().equals(child.getId().toString())) {
+                    if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
                         ChildDetailsRevised updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -93,7 +93,7 @@ public class ClosingCaseService {
             } else if (caseData.getChildren() != null) {
                 List<Element<Child>> children = caseData.getChildren();
                 caseData.getChildren().forEach(child -> {
-                    if (finalOutcomeForChildrenElement.getId().equals(child.getId().toString())) {
+                    if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
                         Child updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -104,7 +104,7 @@ public class ClosingCaseService {
             } else if (caseData.getApplicantChildDetails() != null) {
                 List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
                 caseData.getApplicantChildDetails().forEach(child -> {
-                    if (finalOutcomeForChildrenElement.getId().equals(child.getId().toString())) {
+                    if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
                         ApplicantChild updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
