@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -65,15 +64,6 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
 
-    public JudicialUser getSendReplyJudgeName() {
-        if (sendReplyJudgeName == null
-            || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())
-            || StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
-            return null;
-        }
-        return sendReplyJudgeName;
-    }
-
     //@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = SendReplyJudgeFilter.class)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private JudicialUser sendReplyJudgeName;
@@ -90,8 +80,10 @@ public class Message extends MessageMetaData {
     private String senderName;
     private String senderRole;
 
-    private String otherApplicationLink;
     private String hearingsLink;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<Element<Document>> internalMessageAttachDocs;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
