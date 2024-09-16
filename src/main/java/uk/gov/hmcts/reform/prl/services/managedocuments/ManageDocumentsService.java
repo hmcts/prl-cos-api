@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -102,6 +103,7 @@ public class ManageDocumentsService {
     private final AllTabServiceImpl allTabService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
+    private final NotificationService notificationService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -288,6 +290,11 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
+
+            //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
+            notificationService.sendNotifications(caseData,
+                                                  quarantineLegalDoc,
+                                                  userRole);
         }
     }
 
