@@ -9,7 +9,10 @@ import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -139,6 +142,21 @@ public class BundleCreateRequestMapper {
         if (!fl401WitnessDocs.isEmpty()) {
             allOtherDocuments.addAll(fl401WitnessDocs);
         }
+
+        FL401OtherProceedingDetails fl401OtherProceedingDetails = caseData.getFl401OtherProceedingDetails();
+        if (fl401OtherProceedingDetails != null) {
+            List<Element<BundlingRequestDocument>> fl401ApplicantOtherProceedingsDocs = mapFl401OtherProceedings(
+                caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+            if (!fl401ApplicantOtherProceedingsDocs.isEmpty()) {
+                allOtherDocuments.addAll(fl401ApplicantOtherProceedingsDocs);
+            }
+        }
+
+        List<Element<BundlingRequestDocument>> c100ApplicantOtherProceedingsDocs = mapC100OtherProceedings(caseData.getExistingProceedingsWithDoc());
+        if (!c100ApplicantOtherProceedingsDocs.isEmpty()) {
+            allOtherDocuments.addAll(c100ApplicantOtherProceedingsDocs);
+        }
+
         List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
             mapBundlingDocsFromCitizenUploadedDocs(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
         if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
@@ -177,6 +195,30 @@ public class BundleCreateRequestMapper {
             fl401WitnessDocs.add(ElementUtils.element(mapBundlingRequestDocument(witnessDocs,
                 BundlingDocGroupEnum.applicantWitnessStatements))));
         return fl401WitnessDocs;
+    }
+
+    private List<Element<BundlingRequestDocument>> mapFl401OtherProceedings(List<Element<FL401Proceedings>> fl401OtherProceedingDocuments) {
+        List<Element<BundlingRequestDocument>> fl401OtherProceedingDocs = new ArrayList<>();
+        ElementUtils.unwrapElements(fl401OtherProceedingDocuments)
+            .forEach(otherProceeding ->
+                         fl401OtherProceedingDocs.add(ElementUtils.element(
+                             mapBundlingRequestDocument(
+                                 otherProceeding.getUploadRelevantOrder(),
+                                 BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication
+                             ))));
+        return fl401OtherProceedingDocs;
+    }
+
+    private List<Element<BundlingRequestDocument>> mapC100OtherProceedings(List<Element<ProceedingDetails>> c100OtherProceedingDocuments) {
+        List<Element<BundlingRequestDocument>> c100OtherProceedingDocs = new ArrayList<>();
+        ElementUtils.unwrapElements(c100OtherProceedingDocuments)
+            .forEach(otherProceeding ->
+                         c100OtherProceedingDocs.add(ElementUtils.element(
+                             mapBundlingRequestDocument(
+                                 otherProceeding.getUploadRelevantOrder(),
+                                 BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication
+                             ))));
+        return c100OtherProceedingDocs;
     }
 
     private List<Element<BundlingRequestDocument>> mapFl401SupportingDocs(List<Element<Document>> fl401UploadSupportDocuments) {

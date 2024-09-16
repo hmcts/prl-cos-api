@@ -9,13 +9,17 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
@@ -23,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
@@ -77,6 +82,7 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
@@ -466,6 +472,111 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
+    }
+
+    @Test
+    public void testBundleCreateRequestMapperForFl401OtherProceedings() {
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
+                "hearingJudgeName")
+                                    .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
+                                    .hearingStartDateTime(LocalDateTime.of(2024, 9, 16, 14, 0)).build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
+        List<FL401Proceedings> fl401Docs = new ArrayList<>();
+        Document otherProceedingsDoc = Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+            "otherProceedings.pdf").build();
+        fl401Docs.add(FL401Proceedings.builder().uploadRelevantOrder(otherProceedingsDoc).build());
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.DECISION_OUTCOME)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                "finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                "C1AWelshDoc.pdf").build())
+            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder().fl401OtherProceedings(wrapElements(
+                fl401Docs)).build())
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        BundlingRequestDocument otherProceedingsBundleDoc = BundlingRequestDocument.builder().documentLink(
+                otherProceedingsDoc).documentFileName(
+                otherProceedingsDoc.getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication).build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper
+            .mapCaseDataToBundleCreateRequest(
+                c100CaseData,
+                "eventI",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(),
+                "sample.yaml"
+            );
+        assertNotNull(bundleCreateRequest);
+        assertEquals(
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().get(0).getValue(),
+            otherProceedingsBundleDoc
+        );
+    }
+
+    @Test
+    public void testBundleCreateRequestMapperForC100OtherProceedings() {
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
+                "hearingJudgeName")
+                                    .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
+                                    .hearingStartDateTime(LocalDateTime.of(2024, 9, 16, 14, 0)).build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
+        List<ProceedingDetails> c100Docs = new ArrayList<>();
+        Document otherProceedingsDoc = Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+            "otherProceedings.pdf").build();
+        c100Docs.add(ProceedingDetails.builder().uploadRelevantOrder(otherProceedingsDoc).build());
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.DECISION_OUTCOME)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                "finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName(
+                "C1AWelshDoc.pdf").build())
+            .existingProceedingsWithDoc(wrapElements(c100Docs))
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        BundlingRequestDocument otherProceedingsBundleDoc = BundlingRequestDocument.builder().documentLink(
+                otherProceedingsDoc).documentFileName(
+                otherProceedingsDoc.getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication).build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper
+            .mapCaseDataToBundleCreateRequest(
+                c100CaseData,
+                "eventI",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(),
+                "sample.yaml"
+            );
+        assertNotNull(bundleCreateRequest);
+        assertEquals(
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().get(0).getValue(),
+            otherProceedingsBundleDoc
+        );
     }
 
     @Test
