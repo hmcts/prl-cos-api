@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
-    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET", "C8_DOCUMENT"};
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
