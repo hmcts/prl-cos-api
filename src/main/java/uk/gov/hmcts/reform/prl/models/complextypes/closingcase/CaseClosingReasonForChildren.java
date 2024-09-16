@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.closingcase.CaseClosingReasonEnum;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class CaseClosingReasonForChildren {
-    private String childId;
-    private String childName;
-    private CaseClosingReasonEnum caseClosingReason;
+    private final String childId;
+    private final String childName;
+    private final CaseClosingReasonEnum caseClosingReason;
 }

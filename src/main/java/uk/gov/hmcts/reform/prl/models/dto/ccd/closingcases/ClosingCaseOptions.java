@@ -27,5 +27,6 @@ public class ClosingCaseOptions {
     @JsonProperty("finalOutcomeForChildren")
     private final List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren;
     @JsonUnwrapped
+    @Builder.Default
     private DateFinalDecisionWasMade dateFinalDecisionWasMade;
 }
