@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.closingcase;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -14,5 +15,10 @@ import java.time.LocalDateTime;
 public class DateFinalDecisionWasMade {
     @JsonProperty("finalDecisionDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final LocalDateTime finalDecisionDate;
+    private LocalDateTime finalDecisionDate;
+
+    @JsonCreator
+    public DateFinalDecisionWasMade(LocalDateTime finalDecisionDate) {
+        this.finalDecisionDate  = finalDecisionDate;
+    }
 }
