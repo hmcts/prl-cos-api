@@ -57,10 +57,10 @@ public class ClosingCaseService {
     public Map<String, Object> populateSelectedChildWithFinalOutcome(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        YesOrNo isTheDecisionAboutAllChildren = (YesOrNo) caseDataUpdated.get("isTheDecisionAboutAllChildren");
+        YesOrNo isTheDecisionAboutAllChildren = caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren();
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren = new ArrayList<>();
         if (YesOrNo.No.equals(isTheDecisionAboutAllChildren)) {
-            DynamicMultiSelectList childOptionsForFinalDecision = (DynamicMultiSelectList) caseDataUpdated.get("childOptionsForFinalDecision");
+            DynamicMultiSelectList childOptionsForFinalDecision = caseData.getClosingCaseOptions().getChildOptionsForFinalDecision();
             childOptionsForFinalDecision.getValue().forEach(dynamicMultiselectListElement ->
                 populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, dynamicMultiselectListElement));
         } else {
@@ -73,9 +73,9 @@ public class ClosingCaseService {
     public Map<String, Object> closingCaseForChildren(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        String finalDecisionResolutionDate = (String) caseDataUpdated.get("dateFinalDecisionWasMade");
+        String finalDecisionResolutionDate = caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().toString();
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren =
-            (List<Element<CaseClosingReasonForChildren>>) caseDataUpdated.get("finalOutcomeForChildren");
+            caseData.getClosingCaseOptions().getFinalOutcomeForChildren();
         finalOutcomeForChildren.forEach(finalOutcomeForChildrenElement -> {
             if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
                 || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
