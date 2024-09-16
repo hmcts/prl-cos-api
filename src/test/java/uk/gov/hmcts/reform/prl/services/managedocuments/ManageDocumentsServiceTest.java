@@ -309,7 +309,7 @@ public class ManageDocumentsServiceTest {
         Mockito.when(caseDocumentClient.uploadDocuments(anyString(), anyString(), anyString(), anyString(), anyList()))
             .thenReturn(uploadResponse);
         doNothing().when(caseDocumentClient).deleteDocument(anyString(), anyString(), any(UUID.class), anyBoolean());
-
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
     }
 
@@ -615,7 +615,6 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -737,7 +736,6 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleLA);
 
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -1155,7 +1153,6 @@ public class ManageDocumentsServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -1245,7 +1242,6 @@ public class ManageDocumentsServiceTest {
         when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "345")).thenReturn(
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -1928,7 +1924,6 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
 
         manageDocumentsService
             .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen");
