@@ -1346,6 +1346,45 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testBuildSendMessageWhenMessageAboutOther() {
+        UUID uuid = UUID.randomUUID();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
+        DynamicList list = DynamicList.builder().value(DynamicListElement.builder().code(uuid).build()).build();
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+
+        CaseData data = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(list)
+                            .judicialOrMagistrateTierList(list)
+                            .applicationsList(list)
+                            .futureHearingsList(list)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
+
+        when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
+        Message message = sendAndReplyService.buildSendReplyMessage(data,
+                                                                    data.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+        assertEquals(emptyList(), message.getInternalMessageAttachDocs());
+    }
+
+    @Test
     public void testAddNewOpenMessage() {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
