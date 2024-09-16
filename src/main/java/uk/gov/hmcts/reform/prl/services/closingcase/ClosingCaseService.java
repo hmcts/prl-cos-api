@@ -91,7 +91,9 @@ public class ClosingCaseService {
                         children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                     }
                 });
-
+                log.info("children ==> " + children);
+                log.info("caseData.getNewChildDetails() ==> " + caseData.getNewChildDetails());
+                caseDataUpdated.put("newChildDetails", children);
             } else if (caseData.getChildren() != null) {
                 List<Element<Child>> children = caseData.getChildren();
                 caseData.getChildren().forEach(child -> {
@@ -104,6 +106,9 @@ public class ClosingCaseService {
                         children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                     }
                 });
+                log.info("children ==> " + children);
+                log.info("caseData.getChildren() ==> " + caseData.getChildren());
+                caseDataUpdated.put("children", children);
             } else if (caseData.getApplicantChildDetails() != null) {
                 List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
                 caseData.getApplicantChildDetails().forEach(child -> {
@@ -116,6 +121,9 @@ public class ClosingCaseService {
                         children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                     }
                 });
+                log.info("children ==> " + children);
+                log.info("caseData.getApplicantChildDetails() ==> " + caseData.getApplicantChildDetails());
+                caseDataUpdated.put("applicantChildDetails", children);
             }
         });
         updateChildDetailsInTab(caseDataUpdated, caseData);
