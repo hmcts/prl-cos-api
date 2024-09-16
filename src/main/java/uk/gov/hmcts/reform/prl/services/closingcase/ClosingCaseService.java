@@ -76,12 +76,14 @@ public class ClosingCaseService {
         String finalDecisionResolutionDate = caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().toString();
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren =
             caseData.getClosingCaseOptions().getFinalOutcomeForChildren();
+        log.info("finalOutcomeForChildren " + finalOutcomeForChildren);
         finalOutcomeForChildren.forEach(finalOutcomeForChildrenElement -> {
             if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
                 || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
                 List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
                 caseData.getNewChildDetails().forEach(child -> {
                     if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
+                        log.info("found ChildDetailsRevised");
                         ChildDetailsRevised updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -94,6 +96,7 @@ public class ClosingCaseService {
                 List<Element<Child>> children = caseData.getChildren();
                 caseData.getChildren().forEach(child -> {
                     if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
+                        log.info("found Child");
                         Child updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -105,6 +108,7 @@ public class ClosingCaseService {
                 List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
                 caseData.getApplicantChildDetails().forEach(child -> {
                     if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
+                        log.info("found ApplicantChild");
                         ApplicantChild updatedChildDetails = child.getValue().toBuilder()
                             .finalDecisionResolutionDate(finalDecisionResolutionDate)
                             .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
