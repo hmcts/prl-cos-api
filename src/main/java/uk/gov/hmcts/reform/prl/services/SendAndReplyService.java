@@ -869,13 +869,16 @@ public class SendAndReplyService {
     }
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
-        return MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
-            ? getApplicationDocument(
-            message.getApplicationsList(),
-            caseData,
-            getValueCode(message.getApplicationsList())
-        )
-            : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
+        if (MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())) {
+            return getApplicationDocument(
+                message.getApplicationsList(),
+                caseData,
+                getValueCode(message.getApplicationsList())
+            );
+        } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
+            return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
+        }
+        return emptyList();
     }
 
     private String getInternalOrExternalSentTo(CaseData caseData, Message message) {
