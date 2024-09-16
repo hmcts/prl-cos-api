@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -114,7 +115,14 @@ public class ClosingCaseService {
             }
         });
         updateChildDetailsInTab(caseDataUpdated, caseData);
+        cleanUpClosingCaseChildOptions(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    public static void cleanUpClosingCaseChildOptions(Map<String, Object> caseDataUpdated) {
+        for (ClosingCaseFieldsEnum field : ClosingCaseFieldsEnum.values()) {
+            caseDataUpdated.remove(field.getValue());
+        }
     }
 
     private void updateChildDetailsInTab(Map<String, Object> caseDataUpdated, CaseData caseData) {
