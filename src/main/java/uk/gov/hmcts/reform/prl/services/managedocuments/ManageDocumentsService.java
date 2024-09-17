@@ -291,6 +291,7 @@ public class ManageDocumentsService {
             existingCaseDocuments.add(element(finalConfidentialDocument));
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
 
+            //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
             notificationService.sendNotifications(caseData,
                                                   quarantineLegalDoc,
