@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -24,7 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.time.format.DateTimeFormatter;
@@ -49,7 +48,7 @@ public class ClosingCaseService {
 
     private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
 
-    private final AllTabServiceImpl allTabService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
 
     public Map<String, Object> prePopulateChildData(CallbackRequest callbackRequest) {
@@ -101,29 +100,16 @@ public class ClosingCaseService {
     }
 
     public Map<String, Object> populateSelectedChildWithFinalOutcome(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren = new ArrayList<>();
         if (YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
             DynamicMultiSelectList childOptionsForFinalDecision = caseData.getClosingCaseOptions().getChildOptionsForFinalDecision();
-            childOptionsForFinalDecision.getValue().forEach(dynamicMultiselectListElement -> populateFinalOutcomeForChildren(
-                caseData,
-                finalOutcomeForChildren,
-                dynamicMultiselectListElement
-            ));
+            childOptionsForFinalDecision.getValue().forEach(dynamicMultiselectListElement ->
+                populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, dynamicMultiselectListElement));
         } else {
             populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, null);
         }
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(
-            String.valueOf(
-                caseData.getId()));
-        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            String.valueOf(caseData.getId()),
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataUpdated
-        );
         caseDataUpdated.put("finalOutcomeForChildren", finalOutcomeForChildren);
         return caseDataUpdated;
     }
