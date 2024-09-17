@@ -48,8 +48,6 @@ public class ClosingCaseService {
 
     private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
 
     public Map<String, Object> prePopulateChildData(CallbackRequest callbackRequest) {
 
