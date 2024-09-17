@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.CoverLetterMap;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -1635,10 +1636,19 @@ public class ServiceOfApplicationService {
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                if (ObjectUtils.isNotEmpty(caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags())) {
+                    caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                } else {
+                    caseData.getApplicants().get(0).getValue().getResponse()
+                        .setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                }
                 caseDataMap.put(APPLICANTS, caseData.getApplicants());
             } else {
-                caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getResponse().getCitizenFlags())) {
+                    caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                } else {
+                    caseData.getApplicantsFL401().getResponse().setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                }
                 caseDataMap.put(PrlAppsConstants.FL401_APPLICANTS, caseData.getApplicantsFL401());
             }
         }
