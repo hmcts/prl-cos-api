@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
@@ -106,6 +107,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -315,6 +317,10 @@ public class TaskListService {
                     );
                 }
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                //SNI-6559 - update case flags with updated applicants
+                log.info("Before updated caseflag: {}", objectMapper.writeValueAsString(caseData));
+                caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+                log.info("After updated caseflag: {}", objectMapper.writeValueAsString(caseDataUpdated));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                         .c8Document(updatedCaseData.getC8Document())
@@ -325,6 +331,7 @@ public class TaskListService {
                         .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
                                                 ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
                         .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                        .allPartyFlags(updatedCaseData.getAllPartyFlags())
                         .build();
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);

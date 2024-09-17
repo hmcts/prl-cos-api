@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
@@ -151,6 +152,9 @@ public class TaskListServiceTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
