@@ -197,8 +197,8 @@ public class ClosingCaseService {
     private void markTheCaseAsClosed(Map<String, Object> caseDataUpdated, String finalDecisionResolutionDate, CaseData caseData) {
         caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
         caseDataUpdated.put("caseClosed", YesOrNo.Yes);
-        caseData = caseData.toBuilder().state(State.ALL_FINAL_ORDERS_ISSUED)
-            .allocatedJudge(null)
+        caseData = caseData.toBuilder()
+            .state(State.ALL_FINAL_ORDERS_ISSUED)
             .build();
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
     }
@@ -234,7 +234,7 @@ public class ClosingCaseService {
                                                  DynamicMultiselectListElement dynamicMultiselectListElement) {
         if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
-            caseData.getNewChildDetails().forEach(child -> addInChildrenList(
+            caseData.getNewChildDetails().forEach(child -> getChildList(
                 finalOutcomeForChildren,
                 dynamicMultiselectListElement,
                 child.getId(),
@@ -242,7 +242,7 @@ public class ClosingCaseService {
                 child.getValue().getFinalDecisionResolutionReason()
             ));
         } else if (caseData.getChildren() != null) {
-            caseData.getChildren().forEach(child -> addInChildrenList(
+            caseData.getChildren().forEach(child -> getChildList(
                 finalOutcomeForChildren,
                 dynamicMultiselectListElement,
                 child.getId(),
@@ -250,7 +250,7 @@ public class ClosingCaseService {
                 child.getValue().getFinalDecisionResolutionReason()
             ));
         } else if (caseData.getApplicantChildDetails() != null) {
-            caseData.getApplicantChildDetails().forEach(child -> addInChildrenList(
+            caseData.getApplicantChildDetails().forEach(child -> getChildList(
                 finalOutcomeForChildren,
                 dynamicMultiselectListElement,
                 child.getId(),
@@ -260,7 +260,7 @@ public class ClosingCaseService {
         }
     }
 
-    private void addInChildrenList(List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren,
+    private void getChildList(List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren,
                                    DynamicMultiselectListElement dynamicMultiselectListElement,
                                    UUID childId, String childName,
                                    String finalDecisionResolutionReason) {
