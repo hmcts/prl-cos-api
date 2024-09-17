@@ -76,14 +76,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class NotificationService {
 
     private static final String LETTER_TYPE = "responsePack";
+    public static final String RESPONDENT = "The respondent";
     public static final String RESPONDENT_WELSH = "Mae’r atebydd";
     public static final String RESPONDENT_NAME = "respondentName";
+    public static final String RESPONDENT_NAME_PRESENT = "respNamePresent";
+    public static final String RESPONDENT_NAME_PREFIX = "Mae";
     public static final String ID = "id";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
     public static final String APPLICANT_NAME = "applicantName";
     public static final String DATE = "date";
     public static final String DAT_FORMAT = "dd MMM yyyy";
-    public static final String RESPONDENT = "The respondent";
 
     private final SystemUserService systemUserService;
     private final ServiceOfApplicationService serviceOfApplicationService;
@@ -194,10 +196,14 @@ public class NotificationService {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantName)
-            .respondentName(null == respondentName ? (documentLanguageService.docGenerateLang(caseData).isGenWelsh()
-                ? RESPONDENT_WELSH : RESPONDENT) : respondentName)
+            .respondentName(null != respondentName ? respondentName : RESPONDENT)
+            .respondentNameWel(null != respondentName ? getRespondentNameWelsh(respondentName) : RESPONDENT_WELSH)
             .caseLink(link)
             .build();
+    }
+
+    private String getRespondentNameWelsh(String respondentName) {
+        return String.format("%s %s", RESPONDENT_NAME_PREFIX, respondentName);
     }
 
     private void sendNotificationToApplicantsLipOrSolicitor(CaseData caseData,
@@ -276,8 +282,8 @@ public class NotificationService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
         dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
-        dynamicData.put("respondentName",  null == respondentName ? (documentLanguage.isGenWelsh()
-            ? RESPONDENT_WELSH : RESPONDENT) : respondentName);
+        dynamicData.put(RESPONDENT_NAME,  null != respondentName ? respondentName : RESPONDENT);
+        dynamicData.put(RESPONDENT_NAME_PRESENT, null != respondentName);
         return dynamicData;
     }
 
@@ -384,10 +390,8 @@ public class NotificationService {
         dataMap.put(APPLICANT_NAME, null != applicantName ? applicantName : " ");
         dataMap.put(APPLICANT_ADDRESS, address);
         dataMap.put(ID, String.valueOf(caseData.getId()));
-        dataMap.put(RESPONDENT_NAME,
-                    null == respondentName ? (documentLanguageService.docGenerateLang(caseData).isGenWelsh()
-                        ? RESPONDENT_WELSH : RESPONDENT) : respondentName
-        );
+        dataMap.put(RESPONDENT_NAME,  null != respondentName ? respondentName : RESPONDENT);
+        dataMap.put(RESPONDENT_NAME_PRESENT, null != respondentName);
         dataMap.put(DATE, LocalDate.now().format(DateTimeFormatter.ofPattern(DAT_FORMAT)));
         return dataMap;
     }

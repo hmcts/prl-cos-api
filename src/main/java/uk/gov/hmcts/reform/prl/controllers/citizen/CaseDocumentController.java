@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -88,6 +89,7 @@ public class CaseDocumentController {
     private final CaseService caseService;
     Integer fileIndex;
     private final EmailService emailService;
+    private final CitizenDocumentService citizenDocumentService;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
@@ -444,8 +446,7 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
+        CaseDetails caseDetails = citizenDocumentService.citizenSubmitDocuments(authorisation, documentRequest);
         if (isNotEmpty(caseDetails)) {
             return ResponseEntity.ok(SUCCESS);
         } else {
