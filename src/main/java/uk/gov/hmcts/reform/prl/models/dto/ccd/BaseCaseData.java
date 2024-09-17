@@ -66,4 +66,6 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private ClosingCaseOptions closingCaseOptions;
+
+    private String finalCaseClosedDate;
 }

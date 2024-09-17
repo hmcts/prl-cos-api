@@ -17,11 +17,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseClosedDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -50,16 +54,54 @@ public class ClosingCaseService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
         caseDataUpdated.put("childOptionsForFinalDecision", DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+            .listItems(getChildrenMultiSelectListForFinalDecisions(caseData)).build());
         return caseDataUpdated;
+    }
+
+    public List<DynamicMultiselectListElement> getChildrenMultiSelectListForFinalDecisions(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            caseData.getNewChildDetails().forEach(child -> {
+                if (null == child.getValue().getFinalDecisionResolutionReason()
+                    || child.getValue().getFinalDecisionResolutionReason().trim().isEmpty()) {
+                    listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                      .label(child.getValue().getFirstName() + " "
+                                                 + child.getValue().getLastName()
+                                                 + " (Child " + i.getAndIncrement() + ")").build());
+                }
+            });
+
+        } else if (caseData.getChildren() != null) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            caseData.getChildren().forEach(child -> {
+                if (null == child.getValue().getFinalDecisionResolutionReason()
+                    || child.getValue().getFinalDecisionResolutionReason().trim().isEmpty()) {
+                    listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                      .label(child.getValue().getFirstName() + " "
+                                                 + child.getValue().getLastName()
+                                                 + " (Child " + i.getAndIncrement() + ")").build());
+                }
+            });
+        } else if (caseData.getApplicantChildDetails() != null) {
+            caseData.getApplicantChildDetails().forEach(child -> {
+                if (null == child.getValue().getFinalDecisionResolutionReason()
+                    || child.getValue().getFinalDecisionResolutionReason().trim().isEmpty()) {
+                    listItems.add(DynamicMultiselectListElement.builder()
+                                      .code(child.getId().toString())
+                                      .label(child.getValue().getFullName()).build());
+                }
+            });
+        }
+        return listItems;
     }
 
     public Map<String, Object> populateSelectedChildWithFinalOutcome(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        YesOrNo isTheDecisionAboutAllChildren = caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren();
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren = new ArrayList<>();
-        if (YesOrNo.No.equals(isTheDecisionAboutAllChildren)) {
+        if (YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
             DynamicMultiSelectList childOptionsForFinalDecision = caseData.getClosingCaseOptions().getChildOptionsForFinalDecision();
             childOptionsForFinalDecision.getValue().forEach(dynamicMultiselectListElement ->
                 populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, dynamicMultiselectListElement));
@@ -73,7 +115,12 @@ public class ClosingCaseService {
     public Map<String, Object> closingCaseForChildren(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        String finalDecisionResolutionDate = caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().getFinalDecisionDate().toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+        String finalDecisionResolutionDate = ObjectUtils.isNotEmpty(
+            caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().getFinalDecisionDate())
+            ? caseData.getClosingCaseOptions().getDateFinalDecisionWasMade().getFinalDecisionDate().format(
+            formatter) : EMPTY_STRING;
+
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren =
             caseData.getClosingCaseOptions().getFinalOutcomeForChildren();
         log.info("finalOutcomeForChildren " + finalOutcomeForChildren);
@@ -126,6 +173,12 @@ public class ClosingCaseService {
                 caseDataUpdated.put("applicantChildDetails", children);
             }
         });
+        if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
+            caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
+            caseDataUpdated.put("caseClosedDate", CaseClosedDate.builder()
+                .closedDate(finalDecisionResolutionDate)
+                .build());
+        }
         updateChildDetailsInTab(caseDataUpdated, caseData);
         cleanUpClosingCaseChildOptions(caseDataUpdated);
         return caseDataUpdated;
