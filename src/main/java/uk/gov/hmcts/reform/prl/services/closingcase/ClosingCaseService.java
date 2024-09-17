@@ -175,17 +175,22 @@ public class ClosingCaseService {
                 caseDataUpdated.put("applicantChildDetails", children);
             }
         });
-        if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
-            caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
-            caseDataUpdated.put("caseClosed", YesOrNo.Yes);
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getLabel()));
-            caseDataUpdated.put("caseClosedDate", CaseClosedDate.builder()
-                .closedDate(finalDecisionResolutionDate)
-                .build());
+        if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
+            || getChildrenMultiSelectListForFinalDecisions(caseData).isEmpty()) {
+            markTheCaseAsClosed(caseDataUpdated, finalDecisionResolutionDate);
         }
         updateChildDetailsInTab(caseDataUpdated, caseData);
         cleanUpClosingCaseChildOptions(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private static void markTheCaseAsClosed(Map<String, Object> caseDataUpdated, String finalDecisionResolutionDate) {
+        caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
+        caseDataUpdated.put("caseClosed", YesOrNo.Yes);
+        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getLabel()).build());
+        caseDataUpdated.put("caseClosedDate", CaseClosedDate.builder()
+            .closedDate(finalDecisionResolutionDate)
+            .build());
     }
 
     public static void cleanUpClosingCaseChildOptions(Map<String, Object> caseDataUpdated) {
