@@ -518,7 +518,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     private final List<Element<Document>> fl401UploadWitnessDocuments;
     private final List<Element<Document>> fl401UploadSupportDocuments;
-
     /**
      * Send to Gatekeeper.
      */

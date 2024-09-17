@@ -110,6 +110,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -129,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
@@ -3165,6 +3167,14 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
     }
 
+    @Test
+    public void testSendReplyMessageTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageTemplate", "send_reply_message_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, false);
+
+        assertNotNull(template);
+        assertEquals("send_reply_message_letter_en", template);
+    }
 
     @Test
     public void testCitizenDocumentC1aDraftHintWelsh() {
@@ -3203,7 +3213,32 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
         verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
+
+
+    @Test
+    public void testSendReplyMessageTemplateWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageWelshTemplate", "send_reply_message_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, true);
+
+        assertNotNull(template);
+        assertEquals("send_reply_message_letter_wel", template);
+    }
+
+    @Test
+    public void testC8RespFL401FinalHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8Template", "fl401_resp_c8_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("fl401_resp_c8_letter_en", template);
+    }
+
+    @Test
+    public void testC8RespFL401FinalHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8TemplateWelsh", "fl401_resp_c8_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("fl401_resp_c8_letter_wel", template);
+    }
 }
-
-
-
