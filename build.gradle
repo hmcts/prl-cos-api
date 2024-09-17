@@ -177,7 +177,7 @@ allprojects {
       }
 
       //CVE-2023-34034
-      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.14'
+      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '6.3.3'
 
       //CVE-2023-42795, CVE-2023-45648
       dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.29') {
