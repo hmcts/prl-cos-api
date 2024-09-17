@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -170,7 +171,8 @@ public class CitizenCaseUpdateService {
         allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
-
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        caseDataMapToBeUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
