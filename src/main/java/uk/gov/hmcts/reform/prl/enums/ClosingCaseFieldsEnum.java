@@ -5,7 +5,8 @@ public enum ClosingCaseFieldsEnum {
     childOptionsForFinalDecision("childOptionsForFinalDecision"),
     isTheDecisionAboutAllChildren("isTheDecisionAboutAllChildren"),
     finalOutcomeForChildren("finalOutcomeForChildren"),
-    dateFinalDecisionWasMade("dateFinalDecisionWasMade");
+    dateFinalDecisionWasMade("dateFinalDecisionWasMade"),
+    finalDecisionDate("finalDecisionDate");
 
     private final String value;
 

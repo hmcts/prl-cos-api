@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseClosedDate;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
@@ -175,6 +177,8 @@ public class ClosingCaseService {
         });
         if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
             caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
+            caseDataUpdated.put("caseClosed", YesOrNo.Yes);
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getLabel()));
             caseDataUpdated.put("caseClosedDate", CaseClosedDate.builder()
                 .closedDate(finalDecisionResolutionDate)
                 .build());

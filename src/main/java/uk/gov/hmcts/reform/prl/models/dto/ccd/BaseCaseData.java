@@ -67,5 +67,8 @@ public class BaseCaseData {
     @JsonUnwrapped
     private ClosingCaseOptions closingCaseOptions;
 
+    ///PRL-6191 - Added for Record final decision
     private String finalCaseClosedDate;
+
+    private YesOrNo caseClosed;
 }
