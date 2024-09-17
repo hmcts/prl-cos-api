@@ -27,10 +27,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static java.util.Collections.reverse;
@@ -47,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -84,6 +89,8 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH);
+
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
@@ -116,12 +123,23 @@ public class BundleCreateRequestMapper {
                 if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
                     return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
                         .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? hearingDaySchedules.get(0).getHearingStartDateTime().toString() : BLANK_STRING)
+                            ? getHearingDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
                         .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
                 }
             }
         }
         return BundleHearingInfo.builder().build();
+    }
+
+    private String getHearingDateTime(LocalDateTime hearingStartDateTime) {
+        StringBuilder hearingDateTime = new StringBuilder();
+        LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingStartDateTime);
+
+        return hearingDateTime
+            .append(hearingStartDateTime.format(dateTimeFormatter))
+            .append(EMPTY_SPACE_STRING)
+            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
+            .toString();
     }
 
     private String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
