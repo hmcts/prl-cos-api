@@ -1639,7 +1639,8 @@ public class ServiceOfApplicationService {
                 if (ObjectUtils.isNotEmpty(caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags())) {
                     caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
                 } else {
-                    caseData.getApplicants().get(0).getValue().getResponse().setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                    caseData.getApplicants().get(0).getValue().getResponse()
+                        .setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
                 }
                 caseDataMap.put(APPLICANTS, caseData.getApplicants());
             } else {
