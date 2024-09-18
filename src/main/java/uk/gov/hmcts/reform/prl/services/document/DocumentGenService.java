@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
@@ -306,6 +307,11 @@ public class DocumentGenService {
 
     @Value("${document.templates.common.prl_citizen_c1a_final_response_welsh_template}")
     protected String citizenC1aFinalResponseWelshTemplate;
+
+    @Value("${document.templates.common.doc_send_reply_message_template}")
+    protected String docSendReplyMessageTemplate;
+    @Value("${document.templates.common.doc_send_reply_message_welsh_template}")
+    protected String docSendReplyMessageWelshTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -989,6 +995,9 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
+            case DOCUMENT_SEND_REPLY_MESSAGE:
+                template = findDocSendReplyMessageTemplate(isWelsh);
+                break;
             case DOCUMENT_C7_DRAFT_HINT:
                 template = getC7CitizenDraftTemplate(isWelsh);
                 break;
@@ -1103,6 +1112,10 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocSendReplyMessageTemplate(boolean isWelsh) {
+        return !isWelsh ? docSendReplyMessageTemplate : docSendReplyMessageWelshTemplate;
     }
 
     private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
