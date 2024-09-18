@@ -176,7 +176,7 @@ public class NotificationService {
                                            EmailTemplateNames emailTemplate,
                                            String respondentName,
                                            String cafcassCymruEmail) {
-        if (null != respondentName && null != cafcassCymruEmail) {
+        if (null != cafcassCymruEmail) {
             String dashboardUrl = manageCaseUrl + "/" + caseData.getId() + "#Case%20documents";
             emailService.send(
                 cafcassCymruEmail,
