@@ -23,16 +23,8 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -44,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -61,8 +54,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
@@ -88,7 +81,6 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -459,6 +451,12 @@ public class C100RespondentSolicitorServiceTest {
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
+        List<CaseUser> caseUserList = new ArrayList<>();
+        caseUserList.add(CaseUser.builder()
+                .caseId("12345")
+                .caseRole("[C100RESPONDENTSOLICITOR1]")
+                .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
+
         Address address = Address.builder()
                 .addressLine1("test")
                 .postCode("test")
@@ -470,6 +468,8 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder()
                 .value(interpreterNeeds).build();
+        DynamicListElement dynamicListElement = DynamicListElement
+                .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
                 .value(respondent).build();
@@ -486,6 +486,10 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+        List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+        respondentDocsList.add(respondentDocsElement);
         caseData = CaseData.builder().respondents(respondentList).id(1)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .courtSeal("courtSeal")
@@ -721,6 +725,14 @@ public class C100RespondentSolicitorServiceTest {
 
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum2 = new ArrayList<>();
         welshNeedsListEnum2.add(RespondentWelshNeedsListEnum.speakWelsh);
+        List<PartyEnum> party2 = new ArrayList<>();
+        party2.add(PartyEnum.respondent);
+
+        List<CaseUser> caseUserList2 = new ArrayList<>();
+        caseUserList2.add(CaseUser.builder()
+                .caseId("12345")
+                .caseRole("[C100RESPONDENTSOLICITOR1]")
+                .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
 
         Address address2 = Address.builder()
                 .addressLine1("test")
@@ -749,6 +761,10 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<RespondentInterpreterNeeds>> interpreterList2 = Collections.singletonList(wrappedInterpreter2);
         Element<Address> wrappedAddress2 = Element.<Address>builder().value(address2).build();
         List<Element<Address>> addressList2 = Collections.singletonList(wrappedAddress2);
+        RespondentDocs respondentDocs2 = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement2 = Element.<RespondentDocs>builder().value(respondentDocs2).build();
+        List<Element<RespondentDocs>> respondentDocsList2 = new ArrayList<>();
+        respondentDocsList2.add(respondentDocsElement2);
         caseData2 = CaseData.builder().respondents(respondentList2).id(1)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondentSolicitorData(RespondentSolicitorData.builder()
@@ -879,6 +895,7 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+        List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .eventId("c100ResSolCurrentOrPreviousProceedings")
@@ -1080,7 +1097,7 @@ public class C100RespondentSolicitorServiceTest {
                 Mockito.any(HashMap.class)
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
-                .roles(List.of("caseworker-privatelaw-solicitor")).build();
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
 
         when(documentLanguageService.docGenerateLang(
             Mockito.any(CaseData.class)
@@ -1091,6 +1108,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
+        List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
         );
@@ -1139,12 +1157,13 @@ public class C100RespondentSolicitorServiceTest {
             Mockito.any(HashMap.class)
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
-            .roles(List.of("caseworker-privatelaw-solicitor")).build();
+            .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
+        List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             authToken, callbackRequest
         );
@@ -1222,7 +1241,7 @@ public class C100RespondentSolicitorServiceTest {
             when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
             UserDetails userDetails = UserDetails.builder().forename("test")
-                    .roles(List.of("caseworker-privatelaw-solicitor")).build();
+                    .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
             String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
@@ -1267,10 +1286,11 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         UserDetails userDetails = UserDetails.builder().forename("test")
-                .roles(List.of("caseworker-privatelaw-solicitor")).build();
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
+        List<String> errorList = new ArrayList<>();
         when(documentLanguageService.docGenerateLang(
             Mockito.any(CaseData.class)
         )).thenReturn(documentLanguage);
@@ -1282,7 +1302,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() {
+    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
@@ -1307,7 +1327,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() {
+    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
@@ -1465,6 +1485,12 @@ public class C100RespondentSolicitorServiceTest {
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
+        List<CaseUser> caseUserList = new ArrayList<>();
+        caseUserList.add(CaseUser.builder()
+                .caseId("12345")
+                .caseRole("[C100RESPONDENTSOLICITOR1]")
+                .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
+
         Address address = Address.builder()
                 .addressLine1("test")
                 .postCode("test")
@@ -1476,6 +1502,8 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder()
                 .value(interpreterNeeds).build();
+        DynamicListElement dynamicListElement = DynamicListElement
+                .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
                 .value(respondent).build();
@@ -1492,6 +1520,10 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+        List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+        respondentDocsList.add(respondentDocsElement);
         caseData = CaseData.builder().respondents(respondentList).id(1)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondentSolicitorData(RespondentSolicitorData.builder()
@@ -1599,7 +1631,7 @@ public class C100RespondentSolicitorServiceTest {
 
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100RMiamWithAttendMiamYesOrNoTest() {
+    public void populateAboutToSubmitCaseDataForC100RMiamWithAttendMiamYesOrNoTest() throws Exception {
 
         YesOrNo[] attendMiam = {Yes, No};
         for (YesOrNo yesOrNo : attendMiam) {
@@ -1611,6 +1643,12 @@ public class C100RespondentSolicitorServiceTest {
                     .response(Response.builder().build())
                     .build();
 
+            List<CaseUser> caseUserList = new ArrayList<>();
+            caseUserList.add(CaseUser.builder()
+                    .caseId("12345")
+                    .caseRole("[C100RESPONDENTSOLICITOR1]")
+                    .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
+
             Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                     .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
                     .value(respondent).build();
@@ -1620,6 +1658,10 @@ public class C100RespondentSolicitorServiceTest {
             List<Element<PartyDetails>> respondentList = new ArrayList<>();
             respondentList.add(wrappedRespondents);
             respondentList.add(wrappedRespondents2);
+            RespondentDocs respondentDocs = RespondentDocs.builder().build();
+            Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+            List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+            respondentDocsList.add(respondentDocsElement);
             CaseData caseData1 = CaseData.builder().respondents(respondentList).id(1)
                     .caseTypeOfApplication(C100_CASE_TYPE)
                     .respondents(respondentList)
@@ -2082,9 +2124,11 @@ public class C100RespondentSolicitorServiceTest {
                         .build())
                 .eventId("")
                 .build();
-        assertExpectedException(() -> respondentSolicitorService.getSolicitorRole(
-                callbackRequest
-        ), RespondentSolicitorException.class, TECH_ERROR);
+        assertExpectedException(() -> {
+            respondentSolicitorService.getSolicitorRole(
+                    callbackRequest
+            );
+        }, RespondentSolicitorException.class, TECH_ERROR);
     }
 
     @Test
@@ -2104,9 +2148,11 @@ public class C100RespondentSolicitorServiceTest {
         when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        assertExpectedException(() -> respondentSolicitorService.findSolicitorRepresentedRespondents(
-                callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1
-        ), RespondentSolicitorException.class, RESPONSE_ALREADY_SUBMITTED_ERROR);
+        assertExpectedException(() -> {
+            respondentSolicitorService.findSolicitorRepresentedRespondents(
+                    callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1
+            );
+        }, RespondentSolicitorException.class, RESPONSE_ALREADY_SUBMITTED_ERROR);
     }
 
     @Test
@@ -2117,6 +2163,7 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+        List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .eventId("c100ResSolResponseToAllegationsOfHarmA")
@@ -2153,6 +2200,7 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+        List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("c100ResSolResponseToAllegationsOfHarmA")
@@ -2320,7 +2368,7 @@ public class C100RespondentSolicitorServiceTest {
 
             when(respondentAllegationOfHarmService.updateChildAbusesForDocmosis(any())).thenReturn(childAbuseBehaviourList);
             UserDetails userDetails = UserDetails.builder().forename("test")
-                .roles(List.of("caseworker-privatelaw-solicitor")).build();
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
@@ -2459,248 +2507,5 @@ public class C100RespondentSolicitorServiceTest {
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent2).build();
         assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2, CITIZEN));
-    }
-
-    @Test
-    public void testPopulateDataMapForRaCitizen() {
-        CurrentOrPreviousProceedings currentOrPreviousProceedings = CurrentOrPreviousProceedings.builder()
-            .courtOrderMadeForProtection(Yes)
-            .haveChildrenBeenInvolvedInCourtCase(Yes)
-            .proceedingsList(new ArrayList<>())
-            .build();
-        respondent2 = PartyDetails.builder()
-            .user(User.builder().build())
-            .representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .sendSignUpLink("test")
-            .phoneNumber("1234567890")
-            .response(Response.builder()
-                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .dateOfBirth(LocalDate.now())
-                                              .build())
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .permissionFromCourt(Yes)
-                                       .build())
-                          .c7ResponseSubmitted(No)
-                          .keepDetailsPrivate(KeepDetailsPrivate
-                                                  .builder()
-                                                  .confidentialityList(new ArrayList<>())
-                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
-                                                  .confidentiality(Yes)
-                                                  .build())
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .currentOrPreviousProceedings(currentOrPreviousProceedings)
-                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(Arrays.asList(
-                                                  ReasonableAdjustmentsEnum.docsformat,
-                                                  ReasonableAdjustmentsEnum.commhelp,
-                                                  ReasonableAdjustmentsEnum.travellinghelp,
-                                                  ReasonableAdjustmentsEnum.hearingsupport,
-                                                  ReasonableAdjustmentsEnum.hearingcomfort
-                                              ))
-                                              .docsSupport(Arrays.asList(
-                                                  DocsSupportEnum.docsReadOut,
-                                                  DocsSupportEnum.docsprint,
-                                                  DocsSupportEnum.largeprintdocs,
-                                                  DocsSupportEnum.other,
-                                                  DocsSupportEnum.brailledocs
-                                              ))
-                                              .helpCommunication(Arrays.asList(
-                                                  HelpCommunicationEnum.signlanguage,
-                                                  HelpCommunicationEnum.courthearing,
-                                                  HelpCommunicationEnum.courtvisit,
-                                                  HelpCommunicationEnum.other
-                                              ))
-                                              .courtHearing(Arrays.asList(
-                                                  CourtHearingEnum.animal,
-                                                  CourtHearingEnum.supportworker,
-                                                  CourtHearingEnum.familymember,
-                                                  CourtHearingEnum.other,
-                                                  CourtHearingEnum.assistance
-                                              ))
-                                              .courtComfort(Arrays.asList(
-                                                  CourtComfortEnum.appropriatelighting,
-                                                  CourtComfortEnum.breaks,
-                                                  CourtComfortEnum.other
-                                              ))
-                                              .travellingToCourt(Arrays.asList(
-                                                  TravellingToCourtEnum.building,
-                                                  TravellingToCourtEnum.differentchair,
-                                                  TravellingToCourtEnum.parkingspace,
-                                                  TravellingToCourtEnum.other
-                                              ))
-                                              .docsDetails("test docs")
-                                              .largePrintDetails("test large print details")
-                                              .otherDetails("test other details")
-                                              .safetyArrangements(Arrays.asList(
-                                                  SafetyArrangementsEnum.advancedview,
-                                                  SafetyArrangementsEnum.videolinks
-                                              ))
-                                              .attendingToCourt(List.of(
-                                                  AttendingToCourtEnum.videohearings,
-                                                  AttendingToCourtEnum.phonehearings
-                                              ))
-                                              .languageRequirements(List.of(
-                                                  LanguageRequirementsEnum.speakwelsh,
-                                                  LanguageRequirementsEnum.readandwritewelsh
-                                              ))
-                                              .safetyArrangementsDetails("test")
-                                              .build())
-                          .build())
-            .canYouProvideEmailAddress(Yes)
-            .email("test@test.test")
-            .isEmailAddressConfidential(Yes)
-            .addressLivedLessThan5YearsDetails("test address history")
-            .isPhoneNumberConfidential(Yes)
-            .isAddressConfidential(No)
-            .solicitorOrg(Organisation.builder().build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
-                "AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorReference("test")
-            .address(Address.builder().addressLine1("").build())
-            .build();
-
-        Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
-            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
-            .value(respondent2).build();
-        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2, CITIZEN));
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataWithAoHOrders() {
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document undertakingDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("undertakingDocument.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-
-        Document fmpDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("fmpDoc.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-
-        Document nmDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("nmDocument.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-        Document occupationalDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("occupationalDocument.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-        Document injunctionDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("injunctionDocument.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-        Document restrainingDocument = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("restrainingDocument.pdf")
-            .documentCreatedOn(new Date())
-            .build();
-
-        allegationsOfHarmData = RespondentAllegationsOfHarmData.builder()
-            .respOrdersUndertakingInPlaceDocument(undertakingDocument)
-            .respOrdersForcedMarriageProtectionDocument(fmpDocument)
-            .respOrdersNonMolestationDocument(nmDocument)
-            .respOrdersOccupationDocument(occupationalDocument)
-            .respOrdersOtherInjunctiveDocument(injunctionDocument)
-            .respOrdersRestrainingDocument(restrainingDocument)
-            .build();
-
-        respondent = PartyDetails.builder()
-            .response(Response.builder()
-                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
-
-                          .build())
-            .build();
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
-            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
-            .value(respondent).build();
-        List<Element<PartyDetails>> respondentList = new ArrayList<>();
-        respondentList.add(wrappedRespondents);
-        caseData = CaseData.builder().respondents(respondentList).id(1)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondentSolicitorData(RespondentSolicitorData.builder()
-                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
-                                         .respondentNameForResponse("Test respondent")
-                                         .build())
-            .build();
-
-        stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .eventId("SolicitorA")
-            .build();
-        when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
-
-        when(objectMapper.convertValue(
-            Mockito.<RespondentAllegationsOfHarmData>any(),
-            Mockito.<TypeReference<Map<String, Object>>>any()
-        )).thenReturn(allegationsOfHarmDataMap);
-
-        respondentSolicitorService.buildAoHResponse(
-            caseData,
-            Response.builder().build(),
-            "Test Solicitor"
-        );
-        assertEquals(6, caseData.getRespondentDocsList().size());
     }
 }
