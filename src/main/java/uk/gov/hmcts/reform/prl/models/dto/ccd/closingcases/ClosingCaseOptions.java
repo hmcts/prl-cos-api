@@ -25,6 +25,8 @@ public class ClosingCaseOptions {
     private final DynamicMultiSelectList childOptionsForFinalDecision;
     @JsonProperty("finalOutcomeForChildren")
     private final List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren;
+    @JsonProperty("noOfChildrenResolutionMade")
+    private final String noOfChildrenResolutionMade;
     @JsonProperty("dateFinalDecisionWasMade")
     private DateFinalDecisionWasMade dateFinalDecisionWasMade;
 }
