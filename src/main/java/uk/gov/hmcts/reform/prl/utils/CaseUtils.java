@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -46,6 +48,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -855,6 +858,39 @@ public class CaseUtils {
         return null;
     }
 
+    public static WaMapper getWaMapper(String clientContext) {
+        byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+        String decodedString = new String(decodedBytes);
+        try {
+            return new ObjectMapper().readValue(decodedString, WaMapper.class);
+        } catch (Exception ex) {
+            log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+        }
+        return null;
+    }
+
+    public static String getDraftOrderId(WaMapper waMapper) {
+        if (null != waMapper) {
+            log.info("***Inside getDraftOrderId {}", waMapper);
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                log.info("***draftOrderId {}", waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId());
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId();
+            }
+        }
+        return null;
+    }
+
+    public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
+        if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
+            return draftOrderCollection.stream()
+                .filter(element -> element.getId().equals(draftOrderId))
+                .map(Element::getValue)
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+        }
+        return null;
+    }
+  
     public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
         Optional<Element<PartyDetails>> party = Optional.empty();
         if (CollectionUtils.isNotEmpty(parties)) {
