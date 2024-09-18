@@ -113,6 +113,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -2887,7 +2888,6 @@ public class DocumentGenServiceTest {
         }, InvalidResourceException.class, "Doc name FL401-Final.docx");
     }
 
-
     @Test
     public void testUploadDocument() throws Exception {
 
@@ -3163,6 +3163,45 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+    }
+
+
+    @Test
+    public void testCitizenDocumentC1aDraftHintWelsh() {
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "solicitorC1ADraftWelshTemplate",
+            "citizen_c1a_wel"
+        );
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("citizen_c1a_wel", template);
+    }
+
+    @Test
+    public void testCitizenDocumentC1aDraftHintEnglish() {
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "solicitorC1ADraftTemplate",
+            "citizen_c1a_wel"
+        );
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("citizen_c1a_wel", template);
+    }
+
+    @Test
+    public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
+        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 }
 

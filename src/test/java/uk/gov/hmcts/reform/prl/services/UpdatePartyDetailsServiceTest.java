@@ -693,7 +693,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
@@ -887,7 +887,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
