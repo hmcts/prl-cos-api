@@ -32,14 +32,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ClosingCaseService {
+
+    public static final String CHILD_OPTIONS_FOR_FINAL_DECISION = "childOptionsForFinalDecision";
+    public static final String FINAL_OUTCOME_FOR_CHILDREN = "finalOutcomeForChildren";
+    public static final String APPLICANT_CHILD_DETAILS = "applicantChildDetails";
 
     private final ObjectMapper objectMapper;
 
@@ -54,7 +62,7 @@ public class ClosingCaseService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        caseDataUpdated.put("childOptionsForFinalDecision", DynamicMultiSelectList.builder()
+        caseDataUpdated.put(CHILD_OPTIONS_FOR_FINAL_DECISION, DynamicMultiSelectList.builder()
             .listItems(getChildrenMultiSelectListForFinalDecisions(caseData)).build());
         return caseDataUpdated;
     }
@@ -110,7 +118,7 @@ public class ClosingCaseService {
         } else {
             populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, null);
         }
-        caseDataUpdated.put("finalOutcomeForChildren", finalOutcomeForChildren);
+        caseDataUpdated.put(FINAL_OUTCOME_FOR_CHILDREN, finalOutcomeForChildren);
         return caseDataUpdated;
     }
 
@@ -175,7 +183,7 @@ public class ClosingCaseService {
             });
             log.info("children ==> " + children);
             log.info("caseData.getNewChildDetails() ==> " + caseData.getNewChildDetails());
-            caseDataUpdated.put("newChildDetails", children);
+            caseDataUpdated.put(NEW_CHILDREN, children);
         } else if (caseData.getChildren() != null) {
             List<Element<Child>> children = caseData.getChildren();
             caseData.getChildren().forEach(child -> {
@@ -190,7 +198,7 @@ public class ClosingCaseService {
             });
             log.info("children ==> " + children);
             log.info("caseData.getChildren() ==> " + caseData.getChildren());
-            caseDataUpdated.put("children", children);
+            caseDataUpdated.put(CHILDREN, children);
         } else if (caseData.getApplicantChildDetails() != null) {
             List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
             caseData.getApplicantChildDetails().forEach(child -> {
@@ -205,14 +213,15 @@ public class ClosingCaseService {
             });
             log.info("children ==> " + children);
             log.info("caseData.getApplicantChildDetails() ==> " + caseData.getApplicantChildDetails());
-            caseDataUpdated.put("applicantChildDetails", children);
+            caseDataUpdated.put(APPLICANT_CHILD_DETAILS, children);
         }
     }
 
     private void markTheCaseAsClosed(Map<String, Object> caseDataUpdated, String finalDecisionResolutionDate, CaseData caseData) {
-        caseDataUpdated.put("finalCaseClosedDate", finalDecisionResolutionDate);
-        caseDataUpdated.put("caseClosed", YesOrNo.Yes);
+        caseDataUpdated.put(FINAL_CASE_CLOSED_DATE, finalDecisionResolutionDate);
+        caseDataUpdated.put(CASE_CLOSED, YesOrNo.Yes);
         caseData = caseData.toBuilder()
+            .finalCaseClosedDate(finalDecisionResolutionDate)
             .state(State.ALL_FINAL_ORDERS_ISSUED)
             .build();
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));

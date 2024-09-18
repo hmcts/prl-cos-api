@@ -1032,4 +1032,7 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
+    public static final String FINAL_CASE_CLOSED_DATE = "finalCaseClosedDate";
+    public static final String CASE_CLOSED = "caseClosed";
 }
