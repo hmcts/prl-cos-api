@@ -125,14 +125,16 @@ public class ClosingCaseService {
     public List<String> validateChildDetails(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        if ((YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
-            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getValue().size()
-            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())
-            || (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
-            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getListItems().size()
-            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())) {
+        boolean childrenAltered;
+        if (YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())) {
+            childrenAltered = caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getValue().size()
+                != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size();
+        } else {
+            childrenAltered = getChildrenMultiSelectListForFinalDecisions(caseData).size()
+                != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size();
+        }
+        if (childrenAltered) {
             errorList.add("Children details are altered");
-
         }
         return errorList;
     }
