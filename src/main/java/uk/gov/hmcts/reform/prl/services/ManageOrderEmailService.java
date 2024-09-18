@@ -514,6 +514,7 @@ public class ManageOrderEmailService {
                 });
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
+            log.info("Send notifications for FL401 parties");
             handleFL401ServeOrderNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                bulkPrintOrderDetails, otherOrganisationEmailList, otherOrganisationPostList);
         }
@@ -540,6 +541,7 @@ public class ManageOrderEmailService {
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
         if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            log.info("Non personal service FL401");
             handleFL401NonPersonalServiceNotifications(authorisation,
                                                         caseData,
                                                         manageOrders,
@@ -591,8 +593,8 @@ public class ManageOrderEmailService {
                                                                       caseData.getApplicantsFL401()),
                                                               element(caseData.getRespondentsFL401().getPartyId(),
                                                                       caseData.getRespondentsFL401()));
-
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+        log.info("Parties in the case {}, parties selected {}", partyList, recipientsOptions);
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
                                              partyList,
                                              caseData,
@@ -600,7 +602,6 @@ public class ManageOrderEmailService {
                                              dynamicDataForEmail,
                                              bulkPrintOrderDetails,
                                              orderDocuments);
-
     }
 
 
@@ -1066,6 +1067,7 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("Sending email to sollicitor");
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(
                         authorisation,

@@ -2157,18 +2157,6 @@ public class ServiceOfApplicationService {
             party.getCode()))).toList() : Collections.emptyList();
     }
 
-    public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
-                                                                                        List<Element<PartyDetails>> selectedApplicants,
-                                                                                        List<Document> packQ, String servedParty) {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        selectedApplicants.forEach(applicant -> {
-            if (applicant.getValue().getSolicitorEmail() != null) {
-                sendEmailToApplicantSolicitor(caseData, authorization, packQ, servedParty, emailNotificationDetails, applicant);
-            }
-        });
-        return emailNotificationDetails;
-    }
-
     private void sendEmailToApplicantSolicitor(CaseData caseData, String authorization, List<Document> packQ, String servedParty,
                                                List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                Element<PartyDetails> party) {
