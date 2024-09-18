@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
-import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
@@ -59,7 +58,6 @@ public class ReviewDocumentService {
 
     private final AllTabServiceImpl allTabService;
     private final ManageDocumentsService manageDocumentsService;
-    private final NotificationService notificationService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
@@ -353,13 +351,6 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
-
-            //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            if ((YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo()))) {
-                notificationService.sendNotifications(caseData,
-                                                      quarantineLegalDocElementOptional.get().getValue(),
-                                                      userRole);
-            }
         }
         return isDocumentFound;
     }

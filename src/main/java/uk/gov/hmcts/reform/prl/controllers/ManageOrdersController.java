@@ -206,8 +206,9 @@ public class ManageOrdersController {
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
             manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
-
+            log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                log.info("Preparing to send notifications to parties");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
