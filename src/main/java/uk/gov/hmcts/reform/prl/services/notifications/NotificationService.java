@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.notifications;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +19,12 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
@@ -56,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT;
@@ -108,8 +112,7 @@ public class NotificationService {
         log.info("*** Send notifications, uploader role {}", userRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);
-            String cafcassCymruEmail = null != caseData.getServiceOfApplication()
-                ? caseData.getServiceOfApplication().getSoaCafcassCymruEmail() : null;
+            String cafcassCymruEmail = getCafcassCymruEmail(caseData);
             Document responseDocument = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
 
             if (RESPONDENT_APPLICATION.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
@@ -182,7 +185,7 @@ public class NotificationService {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
             log.info(
-                "Response documents are sent to Cafcass cymru via gov notify email in the case {}",
+                "Response documents are sent to Cafcass cymru via gov notify email for the case {}",
                 caseData.getId()
             );
         }
@@ -404,6 +407,27 @@ public class NotificationService {
             return quarantineLegalDoc.getUploadedBy();
         }
         return null;
+    }
+
+    private String getCafcassCymruEmail(CaseData caseData) {
+        //get Cafcass cymru email from SOA packs
+        String cafcassCymruEmail = null;
+        if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
+            for (Element<ServedApplicationDetails> soaPack : caseData.getFinalServedApplicationDetailsList()) {
+                if (CollectionUtils.isNotEmpty(soaPack.getValue().getEmailNotificationDetails())) {
+                    for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
+                        if (SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
+                            cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
+                            break;
+                        }
+                    }
+                }
+                if (null != cafcassCymruEmail) {
+                    break;
+                }
+            }
+        }
+        return cafcassCymruEmail;
     }
 
     private Document getQuarantineDocumentForUploader(String uploaderRole,
