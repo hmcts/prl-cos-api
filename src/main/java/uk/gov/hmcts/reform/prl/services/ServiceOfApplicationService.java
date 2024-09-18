@@ -3844,7 +3844,9 @@ public class ServiceOfApplicationService {
                 createPartyDynamicMultiSelectListElement(unServedApplicantPack.getPartyIds())
             );
         }
+        log.info("Applicant list selected {}", applicantList);
         List<Document> packDocs = new ArrayList<>(removeCoverLettersFromThePacks(unwrapElements(unServedApplicantPack.getPackDocument())));
+        log.info("pack dos {}", packDocs);
         if (SoaCitizenServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(
             unServedApplicantPack.getPersonalServiceBy())
             || SoaCitizenServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(
