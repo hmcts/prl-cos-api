@@ -114,6 +114,21 @@ public class ClosingCaseService {
         return caseDataUpdated;
     }
 
+    public List<String> validateChildDetails(CallbackRequest callbackRequest) {
+        List<String> errorList = new ArrayList<>();
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
+        if ((YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
+            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getValue().size()
+            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())
+            || (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
+            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getListItems().size()
+            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())) {
+            errorList.add("Children details are altered");
+
+        }
+        return errorList;
+    }
+
     public Map<String, Object> closingCaseForChildren(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
@@ -266,7 +281,8 @@ public class ClosingCaseService {
                                    String finalDecisionResolutionReason) {
         if ((ObjectUtils.isEmpty(dynamicMultiselectListElement)
             && StringUtils.isEmpty(finalDecisionResolutionReason))
-            || dynamicMultiselectListElement.getCode().equals(childId.toString())) {
+            || (ObjectUtils.isNotEmpty(dynamicMultiselectListElement)
+            && dynamicMultiselectListElement.getCode().equals(childId.toString()))) {
             finalOutcomeForChildren.add(getCaseClosingReasonForChildren(
                 childId,
                 childName
@@ -281,5 +297,4 @@ public class ClosingCaseService {
             .build();
         return element(childId, caseClosingReasonForChildren);
     }
-
 }

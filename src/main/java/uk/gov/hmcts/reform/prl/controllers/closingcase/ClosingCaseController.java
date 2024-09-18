@@ -74,6 +74,24 @@ public class ClosingCaseController extends AbstractCallbackController {
         }
     }
 
+    @PostMapping(path = "/closing-case/validate-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List On Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List on notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse validateChildDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .errors(closingCaseService.validateChildDetails(callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/closing-case/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "List On Notice submission flow")
     @ApiResponses(value = {
