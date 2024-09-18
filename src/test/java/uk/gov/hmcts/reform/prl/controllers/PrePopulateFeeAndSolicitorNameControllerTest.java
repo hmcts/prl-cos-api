@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -121,6 +122,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     private DocumentLanguageService documentLanguageService;
     @Mock
     private MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    @Mock
+    private EventService eventPublisher;
 
     @Mock
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;

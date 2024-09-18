@@ -86,6 +86,9 @@ public class UpdatePartyDetailsServiceTest {
     @Mock
     ConfidentialityTabService confidentialityTabService;
 
+    @Mock
+    RefugeConfidentialityService refugeConfidentialityService;
+
     @InjectMocks
     UpdatePartyDetailsService updatePartyDetailsService;
 
