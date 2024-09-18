@@ -48,7 +48,6 @@ public class ClosingCaseService {
     public static final String CHILD_OPTIONS_FOR_FINAL_DECISION = "childOptionsForFinalDecision";
     public static final String FINAL_OUTCOME_FOR_CHILDREN = "finalOutcomeForChildren";
     public static final String APPLICANT_CHILD_DETAILS = "applicantChildDetails";
-    public static final String NO_OF_CHILDREN_RESOLUTION_MADE = "noOfChildrenResolutionMade";
 
     private final ObjectMapper objectMapper;
 
@@ -120,16 +119,20 @@ public class ClosingCaseService {
             populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, null);
         }
         caseDataUpdated.put(FINAL_OUTCOME_FOR_CHILDREN, finalOutcomeForChildren);
-        caseDataUpdated.put(NO_OF_CHILDREN_RESOLUTION_MADE, finalOutcomeForChildren.size());
         return caseDataUpdated;
     }
 
     public List<String> validateChildDetails(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-        if (Integer.valueOf(caseData.getClosingCaseOptions().getNoOfChildrenResolutionMade())
-            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size()) {
+        if ((YesOrNo.No.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
+            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getValue().size()
+            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())
+            || (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
+            && caseData.getClosingCaseOptions().getChildOptionsForFinalDecision().getListItems().size()
+            != caseData.getClosingCaseOptions().getFinalOutcomeForChildren().size())) {
             errorList.add("Children details are altered");
+
         }
         return errorList;
     }
