@@ -120,7 +120,7 @@ public class ClosingCaseService {
             populateFinalOutcomeForChildren(caseData, finalOutcomeForChildren, null);
         }
         caseDataUpdated.put(FINAL_OUTCOME_FOR_CHILDREN, finalOutcomeForChildren);
-        caseDataUpdated.put(NO_OF_CHILDREN_RESOLUTION_MADE, Integer.toString(finalOutcomeForChildren.size()));
+        caseDataUpdated.put(NO_OF_CHILDREN_RESOLUTION_MADE, finalOutcomeForChildren.size());
         return caseDataUpdated;
     }
 
