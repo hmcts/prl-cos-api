@@ -2197,7 +2197,9 @@ public class ServiceOfApplicationService {
                                                                       party.getValue().getLabelForDynamicList(),
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
-            docs.add(coverLetter);
+            if (coverLetter != null) {
+                docs.add(coverLetter);
+            }
             docs.addAll(packDocs);
             log.info("*** Docs to applicant Lip post {}", docs);
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -3728,8 +3730,7 @@ public class ServiceOfApplicationService {
                 bulkPrintDetails,
                 removeCoverLettersFromThePacks(unwrapElements(unServedApplicantPack.getPackDocument())));
         } else {
-            List<Document> packEDocuments = removeCoverLettersFromThePacks(
-                unwrapElements(unServedApplicantPack.getPackDocument()));
+            List<Document> packEDocuments = unwrapElements(unServedApplicantPack.getPackDocument());
             assert unServedRespondentPack != null;
             List<Document> packFDocuments = unwrapElements(unServedRespondentPack.getPackDocument());
             List<Document> docs = new ArrayList<>();
@@ -3747,14 +3748,9 @@ public class ServiceOfApplicationService {
                     EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
                 );
             } else {
-                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs,
-                                           bulkPrintDetails,
+                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails,
                                            element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                                                    CaseUtils.getCoverLettersForParty(caseData.getApplicantsFL401().getPartyId(),
-                                                                                      caseData.getServiceOfApplication()
-                                                                                          .getUnServedApplicantPack()
-                                                                                          .getCoverLettersMap()).get(0),
-                                                    SERVED_PARTY_APPLICANT);
+                                                    null, SERVED_PARTY_APPLICANT);
             }
         }
 
