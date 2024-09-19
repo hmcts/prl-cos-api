@@ -611,10 +611,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/closingcase/ClosingCaseController.java',
-  '**uk/gov/hmcts/reform/prl/services/closingcase/ClosingCaseService.java',
   '**uk/gov/hmcts/reform/prl/services/tab/summary/generator/CaseClosedDateGenerator.java',
-  '**uk/gov/hmcts/reform/prl/services/tab/summary/CaseSummaryTabService.java',
   '**uk/gov/hmcts/reform/prl/controllers/reopenclosedcases/ReopenClosedCasesController.java',
   '**uk/gov/hmcts/reform/prl/services/reopenclosedcases/ReopenClosedCasesService.java'
 

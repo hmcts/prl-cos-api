@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.reform.prl.controllers.closingcase;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

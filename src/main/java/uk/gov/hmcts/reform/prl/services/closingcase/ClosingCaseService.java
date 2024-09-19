@@ -74,7 +74,7 @@ public class ClosingCaseService {
         return caseDataUpdated;
     }
 
-    public List<DynamicMultiselectListElement> getChildrenMultiSelectListForFinalDecisions(CaseData caseData) {
+    private List<DynamicMultiselectListElement> getChildrenMultiSelectListForFinalDecisions(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
