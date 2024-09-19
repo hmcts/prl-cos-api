@@ -1,5 +1,5 @@
 
-package uk.gov.hmcts.reform.prl.controllers.reopenClosedCases;
+package uk.gov.hmcts.reform.prl.controllers.reopenclosedcases;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +20,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService;
-import uk.gov.hmcts.reform.prl.services.reopenClosedCases.ReopenClosedCasesService;
+import uk.gov.hmcts.reform.prl.services.reopenclosedcases.ReopenClosedCasesService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;

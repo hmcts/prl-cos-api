@@ -1,44 +1,31 @@
-package uk.gov.hmcts.reform.prl.services.reopenClosedCases;
+package uk.gov.hmcts.reform.prl.services.reopenclosedcases;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.reopenClosedCases.ValidReopenClosedCasesStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
-import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService.APPLICANT_CHILD_DETAILS;
@@ -74,31 +61,31 @@ public class ReopenClosedCasesService {
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             caseData.getNewChildDetails().forEach(child -> {
-                    ChildDetailsRevised updatedChildDetails = child.getValue().toBuilder()
-                        .finalDecisionResolutionDate(null)
-                        .finalDecisionResolutionReason(null)
-                        .build();
-                    children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
+                ChildDetailsRevised updatedChildDetails = child.getValue().toBuilder()
+                    .finalDecisionResolutionDate(null)
+                    .finalDecisionResolutionReason(null)
+                    .build();
+                children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
             });
             caseDataUpdated.put(NEW_CHILDREN, children);
         } else if (caseData.getChildren() != null) {
             List<Element<Child>> children = caseData.getChildren();
             caseData.getChildren().forEach(child -> {
-                    Child updatedChildDetails = child.getValue().toBuilder()
-                        .finalDecisionResolutionDate(null)
-                        .finalDecisionResolutionReason(null)
-                        .build();
-                    children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
+                Child updatedChildDetails = child.getValue().toBuilder()
+                    .finalDecisionResolutionDate(null)
+                    .finalDecisionResolutionReason(null)
+                    .build();
+                children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
             });
             caseDataUpdated.put(CHILDREN, children);
         } else if (caseData.getApplicantChildDetails() != null) {
             List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
             caseData.getApplicantChildDetails().forEach(child -> {
-                    ApplicantChild updatedChildDetails = child.getValue().toBuilder()
-                        .finalDecisionResolutionDate(null)
-                        .finalDecisionResolutionReason(null)
-                        .build();
-                    children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
+                ApplicantChild updatedChildDetails = child.getValue().toBuilder()
+                    .finalDecisionResolutionDate(null)
+                    .finalDecisionResolutionReason(null)
+                    .build();
+                children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
             });
             caseDataUpdated.put(APPLICANT_CHILD_DETAILS, children);
         }

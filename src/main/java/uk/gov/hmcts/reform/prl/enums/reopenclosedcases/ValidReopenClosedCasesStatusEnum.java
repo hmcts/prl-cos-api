@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.reopenClosedCases;
+package uk.gov.hmcts.reform.prl.enums.reopenclosedcases;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
