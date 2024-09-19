@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -15,8 +14,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
+import uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -37,11 +35,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ReopenClosedCasesService {
 
     private final ObjectMapper objectMapper;
-
-    private final ApplicationsTabService applicationsTabService;
-
-    private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
-
+    private final ClosingCaseService closingCaseService;
     private final CaseSummaryTabService caseSummaryTab;
 
 
@@ -49,14 +43,14 @@ public class ReopenClosedCasesService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
         removeClosingDetailsFromChildren(caseDataUpdated, caseData);
-        reopenTheCase(caseDataUpdated, caseData);
-        updateChildDetailsInTab(caseDataUpdated, caseData);
-        cleanUpClosingCaseChildOptions(caseDataUpdated);
+        reopenCase(caseDataUpdated, caseData);
+        closingCaseService.updateChildDetailsInTab(caseDataUpdated, caseData);
+        cleanUpReopenClosedCaseOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
     private static void removeClosingDetailsFromChildren(Map<String, Object> caseDataUpdated,
-                                           CaseData caseData) {
+                                                         CaseData caseData) {
         if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
@@ -91,7 +85,7 @@ public class ReopenClosedCasesService {
         }
     }
 
-    private void reopenTheCase(Map<String, Object> caseDataUpdated, CaseData caseData) {
+    private void reopenCase(Map<String, Object> caseDataUpdated, CaseData caseData) {
         caseDataUpdated.put(FINAL_CASE_CLOSED_DATE, null);
         caseDataUpdated.put(CASE_CLOSED, null);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -99,34 +93,12 @@ public class ReopenClosedCasesService {
         caseData = caseData.toBuilder()
             .finalCaseClosedDate(null)
             .state(ValidReopenClosedCasesStatusEnum.CASE_ISSUED.equals(caseData.getChangeStatusOptions())
-                   ? State.CASE_ISSUED : State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                       ? State.CASE_ISSUED : State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .build();
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
     }
 
-    public static void cleanUpClosingCaseChildOptions(Map<String, Object> caseDataUpdated) {
-        for (ClosingCaseFieldsEnum field : ClosingCaseFieldsEnum.values()) {
-            caseDataUpdated.remove(field.getValue());
-        }
-    }
-
-    private void updateChildDetailsInTab(Map<String, Object> caseDataUpdated, CaseData caseData) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
-                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-                caseDataUpdated.put(
-                    "childDetailsRevisedTable",
-                    applicationsTabServiceHelper.getChildRevisedDetails(caseData)
-                );
-            } else {
-                caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
-            }
-        } else {
-            Map<String, Object> applicantFamilyMap = applicationsTabService.getApplicantsFamilyDetails(caseData);
-            caseDataUpdated.put("applicantFamilyTable", applicantFamilyMap);
-            if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
-                caseDataUpdated.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
-            }
-        }
+    public static void cleanUpReopenClosedCaseOptions(Map<String, Object> caseDataUpdated) {
+        caseDataUpdated.remove("changeStatusOptions");
     }
 }

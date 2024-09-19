@@ -32,12 +32,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CHILD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FAMILY_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_REVISED_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOES_APPLICANT_HAVE_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILD_DETAILS_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -235,22 +242,22 @@ public class ClosingCaseService {
         }
     }
 
-    private void updateChildDetailsInTab(Map<String, Object> caseDataUpdated, CaseData caseData) {
+    public void updateChildDetailsInTab(Map<String, Object> caseDataUpdated, CaseData caseData) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
                 || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
                 caseDataUpdated.put(
-                    "childDetailsRevisedTable",
+                    CHILD_DETAILS_REVISED_TABLE,
                     applicationsTabServiceHelper.getChildRevisedDetails(caseData)
                 );
             } else {
-                caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
+                caseDataUpdated.put(CHILD_DETAILS_TABLE, applicationsTabService.getChildDetails(caseData));
             }
         } else {
             Map<String, Object> applicantFamilyMap = applicationsTabService.getApplicantsFamilyDetails(caseData);
-            caseDataUpdated.put("applicantFamilyTable", applicantFamilyMap);
-            if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
-                caseDataUpdated.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
+            caseDataUpdated.put(APPLICANT_FAMILY_TABLE, applicantFamilyMap);
+            if ((YES).equals(applicantFamilyMap.get(DOES_APPLICANT_HAVE_CHILDREN))) {
+                caseDataUpdated.put(FL401_CHILD_DETAILS_TABLE, applicantFamilyMap.get(APPLICANT_CHILD));
             }
         }
     }
