@@ -3605,7 +3605,7 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails,
                     bulkPrintDetails,
                     unServedApplicantPack,
-                    unServedRespondentPack
+                    caseData.getServiceOfApplication().getUnservedCitizenRespondentPack()
                 );
             } else {
                 if (null != unServedApplicantPack
