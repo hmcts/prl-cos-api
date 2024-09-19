@@ -2929,13 +2929,10 @@ public class ManageOrderService {
                 setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
             } else {
-                UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
-                    caseData.getDraftOrdersDynamicList(), objectMapper);
-
                 if (null != caseData.getDraftOrderCollection()) {
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
-                        if (e.getId().equals(selectedOrderId)) {
+                        if (e.getId().equals(UUID.fromString(draftOrderId))) {
                             setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                             setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(),
