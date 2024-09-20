@@ -228,12 +228,8 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
 
-        if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
-            caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
-                .getDraftOrderNameForWA(caseData, true));
 
-            manageOrderService.setHearingOptionDetailsForTask(
+        manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
             callbackRequest.getEventId(),
@@ -244,7 +240,7 @@ public class EditAndApproveDraftOrderController {
             WA_ORDER_NAME_JUDGE_APPROVED,
             draftAnOrderService.getApprovedDraftOrderNameForWA(caseData)
         );
-        }
+
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
