@@ -67,7 +67,7 @@ public class OrderDetails {
     private final YesOrNo isOrderUploaded;
     private final YesOrNo doesOrderDocumentNeedSeal;
 
-    private final YesOrNo isAutoHearingReqPending;
+    private YesOrNo isAutoHearingReqPending;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")

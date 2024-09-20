@@ -33,6 +33,7 @@ public class AutomatedHearingUtils {
                         draftOrder.getValue().setManageOrderHearingDetails(manageOrderService
                             .createAutomatedHearingManagement(authorisation, caseData, draftOrder.getValue().getManageOrderHearingDetails()));
                     }
+                    draftOrder.getValue().setIsAutoHearingReqPending(No);
                 });
                 caseDataMap.put("draftOrderCollection", caseData.getDraftOrderCollection());
             } else if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
@@ -45,6 +46,7 @@ public class AutomatedHearingUtils {
                             .createAutomatedHearingManagement(authorisation, caseData, order.getValue()
                                 .getManageOrderHearingDetails()));
                     }
+                    order.getValue().setIsAutoHearingReqPending(No);
                 });
                 caseDataMap.put("orderCollection", caseData.getOrderCollection());
             }
