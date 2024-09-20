@@ -61,6 +61,13 @@ public interface HearingApiClient {
         @RequestBody Map<String,String> caseIdWithRegionIdMap
     );
 
+    @PostMapping(path = "/hearings-by-list-of-caseids-without-venue")
+    List<Hearings> getHearingsForAllCaseIdsWithCourtVenue(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody List<String> caseIds
+    );
+
     @PostMapping(value = "/automated-hearing", consumes = "application/json")
     ResponseEntity<AutomatedHearingResponse> createAutomatedHearing(
         @RequestHeader("Authorization") String authorisation,

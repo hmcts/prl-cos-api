@@ -21,14 +21,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
-import uk.gov.hmcts.reform.prl.services.BulkPrintService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -40,11 +35,9 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -53,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LIST_ON_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService.CONFIRMATION_BODY_WITH_NOTICE;
+import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService.CONFIRMATION_BODY;
 import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService.CONFIRMATION_HEADER;
 
 @Slf4j
@@ -74,8 +67,6 @@ public class Fl401ListOnNoticeServiceTest {
     @Mock
     UserService userService;
 
-    @Mock
-    EmailService emailService;
 
     @Mock
     AllTabServiceImpl allTabService;
@@ -83,17 +74,10 @@ public class Fl401ListOnNoticeServiceTest {
     @Mock
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
-    @Mock
-    private ListOnNoticeService listOnNoticeService;
-
     private CaseData caseData;
     private CallbackRequest callbackRequest;
 
-    @Mock
-    private DgsService dgsService;
 
-    @Mock
-    private BulkPrintService bulkPrintService;
 
     @Before
     public void setUp() {
@@ -191,11 +175,6 @@ public class Fl401ListOnNoticeServiceTest {
             .build();
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        doNothing().when(emailService).send(
-                 anyString(),
-                 any(),
-                 any(),
-                 any());
 
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
             .sendNotification(stringObjectMap, authToken);
@@ -222,11 +201,6 @@ public class Fl401ListOnNoticeServiceTest {
             .build();
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        doNothing().when(emailService).send(
-            anyString(),
-            any(),
-            any(),
-            any());
 
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
             .sendNotification(stringObjectMap, authToken);
@@ -253,19 +227,6 @@ public class Fl401ListOnNoticeServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
-        when(dgsService.generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyMap()
-        )).thenReturn(GeneratedDocumentInfo.builder().build());
-        when(bulkPrintService.send(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyList(),
-            anyString()
-        )).thenReturn(uuid);
 
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
             .sendNotification(stringObjectMap, authToken);
@@ -294,7 +255,7 @@ public class Fl401ListOnNoticeServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
             .sendNotification(stringObjectMap, authToken);
-        assertEquals(CONFIRMATION_BODY_WITH_NOTICE, Objects.requireNonNull(response.getBody()).getConfirmationBody());
+        assertEquals(CONFIRMATION_BODY, Objects.requireNonNull(response.getBody()).getConfirmationBody());
 
     }
 }

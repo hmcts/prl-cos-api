@@ -98,7 +98,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedInvalidClient() throws Exception {
+    public void testHandleSubmittedInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -114,7 +114,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleAboutToStartInvalidClient() throws Exception {
+    public void testHandleAboutToStartInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -130,7 +130,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitInvalidClient() throws Exception {
+    public void testHandleAboutToSubmitInvalidClient() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -165,7 +165,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void handleAboutToSubmit() throws Exception {
+    public void handleAboutToSubmit() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest
             .builder()
@@ -196,7 +196,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForSoaValidation() throws Exception {
+    public void testExceptionForSoaValidation() {
 
         final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()

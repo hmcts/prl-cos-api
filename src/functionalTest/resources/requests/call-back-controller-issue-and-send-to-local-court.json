@@ -2,8 +2,54 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "caseTypeOfApplication": "C100"
-
+      "caseTypeOfApplication": "C100",
+      "courtList": {
+        "value": {
+          "code": "234946:",
+          "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+        },
+        "list_items": null
+      },
+      "allegationsOfHarmYesNo": "Yes",
+      "newAllegationsOfHarmYesNo": "Yes",
+      "children": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "firstName": "Test",
+            "lastName": "Child",
+            "dateOfBirth": "2000-10-10",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "orderAppliedFor": [
+              "childArrangementsOrder"
+            ],
+            "applicantsRelationshipToChild": "grandParent",
+            "otherApplicantsRelationshipToChild": null,
+            "respondentsRelationshipToChild": "mother",
+            "otherRespondentsRelationshipToChild": null,
+            "childLiveWith": [
+              "anotherPerson",
+              "respondent",
+              "applicant"
+            ],
+            "childrenKnownToLocalAuthority": null,
+            "childrenKnownToLocalAuthorityTextArea": null,
+            "childrenSubjectOfChildProtectionPlan": null,
+            "otherPersonWhoLivesWithChild": null,
+            "isChildCurrentAddressKnown": "Yes",
+            "childUnsupervisedTime": "No",
+            "childContactFromOtherRecipients": "No",
+            "relationshipToApplicant": null,
+            "relationshipToRespondent": null
+          }
+        }
+      ]
+    },
+    "allegationOfHarm": {
+      "typesOfHarm": "Domestic abuse, child abduction",
+      "allegationsOfHarmYesNo": "Yes"
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
@@ -13,7 +59,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "CASE_ISSUED"
   },
   "case_details_before": {
     "callback_response_status": "string",
@@ -26,7 +72,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "JUDICIAL_REVIEW"
   },
   "event_id": "string"
 }

@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
@@ -127,7 +128,7 @@ public class LinkCitizenCaseService {
     private Map<String, Object> processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
                                                           YesOrNo isApplicant) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        if (partyId != null) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseDataUpdated.putAll(getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId));
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {

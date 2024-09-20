@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,7 @@ public class ChildDetailsRevised {
     private final String otherGender;
     private final List<OrderTypeEnum> orderAppliedFor;
     private final String parentalResponsibilityDetails;
+    private final DynamicList whoDoesTheChildLiveWith;
 
     private final YesOrNo isFinalOrderIssued;
 

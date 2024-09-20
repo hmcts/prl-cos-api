@@ -1,10 +1,10 @@
 {
   "miam_otherProceedings":"No",
   "miam_consent":"s",
-  "miam_attendance":"No",
+  "miam_attendance":"Yes",
   "miam_haveDocSigned":"Yes",
   "miam_mediatorDocument":"No",
-  "miam_validReason":"Yes",
+  "miam_validReason":"No",
   "miam_nonAttendanceReasons":[
     "none"
   ],

@@ -15,6 +15,7 @@ public enum EventErrorsEnum {
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),
     HEARING_URGENCY_ERROR("Add hearing urgency details"),
     MIAM_ERROR("Add MIAM details"),
+    MIAM_POLICY_UPGRADE_ERROR("Add MIAM details"),
     OTHER_PEOPLE_ERROR("Add the details about other people in the case"),
     OTHER_PEOPLE_REVISED_ERROR("Add the details about other people in the case"),
     ATTENDING_THE_HEARING_ERROR("Add details about attending the hearing"),

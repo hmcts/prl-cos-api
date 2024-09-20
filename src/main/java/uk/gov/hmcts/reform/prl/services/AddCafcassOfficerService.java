@@ -39,7 +39,8 @@ public class AddCafcassOfficerService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             resetExistingCafcassOfficerDetailsChildRevised(caseData);
             for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
                 caseDataUpdated.putAll(populateCafcassOfficerRevisedForCA(caseData, cafcassOfficer));

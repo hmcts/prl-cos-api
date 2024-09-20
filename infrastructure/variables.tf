@@ -1,14 +1,14 @@
 variable "common_tags" {
-  type = map
+  type = map(any)
 }
 
 variable "product" {
-  type = string
+  type    = string
   default = "prl"
 }
 
 variable "component" {
-  type = string
+  type    = string
   default = "cos"
 }
 

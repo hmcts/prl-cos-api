@@ -95,7 +95,7 @@ public class FeesAndPaymentCitizenControllerTest {
     public void createPaymentRequestSuccessfully() throws Exception {
         //Given
         CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
-                .builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(REDIRECT_URL)
+                .builder().caseId(TEST_CASE_ID).returnUrl(REDIRECT_URL)
                 .build();
         CallbackRequest callbackRequest = CallbackRequest
                 .builder()
@@ -129,7 +129,7 @@ public class FeesAndPaymentCitizenControllerTest {
     public void createPaymentRequestWithInvalidClient() throws Exception {
         //Given
         CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
-                .builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(REDIRECT_URL)
+                .builder().caseId(TEST_CASE_ID).returnUrl(REDIRECT_URL)
                 .build();
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
