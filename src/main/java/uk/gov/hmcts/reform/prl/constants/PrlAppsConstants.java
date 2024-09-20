@@ -1031,6 +1031,4 @@ public class PrlAppsConstants {
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
 
-    public static final String LINE_SEPERATOR = "\n\n\n" + "  s  " + "\n\n\n";
-
 }
