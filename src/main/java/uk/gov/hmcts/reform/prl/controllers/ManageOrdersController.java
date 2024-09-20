@@ -204,8 +204,13 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-
-            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+            try {
+                log.info("Initiating court seal for the orders");
+                manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+            } catch (Exception e) {
+                log.info("Error while adding court seal to the order {}", (Object) e.getStackTrace());
+                log.error(e.getMessage());
+            }
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("Preparing to send notifications to parties");
