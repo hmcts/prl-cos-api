@@ -6,8 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.closingcase.CaseClosingReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -55,6 +58,12 @@ public class ClosingCaseServiceTest {
     private ApplicationsTabServiceHelper applicationsTabServiceHelper;
     @Mock
     private CaseSummaryTabService caseSummaryTab;
+    @Mock
+    private RoleAssignmentApi roleAssignmentApi;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private SystemUserService systemUserService;
 
     @InjectMocks
     ClosingCaseService closingCaseService;

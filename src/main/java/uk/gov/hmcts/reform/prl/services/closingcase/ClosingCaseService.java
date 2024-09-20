@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ClosingCaseFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -20,11 +24,18 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAssignmentDeleteQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +74,18 @@ public class ClosingCaseService {
     private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
 
     private final CaseSummaryTabService caseSummaryTab;
+
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
+
+    public static final List<String> ROLE_CATEGORIES = List.of(
+        "JUDICIAL",
+        "LEGAL_OPERATIONS",
+        "CTSC",
+        "ADMIN"
+    );
 
 
     public Map<String, Object> prePopulateChildData(CallbackRequest callbackRequest) {
@@ -167,11 +190,63 @@ public class ClosingCaseService {
                                             ));
         if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
             || getChildrenMultiSelectListForFinalDecisions(caseData).isEmpty()) {
+            unAllocateCourtStaffs(caseData, caseDataUpdated);
             markTheCaseAsClosed(caseDataUpdated, finalDecisionResolutionDate, caseData);
         }
         updateChildDetailsInTab(caseDataUpdated, caseData);
         cleanUpClosingCaseChildOptions(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private void unAllocateCourtStaffs(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String s2sToken = authTokenGenerator.generate();
+        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+            .attributes(QueryAttributes.builder()
+                            .caseId(List.of(Long.toString(caseData.getId())))
+                            .build())
+            .validAt(LocalDateTime.now())
+            .build();
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
+            systemAuthorisation,
+            s2sToken,
+            null,
+            roleAssignmentQueryRequest
+        );
+        log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
+        if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
+            && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
+            List<String> roleCategories = new ArrayList<>();
+            roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
+                .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
+            roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+                .attributes(QueryAttributes.builder()
+                                .caseId(List.of(Long.toString(caseData.getId())))
+                                .build())
+                .roleCategory(roleCategories)
+                .validAt(LocalDateTime.now())
+                .build();
+            List<RoleAssignmentQueryRequest> queryRequests = new ArrayList<>();
+            queryRequests.add(roleAssignmentQueryRequest);
+            RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
+                .queryRequests(queryRequests)
+                .build();
+            log.info("** RoleAssignmentDeleteQueryRequest " + roleAssignmentDeleteQueryRequest);
+            String status = roleAssignmentApi.deleteQueryRoleAssignments(
+                systemAuthorisation,
+                s2sToken,
+                null,
+                roleAssignmentDeleteQueryRequest
+            );
+            log.info("** RoleAssignmentDeleteQueryResponse " + status);
+            if (Integer.valueOf(status).equals(HttpStatus.OK.value())) {
+                caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
+                caseDataUpdated.put("legalAdviserList", caseData.getLegalAdviserList().toBuilder()
+                    .value(null)
+                    .build());
+            }
+        }
     }
 
     private static void updateChildDetails(Map<String, Object> caseDataUpdated,
@@ -190,8 +265,6 @@ public class ClosingCaseService {
                     children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                 }
             });
-            log.info("children ==> " + children);
-            log.info("caseData.getNewChildDetails() ==> " + caseData.getNewChildDetails());
             caseDataUpdated.put(NEW_CHILDREN, children);
         } else if (caseData.getChildren() != null) {
             List<Element<Child>> children = caseData.getChildren();
@@ -205,8 +278,6 @@ public class ClosingCaseService {
                     children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                 }
             });
-            log.info("children ==> " + children);
-            log.info("caseData.getChildren() ==> " + caseData.getChildren());
             caseDataUpdated.put(CHILDREN, children);
         } else if (caseData.getApplicantChildDetails() != null) {
             List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
@@ -220,8 +291,6 @@ public class ClosingCaseService {
                     children.set(children.indexOf(child), element(child.getId(), updatedChildDetails));
                 }
             });
-            log.info("children ==> " + children);
-            log.info("caseData.getApplicantChildDetails() ==> " + caseData.getApplicantChildDetails());
             caseDataUpdated.put(APPLICANT_CHILD_DETAILS, children);
         }
     }
@@ -294,9 +363,9 @@ public class ClosingCaseService {
     }
 
     private void getChildList(List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren,
-                                   DynamicMultiselectListElement dynamicMultiselectListElement,
-                                   UUID childId, String childName,
-                                   String finalDecisionResolutionReason) {
+                              DynamicMultiselectListElement dynamicMultiselectListElement,
+                              UUID childId, String childName,
+                              String finalDecisionResolutionReason) {
         if ((ObjectUtils.isEmpty(dynamicMultiselectListElement)
             && StringUtils.isEmpty(finalDecisionResolutionReason))
             || (ObjectUtils.isNotEmpty(dynamicMultiselectListElement)
