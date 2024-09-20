@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_CONFIRMATION_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_CONFIRMATION_HEADER;
@@ -107,7 +108,7 @@ public class StatementOfServiceController {
             );
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 SOS_CONFIRMATION_HEADER).confirmationBody(
-                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? SOS_CONFIRMATION_BODY_PREFIX : null
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? SOS_CONFIRMATION_BODY_PREFIX : EMPTY_SPACE_STRING
             ).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
