@@ -21,11 +21,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_CONFIRMATION_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_CONFIRMATION_HEADER;
@@ -99,9 +101,13 @@ public class StatementOfServiceController {
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 SOS_CONFIRMATION_HEADER).confirmationBody(
-                SOS_CONFIRMATION_BODY_PREFIX
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? SOS_CONFIRMATION_BODY_PREFIX : null
             ).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
