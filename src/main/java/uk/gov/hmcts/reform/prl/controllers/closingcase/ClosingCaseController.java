@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.closingcase;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,11 +47,6 @@ public class ClosingCaseController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("/closing-case/pre-populate-child-data ===>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(closingCaseService
                           .prePopulateChildData(callbackRequest))
@@ -72,11 +66,6 @@ public class ClosingCaseController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("/closing-case/mid-event ===>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(closingCaseService.populateSelectedChildWithFinalOutcome(callbackRequest)).build();
         } else {
@@ -94,11 +83,6 @@ public class ClosingCaseController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("/closing-case/validate-child-details ===>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(callbackRequest.getCaseDetails().getData())
                 .errors(closingCaseService.validateChildDetails(callbackRequest)).build();
@@ -117,11 +101,6 @@ public class ClosingCaseController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("/closing-case/about-to-submit ===>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(closingCaseService.closingCaseForChildren(callbackRequest)).build();
         } else {

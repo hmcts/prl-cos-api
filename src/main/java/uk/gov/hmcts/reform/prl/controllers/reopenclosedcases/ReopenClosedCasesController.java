@@ -1,7 +1,6 @@
 
 package uk.gov.hmcts.reform.prl.controllers.reopenclosedcases;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,11 +51,6 @@ public class ReopenClosedCasesController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("/reopen-case/about-to-submit ===>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(reopenClosedCasesService.reopenClosedCases(callbackRequest)).build();
         } else {
