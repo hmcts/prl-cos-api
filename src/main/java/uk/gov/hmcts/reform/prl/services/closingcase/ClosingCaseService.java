@@ -190,7 +190,6 @@ public class ClosingCaseService {
                                             ));
         if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
             || getChildrenMultiSelectListForFinalDecisions(caseData).isEmpty()) {
-            unAllocateCourtStaffs(caseData, caseDataUpdated);
             markTheCaseAsClosed(caseDataUpdated, finalDecisionResolutionDate, caseData);
         }
         updateChildDetailsInTab(caseDataUpdated, caseData);
