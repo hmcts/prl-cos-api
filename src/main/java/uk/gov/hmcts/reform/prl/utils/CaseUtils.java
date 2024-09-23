@@ -974,4 +974,27 @@ public class CaseUtils {
             && null != createPaymentRequest.getFeeType()
             && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
+
+    public static List<String> getSelectedPartyIds(String caseTypeOfApplication,
+                                                   List<Element<PartyDetails>> parties,
+                                                   PartyDetails fl401Party,
+                                                   List<DynamicMultiselectListElement> selectedParties) {
+        //FL401
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return selectedParties.stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .filter(code -> fl401Party.getPartyId().toString().equals(code))
+                .toList();
+        }
+        //C100
+        return nullSafeCollection(parties)
+            .stream()
+            .map(Element::getId)
+            .filter(id ->
+                        selectedParties.stream().anyMatch(
+                            party -> id.toString().equals(party.getCode()))
+            )
+            .map(Objects::toString)
+            .toList();
+    }
 }
