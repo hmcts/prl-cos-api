@@ -16,9 +16,9 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.ServiceOfDocumentsCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -141,8 +141,8 @@ public class ServiceOfDocumentsService {
             //Personal service
             if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
                 String servedBy = CaseUtils.isCitizenCase(caseData)
-                    ? caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().getDisplayedValue()
-                    : caseData.getServiceOfApplication().getSoaServingRespondentsOptions().getDisplayedValue();
+                    ? caseData.getServiceOfDocuments().getSodCitizenServingRespondentsOptions().getDisplayedValue()
+                    : caseData.getServiceOfDocuments().getSodSolicitorServingRespondentsOptions().getDisplayedValue();
                 unServedPack = unServedPack.toBuilder()
                     .servedBy(servedBy)
                     .isPersonalService(true)
@@ -287,15 +287,13 @@ public class ServiceOfDocumentsService {
                                                   SodPack unServedPack,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                   List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+        if (SodCitizenServingRespondentsEnum.unrepresentedApplicant
             .getDisplayedValue().equals(unServedPack.getServedBy())) {
             //unrepresented applicant lip
             handlePersonalServiceUnRepApplicant(authorisation, caseData, unServedPack.getDocuments(), emailNotificationDetails, bulkPrintDetails);
-        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+        } else if (SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .getDisplayedValue().equals(unServedPack.getServedBy())) {
             //applicant solicitor
-        } else {
-            //court admin/bailiff
         }
     }
 
@@ -651,8 +649,8 @@ public class ServiceOfDocumentsService {
             "sodAdditionalRecipientsList",
             "sodDocumentsCheckOptions",
             "soaServeToRespondentOptions",
-            "soaServingRespondentsOptions",
-            "soaCitizenServingRespondentsOptions",
+            "sodSolicitorServingRespondentsOptions",
+            "sodCitizenServingRespondentsOptions",
             "soaRecipientsOptions",
             "soaOtherPeoplePresentInCaseFlag",
             "soaOtherParties",

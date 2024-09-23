@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.AdditionalRecipients;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.ServiceOfDocumentsCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
@@ -39,6 +41,9 @@ public class ServiceOfDocuments {
 
     @JsonProperty("sodDocumentsCheckOptions")
     private ServiceOfDocumentsCheckEnum sodDocumentsCheckOptions;
+
+    private final SodSolicitorServingRespondentsEnum sodSolicitorServingRespondentsOptions;
+    private final SodCitizenServingRespondentsEnum sodCitizenServingRespondentsOptions;
 
     private final SodPack sodUnServedPack;
 
