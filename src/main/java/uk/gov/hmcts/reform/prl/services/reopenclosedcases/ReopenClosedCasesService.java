@@ -89,7 +89,7 @@ public class ReopenClosedCasesService {
         caseDataUpdated.put(FINAL_CASE_CLOSED_DATE, null);
         caseDataUpdated.put(CASE_CLOSED, null);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put("reopenState", caseData.getChangeStatusOptions().toString());
+        caseDataUpdated.put("reopenStateTo", caseData.getChangeStatusOptions().toString());
         caseData = caseData.toBuilder()
             .finalCaseClosedDate(null)
             .state(ValidReopenClosedCasesStatusEnum.CASE_ISSUED.equals(caseData.getChangeStatusOptions())

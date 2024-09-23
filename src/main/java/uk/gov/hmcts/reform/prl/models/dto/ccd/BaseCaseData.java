@@ -75,7 +75,7 @@ public class BaseCaseData {
 
     //PRL-6262 - Reopening closed cases
     private ValidReopenClosedCasesStatusEnum changeStatusOptions;
-    private String reopenState;
+    private String reopenStateTo;
 
 
 }
