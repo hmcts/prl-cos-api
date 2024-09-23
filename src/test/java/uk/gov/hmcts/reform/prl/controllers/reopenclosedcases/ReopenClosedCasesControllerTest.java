@@ -29,14 +29,14 @@ public class ReopenClosedCasesControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S_2_S_TOKEN = "s2s AuthToken";
 
 
     @Test
     public void testClosingCaseAboutToSubmit() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        reopenClosedCasesController.reopenClosedCases(authToken, s2sToken, CallbackRequest.builder().build());
+        reopenClosedCasesController.reopenClosedCases(AUTH_TOKEN, S_2_S_TOKEN, CallbackRequest.builder().build());
         verify(reopenClosedCasesService, times(1)).reopenClosedCases(Mockito.any(CallbackRequest.class));
     }
 
@@ -44,10 +44,12 @@ public class ReopenClosedCasesControllerTest {
     @Test
     public void testClosingCaseAboutToSubmitException() {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
         Assert.assertThrows(RuntimeException.class,
-                            () -> reopenClosedCasesController.reopenClosedCases(authToken,
-                                                                                 s2sToken,
-                                                                                 CallbackRequest.builder().build()
+                            () -> reopenClosedCasesController.reopenClosedCases(
+                                AUTH_TOKEN,
+                                S_2_S_TOKEN,
+                                callbackRequest
                             ));
     }
 }
