@@ -218,6 +218,7 @@ public class ServiceOfApplicationService {
     public static final String SEND_GRID_TEMPLATE = "sendGridTemplate";
     public static final String CONFIRMATION_BODY = "confirmationBody";
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
+    public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -4048,6 +4049,13 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<String> errorList = new ArrayList<>();
+        if (YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            && ObjectUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties())
+            && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())
+            && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
+            errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+        }
 
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
