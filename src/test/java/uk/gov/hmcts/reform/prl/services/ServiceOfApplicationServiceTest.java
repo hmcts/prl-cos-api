@@ -3420,7 +3420,29 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
         assertNull(response.getErrors());
+    }
 
+    @Test
+    public void checkErrorMessageForSoaParties_whenNoPeopleSelected() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .soaOtherParties(DynamicMultiSelectList.builder().build())
+            .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
+            callbackRequest
+        );
+        assertEquals(response.getErrors().size(), 1);
     }
 
     @Test
