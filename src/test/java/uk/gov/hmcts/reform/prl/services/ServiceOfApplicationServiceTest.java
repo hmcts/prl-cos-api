@@ -2547,6 +2547,10 @@ public class ServiceOfApplicationServiceTest {
                                                                  .partyIds(partyIds)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIds)
+                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                  .build())
                                       .applicationServedYesNo(Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
@@ -2591,6 +2595,10 @@ public class ServiceOfApplicationServiceTest {
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIds)
+                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                  .build())
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
                                                                   .personalServiceBy(unrepresentedApplicant.toString())
                                                                   .build())
