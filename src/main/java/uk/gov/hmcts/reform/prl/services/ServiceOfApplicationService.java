@@ -4050,14 +4050,13 @@ public class ServiceOfApplicationService {
         log.info("Soa serve to respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
         log.info("other parties {}", caseData.getServiceOfApplication().getSoaOtherParties());
         log.info("soa cafcass cymru options {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
-        log.info("Soa cafcass options {}", caseData.getManageOrders().getCafcassServedOptions());
         log.info("Soa LA options {}", caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo());
 
         if (YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (ObjectUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties())
             || CollectionUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties().getValue()))
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-            && !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions())
+            && (null == caseData.getManageOrders() || !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions()))
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
             errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
         }
