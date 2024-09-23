@@ -878,8 +878,6 @@ public class PrlAppsConstants {
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
-        + "The court will contact the people in the case with details of the first court hearing. "
-        + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
@@ -1032,4 +1030,5 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
 }
