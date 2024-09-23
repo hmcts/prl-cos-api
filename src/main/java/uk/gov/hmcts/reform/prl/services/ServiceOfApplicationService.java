@@ -4058,6 +4058,9 @@ public class ServiceOfApplicationService {
             && isCafcasOptedToBeServed(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
             errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
         }
         log.info("error list {}", errorList);
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
