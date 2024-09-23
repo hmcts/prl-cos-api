@@ -107,7 +107,7 @@ public class StatementOfServiceController {
             );
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 SOS_CONFIRMATION_HEADER).confirmationBody(
-                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? SOS_CONFIRMATION_BODY_PREFIX : null
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? SOS_CONFIRMATION_BODY_PREFIX : "\n\n"
             ).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
