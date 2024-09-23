@@ -4046,8 +4046,6 @@ public class ServiceOfApplicationService {
         );
 
         log.info("inside soaValidation");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         List<String> errorList = new ArrayList<>();
         log.info("Soa serve to respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
         log.info("other parties {}", caseData.getServiceOfApplication().getSoaOtherParties());
@@ -4101,7 +4099,7 @@ public class ServiceOfApplicationService {
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
+            .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
