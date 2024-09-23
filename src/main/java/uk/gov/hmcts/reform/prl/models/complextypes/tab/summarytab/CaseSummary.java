@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab;
 
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarm;
@@ -23,6 +24,7 @@ import java.util.List;
 @Data
 public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
+    private final YesOrNo isRefugeCase;
     private final CaseStatus caseStatus;
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
