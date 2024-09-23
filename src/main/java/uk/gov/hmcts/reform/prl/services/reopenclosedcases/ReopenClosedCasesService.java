@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReopenClosedCasesService {
 
+    public static final String REOPEN_STATE_TO = "reopenStateTo";
     private final ObjectMapper objectMapper;
     private final ClosingCaseService closingCaseService;
     private final CaseSummaryTabService caseSummaryTab;
@@ -89,7 +90,7 @@ public class ReopenClosedCasesService {
         caseDataUpdated.put(FINAL_CASE_CLOSED_DATE, null);
         caseDataUpdated.put(CASE_CLOSED, null);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put("reopenStateTo", caseData.getChangeStatusOptions().toString());
+        caseDataUpdated.put(REOPEN_STATE_TO, caseData.getChangeStatusOptions().toString());
         caseData = caseData.toBuilder()
             .finalCaseClosedDate(null)
             .state(ValidReopenClosedCasesStatusEnum.CASE_ISSUED.equals(caseData.getChangeStatusOptions())

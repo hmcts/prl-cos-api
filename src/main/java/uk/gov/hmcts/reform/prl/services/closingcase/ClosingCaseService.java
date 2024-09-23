@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILD_DETAILS_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.services.reopenclosedcases.ReopenClosedCasesService.REOPEN_STATE_TO;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -300,6 +301,7 @@ public class ClosingCaseService {
     private void markTheCaseAsClosed(Map<String, Object> caseDataUpdated, String finalDecisionResolutionDate, CaseData caseData) {
         caseDataUpdated.put(FINAL_CASE_CLOSED_DATE, finalDecisionResolutionDate);
         caseDataUpdated.put(CASE_CLOSED, YesOrNo.Yes);
+        caseDataUpdated.put(REOPEN_STATE_TO, null);
         caseData = caseData.toBuilder()
             .finalCaseClosedDate(finalDecisionResolutionDate)
             .state(State.ALL_FINAL_ORDERS_ISSUED)
