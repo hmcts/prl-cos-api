@@ -197,7 +197,7 @@ public class ClosingCaseService {
         return caseDataUpdated;
     }
 
-    private void unAllocateCourtStaffs(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public void unAllocateCourtStaffs(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String s2sToken = authTokenGenerator.generate();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
@@ -241,9 +241,12 @@ public class ClosingCaseService {
             log.info("** RoleAssignmentDeleteQueryResponse " + status);
             if (Integer.valueOf(status).equals(HttpStatus.OK.value())) {
                 caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-                caseDataUpdated.put("legalAdviserList", caseData.getLegalAdviserList().toBuilder()
+
+                caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
+                    && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
+                    ? caseData.getLegalAdviserList().toBuilder()
                     .value(null)
-                    .build());
+                    .build() : caseData.getLegalAdviserList());
             }
         }
     }

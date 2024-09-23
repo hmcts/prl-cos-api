@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.closingcase.CaseClosingReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -22,17 +24,24 @@ import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReason
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.DateFinalDecisionWasMade;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAssignmentDeleteQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -477,6 +486,41 @@ public class ClosingCaseServiceTest {
 
         closingCaseService.updateChildDetailsInTab(caseDataUpdated, caseData);
         assertTrue(caseDataUpdated.containsKey(CHILD_DETAILS_REVISED_TABLE));
+    }
+
+    @Test
+    public void testUnAllocateCourtStaffs() {
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleCategory("PROFESSIONAL");
+        roleAssignmentResponse.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8a");
+        RoleAssignmentResponse roleAssignmentResponse1 = new RoleAssignmentResponse();
+        roleAssignmentResponse1.setRoleCategory("LEGAL_OPERATIONS");
+        roleAssignmentResponse1.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8b");
+        RoleAssignmentResponse roleAssignmentResponse2 = new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleCategory("JUDICIAL");
+        roleAssignmentResponse2.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8c");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()
+            .roleAssignmentResponse(List.of(roleAssignmentResponse, roleAssignmentResponse1, roleAssignmentResponse2))
+            .build();
+        when(roleAssignmentApi.queryRoleAssignments(anyString(), anyString(), any(), any(
+            RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
+
+        when(roleAssignmentApi.deleteQueryRoleAssignments(anyString(), anyString(), any(),
+            any(RoleAssignmentDeleteQueryRequest.class))).thenReturn("200");
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .legalAdviserList(DynamicList.builder().value(DynamicListElement.EMPTY).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        closingCaseService.unAllocateCourtStaffs(caseData, caseDataUpdated);
+        assertTrue(caseDataUpdated.containsKey("allocatedJudge"));
+        assertTrue(caseDataUpdated.containsKey("legalAdviserList"));
     }
 
 }
