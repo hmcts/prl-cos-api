@@ -4048,19 +4048,18 @@ public class ServiceOfApplicationService {
         log.info("inside soaValidation");
         List<String> errorList = new ArrayList<>();
         log.info("Soa serve to respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
-        log.info("other parties {}", caseData.getServiceOfApplication().getSoaOtherParties());
+        log.info("other parties {}", isOtherPartySelectedToServe(caseData));
         log.info("soa cafcass cymru options {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
         log.info("Soa LA options {}", caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo());
-
+        log.info("cafcass selected to serve {}", isCafcasOptedToBeServed(caseData));
         if (YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
-            && (ObjectUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties())
-            || CollectionUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties().getValue()))
+            && isOtherPartySelectedToServe(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-            && (null == caseData.getManageOrders() || !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions()))
+            && isCafcasOptedToBeServed(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
             errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
         }
-
+        log.info("error list {}", errorList);
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -4100,6 +4099,15 @@ public class ServiceOfApplicationService {
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(callbackRequest.getCaseDetails().getData())
             .build();
+    }
+
+    private boolean isCafcasOptedToBeServed(CaseData caseData) {
+        return null == caseData.getManageOrders() || !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions());
+    }
+
+    private boolean isOtherPartySelectedToServe(CaseData caseData) {
+        return ObjectUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties())
+            || CollectionUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties().getValue());
     }
 
     public List<Document> getCoverLetters(String authorization,
