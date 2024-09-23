@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGe
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.RefugeCaseGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.TypeOfApplicationGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
@@ -49,6 +50,7 @@ public class CaseSummaryTabService implements TabService {
     private final DateOfSubmissionGenerator dateOfSubmissionGenerator;
     private final ObjectMapper objectMapper;
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
+    private final RefugeCaseGenerator refugeCaseGenerator;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -81,6 +83,7 @@ public class CaseSummaryTabService implements TabService {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
             return List.of(allocatedJudgeDetailsGenerator,
+                           refugeCaseGenerator,
                     caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
                     specialArrangementsGenerator, dateOfSubmissionGenerator);
 
@@ -88,6 +91,7 @@ public class CaseSummaryTabService implements TabService {
 
         return List.of(
                 allocatedJudgeDetailsGenerator,
+                refugeCaseGenerator,
                 caseStatusGenerator,
                 confidentialDetailsGenerator,
                 orderAppliedForGenerator,
