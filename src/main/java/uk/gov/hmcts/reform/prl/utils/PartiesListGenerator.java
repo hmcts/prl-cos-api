@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -13,22 +14,34 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Slf4j
 public class PartiesListGenerator {
     private final ElementUtils elementUtils;
+
+    public static final String APPLICANT_SOLICITOR = " (Applicant solicitor)";
+    public static final String RESPONDENT_SOLICITOR = " (Respondent solicitor)";
 
     public DynamicList buildPartiesList(CaseData caseData, List<DynamicListElement> courtList) {
 
         List<DynamicListElement> partiesList = new ArrayList<>();
 
+        Optional<DynamicListElement> court = courtList.stream()
+            .filter(element -> element.getCode().equalsIgnoreCase(caseData.getCourtName()))
+            .findFirst();
+
         partiesList.addAll(buildApplicantRepresentativeList(caseData));
         partiesList.addAll(buildRespondentRepresentativeList(caseData));
-        partiesList.addAll(courtList);
+        partiesList.add(DynamicListElement.builder()
+                            .label(court.isPresent() ? court.get().getLabel() : caseData.getCourtName())
+                            .code(court.isPresent() ? court.get().getCode() : caseData.getCourtName())
+                            .build());
 
         return DynamicList.builder().value(DynamicListElement.EMPTY).listItems(partiesList)
             .build();
@@ -42,12 +55,14 @@ public class PartiesListGenerator {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             if (applicants != null && !applicants.isEmpty()) {
                 Map<String, String> applicantSolicitors = applicants.stream()
+                    .filter(applicant -> !applicant.getValue().getRepresentativeFullNameForCaseFlags().isBlank())
                     .collect(
                     Collectors.toMap(
                         party -> party.getId().toString(),
-                        party -> party.getValue().getRepresentativeFullNameForCaseFlags()
+                        party -> party.getValue().getRepresentativeFullNameForCaseFlags().concat(APPLICANT_SOLICITOR)
                     ));
 
+                log.info("Applicant solicitors Map<<<<<<<<>>>>>>> {}", applicantSolicitors);
                 for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
                     parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
                 }
@@ -56,7 +71,8 @@ public class PartiesListGenerator {
             PartyDetails fl401Applicant = caseData.getApplicantsFL401();
             if (fl401Applicant != null && !fl401Applicant.getSolicitorEmail().isEmpty() && !fl401Applicant.getRepresentativeFirstName().isEmpty()
                 && !fl401Applicant.getRepresentativeLastName().isEmpty()) {
-                String solicitorName = fl401Applicant.getRepresentativeFirstName() + " " + fl401Applicant.getRepresentativeLastName();
+                String solicitorName = fl401Applicant.getRepresentativeFirstName()
+                    + " " + fl401Applicant.getRepresentativeLastName() + RESPONDENT_SOLICITOR;
                 String solicitorEmailAddress = fl401Applicant.getSolicitorEmail();
                 parties.add(DynamicListElement.builder().code(solicitorEmailAddress).label(solicitorName).build());
             }
