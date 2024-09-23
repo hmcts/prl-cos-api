@@ -344,7 +344,9 @@ public class ManageDocumentsService {
 
     public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         //Setting this flag for WA task
-        if (quarantineLegalDoc.getIsConfidential() != null || quarantineLegalDoc.getIsRestricted() != null) {
+        if (userRole.equals(CITIZEN)
+            || quarantineLegalDoc.getIsConfidential() != null
+            || quarantineLegalDoc.getIsRestricted() != null) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
@@ -423,7 +425,7 @@ public class ManageDocumentsService {
                 }
 
             } else {
-                throw new IllegalStateException("Failed to move document to confidential tab please retry");
+                log.info("since the document name starts with confidential so its not renamed");
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to move document to confidential tab please retry", e);

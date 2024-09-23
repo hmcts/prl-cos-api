@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -234,7 +235,9 @@ public class CitizenPartyDetailsMapper {
             dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         }
-        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Document);
+        c100RespondentSolicitorService.populateConfidentialAndMiscDataMap(updatedPartyElement, dataMapForC8Document,
+                                                                          CITIZEN
+        );
 
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
@@ -764,6 +767,7 @@ public class CitizenPartyDetailsMapper {
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
             c100RebuildChildDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+
             updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
 

@@ -227,6 +227,8 @@ public class EditAndApproveDraftOrderController {
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
+
+
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -238,6 +240,7 @@ public class EditAndApproveDraftOrderController {
             WA_ORDER_NAME_JUDGE_APPROVED,
             draftAnOrderService.getApprovedDraftOrderNameForWA(caseData)
         );
+
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
@@ -417,6 +420,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
