@@ -4044,14 +4044,8 @@ public class ServiceOfApplicationService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         log.info("inside soaValidation");
         List<String> errorList = new ArrayList<>();
-        log.info("Soa serve to respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
-        log.info("other parties {}", isOtherPartySelectedToServe(caseData));
-        log.info("soa cafcass cymru options {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
-        log.info("Soa LA options {}", caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo());
-        log.info("cafcass selected to serve {}", isCafcasOptedToBeServed(caseData));
         if (YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && isOtherPartySelectedToServe(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
@@ -4062,7 +4056,6 @@ public class ServiceOfApplicationService {
                 .errors(errorList)
                 .build();
         }
-        log.info("error list {}", errorList);
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
