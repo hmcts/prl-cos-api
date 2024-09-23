@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -208,40 +209,47 @@ public class ServiceOfDocumentsService {
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
-
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         SodPack unServedPack = caseData.getServiceOfDocuments().getSodUnServedPack();
 
         //Send notifications if no check needed
         if (null != unServedPack
             && ServiceOfDocumentsCheckEnum.noCheck.equals(caseData.getServiceOfDocuments().getSodDocumentsCheckOptions())) {
-            if (unServedPack.isPersonalService()) {
-                //personal service
-                handlePersonalServiceOfDocuments(
-                    authorisation,
-                    caseData,
-                    unServedPack,
-                    emailNotificationDetails,
-                    bulkPrintDetails
-                );
-            } else {
-                //non-personal service
-                handleNonPersonalServiceOfDocuments(
-                    authorisation,
-                    caseData,
-                    unServedPack,
-                    emailNotificationDetails,
-                    bulkPrintDetails
-                );
+            List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+            if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                if (unServedPack.isPersonalService()) {
+                    //personal service
+                    handlePersonalServiceOfDocuments(
+                        authorisation,
+                        caseData,
+                        unServedPack,
+                        emailNotificationDetails,
+                        bulkPrintDetails
+                    );
+                } else {
+                    //non-personal service
+                    handleNonPersonalServiceOfDocuments(
+                        authorisation,
+                        caseData,
+                        unServedPack,
+                        emailNotificationDetails,
+                        bulkPrintDetails
+                    );
+                }
             }
             //other person
 
             //serve additional recipients
+
+            //Reset unserved packs
+            caseDataMap.put("sodUnServedPack", null);
+            //Update served documents
+            caseDataMap.put("servedDocumentsDetailsList",
+                            getUpdatedServedDocumentsDetailsList(caseData, unServedPack, emailNotificationDetails, bulkPrintDetails));
         }
 
         //Clean up the fields
-
+        cleanUpSelections(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -251,6 +259,27 @@ public class ServiceOfDocumentsService {
             caseDataMap
         );
         return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    private Object getUpdatedServedDocumentsDetailsList(CaseData caseData,
+                                                        SodPack unServedPack,
+                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                        List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        List<Element<ServedApplicationDetails>> servedDocumentsDetailsList =
+            CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())
+                ? caseData.getServiceOfDocuments().getServedDocumentsDetailsList()
+                : new ArrayList<>();
+
+        servedDocumentsDetailsList.add(element(ServedApplicationDetails.builder()
+                                                   .emailNotificationDetails(emailNotificationDetails)
+                                                   .bulkPrintDetails(bulkPrintDetails)
+                                                   .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
+                                                   .whoIsResponsible(unServedPack.getServedBy())
+                                                   .servedBy(unServedPack.getSubmittedBy())
+                                                   .servedAt(CaseUtils.getCurrentDate())
+                                                   .build()));
+
+        return servedDocumentsDetailsList;
     }
 
     private void handlePersonalServiceOfDocuments(String authorisation,
@@ -614,4 +643,25 @@ public class ServiceOfDocumentsService {
         ));
     }
 
+    public void cleanUpSelections(Map<String, Object> caseDataMap) {
+        List<String> sodFields = new ArrayList<>(List.of(
+            "sodDocumentsList",
+            "sodAdditionalDocumentsList",
+            "sodAdditionalRecipients",
+            "sodAdditionalRecipientsList",
+            "sodDocumentsCheckOptions",
+            "soaServeToRespondentOptions",
+            "soaServingRespondentsOptions",
+            "soaCitizenServingRespondentsOptions",
+            "soaRecipientsOptions",
+            "soaOtherPeoplePresentInCaseFlag",
+            "soaOtherParties",
+            "missingAddressWarningText",
+            "displayLegalRepOption"
+        ));
+
+        for (String field : sodFields) {
+            caseDataMap.remove(field);
+        }
+    }
 }
