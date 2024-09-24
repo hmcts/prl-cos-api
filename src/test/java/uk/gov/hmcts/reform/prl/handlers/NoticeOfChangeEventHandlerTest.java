@@ -306,7 +306,7 @@ public class NoticeOfChangeEventHandlerTest {
                 CaseInvite.class),
             anyString()
         )).thenReturn(
-            Document.builder().build());
+            List.of(Document.builder().build()));
         when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString())).thenReturn(UUID.randomUUID());
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);

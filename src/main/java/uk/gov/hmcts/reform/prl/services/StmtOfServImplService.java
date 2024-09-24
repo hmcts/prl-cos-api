@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SosUploadedByEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -52,8 +53,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE7;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
@@ -730,13 +731,16 @@ public class StmtOfServImplService {
                                                 ));
 
                 //cover letters
-                List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(
-                    authorization,
-                    caseData,
-                    respondent,
-                    isC100Case ? RE7_HINT : RE8_HINT,
-                    true
-                );
+                CaseInvite caseInvite = null;
+                if (!CaseUtils.hasDashboardAccess(respondent)
+                    && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    caseInvite = serviceOfApplicationService.getCaseInvite(respondent.getId(), caseData.getCaseInvites());
+                }
+                List<Document> coverLetters = serviceOfApplicationService.generateAccessCodeLetter(authorization,
+                                                                                                   caseData, respondent,
+                                                                                                   caseInvite,
+                                                                                                   isC100Case ? PRL_LET_ENG_C100_RE7
+                                                                                                       : PRL_LET_ENG_FL401_RE8);
 
                 documents.addAll(coverLetters);
 

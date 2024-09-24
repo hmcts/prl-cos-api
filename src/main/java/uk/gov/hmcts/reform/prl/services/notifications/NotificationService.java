@@ -44,9 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP13;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP14;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP15;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
@@ -122,7 +122,7 @@ public class NotificationService {
                     caseData,
                     C7_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
-                    AP13_HINT,
+                    PRL_LET_ENG_C100_AP13,
                     C7_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -140,7 +140,7 @@ public class NotificationService {
                     caseData,
                     C1A_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-                    AP14_HINT,
+                    PRL_LET_ENG_C100_AP14,
                     C1A_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -158,7 +158,7 @@ public class NotificationService {
                     caseData,
                     C1A_RESPONSE_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
-                    AP15_HINT,
+                    PRL_LET_ENG_C100_AP15,
                     C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -279,7 +279,7 @@ public class NotificationService {
                                                     PartyDetails applicant,
                                                     String respondentName) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("applicantName", applicant.getLabelForDynamicList());
+        dynamicData.put(APPLICANT_NAME, applicant.getLabelForDynamicList());
         dynamicData.put("solicitorName", applicant.getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -352,13 +352,9 @@ public class NotificationService {
                                                                             applicant.getValue().getAddress(),
                                                                             applicant.getValue().getLabelForDynamicList(),
                                                                             respondentName);
-                responseDocuments.addAll(serviceOfApplicationService
-                                             .getCoverLetters(
-                                                 authorisation,
-                                                 caseData,
-                                                 coverLetterTemplateHint,
-                                                 dataMap
-                                             ));
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                responseDocuments.addAll(serviceOfApplicationService.fetchCoverLetter(authorisation, coverLetterTemplateHint,
+                                                 dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh()));
                 //response document
                 responseDocuments.add(responseDocument);
 
