@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -561,7 +562,12 @@ public class CitizenPartyDetailsMapper {
             .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
-            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
+                ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5Years())
+            .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow()
+                ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
@@ -583,6 +589,22 @@ public class CitizenPartyDetailsMapper {
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if ("Yes".equalsIgnoreCase(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().getDisplayedValue())) {
+            return Yes;
+        } else {
+            return No;
+        }
+    }
+
+    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if (citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().equals(Yes)) {
+            return YesNoDontKnow.yes;
+        } else {
+            return YesNoDontKnow.no;
+        }
     }
 
     private CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
