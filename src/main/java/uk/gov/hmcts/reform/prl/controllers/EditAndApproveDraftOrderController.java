@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -95,6 +96,9 @@ public class EditAndApproveDraftOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
+                caseData = caseData.toBuilder()
+                    .state(State.fromValue(callbackRequest.getCaseDetails().getState()))
+                    .build();
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.getDraftOrderDynamicList(
                         caseData,
