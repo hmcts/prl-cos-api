@@ -534,7 +534,8 @@ public class NoticeOfChangePartiesService {
                 .solicitorOrg(Organisation.builder().organisationID(organisations.getOrganisationIdentifier()).organisationName(
                     organisations.getName()).build()).build();
         } else if (TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)) {
-            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build()).solicitorReference(null).build();
+            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build())
+                .solicitorReference(null).solicitorTelephone(null).build();
         }
         return partyDetails;
     }
