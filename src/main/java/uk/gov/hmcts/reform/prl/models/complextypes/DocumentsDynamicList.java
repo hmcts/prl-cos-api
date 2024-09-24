@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder(toBuilder = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentsDynamicList {
 
     private DynamicList documentsList;
