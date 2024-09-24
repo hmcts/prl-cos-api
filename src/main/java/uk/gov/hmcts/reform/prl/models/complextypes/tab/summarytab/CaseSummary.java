@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarm;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOf
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OrderAppliedFor;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
 
@@ -24,7 +24,7 @@ import java.util.List;
 @Data
 public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
-    private final YesOrNo isRefugeCase;
+    private final RefugeCase refugeCase;
     private final CaseStatus caseStatus;
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
