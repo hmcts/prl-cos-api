@@ -290,7 +290,7 @@ public class Fl401ListOnNoticeControllerTest {
         List<Element<HearingData>> listOnNoticeHearingDetails = Collections.singletonList(childElement);
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
