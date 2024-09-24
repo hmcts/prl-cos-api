@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
+import java.util.List;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -46,9 +48,11 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            List<String> errorList =
+                serviceOfApplicationService.validateRefugeCase(callbackRequest.getCaseDetails());
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
                                                                            .getSoaCaseFieldsMap(authorisation,
-                callbackRequest.getCaseDetails())).build();
+                callbackRequest.getCaseDetails())).errors(errorList).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
