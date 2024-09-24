@@ -123,7 +123,7 @@ public class StmtOfServImplService {
 
     public Map<String, Object> handleSosAboutToSubmit(CaseDetails caseDetails, String authorisation) {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback *** {}",
                  caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
         log.info("SOS request {}", caseData.getStatementOfService().getStmtOfServiceAddRecipient());
