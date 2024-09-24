@@ -146,7 +146,11 @@ public class ApplicantsChecker implements EventChecker {
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
-        fields.add(ofNullable(applicant.getLiveInRefuge()));
+        Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
+        fields.add(liveInRefuge);
+        if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
+            fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
+        }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
