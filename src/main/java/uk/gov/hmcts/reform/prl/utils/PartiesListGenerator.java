@@ -61,7 +61,6 @@ public class PartiesListGenerator {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             if (applicants != null && !applicants.isEmpty()) {
                 Map<String, String> applicantSolicitors = applicants.stream()
-                    .filter(solicitorPresentPredicate)
                     .filter(notNullSolicitorsNamePredicate)
                     .collect(
                     Collectors.toMap(
