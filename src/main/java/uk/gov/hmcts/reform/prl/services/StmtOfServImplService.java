@@ -748,7 +748,10 @@ public class StmtOfServImplService {
                     documents,
                     respondent.getValue().getLabelForDynamicList()
                 );
-
+                log.info(
+                    "Access code cover letter is sent to respondent {}, in the case {}, via bulk print {}",
+                    respondent.getId(), caseData.getId(), bulkPrintDetails.getBulkPrintId()
+                );
                 return element(DocumentsNotification.builder()
                                    .notification(NotificationDetails.builder()
                                                      .bulkPrintId(bulkPrintDetails.getBulkPrintId())
