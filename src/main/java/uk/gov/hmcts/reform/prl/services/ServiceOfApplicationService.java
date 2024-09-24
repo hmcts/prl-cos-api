@@ -2117,7 +2117,6 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail",
             "soaCafcassCymruServedOptions",
             "soaCafcassEmailId",
-            "soaCafcassServedOptions",
             PROCEED_TO_SERVING,
             MISSING_ADDRESS_WARNING_TEXT,
             SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
@@ -2202,6 +2201,11 @@ public class ServiceOfApplicationService {
             caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                                String.valueOf(caseData.getId())));
             caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
+            if (No.equals(caseData.getIsCafcass())) {
+                caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
+            }
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         caseDataUpdated.put(
