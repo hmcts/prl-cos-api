@@ -3242,7 +3242,7 @@ public class ServiceOfApplicationService {
             }
         }
         if (Yes.equals(isRefugeCase)) {
-            errorList.add("This case contains partie(s) who lives in refuge. Service of application is disable for this case.");
+            errorList.add("This case contains party(s) who lives in refuge. Service of application is disabled for this case.");
         }
         return errorList;
     }
