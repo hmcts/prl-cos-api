@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class RefugeCaseGenerator implements FieldGenerator {
                 isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
             }
         }
-        return CaseSummary.builder().isRefugeCase(isRefugeCase).build();
+        return CaseSummary.builder().refugeCase(RefugeCase.builder().isRefugeCase(isRefugeCase).build()).build();
     }
 
     private static YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> caseData) {
