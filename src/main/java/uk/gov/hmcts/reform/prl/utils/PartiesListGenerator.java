@@ -26,13 +26,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class PartiesListGenerator {
     private final ElementUtils elementUtils;
 
-    public static final String APPLICANT_SOLICITOR = " (Applicant solicitor)";
-    public static final String RESPONDENT_SOLICITOR = " (Respondent solicitor)";
+    public static final String APPLICANT_SOLICITOR = " (Applicant Solicitor)";
+    public static final String RESPONDENT_SOLICITOR = " (Respondent Solicitor)";
 
-    Predicate<Element<PartyDetails>> notNullSolicitorsNamePredicate = party
-        -> !party.getValue().getRepresentativeFullNameForCaseFlags().isBlank();
-    Predicate<Element<PartyDetails>> solicitorPresentPredicate = party
-        -> YesNoDontKnow.yes.equals(party.getValue().getDoTheyHaveLegalRepresentation());
+    Predicate<Element<PartyDetails>> notNullSolicitorsNamePredicate = party -> !party.getValue()
+        .getRepresentativeFullNameForCaseFlags().isBlank();
+    Predicate<Element<PartyDetails>> solicitorPresentPredicate = party -> YesNoDontKnow.yes
+        .equals(party.getValue().getDoTheyHaveLegalRepresentation());
 
     public DynamicList buildPartiesList(CaseData caseData, List<DynamicListElement> courtList) {
 
