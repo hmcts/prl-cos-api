@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,15 +37,11 @@ public class PartiesListGenerator {
 
         List<DynamicListElement> partiesList = new ArrayList<>();
 
-        Optional<DynamicListElement> court = courtList.stream()
-            .filter(element -> element.getCode().equalsIgnoreCase(caseData.getCourtName()))
-            .findFirst();
-
         partiesList.addAll(buildApplicantRepresentativeList(caseData));
         partiesList.addAll(buildRespondentRepresentativeList(caseData));
         partiesList.add(DynamicListElement.builder()
-                            .label(court.isPresent() ? court.get().getLabel() : caseData.getCourtName())
-                            .code(court.isPresent() ? court.get().getCode() : caseData.getCourtName())
+                            .label(caseData.getCourtName())
+                            .code(caseData.getCourtId())
                             .build());
 
         return DynamicList.builder().value(DynamicListElement.EMPTY).listItems(partiesList)
@@ -68,7 +63,6 @@ public class PartiesListGenerator {
                         party -> party.getValue().getRepresentativeFullNameForCaseFlags().concat(APPLICANT_SOLICITOR)
                     ));
 
-                log.info("Applicant solicitors Map<<<<<<<<>>>>>>> {}", applicantSolicitors);
                 for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
                     parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
                 }
@@ -102,7 +96,6 @@ public class PartiesListGenerator {
                             party -> party.getId().toString(),
                             party -> party.getValue().getRepresentativeFullNameForCaseFlags().concat(RESPONDENT_SOLICITOR)
                         ));
-                log.info("Respondent solicitors Map<<<<<<<<>>>>>>> {}", respondentSolicitors);
                 for (Map.Entry<String, String> appSols : respondentSolicitors.entrySet()) {
                     parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
                 }
