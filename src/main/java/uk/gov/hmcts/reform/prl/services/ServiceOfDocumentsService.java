@@ -145,7 +145,7 @@ public class ServiceOfDocumentsService {
                     : caseData.getServiceOfDocuments().getSodSolicitorServingRespondentsOptions().getDisplayedValue();
                 unServedPack = unServedPack.toBuilder()
                     .servedBy(servedBy)
-                    .isPersonalService(true)
+                    .isPersonalService(YesOrNo.Yes)
                     .build();
             } else if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
                 //Non-personal service
@@ -161,7 +161,7 @@ public class ServiceOfDocumentsService {
                         caseData.getRespondentsFL401()
                     ))
                     .servedBy(COURT)
-                    .isPersonalService(false)
+                    .isPersonalService(YesOrNo.No)
                     .build();
             }
         }
@@ -217,7 +217,7 @@ public class ServiceOfDocumentsService {
             List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
             List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
             if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-                if (unServedPack.isPersonalService()) {
+                if (YesOrNo.Yes.equals(unServedPack.getIsPersonalService())) {
                     //personal service
                     handlePersonalServiceOfDocuments(
                         authorisation,
