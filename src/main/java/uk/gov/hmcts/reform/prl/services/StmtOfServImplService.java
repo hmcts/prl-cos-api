@@ -123,7 +123,7 @@ public class StmtOfServImplService {
 
     public Map<String, Object> handleSosAboutToSubmit(CaseDetails caseDetails, String authorisation) {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback *** {}",
                  caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
         log.info("SOS request {}", caseData.getStatementOfService().getStmtOfServiceAddRecipient());
@@ -748,7 +748,10 @@ public class StmtOfServImplService {
                     documents,
                     respondent.getValue().getLabelForDynamicList()
                 );
-
+                log.info(
+                    "Access code cover letter is sent to respondent {}, in the case {}, via bulk print {}",
+                    respondent.getId(), caseData.getId(), bulkPrintDetails.getBulkPrintId()
+                );
                 return element(DocumentsNotification.builder()
                                    .notification(NotificationDetails.builder()
                                                      .bulkPrintId(bulkPrintDetails.getBulkPrintId())
