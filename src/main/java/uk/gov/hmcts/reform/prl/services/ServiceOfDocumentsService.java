@@ -99,8 +99,8 @@ public class ServiceOfDocumentsService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
-    public Map<String, Object> aboutToStart(String authorisation,
-                                            CallbackRequest callbackRequest) {
+    public Map<String, Object> handleAboutToStart(String authorisation,
+                                                  CallbackRequest callbackRequest) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -203,8 +203,8 @@ public class ServiceOfDocumentsService {
         return documents;
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation,
-                                                                        CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(String authorisation,
+                                                                     CallbackRequest callbackRequest) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
@@ -265,10 +265,7 @@ public class ServiceOfDocumentsService {
                                                         SodPack unServedPack,
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        List<Element<ServedApplicationDetails>> servedDocumentsDetailsList =
-            CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())
-                ? caseData.getServiceOfDocuments().getServedDocumentsDetailsList()
-                : new ArrayList<>();
+        List<Element<ServedApplicationDetails>> servedDocumentsDetailsList = new ArrayList<>();
 
         servedDocumentsDetailsList.add(element(ServedApplicationDetails.builder()
                                                    .emailNotificationDetails(emailNotificationDetails)
@@ -278,6 +275,10 @@ public class ServiceOfDocumentsService {
                                                    .servedBy(unServedPack.getSubmittedBy())
                                                    .servedAt(CaseUtils.getCurrentDate())
                                                    .build()));
+
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())) {
+            servedDocumentsDetailsList.addAll(caseData.getServiceOfDocuments().getServedDocumentsDetailsList());
+        }
 
         return servedDocumentsDetailsList;
     }
@@ -539,7 +540,7 @@ public class ServiceOfDocumentsService {
             handleNonPersonalServiceToParty(
                 authorisation,
                 caseData,
-                unServedPack.getApplicantIds(),
+                unServedPack.getRespondentIds(),
                 false,
                 unServedPack.getDocuments(),
                 emailNotificationDetails,
@@ -603,7 +604,7 @@ public class ServiceOfDocumentsService {
                 return element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
             } else {
                 return caseData.getRespondents().stream()
-                    .filter(applicant -> applicant.getId().toString().equals(partyId))
+                    .filter(respondent -> respondent.getId().toString().equals(partyId))
                     .findFirst()
                     .orElse(null);
             }
@@ -659,7 +660,9 @@ public class ServiceOfDocumentsService {
         ));
 
         for (String field : sodFields) {
-            caseDataMap.remove(field);
+            if (caseDataMap.containsKey(field)) {
+                caseDataMap.put(field, null);
+            }
         }
     }
 }

@@ -44,7 +44,7 @@ public class ServiceOfDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(serviceOfDocumentsService.aboutToStart(authorisation, callbackRequest))
+                .data(serviceOfDocumentsService.handleAboutToStart(authorisation, callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -82,7 +82,7 @@ public class ServiceOfDocumentsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return serviceOfDocumentsService.handleSoaSubmitted(authorisation, callbackRequest);
+            return serviceOfDocumentsService.handleSubmitted(authorisation, callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
