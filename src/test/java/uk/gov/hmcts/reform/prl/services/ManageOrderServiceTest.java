@@ -197,6 +197,9 @@ public class ManageOrderServiceTest {
     @Mock
     private RefDataUserService refDataUserService;
 
+    @Mock
+    private DocumentSealingService documentSealingService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -3679,6 +3682,28 @@ public class ManageOrderServiceTest {
             .code("1234")
             .label("test label").build();
         elements.add(element);
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
@@ -3709,25 +3734,8 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
-        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                          .builder()
-                                                                                          .orderDocument(Document
-                                                                                                             .builder()
-                                                                                                             .build())
-                                                                                          .dateCreated(now)
-                                                                                          .orderTypeId(TEST_UUID)
-                                                                                          .otherDetails(
-                                                                                              OtherOrderDetails.builder().build())
-                                                                                          .build()).build();
-        List<Element<OrderDetails>> orderList = new ArrayList<>();
-        orderList.add(orders);
-
-        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
-        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
-            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
-            .build();
-        Element<PartyDetails> partyDetailsElement = element(details);
-        partyDetails.add(partyDetailsElement);
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3906,6 +3914,7 @@ public class ManageOrderServiceTest {
                 .builder()
                 .build())
             .dateCreated(now)
+            .isOrderUploaded(YesOrNo.No)
             .orderTypeId("00000000-0000-0000-0000-000000000000")
             .otherDetails(
                 OtherOrderDetails.builder().build())
@@ -3928,6 +3937,9 @@ public class ManageOrderServiceTest {
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .applicantsFL401(PartyDetails.builder().build())
             .build();
+
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);
         assertNotNull(listOfOrders);
@@ -3985,6 +3997,7 @@ public class ManageOrderServiceTest {
                                                                                                              .build())
                                                                                           .dateCreated(now)
                                                                                           .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -3997,6 +4010,8 @@ public class ManageOrderServiceTest {
             .representativeLastName("repLastName")
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
             .build();
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4696,6 +4711,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4718,6 +4734,10 @@ public class ManageOrderServiceTest {
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
+            .uploadOrderDoc(Document
+                                .builder().documentUrl("/")
+                                .build())
+            .orderCollection(orderList)
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
             "test token",
@@ -5176,6 +5196,7 @@ public class ManageOrderServiceTest {
                                                                                                              .build())
                                                                                           .dateCreated(now)
                                                                                           .orderTypeId(TEST_UUID)
+                                                                                          .isOrderUploaded(YesOrNo.No)
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .serveOrderDetails(
@@ -5242,6 +5263,8 @@ public class ManageOrderServiceTest {
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(documentSealingService.sealDocument(Mockito.any(Document.class), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Document.builder().build());
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
@@ -5402,6 +5425,146 @@ public class ManageOrderServiceTest {
         assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
         assertNull(caseDataUpdated.get(WA_IS_ORDER_APPROVED));
         assertNull(caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testAddSealToOrdersShouldSealDocumentAndAddToCollection() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .doesOrderDocumentNeedSeal(YesOrNo.Yes)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        Document sealedOrderDocument = Document.builder().documentFileName("sealedOrderDocument.pdf").build();
+        Element<OrderDetails> expectedOrder = Element.<OrderDetails>builder().id(uuid)
+            .value(OrderDetails
+                       .builder()
+                       .orderDocument(Document
+                                          .builder()
+                                          .build())
+                       .dateCreated(now)
+                       .orderTypeId(TEST_UUID)
+                       .doesOrderDocumentNeedSeal(YesOrNo.No)
+                       .orderDocument(sealedOrderDocument)
+                       .build()).build();
+        List<Element<OrderDetails>> expectedOrderList = new ArrayList<>();
+        expectedOrderList.add(expectedOrder);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        when(documentSealingService.sealDocument(any(), any(), any())).thenReturn(sealedOrderDocument);
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(expectedOrderList, updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenNoOrders() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertNull(updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenDocumentAlreadyHasSeal() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .doesOrderDocumentNeedSeal(YesOrNo.No)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(orderList, updatedCaseData.get("orderCollection"));
+    }
+
+    @Test
+    public void testAddSealToOrdersWhenDocumentShouldNotBeSealed() {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
+                .value(OrderDetails
+                      .builder()
+                      .orderDocument(Document
+                                         .builder()
+                                         .build())
+                      .dateCreated(now)
+                      .orderTypeId(TEST_UUID)
+                      .orderDocument(Document.builder().build())
+                      .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.addSealToOrders("testAuth", caseData, updatedCaseData);
+
+        assertEquals(orderList, updatedCaseData.get("orderCollection"));
     }
 
 }
