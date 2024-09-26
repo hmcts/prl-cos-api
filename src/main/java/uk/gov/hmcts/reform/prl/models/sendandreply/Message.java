@@ -70,6 +70,10 @@ public class Message extends MessageMetaData {
     private Document selectedDocument;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<Document>> externalMessageAttachDocs;
+    private YesOrNo sendMessageToCafcass;
+    private YesOrNo sendMessageToOtherParties;
+    private String cafcassEmailAddress;
+    private String otherPartiesEmailAddress;
 
     // private List<Element<BulkPrintDetails>> messageBulkPrintDetails;
 
