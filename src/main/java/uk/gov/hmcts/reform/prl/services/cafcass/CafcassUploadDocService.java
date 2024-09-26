@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -84,19 +83,19 @@ public class CafcassUploadDocService {
             log.info("Document uploaded successfully through caseDocumentClient");
             //updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
 
-            moveCafcassUplocedDocsToQurantine(document, typeOfDocument, caseId, uploadResponse, authorisation);
+            moveCafcassUploadedDocsToQuarantine(document, typeOfDocument, caseId, uploadResponse);
 
         }
     }
 
-    private void moveCafcassUplocedDocsToQurantine(MultipartFile document,
+    private void moveCafcassUploadedDocsToQuarantine(MultipartFile document,
                                                    String typeOfDocument,
                                                    String caseId,
-                                                   UploadResponse uploadResponse,
-                                                   String authorisation) {
+                                                   UploadResponse uploadResponse) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
             String.valueOf(
                 caseId),
+
             CaseEvent.CAFCASS_ENGLAND_DOCUMENT_UPLOAD.getValue()
         );
 
@@ -104,8 +103,7 @@ public class CafcassUploadDocService {
             document.getOriginalFilename(),
             startAllTabsUpdateDataContent.caseData(),
             uploadResponse.getDocuments().get(0),
-            typeOfDocument,
-            authorisation
+            typeOfDocument
         );
 
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
@@ -194,8 +192,7 @@ public class CafcassUploadDocService {
     private QuarantineLegalDoc getCafcassQuarantineDocument(String fileName,
                                                             CaseData caseData,
                                                             Document uploadedDocument,
-                                                            String typeOfDocument,
-                                                            String authorisation) {
+                                                            String typeOfDocument) {
 
         uk.gov.hmcts.reform.prl.models.documents.Document cafcassDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentUrl(uploadedDocument.links.self.href)
@@ -209,7 +206,6 @@ public class CafcassUploadDocService {
             categoryId = "pathfinder";
             categoryName = "Pathfinder";
         }
-        UserDetails userDetails = userService.getUserDetails(authorisation);
 
         return QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
@@ -218,7 +214,7 @@ public class CafcassUploadDocService {
             .categoryName(categoryName)
             .isConfidential(Yes)
             .fileName(fileName)
-            .uploadedBy(userDetails.getFullName())
+            .uploadedBy(CAFCASS)
             .uploaderRole(CAFCASS)
             .cafcassQuarantineDocument(cafcassDocument)
             .documentParty(uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS.getDisplayedValue())
