@@ -12,23 +12,34 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCaseDataWithUploadedDocs;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 
 @Slf4j
 @Service
@@ -49,6 +60,10 @@ public class CafcassUploadDocService {
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabService;
 
+    private final ManageDocumentsService manageDocumentsService;
+
+    private final UserService userService;
+
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
         if (isValidDocument(document, typeOfDocument)) {
@@ -57,8 +72,6 @@ public class CafcassUploadDocService {
                 log.error("caseId does not exist");
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
 
             // upload document
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -69,9 +82,59 @@ public class CafcassUploadDocService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
+            //updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
+
+            moveCafcassUplocedDocsToQurantine(document, typeOfDocument, caseId, uploadResponse, authorisation);
 
         }
+    }
+
+    private void moveCafcassUplocedDocsToQurantine(MultipartFile document,
+                                                   String typeOfDocument,
+                                                   String caseId,
+                                                   UploadResponse uploadResponse,
+                                                   String authorisation) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            String.valueOf(
+                caseId),
+            CaseEvent.CAFCASS_ENGLAND_DOCUMENT_UPLOAD.getValue()
+        );
+
+        QuarantineLegalDoc courtNavQuarantineLegalDoc = getCafcassQuarantineDocument(
+            document.getOriginalFilename(),
+            startAllTabsUpdateDataContent.caseData(),
+            uploadResponse.getDocuments().get(0),
+            typeOfDocument,
+            authorisation
+        );
+
+        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        manageDocumentsService.moveDocumentsToQuarantineTab(
+            courtNavQuarantineLegalDoc,
+            startAllTabsUpdateDataContent.caseData(),
+            caseDataUpdated,
+            CAFCASS
+        );
+
+        manageDocumentsService.setFlagsForWaTask(
+            startAllTabsUpdateDataContent.caseData(),
+            caseDataUpdated,
+            CAFCASS,
+            courtNavQuarantineLegalDoc
+        );
+
+        //Changes to generate one WA task for courtnav upload document
+        if (!caseDataUpdated.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+        }
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(caseId),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated
+        );
     }
 
     private void updateCcdAfterUploadingDocument(MultipartFile document, String typeOfDocument, String caseId,
@@ -126,5 +189,39 @@ public class CafcassUploadDocService {
         }
         log.error("Un acceptable format/type of document {}", typeOfDocument);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(INVALID_DOCUMENT_TYPE, typeOfDocument));
+    }
+
+    private QuarantineLegalDoc getCafcassQuarantineDocument(String fileName,
+                                                            CaseData caseData,
+                                                            Document uploadedDocument,
+                                                            String typeOfDocument,
+                                                            String authorisation) {
+
+        uk.gov.hmcts.reform.prl.models.documents.Document cafcassDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl(uploadedDocument.links.self.href)
+            .documentBinaryUrl(uploadedDocument.links.binary.href)
+            .documentHash(uploadedDocument.hashToken)
+            .documentFileName(fileName).build();
+        String categoryId = "safeguardingLetter";
+        String categoryName = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
+
+        if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+            categoryId = "pathfinder";
+            categoryName = "Pathfinder";
+        }
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        return QuarantineLegalDoc.builder()
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .documentType(typeOfDocument)
+            .categoryId(categoryId)
+            .categoryName(categoryName)
+            .isConfidential(Yes)
+            .fileName(fileName)
+            .uploadedBy(CAFCASS)
+            .uploaderRole(CAFCASS)
+            .cafcassQuarantineDocument(cafcassDocument)
+            .documentParty(userDetails.getFullName())
+            .build();
     }
 }

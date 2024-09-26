@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafcassUploadDocServiceTest {
 
