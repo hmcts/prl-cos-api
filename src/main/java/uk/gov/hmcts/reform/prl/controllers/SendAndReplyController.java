@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -285,10 +286,18 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
-            sendAndReplyService.sendNotificationToExternalParties(
-                caseData,
-                authorisation
-            );
+            Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+            if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+                if (sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message)) {
+                    sendAndReplyService.sendNotificationToExternalParties(
+                        caseData,
+                        authorisation
+                    );
+                } else {
+                    return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                        "No recipients selected to send your message. Select at least one party")).build();
+                }
+            }
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND

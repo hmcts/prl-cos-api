@@ -2079,4 +2079,10 @@ public class SendAndReplyService {
         return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
             applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
+
+    public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
+        return CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())
+            || Yes.equals(message.getSendMessageToCafcass()) || Yes.equals(message.getSendMessageToOtherParties());
+
+    }
 }
