@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
@@ -237,7 +239,8 @@ public class ServiceOfDocumentsService {
                     );
                 }
             }
-            //other person
+            //serve other persons
+            serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
 
             //serve additional recipients
 
@@ -404,7 +407,6 @@ public class ServiceOfDocumentsService {
                     docs,
                     servedParty
                 )));
-
             } else {
                 log.error(
                     "Couldn't post the documents to party address, as address is null/empty for {}",
@@ -608,6 +610,30 @@ public class ServiceOfDocumentsService {
                     .findFirst()
                     .orElse(null);
             }
+        }
+    }
+
+    private void serveDocumentsToOtherPerson(String authorisation,
+                                             CaseData caseData,
+                                             SodPack unServedPack,
+                                             List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        //send post notifications to other person if selected
+        if (CollectionUtils.isNotEmpty(unServedPack.getOtherPersonIds())) {
+            unServedPack.getOtherPersonIds().stream()
+                .map(Element::getValue)
+                .forEach(id -> {
+                    PartyDetails otherPerson = CaseUtils.getOtherPerson(id, caseData);
+                    if (null != otherPerson) {
+                        sendPostToParty(
+                            authorisation,
+                            caseData,
+                            element(UUID.fromString(id), otherPerson),
+                            SERVED_PARTY_OTHER,
+                            unServedPack.getDocuments(),
+                            bulkPrintDetails
+                        );
+                    }
+                });
         }
     }
 
