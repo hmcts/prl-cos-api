@@ -1021,14 +1021,19 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse fetchDaCourts(@RequestHeader(HttpHeaders.AUTHORIZATION)
                                                               @Parameter(hidden = true) String authorisation,
+                                                              @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                                               @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-                .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
-                        .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                        .toList())
-                .build());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
+                    .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
+                            .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
+                            .toList())
+                    .build());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
 
