@@ -2875,8 +2875,10 @@ public class ServiceOfApplicationService {
                 coverLetters.add(getCoverLetterDocument(authorisation, template, dataMap));
             }
             if (welsh) {
+                log.info("Generating cover letter welsh for template {}", Templates.getWelshTemplate(template));
                 coverLetters.add(getCoverLetterDocument(authorisation,  Templates.getWelshTemplate(template), dataMap));
             }
+            log.info("cover letters {}", coverLetters);
             return coverLetters;
         } catch (Exception e) {
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
