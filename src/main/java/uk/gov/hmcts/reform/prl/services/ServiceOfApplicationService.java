@@ -3194,7 +3194,7 @@ public class ServiceOfApplicationService {
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh);
+        return fetchCoverLetter(authorization, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
