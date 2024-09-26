@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -50,9 +51,29 @@ public class CitizenResponseController {
             @PathVariable("caseId") String caseId,
             @PathVariable("partyId") String partyId,
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+            @RequestHeader("serviceAuthorization") String s2sToken,
+            @RequestBody DocumentRequest documentRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation);
+            return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation, documentRequest.isWelsh());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c1ADraftDocument", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Generate a C1A PDF for citizen as part of Respond to the Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public Document generateC1ADraftDocument(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken,
+        @RequestBody DocumentRequest documentRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return citizenResponseService.generateAndReturnDraftC1A(caseId, partyId, authorisation, documentRequest.isWelsh());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -65,15 +86,19 @@ public class CitizenResponseController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public CaseDataWithHearingResponse submitAndGenerateC7(
-            @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
-            @PathVariable("caseId") String caseId,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authorisation, caseId, citizenUpdatedCaseData);
+            CaseDetails caseDetails = citizenResponseService.generateAndSubmitCitizenResponse(
+                authorisation,
+                caseId,
+                citizenUpdatedCaseData
+            );
             if (caseDetails != null) {
                 return caseService
-                    .getCaseDataWithHearingResponse(authorisation,"Yes", caseDetails);
+                    .getCaseDataWithHearingResponse(authorisation, "Yes", caseDetails);
             } else {
                 log.error("{} event has failed for the case {}", CaseEvent.REVIEW_AND_SUBMIT, caseId);
                 throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");

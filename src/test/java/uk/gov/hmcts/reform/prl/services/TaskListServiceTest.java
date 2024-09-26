@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
@@ -151,6 +152,9 @@ public class TaskListServiceTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
@@ -908,10 +912,10 @@ public class TaskListServiceTest {
             Task.builder().event(CASE_NAME).build(),
             Task.builder().event(TYPE_OF_APPLICATION).build(),
             Task.builder().event(HEARING_URGENCY).build(),
-            Task.builder().event(CHILD_DETAILS_REVISED).build(),
             Task.builder().event(APPLICANT_DETAILS).build(),
             Task.builder().event(RESPONDENT_DETAILS).build(),
             Task.builder().event(OTHER_PEOPLE_IN_THE_CASE_REVISED).build(),
+            Task.builder().event(CHILD_DETAILS_REVISED).build(),
             Task.builder().event(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION).build(),
             Task.builder().event(CHILDREN_AND_APPLICANTS).state(CANNOT_START_YET).build(),
             Task.builder().event(CHILDREN_AND_RESPONDENTS).state(CANNOT_START_YET).build(),

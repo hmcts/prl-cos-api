@@ -128,6 +128,8 @@ public class PrlAppsConstants {
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
     public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
+
+    public static final String DOCUMENT_C1A_DRAFT_HINT = "DOCUMENT_C1A_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
@@ -1006,6 +1008,7 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
     public static final String SOA_CAFCASS_CYMRU_SERVED_OPTIONS = "soaCafcassCymruServedOptions";
 
     public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";

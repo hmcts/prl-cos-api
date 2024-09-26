@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
@@ -106,8 +107,8 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
-
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
@@ -163,10 +164,10 @@ public class TaskListService {
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
-                CHILD_DETAILS_REVISED,
                 APPLICANT_DETAILS,
                 RESPONDENT_DETAILS,
                 OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                CHILD_DETAILS_REVISED,
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 CHILDREN_AND_APPLICANTS,
                 CHILDREN_AND_RESPONDENTS,
@@ -315,6 +316,7 @@ public class TaskListService {
                     );
                 }
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                         .c8Document(updatedCaseData.getC8Document())
@@ -325,6 +327,7 @@ public class TaskListService {
                         .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
                                                 ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
                         .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                        .allPartyFlags(updatedCaseData.getAllPartyFlags())
                         .build();
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
