@@ -218,10 +218,10 @@ public class CafcassUploadDocService {
             .categoryName(categoryName)
             .isConfidential(Yes)
             .fileName(fileName)
-            .uploadedBy(CAFCASS)
+            .uploadedBy(userDetails.getFullName())
             .uploaderRole(CAFCASS)
             .cafcassQuarantineDocument(cafcassDocument)
-            .documentParty(userDetails.getFullName())
+            .documentParty(uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS.getDisplayedValue())
             .build();
     }
 }
