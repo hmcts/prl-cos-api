@@ -85,23 +85,23 @@ public class UpdateHearingActualsService {
                                                      String> caseIds) {
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).map(caseDetails -> {
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-                startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
-                Map<String, Object> caseDataUpdated = new HashMap<>();
-                caseDataUpdated.put("enableUpdateHearingActualTask", "true");
-                allTabService.submitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.authorisation(),
-                        caseId,
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        startAllTabsUpdateDataContent.eventRequestData(),
-                        caseDataUpdated
-                    );
-                }
-                return null;
-            }
+                             if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                                 startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+                                 Map<String, Object> caseDataUpdated = new HashMap<>();
+                                 caseDataUpdated.put("enableUpdateHearingActualTask", "true");
+                                 allTabService.submitAllTabsUpdate(
+                                     startAllTabsUpdateDataContent.authorisation(),
+                                     caseId,
+                                     startAllTabsUpdateDataContent.startEventResponse(),
+                                     startAllTabsUpdateDataContent.eventRequestData(),
+                                     caseDataUpdated
+                                 );
+                             }
+                             return null;
+                         }
         ));
     }
 
