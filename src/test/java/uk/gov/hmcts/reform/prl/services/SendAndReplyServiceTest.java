@@ -120,6 +120,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -3398,6 +3399,41 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataMessage, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
+    }
+
+
+    @Test
+    public void testSendAndReplyExternalPartiesAndCafcass() {
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code("12345")
+            .label("test" + " " + "test")
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code("123456")
+            .label("test" + " " + "test")
+            .build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+        Message message = Message.builder().messageAbout(MessageAboutEnum.APPLICATION).externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .sendMessageToCafcass(
+                Yes).sendMessageToCafcass(Yes).build();
+        boolean atLeastOnePartySelected = sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message);
+        assertEquals(true, atLeastOnePartySelected);
+
+
+    }
+
+    @Test
+    public void testSendAndReplyExternalPartiesAndCafcassScenario2() {
+
+        Message message = Message.builder().messageAbout(MessageAboutEnum.APPLICATION).externalMessageWhoToSendTo(
+                DynamicMultiSelectList.builder().build())
+            .sendMessageToCafcass(
+                No).sendMessageToCafcass(No).build();
+        boolean atLeastOnePartySelected = sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message);
+        assertEquals(false, atLeastOnePartySelected);
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
