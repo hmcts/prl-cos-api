@@ -85,23 +85,23 @@ public class UpdateHearingActualsService {
                                                      String> caseIds) {
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).map(caseDetails -> {
-                             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-                             if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-                                 startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
-                                 Map<String, Object> caseDataUpdated = new HashMap<>();
-                                 caseDataUpdated.put("enableUpdateHearingActualTask", "true");
-                                 allTabService.submitAllTabsUpdate(
-                                     startAllTabsUpdateDataContent.authorisation(),
-                                     caseId,
-                                     startAllTabsUpdateDataContent.startEventResponse(),
-                                     startAllTabsUpdateDataContent.eventRequestData(),
-                                     caseDataUpdated
-                                 );
-                             }
-                             return null;
-                         }
+                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                    startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+                    Map<String, Object> caseDataUpdated = new HashMap<>();
+                    caseDataUpdated.put("enableUpdateHearingActualTask", "true");
+                    allTabService.submitAllTabsUpdate(
+                        startAllTabsUpdateDataContent.authorisation(),
+                        caseId,
+                        startAllTabsUpdateDataContent.startEventResponse(),
+                        startAllTabsUpdateDataContent.eventRequestData(),
+                        caseDataUpdated
+                    );
+                }
+                return null;
+            }
         ));
     }
 
@@ -139,11 +139,13 @@ public class UpdateHearingActualsService {
         hearingsForAllCaseIds.stream().forEach(hearings -> {
             List<Long> filteredHearingIds = hearings.getCaseHearings()
                 .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
-                .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().
-                    anyMatch(
+                .filter(caseHearing -> caseHearing.getHearingDaySchedule()
+                    .stream()
+                    .anyMatch(
                         hearingDaySchedule -> hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(
                             LocalDate.now())
-                    )).map(CaseHearing::getHearingID).toList();
+                    ))
+                .map(CaseHearing::getHearingID).toList();
 
             caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
 
