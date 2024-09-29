@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -100,7 +102,8 @@ public class CafcassUploadDocService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         QuarantineLegalDoc quarantineLegalDoc = createQuarantineDocFromCafcassUploadedDoc(
             typeOfDocument,
-            uploadResponse.getDocuments().get(0)
+            uploadResponse.getDocuments().get(0),
+            startAllTabsUpdateDataContent.caseData().getIsPathfinderCase()
         );
 
         manageDocumentsService.setFlagsForWaTask(
@@ -126,10 +129,11 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument, Document document) {
+    private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument, Document document, YesOrNo isPathfinderCase) {
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .documentType(typeOfDocument)
             .isConfidential(Yes)
             .uploadedBy(CAFCASS)
             .uploaderRole(CAFCASS_ROLE)
@@ -143,40 +147,71 @@ public class CafcassUploadDocService {
             .build();
 
 
-        return fetchCategoryIdAndNameFromTypeOfDocument(quarantineLegalDoc, typeOfDocument);
+        return fetchCategoryIdAndNameFromTypeOfDocument(quarantineLegalDoc, typeOfDocument, isPathfinderCase);
     }
 
-    private QuarantineLegalDoc fetchCategoryIdAndNameFromTypeOfDocument(QuarantineLegalDoc quarantineLegalDoc, String typeOfDocument) {
-        Map<String, String> documentTypeToCategoryMap = new HashMap<>();
-        documentTypeToCategoryMap.put("16_4_Report", "Guardian report");
-        documentTypeToCategoryMap.put("CIR_Part1", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("CIR_Part2", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("CIR_Review", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("CMO_report", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Contact_Centre_Recordings", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Correspondence", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Direct_work", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Enforcement_report", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("FAO_Report", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("FAO_Workplan", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Letter_from_Child", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Other_Non_Section_7_Report", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("Position_Statement", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Positive_Parenting_Programme_Report", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("Re_W_Report", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("S_11H_Monitoring", "Cafcass/Cafcass Cymru other documents");
-        documentTypeToCategoryMap.put("S_16A_Risk_Assessment", "16a risk assessment");
-        documentTypeToCategoryMap.put("Safeguarding_Letter", "Safeguarding letter/Safeguarding Enquiries Report (SER)");
-        documentTypeToCategoryMap.put("Safeguarding_Letter_Returner", "Safeguarding letter/Safeguarding Enquiries Report (SER)");
-        documentTypeToCategoryMap.put("Safeguarding_Letter_Shorter_Template", "Safeguarding letter/Safeguarding Enquiries Report (SER)");
-        documentTypeToCategoryMap.put("Safeguarding_Letter_Update", "Safeguarding letter/Safeguarding Enquiries Report (SER)");
-        documentTypeToCategoryMap.put("Second_Gatekeeping_Safeguarding_Letter", "Safeguarding letter/Safeguarding Enquiries Report (SER)");
-        documentTypeToCategoryMap.put("Section7_Addendum_Report", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("Section7_Report_Child_Impact_Analysis", "Section 7 report/Child Impact Analysis");
-        documentTypeToCategoryMap.put("Suitability_report", "Cafcass/Cafcass Cymru other documents");
-        return quarantineLegalDoc.toBuilder()
-            .categoryId(documentTypeToCategoryMap.get(typeOfDocument))
-            .build();
+    private QuarantineLegalDoc fetchCategoryIdAndNameFromTypeOfDocument(QuarantineLegalDoc quarantineLegalDoc,
+                                                                        String typeOfDocument,
+                                                                        YesOrNo isPathfinderCase) {
+        if (Yes.equals(isPathfinderCase)) {
+            return quarantineLegalDoc.toBuilder()
+                .categoryId("pathfinder")
+                .categoryName("Pathfinder")
+                .build();
+        } else {
+            Map<String, CafcassReportAndGuardianEnum> documentTypeToCategoryMap = new HashMap<>();
+            documentTypeToCategoryMap.put("16_4_Report", CafcassReportAndGuardianEnum.riskAssessment);
+            documentTypeToCategoryMap.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
+            documentTypeToCategoryMap.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
+            documentTypeToCategoryMap.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
+            documentTypeToCategoryMap.put("CMO_report", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Contact_Centre_Recordings", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Correspondence", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Direct_work", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Enforcement_report", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("FAO_Report", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("FAO_Workplan", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Letter_from_Child", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("Other_Non_Section_7_Report", CafcassReportAndGuardianEnum.section7Report);
+            documentTypeToCategoryMap.put("Position_Statement", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put(
+                "Positive_Parenting_Programme_Report",
+                CafcassReportAndGuardianEnum.otherDocs
+            );
+            documentTypeToCategoryMap.put("Re_W_Report", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("S_11H_Monitoring", CafcassReportAndGuardianEnum.otherDocs);
+            documentTypeToCategoryMap.put("S_16A_Risk_Assessment", CafcassReportAndGuardianEnum.riskAssessment);
+            documentTypeToCategoryMap.put(
+                "Safeguarding_Letter",
+                CafcassReportAndGuardianEnum.safeguardingLetter
+            );
+            documentTypeToCategoryMap.put(
+                "Safeguarding_Letter_Returner",
+                CafcassReportAndGuardianEnum.safeguardingLetter
+            );
+            documentTypeToCategoryMap.put(
+                "Safeguarding_Letter_Shorter_Template",
+                CafcassReportAndGuardianEnum.safeguardingLetter
+            );
+            documentTypeToCategoryMap.put(
+                "Safeguarding_Letter_Update",
+                CafcassReportAndGuardianEnum.safeguardingLetter
+            );
+            documentTypeToCategoryMap.put(
+                "Second_Gatekeeping_Safeguarding_Letter",
+                CafcassReportAndGuardianEnum.safeguardingLetter
+            );
+            documentTypeToCategoryMap.put("Section7_Addendum_Report", CafcassReportAndGuardianEnum.section7Report);
+            documentTypeToCategoryMap.put(
+                "Section7_Report_Child_Impact_Analysis",
+                CafcassReportAndGuardianEnum.section7Report
+            );
+            documentTypeToCategoryMap.put("Suitability_report", CafcassReportAndGuardianEnum.otherDocs);
+            return quarantineLegalDoc.toBuilder()
+                .categoryId(documentTypeToCategoryMap.get(typeOfDocument).geCategoryId())
+                .categoryName(documentTypeToCategoryMap.get(typeOfDocument).getCategoryName())
+                .build();
+        }
     }
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
