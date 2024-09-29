@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -41,10 +40,8 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +54,6 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -65,11 +61,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_APPLICANT_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
@@ -87,13 +86,13 @@ public class ServiceOfDocumentsService {
     private final ObjectMapper objectMapper;
     private final SendAndReplyService sendAndReplyService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final UserService userService;
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final EmailService emailService;
-    private final SendgridService sendgridService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -219,25 +218,7 @@ public class ServiceOfDocumentsService {
             List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
             List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
             if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-                if (YesOrNo.Yes.equals(unServedPack.getIsPersonalService())) {
-                    //personal service
-                    handlePersonalServiceOfDocuments(
-                        authorisation,
-                        caseData,
-                        unServedPack,
-                        emailNotificationDetails,
-                        bulkPrintDetails
-                    );
-                } else {
-                    //non-personal service
-                    handleNonPersonalServiceOfDocuments(
-                        authorisation,
-                        caseData,
-                        unServedPack,
-                        emailNotificationDetails,
-                        bulkPrintDetails
-                    );
-                }
+                handleServiceOfDocuments(authorisation, caseData, unServedPack, emailNotificationDetails, bulkPrintDetails);
             }
             //serve other persons
             serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
@@ -286,6 +267,32 @@ public class ServiceOfDocumentsService {
         return servedDocumentsDetailsList;
     }
 
+    private void handleServiceOfDocuments(String authorisation,
+                                          CaseData caseData,
+                                          SodPack unServedPack,
+                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                          List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        if (YesOrNo.Yes.equals(unServedPack.getIsPersonalService())) {
+            //personal service
+            handlePersonalServiceOfDocuments(
+                authorisation,
+                caseData,
+                unServedPack,
+                emailNotificationDetails,
+                bulkPrintDetails
+            );
+        } else {
+            //non-personal service
+            handleNonPersonalServiceOfDocuments(
+                authorisation,
+                caseData,
+                unServedPack,
+                emailNotificationDetails,
+                bulkPrintDetails
+            );
+        }
+    }
+
     private void handlePersonalServiceOfDocuments(String authorisation,
                                                   CaseData caseData,
                                                   SodPack unServedPack,
@@ -298,6 +305,7 @@ public class ServiceOfDocumentsService {
         } else if (SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .getDisplayedValue().equals(unServedPack.getServedBy())) {
             //applicant solicitor
+            handlePersonalServiceApplicantSolicitor(authorisation, caseData, unServedPack.getDocuments(), emailNotificationDetails);
         }
     }
 
@@ -306,53 +314,127 @@ public class ServiceOfDocumentsService {
                                                      List<Element<Document>> documents,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        //C100
+        Map<String, Object> params = new HashMap<>();
+        params.put(AUTHORIZATION, authorisation);
+        params.put("govNotifyTemplate", EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
+        params.put("sendGridTemplate", SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            //C100
             caseData.getApplicants()
-                .forEach(applicant -> {
-                    if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
-                        Map<String, String> params = new HashMap<>();
-                        params.put(AUTHORIZATION, authorisation);
-                        params.put("servedParty", SERVED_PARTY_APPLICANT);
-                        sendEmailToParty(caseData, applicant, documents,
-                                         EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP,
-                                         SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP,
-                                         emailNotificationDetails,
-                                         params
-                        );
-                    } else {
-                        sendPostToParty(
-                            authorisation,
-                            caseData,
-                            applicant,
-                            SERVED_PARTY_APPLICANT,
-                            documents,
-                            bulkPrintDetails
-                        );
-                    }
-                });
-        } else {
-            if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                Map<String, String> params = new HashMap<>();
-                params.put(AUTHORIZATION, authorisation);
-                params.put("servedParty", SERVED_PARTY_APPLICANT);
-                sendEmailToParty(caseData,
-                                 element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                                 documents,
-                                 EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP,
-                                 SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP,
-                                 emailNotificationDetails,
-                                 params
-                );
-            } else {
-                sendPostToParty(
-                    authorisation,
+                .forEach(applicant -> handlePersonalNonPersonalServiceOfDocuments(
                     caseData,
-                    element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                    SERVED_PARTY_APPLICANT,
+                    applicant,
+                    true,
                     documents,
-                    bulkPrintDetails
-                );
+                    emailNotificationDetails,
+                    bulkPrintDetails,
+                    params
+                ));
+        } else {
+            //FL401
+            handlePersonalNonPersonalServiceOfDocuments(
+                caseData,
+                element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                true,
+                documents,
+                emailNotificationDetails,
+                bulkPrintDetails,
+                params
+            );
+        }
+    }
+
+    private void handlePersonalNonPersonalServiceOfDocuments(CaseData caseData,
+                                                             Element<PartyDetails> party,
+                                                             boolean isApplicant,
+                                                             List<Element<Document>> documents,
+                                                             List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                             List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                             Map<String, Object> inputParams) {
+        Map<String, String> params = new HashMap<>();
+        params.put(AUTHORIZATION, (String) inputParams.get(AUTHORIZATION));
+        if (isNotEmpty(party.getValue().getSolicitorEmail())) {
+            params.put(
+                "servedParty",
+                isApplicant ? SERVED_PARTY_APPLICANT_SOLICITOR : SERVED_PARTY_RESPONDENT_SOLICITOR
+            );
+            sendEmailToSolicitor(
+                caseData,
+                party,
+                documents,
+                SOD_APPLICANT_RESPONDENT_SOLICITOR,
+                emailNotificationDetails,
+                params
+            );
+        } else if (isNotEmpty(party.getValue().getEmail())
+            && ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
+            params.put("servedParty", isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT);
+            sendEmailToParty(
+                caseData,
+                party,
+                documents,
+                (EmailTemplateNames) inputParams.get("govNotifyTemplate"),
+                (SendgridEmailTemplateNames) inputParams.get("sendGridTemplate"),
+                emailNotificationDetails,
+                params
+            );
+        } else {
+            sendPostToParty(
+                (String) inputParams.get(AUTHORIZATION),
+                caseData,
+                party,
+                isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT,
+                documents,
+                bulkPrintDetails
+            );
+        }
+    }
+
+    private void handlePersonalServiceApplicantSolicitor(String authorisation,
+                                                         CaseData caseData,
+                                                         List<Element<Document>> documents,
+                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        Map<String, String> params = new HashMap<>();
+        params.put(AUTHORIZATION, authorisation);
+        params.put("servedParty", SERVED_PARTY_APPLICANT_SOLICITOR);
+        Element<PartyDetails> party = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0) : element(
+            caseData.getApplicantsFL401().getPartyId(),
+            caseData.getApplicantsFL401()
+        );
+        //serve documents only to main applicant solicitor
+        sendEmailToSolicitor(
+            caseData,
+            party,
+            documents,
+            SOD_APPLICANT_RESPONDENT_SOLICITOR,
+            emailNotificationDetails,
+            params
+        );
+    }
+
+    private void sendEmailToSolicitor(CaseData caseData,
+                                      Element<PartyDetails> party,
+                                      List<Element<Document>> documents,
+                                      SendgridEmailTemplateNames sendgridTemplate,
+                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                      Map<String, String> params) {
+        String authorisation = params.get(AUTHORIZATION);
+        String servedParty = params.get("servedParty");
+        if (isNotEmpty(party.getValue().getSolicitorEmail())) {
+            EmailNotificationDetails emailNotification = sendSendgridEmail(
+                authorisation,
+                caseData,
+                documents,
+                party,
+                servedParty,
+                party.getValue().getSolicitorEmail(),
+                sendgridTemplate
+            );
+            if (emailNotification != null) {
+                emailNotificationDetails.add(element(emailNotification.toBuilder()
+                                                         .partyIds(String.valueOf(party.getId()))
+                                                         .build()));
             }
         }
     }
@@ -372,7 +454,15 @@ public class ServiceOfDocumentsService {
             emailNotification = sendGovNotifyEmail(caseData, documents, party, servedParty, govNotifyTemplate);
         } else {
             log.debug("Party does not access to dashboard -> send documents via sendgrid email for {}", party.getId());
-            emailNotification = sendSendgridEmail(authorisation, caseData, documents, party, servedParty, sendgridTemplate);
+            emailNotification = sendSendgridEmail(
+                authorisation,
+                caseData,
+                documents,
+                party,
+                servedParty,
+                party.getValue().getEmail(),
+                sendgridTemplate
+            );
         }
 
         if (emailNotification != null) {
@@ -426,7 +516,7 @@ public class ServiceOfDocumentsService {
                                                         EmailTemplateNames govNotifyTemplate) {
         sendEmail(caseData, party.getValue(), SERVED_PARTY_APPLICANT.equals(servedParty), govNotifyTemplate);
 
-        //Create email notification with packs
+        //Create email notification with documents
         return EmailNotificationDetails.builder()
             .emailAddress(party.getValue().getEmail())
             .servedParty(servedParty)
@@ -444,44 +534,6 @@ public class ServiceOfDocumentsService {
             emailData,
             LanguagePreference.getPreferenceLanguage(caseData)
         );
-    }
-
-    private EmailNotificationDetails sendEmail(String authorisation,
-                                               List<Element<Document>> documents,
-                                               Map<String, Object> dynamicDataForEmail,
-                                               String emailAddress,
-                                               String servedParty,
-                                               SendgridEmailTemplateNames sendgridEmailTemplateName) {
-        try {
-            boolean emailSent = sendgridService.sendEmailUsingTemplateWithAttachments(
-                sendgridEmailTemplateName,
-                authorisation,
-                SendgridEmailConfig.builder()
-                    .toEmailAddress(emailAddress)
-                    .dynamicTemplateData(dynamicDataForEmail)
-                    .listOfAttachments(unwrapElements(documents))
-                    .languagePreference(LanguagePreference.english)
-                    .build()
-            );
-
-            if (emailSent) {
-                return EmailNotificationDetails.builder()
-                    .emailAddress(emailAddress)
-                    .servedParty(servedParty)
-                    .docs(documents)
-                    .attachedDocs(String.join(
-                        ",",
-                        documents.stream().map(Element::getValue).map(Document::getDocumentFileName).toList()
-                    ))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                   .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                    .build();
-            }
-        } catch (IOException e) {
-            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-        return null;
     }
 
     private EmailTemplateVars buildEmailData(CaseData caseData,
@@ -514,10 +566,19 @@ public class ServiceOfDocumentsService {
                                                        List<Element<Document>> documents,
                                                        Element<PartyDetails> party,
                                                        String servedParty,
+                                                       String email,
                                                        SendgridEmailTemplateNames sendgridTemplate) {
         Map<String, Object> dynamicData = getEmailDynamicData(caseData, party.getValue());
 
-        return sendEmail(authorisation, documents, dynamicData, party.getValue().getEmail(), servedParty, sendgridTemplate);
+        return serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+            authorisation,
+            email,
+            unwrapElements(documents),
+            sendgridTemplate,
+            dynamicData,
+            servedParty
+        );
+        //return sendEmail(authorisation, documents, dynamicData, servedParty, email, sendgridTemplate);
     }
 
     private void handleNonPersonalServiceOfDocuments(String authorisation,
@@ -527,7 +588,7 @@ public class ServiceOfDocumentsService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
         //applicants
         if (CollectionUtils.isNotEmpty(unServedPack.getApplicantIds())) {
-            handleNonPersonalServiceToParty(
+            handleNonPersonalServiceToPartyOrSolicitor(
                 authorisation,
                 caseData,
                 unServedPack.getApplicantIds(),
@@ -539,7 +600,7 @@ public class ServiceOfDocumentsService {
         }
         //respondents
         if (CollectionUtils.isNotEmpty(unServedPack.getRespondentIds())) {
-            handleNonPersonalServiceToParty(
+            handleNonPersonalServiceToPartyOrSolicitor(
                 authorisation,
                 caseData,
                 unServedPack.getRespondentIds(),
@@ -551,38 +612,37 @@ public class ServiceOfDocumentsService {
         }
     }
 
-    private void handleNonPersonalServiceToParty(String authorisation,
-                                                 CaseData caseData,
-                                                 List<Element<String>> partyIds,
-                                                 boolean isApplicant,
-                                                 List<Element<Document>> documents,
-                                                 List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                 List<Element<BulkPrintDetails>> bulkPrintDetails) {
+    private void handleNonPersonalServiceToPartyOrSolicitor(String authorisation,
+                                                            CaseData caseData,
+                                                            List<Element<String>> partyIds,
+                                                            boolean isApplicant,
+                                                            List<Element<Document>> documents,
+                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                            List<Element<BulkPrintDetails>> bulkPrintDetails) {
         partyIds.stream()
             .map(Element::getValue)
             .forEach(partyId -> {
                 Element<PartyDetails> party = getPartyDetailsById(caseData, partyId, isApplicant);
                 if (null != party) {
-                    if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
-                        Map<String, String> params = new HashMap<>();
-                        params.put(AUTHORIZATION, authorisation);
-                        params.put("servedParty", isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT);
-                        sendEmailToParty(caseData, party, documents,
-                                         EmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP,
-                                         SendgridEmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP,
-                                         emailNotificationDetails,
-                                         params
-                        );
-                    } else {
-                        sendPostToParty(
-                            authorisation,
-                            caseData,
-                            party,
-                            isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT,
-                            documents,
-                            bulkPrintDetails
-                        );
-                    }
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(AUTHORIZATION, authorisation);
+                    params.put(
+                        "govNotifyTemplate",
+                        EmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP
+                    );
+                    params.put(
+                        "sendGridTemplate",
+                        SendgridEmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP
+                    );
+                    handlePersonalNonPersonalServiceOfDocuments(
+                        caseData,
+                        party,
+                        isApplicant,
+                        documents,
+                        emailNotificationDetails,
+                        bulkPrintDetails,
+                        params
+                    );
                 }
             });
     }
@@ -643,8 +703,8 @@ public class ServiceOfDocumentsService {
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodDocumentsList())) {
             return caseData.getServiceOfDocuments().getSodDocumentsList().stream()
                 .map(Element::getValue)
-                .map(docsdynamicList -> sendAndReplyService.getSelectedDocument(
-                    authorisation, docsdynamicList.getDocumentsList()))
+                .map(docsDynamicList -> sendAndReplyService.getSelectedDocument(
+                    authorisation, docsDynamicList.getDocumentsList()))
                 .toList();
         }
         return Collections.emptyList();
