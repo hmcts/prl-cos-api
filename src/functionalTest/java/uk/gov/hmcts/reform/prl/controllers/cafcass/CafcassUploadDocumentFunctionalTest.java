@@ -1,4 +1,3 @@
-/*
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import io.restassured.RestAssured;
@@ -95,4 +94,3 @@ public class CafcassUploadDocumentFunctionalTest {
 
     }
 }
-*/
