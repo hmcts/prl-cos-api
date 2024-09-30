@@ -22,10 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -69,8 +67,6 @@ public class CafcassUploadDocService {
                 log.error("caseId does not exist");
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
 
             // upload document
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -81,14 +77,14 @@ public class CafcassUploadDocService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
+            updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, uploadResponse);
 
 
         }
     }
 
     private void updateCcdAfterUploadingDocument(MultipartFile document, String typeOfDocument, String caseId,
-                                                 CaseData tempCaseData, UploadResponse uploadResponse) {
+                                                 UploadResponse uploadResponse) {
 
         // get the existing CCD record with all the uploaded documents
 
