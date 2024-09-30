@@ -109,13 +109,13 @@ public class CafcassUploadDocService {
         manageDocumentsService.setFlagsForWaTask(
             startAllTabsUpdateDataContent.caseData(),
             caseDataUpdated,
-            CAFCASS_USER_ROLE,
+            CAFCASS,
             quarantineLegalDoc
         );
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
             startAllTabsUpdateDataContent.caseData(),
-            caseDataUpdated, CAFCASS_USER_ROLE
+            caseDataUpdated, CAFCASS
         );
 
         allTabService.submitAllTabsUpdate(
@@ -136,7 +136,7 @@ public class CafcassUploadDocService {
             .documentType(typeOfDocument)
             .isConfidential(Yes)
             .uploadedBy(CAFCASS)
-            .uploaderRole(CAFCASS_ROLE)
+            .uploaderRole(CAFCASS)
             .documentName(document.originalDocumentName)
             .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
