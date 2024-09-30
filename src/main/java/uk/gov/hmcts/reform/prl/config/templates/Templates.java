@@ -31,7 +31,7 @@ public class Templates {
     public static final String PRL_LET_ENG_FL401_RE2 = "PRL-LET-ENG-FL401-RE2.docx";
     public static final String PRL_LET_ENG_FL401_RE3 = "PRL-LET-ENG-FL401-RE3.docx";
     public static final String PRL_LET_ENG_FL401_RE4 = "PRL-LET-ENG-FL401-RE4.docx";
-    public static final String PRL_LET_ENG_C100_RE5 = "PRL_LET_ENG_C100_RE5.docx";
+    public static final String PRL_LET_ENG_C100_RE5 = "PRL-LET-ENG-C100-RE5.docx";
     public static final String PRL_LET_ENG_C100_RE6 = "PRL-LET-ENG-C100-RE6.docx";
     public static final String PRL_LET_ENG_C100_RE7 = "PRL-LET-ENG-C100-RE7.docx";
     public static final String PRL_LET_ENG_FL401_RE8 = "PRL-LET-ENG-FL401-RE8.docx";
