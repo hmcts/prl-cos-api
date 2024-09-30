@@ -41,6 +41,7 @@ import java.util.Map;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -81,13 +82,12 @@ public class UpdateHearingActualsService {
     }
 
     private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
-                                                 Map<String,
-                                                     String> caseIds) {
+                                                 Map<String, String> caseIds) {
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
-            caseId)).map(caseDetails -> {
+            caseId)).forEach(caseDetails -> {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
                 if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                    log.info("Updating hearing WA task {}", caseId);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
                     Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -100,7 +100,6 @@ public class UpdateHearingActualsService {
                         caseDataUpdated
                     );
                 }
-                return null;
             }
         ));
     }
@@ -113,7 +112,7 @@ public class UpdateHearingActualsService {
     }
 
     private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, String hearingId) {
-        return caseData.getDraftOrderCollection()
+        return nullSafeCollection(caseData.getDraftOrderCollection())
             .stream()
             .map(Element::getValue)
             .anyMatch(draftOrderElement -> draftOrderElement.getManageOrderHearingDetails()
@@ -124,7 +123,7 @@ public class UpdateHearingActualsService {
     }
 
     private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, String hearingId) {
-        return caseData.getOrderCollection()
+        return nullSafeCollection(caseData.getOrderCollection())
             .stream()
             .map(Element::getValue)
             .anyMatch(orderElement -> orderElement.getManageOrderHearingDetails()
@@ -136,20 +135,22 @@ public class UpdateHearingActualsService {
     private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
 
         Map<String, String> caseIdHearingIdMapping = new HashMap<>();
-        hearingsForAllCaseIds.stream().forEach(hearings -> {
-            List<Long> filteredHearingIds = hearings.getCaseHearings()
-                .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
-                .filter(caseHearing -> caseHearing.getHearingDaySchedule()
-                    .stream()
-                    .anyMatch(
-                        hearingDaySchedule -> hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(
-                            LocalDate.now())
-                    ))
-                .map(CaseHearing::getHearingID).toList();
-
-            caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
-
-        });
+        if (isNotEmpty(hearingsForAllCaseIds)) {
+            hearingsForAllCaseIds.forEach(hearings -> {
+                List<Long> filteredHearingIds = hearings.getCaseHearings()
+                    .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
+                    .filter(caseHearing -> caseHearing.getHearingDaySchedule()
+                        .stream()
+                        .anyMatch(
+                            hearingDaySchedule -> hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(
+                                LocalDate.now())
+                        ))
+                    .map(CaseHearing::getHearingID).toList();
+                if (isNotEmpty(filteredHearingIds)) {
+                    caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
+                }
+            });
+        }
         return caseIdHearingIdMapping;
     }
 
