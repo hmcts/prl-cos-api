@@ -1912,6 +1912,13 @@ public class C100RespondentSolicitorServiceTest {
                 .documentFileName("Draft_C7_response.pdf")
                 .build();
 
+
+        caseData = caseData.toBuilder()
+                .respondentSolicitorData((RespondentSolicitorData.builder()
+                        .resSolConfirmEditContactDetails(CitizenDetails.builder().contact(Contact.builder().build()).build())
+                        .respondentAllegationsOfHarmData(allegationsOfHarmData).build()))
+                .build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1921,15 +1928,6 @@ public class C100RespondentSolicitorServiceTest {
                 SOLICITOR_C7_DRAFT_DOCUMENT,
                 false
         )).thenReturn(document);
-
-        caseData = caseData.toBuilder()
-                .respondentSolicitorData((RespondentSolicitorData.builder()
-                        .respondentAllegationsOfHarmData(allegationsOfHarmData).build()))
-                .build();
-
-        stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
