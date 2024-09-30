@@ -661,10 +661,14 @@ public class ServiceOfApplicationService {
                     EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV
                 );
             } else {
-                sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
-                                           bulkPrintDetails,
-                                           applicant,
-                                           Templates.PRL_LET_ENG_FL401_AP2
+                sendPostWithAccessCodeLetterToParty(
+                    caseData,
+                    authorization,
+                    packCdocs,
+                    bulkPrintDetails,
+                    applicant,
+                    generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, PRL_LET_ENG_FL401_AP2),
+                    SERVED_PARTY_APPLICANT
                 );
             }
             generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
@@ -701,10 +705,15 @@ public class ServiceOfApplicationService {
                 EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
             );
         } else {
-            sendSoaPacksToPartyViaPost(authorization, caseData, docs,
-                                       bulkPrintDetails,
-                                       applicant,
-                                       Templates.PRL_LET_ENG_FL401_AP1);
+            sendPostWithAccessCodeLetterToParty(
+                caseData,
+                authorization,
+                docs,
+                bulkPrintDetails,
+                applicant,
+                generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, PRL_LET_ENG_FL401_AP1),
+                SERVED_PARTY_APPLICANT
+            );
         }
         packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
             .toList();
@@ -1280,13 +1289,14 @@ public class ServiceOfApplicationService {
                     );
                 } else {
                     //Post packs to applicants
-                    sendSoaPacksToPartyViaPost(
-                        authorization,
+                    sendPostWithAccessCodeLetterToParty(
                         caseData,
+                        authorization,
                         docs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
-                        PRL_LET_ENG_C100_AP7
+                        generateCoverLetterBasedOnCaseAccess(authorization, caseData, selectedApplicant, PRL_LET_ENG_C100_AP7),
+                        SERVED_PARTY_APPLICANT
                     );
                 }
             }
@@ -1358,13 +1368,14 @@ public class ServiceOfApplicationService {
                     );
                 } else {
                     //Post packs to applicants
-                    sendSoaPacksToPartyViaPost(
-                        authorization,
+                    sendPostWithAccessCodeLetterToParty(
                         caseData,
+                        authorization,
                         packDocsWithoutC9,
                         bulkPrintDetails,
                         applicant,
-                        PRL_LET_ENG_C100_AP8
+                        generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, PRL_LET_ENG_C100_AP8),
+                        SERVED_PARTY_APPLICANT
                     );
                 }
             }
@@ -1498,24 +1509,6 @@ public class ServiceOfApplicationService {
                 dynamicData,
                 SERVED_PARTY_APPLICANT
             );
-    }
-
-    private void sendSoaPacksToPartyViaPost(String authorization,
-                                            CaseData caseData,
-                                            List<Document> packDocs,
-                                            List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                            Element<PartyDetails> party,
-                                            String coverLetterTemplate) {
-        log.debug("Sending applicant packs via post for {}", party.getId());
-        sendPostWithAccessCodeLetterToParty(
-            caseData,
-            authorization,
-            packDocs,
-            bulkPrintDetails,
-            party,
-            generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, coverLetterTemplate),
-            SERVED_PARTY_APPLICANT
-        );
     }
 
     private SoaPack generateRespondentsPack(String authorization,
