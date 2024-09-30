@@ -1,4 +1,3 @@
-/*
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import io.restassured.RestAssured;
@@ -27,13 +26,11 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_DUMMY_UPLOAD_FILE;
 import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 
-*/
 /**
  * functional test case for cafcass safegaurding letter upload.
  *<p></p>
  *  ignored the test case as caseId won't be available in PR & higher environment.
- *//*
-
+ */
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
@@ -95,4 +92,3 @@ public class CafcassUploadDocumentFunctionalTest {
 
     }
 }
-*/
