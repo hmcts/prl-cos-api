@@ -137,7 +137,7 @@ public class CafcassUploadDocService {
             .uploaderRole(CAFCASS)
             .documentName(document.originalDocumentName)
             .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .cafcassQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                           .documentUrl(document.links.self.href)
                           .documentBinaryUrl(document.links.binary.href)
                           .documentHash(document.hashToken)
