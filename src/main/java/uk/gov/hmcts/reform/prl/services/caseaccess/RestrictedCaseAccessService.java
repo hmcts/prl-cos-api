@@ -146,6 +146,7 @@ public class RestrictedCaseAccessService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         log.info("** caseDataUpdated:: " + caseDataUpdated);
+        log.info("** caseDataUpdated, ID is :: " + callbackRequest.getCaseDetails().getId());
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
@@ -154,10 +155,11 @@ public class RestrictedCaseAccessService {
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
             );
+        log.info("Case event started for case id::" + callbackRequest.getCaseDetails().getId());
         CaseDataContent caseDataContent = null;
         switch (caseSecurityClassification) {
             case RESTRICTED -> {
-                log.info("** inside restriced:: ");
+                log.info("** inside restricted:: ");
                 caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
                     startAllTabsUpdateDataContent.startEventResponse(),
                     Classification.RESTRICTED
@@ -185,6 +187,7 @@ public class RestrictedCaseAccessService {
                 );
             }
         }
+        log.info("Case event start submitted for case id::" + callbackRequest.getCaseDetails().getId());
         coreCaseDataService.submitUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             startAllTabsUpdateDataContent.eventRequestData(),
@@ -192,6 +195,7 @@ public class RestrictedCaseAccessService {
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             true
         );
+        log.info("Case event submitted for case id::" + callbackRequest.getCaseDetails().getId());
 
         log.info("** restrictedCaseAccess submitUpdate done");
         return setConformationMessages(callbackRequest, caseSecurityClassification);
