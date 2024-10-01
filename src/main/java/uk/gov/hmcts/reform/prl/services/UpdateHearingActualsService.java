@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -56,6 +57,9 @@ public class UpdateHearingActualsService {
     private final AllTabServiceImpl allTabService;
 
     private final ObjectMapper objectMapper;
+
+    @Value("${ccd.elastic-search-api.result-size}")
+    private String ccdElasticSearchApiResultSize;
 
 
     public void updateHearingActuals() {
@@ -213,7 +217,10 @@ public class UpdateHearingActualsService {
 
         Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
 
-        return QueryParam.builder().query(Query.builder().bool(finalFilter).build()).build();
+        return QueryParam.builder()
+                .query(Query.builder().bool(finalFilter).build())
+                .size(ccdElasticSearchApiResultSize)
+                .build();
     }
 
 }
