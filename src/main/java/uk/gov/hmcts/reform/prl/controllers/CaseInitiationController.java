@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -67,13 +69,18 @@ public class CaseInitiationController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
+    public AboutToStartOrSubmitCallbackResponse populateCourtList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseInitiationService.prePopulateCourtDetails(authorisation, caseDataUpdated)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
 
-        log.info("<<<<<<<<<<>>>>>>>>>  Inside populate court list");
-        return null;
     }
 }

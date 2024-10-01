@@ -85,5 +85,14 @@ public class CaseInitiationControllerTest {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
+
+    @Test
+    public void testHandlePopulateCourtList() {
+        caseInitiationController.populateCourtList(authToken, s2sToken, callbackRequest);
+        verify(caseInitiationService, times(1)).prePopulateCourtDetails(
+            authToken,
+            new HashMap<>()
+        );
+    }
 }
 
