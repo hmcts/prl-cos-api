@@ -84,19 +84,20 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
 
-        dataMap.forEach((k, v) -> {
+        Map<String, Object> welshDataMap = new HashMap<>();
+        welshDataMap.putAll(dataMap);
+        welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseTypeOfApplication)
                 );
-                dataMap.put(k, updatedWelshObj);
+                welshDataMap.put(k, updatedWelshObj);
             }
         });
-
         return generateDocument(authorisation, caseId, templateName,
-                                dataMap
+                                welshDataMap
         );
     }
 
