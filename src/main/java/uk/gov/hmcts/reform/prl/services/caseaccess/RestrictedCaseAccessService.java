@@ -236,6 +236,10 @@ public class RestrictedCaseAccessService {
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
         log.info("dataClassification for changeCaseAccess::" + dataClassification);
+        for (Map.Entry<String, Object> entry : dataClassification.entrySet()) {
+            entry.setValue(caseSecurityClassification.getValue().toUpperCase());
+        }
+        log.info("dataClassification for changeCaseAccess after modification::" + dataClassification);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .dataClassification(dataClassification)
