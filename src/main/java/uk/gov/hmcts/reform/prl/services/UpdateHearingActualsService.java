@@ -72,6 +72,7 @@ public class UpdateHearingActualsService {
     }
 
     private Map<String, String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
+        log.info("Fetching hearings for list of cases");
         List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
@@ -87,7 +88,7 @@ public class UpdateHearingActualsService {
             caseId)).forEach(caseDetails -> {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    log.info("Updating hearing WA task {}", caseId);
+                    log.info("Triggering update hearing actual WA task event for the case {}", caseId);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
                     Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -115,7 +116,7 @@ public class UpdateHearingActualsService {
         return nullSafeCollection(caseData.getDraftOrderCollection())
             .stream()
             .map(Element::getValue)
-            .anyMatch(draftOrderElement -> draftOrderElement.getManageOrderHearingDetails()
+            .anyMatch(draftOrderElement -> nullSafeCollection(draftOrderElement.getManageOrderHearingDetails())
                 .stream()
                 .map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
@@ -126,31 +127,32 @@ public class UpdateHearingActualsService {
         return nullSafeCollection(caseData.getOrderCollection())
             .stream()
             .map(Element::getValue)
-            .anyMatch(orderElement -> orderElement.getManageOrderHearingDetails()
+            .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
                 .stream().map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
                     && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)));
     }
 
     private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
-
+        log.info("Filtering cases having hearings listed for today");
         Map<String, String> caseIdHearingIdMapping = new HashMap<>();
         if (isNotEmpty(hearingsForAllCaseIds)) {
             hearingsForAllCaseIds.forEach(hearings -> {
-                List<Long> filteredHearingIds = hearings.getCaseHearings()
-                    .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
-                    .filter(caseHearing -> caseHearing.getHearingDaySchedule()
+                List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
+                    .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
+                    .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
                         .stream()
-                        .anyMatch(
-                            hearingDaySchedule -> hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(
-                                LocalDate.now())
+                        .anyMatch(hearingDaySchedule -> null != hearingDaySchedule.getHearingStartDateTime()
+                                && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
                         ))
                     .map(CaseHearing::getHearingID).toList();
                 if (isNotEmpty(filteredHearingIds)) {
+                    log.info("Found a hearing is listed for today for the case {}, & hearing {}", hearings.getCaseRef(), filteredHearingIds.get(0));
                     caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
                 }
             });
         }
+        log.info("*** Cases having hearings listed for today {}", caseIdHearingIdMapping);
         return caseIdHearingIdMapping;
     }
 
@@ -192,7 +194,8 @@ public class UpdateHearingActualsService {
     private QueryParam buildCcdQueryParam() {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(
-            Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build()
+                Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
+                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build()
         );
 
         //Hearing state
