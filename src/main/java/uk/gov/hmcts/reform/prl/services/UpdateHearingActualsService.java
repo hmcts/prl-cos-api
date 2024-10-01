@@ -158,6 +158,10 @@ public class UpdateHearingActualsService {
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
+        log.info("*** List of cases retrieved ***");
+        for (CaseDetails caseDetails : caseDetailsList) {
+            log.info("Case ID: {} & State: {}", caseDetails.getId(), caseDetails.getState());
+        }
         return caseDetailsList.stream().map(CaseDetails::getId).map(String::valueOf).toList();
 
     }
