@@ -181,7 +181,7 @@ public class RestrictedCaseAccessService {
             }
             default -> {
                 log.info("** inside default:: ");
-                coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
                     startAllTabsUpdateDataContent.startEventResponse(),
                     Classification.PUBLIC
                 );
@@ -255,8 +255,8 @@ public class RestrictedCaseAccessService {
             if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
                 caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
             } else if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-                caseDataUpdated.put("errors", "No one have access to this case right now, "
-                    + "Please provide access to the people with right permissions");
+                caseDataUpdated.put("errors", "No user got access to this case right now, "
+                    + "Please provide access to the users with right permissions before proceeding.");
             }
         }
         log.info("** retrieveAssignedUserRoles done");
@@ -303,23 +303,27 @@ public class RestrictedCaseAccessService {
         }
         log.info("** AssignedUserDetails " + assignedUserDetails);
         if (!assignedUserDetails.isEmpty()) {
+            assignedUserDetailsHtml.add("<div class='width-100'>");
+            assignedUserDetailsHtml.add(
+                "<h2 class=\"govuk-heading-m\">Users with access</h2>");
             assignedUserDetailsHtml.add("<table class=\"govuk-table\">");
-            assignedUserDetailsHtml.add(
-                "<caption class=\"govuk-table__caption govuk-table__caption--m\">Users with access</caption>");
+            // assignedUserDetailsHtml.add(
+            // "<caption class=\"govuk-table__caption govuk-table__caption--m\">Users with access</caption>");
             assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
             assignedUserDetailsHtml.add(
-                "<tr class=\"govuk-table__row\"><th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-half\">Name</th>"
-                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Case role</th>"
-                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Email address</th></tr>");
-            assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
+                "<tr class=\"govuk-table__row\"><th scope=\"col\" class=\"govuk-table__header govuk-table-column-header\">User</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-table-column-header\">Case role</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-table-column-actions\">Email address</th></tr>");
+            assignedUserDetailsHtml.add("</thead>");
+            // assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
             assignedUserDetailsHtml.add("<tbody class=\"govuk-table__body\">");
             for (Map.Entry<String, String> entry : assignedUserDetails.entrySet()) {
                 assignedUserDetailsHtml.add("<tr class=\"govuk-table__row\">");
                 String name = entry.getKey().split(HYPHEN_SEPARATOR)[0];
                 String email = entry.getKey().split(HYPHEN_SEPARATOR)[1];
                 assignedUserDetailsHtml.add("<td class=\"govuk-table__cell\">" + name + "</td>"
-                                                + "<td class=\"govuk-table__cell\">" + entry.getValue()
-                                                + "</td><td class=\"govuk-table__cell\">" + email + "</td>");
+                                                + "<td class=\"govuk-table__cell\">" + entry.getValue() + "</td>"
+                                                + "<td class=\"govuk-table__cell\">" + email + "</td>");
                 assignedUserDetailsHtml.add("</tr>");
             }
             assignedUserDetailsHtml.add("</tbody>");
