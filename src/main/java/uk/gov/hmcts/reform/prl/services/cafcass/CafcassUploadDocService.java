@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVA
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 
 @Slf4j
 @Service
@@ -106,6 +107,12 @@ public class CafcassUploadDocService {
             CAFCASS,
             quarantineLegalDoc
         );
+
+        //Changes to generate one WA task for cafcass upload document
+        if (!caseDataUpdated.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+        }
+
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
             startAllTabsUpdateDataContent.caseData(),
