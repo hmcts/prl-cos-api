@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -883,7 +884,7 @@ public class SendAndReplyService {
 
     private String getInternalOrExternalSentTo(CaseData caseData, Message message) {
         return InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-            ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : getMessageSentTO(caseData, message);
+            ? getExternalSentTo(message) : getMessageSentTO(caseData, message);
     }
 
     private String getMessageSentTO(CaseData caseData, Message message) {
@@ -1338,17 +1339,28 @@ public class SendAndReplyService {
             .build();
     }
 
-    private String getExternalSentTo(DynamicMultiSelectList externalMessageWhoToSendTo) {
-        log.info("external messages sent to {}",externalMessageWhoToSendTo);
-        Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(externalMessageWhoToSendTo);
-        log.info("external message sent to string {}",externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
-            .getValue().stream()
-            .map(DynamicMultiselectListElement::getLabel)
-            .collect(Collectors.joining(","))).orElse(""));
-        return externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+    private String getExternalSentTo(Message message) {
+        log.info("external messages sent to {}",message.getExternalMessageWhoToSendTo());
+        Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(message.getExternalMessageWhoToSendTo());
+        String externalOrInternalWhoSendTO = externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
             .getValue().stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","))).orElse("");
+        externalOrInternalWhoSendTO =
+            generateExternalOrInternalWhoSendTO(message.getCafcassEmailAddress(), externalOrInternalWhoSendTO);
+        externalOrInternalWhoSendTO =
+            generateExternalOrInternalWhoSendTO(message.getOtherPartiesEmailAddress(), externalOrInternalWhoSendTO);
+        return  externalOrInternalWhoSendTO;
+    }
+
+    private String generateExternalOrInternalWhoSendTO(String emailAddress, String externalOrInternalWhoSendTO) {
+        return StringUtils.isNotEmpty(emailAddress) ? (StringUtils.isEmpty(
+            externalOrInternalWhoSendTO)
+            ? emailAddress : StringUtils.join(
+            externalOrInternalWhoSendTO,
+            ",",
+            emailAddress
+        )) : externalOrInternalWhoSendTO;
     }
 
 
@@ -1696,6 +1708,21 @@ public class SendAndReplyService {
             }
             );
         }
+
+        if (YesOrNo.Yes.equals(message.getSendMessageToCafcass()) || Yes.equals(message.getSendMessageToOtherParties())) {
+
+            List<String> emails = new ArrayList<>();
+            if (StringUtils.isNotEmpty(message.getCafcassEmailAddress())) {
+                emails.add(message.getCafcassEmailAddress());
+            }
+            if (StringUtils.isNotEmpty(message.getOtherPartiesEmailAddress())) {
+                emails.addAll(List.of(StringUtils.split(message.getOtherPartiesEmailAddress(), ",")));
+            }
+            sendEmailNotificationToCafcassAndOtherParties(caseData, emails, auth);
+
+        }
+
+
     }
 
     private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party) {
@@ -1798,6 +1825,35 @@ public class SendAndReplyService {
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
+    }
+
+    private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
+
+
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        setMessageDataForEmail(caseData,message,allSelectedDocuments,dynamicData);
+        dynamicData.put("name","");
+        if (CollectionUtils.isNotEmpty(emails)) {
+            emails.forEach(emailAddress -> {
+
+                try {
+                    sendgridService.sendEmailUsingTemplateWithAttachments(
+                        SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+                        authorization,
+                        SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                            .dynamicTemplateData(dynamicData)
+                            .listOfAttachments(allSelectedDocuments)
+                            .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
+                            .build()
+                    );
+                } catch (IOException e) {
+                    log.error("Failed to send Email", e);
+                }
+            });
+
+        }
     }
 
     private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
@@ -1966,23 +2022,24 @@ public class SendAndReplyService {
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         // get selected Document size
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        String receiverFullName = getReceiverFullName(partyDetails);
+        dynamicData.put("name", receiverFullName);
+        setMessageDataForEmail(caseData, message, allSelectedDocuments, dynamicData);
+        return dynamicData;
+    }
+
+    private void setMessageDataForEmail(CaseData caseData, Message message, List<Document> allSelectedDocuments, Map<String, Object> dynamicData) {
         int documentSize = 0;
         if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
             documentSize = allSelectedDocuments.size();
         }
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
-        dynamicData.put("dashBoardLink", dashboardLink);
         dynamicData.put("subject", message.getMessageSubject());
         dynamicData.put("messageContent", caseData.getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
-        String receiverFullName = getReceiverFullName(partyDetails);
-        dynamicData.put("name", receiverFullName);
         dynamicData.put("documentSize", documentSize);
-        log.info("message about {}", message.getMessageAbout());
         dynamicData.put("messageAbout", String.valueOf(message.getMessageAbout()));
-        return dynamicData;
     }
 
     private String getReceiverFullName(PartyDetails partyDetails) {
@@ -2021,5 +2078,11 @@ public class SendAndReplyService {
         DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
         return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
             applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
+    }
+
+    public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
+        return CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())
+            || Yes.equals(message.getSendMessageToCafcass()) || Yes.equals(message.getSendMessageToOtherParties());
+
     }
 }

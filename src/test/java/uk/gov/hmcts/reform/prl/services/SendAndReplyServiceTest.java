@@ -120,6 +120,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -2396,6 +2397,110 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationToCafcassAndOthersC100Case() throws IOException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Respondent firstname")
+            .lastName("Respondent lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .contactPreferences(ContactPreferences.email)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(
+            respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(respondent.getFirstName() + " " + respondent.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .messageContent("some msg content")
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .sendMessageToCafcass(Yes)
+                                           .cafcassEmailAddress("cafcass@test.com")
+                                           .sendMessageToOtherParties(Yes)
+                                           .otherPartiesEmailAddress("test@test.com,test2@test.com")
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .messageSubject("message subject")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
+        dynamicData.put("name","");
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("test@test.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );
+    }
+
+    @Test
     public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
@@ -2485,7 +2590,6 @@ public class SendAndReplyServiceTest {
     private Map<String, Object> getEmailDynamicData(CaseData caseData) {
         Map<String, Object> dynamicData = new HashMap<>();
         dynamicData.put("caseReference", "12345");
-        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId());
         dynamicData.put("subject", "message subject");
         dynamicData.put("messageContent", "some msg content");
         dynamicData.put("attachmentType", "pdf");
@@ -3295,6 +3399,41 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataMessage, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
+    }
+
+
+    @Test
+    public void testSendAndReplyExternalPartiesAndCafcass() {
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code("12345")
+            .label("test" + " " + "test")
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code("123456")
+            .label("test" + " " + "test")
+            .build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+        Message message = Message.builder().messageAbout(MessageAboutEnum.APPLICATION).externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .sendMessageToCafcass(
+                Yes).sendMessageToCafcass(Yes).build();
+        boolean atLeastOnePartySelected = sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message);
+        assertEquals(true, atLeastOnePartySelected);
+
+
+    }
+
+    @Test
+    public void testSendAndReplyExternalPartiesAndCafcassScenario2() {
+
+        Message message = Message.builder().messageAbout(MessageAboutEnum.APPLICATION).externalMessageWhoToSendTo(
+                DynamicMultiSelectList.builder().build())
+            .sendMessageToCafcass(
+                No).sendMessageToCafcass(No).build();
+        boolean atLeastOnePartySelected = sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message);
+        assertEquals(false, atLeastOnePartySelected);
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
