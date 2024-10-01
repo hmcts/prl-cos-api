@@ -3,19 +3,23 @@ package uk.gov.hmcts.reform.prl.services.caseinitiation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
@@ -46,6 +50,9 @@ public class CaseInitiationServiceTest {
     private CoreCaseDataApi coreCaseDataApi;
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
+
+    @Mock
+    private LocationRefDataService locationRefDataService;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -92,6 +99,14 @@ public class CaseInitiationServiceTest {
             CallbackRequest.builder().caseDetails(caseDetails).build());
 
         verify(eventPublisher, times(1)).publishEvent(any());
+    }
+
+    @Test
+    public void testHandlePrePopulateCourtDetails() {
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+
+        Assertions.assertNotNull(caseInitiationService.prePopulateCourtDetails(AUTHORISATION, caseDataMap));
     }
 
 }
