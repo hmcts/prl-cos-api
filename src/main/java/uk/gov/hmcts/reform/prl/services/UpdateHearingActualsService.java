@@ -72,13 +72,13 @@ public class UpdateHearingActualsService {
     }
 
     private Map<String, String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
-        log.info("Fetching hearings for list of cases");
+        log.info("Fetching hearings for list of cases {}", listOfCaseidsForHearings);
         List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
             listOfCaseidsForHearings
         );
-
+        log.info("Hearings details for the list of cases {}", hearingsList);
         return filterCaseIdAndHearingsForTodaysDate(hearingsList);
     }
 
@@ -134,10 +134,10 @@ public class UpdateHearingActualsService {
     }
 
     private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
-        log.info("Filtering cases having hearings listed for today");
         Map<String, String> caseIdHearingIdMapping = new HashMap<>();
         if (isNotEmpty(hearingsForAllCaseIds)) {
             hearingsForAllCaseIds.forEach(hearings -> {
+                log.info("Filtering hearings for case {}, with case hearings {}", hearings.getCaseRef(), hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
                     .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
@@ -146,6 +146,7 @@ public class UpdateHearingActualsService {
                                 && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
                         ))
                     .map(CaseHearing::getHearingID).toList();
+                log.info("Filtered hearings ids {}", filteredHearingIds);
                 if (isNotEmpty(filteredHearingIds)) {
                     log.info("Found a hearing is listed for today for the case {}, & hearing {}", hearings.getCaseRef(), filteredHearingIds.get(0));
                     caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
