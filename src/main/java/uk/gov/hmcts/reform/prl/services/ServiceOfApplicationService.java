@@ -2211,7 +2211,7 @@ public class ServiceOfApplicationService {
         return caseDataUpdated;
     }
 
-    private String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
+    public String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
         String warningText = BLANK_STRING;
         boolean isRespondentAddressPresent = true;
         boolean isOtherPeopleAddressPresent = true;

@@ -749,7 +749,7 @@ public class SendAndReplyService {
         return "";
     }
 
-    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
+    public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
                                                                                   DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
             return null;

@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -73,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
@@ -175,6 +177,15 @@ public class CaseUtils {
             return true;
         }
 
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
+    }
+
+    /*
+    Below method checks for Both if the case is a citizen case
+    or the main applicant in the case is not represented.
+    * **/
+    public static boolean isCitizenCase(CaseData caseData) {
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
             0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
@@ -881,5 +892,44 @@ public class CaseUtils {
         if (address.getPostCode() != null && StringUtils.isNotEmpty(address.getPostCode().trim())) {
             addressLines.add(address.getPostCode());
         }
+    }
+
+    public static List<String> getSelectedPartyIds(String caseTypeOfApplication,
+                                                   List<Element<PartyDetails>> parties,
+                                                   PartyDetails fl401Party,
+                                                   List<DynamicMultiselectListElement> selectedParties) {
+        //FL401
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return selectedParties.stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .filter(code -> fl401Party.getPartyId().toString().equals(code))
+                .toList();
+        }
+        //C100
+        return nullSafeCollection(parties)
+            .stream()
+            .map(Element::getId)
+            .filter(id ->
+                        selectedParties.stream().anyMatch(
+                            party -> id.toString().equals(party.getCode()))
+            )
+            .map(Objects::toString)
+            .toList();
+    }
+
+    public static PartyDetails getOtherPerson(String id, CaseData caseData) {
+        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised()
+            : caseData.getOthersToNotify();
+        if (null != otherPartiesToNotify) {
+            Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
+                .filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                .findFirst();
+            if (otherPerson.isPresent()) {
+                return otherPerson.get().getValue();
+            }
+        }
+        return null;
     }
 }
