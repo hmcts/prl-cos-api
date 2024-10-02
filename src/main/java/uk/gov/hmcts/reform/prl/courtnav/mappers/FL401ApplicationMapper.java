@@ -83,6 +83,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -207,7 +208,7 @@ public class FL401ApplicationMapper {
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
-                               .interpreterNeeds(interpreterLanguageDetails(courtNavCaseData))
+                               .interpreterNeeds(getInterpreterNeeds(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
                                                         ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
@@ -235,6 +236,11 @@ public class FL401ApplicationMapper {
 
         return caseData;
 
+    }
+
+    private List<Element<InterpreterNeed>> getInterpreterNeeds(CourtNavFl401 courtNavCaseData) {
+        return Boolean.FALSE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
+            ? Collections.emptyList() : interpreterLanguageDetails(courtNavCaseData);
     }
 
     private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
