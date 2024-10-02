@@ -1036,4 +1036,7 @@ public class PrlAppsConstants {
     public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
 
     public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";
+
+    public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
+
 }
