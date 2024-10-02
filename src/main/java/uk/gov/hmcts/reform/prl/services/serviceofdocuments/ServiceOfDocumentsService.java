@@ -768,4 +768,20 @@ public class ServiceOfDocumentsService {
             }
         }
     }
+
+    public List<String> validateDocuments(CallbackRequest callbackRequest) {
+        List<String> errors = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodAdditionalDocumentsList())
+            && emptyCfvSelectedDocuments(caseData)) {
+            errors.add("Please select a document or upload a document to serve");
+        }
+        return errors;
+    }
+
+    private boolean emptyCfvSelectedDocuments(CaseData caseData) {
+        return CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodDocumentsList())
+            || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0)
+            || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0).getValue();
+    }
 }
