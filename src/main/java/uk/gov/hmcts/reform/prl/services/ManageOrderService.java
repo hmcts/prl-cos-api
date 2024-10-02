@@ -106,6 +106,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -3286,9 +3287,10 @@ public class ManageOrderService {
             waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
                 WA_SER_DUE_DATE,
-                caseData.getServeOrderData().getWhenReportsMustBeFiled().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                DAYS.between(caseData.getServeOrderData().getWhenReportsMustBeFiled(), LocalDate.now()) > 7
+                    ? caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE) : null
             );
-
+            log.info("waFieldsMap => " + waFieldsMap);
         }
     }
 
