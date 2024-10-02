@@ -153,9 +153,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
@@ -1148,7 +1150,7 @@ public class ManageOrderService {
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
-            if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            if (!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             } else {
@@ -1247,7 +1249,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                              .isJudgeApprovalNeeded(noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
@@ -1381,7 +1383,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                              .isJudgeApprovalNeeded(noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
@@ -3266,18 +3268,21 @@ public class ManageOrderService {
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
             }
         }
-        setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap);
+        setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
         return waFieldsMap;
     }
 
-    public void setFieldsForRequestSafeGuardingReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
-        if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+    public void setFieldsForRequestSafeGuardingReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap, String eventId) {
+        if (((eventId.equals(MANAGE_ORDERS.getId()) && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
+                || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId()))
             && CollectionUtils.isNotEmpty(caseData.getServeOrderData().getCafcassCymruDocuments())
             && caseData.getServeOrderData().getCafcassCymruDocuments().contains(CafcassCymruDocumentsEnum.safeGuardingLetter)
+            && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
             && YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+            log.info("Inside setFieldsForRequestSafeGuardingReportWaTask");
             waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
                 WA_SER_DUE_DATE,
