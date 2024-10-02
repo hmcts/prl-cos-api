@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -3279,15 +3278,14 @@ public class ManageOrderService {
     public void setFieldsForRequestSafeGuardingReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap, String eventId) {
         if (((eventId.equals(MANAGE_ORDERS.getId()) && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
                 || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId()))
-            && CollectionUtils.isNotEmpty(caseData.getServeOrderData().getCafcassCymruDocuments())
-            && caseData.getServeOrderData().getCafcassCymruDocuments().contains(CafcassCymruDocumentsEnum.safeGuardingLetter)
+            && Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())
             && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
             && YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
             log.info("Inside setFieldsForRequestSafeGuardingReportWaTask");
             waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
                 WA_SER_DUE_DATE,
-                DAYS.between(caseData.getServeOrderData().getWhenReportsMustBeFiled(), LocalDate.now()) > 7
+                DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) > 7
                     ? caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE) : null
             );
             log.info("waFieldsMap => " + waFieldsMap);
