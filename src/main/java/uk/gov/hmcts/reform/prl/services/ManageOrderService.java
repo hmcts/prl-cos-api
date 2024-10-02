@@ -3280,14 +3280,12 @@ public class ManageOrderService {
                 || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId()))
             && Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())
             && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
+            && DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) >= 7
             && YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
             log.info("Inside setFieldsForRequestSafeGuardingReportWaTask");
             waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
-                WA_SER_DUE_DATE,
-                DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) > 7
-                    ? caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE) : null
-            );
+                WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE));
             log.info("waFieldsMap => " + waFieldsMap);
         }
     }

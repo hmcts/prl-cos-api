@@ -5595,7 +5595,7 @@ public class ManageOrderServiceTest {
         );
 
         assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
-        assertEquals(LocalDate.now().plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
+        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
     }
 
     @Test
@@ -5618,7 +5618,7 @@ public class ManageOrderServiceTest {
             MANAGE_ORDERS.getId()
         );
 
-        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
         assertNull(updatedCaseData.get(WA_SER_DUE_DATE));
     }
 
@@ -5630,7 +5630,7 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
             .serveOrderData(ServeOrderData.builder()
                                 .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
                                 .build())
             .isPathfinderCase(YesOrNo.Yes)
             .build();
@@ -5652,7 +5652,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .serveOrderData(ServeOrderData.builder()
                                 .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
                                 .build())
             .isPathfinderCase(YesOrNo.Yes)
             .build();
