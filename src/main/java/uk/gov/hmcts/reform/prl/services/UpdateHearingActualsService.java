@@ -219,7 +219,7 @@ public class UpdateHearingActualsService {
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
-                .size(ccdElasticSearchApiResultSize)
+                .size("100")
                 .build();
     }
 
