@@ -165,6 +165,7 @@ uk:
             SOA_UNREPRESENTED_APPLICANT_COURTNAV: fefaa319-3184-48a1-8de5-66f63036a912
             SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV: 607dcbd6-8c46-4ab9-92ef-8f41fc8be863
             SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT: fefaa319-3184-48a1-8de5-66f63036a912
+            SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS: be25c994-b95b-431a-bd5f-08e27fc0e60e
             CA_LIP_ORDERS: 0bf7cd2a-64ef-4b07-b886-d2658bc0a34e
             SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A: ae88f74f-6b77-4faa-884c-73c1ac596a44
             FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
@@ -198,6 +199,7 @@ uk:
             C7_NOTIFICATION_APPLICANT: 2475c145-4f08-4a04-85c0-bfda7cd4b1e1
             C1A_NOTIFICATION_APPLICANT: fbfab6ba-0a4b-4a8d-8696-6b7000d1df3f
             C1A_RESPONSE_NOTIFICATION_APPLICANT: 4d38f282-de3b-40bd-86bd-76fd556aa453
+            SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS: 061c4280-b68e-49bb-b2d0-abbc033c3cb2
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -746,7 +748,7 @@ cafcaas:
   hearingStatus: LISTED, CANCELLED
 ccd:
   elastic-search-api:
-    result-size: 100
+    result-size: 10000
     boost: 2.0
 
 refdata:
