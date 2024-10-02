@@ -91,6 +91,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfDocumentsService {
 
+    public static final String GOV_NOTIFY_TEMPLATE = "govNotifyTemplate";
+    public static final String SEND_GRID_TEMPLATE = "sendGridTemplate";
+    public static final String SERVED_PARTY = "servedParty";
     private final ObjectMapper objectMapper;
     private final SendAndReplyService sendAndReplyService;
     private final ServiceOfApplicationService serviceOfApplicationService;
@@ -311,8 +314,8 @@ public class ServiceOfDocumentsService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
         Map<String, Object> params = new HashMap<>();
         params.put(AUTHORIZATION, authorisation);
-        params.put("govNotifyTemplate", EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
-        params.put("sendGridTemplate", SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
+        params.put(GOV_NOTIFY_TEMPLATE, EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
+        params.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             //C100
             caseData.getApplicants()
@@ -350,7 +353,7 @@ public class ServiceOfDocumentsService {
         params.put(AUTHORIZATION, (String) inputParams.get(AUTHORIZATION));
         if (isNotEmpty(party.getValue().getSolicitorEmail())) {
             params.put(
-                "servedParty",
+                SERVED_PARTY,
                 isApplicant ? SERVED_PARTY_APPLICANT_SOLICITOR : SERVED_PARTY_RESPONDENT_SOLICITOR
             );
             sendEmailToSolicitor(
@@ -363,13 +366,13 @@ public class ServiceOfDocumentsService {
             );
         } else if (isNotEmpty(party.getValue().getEmail())
             && ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
-            params.put("servedParty", isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT);
+            params.put(SERVED_PARTY, isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT);
             sendEmailToParty(
                 caseData,
                 party,
                 unServedPack,
-                (EmailTemplateNames) inputParams.get("govNotifyTemplate"),
-                (SendgridEmailTemplateNames) inputParams.get("sendGridTemplate"),
+                (EmailTemplateNames) inputParams.get(GOV_NOTIFY_TEMPLATE),
+                (SendgridEmailTemplateNames) inputParams.get(SEND_GRID_TEMPLATE),
                 emailNotificationDetails,
                 params
             );
@@ -391,7 +394,7 @@ public class ServiceOfDocumentsService {
                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         Map<String, String> params = new HashMap<>();
         params.put(AUTHORIZATION, authorisation);
-        params.put("servedParty", SERVED_PARTY_APPLICANT_SOLICITOR);
+        params.put(SERVED_PARTY, SERVED_PARTY_APPLICANT_SOLICITOR);
         Element<PartyDetails> party = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
             ? caseData.getApplicants().get(0) : element(
             caseData.getApplicantsFL401().getPartyId(),
@@ -415,7 +418,7 @@ public class ServiceOfDocumentsService {
                                       List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                       Map<String, String> params) {
         String authorisation = params.get(AUTHORIZATION);
-        String servedParty = params.get("servedParty");
+        String servedParty = params.get(SERVED_PARTY);
         if (isNotEmpty(party.getValue().getSolicitorEmail())) {
             EmailNotificationDetails emailNotification = sendSendgridEmail(
                 authorisation,
@@ -443,9 +446,9 @@ public class ServiceOfDocumentsService {
                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                   Map<String, String> params) {
         String authorisation = params.get(AUTHORIZATION);
-        String servedParty = params.get("servedParty");
+        String servedParty = params.get(SERVED_PARTY);
         EmailNotificationDetails emailNotification;
-        if (CaseUtils.isCitizenAccessEnabled(party.getValue())) {
+        if (CaseUtils.hasDashboardAccess(party)) {
             log.debug("Party has access to dashboard -> send gov notify email for {}", party.getId());
             emailNotification = sendGovNotifyEmail(caseData, getDocumentsToBeServed(unServedPack), party, servedParty, govNotifyTemplate);
         } else {
@@ -507,7 +510,7 @@ public class ServiceOfDocumentsService {
             }
         } catch (Exception e) {
             log.error("error while generating coversheet {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -629,11 +632,11 @@ public class ServiceOfDocumentsService {
                     Map<String, Object> params = new HashMap<>();
                     params.put(AUTHORIZATION, authorisation);
                     params.put(
-                        "govNotifyTemplate",
+                        GOV_NOTIFY_TEMPLATE,
                         EmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP
                     );
                     params.put(
-                        "sendGridTemplate",
+                        SEND_GRID_TEMPLATE,
                         SendgridEmailTemplateNames.SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP
                     );
                     handlePersonalNonPersonalServiceOfDocuments(

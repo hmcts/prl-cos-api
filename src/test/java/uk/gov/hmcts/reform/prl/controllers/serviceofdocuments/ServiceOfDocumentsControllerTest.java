@@ -93,14 +93,6 @@ public class ServiceOfDocumentsControllerTest {
         }, RuntimeException.class, "Invalid Client");
     }
 
-    /*@Test
-    public void testHandleSubmitted() throws Exception {
-        when(serviceOfDocumentsService.handleSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(
-            ok(SubmittedCallbackResponse.builder().build()));
-
-        assertNotNull(serviceOfDocumentsController.handleSubmitted(any(),any(),callbackRequest));
-    }*/
-
     @Test
     public void testExceptionHandleSubmitted() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);

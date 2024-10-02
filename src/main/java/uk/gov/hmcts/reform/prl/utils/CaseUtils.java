@@ -496,11 +496,6 @@ public class CaseUtils {
         return givenZonedTime.withZoneSameInstant(ZoneId.of(EUROPE_LONDON)).toLocalDateTime();
     }
 
-    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
-        return party != null && party.getUser() != null
-            && party.getUser().getIdamId() != null;
-    }
-
     public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
