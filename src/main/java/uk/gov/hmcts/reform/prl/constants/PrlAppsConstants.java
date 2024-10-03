@@ -595,8 +595,10 @@ public class PrlAppsConstants {
     public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
     public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
     public static final String APPLICANT_C1A_RESPONSE = "Applicant C1A response";
-    public static final String RESPONDENT_APPLCATION = "Respondent application";
-    public static final String RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
+    public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
+    public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
+    public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
     public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";

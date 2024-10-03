@@ -49,6 +49,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
@@ -66,14 +68,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_DISCLOSURES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_APPLCATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -389,15 +391,25 @@ public class BundleCreateRequestMapperTest {
             .documentParty("Court").categoryName(ANY_OTHER_DOCUMENTS).build();
         courtStaffDoc.add(element(anyOtherDocuments));
 
-        QuarantineLegalDoc respondentApplication = QuarantineLegalDoc.builder()
+        QuarantineLegalDoc solicitorRespondentApplication = QuarantineLegalDoc.builder()
             .respondentApplicationDocument(Document.builder().documentFileName("respondentApplication").build())
-            .categoryName(RESPONDENT_APPLCATION).build();
-        courtStaffDoc.add(element(respondentApplication));
+            .categoryName(SOLICITOR_RESPONDENT_APPLCATION).build();
+        courtStaffDoc.add(element(solicitorRespondentApplication));
 
-        QuarantineLegalDoc respondentC1aApplication = QuarantineLegalDoc.builder()
+        QuarantineLegalDoc solicitorRespondentC1aApplication = QuarantineLegalDoc.builder()
             .respondentC1AApplicationDocument(Document.builder().documentFileName("respondentC1aApplication").build())
-            .categoryName(RESPONDENT_C1A_APPLCATION).build();
-        courtStaffDoc.add(element(respondentC1aApplication));
+            .categoryName(SOLICITOR_RESPONDENT_C1A_APPLCATION).build();
+        courtStaffDoc.add(element(solicitorRespondentC1aApplication));
+
+        QuarantineLegalDoc citizenRespondentApplication = QuarantineLegalDoc.builder()
+            .respondentApplicationDocument(Document.builder().documentFileName("respondentApplication").build())
+            .categoryName(CITIZEN_RESPONDENT_APPLCATION).build();
+        courtStaffDoc.add(element(citizenRespondentApplication));
+
+        QuarantineLegalDoc citizenRespondentC1aApplication = QuarantineLegalDoc.builder()
+            .respondentC1AApplicationDocument(Document.builder().documentFileName("respondentC1aApplication").build())
+            .categoryName(CITIZEN_RESPONDENT_C1A_APPLCATION).build();
+        courtStaffDoc.add(element(citizenRespondentC1aApplication));
 
         QuarantineLegalDoc respondentC1aResponse = QuarantineLegalDoc.builder()
             .respondentC1AResponseDocument(Document.builder().documentFileName("respondentC1aResponse").build())

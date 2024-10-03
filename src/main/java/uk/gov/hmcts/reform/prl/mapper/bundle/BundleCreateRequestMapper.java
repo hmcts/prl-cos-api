@@ -48,6 +48,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_DOCUMENT;
@@ -71,14 +73,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_APPLCATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -175,11 +177,11 @@ public class BundleCreateRequestMapper {
             allOtherDocuments.addAll(c100ApplicantOtherProceedingsDocs);
         }
 
-        List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
-            mapBundlingDocsFromCitizenUploadedDocs(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
-        if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
-            allOtherDocuments.addAll(citizenUploadedDocuments);
-        }
+        //List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
+        //    mapBundlingDocsFromCitizenUploadedDocs(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
+        //if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
+        //    allOtherDocuments.addAll(citizenUploadedDocuments);
+        //}
         //SNI-4260 fix
         //Updated to retrieve otherDocuments according to the new manageDocuments event
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
@@ -369,6 +371,13 @@ public class BundleCreateRequestMapper {
             List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
             allDocuments.addAll(legalProfUploadDocList);
         }
+
+        if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()
+            && !caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().isEmpty()) {
+            List<Element<QuarantineLegalDoc>> citizenUploadedDocuments = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab();
+            allDocuments.addAll(citizenUploadedDocuments);
+        }
+
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         List<QuarantineLegalDoc> allDocs = ElementUtils.unwrapElements(allDocuments);
         for (QuarantineLegalDoc doc : allDocs) {
@@ -525,13 +534,15 @@ public class BundleCreateRequestMapper {
                     .documentFileName(doc.getApplicantC1AResponseDocument().getDocumentFileName())
                     .documentGroup(BundlingDocGroupEnum.applicantC1AResponse).build();
                 break;
-            case RESPONDENT_APPLCATION:
+            case SOLICITOR_RESPONDENT_APPLCATION:
+            case CITIZEN_RESPONDENT_APPLCATION:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentApplicationDocument())
                     .documentFileName(doc.getRespondentApplicationDocument().getDocumentFileName())
                     .documentGroup(BundlingDocGroupEnum.respondentApplication).build();
                 break;
-            case RESPONDENT_C1A_APPLCATION:
+            case SOLICITOR_RESPONDENT_C1A_APPLCATION:
+            case CITIZEN_RESPONDENT_C1A_APPLCATION:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentC1AApplicationDocument())
                     .documentFileName(doc.getRespondentC1AApplicationDocument().getDocumentFileName())
