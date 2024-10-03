@@ -895,18 +895,20 @@ public class ServiceOfApplicationService {
             .id(caseData.getRespondentsFL401().getPartyId())
             .value(caseData.getRespondentsFL401())
             .build();
-        reLetters.add(getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondent));
+        reLetters.add(getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondent,
+                                                            CaseUtils.getCaseInvite(respondent.getId(), caseData.getCaseInvites())));
         coverLetterMap.add(element(respondent.getId(), CoverLetterMap.builder().coverLetters(wrapElements(reLetters)).build()));
         return reLetters;
     }
 
-    private Document getRe1OrRe4BasedOnWithOrWithoutNotice(CaseData caseData, String authorization, Element<PartyDetails> respondent) {
+    private Document getRe1OrRe4BasedOnWithOrWithoutNotice(CaseData caseData, String authorization, Element<PartyDetails> respondent,
+                                                           CaseInvite caseInvite) {
         boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(
             caseData);
         if (applyOrderWithoutGivingNoticeToRespondent) {
-            return generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE4);
+            return generateAccessCodeLetter(authorization, caseData, respondent, caseInvite, PRL_LET_ENG_FL401_RE4);
         } else {
-            return generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE1);
+            return generateAccessCodeLetter(authorization, caseData, respondent, caseInvite, PRL_LET_ENG_FL401_RE1);
         }
     }
 
@@ -1012,7 +1014,9 @@ public class ServiceOfApplicationService {
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
-                coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0));
+                coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
+                                                                    CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
+                                                                                            caseData.getCaseInvites()));
                 sendEmail = false;
                 docs.add(coverLetter);
             }
@@ -3305,7 +3309,8 @@ public class ServiceOfApplicationService {
             if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 log.info("applicant lip");
                 partyId = String.valueOf(applicantFl401.get(0).getId());
-                Document coverletter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP2);
+                Document coverletter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0),
+                                                                            PRL_LET_ENG_AP2);
                 docs.add(coverletter);
                 coverLetterMap.add(element(UUID.fromString(partyId), CoverLetterMap.builder()
                     .coverLetters(List.of(element(coverletter))).build()));
@@ -3327,7 +3332,9 @@ public class ServiceOfApplicationService {
             if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 log.info("respondent lip");
                 partyId = String.valueOf(respondentFl401.get(0).getId());
-                Document coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0));
+                Document coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
+                                                                             CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
+                                                                                                     caseData.getCaseInvites()));
                 docs.add(coverLetter);
                 coverLetterMap.add(element(UUID.fromString(partyId), CoverLetterMap.builder()
                     .coverLetters(List.of(element(coverLetter))).build()));
