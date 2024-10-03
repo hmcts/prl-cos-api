@@ -16,14 +16,19 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.AdditionalRecipients;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.ServiceOfDocumentsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -35,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
@@ -45,6 +51,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.time.ZoneId;
@@ -73,11 +80,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER_ORGANISATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_ADDITIONAL_RECIPIENTS;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_APPLICANT_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
@@ -94,6 +103,7 @@ public class ServiceOfDocumentsService {
     public static final String GOV_NOTIFY_TEMPLATE = "govNotifyTemplate";
     public static final String SEND_GRID_TEMPLATE = "sendGridTemplate";
     public static final String SERVED_PARTY = "servedParty";
+    private static final String LETTER_TYPE = "Documents";
     private final ObjectMapper objectMapper;
     private final SendAndReplyService sendAndReplyService;
     private final ServiceOfApplicationService serviceOfApplicationService;
@@ -104,6 +114,7 @@ public class ServiceOfDocumentsService {
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final EmailService emailService;
+    private final BulkPrintService bulkPrintService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -187,11 +198,14 @@ public class ServiceOfDocumentsService {
                 .build();
         }
         //additional recipients
-        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipients())) {
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipients())
+            && caseData.getServiceOfDocuments().getSodAdditionalRecipients().contains(AdditionalRecipients.additionalRecipients)
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
             unServedPack = unServedPack.toBuilder()
                 .additionalRecipients(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())
                 .build();
         }
+
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         //Add un-served documents to caseData
         caseDataMap.put("sodUnServedPack", unServedPack);
@@ -241,6 +255,7 @@ public class ServiceOfDocumentsService {
             serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
 
             //serve additional recipients
+            serveDocumentsToAdditionalRecipients(authorisation, caseData, unServedPack, emailNotificationDetails, bulkPrintDetails);
 
             //Reset unserved packs
             caseDataMap.put("sodUnServedPack", null);
@@ -504,6 +519,26 @@ public class ServiceOfDocumentsService {
         }
     }
 
+    private void sendEmailToAdditionalRecipients(String authorisation,
+                                                 CaseData caseData,
+                                                 SodPack unServedPack,
+                                                 List<EmailInformation> emailList,
+                                                 List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        emailList.forEach(emailInfo -> {
+            Map<String, Object> dynamicData = getEmailDynamicData(caseData, null, emailInfo.getEmailName());
+
+            emailNotificationDetails.add(
+                element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                    authorisation,
+                    emailInfo.getEmailAddress(),
+                    unwrapElements(unServedPack.getDocuments()),
+                    SOD_ADDITIONAL_RECIPIENTS,
+                    dynamicData,
+                    SERVED_PARTY_OTHER_ORGANISATION
+                )));
+        });
+    }
+
     private void sendPostToParty(String authorisation,
                                  CaseData caseData,
                                  Element<PartyDetails> party,
@@ -522,13 +557,20 @@ public class ServiceOfDocumentsService {
                                                           ));
 
                 docs.addAll(unwrapElements(documents));
-                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-                    caseData,
+
+                BulkPrintDetails bulkPrintNotif = sendPostViaBulkPrint(
                     authorisation,
-                    party,
+                    caseData,
                     docs,
+                    party.getValue().getLabelForDynamicList(),
+                    party.getValue().getAddress(),
                     servedParty
-                )));
+                );
+                if (null != bulkPrintNotif) {
+                    bulkPrintDetails.add(element(bulkPrintNotif.toBuilder()
+                                                     .partyIds(String.valueOf(party.getId()))
+                                                     .build()));
+                }
             } else {
                 log.error(
                     "Couldn't post the documents to party address, as address is null/empty for {}",
@@ -539,6 +581,74 @@ public class ServiceOfDocumentsService {
             log.error("error while generating coversheet {}", e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private void sendPostToAdditionalRecipients(String authorisation,
+                                                CaseData caseData,
+                                                SodPack unServedPack,
+                                                List<PostalInformation> postList,
+                                                List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        postList.forEach(postInfo -> {
+            if ((isNotEmpty(postInfo)
+                && isNotEmpty(postInfo.getPostalAddress()))
+                && isNotEmpty(postInfo.getPostalAddress().getAddressLine1())) {
+                List<Document> documents = null;
+                try {
+                    documents = new ArrayList<>(serviceOfApplicationPostService
+                                                    .getCoverSheets(
+                                                        caseData,
+                                                        authorisation,
+                                                        postInfo.getPostalAddress(),
+                                                        postInfo.getPostalName(),
+                                                        DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                                                    ));
+                    documents.addAll(unwrapElements(unServedPack.getDocuments()));
+
+                    bulkPrintDetails.add(element(sendPostViaBulkPrint(
+                        authorisation,
+                        caseData,
+                        documents,
+                        postInfo.getPostalName(),
+                        postInfo.getPostalAddress(),
+                        SERVED_PARTY_OTHER_ORGANISATION
+                    )));
+                } catch (Exception e) {
+                    log.error("error while generating coversheet {}", e.getMessage(), e);
+                    throw new RuntimeException(e.getMessage());
+                }
+            } else {
+                log.error(
+                    "Couldn't post the documents to additional recipients address, as address is null/empty for {}",
+                    postInfo.getPostalName()
+                );
+            }
+        });
+    }
+
+    private BulkPrintDetails sendPostViaBulkPrint(String authorisation,
+                                                  CaseData caseData,
+                                                  List<Document> documents,
+                                                  String name,
+                                                  Address address,
+                                                  String servedParty) {
+        UUID bulkPrintId = bulkPrintService.send(
+            String.valueOf(caseData.getId()),
+            authorisation,
+            LETTER_TYPE,
+            documents,
+            name
+        );
+
+        return BulkPrintDetails.builder()
+            .bulkPrintId(String.valueOf(bulkPrintId))
+            .servedParty(servedParty)
+            .printedDocs(String.join(",", documents.stream().map(Document::getDocumentFileName).toList()))
+            .recipientsName(name)
+            .printDocs(documents.stream().map(ElementUtils::element).toList())
+            .postalAddress(address)
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                           .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .build();
     }
 
     private EmailNotificationDetails sendGovNotifyEmail(CaseData caseData,
@@ -583,10 +693,16 @@ public class ServiceOfDocumentsService {
     }
 
     private Map<String, Object> getEmailDynamicData(CaseData caseData,
-                                                    PartyDetails party) {
+                                                    PartyDetails party,
+                                                    String addlRecipientName) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("partyName", party.getLabelForDynamicList());
-        dynamicData.put("solicitorName", party.getRepresentativeFullName());
+        if (null != party) {
+            dynamicData.put("partyName", party.getLabelForDynamicList());
+            dynamicData.put("solicitorName", party.getRepresentativeFullName());
+        }
+        if (null != addlRecipientName) {
+            dynamicData.put("name", addlRecipientName);
+        }
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
@@ -601,7 +717,7 @@ public class ServiceOfDocumentsService {
                                                        String servedParty,
                                                        String email,
                                                        SendgridEmailTemplateNames sendgridTemplate) {
-        Map<String, Object> dynamicData = getEmailDynamicData(caseData, party.getValue());
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData, party.getValue(), null);
 
         return serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorisation,
@@ -726,6 +842,32 @@ public class ServiceOfDocumentsService {
                         );
                     }
                 });
+        }
+    }
+
+    private void serveDocumentsToAdditionalRecipients(String authorisation,
+                                                      CaseData caseData,
+                                                      SodPack unServedPack,
+                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        List<EmailInformation> emailList = new ArrayList<>();
+        List<PostalInformation> postList = new ArrayList<>();
+        //get email and postal information
+        unServedPack.getAdditionalRecipients().stream()
+            .map(Element::getValue)
+            .forEach(addRecipient -> {
+                if (DeliveryByEnum.email.equals(addRecipient.getServeByPostOrEmail())) {
+                    emailList.add(addRecipient.getEmailInformation());
+                } else if (DeliveryByEnum.post.equals(addRecipient.getServeByPostOrEmail())) {
+                    postList.add(addRecipient.getPostalInformation());
+                }
+            });
+
+        if (CollectionUtils.isNotEmpty(emailList)) {
+            sendEmailToAdditionalRecipients(authorisation, caseData, unServedPack, emailList, emailNotificationDetails);
+        }
+        if (CollectionUtils.isNotEmpty(postList)) {
+            sendPostToAdditionalRecipients(authorisation, caseData, unServedPack, postList, bulkPrintDetails);
         }
     }
 
