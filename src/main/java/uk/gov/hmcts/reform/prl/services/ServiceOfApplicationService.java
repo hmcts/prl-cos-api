@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -58,6 +59,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -81,6 +83,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
@@ -122,6 +125,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.M;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
@@ -147,6 +151,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PRODUCT_HEARING_BUNDLE_ON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -312,6 +317,8 @@ public class ServiceOfApplicationService {
     private final CaseInviteManager caseInviteManager;
     private final DgsService dgsService;
     private final LaunchDarklyClient launchDarklyClient;
+
+    private final HearingService hearingService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1644,7 +1651,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
+    public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
@@ -1677,11 +1684,34 @@ public class ServiceOfApplicationService {
         //PRL-5335 - WA fields for bundling lip case
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
         if (null == isAllApplicantsAreLiP) {
-            caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? YES : NO);
+            if (isApplicantRepresented(caseData)) {
+                caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, YES);
+            } else {
+                log.info("applicant not represented");
+                caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, NO);
+                publishHearingDate(callbackRequest, authorisation, caseDataMap);
+            }
         } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
         }
         return caseDataMap;
+    }
+
+    private void publishHearingDate(CallbackRequest callbackRequest, String authorisation, Map<String, Object> caseDataMap) {
+        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(callbackRequest.getCaseDetails().getId()));
+        if (null != hearings && CollectionUtils.isNotEmpty(hearings.getCaseHearings())
+            && LISTED.equals(hearings.getCaseHearings().get(0).getHmcStatus()) && null != hearings.getCaseHearings().get(
+            0).getNextHearingDate()) {
+            caseDataMap.put(
+                WA_PRODUCT_HEARING_BUNDLE_ON,
+                DAYS.between(
+                                LocalDate.now(),
+                                hearings.getCaseHearings().get(0).getNextHearingDate().toLocalDate()) > 3
+                                ? hearings.getCaseHearings().get(0).getNextHearingDate().minusDays(3).format(
+                                DateTimeFormatter.ISO_LOCAL_DATE) : LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            );
+        }
+        log.info("publishHearingDate -> caseDataMap" + caseDataMap);
     }
 
 
@@ -2646,7 +2676,8 @@ public class ServiceOfApplicationService {
             "soaCafcassEmailId",
             PROCEED_TO_SERVING,
             MISSING_ADDRESS_WARNING_TEXT,
-            SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
+            SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA,
+            WA_PRODUCT_HEARING_BUNDLE_ON
         ));
 
         for (String field : soaFields) {
