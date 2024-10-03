@@ -91,8 +91,6 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
@@ -125,7 +123,7 @@ public class BundleCreateRequestMapper {
                 if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
                     return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
                         .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getHearingDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
+                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
                         .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
                 }
             }
@@ -133,12 +131,12 @@ public class BundleCreateRequestMapper {
         return BundleHearingInfo.builder().build();
     }
 
-    private String getHearingDateTime(LocalDateTime hearingStartDateTime) {
-        StringBuilder hearingDateTime = new StringBuilder();
-        LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingStartDateTime);
+    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
+        StringBuilder newBundleDateTime = new StringBuilder();
+        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
 
-        return hearingDateTime
-            .append(hearingStartDateTime.format(dateTimeFormatter))
+        return newBundleDateTime
+            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
             .append(EMPTY_SPACE_STRING)
             .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
             .toString();
