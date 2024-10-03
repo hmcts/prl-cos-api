@@ -95,6 +95,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1009,6 +1010,30 @@ public class CallbackController {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyChildDetails(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/fetch-da-courts", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Gets DA courts")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse fetchDaCourts(@RequestHeader(HttpHeaders.AUTHORIZATION)
+                                                              @Parameter(hidden = true) String authorisation,
+                                                              @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                              @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
+                    .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
+                            .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
+                            .toList())
+                    .build());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
 

@@ -3443,4 +3443,38 @@ public class CallbackControllerTest {
             .populateChildInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("children"));
     }
+
+    @Test
+    public void testDaCourtLocations() {
+        Map<String, Object> caseDetails = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(1L)
+                        .data(caseDetails).build()).build();
+        List<DynamicListElement> courts = List.of(DynamicListElement.builder().label("123").build());
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(locationRefDataService.getDaCourtLocations(authToken))
+                .thenReturn(courts);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+                .fetchDaCourts(authToken,s2sToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("submitCountyCourtSelection"));
+    }
+
+    @Test
+    public void testDaCourtLocations_Validation_False() {
+        Map<String, Object> caseDetails = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(1L)
+                        .data(caseDetails).build()).build();
+        List<DynamicListElement> courts = List.of(DynamicListElement.builder().label("123").build());
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        when(locationRefDataService.getDaCourtLocations(authToken))
+                .thenReturn(courts);
+        assertExpectedException(() -> {
+            callbackController.fetchDaCourts(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
 }
