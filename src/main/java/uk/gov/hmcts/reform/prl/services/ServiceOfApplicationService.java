@@ -2666,7 +2666,8 @@ public class ServiceOfApplicationService {
             "soaCafcassEmailId",
             PROCEED_TO_SERVING,
             MISSING_ADDRESS_WARNING_TEXT,
-            SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
+            SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA,
+            WA_PRODUCT_HEARING_BUNDLE_ON
         ));
 
         for (String field : soaFields) {
