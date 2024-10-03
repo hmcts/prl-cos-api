@@ -151,7 +151,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_LISTED_NEXT_HEARING_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PRODUCT_HEARING_BUNDLE_ON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1691,8 +1691,9 @@ public class ServiceOfApplicationService {
         if (null != hearings && CollectionUtils.isNotEmpty(hearings.getCaseHearings())
             && LISTED.equals(hearings.getCaseHearings().get(0).getHmcStatus()) && null != hearings.getCaseHearings().get(
             0).getNextHearingDate()) {
-            caseDataMap.put(WA_LISTED_NEXT_HEARING_DATE,
-                            DAYS.between(
+            caseDataMap.put(
+                WA_PRODUCT_HEARING_BUNDLE_ON,
+                DAYS.between(
                                 LocalDate.now(),
                                 hearings.getCaseHearings().get(0).getNextHearingDate().toLocalDate()) > 3
                                 ? hearings.getCaseHearings().get(0).getNextHearingDate().minusDays(3).format(
