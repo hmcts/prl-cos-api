@@ -17,8 +17,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SodPack {
 
-    private final List<Element<Document>> uploadedDocuments;
-    private final List<Element<Document>> cfvDocuments;
+    private final List<Element<Document>> documents;
     private final List<Element<String>> applicantIds;
     private final List<Element<String>> respondentIds;
     private final List<Element<String>> otherPersonIds;

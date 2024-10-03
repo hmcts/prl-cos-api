@@ -145,8 +145,7 @@ public class ServiceOfDocumentsService {
                                                    CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         SodPack unServedPack = SodPack.builder()
-            .uploadedDocuments(getUploadedDocuments(caseData))
-            .cfvDocuments(getSelectedDocuments(authorisation, caseData))
+            .documents(wrapElements(getDocumentsTobeServed(authorisation, caseData)))
             .submittedBy(userService.getUserDetails(authorisation).getFullName())
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .build();
@@ -200,6 +199,22 @@ public class ServiceOfDocumentsService {
         return caseDataMap;
     }
 
+    private List<Document> getDocumentsTobeServed(String authorisation,
+                                                  CaseData caseData) {
+        List<Document> documents = new ArrayList<>();
+        //get user uploaded documents
+        List<Document> uploadedDocuments = getUploadedDocuments(caseData);
+        if (CollectionUtils.isNotEmpty(uploadedDocuments)) {
+            documents.addAll(uploadedDocuments);
+        }
+        //get selected documents
+        List<Document> cfvDocuments = getSelectedDocuments(authorisation, caseData);
+        if (CollectionUtils.isNotEmpty(cfvDocuments)) {
+            documents.addAll(cfvDocuments);
+        }
+        return documents;
+    }
+
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(String authorisation,
                                                                      CallbackRequest callbackRequest) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
@@ -214,7 +229,13 @@ public class ServiceOfDocumentsService {
             List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
             List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
             if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-                handleServiceOfDocuments(authorisation, caseData, unServedPack, emailNotificationDetails, bulkPrintDetails);
+                handleServiceOfDocuments(
+                    authorisation,
+                    caseData,
+                    unServedPack,
+                    emailNotificationDetails,
+                    bulkPrintDetails
+                );
             }
             //serve other persons
             serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
@@ -224,8 +245,10 @@ public class ServiceOfDocumentsService {
             //Reset unserved packs
             caseDataMap.put("sodUnServedPack", null);
             //Update served documents
-            caseDataMap.put("servedDocumentsDetailsList",
-                            getUpdatedServedDocumentsDetailsList(caseData, unServedPack, emailNotificationDetails, bulkPrintDetails));
+            caseDataMap.put(
+                "servedDocumentsDetailsList",
+                getUpdatedServedDocumentsDetailsList(caseData, unServedPack, emailNotificationDetails, bulkPrintDetails)
+            );
         }
 
         //Clean up the fields
@@ -299,17 +322,28 @@ public class ServiceOfDocumentsService {
         if (SodCitizenServingRespondentsEnum.unrepresentedApplicant
             .getDisplayedValue().equals(unServedPack.getServedBy())) {
             //unrepresented applicant lip
-            handlePersonalServiceUnRepApplicant(authorisation, caseData, unServedPack, emailNotificationDetails, bulkPrintDetails);
+            handlePersonalServiceUnRepApplicant(
+                authorisation,
+                caseData,
+                unServedPack.getDocuments(),
+                emailNotificationDetails,
+                bulkPrintDetails
+            );
         } else if (SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .getDisplayedValue().equals(unServedPack.getServedBy())) {
             //applicant solicitor
-            handlePersonalServiceApplicantSolicitor(authorisation, caseData, unServedPack, emailNotificationDetails);
+            handlePersonalServiceApplicantSolicitor(
+                authorisation,
+                caseData,
+                unServedPack.getDocuments(),
+                emailNotificationDetails
+            );
         }
     }
 
     private void handlePersonalServiceUnRepApplicant(String authorisation,
                                                      CaseData caseData,
-                                                     SodPack unServedPack,
+                                                     List<Element<Document>> documents,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
         Map<String, Object> params = new HashMap<>();
@@ -323,7 +357,7 @@ public class ServiceOfDocumentsService {
                     caseData,
                     applicant,
                     true,
-                    unServedPack,
+                    documents,
                     emailNotificationDetails,
                     bulkPrintDetails,
                     params
@@ -334,7 +368,7 @@ public class ServiceOfDocumentsService {
                 caseData,
                 element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
                 true,
-                unServedPack,
+                documents,
                 emailNotificationDetails,
                 bulkPrintDetails,
                 params
@@ -345,7 +379,7 @@ public class ServiceOfDocumentsService {
     private void handlePersonalNonPersonalServiceOfDocuments(CaseData caseData,
                                                              Element<PartyDetails> party,
                                                              boolean isApplicant,
-                                                             SodPack unServedPack,
+                                                             List<Element<Document>> documents,
                                                              List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                              List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                              Map<String, Object> inputParams) {
@@ -359,7 +393,7 @@ public class ServiceOfDocumentsService {
             sendEmailToSolicitor(
                 caseData,
                 party,
-                unServedPack,
+                documents,
                 SOD_APPLICANT_RESPONDENT_SOLICITOR,
                 emailNotificationDetails,
                 params
@@ -370,7 +404,7 @@ public class ServiceOfDocumentsService {
             sendEmailToParty(
                 caseData,
                 party,
-                unServedPack,
+                documents,
                 (EmailTemplateNames) inputParams.get(GOV_NOTIFY_TEMPLATE),
                 (SendgridEmailTemplateNames) inputParams.get(SEND_GRID_TEMPLATE),
                 emailNotificationDetails,
@@ -382,7 +416,7 @@ public class ServiceOfDocumentsService {
                 caseData,
                 party,
                 isApplicant ? SERVED_PARTY_APPLICANT : SERVED_PARTY_RESPONDENT,
-                unServedPack,
+                documents,
                 bulkPrintDetails
             );
         }
@@ -390,7 +424,7 @@ public class ServiceOfDocumentsService {
 
     private void handlePersonalServiceApplicantSolicitor(String authorisation,
                                                          CaseData caseData,
-                                                         SodPack unServedPack,
+                                                         List<Element<Document>> documents,
                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         Map<String, String> params = new HashMap<>();
         params.put(AUTHORIZATION, authorisation);
@@ -404,7 +438,7 @@ public class ServiceOfDocumentsService {
         sendEmailToSolicitor(
             caseData,
             party,
-            unServedPack,
+            documents,
             SOD_APPLICANT_RESPONDENT_SOLICITOR,
             emailNotificationDetails,
             params
@@ -413,7 +447,7 @@ public class ServiceOfDocumentsService {
 
     private void sendEmailToSolicitor(CaseData caseData,
                                       Element<PartyDetails> party,
-                                      SodPack unServedPack,
+                                      List<Element<Document>> documents,
                                       SendgridEmailTemplateNames sendgridTemplate,
                                       List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                       Map<String, String> params) {
@@ -423,7 +457,7 @@ public class ServiceOfDocumentsService {
             EmailNotificationDetails emailNotification = sendSendgridEmail(
                 authorisation,
                 caseData,
-                getDocumentsToBeServed(unServedPack),
+                documents,
                 party,
                 servedParty,
                 party.getValue().getSolicitorEmail(),
@@ -432,7 +466,6 @@ public class ServiceOfDocumentsService {
             if (emailNotification != null) {
                 emailNotificationDetails.add(element(emailNotification.toBuilder()
                                                          .partyIds(String.valueOf(party.getId()))
-                                                         .docs(unServedPack.getUploadedDocuments())
                                                          .build()));
             }
         }
@@ -440,7 +473,7 @@ public class ServiceOfDocumentsService {
 
     private void sendEmailToParty(CaseData caseData,
                                   Element<PartyDetails> party,
-                                  SodPack unServedPack,
+                                  List<Element<Document>> documents,
                                   EmailTemplateNames govNotifyTemplate,
                                   SendgridEmailTemplateNames sendgridTemplate,
                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
@@ -450,13 +483,13 @@ public class ServiceOfDocumentsService {
         EmailNotificationDetails emailNotification;
         if (CaseUtils.hasDashboardAccess(party)) {
             log.debug("Party has access to dashboard -> send gov notify email for {}", party.getId());
-            emailNotification = sendGovNotifyEmail(caseData, getDocumentsToBeServed(unServedPack), party, servedParty, govNotifyTemplate);
+            emailNotification = sendGovNotifyEmail(caseData, documents, party, servedParty, govNotifyTemplate);
         } else {
             log.debug("Party does not access to dashboard -> send documents via sendgrid email for {}", party.getId());
             emailNotification = sendSendgridEmail(
                 authorisation,
                 caseData,
-                getDocumentsToBeServed(unServedPack),
+                documents,
                 party,
                 servedParty,
                 party.getValue().getEmail(),
@@ -467,7 +500,6 @@ public class ServiceOfDocumentsService {
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification.toBuilder()
                                                      .partyIds(String.valueOf(party.getId()))
-                                                     .docs(unServedPack.getUploadedDocuments())
                                                      .build()));
         }
     }
@@ -476,7 +508,7 @@ public class ServiceOfDocumentsService {
                                  CaseData caseData,
                                  Element<PartyDetails> party,
                                  String servedParty,
-                                 SodPack unServedPack,
+                                 List<Element<Document>> documents,
                                  List<Element<BulkPrintDetails>> bulkPrintDetails) {
         try {
             if ((isNotEmpty(party.getValue())
@@ -489,19 +521,14 @@ public class ServiceOfDocumentsService {
                                                                           DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
                                                           ));
 
-                docs.addAll(unwrapElements(getDocumentsToBeServed(unServedPack)));
-                BulkPrintDetails bulkPrintNotification = serviceOfApplicationPostService.sendPostNotificationToParty(
+                docs.addAll(unwrapElements(documents));
+                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                     caseData,
                     authorisation,
                     party,
                     docs,
                     servedParty
-                );
-                if (null != bulkPrintNotification) {
-                    bulkPrintDetails.add(element(bulkPrintNotification.toBuilder()
-                                                     .printDocs(unServedPack.getUploadedDocuments())
-                                                     .build()));
-                }
+                )));
             } else {
                 log.error(
                     "Couldn't post the documents to party address, as address is null/empty for {}",
@@ -598,7 +625,7 @@ public class ServiceOfDocumentsService {
                 caseData,
                 unServedPack.getApplicantIds(),
                 true,
-                unServedPack,
+                unServedPack.getDocuments(),
                 emailNotificationDetails,
                 bulkPrintDetails
             );
@@ -610,7 +637,7 @@ public class ServiceOfDocumentsService {
                 caseData,
                 unServedPack.getRespondentIds(),
                 false,
-                unServedPack,
+                unServedPack.getDocuments(),
                 emailNotificationDetails,
                 bulkPrintDetails
             );
@@ -621,7 +648,7 @@ public class ServiceOfDocumentsService {
                                                             CaseData caseData,
                                                             List<Element<String>> partyIds,
                                                             boolean isApplicant,
-                                                            SodPack unServedPack,
+                                                            List<Element<Document>> documents,
                                                             List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                             List<Element<BulkPrintDetails>> bulkPrintDetails) {
         partyIds.stream()
@@ -643,7 +670,7 @@ public class ServiceOfDocumentsService {
                         caseData,
                         party,
                         isApplicant,
-                        unServedPack,
+                        documents,
                         emailNotificationDetails,
                         bulkPrintDetails,
                         params
@@ -694,7 +721,7 @@ public class ServiceOfDocumentsService {
                             caseData,
                             element(UUID.fromString(id), otherPerson),
                             SERVED_PARTY_OTHER,
-                            unServedPack,
+                            unServedPack.getDocuments(),
                             bulkPrintDetails
                         );
                     }
@@ -702,34 +729,24 @@ public class ServiceOfDocumentsService {
         }
     }
 
-    private List<Element<Document>> getDocumentsToBeServed(SodPack unServedPack) {
-        List<Element<Document>> documents = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(unServedPack.getUploadedDocuments())) {
-            documents.addAll(unServedPack.getUploadedDocuments());
-        }
-        if (CollectionUtils.isNotEmpty(unServedPack.getCfvDocuments())) {
-            documents.addAll(unServedPack.getCfvDocuments());
-        }
-        return documents;
-    }
-
-    private List<Element<Document>> getSelectedDocuments(String authorisation,
-                                                         CaseData caseData) {
+    private List<Document> getSelectedDocuments(String authorisation,
+                                                CaseData caseData) {
         if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodDocumentsList())) {
-            List<Document> documents = caseData.getServiceOfDocuments().getSodDocumentsList().stream()
+            return caseData.getServiceOfDocuments().getSodDocumentsList().stream()
                 .map(Element::getValue)
                 .map(docsDynamicList -> sendAndReplyService.getSelectedDocument(
                     authorisation, docsDynamicList.getDocumentsList()))
                 .toList();
-            return wrapElements(documents);
         }
         return Collections.emptyList();
     }
 
-    private List<Element<Document>> getUploadedDocuments(CaseData caseData) {
+    private List<Document> getUploadedDocuments(CaseData caseData) {
         if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalDocumentsList())) {
             return caseData.getServiceOfDocuments().getSodAdditionalDocumentsList()
-                .stream().toList();
+                .stream()
+                .map(Element::getValue)
+                .toList();
         }
         return Collections.emptyList();
     }
