@@ -532,15 +532,13 @@ public class BundleCreateRequestMapper {
                     .documentFileName(doc.getApplicantC1AResponseDocument().getDocumentFileName())
                     .documentGroup(BundlingDocGroupEnum.applicantC1AResponse).build();
                 break;
-            case SOLICITOR_RESPONDENT_APPLCATION:
-            case CITIZEN_RESPONDENT_APPLCATION:
+            case SOLICITOR_RESPONDENT_APPLCATION, CITIZEN_RESPONDENT_APPLCATION:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentApplicationDocument())
                     .documentFileName(doc.getRespondentApplicationDocument().getDocumentFileName())
                     .documentGroup(BundlingDocGroupEnum.respondentApplication).build();
                 break;
-            case SOLICITOR_RESPONDENT_C1A_APPLCATION:
-            case CITIZEN_RESPONDENT_C1A_APPLCATION:
+            case SOLICITOR_RESPONDENT_C1A_APPLCATION, CITIZEN_RESPONDENT_C1A_APPLCATION:
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentC1AApplicationDocument())
                     .documentFileName(doc.getRespondentC1AApplicationDocument().getDocumentFileName())
