@@ -503,7 +503,7 @@ public class BundleCreateRequestMapperTest {
             .mapCaseDataToBundleCreateRequest(c100CaseData, "eventI", Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
         assertEquals(
-            "16 September 2024 3:00 PM",
+            "16 Sep 2024 3:00 PM",
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime()
         );
     }
