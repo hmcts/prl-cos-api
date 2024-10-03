@@ -28,6 +28,9 @@ public class RefugeCaseGenerator implements FieldGenerator {
             if (YesOrNo.No.equals(isRefugeCase)) {
                 isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getRespondents());
             }
+            if (YesOrNo.No.equals(isRefugeCase)) {
+                isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getOtherPartyInTheCaseRevised());
+            }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
             if (YesOrNo.No.equals(isRefugeCase)) {
