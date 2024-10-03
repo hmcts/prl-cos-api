@@ -33,7 +33,7 @@ public class CaseInitiationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AssignCaseAccessService assignCaseAccessService;
     private final LocationRefDataService locationRefDataService;
-    public static final String COURT_LIST = "courtList";
+    public static final String COURT_LIST = "submitCountyCourtSelection";
 
     public void handleCaseInitiation(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
