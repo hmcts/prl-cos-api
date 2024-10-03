@@ -1239,14 +1239,24 @@ public class ServiceOfApplicationService {
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
-            List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
+            List<Document> respondentCoverLetters = new ArrayList<>();
+            for (Element<PartyDetails> party : caseData.getRespondents()) {
+                respondentCoverLetters.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+            }
+            List<Document> packLdocs = new ArrayList<>(respondentCoverLetters);
+            packLdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs));
+            List<Document> respondentStaticDocs = getNotificationPack(caseData, M, c100StaticDocs);
+            List<Document> applicantPack = new ArrayList<>();
+            removeDuplicatesAndGetConsolidatedDocs(packLdocs, respondentStaticDocs, applicantPack);
             notifyC100ApplicantsPersonalServiceUnRepApplicant(authorization,
                                                               caseData,
                                                               emailNotificationDetails,
                                                               bulkPrintDetails,
                                                               packLdocs);
+            List<Document> respondentPackDocs = new ArrayList<>(respondentCoverLetters);
+            respondentPackDocs.addAll(respondentStaticDocs);
             caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
-                .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
+                .packDocument(wrapElements(respondentPackDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
@@ -3078,8 +3088,13 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
                                                                                                   c100StaticDocs));
+            List<Document> respondentPackDocs = new ArrayList<>();
+            for (Element<PartyDetails> party : caseData.getRespondents()) {
+                respondentPackDocs.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+            }
+            respondentPackDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs));
             caseDataUpdated.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
-                .packDocument(wrapElements(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs)))
+                .packDocument(wrapElements(respondentPackDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
