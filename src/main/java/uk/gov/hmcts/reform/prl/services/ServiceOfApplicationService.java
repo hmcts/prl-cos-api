@@ -1677,6 +1677,7 @@ public class ServiceOfApplicationService {
             if (isApplicantRepresented(caseData)) {
                 caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, YES);
             } else {
+                log.info("applicant not represented");
                 caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, NO);
                 publishHearingDate(callbackRequest, authorisation, caseDataMap);
             }
