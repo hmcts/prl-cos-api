@@ -531,7 +531,7 @@ public class StmtOfServImplService {
 
     private void updateFinalListOfServedApplications(String authorisation, String authorization,
                                                      CaseData updatedCaseData, List<String> partiesList, Map<String, Object> updatedCaseDataMap) {
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
         List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument();
         List<String> partiesServed = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
@@ -547,10 +547,8 @@ public class StmtOfServImplService {
         }
         log.info("pack docs {}", packDocs);
         if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
+            log.info("*** fetching finalServedApplicationDetailsList ***");
             finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
-        } else {
-            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
-            finalServedApplicationDetailsList = new ArrayList<>();
         }
         finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder()
                                                           .servedBy(userService.getUserDetails(authorisation).getFullName())
@@ -638,7 +636,7 @@ public class StmtOfServImplService {
                     authorization,
                     caseData,
                     element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401()),
-                    false
+                    RE8_HINT
                 ));
             }
         } else {
@@ -657,7 +655,7 @@ public class StmtOfServImplService {
                                                       authorization,
                                                       caseData,
                                                       respondent,
-                                                      true
+                                                      RE7_HINT
                                                   )).toList());
         } else {
             //send to selected respondent
@@ -668,7 +666,7 @@ public class StmtOfServImplService {
                                                       authorization,
                                                       caseData,
                                                       respondent,
-                                                      true
+                                                      RE7_HINT
                                                   )).toList());
         }
     }
@@ -687,7 +685,7 @@ public class StmtOfServImplService {
                                                                authorization,
                                                                caseData,
                                                                respondent,
-                                                               true
+                                                               RE7_HINT
                                                            )).toList());
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -696,7 +694,7 @@ public class StmtOfServImplService {
                     authorization,
                     caseData,
                     element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401()),
-                    false
+                    RE8_HINT
                 ));
             }
         } else {
@@ -716,7 +714,7 @@ public class StmtOfServImplService {
     private Element<DocumentsNotification> sendAccessCodeCoverLetter(String authorization,
                                                                      CaseData caseData,
                                                                      Element<PartyDetails> respondent,
-                                                                     boolean isC100Case) {
+                                                                     String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
             List<Document> documents = null;
@@ -734,7 +732,7 @@ public class StmtOfServImplService {
                     authorization,
                     caseData,
                     respondent,
-                    isC100Case ? RE7_HINT : RE8_HINT,
+                    template,
                     true
                 );
 
