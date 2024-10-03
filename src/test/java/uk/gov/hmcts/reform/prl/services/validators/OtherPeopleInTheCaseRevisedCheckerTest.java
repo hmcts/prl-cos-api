@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -101,6 +102,8 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
                          .addressLine1("add1")
                          .postCode("postcode")
                          .build())
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
             .isAddressConfidential(YesOrNo.Yes)
             .isAtAddressLessThan5Years(YesOrNo.No)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -222,6 +225,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .placeOfBirth("London")
             .isCurrentAddressKnown(YesOrNo.Yes)
             .isAtAddressLessThan5Years(YesOrNo.No)
+            .liveInRefuge(YesOrNo.No)
             .address(Address.builder()
                          .addressLine1("add1")
                          .postCode("postcode")

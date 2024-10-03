@@ -44,7 +44,7 @@ public class ApplicantsChecker implements EventChecker {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
             && caseData.getApplicantsFL401() != null) {
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
-            applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            applicantsWrapped = Optional.of(Collections.singletonList(wrappedPartyDetails));
         }
 
         if (applicantsWrapped.isEmpty()) {
@@ -95,7 +95,7 @@ public class ApplicantsChecker implements EventChecker {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (caseData.getApplicantsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
-                applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+                applicantsWrapped = Optional.of(Collections.singletonList(wrappedPartyDetails));
             }
         } else {
             applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -103,7 +103,7 @@ public class ApplicantsChecker implements EventChecker {
 
         boolean mandatoryCompleted = false;
 
-        if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -210,8 +210,8 @@ public class ApplicantsChecker implements EventChecker {
         } else if (CaseCreatedBy.COURT_ADMIN.equals(caseCreatedBy)) {
             Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
             if (solicitorAddress.isPresent()
-                && (!ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
-                && !ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
+                && (ofNullable(solicitorAddress.get().getAddressLine1()).isPresent()
+                && ofNullable(solicitorAddress.get().getPostCode()).isPresent())) {
                 fields.add(solicitorAddress);
             }
         } else {

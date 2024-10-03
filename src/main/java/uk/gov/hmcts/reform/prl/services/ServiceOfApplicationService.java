@@ -3224,36 +3224,4 @@ public class ServiceOfApplicationService {
             .data(caseDataUpdated)
             .build();
     }
-
-    public List<String> validateRefugeCase(CaseDetails caseDetails) {
-        List<String> errorList = new ArrayList<>();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        YesOrNo isRefugeCase = YesOrNo.No;
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getApplicants());
-
-            if (YesOrNo.No.equals(isRefugeCase)) {
-                isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getRespondents());
-            }
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
-            if (YesOrNo.No.equals(isRefugeCase)) {
-                isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
-            }
-        }
-        if (Yes.equals(isRefugeCase)) {
-            errorList.add("This case contains party(s) who lives in refuge. Service of application is disabled for this case.");
-        }
-        return errorList;
-    }
-
-    private static YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> caseData) {
-        Optional<Element<PartyDetails>> refugeParty
-            = caseData
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getLiveInRefuge()))
-            .findFirst();
-
-        return refugeParty.isPresent() ? YesOrNo.Yes : YesOrNo.No;
-    }
 }
