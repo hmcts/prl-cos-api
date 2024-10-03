@@ -80,7 +80,7 @@ public class BundlingController extends AbstractCallbackController {
                     BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                         .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                         .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
-                        .bundleCreationDateAndTime(getBundleDateTime(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime()))
+                        .bundleCreationDateAndTime(getBundleDateTime(ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime()))
                         .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
                                                       && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
                                                       ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
