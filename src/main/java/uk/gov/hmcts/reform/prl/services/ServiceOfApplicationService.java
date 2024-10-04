@@ -3137,6 +3137,7 @@ public class ServiceOfApplicationService {
                 respondentPackDocs.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
             }
             respondentPackDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs));
+            log.info("Respondent pack for applicant Lip {}", respondentPackDocs);
             caseDataUpdated.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(respondentPackDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
