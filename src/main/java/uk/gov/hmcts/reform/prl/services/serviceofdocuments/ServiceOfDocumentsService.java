@@ -157,6 +157,7 @@ public class ServiceOfDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         SodPack unServedPack = SodPack.builder()
             .documents(wrapElements(getDocumentsTobeServed(authorisation, caseData)))
+            .servedBy(COURT)
             .submittedBy(userService.getUserDetails(authorisation).getFullName())
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .build();
@@ -183,7 +184,6 @@ public class ServiceOfDocumentsService {
                         caseData.getRespondents(),
                         caseData.getRespondentsFL401()
                     ))
-                    .servedBy(COURT)
                     .isPersonalService(YesOrNo.No)
                     .build();
             }
