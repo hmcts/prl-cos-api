@@ -173,25 +173,31 @@ public class ServiceOfApplicationPostService {
             );
         } else {
 
+            List<MultipartFile> files = new ArrayList<>(List.of(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    PRIVACY_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                ),
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_FL415_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+                )
+            ));
+
+            // FPET-1056 Annex 1 file inclusion
+            if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+                attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
+            }
             uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_FL415_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-                    )
-                )
+                files
             );
         }
         if (null != uploadResponse) {

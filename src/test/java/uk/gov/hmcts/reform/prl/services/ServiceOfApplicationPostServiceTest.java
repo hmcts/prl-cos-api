@@ -410,12 +410,51 @@ public class ServiceOfApplicationPostServiceTest {
 
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(AUTH, s2sToken, CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
+
+    }
+
+    @Test
+    public void testAnnex1StaticDocsForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("test@gmail.com")
+                                  .representativeLastName("LastName")
+                                  .representativeFirstName("FirstName")
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .build())
+            .serviceOfApplication(ServiceOfApplication.builder().isConfidential(Yes).build())
+            .build();
+
+        byte[] pdf = new byte[]{1,2,3,4,5};
+        MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
+
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(caseDocumentClient.uploadDocuments(AUTH, s2sToken, CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
-
-
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
+        List<Document> docs= serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData);
+        assertNotNull(docs);
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
