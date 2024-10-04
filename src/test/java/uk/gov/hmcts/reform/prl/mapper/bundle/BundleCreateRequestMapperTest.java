@@ -49,8 +49,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_SUMMARY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_APPLCATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DNA_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
@@ -256,169 +254,162 @@ public class BundleCreateRequestMapperTest {
 
         QuarantineLegalDoc respStatement = QuarantineLegalDoc.builder()
             .respondentStatementsDocument(Document.builder().documentFileName("respondentStatements").build())
-            .documentParty("Respondent").categoryName("Respondent's statements").build();
+            .documentParty("Respondent").categoryName("Respondent's statements").categoryId("respondentStatements").build();
         List<Element<QuarantineLegalDoc>> courtStaffDoc = new ArrayList<>();
         courtStaffDoc.add(element(respStatement));
 
         QuarantineLegalDoc applStatement = QuarantineLegalDoc.builder()
             .applicantStatementsDocument(Document.builder().documentFileName("applicantStatements").build())
-            .documentParty("Applicant").categoryName("Applicant's statements").build();
+            .documentParty("Applicant").categoryName("Applicant's statements").categoryId("applicantStatements").build();
         courtStaffDoc.add(element(applStatement));
 
         QuarantineLegalDoc policeReport = QuarantineLegalDoc.builder()
             .policeReportDocument(Document.builder().documentFileName("policeReport").build())
-            .documentParty("Applicant").categoryName("Police report").build();
+            .documentParty("Applicant").categoryName("Police report").categoryId("policeReport").build();
         courtStaffDoc.add(element(policeReport));
 
+        List<Element<QuarantineLegalDoc>> citizenDoc = new ArrayList<>();
         QuarantineLegalDoc drugTest = QuarantineLegalDoc.builder()
             .drugAndAlcoholTestDocument(Document.builder().documentFileName("drugTest").build())
-            .documentParty("Applicant").categoryName("Drug and alcohol test (toxicology)").build();
-        courtStaffDoc.add(element(drugTest));
+            .documentParty("Applicant").categoryName("Drug and alcohol test (toxicology)").categoryId("drugAndAlcoholTest(toxicology)").build();
+        citizenDoc.add(element(drugTest));
 
         QuarantineLegalDoc medicalRecords = QuarantineLegalDoc.builder()
             .medicalRecordsDocument(Document.builder().documentFileName("medicalRecords").build())
-            .documentParty("Applicant").categoryName("Medical records").build();
+            .documentParty("Applicant").categoryName("Medical records").categoryId("medicalRecords").build();
         courtStaffDoc.add(element(medicalRecords));
 
         QuarantineLegalDoc medicalReports = QuarantineLegalDoc.builder()
             .medicalReportsDocument(Document.builder().documentFileName("medicalReports").build())
-            .documentParty("Applicant").categoryName("Medical reports").build();
+            .documentParty("Applicant").categoryName("Medical reports").categoryId("medicalReports").build();
         courtStaffDoc.add(element(medicalReports));
 
         QuarantineLegalDoc witnessStmnts = QuarantineLegalDoc.builder()
             .otherWitnessStatementsDocument(Document.builder().documentFileName("witnessStmnts").build())
-            .documentParty("Applicant").categoryName("Other witness statements").build();
+            .documentParty("Applicant").categoryName("Other witness statements").categoryId("otherWitnessStatements").build();
         courtStaffDoc.add(element(witnessStmnts));
 
         QuarantineLegalDoc positionStmnts = QuarantineLegalDoc.builder()
             .positionStatementsDocument(Document.builder().documentFileName("positionStmnts").build())
-            .documentParty("Applicant").categoryName("Position statements").build();
+            .documentParty("Applicant").categoryName("Position statements").categoryId("positionStatements").build();
         courtStaffDoc.add(element(positionStmnts));
 
         QuarantineLegalDoc dnaReports = QuarantineLegalDoc.builder()
             .dnaReportsExpertReportDocument(Document.builder().documentFileName("DNAReports").build())
-            .documentParty("Applicant").categoryName(DNA_REPORTS).build();
+            .documentParty("Applicant").categoryName(DNA_REPORTS).categoryId("DNAReports_expertReport").build();
         courtStaffDoc.add(element(dnaReports));
 
+        List<Element<QuarantineLegalDoc>> legalProfDoc = new ArrayList<>();
         QuarantineLegalDoc resultsOfHairStrandBloodTests = QuarantineLegalDoc.builder()
             .resultsOfHairStrandBloodTestsDocument(Document.builder().documentFileName("resultsOfHairStrandBloodTests").build())
-            .documentParty("Applicant").categoryName(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS).build();
-        courtStaffDoc.add(element(resultsOfHairStrandBloodTests));
+            .documentParty("Applicant").categoryName(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS).categoryId("resultsOfHairStrandBloodTests").build();
+        legalProfDoc.add(element(resultsOfHairStrandBloodTests));
 
         QuarantineLegalDoc policeDisclosures = QuarantineLegalDoc.builder()
             .policeDisclosuresDocument(Document.builder().documentFileName("policeDisclosures").build())
-            .documentParty("Applicant").categoryName(POLICE_DISCLOSURES).build();
+            .documentParty("Applicant").categoryName(POLICE_DISCLOSURES).categoryId("policeDisclosures").build();
         courtStaffDoc.add(element(policeDisclosures));
 
         QuarantineLegalDoc applicantC1AResponse = QuarantineLegalDoc.builder()
             .applicantC1AResponseDocument(Document.builder().documentFileName("applicantC1AResponse").build())
-            .documentParty("Applicant").categoryName(APPLICANT_C1A_RESPONSE).build();
+            .documentParty("Applicant").categoryName(APPLICANT_C1A_RESPONSE).categoryId("applicantC1AResponse").build();
         courtStaffDoc.add(element(applicantC1AResponse));
 
         QuarantineLegalDoc caseSummary = QuarantineLegalDoc.builder()
             .caseSummaryDocument(Document.builder().documentFileName("caseSummary").build())
-            .documentParty("Court").categoryName(CASE_SUMMARY).build();
+            .documentParty("Court").categoryName(CASE_SUMMARY).categoryId("caseSummary").build();
         courtStaffDoc.add(element(caseSummary));
 
         QuarantineLegalDoc transcriptsOfJudgements = QuarantineLegalDoc.builder()
             .transcriptsOfJudgementsDocument(Document.builder().documentFileName("transcriptsOfJudgements").build())
-            .documentParty("Court").categoryName(TRANSCRIPTS_OF_JUDGEMENTS).build();
+            .documentParty("Court").categoryName(TRANSCRIPTS_OF_JUDGEMENTS).categoryId("transcriptsOfJudgements").build();
         courtStaffDoc.add(element(transcriptsOfJudgements));
 
         QuarantineLegalDoc magistratesFactsAndReasons = QuarantineLegalDoc.builder()
             .magistratesFactsAndReasonsDocument(Document.builder().documentFileName("magistratesFactsAndReasons").build())
-            .documentParty("Court").categoryName(MAGISTRATES_FACTS_AND_REASONS).build();
+            .documentParty("Court").categoryName(MAGISTRATES_FACTS_AND_REASONS).categoryId("magistratesFactsAndReasons").build();
         courtStaffDoc.add(element(magistratesFactsAndReasons));
 
+        List<Element<QuarantineLegalDoc>> cafcassDoc = new ArrayList<>();
         QuarantineLegalDoc safeGuardingLetter = QuarantineLegalDoc.builder()
             .safeguardingLetterDocument(Document.builder().documentFileName("safeGuardingLetter").build())
-            .documentParty("Cafcass Cymru").categoryName(SAFEGUARDING_LETTER).build();
-        courtStaffDoc.add(element(safeGuardingLetter));
+            .documentParty("Cafcass Cymru").categoryName(SAFEGUARDING_LETTER).categoryId("safeguardingLetter").build();
+        cafcassDoc.add(element(safeGuardingLetter));
 
         QuarantineLegalDoc section7Report = QuarantineLegalDoc.builder()
             .section7ReportDocument(Document.builder().documentFileName("section7Report").build())
-            .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).build();
+            .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).categoryId("section7Report").build();
         courtStaffDoc.add(element(section7Report));
 
         QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
             .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
-            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).build();
+            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
         courtStaffDoc.add(element(sixteenARiskAssessment));
 
         QuarantineLegalDoc guardianReport = QuarantineLegalDoc.builder()
             .guardianReportDocument(Document.builder().documentFileName("guardianReport").build())
-            .documentParty("Cafcass Cymru").categoryName(GUARDIAN_REPORT).build();
+            .documentParty("Cafcass Cymru").categoryName(GUARDIAN_REPORT).categoryId("guardianReport").build();
         courtStaffDoc.add(element(guardianReport));
 
         QuarantineLegalDoc specialGuardianshipReport = QuarantineLegalDoc.builder()
             .specialGuardianshipReportDocument(Document.builder().documentFileName("specialGuardianshipReport").build())
-            .documentParty("Cafcass Cymru").categoryName(SPECIAL_GUARDIANSHIP_REPORT).build();
+            .documentParty("Cafcass Cymru").categoryName(SPECIAL_GUARDIANSHIP_REPORT).categoryId("specialGuardianshipReport").build();
         courtStaffDoc.add(element(specialGuardianshipReport));
 
         QuarantineLegalDoc section37Report = QuarantineLegalDoc.builder()
             .section37ReportDocument(Document.builder().documentFileName("section37Report").build())
-            .documentParty("Cafcass Cymru").categoryName(SECTION_37_REPORT).build();
+            .documentParty("Cafcass Cymru").categoryName(SECTION_37_REPORT).categoryId("section37Report").build();
         courtStaffDoc.add(element(section37Report));
 
         QuarantineLegalDoc cafcassOtherDocuments = QuarantineLegalDoc.builder()
             .otherDocsDocument(Document.builder().documentFileName("otherDocuments").build())
-            .documentParty("Cafcass Cymru").categoryName(CAFCASS_OTHER_DOCUMENTS).build();
+            .documentParty("Cafcass Cymru").categoryName(CAFCASS_OTHER_DOCUMENTS).categoryId("otherDocs").build();
         courtStaffDoc.add(element(cafcassOtherDocuments));
 
         QuarantineLegalDoc laSection37Report = QuarantineLegalDoc.builder()
             .sec37ReportDocument(Document.builder().documentFileName("laSection37Report").build())
-            .documentParty("Local Authority").categoryName(SECTION_37_REPORT).build();
+            .documentParty("Local Authority").categoryName(SECTION_37_REPORT).categoryId("sec37Report").build();
         courtStaffDoc.add(element(laSection37Report));
 
         QuarantineLegalDoc laOtherDocuments = QuarantineLegalDoc.builder()
             .localAuthorityOtherDocDocument(Document.builder().documentFileName("laOtherDocuments").build())
-            .documentParty("Cafcass Cymru").categoryName(LA_OTHER_DOCUMENTS).build();
+            .documentParty("Cafcass Cymru").categoryName(LA_OTHER_DOCUMENTS).categoryId("localAuthorityOtherDoc").build();
         courtStaffDoc.add(element(laOtherDocuments));
 
         QuarantineLegalDoc applicantPreviousOrders = QuarantineLegalDoc.builder()
             .previousOrdersSubmittedWithApplicationDocument(Document.builder().documentFileName(
                 "applicantPreviousOrders").build())
-            .documentParty("Applicant").categoryName(PREVIOUS_ORDERS).build();
+            .documentParty("Applicant").categoryName(PREVIOUS_ORDERS).categoryId("previousOrdersSubmittedWithApplication").build();
         courtStaffDoc.add(element(applicantPreviousOrders));
 
         QuarantineLegalDoc respondentPreviousOrders = QuarantineLegalDoc.builder()
             .ordersFromOtherProceedingsDocument(Document.builder().documentFileName("respondentPreviousOrders").build())
-            .documentParty("Respondent").categoryName(PREVIOUS_ORDERS).build();
+            .documentParty("Respondent").categoryName(PREVIOUS_ORDERS).categoryId("ordersFromOtherProceedings").build();
         courtStaffDoc.add(element(respondentPreviousOrders));
 
         QuarantineLegalDoc anyOtherDocuments = QuarantineLegalDoc.builder()
             .anyOtherDocDocument(Document.builder().documentFileName("anyOtherDocuments").build())
-            .documentParty("Court").categoryName(ANY_OTHER_DOCUMENTS).build();
+            .documentParty("Court").categoryName(ANY_OTHER_DOCUMENTS).categoryId("anyOtherDoc").build();
         courtStaffDoc.add(element(anyOtherDocuments));
 
         QuarantineLegalDoc solicitorRespondentApplication = QuarantineLegalDoc.builder()
             .respondentApplicationDocument(Document.builder().documentFileName("respondentApplication").build())
-            .categoryName(SOLICITOR_RESPONDENT_APPLCATION).build();
+            .categoryName(SOLICITOR_RESPONDENT_APPLCATION).categoryId("respondentApplication").build();
         courtStaffDoc.add(element(solicitorRespondentApplication));
 
         QuarantineLegalDoc solicitorRespondentC1aApplication = QuarantineLegalDoc.builder()
             .respondentC1AApplicationDocument(Document.builder().documentFileName("respondentC1aApplication").build())
-            .categoryName(SOLICITOR_RESPONDENT_C1A_APPLCATION).build();
+            .categoryName(SOLICITOR_RESPONDENT_C1A_APPLCATION).categoryId("respondentC1AApplication").build();
         courtStaffDoc.add(element(solicitorRespondentC1aApplication));
-
-        QuarantineLegalDoc citizenRespondentApplication = QuarantineLegalDoc.builder()
-            .respondentApplicationDocument(Document.builder().documentFileName("respondentApplication").build())
-            .categoryName(CITIZEN_RESPONDENT_APPLCATION).build();
-        courtStaffDoc.add(element(citizenRespondentApplication));
-
-        QuarantineLegalDoc citizenRespondentC1aApplication = QuarantineLegalDoc.builder()
-            .respondentC1AApplicationDocument(Document.builder().documentFileName("respondentC1aApplication").build())
-            .categoryName(CITIZEN_RESPONDENT_C1A_APPLCATION).build();
-        courtStaffDoc.add(element(citizenRespondentC1aApplication));
 
         QuarantineLegalDoc respondentC1aResponse = QuarantineLegalDoc.builder()
             .respondentC1AResponseDocument(Document.builder().documentFileName("respondentC1aResponse").build())
-            .categoryName(RESPONDENT_C1A_RESPONSE).build();
+            .categoryName(RESPONDENT_C1A_RESPONSE).categoryId("respondentC1AResponse").build();
         courtStaffDoc.add(element(respondentC1aResponse));
 
         QuarantineLegalDoc miamCertificate = QuarantineLegalDoc.builder()
             .miamCertificateDocument(Document.builder().documentFileName("miamCertificate").build())
-            .categoryName(MIAM_CERTIFICATE).build();
+            .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
         courtStaffDoc.add(element(miamCertificate));
 
         CaseData c100CaseData = CaseData.builder()
@@ -448,7 +439,12 @@ public class BundleCreateRequestMapperTest {
             .applicantName("ApplicantFirstNameAndLastName")
             .fl401UploadWitnessDocuments(ElementUtils.wrapElements(fl401UploadWitnessDocuments))
             .fl401UploadSupportDocuments(ElementUtils.wrapElements(fl401UploadSupportingDocuments))
-            .reviewDocuments(ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffDoc).build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(courtStaffDoc)
+                                 .cafcassUploadDocListDocTab(cafcassDoc)
+                                 .legalProfUploadDocListDocTab(legalProfDoc)
+                                 .citizenUploadedDocListDocTab(citizenDoc)
+                                 .build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
