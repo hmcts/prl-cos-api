@@ -504,8 +504,8 @@ public class CaseUtils {
     public static CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
         if (CollectionUtils.isNotEmpty(caseInvites)) {
             Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
-                .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
-                ).findFirst();
+                .filter(caseInviteElement -> Optional.ofNullable(caseInviteElement.getValue().getPartyId()).isPresent())
+                .filter(caseInviteElement -> partyId.equals(caseInviteElement.getValue().getPartyId())).findFirst();
             if (caseInvite.isPresent()) {
                 return caseInvite.map(Element::getValue).orElse(null);
             }
