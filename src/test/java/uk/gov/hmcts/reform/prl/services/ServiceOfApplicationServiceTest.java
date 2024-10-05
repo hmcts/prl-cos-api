@@ -469,7 +469,7 @@ public class ServiceOfApplicationServiceTest {
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .coverLettersMap(coverletterMap)
                                                                  .build())
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .packDocument(List.of(element(Document.builder()
                                                                                                     .documentFileName("").build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -562,7 +562,7 @@ public class ServiceOfApplicationServiceTest {
                                                                  .coverLettersMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
+                                      .unservedCitizenRespondentPack(SoaPack.builder().build())
                                       .unServedCafcassCymruPack(SoaPack.builder()
                                                                     .partyIds(List.of(element(TEST_UUID)))
                                                                     .build())
