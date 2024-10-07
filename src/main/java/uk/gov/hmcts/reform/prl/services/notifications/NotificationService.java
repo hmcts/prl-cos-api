@@ -57,16 +57,12 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C7_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS;
-import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -109,7 +105,7 @@ public class NotificationService {
                                   QuarantineLegalDoc quarantineLegalDoc,
                                   String userRole, Map<String, Object> caseDataMap) {
         log.info("*** Send notifications, uploader role {}", userRole);
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);
             String cafcassCymruEmail = getCafcassCymruEmail(caseData);
             Document responseDocument = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
@@ -289,8 +285,8 @@ public class NotificationService {
         dynamicData.put("solicitorName", applicant.getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
-        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+        dynamicData.put(PrlAppsConstants.IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(PrlAppsConstants.IS_WELSH, documentLanguage.isGenWelsh());
         dynamicData.put(RESPONDENT_NAME,  null != respondentName ? respondentName : RESPONDENT);
         dynamicData.put(RESPONDENT_NAME_PRESENT, null != respondentName);
         return dynamicData;
@@ -350,7 +346,7 @@ public class NotificationService {
                     authorisation,
                     applicant.getValue().getAddress(),
                     applicant.getValue().getLabelForDynamicList(),
-                    DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                    PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
                 );
 
                 //cover letters
@@ -385,7 +381,8 @@ public class NotificationService {
                                                                          .notificationType(NotificationType.BULK_PRINT)
                                                                          .partyId(String.valueOf(applicant.getId()))
                                                                          .partyType(PartyType.APPLICANT)
-                                                                         .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                                         .sentDateTime(LocalDateTime.now(ZoneId.of(
+                                                                             PrlAppsConstants.LONDON_TIME_ZONE)))
                                                                          .build())
                                                        .documents(ElementUtils.wrapElements(coverLetters))
                                                        .build()));
@@ -423,7 +420,7 @@ public class NotificationService {
                                         String userRole) {
         if (SOLICITOR.equalsIgnoreCase(userRole)) {
             return quarantineLegalDoc.getSolicitorRepresentedPartyName();
-        } else if (CITIZEN.equalsIgnoreCase(userRole)) {
+        } else if (PrlAppsConstants.CITIZEN.equalsIgnoreCase(userRole)) {
             return quarantineLegalDoc.getUploadedBy();
         }
         return null;
@@ -436,7 +433,7 @@ public class NotificationService {
             for (Element<ServedApplicationDetails> soaPack : caseData.getFinalServedApplicationDetailsList()) {
                 if (CollectionUtils.isNotEmpty(soaPack.getValue().getEmailNotificationDetails())) {
                     for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
-                        if (SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
+                        if (PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
                             cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
                             break;
                         }
@@ -454,11 +451,11 @@ public class NotificationService {
                                                       QuarantineLegalDoc quarantineLegalDoc) {
         return switch (uploaderRole) {
             case SOLICITOR -> quarantineLegalDoc.getDocument();
-            case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
-            case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
-            case BULK_SCAN -> quarantineLegalDoc.getUrl();
-            case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
-            case COURTNAV -> quarantineLegalDoc.getCourtNavQuarantineDocument();
+            case PrlAppsConstants.CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
+            case PrlAppsConstants.COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
+            case PrlAppsConstants.BULK_SCAN -> quarantineLegalDoc.getUrl();
+            case PrlAppsConstants.CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
+            case PrlAppsConstants.COURTNAV -> quarantineLegalDoc.getCourtNavQuarantineDocument();
             default -> null;
         };
     }
