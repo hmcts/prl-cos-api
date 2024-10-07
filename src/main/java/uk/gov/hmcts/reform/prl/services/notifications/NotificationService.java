@@ -17,6 +17,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
+import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -34,10 +38,13 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -50,17 +57,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C7_NOTIFICATION_APPLICANT;
@@ -79,6 +76,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NotificationService {
 
+    public static final String SOLICITOR = "solicitor";
     private static final String LETTER_TYPE = "responsePack";
     public static final String RESPONDENT = "The respondent";
     public static final String RESPONDENT_WELSH = "Mae’r atebydd";
@@ -90,6 +88,7 @@ public class NotificationService {
     public static final String APPLICANT_NAME = "applicantName";
     public static final String DATE = "date";
     public static final String DAT_FORMAT = "dd MMM yyyy";
+    public static final String PARTY = "party";
 
     private final SystemUserService systemUserService;
     private final ServiceOfApplicationService serviceOfApplicationService;
@@ -108,24 +107,26 @@ public class NotificationService {
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
-                                  String userRole) {
+                                  String userRole, Map<String, Object> caseDataMap) {
         log.info("*** Send notifications, uploader role {}", userRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);
             String cafcassCymruEmail = getCafcassCymruEmail(caseData);
             Document responseDocument = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
-
+            Map<String, SendgridEmailTemplateNames> sendGridTemplateMap = new HashMap<>();
             if (RESPONDENT_APPLICATION.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
                 log.info("*** Sending respondent C7 response documents to applicants ***");
+                sendGridTemplateMap.put(PARTY, SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT);
+                sendGridTemplateMap.put(SOLICITOR, SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR);
                 //C7 response
                 sendNotificationToApplicantsLipOrSolicitor(
                     caseData,
                     C7_NOTIFICATION_APPLICANT,
-                    SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+                    sendGridTemplateMap,
                     AP13_HINT,
-                    C7_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
-                    responseDocument
+                    responseDocument,
+                    caseDataMap
                 );
 
                 sendNotificationToCafCass(caseData,
@@ -135,15 +136,17 @@ public class NotificationService {
 
             } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
                 log.info("*** Sending respondent C1A documents to applicants/solicitor ***");
+                sendGridTemplateMap.put(PARTY, SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT);
+                sendGridTemplateMap.put(SOLICITOR, SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR);
                 //C1A
                 sendNotificationToApplicantsLipOrSolicitor(
                     caseData,
                     C1A_NOTIFICATION_APPLICANT,
-                    SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+                    sendGridTemplateMap,
                     AP14_HINT,
-                    C1A_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
-                    responseDocument
+                    responseDocument,
+                    caseDataMap
                 );
 
                 sendNotificationToCafCass(caseData,
@@ -153,15 +156,17 @@ public class NotificationService {
 
             } else if (RESPONDENT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
                 log.info("*** Sending respondent response to C1A documents to applicants/solicitor ***");
+                sendGridTemplateMap.put(PARTY, SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT);
+                sendGridTemplateMap.put(SOLICITOR, SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR);
                 //C1A response
                 sendNotificationToApplicantsLipOrSolicitor(
                     caseData,
                     C1A_RESPONSE_NOTIFICATION_APPLICANT,
-                    SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
+                    sendGridTemplateMap,
                     AP15_HINT,
-                    C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
-                    responseDocument
+                    responseDocument,
+                    caseDataMap
                 );
 
                 sendNotificationToCafCass(caseData,
@@ -210,12 +215,11 @@ public class NotificationService {
     }
 
     private void sendNotificationToApplicantsLipOrSolicitor(CaseData caseData,
-                                              EmailTemplateNames partyGovNotifyTemplate,
-                                              SendgridEmailTemplateNames partySendgridTemplate,
-                                              String coverLetterTemplateHint,
-                                              SendgridEmailTemplateNames solicitorSendgridTemplate,
-                                              String respondentName,
-                                              Document responseDocument) {
+                                                            EmailTemplateNames partyGovNotifyTemplate,
+                                                            Map<String, SendgridEmailTemplateNames> sendGridTemplateMap,
+                                                            String coverLetterTemplateHint,
+                                                            String respondentName,
+                                                            Document responseDocument, Map<String, Object> caseDataMap) {
         caseData.getApplicants().forEach(partyDataEle -> {
             PartyDetails partyData = partyDataEle.getValue();
             Map<String, Object> dynamicData = getEmailDynamicData(caseData, partyData, respondentName);
@@ -225,7 +229,7 @@ public class NotificationService {
                     responseDocument,
                     dynamicData,
                     partyData.getSolicitorEmail(),
-                    solicitorSendgridTemplate
+                    sendGridTemplateMap.get(SOLICITOR)
                 );
                 log.info(
                     "Response documents are sent to solicitor via email for applicant {}, in the case {}",
@@ -253,7 +257,8 @@ public class NotificationService {
                             responseDocument,
                             dynamicData,
                             partyData.getEmail(),
-                            partySendgridTemplate
+                            sendGridTemplateMap.get(PARTY)
+
                         );
                         log.info(
                             "Response documents are sent to applicant {} via email, in the case {}",
@@ -268,7 +273,8 @@ public class NotificationService {
                         partyDataEle,
                         respondentName,
                         responseDocument,
-                        coverLetterTemplateHint
+                        coverLetterTemplateHint,
+                        caseDataMap
                     );
                 }
             }
@@ -279,7 +285,7 @@ public class NotificationService {
                                                     PartyDetails applicant,
                                                     String respondentName) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("applicantName", applicant.getLabelForDynamicList());
+        dynamicData.put(APPLICANT_NAME, applicant.getLabelForDynamicList());
         dynamicData.put("solicitorName", applicant.getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -332,7 +338,7 @@ public class NotificationService {
                                                  Element<PartyDetails> applicant,
                                                  String respondentName,
                                                  Document responseDocument,
-                                                 String coverLetterTemplateHint) {
+                                                 String coverLetterTemplateHint, Map<String, Object> caseDataMap) {
         if (ObjectUtils.isNotEmpty(applicant.getValue())
             && ObjectUtils.isNotEmpty(applicant.getValue().getAddress())
             && ObjectUtils.isNotEmpty(applicant.getValue().getAddress().getAddressLine1())) {
@@ -352,13 +358,16 @@ public class NotificationService {
                                                                             applicant.getValue().getAddress(),
                                                                             applicant.getValue().getLabelForDynamicList(),
                                                                             respondentName);
-                responseDocuments.addAll(serviceOfApplicationService
-                                             .getCoverLetters(
-                                                 authorisation,
-                                                 caseData,
-                                                 coverLetterTemplateHint,
-                                                 dataMap
-                                             ));
+                List<Document> coverLetters = serviceOfApplicationService
+                    .getCoverLetters(
+                        authorisation,
+                        caseData,
+                        coverLetterTemplateHint,
+                        dataMap
+                    );
+                List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
+
+                responseDocuments.addAll(coverLetters);
                 //response document
                 responseDocuments.add(responseDocument);
 
@@ -370,6 +379,17 @@ public class NotificationService {
                     responseDocuments,
                     applicant.getValue().getLabelForDynamicList()
                 );
+                documentsNotifications.add(element(DocumentsNotification.builder()
+                                                       .notification(NotificationDetails.builder()
+                                                                         .bulkPrintId(String.valueOf(bulkPrintId))
+                                                                         .notificationType(NotificationType.BULK_PRINT)
+                                                                         .partyId(String.valueOf(applicant.getId()))
+                                                                         .partyType(PartyType.APPLICANT)
+                                                                         .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                                         .build())
+                                                       .documents(ElementUtils.wrapElements(coverLetters))
+                                                       .build()));
+                caseDataMap.put("accessCodeNotifications", documentsNotifications);
                 log.info(
                     "Response documents are sent to applicant {} in the case {} - via post {}",
                     applicant.getId(),

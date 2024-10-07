@@ -295,7 +295,7 @@ public class ManageDocumentsService {
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
             notificationService.sendNotifications(caseData,
                                                   quarantineLegalDoc,
-                                                  userRole);
+                                                  userRole,caseDataUpdated);
         }
     }
 

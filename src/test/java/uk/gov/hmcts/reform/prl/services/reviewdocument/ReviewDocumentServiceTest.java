@@ -284,7 +284,7 @@ public class ReviewDocumentServiceTest {
         when(manageDocumentsService.getQuarantineDocumentForUploader(
             anyString(), any(QuarantineLegalDoc.class))).thenReturn(caseDoc);
 
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString(), );
     }
 
     private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

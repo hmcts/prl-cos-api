@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
@@ -978,5 +979,13 @@ public class CaseUtils {
             && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && null != createPaymentRequest.getFeeType()
             && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
+    }
+
+    public static List<Element<DocumentsNotification>> getExistingAccessCodeNotifications(CaseData caseData) {
+        return null != caseData.getDocumentsNotifications()
+            && CollectionUtils.isNotEmpty(caseData.getDocumentsNotifications()
+                                              .getAccessCodeNotifications())
+            ? caseData.getDocumentsNotifications().getAccessCodeNotifications()
+            : new ArrayList<>();
     }
 }

@@ -207,7 +207,7 @@ public class CitizenDocumentServiceTest {
             quarantineLegalDoc);
         when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
                                                                  .roles(List.of(Roles.CITIZEN.getValue())).build());
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString(), );
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(

@@ -151,7 +151,7 @@ public class NotificationServiceTest {
 
         notificationService.sendNotifications(caseData,
                                               quarantineLegalDoc,
-                                              CITIZEN);
+                                              CITIZEN, );
 
         verify(emailService, times(1)).send(eq("afl11@test.com"),
                                             eq(emailTemplate), any(),
@@ -223,7 +223,7 @@ public class NotificationServiceTest {
 
         notificationService.sendNotifications(caseData,
                                               quarantineLegalDoc,
-                                              CITIZEN);
+                                              CITIZEN, );
 
         //cafcass
         verify(emailService, times(1)).send(eq("test@email.com"),
