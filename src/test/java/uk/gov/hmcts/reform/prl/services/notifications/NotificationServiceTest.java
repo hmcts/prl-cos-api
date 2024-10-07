@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -151,7 +152,7 @@ public class NotificationServiceTest {
 
         notificationService.sendNotifications(caseData,
                                               quarantineLegalDoc,
-                                              CITIZEN, );
+                                              CITIZEN, new HashMap<>());
 
         verify(emailService, times(1)).send(eq("afl11@test.com"),
                                             eq(emailTemplate), any(),
@@ -223,7 +224,7 @@ public class NotificationServiceTest {
 
         notificationService.sendNotifications(caseData,
                                               quarantineLegalDoc,
-                                              CITIZEN, );
+                                              CITIZEN, new HashMap<>());
 
         //cafcass
         verify(emailService, times(1)).send(eq("test@email.com"),
