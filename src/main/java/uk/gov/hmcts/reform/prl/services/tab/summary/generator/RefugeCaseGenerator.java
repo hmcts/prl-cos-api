@@ -32,21 +32,25 @@ public class RefugeCaseGenerator implements FieldGenerator {
                 isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getOtherPartyInTheCaseRevised());
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
-            if (YesOrNo.No.equals(isRefugeCase)) {
+            if (caseData.getApplicantsFL401() != null) {
+                isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
+            }
+            if (YesOrNo.No.equals(isRefugeCase) && (caseData.getRespondentsFL401() != null)) {
                 isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
             }
         }
         return CaseSummary.builder().refugeCase(RefugeCase.builder().isRefugeCase(isRefugeCase).build()).build();
     }
 
-    private static YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> caseData) {
-        Optional<Element<PartyDetails>> refugeParty
-            = caseData
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getLiveInRefuge()))
-            .findFirst();
-
+    private static YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> partyDetailsList) {
+        Optional<Element<PartyDetails>> refugeParty = Optional.empty();
+        if (partyDetailsList != null) {
+            refugeParty
+                = partyDetailsList
+                .stream()
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getLiveInRefuge()))
+                .findFirst();
+        }
         return refugeParty.isPresent() ? YesOrNo.Yes : YesOrNo.No;
     }
 }
