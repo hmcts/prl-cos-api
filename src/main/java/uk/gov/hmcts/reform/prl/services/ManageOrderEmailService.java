@@ -476,16 +476,18 @@ public class ManageOrderEmailService {
                 EmailTemplateNames.CA_LIP_ORDERS
             ));
             //Added as part of PRL-5509
-            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
+            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail,
+                                                                                             EmailTemplateNames.CA_LIP_ORDERS));
         }
     }
 
-    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
+    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail,
+                                                       EmailTemplateNames template) {
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.isAccessEnabled(party)) {
             emailService.send(
                 party.getValue().getEmail(),
-                EmailTemplateNames.CA_LIP_ORDERS,
+                template,
                 buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                 dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
             );
@@ -568,7 +570,7 @@ public class ManageOrderEmailService {
                 orderDocuments,
                 bulkPrintOrderDetails,
                 SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP,
-                EmailTemplateNames.CA_LIP_ORDERS
+                EmailTemplateNames.DA_LIP_ORDERS
             );
         }
     }

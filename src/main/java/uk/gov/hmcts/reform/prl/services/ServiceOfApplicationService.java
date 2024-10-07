@@ -1237,6 +1237,10 @@ public class ServiceOfApplicationService {
         return documents.stream().filter(document -> !document.getDocumentFileName().contains("cover_letter")).toList();
     }
 
+    public List<Document> extractCoverLettersFromPack(List<Document> documents) {
+        return documents.stream().filter(document -> document.getDocumentFileName().contains("cover_letter")).toList();
+    }
+
     private String handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
@@ -1250,7 +1254,7 @@ public class ServiceOfApplicationService {
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
             List<Document> respondentCoverLetters = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                respondentCoverLetters.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+                respondentCoverLetters.addAll(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5));
             }
             List<Document> packLdocs = new ArrayList<>(respondentCoverLetters);
             packLdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs));
@@ -1337,13 +1341,22 @@ public class ServiceOfApplicationService {
         List<Element<CoverLetterMap>> coverLetterMap = caseData.getServiceOfApplication().getUnServedApplicantPack().getCoverLettersMap();
         caseData.getApplicants().forEach(selectedApplicant -> {
             if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
+                List<Document> applicantDocs = new ArrayList<>(extractCoverLettersFromPack(unwrapElements(caseData.getServiceOfApplication()
+                                                                                                              .getUnservedCitizenRespondentPack()
+                                                                                                              .getPackDocument())));
+                removeDuplicatesAndGetConsolidatedDocs(docs,
+                                                       removeCoverLettersFromThePacks(unwrapElements(caseData.getServiceOfApplication()
+                                                                                                         .getUnservedCitizenRespondentPack()
+                                                                                                         .getPackDocument())),
+                                                       applicantDocs);
+                log.info("Applicant Pack personal service {}", applicantDocs);
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     sendEmailToCitizenLipByCheckingDashboardAccess(caseData,
                                                              emailNotificationDetails,
                                                              selectedApplicant,
-                                                             docs,
+                                                                   applicantDocs,
                                                              SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
                                                              fieldsMap,
                                                              doesC1aExists(caseData).equals(Yes)
@@ -1355,7 +1368,7 @@ public class ServiceOfApplicationService {
                     sendPostWithAccessCodeLetterToParty(
                         caseData,
                         authorization,
-                        docs, //C9 to be sent for all applicants
+                        applicantDocs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
                         CaseUtils.getCoverLettersForParty(selectedApplicant.getId(), coverLetterMap),
@@ -2996,19 +3009,6 @@ public class ServiceOfApplicationService {
         return No;
     }
 
-    public CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
-        if (CollectionUtils.isNotEmpty(caseInvites)) {
-            Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
-                .filter(caseInviteElement -> Optional.ofNullable(caseInviteElement.getValue().getPartyId()).isPresent())
-                .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
-            ).findFirst();
-            if (caseInvite.isPresent()) {
-                return caseInvite.map(Element::getValue).orElse(null);
-            }
-        }
-        return null;
-    }
-
     public List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites();
         if (CollectionUtils.isEmpty(caseInvites)) {
@@ -3130,9 +3130,10 @@ public class ServiceOfApplicationService {
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
             List<Document> respondentPackDocs = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                respondentPackDocs.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+                respondentPackDocs.addAll(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5));
             }
             respondentPackDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs));
+            log.info("Respondent pack for applicant Lip {}", respondentPackDocs);
             caseDataUpdated.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(respondentPackDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -3247,7 +3248,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
         if (!CaseUtils.isCitizenAccessEnabled(party.getValue()) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
-            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+            caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
