@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class QueryParam {
     private Query query;
-    private String size = "100";
+    private String size;
 }
 
