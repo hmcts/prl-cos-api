@@ -549,23 +549,16 @@ public class ServiceOfDocumentsService {
             if ((isNotEmpty(party.getValue())
                 && isNotEmpty(party.getValue().getAddress()))
                 && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
-                List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
-                                                          .getCoverSheets(caseData, authorisation,
-                                                                          party.getValue().getAddress(),
-                                                                          party.getValue().getLabelForDynamicList(),
-                                                                          DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
-                                                          ));
-
-                docs.addAll(unwrapElements(documents));
 
                 BulkPrintDetails bulkPrintNotif = sendPostViaBulkPrint(
                     authorisation,
                     caseData,
-                    docs,
+                    documents,
                     party.getValue().getLabelForDynamicList(),
                     party.getValue().getAddress(),
                     servedParty
                 );
+
                 if (null != bulkPrintNotif) {
                     bulkPrintDetails.add(element(bulkPrintNotif.toBuilder()
                                                      .partyIds(String.valueOf(party.getId()))
@@ -592,22 +585,11 @@ public class ServiceOfDocumentsService {
             if ((isNotEmpty(postInfo)
                 && isNotEmpty(postInfo.getPostalAddress()))
                 && isNotEmpty(postInfo.getPostalAddress().getAddressLine1())) {
-                List<Document> documents = null;
                 try {
-                    documents = new ArrayList<>(serviceOfApplicationPostService
-                                                    .getCoverSheets(
-                                                        caseData,
-                                                        authorisation,
-                                                        postInfo.getPostalAddress(),
-                                                        postInfo.getPostalName(),
-                                                        DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
-                                                    ));
-                    documents.addAll(unwrapElements(unServedPack.getDocuments()));
-
                     bulkPrintDetails.add(element(sendPostViaBulkPrint(
                         authorisation,
                         caseData,
-                        documents,
+                        unServedPack.getDocuments(),
                         postInfo.getPostalName(),
                         postInfo.getPostalAddress(),
                         SERVED_PARTY_OTHER_ORGANISATION
@@ -627,10 +609,20 @@ public class ServiceOfDocumentsService {
 
     private BulkPrintDetails sendPostViaBulkPrint(String authorisation,
                                                   CaseData caseData,
-                                                  List<Document> documents,
+                                                  List<Element<Document>> docs,
                                                   String name,
                                                   Address address,
-                                                  String servedParty) {
+                                                  String servedParty) throws Exception {
+        List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
+                                                       .getCoverSheets(
+                                                           caseData,
+                                                           authorisation,
+                                                           address,
+                                                           name,
+                                                           DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                                                       ));
+        documents.addAll(unwrapElements(docs));
+
         UUID bulkPrintId = bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
