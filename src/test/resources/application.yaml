@@ -31,7 +31,7 @@ prl:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: DECISION_OUTCOME
+  caseState: DECISION_OUTCOME,PREPARE_FOR_HEARING_CONDUCT_HEARING,ALL_FINAL_ORDERS_ISSUED
   hearingStatus: LISTED
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
