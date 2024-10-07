@@ -22,14 +22,17 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -43,6 +46,8 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -51,7 +56,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
-    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET", "C8_DOCUMENT"};
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -60,7 +65,7 @@ public class CourtNavCaseService {
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final SystemUserService systemUserService;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -215,7 +220,17 @@ public class CourtNavCaseService {
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        data.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DARESPONDENT));
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DAAPPLICANT));
+        data.put("caseFlags", Flags.builder().build());
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+
         allTabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -223,7 +238,35 @@ public class CourtNavCaseService {
             startAllTabsUpdateDataContent.eventRequestData(),
             caseData
         );
-        log.info("**********************Tab refresh and CourtNav case creation complete**************************");
+
+        /** Tech debt: need to pick this extra transaction as a tech debt.
+         *  In the previous one, case data conversion is removing multiple must to have fields.
+         **/
+        updateCommonSetUpForNoCAndCaseFlags(caseId);
+        log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
+    }
+
+    public void updateCommonSetUpForNoCAndCaseFlags(String caseId) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        caseDataMap.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DARESPONDENT));
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DAAPPLICANT));
+        caseDataMap.put("caseFlags", Flags.builder().build());
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+        log.info("Common component setup for NoC and case flags is completed");
     }
 }
 
