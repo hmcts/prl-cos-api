@@ -363,7 +363,13 @@ public class DocumentGenService {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
-            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
+            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+                log.info(
+                    "allegation of harm {}",
+                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                );
+
+            }
 
         }
 
@@ -505,7 +511,12 @@ public class DocumentGenService {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
-            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
+            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+                log.info(
+                    "allegation of harm {}",
+                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                );
+            }
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);

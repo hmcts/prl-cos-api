@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
@@ -57,7 +58,12 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
+            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+                log.info(
+                    "allegation of harm {}",
+                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                );
+            }
 
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
@@ -110,7 +116,13 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
+            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+                log.info(
+                    "allegation of harm {}",
+                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                );
+
+            }
         }
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
