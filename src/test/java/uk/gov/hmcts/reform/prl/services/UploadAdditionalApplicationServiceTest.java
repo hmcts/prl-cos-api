@@ -146,11 +146,8 @@ class UploadAdditionalApplicationServiceTest {
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
-        when(paymentRequestService.createServiceRequestForAdditionalApplications(any(CaseData.class),
-                                                                                 anyString(),
-                                                                                 any(FeeResponse.class),
-                                                                                 anyString()
-        )).thenReturn(PaymentServiceResponse.builder()
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder()
                           .build());
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)

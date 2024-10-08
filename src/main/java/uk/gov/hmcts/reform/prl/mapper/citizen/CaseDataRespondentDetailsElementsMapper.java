@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -63,11 +64,12 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(respondentDetails.getPersonalDetails().getDateOfBirth() != null ? Yes : No)
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
-            .isAtAddressLessThan5Years(buildAddressLivedLessThan5YearsDetails(respondentDetails))
+            .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetails(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
@@ -98,9 +100,15 @@ public class CaseDataRespondentDetailsElementsMapper {
         return null;
     }
 
-    private static YesOrNo buildAddressLivedLessThan5YearsDetails(RespondentDetails respondentDetails) {
+    private static YesNoDontKnow buildAddressLivedLessThan5YearsDetails(RespondentDetails respondentDetails) {
 
-        return (!"Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) ? Yes : YesOrNo.No;
+        if ("Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) {
+            return YesNoDontKnow.yes;
+        } else if ("No".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) {
+            return YesNoDontKnow.no;
+        } else {
+            return YesNoDontKnow.dontKnow;
+        }
     }
 
     private static String buildPreviousName(RespondentDetails respondentDetails) {

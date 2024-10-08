@@ -95,7 +95,7 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
 
-        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
+        return paymentRequestService.createPayment(authorization, createPaymentRequest);
 
     }
 
@@ -146,6 +146,7 @@ public class FeesAndPaymentCitizenController {
     ) {
         FeeResponseForCitizen feeResponseForCitizen = null;
         try {
+            log.info("#### FeeRequest {}", feeRequest);
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
             } else {

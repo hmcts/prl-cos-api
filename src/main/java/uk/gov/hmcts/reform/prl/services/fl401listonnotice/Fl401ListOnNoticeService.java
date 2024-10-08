@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -86,7 +87,8 @@ public class Fl401ListOnNoticeService {
         return caseDataUpdated;
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> sendNotification(Map<String, Object> caseDataUpdated, String authorisation) {
+    public ResponseEntity<SubmittedCallbackResponse> sendNotification(CallbackRequest callbackRequest, String authorisation) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
@@ -107,11 +109,11 @@ public class Fl401ListOnNoticeService {
 
         cleanUpListOnNoticeFields(caseDataUpdated);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
+            = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
         //update all tabs
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
-                                          String.valueOf(caseData.getId()),
+                                          String.valueOf(String.valueOf(callbackRequest.getCaseDetails().getId())),
                                           startAllTabsUpdateDataContent.startEventResponse(),
                                           startAllTabsUpdateDataContent.eventRequestData(),
                                           caseDataUpdated);

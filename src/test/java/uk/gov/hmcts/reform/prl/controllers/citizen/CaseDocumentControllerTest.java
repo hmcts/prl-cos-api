@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
@@ -91,6 +92,9 @@ public class CaseDocumentControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private CitizenDocumentService citizenDocumentService;
 
     @Before
     public void setUp() {
@@ -573,7 +577,7 @@ public class CaseDocumentControllerTest {
         //When
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.citizenSubmitDocuments(authToken, documentRequest)).thenReturn(caseDetails);
+        when(citizenDocumentService.citizenSubmitDocuments(authToken, documentRequest)).thenReturn(caseDetails);
 
         //Action
         ResponseEntity<?> response = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, documentRequest);

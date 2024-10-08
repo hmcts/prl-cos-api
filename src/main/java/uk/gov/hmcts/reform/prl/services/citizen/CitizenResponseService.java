@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -493,6 +494,7 @@ public class CitizenResponseService {
                            .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                            .uploaderRole(PrlAppsConstants.CITIZEN)
                            .fileName(element.getValue().getDocumentFileName())
+                           .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
                            .documentLanguage(language)
                            .isConfidential(Yes)
                            .build())
@@ -518,6 +520,7 @@ public class CitizenResponseService {
                                .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                                .uploaderRole(PrlAppsConstants.CITIZEN)
                                .fileName(document.getDocumentFileName())
+                               .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
                                .documentLanguage(language)
                                .isConfidential(Yes)
                                .build())

@@ -46,7 +46,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
@@ -431,7 +430,7 @@ public class Fl401ListOnNoticeControllerTest {
     @Test
     public void testSendListOnNoticeNotification() throws Exception {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(fl401ListOnNoticeService.sendNotification(anyMap(), anyString()))
+        when(fl401ListOnNoticeService.sendNotification(any(CallbackRequest.class), anyString()))
             .thenReturn(ok(SubmittedCallbackResponse.builder()
                                .confirmationHeader("test")
                                .confirmationBody("test").build()));

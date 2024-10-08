@@ -6,6 +6,7 @@
       "id": 1711105989241323,
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
+      "isApplicantRepresented" : null,
       "caseManagementLocation": {
         "baseLocationId": "1",
         "regionId": "1",
@@ -16,6 +17,11 @@
         {
           "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
           "value": {
+            "user": {
+              "email": null,
+              "idamId": null,
+              "solicitorRepresented": null
+            },
             "firstName": "test",
             "lastName": "data",
             "previousName": null,
@@ -63,9 +69,9 @@
             "representativeFirstName": "repFirstName",
             "representativeLastName": "repLastName",
             "isAtAddressLessThan5YearsWithDontKnow": null,
-            "doTheyHaveLegalRepresentation": null,
+            "doTheyHaveLegalRepresentation": "yes",
             "sendSignUpLink": null,
-            "solicitorEmail": null
+            "solicitorEmail": "test@test.com"
           }
         }
       ],
@@ -232,5 +238,5 @@
       }
     }
   },
-  "event_id": "litigationCapacity"
+  "event_id": "serviceOfApplication"
 }

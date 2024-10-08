@@ -66,7 +66,7 @@ public class ServiceOfApplicationController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
-                callbackRequest)).build();
+                callbackRequest, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

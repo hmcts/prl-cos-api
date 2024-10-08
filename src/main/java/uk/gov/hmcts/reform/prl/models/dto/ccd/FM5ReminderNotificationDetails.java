@@ -17,5 +17,4 @@ public class FM5ReminderNotificationDetails {
 
     private List<Element<NotificationDetails>> fm5ReminderNotifications;
     private String fm5RemindersSent;
-
 }

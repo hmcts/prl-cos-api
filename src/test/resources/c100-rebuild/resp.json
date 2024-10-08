@@ -28,7 +28,7 @@
         "AddressLine2":"resp1 adrs line 2",
         "PostTown":"resp1Town",
         "PostCode":"CV3 2ND",
-        "addressHistory":"dontKnow",
+        "addressHistory":"Yes",
         "provideDetailsOfPreviousAddresses":""
       },
       "relationshipDetails":{

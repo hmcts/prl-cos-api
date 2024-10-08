@@ -74,7 +74,7 @@ public class ServiceOfApplicationControllerTest {
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
 
-        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class), Mockito.anyString()))
             .thenReturn(caseData);
         assertNotNull(serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest).getData());
     }
