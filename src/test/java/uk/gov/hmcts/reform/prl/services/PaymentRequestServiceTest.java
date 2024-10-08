@@ -226,11 +226,9 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldThrowNullPointerException() throws Exception {
+    public void shouldThrowNullPointerException() {
         callbackRequest = CallbackRequest.builder().build();
-        assertThrows(NullPointerException.class, () -> {
-            PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "", feeResponse);
-        });
+        assertThrows(NullPointerException.class, () -> paymentRequestService.createServiceRequest(callbackRequest, "", feeResponse));
     }
 
     @Test
