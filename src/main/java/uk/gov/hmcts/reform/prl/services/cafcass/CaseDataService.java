@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
@@ -49,6 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 
 @Slf4j
 @Service
@@ -296,8 +300,39 @@ public class CaseDataService {
             caseIdWithRegionIdMap
         );
 
+        //PRL-6431
+        filterCancelledHearingsBeforeListing(listOfHearingDetails);
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
+    }
+
+    public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
+        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
+        if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
+            for (Hearings hearings : listOfHearingDetails) {
+                hearings.getCaseHearings().forEach(caseHearing -> {
+                    if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
+                        filteredCaseHearings.add(caseHearing);
+                    }
+                });
+                hearings.setCaseHearings(filteredCaseHearings);
+            }
+        }
+    }
+
+    private static boolean checkIfHearingCancelledBeforeListing(CaseHearing caseHearing) {
+        boolean hearingCancelledBeforeListing = false;
+        if (CANCELLED.equals(caseHearing.getHmcStatus())
+            && null != caseHearing.getHearingDaySchedule()) {
+            for (HearingDaySchedule hearingDaySchedule : caseHearing.getHearingDaySchedule()) {
+                if (ObjectUtils.isEmpty(hearingDaySchedule.getHearingStartDateTime())
+                    && ObjectUtils.isEmpty(hearingDaySchedule.getHearingEndDateTime())) {
+                    hearingCancelledBeforeListing = true;
+                    break;
+                }
+            }
+        }
+        return hearingCancelledBeforeListing;
     }
 
     private List<Element<OtherDocuments>> updateOtherDocuments(CafCassCaseData caseData) {
