@@ -57,6 +57,8 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
+
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names
@@ -68,6 +70,7 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        log.info("temp case details {}",tempCaseDetails);
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -107,6 +110,7 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+            log.info("allegation of harm {}", caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis());
         }
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
@@ -129,6 +133,7 @@ public class DgsService {
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
+        log.info("temp case details {}",tempCaseDetails);
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
