@@ -58,9 +58,9 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+            if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
                 log.info(
-                    "allegation of harm {}",
+                    "allegation of harm 1{}",
                     caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
             }
@@ -116,9 +116,9 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
+            if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
                 log.info(
-                    "allegation of harm {}",
+                    "allegation of harm 2{}",
                     caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
 
@@ -145,8 +145,8 @@ public class DgsService {
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
-        log.info("temp case details {}",tempCaseDetails);
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
+        log.info("temp case details {}",tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =

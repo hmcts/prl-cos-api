@@ -365,7 +365,7 @@ public class DocumentGenService {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
             if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
                 log.info(
-                    "allegation of harm {}",
+                    "allegation of harm 3 {}",
                     caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
 
@@ -513,7 +513,7 @@ public class DocumentGenService {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
             if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
                 log.info(
-                    "allegation of harm {}",
+                    "allegation of harm 4 {}",
                     caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
             }
