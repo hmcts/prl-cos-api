@@ -28,9 +28,9 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -92,8 +92,7 @@ public class CourtNavCaseServiceTest {
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Mock
-    SystemUserService systemUserService;
-
+    private NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     private Map<String, Object> caseDataMap = new HashMap<>();
     private CaseData caseData;

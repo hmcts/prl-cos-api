@@ -128,6 +128,8 @@ public class PrlAppsConstants {
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
     public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
+
+    public static final String DOCUMENT_C1A_DRAFT_HINT = "DOCUMENT_C1A_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
@@ -836,6 +838,8 @@ public class PrlAppsConstants {
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
+    public static final String ANNEX1_FILENAME = "Annex 1 - Confidential contact details notice.pdf";
+    public static final String ANNEX1_FILENAME_WELSH = "Annex 1 - Confidential contact details notice - welsh.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
     public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";

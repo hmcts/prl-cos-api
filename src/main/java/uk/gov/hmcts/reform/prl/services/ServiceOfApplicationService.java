@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
@@ -287,6 +288,7 @@ public class ServiceOfApplicationService {
     private final DgsService dgsService;
     private final CaseInviteManager caseInviteManager;
     private final LaunchDarklyClient launchDarklyClient;
+    private final ConfidentialityCheckService confidentialityCheckService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -458,7 +460,7 @@ public class ServiceOfApplicationService {
                                                                                       caseData);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             log.info("Sending service of application notifications to C100 citizens");
-            if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                 && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
@@ -511,7 +513,7 @@ public class ServiceOfApplicationService {
                                                                                       CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                       caseData);
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                            .getSoaServingRespondentsOptionsCA())) {
                 log.info("Personal Service - Case created by - Solicitor");
@@ -552,7 +554,7 @@ public class ServiceOfApplicationService {
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             }
-        } else if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+        } else if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             log.info("Non personal Service - Case created by - Solicitor");
@@ -1217,7 +1219,7 @@ public class ServiceOfApplicationService {
     private String getResponsibleForService(CaseData caseData) {
         String responsibleForService = null;
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
                 if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                     responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().getId();
                 } else {
@@ -1267,7 +1269,7 @@ public class ServiceOfApplicationService {
         String confirmationBody = "";
         String confirmationHeader;
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBody = CONFIRMATION_BODY_PREFIX;
             confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
         } else {
@@ -2439,11 +2441,11 @@ public class ServiceOfApplicationService {
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                       CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                       caseData);
-        if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+        if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
-        } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+        } else if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
         }
         //serving other people in the case
@@ -2459,6 +2461,8 @@ public class ServiceOfApplicationService {
             && StringUtils.isNotEmpty(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())) {
             caseDataUpdated.put(UNSERVED_CAFCASS_CYMRU_PACK, SoaPack.builder()
                     .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())))
+                    .servedBy(userService.getUserDetails(authorization).getFullName())
+                    .servedPartyEmail(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())
                 .build());
         }
 
@@ -3081,7 +3085,7 @@ public class ServiceOfApplicationService {
         }
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
-
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),

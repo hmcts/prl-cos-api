@@ -3,26 +3,17 @@ package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ListOnNoticeEmail;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 
@@ -30,8 +21,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_AD
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ListOnNoticeService {
-
-    private final EmailService emailService;
 
     public String getReasonsSelected(Object listOnNoticeReasonsEnum, long caseId) {
         if (null != listOnNoticeReasonsEnum) {
@@ -44,52 +33,6 @@ public class ListOnNoticeService {
         } else {
             log.info("***No Reasons selected for list on Notice for the case id: {}", caseId);
             return null;
-        }
-    }
-
-    public void sendNotification(CaseData caseData, String selectedAndAdditionalReasons) {
-        List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            StringBuilder finalSelectedAndAdditionalReasons
-                = new StringBuilder(selectedAndAdditionalReasons.replace("\n\n", "\n• "))
-                .insert(0,"• ");
-            applicantsInCase.forEach(applicant -> {
-                if (StringUtils.isNotEmpty(applicant.getValue().getSolicitorEmail())) {
-                    log.info(
-                        "Sending the email notification to applicant solicitor for List on Notice for caseId {}",
-                        caseData.getId()
-                    );
-                    emailService.send(
-                        applicant.getValue().getSolicitorEmail(),
-                        EmailTemplateNames.LIST_ON_NOTICE_EMAIL_NOTIFICATION,
-                        buildListOnNoticeEmail(
-                            caseData,
-                            applicant.getValue().getRepresentativeFirstName()
-                                + EMPTY_SPACE_STRING
-                                + applicant.getValue().getRepresentativeLastName(),
-                            finalSelectedAndAdditionalReasons.toString()
-                        ),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    );
-                } else {
-                    log.info(
-                        "Sending the email notification to applicant for List on Notice for caseId {}",
-                        caseData.getId()
-                    );
-                    emailService.send(
-                        applicant.getValue().getEmail(),
-                        EmailTemplateNames.LIST_ON_NOTICE_EMAIL_NOTIFICATION,
-                        buildListOnNoticeEmail(
-                            caseData,
-                            applicant.getValue().getFirstName()
-                                + EMPTY_SPACE_STRING
-                                + applicant.getValue().getLastName(),
-                            finalSelectedAndAdditionalReasons.toString()
-                        ),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    );
-                }
-            });
         }
     }
 
