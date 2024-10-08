@@ -362,8 +362,10 @@ public class NotificationService {
                         dataMap
                     );
                 responseDocuments.addAll(coverLetters);
-                //response document
-                responseDocuments.add(responseDocument);
+                if (responseDocument != null) {
+                    //response document
+                    responseDocuments.add(responseDocument);
+                }
                 log.info("response docs {}", responseDocuments);
                 // Add coversheet and send it to bulk print
                 UUID bulkPrintId = bulkPrintService.send(
