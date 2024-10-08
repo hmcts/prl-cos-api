@@ -1,4 +1,5 @@
-package uk.gov.hmcts.reform.prl.controllers;
+
+package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -14,7 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfDocumentsService;
+import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -91,14 +92,6 @@ public class ServiceOfDocumentsControllerTest {
             serviceOfDocumentsController.handleAboutToSubmit(any(), any(), callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
-
-    /*@Test
-    public void testHandleSubmitted() throws Exception {
-        when(serviceOfDocumentsService.handleSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(
-            ok(SubmittedCallbackResponse.builder().build()));
-
-        assertNotNull(serviceOfDocumentsController.handleSubmitted(any(),any(),callbackRequest));
-    }*/
 
     @Test
     public void testExceptionHandleSubmitted() {

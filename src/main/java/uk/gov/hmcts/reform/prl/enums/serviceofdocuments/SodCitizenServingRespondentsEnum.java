@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.enums.serviceofdocuments;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
