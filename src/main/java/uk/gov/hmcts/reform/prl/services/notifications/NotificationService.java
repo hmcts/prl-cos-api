@@ -361,8 +361,6 @@ public class NotificationService {
                         coverLetterTemplateHint,
                         dataMap
                     );
-                List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
-
                 responseDocuments.addAll(coverLetters);
                 //response document
                 responseDocuments.add(responseDocument);
@@ -375,6 +373,7 @@ public class NotificationService {
                     responseDocuments,
                     applicant.getValue().getLabelForDynamicList()
                 );
+                List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
                 documentsNotifications.add(element(DocumentsNotification.builder()
                                                        .notification(NotificationDetails.builder()
                                                                          .bulkPrintId(String.valueOf(bulkPrintId))
