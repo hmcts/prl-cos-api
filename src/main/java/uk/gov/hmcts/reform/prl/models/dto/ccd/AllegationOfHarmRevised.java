@@ -128,7 +128,6 @@ public class AllegationOfHarmRevised {
     @JsonProperty("childEmotionalAbuse")
     private final ChildAbuse childEmotionalAbuse;
 
-    @JsonIgnore
     @JsonProperty("childAbuseBehavioursDocmosis")
     private final  List<Element<ChildAbuseBehaviour>> childAbuseBehavioursDocmosis;
 

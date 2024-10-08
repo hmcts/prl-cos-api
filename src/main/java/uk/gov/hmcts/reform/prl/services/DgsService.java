@@ -61,7 +61,7 @@ public class DgsService {
             if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
                 log.info(
                     "allegation of harm 1{}",
-                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                    caseDetails.getCaseData().getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
             }
 
@@ -119,7 +119,7 @@ public class DgsService {
             if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
                 log.info(
                     "allegation of harm 2{}",
-                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
+                    caseDetails.getCaseData().getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
                 );
 
             }
