@@ -73,7 +73,7 @@ public class CreateBundleConsumerTest {
     private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws Exception {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
-            .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.applicantPositionStatements).build());
+            .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.positionStatements).build());
         BundleCreateRequest.builder().eventId("createBundle").jurisdictionId("JURISDICTIONID").caseTypeId("CASETYPEID").caseDetails(
             BundlingCaseDetails.builder().caseData(BundlingCaseData.builder().id("CaseID").bundleConfiguration("BUNDLE_config.yaml")
                     .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())

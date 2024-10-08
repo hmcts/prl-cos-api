@@ -180,7 +180,7 @@ public class PrlAppsConstants {
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
 
-    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness Statements";
+    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
 
@@ -196,7 +196,10 @@ public class PrlAppsConstants {
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
 
     public static final String DRUG_AND_ALCOHOL_TESTS_DOCUMENT = "Drug and alcohol test (toxicology)";
+    public static final String RESULTS_OF_HAIR_STRAND_BLOOD_TESTS = "Results of hair strand/blood tests";
+    public static final String DNA_REPORTS = "DNA reports";
     public static final String POLICE_REPORTS = "Police reports";
+    public static final String POLICE_DISCLOSURES = "Police disclosures";
 
     public static final String POLICE_REPORT_DOCUMENT = "Police report";
     public static final String OTHER_DOCUMENTS = "Other documents";
@@ -591,6 +594,26 @@ public class PrlAppsConstants {
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
     public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
+    public static final String APPLICANT_C1A_RESPONSE = "Applicant C1A response";
+    public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
+    public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
+    public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
+    public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
+    public static final String CASE_SUMMARY = "Case summary";
+    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";
+    public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
+    public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
+    public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
+    public static final String SECTION_37_REPORT = "Section 37 report";
+    public static final String SIXTEENA_RISK_ASSESSMENT = "16a risk assessment";
+    public static final String GUARDIAN_REPORT = "Guardian report";
+    public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
+    public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
+    public static final String LA_OTHER_DOCUMENTS = "Local Authority other documents";
+    public static final String MIAM_CERTIFICATE = "MIAM certificate/Exemption";
+    public static final String PREVIOUS_ORDERS = "Orders from other proceedings";
+    public static final String ANY_OTHER_DOCUMENTS = "Any other documents";
 
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";

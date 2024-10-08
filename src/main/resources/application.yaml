@@ -672,9 +672,9 @@ bundle:
   api:
     url: ${BUNDLE_URL:}
   english:
-    config: ${BUNDLE_ENGLISH_CONFIG:prl-bundle-config.yaml}
+    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
   welsh:
-    config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
+    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
