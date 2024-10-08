@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
@@ -120,7 +123,7 @@ public class ServiceOfApplicationPostService {
         UploadResponse uploadResponse = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage);
+            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage, caseData);
         } else {
             uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage);
         }
@@ -134,22 +137,9 @@ public class ServiceOfApplicationPostService {
 
     private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage) {
         List<MultipartFile> files = new ArrayList<>();
-        if (documentLanguage.isGenEng()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                PRIVACY_DOCUMENT_FILENAME,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-            ));
-        }
-        if (documentLanguage.isGenWelsh()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                PRIVACY_DOCUMENT_FILENAME_WELSH,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
-            ));
-        }
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(
                 SOA_MULTIPART_FILE,
@@ -167,41 +157,18 @@ public class ServiceOfApplicationPostService {
         );
     }
 
-    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage) {
+    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage, CaseData caseData) {
         List<MultipartFile> files = new ArrayList<>();
-        if (documentLanguage.isGenEng()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                PRIVACY_DOCUMENT_FILENAME,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-            ));
-        }
-        if (documentLanguage.isGenWelsh()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                PRIVACY_DOCUMENT_FILENAME_WELSH,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
-            ));
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
+        // FPET-1056 Annex 1 file inclusion
+        if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
         }
         //PRL-5360 - Remove mediation voucher & add new President note
-        if (documentLanguage.isGenEng()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                SOA_FAMILY_PRESIDENTS_NOTE,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
-            ));
-        }
-        if (documentLanguage.isGenWelsh()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                SOA_FAMILY_PRESIDENTS_NOTE_WELSH,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE_WELSH)
-            ));
-        }
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_FAMILY_PRESIDENTS_NOTE, SOA_FAMILY_PRESIDENTS_NOTE_WELSH);
+
         files.addAll(
             List.of(
                 new InMemoryMultipartFile(
@@ -218,24 +185,8 @@ public class ServiceOfApplicationPostService {
                 )
             )
         );
-        if (documentLanguage.isGenEng()) {
-            files.add(
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    C1A_BLANK_DOCUMENT_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
-                ));
-        }
-        if (documentLanguage.isGenWelsh()) {
-            files.add(
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    C1A_BLANK_DOCUMENT_WELSH_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_WELSH_FILENAME)
-                ));
-        }
+
+        attachStaticFileToTheDocuments(documentLanguage, files, C1A_BLANK_DOCUMENT_FILENAME, C1A_BLANK_DOCUMENT_WELSH_FILENAME);
 
         return caseDocumentClient.uploadDocuments(
             auth,
@@ -244,6 +195,28 @@ public class ServiceOfApplicationPostService {
             PrlAppsConstants.JURISDICTION,
             files
         );
+    }
+
+    private void attachStaticFileToTheDocuments(DocumentLanguage documentLanguage,
+                                                List<MultipartFile> files,
+                                                String fileName,
+                                                String fileNameWelsh) {
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                fileName,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + fileName)
+            ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                fileNameWelsh,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + fileNameWelsh)
+            ));
+        }
     }
 
     public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
