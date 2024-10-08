@@ -587,6 +587,9 @@ public class CitizenPartyDetailsMapper {
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(existingPartyDetails.getResponse().toBuilder()
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
+                          .safeToCallOption(null != citizenProvidedPartyDetails.getResponse()
+                                                ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
+                                                : null)
                           .build())
             .build();
     }

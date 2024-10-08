@@ -84,12 +84,12 @@ public class ServiceOfApplicationPostService {
             if (documentLanguage.isGenEng()) {
                 GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
                                                                                  coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet.pdf"));
             }
             if (documentLanguage.isGenWelsh()) {
                 GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
                                                                                  coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet_welsh.pdf"));
             }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
