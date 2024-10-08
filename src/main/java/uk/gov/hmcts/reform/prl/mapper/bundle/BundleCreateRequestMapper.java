@@ -374,25 +374,20 @@ public class BundleCreateRequestMapper {
     }
 
 
-
     private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(QuarantineLegalDoc doc) {
         HashMap<String, BundlingRequestDocument> bundleMap = new HashMap<>();
         log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
 
-        bundleMap.put(
-            POSITION_STATEMENTS,
-            Objects.nonNull(doc.getPositionStatementsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getPositionStatementsDocument())
-                .documentFileName(doc.getPositionStatementsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.positionStatements).build() : null
-        );
-        bundleMap.put(
-            OTHER_WITNESS_STATEMENTS,
-            Objects.nonNull(doc.getOtherWitnessStatementsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getOtherWitnessStatementsDocument())
-                .documentFileName(doc.getOtherWitnessStatementsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.otherWitnessStatements).build() : null
-        );
+        mapPreliminaryDocuments(doc, bundleMap);
+        mapApplicationsAndOrders(doc, bundleMap);
+        mapWitnessStatements(doc, bundleMap);
+        mapCafcassLaReports(doc, bundleMap);
+        mapOtherDocuments(doc, bundleMap);
+
+        return bundleMap.get(doc.getCategoryId());
+    }
+
+    private static void mapOtherDocuments(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(
             MEDICAL_REPORTS,
             Objects.nonNull(doc.getMedicalReportsDocument()) ? BundlingRequestDocument.builder()
@@ -439,6 +434,13 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getPoliceDisclosuresDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.policeDisclosures).build() : null
         );
+        bundleMap.put(ANY_OTHER_DOC, Objects.nonNull(doc.getAnyOtherDocDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getAnyOtherDocDocument())
+            .documentFileName(doc.getAnyOtherDocDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.anyOtherDocuments).build() : null);
+    }
+
+    private static void mapWitnessStatements(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(
             APPLICANT_STATEMENTS,
             Objects.nonNull(doc.getApplicantStatementsDocument()) ? BundlingRequestDocument.builder()
@@ -453,6 +455,16 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getRespondentStatementsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.respondentWitnessStatements).build() : null
         );
+        bundleMap.put(
+            OTHER_WITNESS_STATEMENTS,
+            Objects.nonNull(doc.getOtherWitnessStatementsDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getOtherWitnessStatementsDocument())
+                .documentFileName(doc.getOtherWitnessStatementsDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.otherWitnessStatements).build() : null
+        );
+    }
+
+    private static void mapApplicationsAndOrders(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(
             APPLICANT_C1A_RESPONSE,
             Objects.nonNull(doc.getApplicantC1AResponseDocument()) ? BundlingRequestDocument.builder()
@@ -481,10 +493,6 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getRespondentC1AResponseDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.respondentC1AResponse).build() : null
         );
-        bundleMap.put(CASE_SUMMARY, Objects.nonNull(doc.getCaseSummaryDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCaseSummaryDocument())
-            .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.caseSummary).build() : null);
         bundleMap.put(
             TRANSCRIPTS_OF_JUDGEMENTS,
             Objects.nonNull(doc.getTranscriptsOfJudgementsDocument()) ? BundlingRequestDocument.builder()
@@ -499,6 +507,30 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getMagistratesFactsAndReasonsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.magistrateFactAndReasons).build() : null
         );
+        bundleMap.put(
+            MIAM_CERTIFICATE,
+            Objects.nonNull(doc.getMiamCertificateDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getMiamCertificateDocument())
+                .documentFileName(doc.getMiamCertificateDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.applicantMiamCertificate).build() : null
+        );
+        bundleMap.put(
+            PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+            Objects.nonNull(doc.getPreviousOrdersSubmittedWithApplicationDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getPreviousOrdersSubmittedWithApplicationDocument())
+                .documentFileName(doc.getPreviousOrdersSubmittedWithApplicationDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication).build() : null
+        );
+        bundleMap.put(
+            ORDERS_FROM_OTHER_PROCEEDINGS,
+            Objects.nonNull(doc.getOrdersFromOtherProceedingsDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getOrdersFromOtherProceedingsDocument())
+                .documentFileName(doc.getOrdersFromOtherProceedingsDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.respondentPreviousOrdersSubmittedWithApplication).build() : null
+        );
+    }
+
+    private static void mapCafcassLaReports(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
         bundleMap.put(
             SAFEGUARDING_LETTER,
             Objects.nonNull(doc.getSafeguardingLetterDocument()) ? BundlingRequestDocument.builder()
@@ -556,32 +588,19 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getLocalAuthorityOtherDocDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.laOtherDocuments).build() : null
         );
-        bundleMap.put(
-            MIAM_CERTIFICATE,
-            Objects.nonNull(doc.getMiamCertificateDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getMiamCertificateDocument())
-                .documentFileName(doc.getMiamCertificateDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.applicantMiamCertificate).build() : null
-        );
-        bundleMap.put(
-            PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
-            Objects.nonNull(doc.getPreviousOrdersSubmittedWithApplicationDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getPreviousOrdersSubmittedWithApplicationDocument())
-                .documentFileName(doc.getPreviousOrdersSubmittedWithApplicationDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication).build() : null
-        );
-        bundleMap.put(
-            ORDERS_FROM_OTHER_PROCEEDINGS,
-            Objects.nonNull(doc.getOrdersFromOtherProceedingsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getOrdersFromOtherProceedingsDocument())
-                .documentFileName(doc.getOrdersFromOtherProceedingsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.respondentPreviousOrdersSubmittedWithApplication).build() : null
-        );
-        bundleMap.put(ANY_OTHER_DOC, Objects.nonNull(doc.getAnyOtherDocDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getAnyOtherDocDocument())
-            .documentFileName(doc.getAnyOtherDocDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.anyOtherDocuments).build() : null);
+    }
 
-        return bundleMap.get(doc.getCategoryId());
+    private static void mapPreliminaryDocuments(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
+        bundleMap.put(
+            POSITION_STATEMENTS,
+            Objects.nonNull(doc.getPositionStatementsDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getPositionStatementsDocument())
+                .documentFileName(doc.getPositionStatementsDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.positionStatements).build() : null
+        );
+        bundleMap.put(CASE_SUMMARY, Objects.nonNull(doc.getCaseSummaryDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getCaseSummaryDocument())
+            .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.caseSummary).build() : null);
     }
 }
