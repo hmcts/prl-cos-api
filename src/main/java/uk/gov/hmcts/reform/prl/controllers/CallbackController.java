@@ -849,8 +849,10 @@ public class CallbackController {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+            log.info("userOrganisation.isPresent() {}", userOrganisation.isPresent());
             if (userOrganisation.isPresent()) {
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
+                log.info("launchDarklyClient.isFeatureEnabled(share-a-case) {}", launchDarklyClient.isFeatureEnabled("share-a-case"));
                 if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                         .organisation(Organisation.builder()
@@ -858,16 +860,19 @@ public class CallbackController {
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
                         .build();
+                    log.info("applicantOrganisationPolicy 1 {}", objectMapper.writeValueAsString(applicantOrganisationPolicy));
                     if (caseData.getApplicantOrganisationPolicy() != null) {
                         applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
                             .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
                             .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                             .build();
+                        log.info("applicantOrganisationPolicy 2 {}", objectMapper.writeValueAsString(applicantOrganisationPolicy));
                     } else {
                         applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
                             .orgPolicyReference(StringUtils.EMPTY)
                             .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
                             .build();
+                        log.info("applicantOrganisationPolicy 3 {}", objectMapper.writeValueAsString(applicantOrganisationPolicy));
                     }
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
