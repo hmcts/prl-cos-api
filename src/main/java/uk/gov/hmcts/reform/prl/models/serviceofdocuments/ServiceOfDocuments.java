@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.AdditionalRecipients;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.ServiceOfDocumentsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
@@ -46,5 +47,8 @@ public class ServiceOfDocuments {
     private final SodCitizenServingRespondentsEnum sodCitizenServingRespondentsOptions;
 
     private final SodPack sodUnServedPack;
+
+    @JsonProperty("sodServeToRespondentOptions")
+    private final YesNoNotApplicable sodServeToRespondentOptions;
 
 }

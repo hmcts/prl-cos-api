@@ -165,9 +165,9 @@ public class ServiceOfDocumentsService {
             .submittedBy(userService.getUserDetails(authorisation).getFullName())
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .build();
-        if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+        if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
             //Personal service
-            if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
                 String servedBy = CaseUtils.isCitizenCase(caseData)
                     ? caseData.getServiceOfDocuments().getSodCitizenServingRespondentsOptions().getDisplayedValue()
                     : caseData.getServiceOfDocuments().getSodSolicitorServingRespondentsOptions().getDisplayedValue();
@@ -175,7 +175,7 @@ public class ServiceOfDocumentsService {
                     .servedBy(servedBy)
                     .isPersonalService(YesOrNo.Yes)
                     .build();
-            } else if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            } else if (YesNoNotApplicable.No.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
                 //Non-personal service
                 unServedPack = unServedPack.toBuilder()
                     .applicantIds(getSelectedPartyIds(
@@ -925,7 +925,7 @@ public class ServiceOfDocumentsService {
             "sodAdditionalRecipients",
             "sodAdditionalRecipientsList",
             "sodDocumentsCheckOptions",
-            "soaServeToRespondentOptions",
+            "sodServeToRespondentOptions",
             "sodSolicitorServingRespondentsOptions",
             "sodCitizenServingRespondentsOptions",
             "soaRecipientsOptions",
