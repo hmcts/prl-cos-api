@@ -61,6 +61,7 @@ public class DynamicMultiSelectListServiceTest {
                                                                         .representativeLastName("test")
                                                                         .user(User.builder().solicitorRepresented(Yes)
                                                                                   .build())
+                                                                        .partyId(UUID.fromString(TEST_UUID))
                                                                         .build()).build());
         List<Element<OrderDetails>> orders = List.of(Element.<OrderDetails>builder().id(UUID.fromString(TEST_UUID))
                                                          .value(OrderDetails.builder()

@@ -911,7 +911,7 @@ public class ServiceOfDocumentsService {
                                                       List<Element<PartyDetails>> parties,
                                                       PartyDetails fl401Party) {
         return wrapElements(CaseUtils.getSelectedPartyIds(
-            caseData.getCaseTypeOfApplication(),
+            CaseUtils.getCaseTypeOfApplication(caseData),
             parties,
             fl401Party,
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
