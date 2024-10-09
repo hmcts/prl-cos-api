@@ -142,14 +142,14 @@ public class ConfidentialityCheckControllerTest {
                                                               .build())
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(12345L)
-                             .data(caseDetails).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(serviceOfApplicationService.setSoaOrConfidentialWaFields(Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Map.of("test", "test"));
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDetails).build()).build();
         assertNull("test", confidentialityCheckController.handleAboutToSubmit(authToken,s2sToken, callbackRequest).getData().get("test"));
     }
 
