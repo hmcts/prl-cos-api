@@ -288,6 +288,7 @@ public class ServiceOfApplicationService {
     private final DgsService dgsService;
     private final CaseInviteManager caseInviteManager;
     private final LaunchDarklyClient launchDarklyClient;
+    private final ConfidentialityCheckService confidentialityCheckService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -3084,7 +3085,7 @@ public class ServiceOfApplicationService {
         }
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
-
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
