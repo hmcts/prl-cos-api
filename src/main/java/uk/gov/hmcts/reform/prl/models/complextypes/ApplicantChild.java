@@ -18,4 +18,7 @@ public class ApplicantChild {
     private final YesOrNo applicantRespondentShareParental;
     private final String respondentChildRelationship;
 
+    private final String finalDecisionResolutionReason;
+    private final String finalDecisionResolutionDate;
+
 }

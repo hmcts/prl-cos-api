@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmRevisedGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
@@ -50,6 +51,8 @@ public class CaseSummaryTabService implements TabService {
     private final ObjectMapper objectMapper;
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
 
+    private final CaseClosedDateGenerator caseClosedDateGenerator;
+
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
 
@@ -82,7 +85,7 @@ public class CaseSummaryTabService implements TabService {
 
             return List.of(allocatedJudgeDetailsGenerator,
                     caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
-                    specialArrangementsGenerator, dateOfSubmissionGenerator);
+                    specialArrangementsGenerator, dateOfSubmissionGenerator, caseClosedDateGenerator);
 
         }
 
@@ -96,7 +99,8 @@ public class CaseSummaryTabService implements TabService {
                 TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                         || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
                         : allegationOfHarmGenerator,
-                dateOfSubmissionGenerator
+                dateOfSubmissionGenerator,
+                caseClosedDateGenerator
         );
     }
 
