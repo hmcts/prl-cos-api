@@ -2518,8 +2518,8 @@
     },
     "applicantOrganisationPolicy": {
       "Organisation": {
-        "OrganisationID": "LM6OZX0",
-        "OrganisationName": "Private law NOC solution"
+        "OrganisationID": "QO4A1Q8",
+        "OrganisationName": "FPRL-test-organisation"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
