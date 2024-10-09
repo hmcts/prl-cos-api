@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDateTime;
 
@@ -61,4 +63,7 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
+
+    @JsonUnwrapped
+    private ServiceOfDocuments serviceOfDocuments;
 }
