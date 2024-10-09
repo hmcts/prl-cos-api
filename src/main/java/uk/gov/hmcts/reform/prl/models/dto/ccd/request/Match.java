@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @AllArgsConstructor
@@ -21,5 +22,8 @@ public class Match {
 
     @JsonProperty("data.fm5RemindersSent")
     private String fm5RemindersSent;
+
+    @JsonProperty("data.cafcassServedOptions")
+    private YesOrNo cafcassServedOptions;
 
 }
