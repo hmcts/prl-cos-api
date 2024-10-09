@@ -612,6 +612,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java',
   '**uk/gov/hmcts/reform/prl/controllers/serviceofdocuments/ServiceOfDocumentsController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/serviceofdocuments/ServiceOfDocumentsConfCheckController.java'
 ]
 
 sonarqube {

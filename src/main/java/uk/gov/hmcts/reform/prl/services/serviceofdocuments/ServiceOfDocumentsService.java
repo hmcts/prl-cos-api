@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
@@ -86,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_ADDITIONAL_RECIPIENTS;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_APPLICANT_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.AUTHORIZATION;
@@ -115,6 +118,7 @@ public class ServiceOfDocumentsService {
     private final DocumentLanguageService documentLanguageService;
     private final EmailService emailService;
     private final BulkPrintService bulkPrintService;
+    private final ConfidentialityCheckService confidentialityCheckService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -240,29 +244,11 @@ public class ServiceOfDocumentsService {
         //Send notifications if no check needed
         if (null != unServedPack
             && ServiceOfDocumentsCheckEnum.noCheck.equals(caseData.getServiceOfDocuments().getSodDocumentsCheckOptions())) {
-            List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-            if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-                handleServiceOfDocuments(
-                    authorisation,
-                    caseData,
-                    unServedPack,
-                    emailNotificationDetails,
-                    bulkPrintDetails
-                );
-            }
-            //serve other persons
-            serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
-
-            //serve additional recipients
-            serveDocumentsToAdditionalRecipients(authorisation, caseData, unServedPack, emailNotificationDetails, bulkPrintDetails);
-
-            //Reset unserved packs
-            caseDataMap.put("sodUnServedPack", null);
-            //Update served documents
-            caseDataMap.put(
-                "servedDocumentsDetailsList",
-                getUpdatedServedDocumentsDetailsList(caseData, unServedPack, emailNotificationDetails, bulkPrintDetails)
+            handleServiceOfDocumentsNotifications(
+                authorisation,
+                caseData,
+                caseDataMap,
+                unServedPack
             );
         }
 
@@ -278,6 +264,42 @@ public class ServiceOfDocumentsService {
         );
 
         return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    private void handleServiceOfDocumentsNotifications(String authorisation,
+                                                       CaseData caseData,
+                                                       Map<String, Object> caseDataMap,
+                                                       SodPack unServedPack) {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        //serve parties/solicitors
+        serveDocumentsToPartiesOrSolicitors(
+            authorisation,
+            caseData,
+            unServedPack,
+            emailNotificationDetails,
+            bulkPrintDetails
+        );
+
+        //serve other persons
+        serveDocumentsToOtherPerson(authorisation, caseData, unServedPack, bulkPrintDetails);
+
+        //serve additional recipients
+        serveDocumentsToAdditionalRecipients(
+            authorisation,
+            caseData,
+            unServedPack,
+            emailNotificationDetails,
+            bulkPrintDetails
+        );
+
+        //Reset unserved packs
+        caseDataMap.put("sodUnServedPack", null);
+        //Update served documents
+        caseDataMap.put(
+            "servedDocumentsDetailsList",
+            getUpdatedServedDocumentsDetailsList(caseData, unServedPack, emailNotificationDetails, bulkPrintDetails)
+        );
     }
 
     private Object getUpdatedServedDocumentsDetailsList(CaseData caseData,
@@ -303,11 +325,11 @@ public class ServiceOfDocumentsService {
         return servedDocumentsDetailsList;
     }
 
-    private void handleServiceOfDocuments(String authorisation,
-                                          CaseData caseData,
-                                          SodPack unServedPack,
-                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                          List<Element<BulkPrintDetails>> bulkPrintDetails) {
+    private void serveDocumentsToPartiesOrSolicitors(String authorisation,
+                                                     CaseData caseData,
+                                                     SodPack unServedPack,
+                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         if (YesOrNo.Yes.equals(unServedPack.getIsPersonalService())) {
             //personal service
             handlePersonalServiceOfDocuments(
@@ -317,7 +339,7 @@ public class ServiceOfDocumentsService {
                 emailNotificationDetails,
                 bulkPrintDetails
             );
-        } else {
+        } else if (YesOrNo.No.equals(unServedPack.getIsPersonalService())) {
             //non-personal service
             handleNonPersonalServiceOfDocuments(
                 authorisation,
@@ -910,7 +932,8 @@ public class ServiceOfDocumentsService {
             "soaOtherPeoplePresentInCaseFlag",
             "soaOtherParties",
             "missingAddressWarningText",
-            "displayLegalRepOption"
+            "displayLegalRepOption",
+            "applicationServedYesNo"
         ));
 
         for (String field : sodFields) {
@@ -934,5 +957,65 @@ public class ServiceOfDocumentsService {
         return CollectionUtils.isEmpty(caseData.getServiceOfDocuments().getSodDocumentsList())
             || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0)
             || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0).getValue();
+    }
+
+    public AboutToStartOrSubmitCallbackResponse handleConfCheckAboutToStart(String authorisation,
+                                                                            CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (null != caseData.getServiceOfDocuments()
+            && null != caseData.getServiceOfDocuments().getSodUnServedPack()
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
+            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
+            log.info("*** SOD - Documents are present for conf check");
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no documents available for confidential check")).build();
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> handleConfCheckSubmitted(String authorisation,
+                                                                              CallbackRequest callbackRequest) {
+        ResponseEntity<SubmittedCallbackResponse> response;
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+            callbackRequest.getCaseDetails().getId()));
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        SodPack unServedPack = caseData.getServiceOfDocuments().getSodUnServedPack();
+
+        if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
+            && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+            handleServiceOfDocumentsNotifications(
+                authorisation,
+                caseData,
+                caseDataMap,
+                unServedPack
+            );
+
+            response = ok(SubmittedCallbackResponse.builder()
+                          .confirmationHeader("# Document(s) will be served")
+                          .build());
+        } else {
+            //Reset unserved packs
+            caseDataMap.put("sodUnServedPack", null);
+
+            response = ok(SubmittedCallbackResponse.builder()
+                          .confirmationHeader("# Document(s) reject, Refer to court admin")
+                          .build());
+        }
+
+        //Clean up the fields
+        cleanUpSelections(caseDataMap);
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(caseData.getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+
+        return response;
     }
 }
