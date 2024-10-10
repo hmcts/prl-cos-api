@@ -385,10 +385,10 @@ public class ServiceOfDocumentsService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails) {
         Map<String, Object> params = new HashMap<>();
         params.put(AUTHORIZATION, authorisation);
-        params.put(GOV_NOTIFY_TEMPLATE, EmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
         params.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOD_PERSONAL_SERVICE_APPLICANT_LIP);
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             //C100
+            params.put(GOV_NOTIFY_TEMPLATE, EmailTemplateNames.SOD_CA_PERSONAL_SERVICE_APPLICANT_LIP);
             caseData.getApplicants()
                 .forEach(applicant -> handlePersonalNonPersonalServiceOfDocuments(
                     caseData,
@@ -401,6 +401,7 @@ public class ServiceOfDocumentsService {
                 ));
         } else {
             //FL401
+            params.put(GOV_NOTIFY_TEMPLATE, EmailTemplateNames.SOD_DA_PERSONAL_SERVICE_APPLICANT_LIP);
             handlePersonalNonPersonalServiceOfDocuments(
                 caseData,
                 element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
@@ -721,6 +722,7 @@ public class ServiceOfDocumentsService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
         dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+        dynamicData.put("isDaCase", FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)));
         return dynamicData;
     }
 
