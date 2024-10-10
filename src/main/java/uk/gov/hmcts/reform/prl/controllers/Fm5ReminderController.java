@@ -41,6 +41,7 @@ public class Fm5ReminderController {
         @PathVariable("hearingAwayDays") Long hearingAwayDays,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        log.info("Sonar Check log");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Trigger FM5 reminder notifications via API ***");
             fm5ReminderService.sendFm5ReminderNotifications(hearingAwayDays);
@@ -55,6 +56,7 @@ public class Fm5ReminderController {
         @PathVariable("hearingAwayDays") Long hearingAwayDays,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        log.info("Sonar Check log");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Retrieve FM5 reminder eligible cases via API ***");
             List<CaseDetails> caseDetailsList = fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders();

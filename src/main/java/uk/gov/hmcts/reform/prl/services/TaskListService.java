@@ -110,6 +110,7 @@ public class TaskListService {
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
+        log.info("Sonar Check log");
         return getEvents(caseData).stream()
                 .map(event -> Task.builder()
                         .event(event)
@@ -119,6 +120,7 @@ public class TaskListService {
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
+        log.info("Sonar Check log");
         boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
                 .map(event -> RespondentTask.builder()
@@ -157,7 +159,7 @@ public class TaskListService {
     }
 
     public List<Event> getC100Events(CaseData caseData) {
-
+        log.info("Sonar Check log");
         if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
                 CASE_NAME,
@@ -230,7 +232,7 @@ public class TaskListService {
     }
 
     public List<Event> getFL401Events(CaseData caseData) {
-
+        log.info("Sonar Check log");
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
         List<Event> eventsList = new ArrayList<>(List.of(
@@ -264,6 +266,7 @@ public class TaskListService {
     }
 
     public List<RespondentSolicitorEvents> getRespondentsEvents(CaseData caseData) {
+        log.info("Sonar Check log");
         if (null != caseData.getC1ADocument()) {
             return new ArrayList<>(List.of(
                 CONSENT,
@@ -296,6 +299,7 @@ public class TaskListService {
     }
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
+        log.info("Sonar Check log");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = startAllTabsUpdateDataContent.caseData();

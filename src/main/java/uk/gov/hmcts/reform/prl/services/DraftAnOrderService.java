@@ -221,6 +221,7 @@ public class DraftAnOrderService {
     private final WelshCourtEmail welshCourtEmail;
 
     public List<Element<DraftOrder>> generateDraftOrderCollection(CaseData caseData, String authorisation) {
+        log.info("Sonar Check log");
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
@@ -249,6 +250,7 @@ public class DraftAnOrderService {
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType, String authorisation) {
+        log.info("Sonar Check log");
         UserDetails userDetails = userService.getUserDetails(authorisation);
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails);
@@ -259,6 +261,7 @@ public class DraftAnOrderService {
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
                                                         String eventId,
                                                         String authorisation) {
+        log.info("Sonar Check log");
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
@@ -339,6 +342,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
+        log.info("Sonar Check log");
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -645,6 +649,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData populateCustomFields(CaseData caseData) {
+        log.info("Sonar Check log");
         switch (caseData.getCreateSelectOrderOptions()) {
             case blankOrderOrDirections:
                 return null;
@@ -657,6 +662,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization) {
+        log.info("Sonar Check log");
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(
             caseData.getDraftOrderCollection(),
@@ -705,6 +711,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, DraftOrder selectedOrder) {
+        log.info("Sonar Check log");
         Map<String, Object> caseDataMap = new HashMap<>();
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
             caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
@@ -773,6 +780,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder) {
+        log.info("Sonar Check log");
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(
             caseData.getDraftOrderCollection(),
@@ -881,6 +889,7 @@ public class DraftAnOrderService {
     }
 
     public StandardDirectionOrder copyPropertiesToStandardDirectionOrder(SdoDetails updatedSdoDetails) throws JsonProcessingException {
+        log.info("Sonar Check log");
         StandardDirectionOrder standardDirectionOrder;
         String sdoDetailsJson = objectMapper.writeValueAsString(updatedSdoDetails);
         standardDirectionOrder = objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class);
@@ -888,6 +897,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, DraftOrder selectedOrder) {
+        log.info("Sonar Check log");
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, caseData.getDraftOrdersDynamicList());
@@ -978,6 +988,7 @@ public class DraftAnOrderService {
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
                                             List<Element<HearingData>> manageOrderHearingDetail) {
+        log.info("Sonar Check log");
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -1026,6 +1037,7 @@ public class DraftAnOrderService {
     }
 
     public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
+        log.info("Sonar Check log");
         UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
         return draftOrderCollection.stream()
             .filter(element -> element.getId().equals(orderId))
@@ -1035,6 +1047,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {
+        log.info("Sonar Check log");
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId;
@@ -1250,7 +1263,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData updateCustomFieldsWithApplicantRespondentDetails(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
-
+        log.info("Sonar Check log");
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -1345,6 +1358,7 @@ public class DraftAnOrderService {
     }
 
     public static boolean checkStandingOrderOptionsSelected(CaseData caseData, List<String> errorList) {
+        log.info("Sonar Check log");
         if (caseData.getStandardDirectionOrder() != null
             && caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -1363,6 +1377,7 @@ public class DraftAnOrderService {
     }
 
     public static boolean validationIfDirectionForFactFindingSelected(CaseData caseData, List<String> errorList) {
+        log.info("Sonar Check log");
         if (caseData.getStandardDirectionOrder() != null
             && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)
@@ -1377,7 +1392,7 @@ public class DraftAnOrderService {
     }
 
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-
+        log.info("Sonar Check log");
         List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(
             caseData);
         if (CollectionUtils.isNotEmpty(
@@ -1887,6 +1902,7 @@ public class DraftAnOrderService {
     }
 
     public static boolean checkDirectionOnIssueOptionsSelected(CaseData caseData) {
+        log.info("Sonar Check log");
         return !(caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
             && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
             && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
@@ -1896,7 +1912,7 @@ public class DraftAnOrderService {
     }
 
     public void populateDirectionOnIssueFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-
+        log.info("Sonar Check log");
         if (!caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
             && caseData.getDirectionOnIssue().getDioPreamblesList().contains(DioPreamblesEnum.rightToAskCourt)) {
             caseDataUpdated.put("dioRightToAskCourt", DIO_RIGHT_TO_ASK);
@@ -1982,7 +1998,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
-
+        log.info("Sonar Check log");
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder.getOrderType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(
@@ -2002,6 +2018,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getEligibleServeOrderDetails(String authorisation, CallbackRequest callbackRequest) {
+        log.info("Sonar Check log");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -2015,6 +2032,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> adminEditAndServeAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2055,6 +2073,7 @@ public class DraftAnOrderService {
                                                                     List<Element<HearingData>> ordersHearingDetails,
                                                                     boolean isOrderEdited,
                                                                     CreateSelectOrderOptionsEnum orderType) throws Exception {
+        log.info("Sonar Check log");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -2084,6 +2103,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails) throws Exception {
+        log.info("Sonar Check log");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -2130,6 +2150,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
+        log.info("Sonar Check log");
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -2196,6 +2217,7 @@ public class DraftAnOrderService {
     }
 
     public String getApprovedDraftOrderNameForWA(CaseData caseData) {
+        log.info("Sonar Check log");
         if (!Objects.isNull(caseData.getDraftOrdersDynamicList())) {
             return getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
@@ -2207,6 +2229,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> resetFields(CallbackRequest callbackRequest) {
+        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2217,7 +2240,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> handlePopulateDraftOrderFields(CallbackRequest callbackRequest, String authorisation) throws Exception {
-
+        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2294,6 +2317,7 @@ public class DraftAnOrderService {
     }
 
     public AboutToStartOrSubmitCallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation) {
+        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2431,6 +2455,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        log.info("Sonar Check log");
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2492,6 +2517,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> handleDocumentGenerationForaDraftOrder(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
