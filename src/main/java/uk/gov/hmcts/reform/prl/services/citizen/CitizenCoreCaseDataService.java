@@ -25,8 +25,10 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
+import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 
 @Slf4j
@@ -110,6 +112,10 @@ public class CitizenCoreCaseDataService {
 
         if (userDetails.getRoles().contains(CITIZEN_ROLE)) {
             caseData.setCaseCreatedBy(CITIZEN);
+        }
+        //Added for DS WEB create case by court staff
+        if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+            caseData.setCaseCreatedBy(COURT_STAFF);
         }
         StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
             authorisation,

@@ -8,9 +8,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -18,12 +20,14 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -34,12 +38,16 @@ import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
@@ -85,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -110,6 +119,11 @@ public class CaseService {
     private final UserService userService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
+    private final LocationRefDataApi locationRefDataApi;
+    private final AuthTokenGenerator authTokenGenerator;
+
+    @Value("${courts.edgeCaseCourtList}")
+    protected String edgeCaseCourtList;
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -231,6 +245,97 @@ public class CaseService {
                         .valueOf(caseData.getId()))).build();
         }
         return caseDataWithHearingResponse;
+    }
+
+    public String getEdgeCasesCourtList() {
+        return edgeCaseCourtList;
+    }
+
+    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
+
+        System.out.println("dssCaseDate recieved " + dssCaseData);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        List<Element<Document>> uploadDssDocs = new ArrayList<Element<Document>>();
+        List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<Element<Document>>();
+        dssCaseData.getApplicantApplicationFormDocuments().stream().forEach(edgeCaseDocumentElement -> {
+            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
+            System.out.println("document---------------" + document);
+            uploadDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
+                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
+            System.out.println("**************");
+            System.out.println("uploadDssDocs ==========" + uploadDssDocs);
+
+        });
+
+        dssCaseData.getApplicantAdditionalDocuments().stream().forEach(edgeCaseDocumentElement -> {
+            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
+
+            uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
+                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
+        });
+
+        PartyDetails partyDetails = PartyDetails.builder().firstName(dssCaseData.getApplicantFirstName()).email(
+            dssCaseData.getApplicantEmailAddress()).address(Address.builder().addressLine1(dssCaseData.getApplicantAddress1()).addressLine2(
+            dssCaseData.getApplicantAddress2()).country("United Kingdom").postCode(dssCaseData.getApplicantAddressPostCode()).build()).dateOfBirth(
+            LocalDate.parse(
+                dssCaseData.getApplicantDateOfBirth(),
+                dateTimeFormatter
+            )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
+            .dssCaseDetails(
+            caseData.getDssCaseDetails().toBuilder()
+                .dssUploadedDocuments(uploadDssDocs)
+                .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
+                .selectedCourt(dssCaseData.getSelectedCourt())
+                .build()).build();
+        updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
+        log.info("updatedCaseData --" + updatedCaseData);
+
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+
+    }
+
+    private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
+        if (null != updatedCaseData.getDssCaseDetails()
+            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
+            && null != dssCaseData.getSelectedCourt()) {
+
+            CaseManagementLocation courtLocationByEpmsId = getCourtLocationByEpmsId(
+                dssCaseData.getSelectedCourt(),
+                authToken
+            );
+            updatedCaseData = updatedCaseData.toBuilder()
+                .caseManagementLocation(courtLocationByEpmsId)
+                .courtName(courtLocationByEpmsId.getBaseLocationName())
+                .courtId(courtLocationByEpmsId.getBaseLocation())
+                .build();
+        }
+        return updatedCaseData;
+    }
+
+    private CaseManagementLocation getCourtLocationByEpmsId(String epmsId, String authorisation) {
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+
+        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream()
+            .filter(location -> epmsId.equalsIgnoreCase(location.getCourtEpimmsId()))
+            .findFirst();
+        if (courtVenue.isPresent()) {
+            return CaseManagementLocation.builder()
+                .baseLocation(courtVenue.get().getCourtEpimmsId())
+                .baseLocationName(courtVenue.get().getCourtName())
+                .region(courtVenue.get().getRegionId())
+                .regionName(courtVenue.get().getRegion()).build();
+        }
+        return CaseManagementLocation.builder().build();
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {

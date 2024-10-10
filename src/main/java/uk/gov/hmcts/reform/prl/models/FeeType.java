@@ -17,6 +17,9 @@ public enum FeeType {
     C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD,
     C4_WHEREABOUTS_OF_A_MISSING_CHILD,
     FL407_ARREST_WARRANT,
+    PARENTAL_ORDER,
+    SPECIAL_GUARDIANSHIP_ORDER,
+    DECLARATION_OF_PARENTAGE,
     NO_FEE;
 
     public static final Map<String, FeeType> applicationToFeeMap = Map.of(
