@@ -2896,7 +2896,8 @@ public class ManageOrderService {
         caseDataUpdated.put(WA_HEARING_OPTION_SELECTED, hearingOptionSelected);
     }
 
-    public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
+    public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                               String eventId, String performingUser, String draftOrderId) {
 
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
@@ -2917,11 +2918,9 @@ public class ManageOrderService {
             }
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
-        } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
+        } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId()) && null != draftOrderId) {
             boolean isSdoOrder = false;
-            Object dynamicList = caseData.getDraftOrdersDynamicList();
-            DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                         dynamicList);
+            DraftOrder selectedDraftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
             List<Element<HearingData>> sdoHearings = new ArrayList<>();
             if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
                 isSdoOrder = true;
@@ -3123,7 +3122,7 @@ public class ManageOrderService {
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
-            //check with Shashi if these needed individually?
+            //check if these needed individually?
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
@@ -3252,7 +3251,7 @@ public class ManageOrderService {
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser);
+                setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser, null);
             }
 
             if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {

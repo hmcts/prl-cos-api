@@ -69,6 +69,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -78,6 +79,7 @@ import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,11 +143,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_SOLICITOR_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHO_MADE_ALLEGATIONS_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_RETURNED_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
@@ -402,10 +406,12 @@ public class DraftAnOrderService {
         caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
         StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
+            //Setting null to draftOrderId as it needs to be set with real value only in judges approval journey from client context header
             Map<String, Object> standardDirectionOrderMap = populateStandardDirectionOrder(
                 authorisation,
                 caseData,
-                false
+                false,
+                null
             );
             standardDirectionOrder = objectMapper.convertValue(standardDirectionOrderMap, StandardDirectionOrder.class);
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
@@ -656,12 +662,18 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization) {
+    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(
-            caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList()
-        );
+        DraftOrder selectedOrder;
+        if (null != draftOrderId) {
+            selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+        } else {
+            selectedOrder = getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getDraftOrdersDynamicList()
+            );
+        }
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
@@ -700,6 +712,8 @@ public class DraftAnOrderService {
         updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
+
+        log.info("case data map {}", caseDataMap);
 
         return caseDataMap;
     }
@@ -772,12 +786,18 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder) {
+    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder, String draftOrderId) {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(
-            caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList()
-        );
+        DraftOrder selectedOrder;
+        if (null != draftOrderId) {
+            selectedOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(), draftOrderId);
+
+        } else {
+            selectedOrder = getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getDraftOrdersDynamicList()
+            );
+        }
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder = null;
             try {
@@ -1027,6 +1047,7 @@ public class DraftAnOrderService {
 
     public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
+        log.info("******orderId from getSelectedDraftOrderDetails {}", orderId);
         return draftOrderCollection.stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
@@ -2072,6 +2093,7 @@ public class DraftAnOrderService {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
+            //Todo Client-context
             DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData, selectedOrder));
         } else {
@@ -2174,32 +2196,34 @@ public class DraftAnOrderService {
         }
         List<Element<DraftOrder>> draftOrderCollection = generateDraftOrderCollection(caseData, authorisation);
         caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
-        caseDataUpdated.put(
-            WA_ORDER_NAME_SOLICITOR_CREATED,
-            getDraftOrderNameForWA(
-                null != draftOrderCollection && !draftOrderCollection.isEmpty() ? draftOrderCollection.get(0).getValue() : null,
-                callbackRequest.getEventId()
-            )
-        );
+        caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderCollection.get(0).getId());
+        caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, callbackRequest.getEventId()));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
-    private String getDraftOrderNameForWA(DraftOrder draftOrder, String eventId) {
-        if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId) && null != draftOrder) {
-            return draftOrder.getLabelForOrdersDynamicList();
-        } else {
-            log.error("Error while fetching the order name for WA");
-            return "";
-        }
-    }
-
-    public String getApprovedDraftOrderNameForWA(CaseData caseData) {
-        if (!Objects.isNull(caseData.getDraftOrdersDynamicList())) {
+    public String getDraftOrderNameForWA(CaseData caseData, String eventId) {
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
+            //Todo This block of code is not getting executed?
             return getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
+            )
+                .getLabelForOrdersDynamicList();
+        } else if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
+            if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+                return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue(),
+                                                                   LocalDateTime.now()
+                );
+            } else if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+                return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(
+                    caseData), LocalDateTime.now());
+            }
+        } else if (EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            return getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getManageOrders().getRejectedOrdersDynamicList()
             )
                 .getLabelForOrdersDynamicList();
         }
@@ -2430,7 +2454,8 @@ public class DraftAnOrderService {
         return caseData;
     }
 
-    public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> handleDocumentGeneration(String authorisation,
+                                                        CallbackRequest callbackRequest, String clientContext) throws Exception {
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2458,10 +2483,11 @@ public class DraftAnOrderService {
                     caseData.getManageOrders()
                         .getRejectedOrdersDynamicList()
                 );
-            } else {
-                draftOrder = getSelectedDraftOrderDetails(
+            } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+                draftOrder = CaseUtils.getDraftOrderFromCollectionId(
                     caseData.getDraftOrderCollection(),
-                    caseData.getDraftOrdersDynamicList()
+                    CaseUtils.getDraftOrderId(waMapper)
                 );
             }
 
@@ -2521,6 +2547,7 @@ public class DraftAnOrderService {
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
+            //Todo Client context check for edit and approve?
             DraftOrder draftOrder = getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()

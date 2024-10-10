@@ -956,6 +956,7 @@ public class PrlAppsConstants {
 
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
+    public static final String WA_ORDER_COLLECTION_ID = "draftOrderCollectionId";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
     public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
     public static final String HEARING_JUDGE_ROLE = "hearing-judge";
@@ -1034,4 +1035,6 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+    public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
+    public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
 }
