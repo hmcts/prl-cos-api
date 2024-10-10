@@ -266,8 +266,6 @@ public class CitizenCaseUpdateServiceTest {
     public void testSubmitApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         partyDetails = PartyDetails.builder().build();
-        Long caseIdSubmit = 12345L;
-
         caseData = caseData.toBuilder()
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .c100RebuildData(c100RebuildData)
@@ -299,10 +297,10 @@ public class CitizenCaseUpdateServiceTest {
         when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent1);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
-            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
+            .thenReturn(CaseDetails.builder().id(12345L).build());
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
-        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseIdSubmit)))
-            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
