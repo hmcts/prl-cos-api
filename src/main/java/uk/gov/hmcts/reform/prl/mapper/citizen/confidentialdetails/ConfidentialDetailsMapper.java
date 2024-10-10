@@ -66,14 +66,20 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
+            if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())) {
                 addressSet = true;
-            }
-            if ((YesOrNo.Yes).equals(respondent.getIsEmailAddressConfidential())) {
                 emailSet = true;
-            }
-            if ((YesOrNo.Yes).equals(respondent.getIsPhoneNumberConfidential())) {
                 phoneSet = true;
+            } else {
+                if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
+                    addressSet = true;
+                }
+                if ((YesOrNo.Yes).equals(respondent.getIsEmailAddressConfidential())) {
+                    emailSet = true;
+                }
+                if ((YesOrNo.Yes).equals(respondent.getIsPhoneNumberConfidential())) {
+                    phoneSet = true;
+                }
             }
 
             if (addressSet || emailSet || phoneSet) {

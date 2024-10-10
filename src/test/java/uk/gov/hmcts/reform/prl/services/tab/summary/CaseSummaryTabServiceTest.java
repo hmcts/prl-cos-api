@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetail
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.RefugeCaseGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
 
@@ -39,6 +40,9 @@ public class CaseSummaryTabServiceTest {
 
     @Mock
     AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
+
+    @Mock
+    RefugeCaseGenerator refugeCaseGenerator;
 
     @Mock
     CaseStatusGenerator caseStatusGenerator;
@@ -77,36 +81,40 @@ public class CaseSummaryTabServiceTest {
     private static final CaseSummary CASE_SUMMARY6 = mock(CaseSummary.class);
     private static final CaseSummary CASE_SUMMARY7 = mock(CaseSummary.class);
     private static final CaseSummary CASE_SUMMARY8 = mock(CaseSummary.class);
+    private static final CaseSummary CASE_SUMMARY9 = mock(CaseSummary.class);
     private static final String[] EMPTY_ARRAY = {};
 
     @Before
     public void setUp() {
         when(allocatedJudgeDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY0);
-        when(caseStatusGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY1);
-        when(confidentialDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY2);
-        when(orderAppliedForGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY3);
-        when(specialArrangementsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY4);
-        when(urgencyGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY5);
-        when(allegationOfHarmGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY6);
-        when(dateOfSubmissionGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY7);
-        when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY8);
+        when(refugeCaseGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY1);
+        when(caseStatusGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY2);
+        when(confidentialDetailsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY3);
+        when(orderAppliedForGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY4);
+        when(specialArrangementsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY5);
+        when(urgencyGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY6);
+        when(allegationOfHarmGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY7);
+        when(dateOfSubmissionGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY8);
+        when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(otherProceedingsGenerator.getOtherProceedingsDetails(CASE_DATA)).thenReturn(new ArrayList<>());
 
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field0", "value0"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY1),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field1", "value1"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("fieldR", "valueR"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY2),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field2", "value2"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field1", "value1"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY3),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field3", "value3"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field2", "value2"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY4),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field4", "value4"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field3", "value3"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY5),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field5", "value5"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field4", "value4"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY6),
-                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field6", "value6"));
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field5", "value5"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY7),
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field6", "value6"));
+        when(objectMapper.convertValue(eq(CASE_SUMMARY8),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field7", "value7"));
 
     }
@@ -118,6 +126,7 @@ public class CaseSummaryTabServiceTest {
 
         Map<String, Object> fields = new HashMap<String, Object>();
         fields.put("field0", "value0");
+        fields.put("fieldR", "valueR");
         fields.put("field1", "value1");
         fields.put("field2", "value2");
         fields.put("field3", "value3");
@@ -147,6 +156,7 @@ public class CaseSummaryTabServiceTest {
         Map<String, Object> expected = new HashMap<>();
         expected.put("field0", "value0");
         expected.put("fieldNull", null);
+        expected.put("fieldR", "valueR");
         expected.put("field1", "value1");
         expected.put("field2", "value2");
         expected.put("field3", "value3");
@@ -177,6 +187,7 @@ public class CaseSummaryTabServiceTest {
 
         Map<String, Object> expected = new HashMap<>();
         expected.put("field0", "value0");
+        expected.put("fieldR", "valueR");
         expected.put("field1", "value1");
         expected.put("field2", "value2");
         expected.put("field3", "value3");
