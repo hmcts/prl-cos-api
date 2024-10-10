@@ -72,6 +72,7 @@ public class UpdatePartyDetailsService {
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     private static final String APPLICANTS = "applicants";
     private static final String RESPONDENTS = "respondents";
+    private static final String OTHER_PARTY = "otherPartyInTheCaseRevised";
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -125,6 +126,9 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
+            updatedCaseData.put(APPLICANTS, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getApplicants())));
+            updatedCaseData.put(RESPONDENTS, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getRespondents())));
+            updatedCaseData.put(OTHER_PARTY, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getOtherPartyInTheCaseRevised())));
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -302,6 +306,22 @@ public class UpdatePartyDetailsService {
             }
             caseDetails.put(RESPONDENTS, respondentsWrapped);
         }
+    }
+
+    private Optional<List<Element<PartyDetails>>> processApplicantsConfidentialityIfLivesInRefuge(
+        Optional<List<Element<PartyDetails>>> partyDetailsElementList) {
+        if (partyDetailsElementList.isPresent() && !partyDetailsElementList.get().isEmpty()) {
+            List<PartyDetails> partyDetailsList = partyDetailsElementList.get().stream().map(Element::getValue).toList();
+
+            for (PartyDetails partyDetails : partyDetailsList) {
+                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                    partyDetails.setIsAddressConfidential(YesOrNo.Yes);
+                    partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
+                    partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+                }
+            }
+        }
+        return partyDetailsElementList;
     }
 
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
