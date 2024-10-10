@@ -10,11 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -32,6 +35,9 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.citizen.NotificationNames;
@@ -54,6 +60,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDeta
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -89,9 +96,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
@@ -155,6 +164,9 @@ public class CaseServiceTest {
     @Mock
     private DashboardNotificationsConfig notificationsConfig;
 
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
+
     private CaseData caseData;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
@@ -168,9 +180,12 @@ public class CaseServiceTest {
 
     private ServedApplicationDetails servedApplicationDetailsEmailOnly;
 
+    private ServedApplicationDetails servedApplicationDetailsPostOnly;
+
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
 
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList1;
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsListPostOnly;
 
     private CaseData citizenCaseData;
     private QuarantineLegalDoc quarantineLegalDoc;
@@ -184,7 +199,7 @@ public class CaseServiceTest {
             .lastName("test")
             .email("")
             .citizenSosObject(CitizenSos.builder().build())
-            .user(User.builder().email("").idamId("").build())
+            .user(User.builder().email("").idamId(TEST_UUID).build())
             .build();
         caseData = CaseData.builder()
             .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
@@ -264,9 +279,16 @@ public class CaseServiceTest {
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, null))
             .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
             .build();
+        servedApplicationDetailsPostOnly = ServedApplicationDetails.builder()
+            .servedBy("FullName")
+            .servedAt(formatter)
+            .modeOfService(CaseUtils.getModeOfService(null, bulkPrintDetails))
+            .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_BAILIFF)
+            .bulkPrintDetails(bulkPrintDetails).build();
 
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
         finalServedApplicationDetailsList1 = List.of(element(servedApplicationDetailsEmailOnly));
+        finalServedApplicationDetailsListPostOnly = List.of(element(servedApplicationDetailsPostOnly));
 
         Document document = Document.builder().documentFileName("test").build();
         quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -446,7 +468,7 @@ public class CaseServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Collections.singletonList(element(applicant)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
             .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(applicant1PartyFlags).caRespondent1ExternalFlags(
@@ -466,7 +488,7 @@ public class CaseServiceTest {
 
         // Happy path 1 - when the request is valid and respondent party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-            "C100",
+            C100_CASE_TYPE,
             PartyRole.Representing.CARESPONDENT,
             1
         )).thenReturn("caRespondent2ExternalFlags");
@@ -477,7 +499,7 @@ public class CaseServiceTest {
 
         // Happy path 2 - when the request is valid and applicant party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-            "C100",
+            C100_CASE_TYPE,
             PartyRole.Representing.CAAPPLICANT,
             0
         )).thenReturn("caApplicant1ExternalFlags");
@@ -693,7 +715,7 @@ public class CaseServiceTest {
     public void testGetCitizenApplicantOrdersC100() {
         //Given
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(element(testUuid, partyDetails)))
             .state(State.DECISION_OUTCOME)
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
@@ -721,10 +743,11 @@ public class CaseServiceTest {
                                    .serveOnRespondent(Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
+            .otherDetails(OtherOrderDetails.builder().orderCreatedDate("12_JAN_2021").orderMadeDate("12_JAN_2021").build())
             .build();
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicants(List.of(element(testUuid, partyDetails)))
@@ -750,7 +773,7 @@ public class CaseServiceTest {
         //Given
         finalServedApplicationDetailsList.get(0).getValue().getBulkPrintDetails().get(0).getValue().setPartyIds(testUuid.toString());
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
@@ -780,7 +803,7 @@ public class CaseServiceTest {
                                    .build())
             .build();
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .orderCollection(List.of(element(orderDetails)))
@@ -813,7 +836,7 @@ public class CaseServiceTest {
             .build();
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicants(List.of(element(testUuid, partyDetails)))
@@ -842,7 +865,7 @@ public class CaseServiceTest {
             .sosStatus(SOS_COMPLETED)
             .build();
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .orderCollection(List.of(element(orderDetails)))
@@ -870,7 +893,7 @@ public class CaseServiceTest {
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
             .applicants(List.of(element(testUuid, partyDetails)))
             .serviceOfApplication(ServiceOfApplication.builder().unservedCitizenRespondentPack(
@@ -902,7 +925,7 @@ public class CaseServiceTest {
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .serviceOfApplication(ServiceOfApplication.builder().unservedCitizenRespondentPack(
@@ -937,7 +960,7 @@ public class CaseServiceTest {
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
             .applicants(List.of(element(testUuid, partyDetails)))
             .respondents(List.of(element(testUuid, partyDetails)))
@@ -970,7 +993,7 @@ public class CaseServiceTest {
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
 
         caseData = caseData.toBuilder()
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .state(State.DECISION_OUTCOME)
@@ -993,5 +1016,129 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
         assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+    }
+
+    @Test
+    public void testCitizenApplicantSosCompletedPostOnly() {
+        //Given
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .state(State.DECISION_OUTCOME)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_SOA_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+    }
+
+    @Test
+    public void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {
+        //Given
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyExternalFlags(FlagsRequest.builder().build())
+            .partyIdamId("test")
+            .build();
+        when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
+        when(coreCaseDataService.startUpdate(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()))
+            .thenReturn(StartEventResponse.builder()
+                            .caseDetails(caseDetails)
+                            .build());
+        when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
+                                                                                                  .build());
+        //Action
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+
+        //Assert
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testUpdateCitizenRaFlagsBadRequest() {
+        //Given
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyExternalFlags(FlagsRequest.builder().build())
+            .build();
+        //Action
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+
+        //Assert
+        assertEquals("bad request", response.getBody());
+    }
+
+    @Test
+    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaEmptyExtCaseFlag() {
+        //Given
+        caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyExternalFlags(FlagsRequest.builder().build())
+            .partyIdamId(TEST_UUID)
+            .build();
+        when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
+        when(coreCaseDataService.startUpdate(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()))
+            .thenReturn(StartEventResponse.builder()
+                            .caseDetails(caseDetails)
+                            .build());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
+                                                                                                  .build());
+        //Action
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+
+        //Assert
+        assertEquals("party external flag details not found", response.getBody());
+    }
+
+    @Test
+    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
+        //Given
+        caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyExternalFlags(FlagsRequest.builder().details(List.of(element(FlagDetailRequest.builder().build()))).build())
+            .partyIdamId(TEST_UUID)
+            .build();
+        when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
+        Map<String, Object> updatedCaseMap = caseDetails.getData();
+        updatedCaseMap.put("caApplicant1ExternalFlags", Flags.builder().build());
+        caseDetails = caseDetails.toBuilder().data(updatedCaseMap).build();
+        when(coreCaseDataService.startUpdate(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.anyBoolean()))
+            .thenReturn(StartEventResponse.builder()
+                            .caseDetails(caseDetails)
+                            .build());
+        when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(Mockito.anyString(), Mockito.any(), Mockito.anyInt()))
+            .thenReturn("caApplicant1ExternalFlags");
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(updatedCaseMap.get("caApplicant1ExternalFlags"), Flags.class))
+            .thenReturn(Flags.builder().build());
+        when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
+                                                                                                  .build());
+        //Action
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+
+        //Assert
+        assertEquals("party flags updated", response.getBody());
+    }
+
+    @Test
+    public void testFetchIdamRoles() {
+        when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
+        Map<String, String> roles= caseService.fetchIdamAmRoles(authToken, "test");
+        assertEquals("role", roles.get("test"));
     }
 }
