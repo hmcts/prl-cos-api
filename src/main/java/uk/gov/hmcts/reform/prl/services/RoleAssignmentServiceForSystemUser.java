@@ -38,7 +38,6 @@ public class RoleAssignmentServiceForSystemUser {
     private final AuthTokenGenerator authTokenGenerator;
 
     public void assignHearingRoleToSysUser() {
-        log.info("Sonar Check log");
         String systemUserToken = systemUserService.getSysUserToken();
         String systemUserIdamID = systemUserService.getUserId(systemUserToken);
 

@@ -294,7 +294,6 @@ public class ServiceOfApplicationService {
     private String citizenUrl;
 
     public String getCollapsableOfSentDocuments() {
-        log.info("Sonar Check log");
         final List<String> collapsible = new ArrayList<>();
         collapsible.add("<details class='govuk-details'>");
         collapsible.add("<summary class='govuk-details__summary'>");
@@ -319,7 +318,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String, Object> caseData) {
-        log.info("Sonar Check log");
         for (String s : orderList) {
             caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s), "1");
         }
@@ -330,7 +328,6 @@ public class ServiceOfApplicationService {
     public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseData caseData, String authorization,
                                                                        List<DynamicMultiselectListElement> selectedOthers,
                                                                        List<Document> packN, String servedParty) {
-        log.info("Sonar Check log");
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                                                         || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
@@ -369,7 +366,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(CaseData caseData, String email, String servedParty) {
-        log.info("Sonar Check log");
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
             caseData,
@@ -381,7 +377,6 @@ public class ServiceOfApplicationService {
 
     public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseData caseData, String authorization,
                                                                             Map<String, Object> caseDataMap) {
-        log.info("Sonar Check log");
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing;
@@ -1171,7 +1166,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
-        log.info("Sonar Check log");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
@@ -1189,7 +1183,6 @@ public class ServiceOfApplicationService {
 
 
     public Map<String, Object> setSoaOrConfidentialWaFields(CaseData caseData, String eventId) {
-        log.info("Sonar Check log");
         Map<String, Object> soaWaMap = new HashMap<>();
         String isC8CheckNeeded = NO;
         String responsibleForService = null;
@@ -1244,7 +1237,6 @@ public class ServiceOfApplicationService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) {
-        log.info("Sonar Check log");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
@@ -1459,7 +1451,6 @@ public class ServiceOfApplicationService {
     public uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,
                                                                                             DynamicList selectedDocument,
                                                                                             String caseId) {
-        log.info("Sonar Check log");
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -1675,7 +1666,6 @@ public class ServiceOfApplicationService {
     public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
                                                                                         List<DynamicMultiselectListElement> selectedApplicants,
                                                                                         List<Document> packQ, String servedParty) {
-        log.info("Sonar Check log");
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<PartyDetails>> applicantsInCase;
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -1753,7 +1743,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
-        log.info("Sonar Check log");
         List<Document> docs = new ArrayList<>();
         switch (requiredPack) {
             case PrlAppsConstants.A -> docs.addAll(generatePackA(caseData, staticDocs));
@@ -1869,7 +1858,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
-        log.info("Sonar Check log");
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER) || d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER_WELSH)).collect(Collectors.toList());
@@ -2094,7 +2082,6 @@ public class ServiceOfApplicationService {
     }
 
     public void cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        log.info("Sonar Check log");
         List<String> soaFields = new ArrayList<>(List.of(
             "pd36qLetter",
             "specialArrangementsLetter",
@@ -2145,7 +2132,6 @@ public class ServiceOfApplicationService {
     }
 
     public DynamicMultiSelectList getCombinedRecipients(CaseData caseData) {
-        log.info("Sonar Check log");
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
@@ -2166,7 +2152,6 @@ public class ServiceOfApplicationService {
     }
 
     public YesOrNo getCafcass(CaseData caseData) {
-        log.info("Sonar Check log");
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (caseData.getIsCafcass() != null) {
                 return caseData.getIsCafcass();
@@ -2181,7 +2166,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
-        log.info("Sonar Check log");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -2328,7 +2312,6 @@ public class ServiceOfApplicationService {
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
-        log.info("Sonar Check log");
         final List<String> collapsible = new ArrayList<>();
         collapsible.add("<details class='govuk-details'>");
         collapsible.add("<summary class='govuk-details__summary'>");
@@ -2353,7 +2336,7 @@ public class ServiceOfApplicationService {
 
     public Document generateAccessCodeLetter(String authorisation, CaseData caseData,Element<PartyDetails> party,
                                       CaseInvite caseInvite, String template) {
-        log.info("Sonar Check log");
+
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         return fetchCoverLetter(authorisation, template, dataMap);
     }
@@ -2378,7 +2361,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> populateAccessCodeMap(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
-        log.info("Sonar Check log");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("serviceUrl", citizenUrl);
@@ -2433,7 +2415,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
-        log.info("Sonar Check log");
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites();
         if (CollectionUtils.isEmpty(caseInvites)) {
             caseInvites =  new ArrayList<>();
@@ -2452,7 +2433,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> generatePacksForConfidentialCheckC100(CaseDetails caseDetails, String authorization) {
-        log.info("Sonar Check log");
         log.info("Inside generatePacks for confidential check C100 method");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -2637,7 +2617,6 @@ public class ServiceOfApplicationService {
                                                          CaseData caseData,
                                                          Element<PartyDetails> party,
                                                          String template) {
-        log.info("Sonar Check log");
         Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
         if (!isAccessEnabled(party) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
@@ -2689,7 +2668,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> generatePacksForConfidentialCheckFl401(CaseDetails caseDetails, String authorization) {
-        log.info("Sonar Check log");
         log.info("Inside generatePacksForConfidentialCheck FL401 Method");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -2854,7 +2832,6 @@ public class ServiceOfApplicationService {
     }
 
     public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
-        log.info("Sonar Check log");
         //Suppressed java:S6541 , suppression will be removed after refactoring in the IP sprint.
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -3077,7 +3054,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<DynamicMultiselectListElement> createPartyDynamicMultiSelectListElement(List<Element<String>> partyList) {
-        log.info("Sonar Check log");
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         final List<String> partyIds = ElementUtils.unwrapElements(partyList);
 
@@ -3087,7 +3063,7 @@ public class ServiceOfApplicationService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> processConfidentialityCheck(String authorisation, CallbackRequest callbackRequest) {
-        log.info("Sonar Check log");
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
@@ -3199,7 +3175,6 @@ public class ServiceOfApplicationService {
     }
 
     public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
-        log.info("Sonar Check log");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class

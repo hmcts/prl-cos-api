@@ -37,8 +37,6 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
-
-        log.info("Sonar Check log");
         EnumMap<RespondentSolicitorEvents, RespondentEventChecker> mandatoryEvents = new EnumMap<>(RespondentSolicitorEvents.class);
 
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());

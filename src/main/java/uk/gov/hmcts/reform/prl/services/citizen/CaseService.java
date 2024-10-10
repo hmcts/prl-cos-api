@@ -115,7 +115,6 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
-        log.info("Sonar Check log");
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
             caseData = caseData.toBuilder()
@@ -127,7 +126,6 @@ public class CaseService {
     }
 
     public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
-        log.info("Sonar Check log");
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
         ObjectMapper mapper = new ObjectMapper();
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
@@ -160,7 +158,7 @@ public class CaseService {
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
-        log.info("Sonar Check log");
+
         Map<String, String> searchCriteria = new HashMap<>();
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
@@ -196,18 +194,14 @@ public class CaseService {
     }
 
     public CaseDetails getCase(String authToken, String caseId) {
-
-        log.info("Sonar Check log");
         return caseRepository.getCase(authToken, caseId);
     }
 
     public CaseDetails createCase(CaseData caseData, String authToken) {
-        log.info("Sonar Check log");
         return caseRepository.createCase(authToken, caseData);
     }
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
-        log.info("Sonar Check log");
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         return getCaseDataWithHearingResponse(
             authorisation,
@@ -219,7 +213,6 @@ public class CaseService {
     public CaseDataWithHearingResponse getCaseDataWithHearingResponse(String authorisation,
                                                                       String hearingNeeded,
                                                                       CaseDetails caseDetails) {
-        log.info("Sonar Check log");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder()
             .caseData(UiCitizenCaseData.builder()
@@ -241,7 +234,6 @@ public class CaseService {
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
-        log.info("Sonar Check log");
         CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
@@ -272,8 +264,6 @@ public class CaseService {
 
     public ResponseEntity<Object> updateCitizenRAflags(
         String caseId, String eventId, String authToken, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
-        log.info("Sonar Check log");
-
         if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
             citizenPartyFlagsRequest.getPartyExternalFlags())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
@@ -378,7 +368,6 @@ public class CaseService {
     }
 
     public Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
-        log.info("Sonar Check log");
 
         Optional<String> partyExternalCaseFlagField = Optional.empty();
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseType);
@@ -403,15 +392,11 @@ public class CaseService {
     }
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
-        log.info("Sonar Check log");
-
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
     }
 
     public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
                                                                    CaseData caseData) {
-        log.info("Sonar Check log");
-
         UserDetails userDetails = userService.getUserDetails(authToken);
 
         CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()

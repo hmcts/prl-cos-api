@@ -57,7 +57,6 @@ public class RoleAssignmentService {
                                      String eventName,
                                      boolean replaceExisting,
                                      String roleName) {
-        log.info("Sonar Check log");
         if (!environment.equals("preview")) {
 
             log.info("Role Assignment called from event - {}", eventName);
@@ -140,7 +139,6 @@ public class RoleAssignmentService {
         String authorization,
         CallbackRequest callbackRequest
     ) {
-        log.info("Sonar Check log");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String[] judgeIdamIds = getIdamId(caseDataUpdated.get(JUDGE_NAME));
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -171,7 +169,6 @@ public class RoleAssignmentService {
     }
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
-        log.info("Sonar Check log");
         Map<String, String> finalRoles = new HashMap<>();
         List<UserDetails> userDetails = userService.getUserByEmailId(authorisation, emailId);
         final String[] idamRoles = {null};
