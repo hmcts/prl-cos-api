@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.AdditionalRecipients;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.ServiceOfDocumentsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
@@ -50,5 +51,7 @@ public class ServiceOfDocuments {
 
     @JsonProperty("sodServeToRespondentOptions")
     private final YesNoNotApplicable sodServeToRespondentOptions;
+
+    private final YesOrNo canDocumentsBeServed;
 
 }

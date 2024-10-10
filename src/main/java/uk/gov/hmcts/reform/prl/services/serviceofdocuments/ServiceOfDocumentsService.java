@@ -933,7 +933,7 @@ public class ServiceOfDocumentsService {
             "soaOtherParties",
             "missingAddressWarningText",
             "displayLegalRepOption",
-            "applicationServedYesNo"
+            "canDocumentsBeServed"
         ));
 
         for (String field : sodFields) {
@@ -966,8 +966,8 @@ public class ServiceOfDocumentsService {
             && null != caseData.getServiceOfDocuments().getSodUnServedPack()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-            confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
-            log.info("*** SOD - Documents are present for conf check");
+            //UNCOMMENT WHEN PET TEAM FIXES RESPONDENT C8 ISSUES
+            //confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         }
 
@@ -983,8 +983,7 @@ public class ServiceOfDocumentsService {
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         SodPack unServedPack = caseData.getServiceOfDocuments().getSodUnServedPack();
 
-        if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
-            && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+        if (Yes.equals(caseData.getServiceOfDocuments().getCanDocumentsBeServed())) {
             handleServiceOfDocumentsNotifications(
                 authorisation,
                 caseData,
