@@ -10,8 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -111,7 +109,6 @@ public class CaseServiceTest {
     public static final String eventId = "1234567891234567";
 
     public static final String accessCode = "123456";
-    private static final Logger log = LoggerFactory.getLogger(CaseServiceTest.class);
 
     public static final String CA_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT,CAN9_SOA_PERSONAL_APPLICANT";
     public static final String DA_SOA_PERSONAL_APPLICANT = "DN2_SOA_PERSONAL_APPLICANT";

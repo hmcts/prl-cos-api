@@ -89,7 +89,7 @@ public class StmtOfServImplServiceTest {
     @Mock
     private ManageDocumentsService manageDocumentsService;
 
-    private DynamicList dynamicList;
+    private DynamicList dynamicList1;
     private PartyDetails respondent;
     private Element<PartyDetails> wrappedRespondents;
     private List<Element<PartyDetails>> listOfRespondents;
@@ -120,7 +120,7 @@ public class StmtOfServImplServiceTest {
         listOfRespondents = Arrays.asList(wrappedRespondents, element(UUID.fromString(TEST_UUID), respondent2));
 
         DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label("").build();
-        dynamicList = DynamicList.builder()
+        dynamicList1 = DynamicList.builder()
             .listItems(List.of(dynamicListElement))
             .value(dynamicListElement)
             .build();
@@ -139,7 +139,7 @@ public class StmtOfServImplServiceTest {
             .build();
 
         StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
-            .respondentDynamicList(dynamicList)
+            .respondentDynamicList(dynamicList1)
             .stmtOfServiceDocument(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -187,7 +187,7 @@ public class StmtOfServImplServiceTest {
             .build();
 
         StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
-            .respondentDynamicList(dynamicList)
+            .respondentDynamicList(dynamicList1)
             .stmtOfServiceDocument(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

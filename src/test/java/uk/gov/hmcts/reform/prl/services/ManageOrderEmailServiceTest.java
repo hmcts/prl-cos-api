@@ -97,8 +97,6 @@ public class ManageOrderEmailServiceTest {
     @InjectMocks
     private ManageOrderEmailService manageOrderEmailService;
 
-    private Map<String, String> expectedEmailVarsAsMap;
-
     @Mock
     private CourtFinderApi courtFinderApi;
 
@@ -213,8 +211,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .build();
 
-        List<Court> courtList = new ArrayList<>();
-        courtList.add(court);
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -549,12 +545,6 @@ public class ManageOrderEmailServiceTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                .label("John (Child 1)")
-                .code("00000000-0000-0000-0000-000000000000")
-                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -649,12 +639,6 @@ public class ManageOrderEmailServiceTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)

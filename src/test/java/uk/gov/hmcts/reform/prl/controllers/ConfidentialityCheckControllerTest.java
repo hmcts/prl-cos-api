@@ -133,7 +133,7 @@ public class ConfidentialityCheckControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitCallBack() throws Exception {
+    public void testHandleAboutToSubmitCallBack() {
         CaseData caseData = CaseData.builder().id(12345L)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedOthersPack(SoaPack.builder()
@@ -165,7 +165,7 @@ public class ConfidentialityCheckControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedCallBack() throws Exception {
+    public void testHandleSubmittedCallBack() {
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
