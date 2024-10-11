@@ -61,7 +61,7 @@ public class AllegationOfHarmRevisedController {
     }
 
 
-    @PostMapping(path = "/allegation-of-harm/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/allegation-of-harm/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
