@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -133,6 +134,8 @@ public class SendAndReplyService {
     private final HearingService hearingService;
 
     private final CaseDocumentClient caseDocumentClient;
+
+    private final ManageDocumentsService manageDocumentsService;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -711,7 +714,7 @@ public class SendAndReplyService {
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
-            .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
+            .senderRole(getUserRole(authorization))
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
@@ -734,7 +737,8 @@ public class SendAndReplyService {
         return null;
     }
 
-    private String getUserRole(List<String> roles) {
+    private String getUserRole(String authorization) {
+        List<String> roles = manageDocumentsService.getLoggedInUserType(authorization);
         if (isNotEmpty(roles)) {
             if (roles.contains(COURT_ADMIN_ROLE)) {
                 return COURT_ADMIN;
@@ -742,11 +746,9 @@ public class SendAndReplyService {
                 return JUDICIARY;
             } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
                 return LEGAL_ADVISER;
-            } else {
-                return "";
             }
         }
-        return "";
+        return null;
     }
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,

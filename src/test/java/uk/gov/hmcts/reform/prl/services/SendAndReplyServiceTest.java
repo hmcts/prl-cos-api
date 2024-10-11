@@ -55,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -110,6 +111,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     EmailService emailService;
+
+    @Mock
+    ManageDocumentsService manageDocumentsService;
 
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
@@ -182,9 +186,10 @@ public class SendAndReplyServiceTest {
     @Before
     public void init() {
         when(time.now()).thenReturn(LocalDateTime.now());
+        List<String> roles = Arrays.asList("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge ","caseworker-privatelaw-la ");
         userDetails = UserDetails.builder()
             .email("sender@email.com")
-            .roles(Arrays.asList("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge ","caseworker-privatelaw-la "))
+            .roles(roles)
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
@@ -288,6 +293,8 @@ public class SendAndReplyServiceTest {
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
             .build();
+
+        when(manageDocumentsService.getLoggedInUserType(anyString())).thenReturn(roles);
     }
 
     @Test
