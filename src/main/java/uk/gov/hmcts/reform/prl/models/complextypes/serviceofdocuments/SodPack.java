@@ -21,6 +21,7 @@ public class SodPack {
     private final List<Element<String>> applicantIds;
     private final List<Element<String>> respondentIds;
     private final List<Element<String>> otherPersonIds;
+    private final String partiesToBeServed;
     private List<Element<ServeOrgDetails>> additionalRecipients;
     private final String servedBy;
     private final YesOrNo isPersonalService;

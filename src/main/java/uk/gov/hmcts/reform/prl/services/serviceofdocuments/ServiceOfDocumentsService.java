@@ -71,6 +71,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
@@ -165,6 +166,7 @@ public class ServiceOfDocumentsService {
             .submittedBy(userService.getUserDetails(authorisation).getFullName())
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             .build();
+        List<String> partiesToBeServed = new ArrayList<>();
         if (!YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
             //Personal service
             if (YesNoNotApplicable.Yes.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
@@ -175,6 +177,7 @@ public class ServiceOfDocumentsService {
                     .servedBy(servedBy)
                     .isPersonalService(YesOrNo.Yes)
                     .build();
+                partiesToBeServed.addAll(getPartiesToBeServedForPersonalService(caseData));
             } else if (YesNoNotApplicable.No.equals(caseData.getServiceOfDocuments().getSodServeToRespondentOptions())) {
                 //Non-personal service
                 unServedPack = unServedPack.toBuilder()
@@ -190,15 +193,19 @@ public class ServiceOfDocumentsService {
                     ))
                     .isPersonalService(YesOrNo.No)
                     .build();
+                partiesToBeServed.addAll(getPartiesToBeServedForNonPersonalService(caseData));
             }
         }
         //other persons
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()) {
+            List<String> otherPersonIds = new ArrayList<>();
+            caseData.getServiceOfApplication().getSoaOtherParties().getValue()
+                .forEach(element -> {
+                    otherPersonIds.add(element.getCode());
+                    partiesToBeServed.add(element.getLabel() + " (Other person)");
+                });
             unServedPack = unServedPack.toBuilder()
-                .otherPersonIds(wrapElements(caseData.getServiceOfApplication().getSoaOtherParties().getValue()
-                                                 .stream()
-                                                 .map(DynamicMultiselectListElement::getCode)
-                                                 .toList()))
+                .otherPersonIds(wrapElements(otherPersonIds))
                 .build();
         }
         //additional recipients
@@ -209,6 +216,10 @@ public class ServiceOfDocumentsService {
                 .additionalRecipients(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())
                 .build();
         }
+        //Add parties to be served
+        unServedPack = unServedPack.toBuilder()
+            .partiesToBeServed(String.join(COMMA, partiesToBeServed))
+            .build();
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         //Add un-served documents to caseData
@@ -961,6 +972,19 @@ public class ServiceOfDocumentsService {
             || null == caseData.getServiceOfDocuments().getSodDocumentsList().get(0).getValue();
     }
 
+    private List<String> getPartiesToBeServedForPersonalService(CaseData caseData) {
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? CaseUtils.getPartyNameList(true, caseData.getApplicants())
+            : List.of(caseData.getApplicantsFL401().getLabelForDynamicList() + " (Applicant)");
+    }
+
+    private List<String> getPartiesToBeServedForNonPersonalService(CaseData caseData) {
+        return caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+            .stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .toList();
+    }
+
     public AboutToStartOrSubmitCallbackResponse handleConfCheckAboutToStart(String authorisation,
                                                                             CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -1007,7 +1031,8 @@ public class ServiceOfDocumentsService {
 
         //Clean up the fields
         cleanUpSelections(caseDataMap);
-        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+        //UNCOMMENT WHEN PET TEAM FIXES RESPONDENT C8 ISSUES
+        //confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),

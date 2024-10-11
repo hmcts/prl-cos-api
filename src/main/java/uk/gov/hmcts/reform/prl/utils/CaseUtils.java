@@ -619,6 +619,21 @@ public class CaseUtils {
         return applicantList;
     }
 
+    public static List<String> getPartyNameList(boolean isApplicant,
+                                                List<Element<PartyDetails>> parties) {
+        List<String> partyList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            partyList = parties.stream()
+                .map(Element::getValue)
+                .map(party -> party.getLabelForDynamicList() + (isApplicant
+                    ? " (Applicant " + i.getAndIncrement() + ")"
+                    : " (Respondent " + i.getAndIncrement() + ")"))
+                .toList();
+        }
+        return partyList;
+    }
+
     public static List<String> getApplicantSolicitorNameList(List<Element<PartyDetails>> parties) {
         List<String> applicantSolicitorList = new ArrayList<>();
         if (isNotEmpty(parties)) {
