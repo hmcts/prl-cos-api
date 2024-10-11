@@ -1062,7 +1062,8 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+                                                                           citizenPartyFlagsRequest);
 
         //Assert
         assertNotNull(response);
@@ -1075,7 +1076,8 @@ public class CaseServiceTest {
             .partyExternalFlags(FlagsRequest.builder().build())
             .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+                                                                           citizenPartyFlagsRequest);
 
         //Assert
         assertEquals("bad request", response.getBody());
@@ -1099,7 +1101,8 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+                                                                           citizenPartyFlagsRequest);
 
         //Assert
         assertEquals("party external flag details not found", response.getBody());
@@ -1109,10 +1112,6 @@ public class CaseServiceTest {
     public void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
         //Given
         caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
-        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-            .partyExternalFlags(FlagsRequest.builder().details(List.of(element(FlagDetailRequest.builder().build()))).build())
-            .partyIdamId(TEST_UUID)
-            .build();
         when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
         Map<String, Object> updatedCaseMap = caseDetails.getData();
         updatedCaseMap.put("caApplicant1ExternalFlags", Flags.builder().build());
@@ -1128,8 +1127,13 @@ public class CaseServiceTest {
             .thenReturn(Flags.builder().build());
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyExternalFlags(FlagsRequest.builder().details(List.of(element(FlagDetailRequest.builder().build()))).build())
+            .partyIdamId(TEST_UUID)
+            .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken, citizenPartyFlagsRequest);
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+                                                                           citizenPartyFlagsRequest);
 
         //Assert
         assertEquals("party flags updated", response.getBody());
