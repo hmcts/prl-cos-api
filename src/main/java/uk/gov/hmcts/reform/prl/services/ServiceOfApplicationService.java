@@ -317,6 +317,7 @@ public class ServiceOfApplicationService {
     private final CaseInviteManager caseInviteManager;
     private final DgsService dgsService;
     private final LaunchDarklyClient launchDarklyClient;
+    private final ConfidentialityCheckService confidentialityCheckService;
 
     private final HearingService hearingService;
 
@@ -4016,7 +4017,7 @@ public class ServiceOfApplicationService {
         }
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
-
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
