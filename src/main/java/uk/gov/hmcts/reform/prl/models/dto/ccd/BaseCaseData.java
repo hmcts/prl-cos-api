@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDateTime;
 
@@ -78,4 +79,7 @@ public class BaseCaseData {
 
     @JsonProperty("isApplicantRepresented")
     private String isApplicantRepresented;
+
+    @JsonUnwrapped
+    private ServiceOfDocuments serviceOfDocuments;
 }
