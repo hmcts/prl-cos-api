@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -47,9 +50,11 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
@@ -90,7 +95,15 @@ public class CaseDataService {
 
     private final OrganisationService organisationService;
 
-    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
+    private final CoreCaseDataApi coreCaseDataApi;
+
+    @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
+    private List<String> excludedDocumentCategoryList;
+
+    @Value("#{'${cafcaas.excludedDocuments}'.split(',')}")
+    private List<String> excludedDocumentList;
+
+    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate, String serviceAuthorisation) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
@@ -124,7 +137,7 @@ public class CaseDataService {
                 );
 
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-
+                    addSpecificDocumnetsFromCaseFileViewBasedOnCategories(cafCassResponse, authorisation, serviceAuthorisation);
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
@@ -143,6 +156,76 @@ public class CaseDataService {
         }
         return cafCassResponse;
     }
+
+    private void addSpecificDocumnetsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse,
+                                                                      String authorisation,
+                                                                      String serviceAuthorisation) {
+
+
+        cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                authorisation,
+                serviceAuthorisation,
+                String.valueOf(cafCassCaseDetail.getId())
+            );
+            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
+
+            List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+                .sorted(Comparator.comparing(Category::getCategoryName))
+                .toList();
+            log.info("Parent categories {}", parentCategories);
+            parseCategoryAndCreateList(parentCategories, otherDocsList);
+            parentCategories.forEach(cat -> log.info(cat.getCategoryId(), cat.getCategoryName()));
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            final CafCassCaseData cafCassCaseData = caseData.toBuilder()
+                .otherDocuments(otherDocsList)
+                .build();
+            cafCassCaseDetail.setCaseData(cafCassCaseData);
+        });
+
+
+    }
+
+    private void parseCategoryAndCreateList(List<Category> parentCategories,
+                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
+        log.info("excludedDocumentCategoryList --> {}", excludedDocumentCategoryList);
+        log.info("excludedDocumentList {} --> {}", excludedDocumentList);
+        parentCategories.forEach(category -> {
+            if (CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(
+                categoryId)) {
+                if (category.getSubCategories() != null) {
+                    parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
+                }
+                log.info("category name {} --> {}", category.getCategoryName(), category.getCategoryId());
+                category.getDocuments().forEach(document -> {
+                    if (CollectionUtils.isEmpty(excludedDocumentList)
+                        || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
+                        otherDocsList.add(Element.<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>builder().id(
+                            UUID.randomUUID()).value(uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments.builder().documentOther(
+                            buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).docCategory(
+                            category.getCategoryId()).build()).build());
+                    }
+                });
+            }
+        });
+    }
+
+    private boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+        for (String excludedDocumentName : excludedDocumentList) {
+            if (documentFilename.startsWith(excludedDocumentName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) {
+        return Document.builder()
+            .documentUrl(cfvDocument.getDocumentURL())
+            .documentFileName(cfvDocument.getDocumentFilename())
+            .build();
+    }
+
 
     private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
         Map<String, Address> orgIdToAddressMap = new HashMap<>();

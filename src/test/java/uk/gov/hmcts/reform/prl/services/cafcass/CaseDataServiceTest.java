@@ -14,6 +14,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -73,6 +76,9 @@ public class CaseDataServiceTest {
 
     @Mock
     private OrganisationService organisationService;
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
 
     @BeforeEach
     public void setUp() {
@@ -139,9 +145,15 @@ public class CaseDataServiceTest {
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, new ArrayList<>(), new ArrayList<>());
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -206,9 +218,20 @@ public class CaseDataServiceTest {
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -231,7 +254,7 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 
@@ -281,7 +304,7 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
-                                                                               "start", "end"
+                                                                               "start", "end", "tests2s"
         ));
 
     }

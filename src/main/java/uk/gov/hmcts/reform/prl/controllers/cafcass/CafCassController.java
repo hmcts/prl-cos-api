@@ -68,7 +68,8 @@ public class CafCassController extends AbstractCallbackController {
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
                     startDate,
-                    endDate
+                    endDate,
+                    serviceAuthorisation
                 ));
 
             } else {
