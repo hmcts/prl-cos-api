@@ -126,9 +126,21 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
-            updatedCaseData.put(APPLICANTS, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getApplicants())));
-            updatedCaseData.put(RESPONDENTS, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getRespondents())));
-            updatedCaseData.put(OTHER_PARTY, processApplicantsConfidentialityIfLivesInRefuge(ofNullable(caseData.getOtherPartyInTheCaseRevised())));
+            processPartiesConfidentialityIfLivesInRefuge(
+                ofNullable(caseData.getApplicants()),
+                updatedCaseData,
+                APPLICANTS
+            );
+            processPartiesConfidentialityIfLivesInRefuge(
+                ofNullable(caseData.getRespondents()),
+                updatedCaseData,
+                RESPONDENTS
+            );
+            processPartiesConfidentialityIfLivesInRefuge(
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                updatedCaseData,
+                OTHER_PARTY
+            );
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -308,10 +320,12 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private Optional<List<Element<PartyDetails>>> processApplicantsConfidentialityIfLivesInRefuge(
-        Optional<List<Element<PartyDetails>>> partyDetailsElementList) {
-        if (partyDetailsElementList.isPresent() && !partyDetailsElementList.get().isEmpty()) {
-            List<PartyDetails> partyDetailsList = partyDetailsElementList.get().stream().map(Element::getValue).toList();
+    private void processPartiesConfidentialityIfLivesInRefuge(
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        Map<String, Object> updatedCaseData,
+        String party) {
+        if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
 
             for (PartyDetails partyDetails : partyDetailsList) {
                 if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
@@ -320,8 +334,8 @@ public class UpdatePartyDetailsService {
                     partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
                 }
             }
+            updatedCaseData.put(party, partyDetailsWrappedList);
         }
-        return partyDetailsElementList;
     }
 
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
