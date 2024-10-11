@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -38,15 +40,16 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -82,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -135,7 +139,9 @@ public class SendAndReplyService {
 
     private final CaseDocumentClient caseDocumentClient;
 
-    private final ManageDocumentsService manageDocumentsService;
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -714,7 +720,7 @@ public class SendAndReplyService {
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
-            .senderRole(getUserRole(authorization))
+            .senderRole(getUserRole(authorization, userDetails))
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
@@ -737,8 +743,19 @@ public class SendAndReplyService {
         return null;
     }
 
-    private String getUserRole(String authorization) {
-        List<String> roles = manageDocumentsService.getLoggedInUserType(authorization);
+    private String getUserRole(String authorization,
+                               UserDetails userDetails) {
+        List<String> roles = userDetails.getRoles();
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorization,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorization, userDetails);
+        }
+
         if (isNotEmpty(roles)) {
             if (roles.contains(COURT_ADMIN_ROLE)) {
                 return COURT_ADMIN;

@@ -321,6 +321,7 @@ public class StmtOfServImplService {
                                        : null)
             .uploadedBy(getSosUploadedBy(authorisation))
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+            .servedDateTimeOption(null)
             .build();
     }
 
