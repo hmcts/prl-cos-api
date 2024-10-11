@@ -720,7 +720,7 @@ public class SendAndReplyService {
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
-            .senderRole(getUserRole(authorization, userDetails))
+            .senderRole(null != userDetails ? getUserRole(authorization, userDetails) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
@@ -746,6 +746,7 @@ public class SendAndReplyService {
     private String getUserRole(String authorization,
                                UserDetails userDetails) {
         List<String> roles = userDetails.getRoles();
+        //PRL-6477 - fetch & map AM roles
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
                 authorization,

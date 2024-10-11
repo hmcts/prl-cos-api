@@ -320,7 +320,7 @@ public class CitizenCaseUpdateServiceTest {
         caseData = caseData.toBuilder()
             .c100RebuildData(c100RebuildData)
             .withDrawApplicationData(withdrawApplication).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),

@@ -321,6 +321,7 @@ public class StmtOfServImplService {
                                        : null)
             .uploadedBy(getSosUploadedBy(authorisation))
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+            //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
             .build();
     }
