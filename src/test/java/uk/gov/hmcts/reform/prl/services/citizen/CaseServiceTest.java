@@ -1138,7 +1138,7 @@ public class CaseServiceTest {
     @Test
     public void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
-        Map<String, String> roles= caseService.fetchIdamAmRoles(authToken, "test");
+        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, "test");
         assertEquals("role", roles.get("test"));
     }
 }
