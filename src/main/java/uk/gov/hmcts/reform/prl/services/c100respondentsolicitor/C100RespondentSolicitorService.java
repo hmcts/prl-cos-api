@@ -1920,8 +1920,9 @@ public class C100RespondentSolicitorService {
         if (citizenDetails.getContact() != null && citizenDetails.getContact().getPhoneNumber() != null) {
             partyDetailsBuilder.phoneNumber(citizenDetails.getContact().getPhoneNumber());
             boolean isPhone = Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
-                    || solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
-                    .contains(ConfidentialityListEnum.phoneNumber);
+                    || (solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList() != null
+                && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
+                    .contains(ConfidentialityListEnum.phoneNumber));
             partyDetailsBuilder.isPhoneNumberConfidential(isPhone ? Yes : No);
 
         }
