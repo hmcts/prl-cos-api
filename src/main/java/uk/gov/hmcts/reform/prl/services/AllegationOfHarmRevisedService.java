@@ -296,10 +296,10 @@ public class AllegationOfHarmRevisedService {
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
         if (Objects.nonNull(allegationOfHarmRevised)) {
             if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
-                caseDataUpdated.put("newAllegationsOfHarmSubstanceAbuseDetails", null);
+                caseDataUpdated.put("newAllegationsOfHarmSubstanceAbuseDetails", "");
             }
             if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmOtherConcerns())) {
-                caseDataUpdated.put("newAllegationsOfHarmOtherConcernsDetails", null);
+                caseDataUpdated.put("newAllegationsOfHarmOtherConcernsDetails", "");
             }
             if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
                 caseDataUpdated.put("childAbuses", Collections.emptyList());

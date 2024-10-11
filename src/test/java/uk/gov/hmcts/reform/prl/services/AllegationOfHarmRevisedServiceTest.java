@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -218,9 +219,9 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testResetFields1() {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails","test");
+        caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails", "test");
         caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", "test");
-        caseDataMap.put("childAbuses",List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse));
+        caseDataMap.put("childAbuses", List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse));
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
             .allChildrenAreRiskFinancialAbuse(YesOrNo.No)
             .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.No)
@@ -228,8 +229,8 @@ public class AllegationOfHarmRevisedServiceTest {
             .newAllegationsOfHarmOtherConcerns(YesOrNo.No)
             .build();
         allegationOfHarmService
-            .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(),caseDataMap);
-        Assert.assertNull(caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
+            .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(), caseDataMap);
+        Assert.assertEquals(StringUtils.EMPTY, caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
     }
 
     @Test
