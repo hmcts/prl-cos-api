@@ -537,7 +537,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails.add(element(emailNotification));
                     }
                 } catch (IOException e) {
-                    log.error("Failed to serve email to Local Authority", e);
+                    log.error("Failed to serve email to Local Authority {}", e.getMessage());
                 }
             }
         }
@@ -2020,7 +2020,7 @@ public class ServiceOfApplicationService {
             }
             return selectedDoc;
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return null;
     }

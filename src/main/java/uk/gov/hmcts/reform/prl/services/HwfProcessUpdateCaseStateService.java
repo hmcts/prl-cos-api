@@ -137,7 +137,7 @@ public class HwfProcessUpdateCaseStateService {
                 SearchResultResponse.class
             );
         } catch (JsonProcessingException e) {
-            log.error("Exception happened in parsing query param ", e);
+            log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
         if (null != searchResultResponse) {

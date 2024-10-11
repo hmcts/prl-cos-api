@@ -468,7 +468,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
         } catch (Exception e) {
-            log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
+            log.error("Error while calling Ref data api in getRefDataMap method --->  {}", e.getMessage());
         }
         return Collections.emptyMap();
     }
@@ -588,7 +588,7 @@ public class SendAndReplyService {
                 return getDynamicList(judiciaryTierDynamicElementList);
             }
         } catch (Exception e) {
-            log.error("Error in getJudiciaryTierDynamicList method", e);
+            log.error("Error in getJudiciaryTierDynamicList method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -604,7 +604,7 @@ public class SendAndReplyService {
             );
             return createDynamicList(categoriesAndDocuments);
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();

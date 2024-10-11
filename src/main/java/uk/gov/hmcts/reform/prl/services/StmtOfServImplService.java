@@ -764,9 +764,9 @@ public class StmtOfServImplService {
                                    .build());
             } catch (Exception e) {
                 log.error(
-                    "SOS: Exception occurred in sending access code cover letter to respondent {} ",
+                    "SOS: Exception occurred in sending access code cover letter to respondent {} {}",
                     respondent.getId(),
-                    e
+                    e.getMessage()
                 );
                 return null;
             }

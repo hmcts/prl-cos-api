@@ -307,7 +307,7 @@ public class NotificationService {
                     .build()
             );
         } catch (IOException e) {
-            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
+            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage());
             throw (new RuntimeException(e));
         }
     }
@@ -377,7 +377,7 @@ public class NotificationService {
                     bulkPrintId
                 );
             } catch (Exception e) {
-                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId(), e);
+                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId());
                 throw (new RuntimeException(e));
             }
         } else {

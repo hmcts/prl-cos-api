@@ -284,7 +284,7 @@ public class ServiceOfApplicationPostService {
                 bulkPrintedId = String.valueOf(bulkPrintId);
             }
         } catch (Exception e) {
-            log.error("The bulk print service has failed", e);
+            log.error("The bulk print service has failed {}", e.getMessage());
         }
         Address address = Yes.equals(partyDetails.getIsAddressConfidential())
             ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()

@@ -1959,7 +1959,7 @@ public class C100RespondentSolicitorService {
                 orgName = respondingParty.getValue().getSendSignUpLink();
             }
         } catch (Exception e) {
-            log.error("Error fetching organisation for respondent solicitor {}", e);
+            log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
         dataMap.put("solicitorAddress", address);
         dataMap.put("solicitorOrg", orgName);
