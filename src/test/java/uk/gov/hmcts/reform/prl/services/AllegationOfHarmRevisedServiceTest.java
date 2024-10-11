@@ -221,8 +221,6 @@ public class AllegationOfHarmRevisedServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails","test");
         caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", "test");
-        List<Element<RespChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-        caseDataMap.put("childAbuseBehavioursDocmosis",childAbuseBehaviourList);
         caseDataMap.put("childAbuses",List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse));
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
             .allChildrenAreRiskFinancialAbuse(YesOrNo.No)
@@ -233,7 +231,6 @@ public class AllegationOfHarmRevisedServiceTest {
         allegationOfHarmService
             .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(),caseDataMap);
         Assert.assertNull(caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
-        Assert.assertNull(caseDataMap.get("childAbuseBehavioursDocmosis"));
     }
 
     @Test
@@ -241,8 +238,6 @@ public class AllegationOfHarmRevisedServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails","test");
         caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", "test");
-        List<Element<RespChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-        caseDataMap.put("childAbuseBehavioursDocmosis",childAbuseBehaviourList);
         caseDataMap.put("childAbuses",List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse));
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
             .allChildrenAreRiskFinancialAbuse(YesOrNo.No)

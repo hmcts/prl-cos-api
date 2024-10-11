@@ -301,7 +301,6 @@ public class AllegationOfHarmRevisedService {
             if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmOtherConcerns())) {
                 caseDataUpdated.put("newAllegationsOfHarmOtherConcernsDetails", null);
             }
-            caseDataUpdated.put("childAbuseBehavioursDocmosis", null);
             if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
                 caseDataUpdated.put("childAbuses", Collections.emptyList());
             }
