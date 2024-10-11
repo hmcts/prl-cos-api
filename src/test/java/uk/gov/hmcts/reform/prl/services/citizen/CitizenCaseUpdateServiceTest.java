@@ -320,11 +320,11 @@ public class CitizenCaseUpdateServiceTest {
         caseData = caseData.toBuilder()
             .c100RebuildData(c100RebuildData)
             .withDrawApplicationData(withdrawApplication).build();
-        Map<String, Object> caseDetails1 = caseData.toMap(new ObjectMapper());
+        caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        caseDetails1, caseData, null);
+                                                                                                        caseDetails, caseData, null);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCaseWithdraw", authToken))
             .thenReturn(startAllTabsUpdateDataContent1);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
