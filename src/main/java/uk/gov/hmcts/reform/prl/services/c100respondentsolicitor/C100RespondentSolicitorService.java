@@ -1903,8 +1903,9 @@ public class C100RespondentSolicitorService {
                 partyDetailsBuilder.address(citizenDetails.getAddress());
                 partyDetailsBuilder.isCurrentAddressKnown(Yes);
                 boolean isEmail = Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
-                        || solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
-                        .contains(ConfidentialityListEnum.address);
+                        || (solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList() != null
+                    && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
+                        .contains(ConfidentialityListEnum.address));
                 partyDetailsBuilder.isAddressConfidential(isEmail ? Yes : No);
 
                 updateRespondentContactDetailsForDoc(solicitorRepresentedRespondent, citizenDetails, partyDetailsBuilder);
