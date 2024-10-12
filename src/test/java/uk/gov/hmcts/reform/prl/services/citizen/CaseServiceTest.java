@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -736,7 +735,6 @@ public class CaseServiceTest {
         assertEquals(CA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
-    @Ignore
     @Test
     public void testGetCitizenRespondentOrdersC100() {
         //Given
@@ -745,7 +743,7 @@ public class CaseServiceTest {
                                    .serveOnRespondent(Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
-            .otherDetails(OtherOrderDetails.builder().orderCreatedDate("12_JAN_2021").orderMadeDate("12_JAN_2021").build())
+            .otherDetails(OtherOrderDetails.builder().orderCreatedDate("12 Jan 2021").orderMadeDate("12 Jan 2021").build())
             .build();
 
         caseData = caseData.toBuilder()
