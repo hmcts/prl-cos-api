@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_SOLICITOR_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -131,11 +132,25 @@ public class EditReturnedOrderService {
     }
 
     public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
-        Map<String,Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
-        DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                                 caseData.getManageOrders().getRejectedOrdersDynamicList());
-
+        caseDataMap.put(
+            WA_ORDER_COLLECTION_ID,
+            elementUtils.getDynamicListSelectedValue(
+                caseData.getManageOrders().getRejectedOrdersDynamicList(),
+                objectMapper
+            )
+        );
+        caseDataMap.put(
+            WA_ORDER_NAME_SOLICITOR_CREATED,
+            draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId())
+        );
+        log.info("****order collection id****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
+        log.info("****orderNameSolresubmitted****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
+        DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+            caseData.getDraftOrderCollection(),
+            caseData.getManageOrders().getRejectedOrdersDynamicList()
+        );
         if (ManageOrdersOptionsEnum.uploadAnOrder.toString().equalsIgnoreCase(draftOrder.getOrderSelectionType())) {
             DraftOrder updatedOrder = updateUploadedDraftOrderDetails(caseData, draftOrder);
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -155,7 +170,11 @@ public class EditReturnedOrderService {
             ));
             caseDataMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         } else {
-            caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
+            caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(
+                caseData,
+                authorisation,
+                Event.EDIT_RETURNED_ORDER.getId()
+            ));
         }
         caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftOrder.getLabelForOrdersDynamicList());
         return caseDataMap;
