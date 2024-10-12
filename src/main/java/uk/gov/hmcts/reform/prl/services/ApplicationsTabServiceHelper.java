@@ -105,6 +105,8 @@ public class ApplicationsTabServiceHelper {
                 .cafcassOfficerName(child.getCafcassOfficerName())
                 .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
                 .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
+            .finalDecisionResolutionDate(child.getFinalDecisionResolutionDate())
+            .finalDecisionResolutionReason(child.getFinalDecisionResolutionReason())
             .build();
     }
 

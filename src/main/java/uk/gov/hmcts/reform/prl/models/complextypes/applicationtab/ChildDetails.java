@@ -34,5 +34,7 @@ public class ChildDetails {
     private final String cafcassOfficerName;
     private final String cafcassOfficerEmailAddress;
     private final String cafcassOfficerPhoneNo;
+    private final String finalDecisionResolutionReason;
+    private final String finalDecisionResolutionDate;
 
 }
