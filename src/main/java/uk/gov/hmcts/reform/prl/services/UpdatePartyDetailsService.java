@@ -126,17 +126,17 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
-            processPartiesConfidentialityIfLivesInRefuge(
+            processForcePartiesConfidentialityIfLivesInRefuge(
                 ofNullable(caseData.getApplicants()),
                 updatedCaseData,
                 APPLICANTS
             );
-            processPartiesConfidentialityIfLivesInRefuge(
+            processForcePartiesConfidentialityIfLivesInRefuge(
                 ofNullable(caseData.getRespondents()),
                 updatedCaseData,
                 RESPONDENTS
             );
-            processPartiesConfidentialityIfLivesInRefuge(
+            processForcePartiesConfidentialityIfLivesInRefuge(
                 ofNullable(caseData.getOtherPartyInTheCaseRevised()),
                 updatedCaseData,
                 OTHER_PARTY
@@ -320,7 +320,7 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void processPartiesConfidentialityIfLivesInRefuge(
+    private void processForcePartiesConfidentialityIfLivesInRefuge(
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
         Map<String, Object> updatedCaseData,
         String party) {
@@ -329,12 +329,30 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails partyDetails : partyDetailsList) {
                 if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
-                    partyDetails.setIsAddressConfidential(YesOrNo.Yes);
-                    partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
-                    partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+                    forceConfidentialityChangeForRefuge(party, partyDetails);
                 }
             }
             updatedCaseData.put(party, partyDetailsWrappedList);
+        }
+    }
+
+    private static void forceConfidentialityChangeForRefuge(String party, PartyDetails partyDetails) {
+        if (party.equals(APPLICANTS)) {
+            partyDetails.setIsAddressConfidential(YesOrNo.Yes);
+            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
+            }
+            partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+        } else {
+            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                partyDetails.setIsAddressConfidential(YesOrNo.Yes);
+            }
+            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
+            }
+            if (YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())) {
+                partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+            }
         }
     }
 
