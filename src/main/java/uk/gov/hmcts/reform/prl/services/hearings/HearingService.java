@@ -72,7 +72,7 @@ public class HearingService {
             return hearings;
 
         } catch (Exception e) {
-            log.error("Error in getting hearings ", e);
+            log.error("Error in getting hearings {}", e.getMessage());
         }
         return null;
     }
@@ -83,7 +83,7 @@ public class HearingService {
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
         } catch (Exception e) {
-            log.error("Error in getCaseLinkedData ", e);
+            log.error("Error in getCaseLinkedData {}", e.getMessage());
         }
         return caseLinkedData;
     }
@@ -94,7 +94,7 @@ public class HearingService {
         try {
             return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error("Error in getNextHearingDate", e);
+            log.error("Error in getNextHearingDate {}", e.getMessage());
         }
         return null;
     }
@@ -104,7 +104,7 @@ public class HearingService {
         try {
             return hearingApiClient.getFutureHearings(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error("Error in getFutureHearings ----> {}", e);
+            log.error("Error in getFutureHearings ----> {}", e.getMessage());
         }
         return null;
     }
@@ -173,7 +173,7 @@ public class HearingService {
                 hearingTypeCategoryId
             );
         } catch (Exception e) {
-            log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
+            log.error("Error while calling Ref data api in getRefDataMap method --->  {}", e.getMessage());
         }
         return Collections.emptyMap();
     }
@@ -209,7 +209,7 @@ public class HearingService {
             return hearingsList;
 
         } catch (Exception e) {
-            log.error("Error in getting hearings ", e);
+            log.error("Error in getting hearings {}", e.getMessage());
         }
         return Collections.emptyList();
     }

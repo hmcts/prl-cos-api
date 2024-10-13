@@ -88,7 +88,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return fl401ListOnNoticeService.sendNotification(callbackRequest.getCaseDetails().getData(), authorisation);
+            return fl401ListOnNoticeService.sendNotification(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
