@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 
@@ -39,12 +40,12 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo) {
+    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName("coversheet.pdf")
+                .documentFileName(fileName)
                 .build();
         }
         return null;
@@ -128,6 +129,8 @@ public class DocumentUtils {
             loggedInUserType = CITIZEN;
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType = BULK_SCAN;
+        } else if (roles.contains(Roles.COURTNAV.getValue())) {
+            loggedInUserType = COURTNAV;
         } else {
             loggedInUserType = CAFCASS;
         }
