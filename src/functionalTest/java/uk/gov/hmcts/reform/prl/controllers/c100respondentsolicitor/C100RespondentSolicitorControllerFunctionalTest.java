@@ -23,11 +23,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
 public class C100RespondentSolicitorControllerFunctionalTest {
 
     private final String targetInstance =
@@ -57,6 +57,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
 
 
+    @Ignore
     @Test
     @Order(1)
     public void createCcdTestCase() throws Exception {
@@ -215,6 +216,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     /**
      * Respondent solicitor ViewResponseDraftDocument journey - C1A both English and Welsh Draft document should be generated.
      */
+    @Ignore
     @Test
     @Order(9)
     public void givenRequestBody_whenGenerate_c7c1a_draft_welshAndEnglish_document() throws Exception {
@@ -239,6 +241,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
      * Respondent solicitor submit journey - C1A both English and Welsh Final document should be generated
      * and moved to quarantine (Documents To be Reviewed).
      */
+    @Ignore
     @Test
     @Order(10)
     public void givenRequestBody_whenSubmit_c7C1A_final_welshAndEnglish_document() throws Exception {
