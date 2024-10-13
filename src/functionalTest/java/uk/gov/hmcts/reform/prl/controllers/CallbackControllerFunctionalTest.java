@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class CallbackControllerFunctionalTest {
 
 

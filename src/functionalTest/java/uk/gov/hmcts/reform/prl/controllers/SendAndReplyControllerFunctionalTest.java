@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.hasKey;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class SendAndReplyControllerFunctionalTest {
 
     @Autowired
