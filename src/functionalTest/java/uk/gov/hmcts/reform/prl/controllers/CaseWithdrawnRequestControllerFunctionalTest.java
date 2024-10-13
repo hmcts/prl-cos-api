@@ -18,11 +18,11 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class CaseWithdrawnRequestControllerFunctionalTest {
 
 

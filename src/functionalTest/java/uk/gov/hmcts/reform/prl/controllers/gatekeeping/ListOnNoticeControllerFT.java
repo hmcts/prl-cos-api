@@ -26,11 +26,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
 public class ListOnNoticeControllerFT {
 
     @Autowired
@@ -69,6 +69,7 @@ public class ListOnNoticeControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
+    @Ignore
     @Test
     @Order(1)
     public void createCcdTestCase() throws Exception {
@@ -188,6 +189,7 @@ public class ListOnNoticeControllerFT {
         Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
     }
 
+    @Ignore
     @Test
     public void testSendListOnNoticeNotification() throws Exception {
 

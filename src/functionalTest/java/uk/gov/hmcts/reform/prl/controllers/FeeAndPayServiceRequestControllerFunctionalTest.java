@@ -29,9 +29,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 /*
    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
 */
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-@Ignore
 public class FeeAndPayServiceRequestControllerFunctionalTest {
 
     private MockMvc mockMvc;

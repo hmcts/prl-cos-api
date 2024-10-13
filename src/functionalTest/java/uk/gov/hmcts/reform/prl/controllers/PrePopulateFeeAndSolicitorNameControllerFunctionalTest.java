@@ -17,11 +17,11 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
 
     @Autowired

@@ -18,11 +18,10 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
-@Ignore
 public class AllocateJudgeControllerFT {
 
     @Autowired

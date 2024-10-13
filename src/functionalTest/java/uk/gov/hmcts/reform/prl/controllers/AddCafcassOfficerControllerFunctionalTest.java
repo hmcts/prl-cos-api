@@ -19,11 +19,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
-
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
-@Ignore
 public class AddCafcassOfficerControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
