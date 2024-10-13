@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -26,6 +27,9 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -282,10 +286,16 @@ public class FeeServiceTest {
             .caseType("FL401").build();
 
         CaseData caseData1 = CaseData.builder()
-            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
-                                                              .otherApplicationsBundle(OtherApplicationsBundle.builder().applicationType(
-                                                                  OtherApplicationType.FL403_EXTEND_AN_ORDER).build())
-                                                              .build()))).build();
+            .additionalApplicationsBundle(List.of(element(
+                AdditionalApplicationsBundle.builder()
+                    .partyType(PartyEnum.respondent)
+                    .otherApplicationsBundle(
+                        OtherApplicationsBundle.builder()
+                            .applicationType(OtherApplicationType
+                                                 .FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER)
+                            .build())
+                    .build())))
+            .build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.FL403_EXTEND_AN_ORDER)).thenReturn(feeParameters);
 
@@ -309,7 +319,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("24/04/2022").build();
+            .hearingDate("First Hearing -- 24/04/2022").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
@@ -333,7 +343,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(NO)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("27/12/2023").build();
+            .hearingDate("First Hearing -- 27/12/2023").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
@@ -357,7 +367,7 @@ public class FeeServiceTest {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("27/10/2023").build();
+            .hearingDate("First Hearing -- 27/10/2023").build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITHOUT_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
@@ -481,4 +491,23 @@ public class FeeServiceTest {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
+    @Test
+    public void testFetchFeeCodeWithNoFees() throws Exception {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London")).plusDays(15);
+        String currentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(zonedDateTime);
+        String hearingDate = "First Hearing -- " + currentDate;
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
+            .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
+            .hearingDate(hearingDate)
+            .applicationReason("delay-or-cancel-hearing-date")
+            .notice(YES)
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals("0.00",response.getAmount());
+    }
 }
