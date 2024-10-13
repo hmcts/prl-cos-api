@@ -65,5 +65,21 @@ public class BaseCaseData {
     private YesOrNo isSdoSelected;
 
     @JsonUnwrapped
+    private DocumentsNotifications documentsNotifications;
+
+    private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
+    private String awpWaTaskName;
+    private String awpHwfRefNo;
+
+    /**
+     * Process urgent help with fees.
+     */
+    @JsonUnwrapped
+    private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
+
+    @JsonProperty("isApplicantRepresented")
+    private String isApplicantRepresented;
+
+    @JsonUnwrapped
     private ServiceOfDocuments serviceOfDocuments;
 }

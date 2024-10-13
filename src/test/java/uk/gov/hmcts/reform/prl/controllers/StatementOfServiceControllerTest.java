@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
@@ -419,5 +421,23 @@ public class StatementOfServiceControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
         assertNotNull(statementOfServiceController.sosSubmitConfirmation(authToken, s2sToken, callbackRequest));
+    }
+
+    @Test
+    public void testCitizenSoaSubmit() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        assertNotNull(statementOfServiceController.citizenSoaSubmit("123456789", "Citizen-case-update",
+                                                                    authToken, s2sToken, CitizenSos.builder().build()));
+    }
+
+    @Test
+    public void testCitizenSoaSubmitException() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        assertThrows(Exception.class, () -> {
+            statementOfServiceController.citizenSoaSubmit("123456789", "Citizen-case-update",
+                                                          authToken, s2sToken, CitizenSos.builder().build());
+        });
     }
 }
