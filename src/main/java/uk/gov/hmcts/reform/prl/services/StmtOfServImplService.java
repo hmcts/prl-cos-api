@@ -540,6 +540,7 @@ public class StmtOfServImplService {
             log.info("*** fetching finalServedApplicationDetailsList ***");
             finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
         }
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
             List<Document> c100RespondentDocsWithoutLetters = serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(packDocs));
             for (Element<PartyDetails> respondent: updatedCaseData.getRespondents()) {
@@ -550,17 +551,24 @@ public class StmtOfServImplService {
                             .getCoverLettersMap()
                     ));
                     respondentDocs.addAll(c100RespondentDocsWithoutLetters);
-                    finalServedApplicationDetailsList.add(getServedSosPartyList(authorisation, respondent, respondentDocs));
+                    bulkPrintDetails.add(getServedSosPartyElement(authorisation, respondent, respondentDocs));
                 }
             }
         } else {
             if (partiesList.contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
-                finalServedApplicationDetailsList.add(getServedSosPartyList(authorisation,
+                bulkPrintDetails.add(getServedSosPartyElement(authorisation,
                                                                             element(updatedCaseData.getRespondentsFL401().getPartyId(),
                                                                                     updatedCaseData.getRespondentsFL401()),
                                                                             unwrapElements(packDocs)));
             }
         }
+        finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder()
+                    .servedBy(userService.getUserDetails(authorisation).getFullName())
+                    .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                  .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                    .modeOfService(BY_POST)
+                    .whoIsResponsible("Applicant Lip")
+                    .bulkPrintDetails(bulkPrintDetails).build()));
         updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         //PRL-5979 - Send cover letter with access code to respondents
         updatedCaseDataMap.put(
@@ -569,33 +577,27 @@ public class StmtOfServImplService {
         );
     }
 
-    private Element<ServedApplicationDetails> getServedSosPartyList(String authorisation, Element<PartyDetails> party,
-                                                                          List<Document> respondentDocs) {
+    private Element<BulkPrintDetails> getServedSosPartyElement(String authorisation, Element<PartyDetails> party,
+                                                                  List<Document> respondentDocs) {
         log.info("respondent docs {}", respondentDocs);
-        return element(ServedApplicationDetails.builder()
-                    .servedBy(userService.getUserDetails(authorisation).getFullName())
-                    .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                  .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                    .modeOfService(BY_POST)
-                    .whoIsResponsible("Applicant Lip")
-                    .bulkPrintDetails(List.of(element(BulkPrintDetails.builder()
-                                                          .bulkPrintId("Application personally served by "
-                                                                           + userService.getUserDetails(authorisation)
-                                                              .getFullName())
-                                                          .servedParty(party.getValue().getLabelForDynamicList())
-                                                          .printedDocs(String.join(COMMA,
-                                                                                   respondentDocs.stream()
-                                                                                       .filter(Objects::nonNull)
-                                                                                       .map(Document::getDocumentFileName)
-                                                                                       .toList()
-                                                          ))
-                                                          .recipientsName(party.getValue().getLabelForDynamicList())
-                                                          .printDocs(wrapElements(respondentDocs))
-                                                          .timeStamp(DateTimeFormatter.ofPattern(
-                                                              DD_MMM_YYYY_HH_MM_SS).format(
-                                                              ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                                          .partyIds(party.getId().toString())
-                                                          .build()))).build());
+        return element(BulkPrintDetails.builder()
+                                   .bulkPrintId("Application personally served by "
+                                                    + userService.getUserDetails(authorisation)
+                                       .getFullName())
+                                   .servedParty(party.getValue().getLabelForDynamicList())
+                                   .printedDocs(String.join(COMMA,
+                                                            respondentDocs.stream()
+                                                                .filter(Objects::nonNull)
+                                                                .map(Document::getDocumentFileName)
+                                                                .toList()
+                                   ))
+                                   .recipientsName(party.getValue().getLabelForDynamicList())
+                                   .printDocs(wrapElements(respondentDocs))
+                                   .timeStamp(DateTimeFormatter.ofPattern(
+                                       DD_MMM_YYYY_HH_MM_SS).format(
+                                       ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                   .partyIds(party.getId().toString())
+                                   .build());
     }
 
     private void updateStatementOfServiceCollection(CitizenSos sosObject, CaseData updatedCaseData,
