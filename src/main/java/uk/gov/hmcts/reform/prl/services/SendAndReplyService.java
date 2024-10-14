@@ -1791,6 +1791,7 @@ public class SendAndReplyService {
         CaseData caseData, PartyDetails partyDetails, Message message, String authorization) {
 
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         try {
             log.info("Sending the post message to external parties in case for caseId {}", caseData.getId());
@@ -1803,9 +1804,16 @@ public class SendAndReplyService {
                          partyDetails.getAddress().getAddressLine1());
 
                 List<Document> attachedDocs = getExternalMessageSelectedDocumentList(caseData, authorization, message);
-
-                docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
-                                       partyDetails.getLabelForDynamicList()));
+                if (documentLanguage.isGenEng()) {
+                    docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
+                                           partyDetails.getLabelForDynamicList(), "coversheet.pdf"
+                    ));
+                }
+                if (documentLanguage.isGenWelsh()) {
+                    docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
+                                           partyDetails.getLabelForDynamicList(), "coversheet_welsh.pdf"
+                    ));
+                }
                 docs.add(getMessageDocument(authorization, caseData, message, partyDetails, attachedDocs));
 
                 docs.addAll(attachedDocs);
@@ -1916,11 +1924,11 @@ public class SendAndReplyService {
         return null;
     }
 
-    private Document getCoverSheet(String authorization, CaseData caseData, Address address, String name) {
+    private Document getCoverSheet(String authorization, CaseData caseData, Address address, String name, String fileName) {
 
         try {
             return DocumentUtils.toCoverSheetDocument(
-                getCoverLetterGeneratedDocInfo(caseData, authorization, address, name));
+                getCoverLetterGeneratedDocInfo(caseData, authorization, address, name), fileName);
         } catch (Exception e) {
             log.error("Failed to generate cover sheet {}", e);
         }
