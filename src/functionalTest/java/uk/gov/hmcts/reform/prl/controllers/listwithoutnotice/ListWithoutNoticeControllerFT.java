@@ -21,10 +21,10 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX_CA;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class ListWithoutNoticeControllerFT {
 
     @Autowired

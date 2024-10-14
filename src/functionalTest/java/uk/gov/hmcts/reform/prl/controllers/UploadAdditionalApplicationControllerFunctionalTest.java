@@ -19,11 +19,11 @@ import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class UploadAdditionalApplicationControllerFunctionalTest {
 
     private final String targetInstance =

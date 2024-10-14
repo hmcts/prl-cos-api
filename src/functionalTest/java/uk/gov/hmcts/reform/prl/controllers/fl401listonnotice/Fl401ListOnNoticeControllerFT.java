@@ -29,11 +29,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_WITH
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService.CONFIRMATION_HEADER;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class Fl401ListOnNoticeControllerFT {
 
     @Autowired
@@ -68,7 +68,6 @@ public class Fl401ListOnNoticeControllerFT {
 
     private static CaseDetails caseDetails;
 
-    @Ignore
     @Test
     @Order(1)
     public void createCcdTestCase() throws Exception {
@@ -93,7 +92,6 @@ public class Fl401ListOnNoticeControllerFT {
     /* commented below test case since it was failing in the master pipeline
     * will be fixed as part of FPET-959 */
     /*@Test*/
-    @Ignore
     @Test
     @Order(2)
     public void testSubmittedEvent() throws Exception {
