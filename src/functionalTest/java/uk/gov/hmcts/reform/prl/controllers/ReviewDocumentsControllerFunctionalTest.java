@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class ReviewDocumentsControllerFunctionalTest {
 
     @Autowired

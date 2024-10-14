@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutN
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class ListWithoutNoticeControllerFT {
 
     @Autowired

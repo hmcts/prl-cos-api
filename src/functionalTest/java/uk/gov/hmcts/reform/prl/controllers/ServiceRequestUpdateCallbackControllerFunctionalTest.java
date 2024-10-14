@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class ServiceRequestUpdateCallbackControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";

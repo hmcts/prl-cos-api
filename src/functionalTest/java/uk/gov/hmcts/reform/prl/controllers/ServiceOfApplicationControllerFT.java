@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";

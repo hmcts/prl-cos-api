@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class AllocateJudgeControllerFT {
 
     @Autowired

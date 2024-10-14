@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.nullValue;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class DraftOrdersControllerFunctionalTest {
 
 

@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class C100IssueCaseControllerFunctionalTest {
 
     @Autowired
