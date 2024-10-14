@@ -363,14 +363,6 @@ public class DocumentGenService {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
-            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
-                log.info(
-                    "allegation of harm 3 {}",
-                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
-                );
-
-            }
-
         }
 
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -465,7 +457,6 @@ public class DocumentGenService {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
-                log.info("generating draft document for C1A");
                 updatedCaseData.put(
                     DOCUMENT_FIELD_DRAFT_C1A,
                     getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
@@ -512,12 +503,6 @@ public class DocumentGenService {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
-            if (Objects.nonNull(caseData.getAllegationOfHarmRevised())) {
-                log.info(
-                    "allegation of harm 4 {}",
-                    caseData.getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
-                );
-            }
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);

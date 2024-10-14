@@ -40,7 +40,6 @@ public class AllegationOfHarmRevisedService {
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
-            log.info("populating data related to child abuse");
             Optional<ChildAbuse> childPhysicalAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
 
@@ -94,7 +93,6 @@ public class AllegationOfHarmRevisedService {
                     }
                 }
             }
-            log.info("allegation of harm data {}",childAbuseBehaviourList);
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 

@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
@@ -58,13 +57,6 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
-                log.info(
-                    "allegation of harm 1{}",
-                    caseDetails.getCaseData().getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
-                );
-            }
-
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names
@@ -76,7 +68,6 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        log.info("temp case details {}",tempCaseDetails);
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -116,13 +107,6 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
-            if (Objects.nonNull(caseDetails.getCaseData().getAllegationOfHarmRevised())) {
-                log.info(
-                    "allegation of harm 2{}",
-                    caseDetails.getCaseData().getAllegationOfHarmRevised().getChildAbuseBehavioursDocmosis()
-                );
-
-            }
         }
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
@@ -146,7 +130,6 @@ public class DgsService {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-        log.info("temp case details {}",tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
