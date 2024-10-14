@@ -21,10 +21,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class C100IssueCaseControllerFunctionalTest {
 
     @Autowired

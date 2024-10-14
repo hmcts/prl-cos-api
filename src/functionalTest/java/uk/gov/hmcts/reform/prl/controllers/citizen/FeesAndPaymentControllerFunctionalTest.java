@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";

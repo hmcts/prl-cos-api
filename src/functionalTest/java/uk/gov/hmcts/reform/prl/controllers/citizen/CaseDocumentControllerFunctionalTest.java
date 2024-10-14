@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -40,6 +39,7 @@ import java.nio.file.Files;
     }
 )
 @ContextConfiguration
+@Ignore
 @SuppressWarnings("PMD")
 public class CaseDocumentControllerFunctionalTest {
 

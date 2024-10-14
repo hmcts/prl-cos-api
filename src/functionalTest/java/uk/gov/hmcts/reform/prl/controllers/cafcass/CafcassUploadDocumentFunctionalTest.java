@@ -32,11 +32,11 @@ import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
  *<p></p>
  *  ignored the test case as caseId won't be available in PR & higher environment.
  */
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class CafcassUploadDocumentFunctionalTest {
 
     @Autowired
@@ -56,7 +56,6 @@ public class CafcassUploadDocumentFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Ignore
     @Test
     @Order(1)
     public void createCcdTestCase() throws Exception {
@@ -77,7 +76,6 @@ public class CafcassUploadDocumentFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
     @Order(2)
     public void givenValidDocumentData_then200Response() throws IOException {
