@@ -636,17 +636,8 @@ public class ServiceOfApplicationService {
                                                          : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
             );
         } else {
-            Document coverLetter;
-
-            if (isPartyEmailSameAsIdamEmail(caseData, selectedApplicant) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                coverLetter = generateAccessCodeLetter(authorization, caseData,
-                                                                   selectedApplicant, null, Templates.PRL_LET_ENG_AP6);
-            } else {
-                coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                            selectedApplicant, Templates.PRL_LET_ENG_AP6);
-            }
-
+            Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                        selectedApplicant, Templates.PRL_LET_ENG_AP6);
             sendPostWithAccessCodeLetterToParty(
                 caseData,
                 authorization,
@@ -1496,16 +1487,8 @@ public class ServiceOfApplicationService {
         //Send a gov notify email
         sendGovNotifyEmail(caseData, party, emailTemplate);
         //Generate cover letter without access code for applicant who has access to dashboard
-        List<Document> packsWithCoverLetter = new ArrayList<>();
-        //To address not sending access code to autolinked citizen
-        if (isPartyEmailSameAsIdamEmail(caseData, party) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            packsWithCoverLetter.addAll(List.of((generateAccessCodeLetter(authorization, caseData, party, null,
-                                                                          template))));
-        } else {
-            packsWithCoverLetter.addAll(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template))));
-
-        }
+        List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                                            party, template))));
         packsWithCoverLetter.addAll(packDocs);
 
         //Create email notification with packs
@@ -1583,14 +1566,9 @@ public class ServiceOfApplicationService {
                                             Element<PartyDetails> party,
                                             String coverLetterTemplate) {
         log.debug("Sending applicant packs via post for {}", party.getId());
-        Document coverLetter;
-        if (isPartyEmailSameAsIdamEmail(caseData, party) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            coverLetter = generateAccessCodeLetter(authorization, caseData, party, null, coverLetterTemplate);
-        } else {
-            coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, coverLetterTemplate);
-        }
-
+        Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                    party, coverLetterTemplate
+        );
         sendPostWithAccessCodeLetterToParty(
             caseData,
             authorization,
@@ -3239,14 +3217,7 @@ public class ServiceOfApplicationService {
         parties.forEach(party -> {
             if (!CaseUtils.hasLegalRepresentation(party.getValue())) {
                 List<Document> coverLetters = new ArrayList<>();
-                if (isPartyEmailSameAsIdamEmail(caseData, party) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-                    && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                    && template.equalsIgnoreCase(PRL_LET_ENG_AP8)) {
-                    coverLetters.add(generateAccessCodeLetter(authorization, caseData, party, null, template));
-                } else {
-                    coverLetters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template));
-                }
-
+                coverLetters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template));
                 packDocs.addAll(coverLetters);
                 CaseUtils.mapCoverLetterToTheParty(party.getId(), coverLetterMap, coverLetters);
             }
@@ -3262,15 +3233,8 @@ public class ServiceOfApplicationService {
         caseData.getApplicants().forEach(applicant -> {
             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                 List<Document> coverLetters = new ArrayList<>();
-                if (isPartyEmailSameAsIdamEmail(caseData, applicant) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-                    && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    coverLetters.add(generateAccessCodeLetter(authorization, caseData,
-                                                                          applicant, null, PRL_LET_ENG_AP7));
-                } else {
-                    coverLetters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                          applicant, PRL_LET_ENG_AP7));
-                }
-
+                coverLetters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                      applicant, PRL_LET_ENG_AP7));
                 packLdocs.addAll(coverLetters);
                 CaseUtils.mapCoverLetterToTheParty(applicant.getId(), coverLetterMap, coverLetters);
             }
