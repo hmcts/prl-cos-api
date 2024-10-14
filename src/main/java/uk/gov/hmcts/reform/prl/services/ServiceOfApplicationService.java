@@ -1268,8 +1268,12 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
             List<Document> respondentCoverLetters = new ArrayList<>();
+            List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                respondentCoverLetters.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+                Document coverLetter = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5);
+                coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
+                    .coverLetters(wrapElements(List.of(coverLetter))).build()));
+                respondentCoverLetters.add(coverLetter);
             }
             List<Document> packLdocs = new ArrayList<>(respondentCoverLetters);
             packLdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs));
@@ -1289,6 +1293,7 @@ public class ServiceOfApplicationService {
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(CaseUtils.getCurrentDate())
+                    .coverLettersMap(coverLetterMap)
                 .build());
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         } else {
