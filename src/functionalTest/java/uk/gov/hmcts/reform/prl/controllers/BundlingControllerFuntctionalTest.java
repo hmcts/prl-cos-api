@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class BundlingControllerFuntctionalTest {
     private final String userToken = "Bearer testToken";
 

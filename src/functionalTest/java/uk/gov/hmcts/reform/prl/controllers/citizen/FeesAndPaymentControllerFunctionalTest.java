@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +17,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
-@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";

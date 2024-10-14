@@ -5,7 +5,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +22,6 @@ import static org.hamcrest.Matchers.notNullValue;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
-@Ignore
 public class AddCafcassOfficerControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
