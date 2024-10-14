@@ -168,7 +168,8 @@ public class SendAndReplyServiceTest {
     private DocumentLanguageService documentLanguageService;
 
     private static final String RANDOM_ALPHA_NUMERIC = "Abc123EFGH";
-  
+
+    @Mock
     LaunchDarklyClient launchDarklyClient;
 
     @Mock
@@ -264,6 +265,8 @@ public class SendAndReplyServiceTest {
                 "caseworker-privatelaw-la "
             ))
             .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
             .senderEmail("sender@email.com")
@@ -401,6 +404,7 @@ public class SendAndReplyServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = getRoleAssignmentServiceResponse();
         when(roleAssignmentApi.getRoleAssignments(auth, serviceAuthToken, null, null)).thenReturn(roleAssignmentServiceResponse);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
     }
 
