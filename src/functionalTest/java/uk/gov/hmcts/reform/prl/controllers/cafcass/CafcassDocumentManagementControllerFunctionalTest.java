@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.equalTo;
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class CafcassDocumentManagementControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";

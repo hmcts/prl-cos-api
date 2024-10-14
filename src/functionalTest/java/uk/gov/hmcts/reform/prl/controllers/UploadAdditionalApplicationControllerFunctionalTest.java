@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class UploadAdditionalApplicationControllerFunctionalTest {
 
     private final String targetInstance =

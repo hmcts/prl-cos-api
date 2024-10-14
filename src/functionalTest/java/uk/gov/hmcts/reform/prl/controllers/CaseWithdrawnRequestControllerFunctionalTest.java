@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.notNullValue;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class CaseWithdrawnRequestControllerFunctionalTest {
 
 

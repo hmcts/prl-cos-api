@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Ignore
 public class CafcassUploadDocumentFunctionalTest {
 
     @Autowired

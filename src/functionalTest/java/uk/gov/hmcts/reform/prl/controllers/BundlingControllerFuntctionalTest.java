@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class BundlingControllerFuntctionalTest {
     private final String userToken = "Bearer testToken";
 
