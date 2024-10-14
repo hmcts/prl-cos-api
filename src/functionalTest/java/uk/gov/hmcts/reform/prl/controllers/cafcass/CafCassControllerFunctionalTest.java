@@ -59,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKE
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class CafCassControllerFunctionalTest {
 
     private static final String USER_TOKEN = "Bearer testToken";

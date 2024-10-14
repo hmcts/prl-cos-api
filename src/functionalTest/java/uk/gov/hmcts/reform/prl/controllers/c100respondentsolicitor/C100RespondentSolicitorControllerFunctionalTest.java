@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
 public class C100RespondentSolicitorControllerFunctionalTest {
 
     private final String targetInstance =

@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoti
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
 public class Fl401ListOnNoticeControllerFT {
 
     @Autowired

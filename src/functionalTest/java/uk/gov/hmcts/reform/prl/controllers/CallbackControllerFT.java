@@ -20,7 +20,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
-@Ignore
 public class CallbackControllerFT {
 
     @Autowired
