@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -309,6 +310,61 @@ public class ConfidentialityTabService {
         }
 
         return childrenConfidentialDetails;
+    }
+
+    public void processForcePartiesConfidentialityIfLivesInRefuge(
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        Map<String, Object> updatedCaseData,
+        String party,
+        boolean cleanUpNeeded) {
+        log.info("start processForcePartiesConfidentialityIfLivesInRefuge");
+        log.info("party we got now: " + party);
+        log.info("cleanUpNeeded we got now: " + cleanUpNeeded);
+        if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
+            log.info("inside party details list");
+            for (PartyDetails partyDetails : partyDetailsList) {
+                log.info("inside party details for loop");
+                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                    log.info("says yes to refuge for the party::" + party);
+                    forceConfidentialityChangeForRefuge(party, partyDetails);
+                } else if (cleanUpNeeded) {
+                    log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                    partyDetails.setRefugeConfidentialityC8Form(null);
+                }
+            }
+            updatedCaseData.put(party, partyDetailsWrappedList);
+        }
+        log.info("end processForcePartiesConfidentialityIfLivesInRefuge");
+    }
+
+    private void forceConfidentialityChangeForRefuge(String party, PartyDetails partyDetails) {
+        log.info("start forceConfidentialityChangeForRefuge");
+        log.info("start forceConfidentialityChangeForRefuge for the party:" + party);
+        if (APPLICANTS.equals(party)) {
+            log.info("setting for applicants");
+            partyDetails.setIsAddressConfidential(YesOrNo.Yes);
+            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                log.info("current address is known");
+                partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
+            }
+            partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+        } else {
+            log.info("setting for others");
+            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                log.info("current address is known");
+                partyDetails.setIsAddressConfidential(YesOrNo.Yes);
+            }
+            if (YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
+                log.info("email address is known");
+                partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
+            }
+            if (YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())) {
+                log.info("phone number is known");
+                partyDetails.setIsPhoneNumberConfidential(YesOrNo.Yes);
+            }
+        }
+        log.info("end forceConfidentialityChangeForRefuge");
     }
 
 }
