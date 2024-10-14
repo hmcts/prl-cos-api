@@ -150,7 +150,8 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                AllegationOfHarmRevised allegationOfHarmRevised) {
 
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())
-            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild()) {
             return allegationOfHarmRevised;
         }
 
