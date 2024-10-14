@@ -3579,24 +3579,12 @@ public class ServiceOfApplicationService {
             if (party.isPresent()) {
                 if (!CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                     List<Document> coverLetters = new ArrayList<>();
-                    if (isPartyEmailSameAsIdamEmail(caseData, party.get()) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-                        && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        coverLetters.add(generateAccessCodeLetter(
-                            authorization,
-                            caseData,
-                            party.get(),
-                            null,
-                            Templates.PRL_LET_ENG_AP6
-                        ));
-                    } else {
-                        coverLetters.add(generateCoverLetterBasedOnCaseAccess(
-                            authorization,
-                            caseData,
-                            party.get(),
-                            Templates.PRL_LET_ENG_AP6
-                        ));
-                    }
-
+                    coverLetters.add(generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData,
+                        party.get(),
+                        Templates.PRL_LET_ENG_AP6
+                    ));
                     packDocs.add(element(coverLetters.get(0)));
                     CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
                 }
