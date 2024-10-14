@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
