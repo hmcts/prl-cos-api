@@ -317,6 +317,7 @@ public class ServiceOfApplicationService {
     private final CaseInviteManager caseInviteManager;
     private final DgsService dgsService;
     private final LaunchDarklyClient launchDarklyClient;
+    private final ConfidentialityCheckService confidentialityCheckService;
 
     private final HearingService hearingService;
 
@@ -536,7 +537,7 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails.add(element(emailNotification));
                     }
                 } catch (IOException e) {
-                    log.error("Failed to serve email to Local Authority", e);
+                    log.error("Failed to serve email to Local Authority {}", e.getMessage());
                 }
             }
         }
@@ -2019,7 +2020,7 @@ public class ServiceOfApplicationService {
             }
             return selectedDoc;
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return null;
     }
@@ -4016,7 +4017,7 @@ public class ServiceOfApplicationService {
         }
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
-
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),

@@ -117,7 +117,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}", e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -137,7 +137,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e);
+                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);

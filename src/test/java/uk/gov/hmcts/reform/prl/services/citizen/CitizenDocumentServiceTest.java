@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenDocumentServiceTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @InjectMocks
     private CitizenDocumentService citizenDocumentService;
@@ -136,17 +136,17 @@ public class CitizenDocumentServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                         EventRequestData.builder().build(),
-                                                                                                         StartEventResponse.builder().build(),
-                                                                                                         stringObjectMap,
-                                                                                                         caseData,
-                                                                                                         null
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(
+            AUTH_TOKEN,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
         );
 
         when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
             startAllTabsUpdateDataContents);
-        //when(caseService.getCase(any(), any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
             quarantineCaseDoc);
@@ -156,7 +156,7 @@ public class CitizenDocumentServiceTest {
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = citizenDocumentService.citizenSubmitDocuments(
-            authToken,
+            AUTH_TOKEN,
             documentRequest
         );
 
@@ -183,9 +183,6 @@ public class CitizenDocumentServiceTest {
             .id(123L)
             .data(caseData.toMap(new ObjectMapper()))
             .build();
-
-        //When
-        //when(caseService.getCase(any(), any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("fm5StatementsDocument", caseDoc);
@@ -207,11 +204,11 @@ public class CitizenDocumentServiceTest {
             quarantineLegalDoc);
         when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
                                                                  .roles(List.of(Roles.CITIZEN.getValue())).build());
-        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString(),
-                                                                any());
+        doNothing().when(notificationService).sendNotifications(any(CaseData.class), any(QuarantineLegalDoc.class), anyString());
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(
-            authToken,
+            AUTH_TOKEN,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMap,
@@ -225,7 +222,7 @@ public class CitizenDocumentServiceTest {
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = citizenDocumentService.citizenSubmitDocuments(
-            authToken,
+            AUTH_TOKEN,
             documentRequest
         );
 

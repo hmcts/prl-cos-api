@@ -322,7 +322,6 @@ public class ManageOrderEmailService {
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
-                log.info("*** CA Personal service option selected {}",manageOrders.getPersonallyServeRespondentsOptions());
                 String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                     ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions().getId();
                 handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
@@ -390,12 +389,8 @@ public class ManageOrderEmailService {
 
 
         } else {
-            log.info("*** DA Personal service represented serving option selected {}",
-                     manageOrders.getPersonallyServeRespondentsOptions());
-            log.info(
-                "*** DA Personal service unrepresented serving option selected {}",
-                manageOrders.getServingOptionsForNonLegalRep()
-            );
+            log.info("*** DA Personal service ");
+            log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                 ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions()
                 .getId();
@@ -433,7 +428,6 @@ public class ManageOrderEmailService {
                                                               element(caseData.getRespondentsFL401().getPartyId(),
                                                                       caseData.getRespondentsFL401()));
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
-        log.info("Parties in the case {}, parties selected {}", partyList, recipientsOptions);
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
                                              partyList,
                                              caseData,
@@ -645,7 +639,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("There is a failure in sending send grid email with exception {}",
-                      e.getMessage(), e);
+                      e.getMessage());
         }
     }
 
@@ -665,7 +659,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      cafcassCymruEmailId, e.getMessage(), e);
+                      cafcassCymruEmailId, e.getMessage());
         }
 
     }
@@ -800,7 +794,7 @@ public class ManageOrderEmailService {
                                                   organisationPostalInfo.getPostalName())));
                 } catch (Exception e) {
                     log.error("Error in sending order docs to other person {}", organisationPostalInfo.hashCode());
-                    log.error("Exception occurred in sending order docs to other person", e);
+                    log.error("Exception occurred in sending order docs to other person {}", e.getMessage());
                 }
             } else {
                 log.info("Couldn't send serve order details to other person, address is null/empty for {}",
@@ -831,7 +825,7 @@ public class ManageOrderEmailService {
                     )));
             } catch (Exception e) {
                 log.error("Error in sending orders to party address {}", partyElement.getId());
-                log.error("Exception occurred in sending orders to party address", e);
+                log.error("Exception occurred in sending orders to party address {}", e.getMessage());
             }
         } else {
             log.info(

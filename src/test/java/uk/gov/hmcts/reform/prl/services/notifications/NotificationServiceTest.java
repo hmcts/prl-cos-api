@@ -174,7 +174,7 @@ public class NotificationServiceTest {
 
 
     @Test
-    public void testCafcassCymruNotifications_C7Application() throws IOException {
+    public void testCafcassCymruNotifications_C7Application() {
         testCafcassCymruNotifications(
             "respondentApplication",
             EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS
@@ -182,7 +182,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testCafcassCymruNotifications_C1AApplication() throws IOException {
+    public void testCafcassCymruNotifications_C1AApplication() {
         testCafcassCymruNotifications(
             "respondentC1AApplication",
             EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS
@@ -190,7 +190,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testCafcassCymruNotifications_C1AResponse() throws IOException {
+    public void testCafcassCymruNotifications_C1AResponse() {
         testCafcassCymruNotifications(
             "respondentC1AResponse",
             EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS

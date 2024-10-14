@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -325,11 +326,11 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        UserInfo userInfo = idamClient.getUserInfo(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
             caseEvent,
-            userDetails.getId()
+            userInfo.getUid()
         );
 
         StartEventResponse startEventResponse =

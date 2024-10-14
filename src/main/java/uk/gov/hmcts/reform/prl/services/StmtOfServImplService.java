@@ -321,6 +321,8 @@ public class StmtOfServImplService {
                                        : null)
             .uploadedBy(getSosUploadedBy(authorisation))
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+            //PRL-6478 - Reset to null as not to show duplicate date field in XUI
+            .servedDateTimeOption(null)
             .build();
     }
 
@@ -703,7 +705,6 @@ public class StmtOfServImplService {
         return documentsNotifications.stream().filter(Objects::nonNull).toList();
     }
 
-
     private Element<DocumentsNotification> sendAccessCodeCoverLetter(String authorization,
                                                                      CaseData caseData,
                                                                      Element<PartyDetails> respondent,
@@ -755,9 +756,9 @@ public class StmtOfServImplService {
                                    .build());
             } catch (Exception e) {
                 log.error(
-                    "SOS: Exception occurred in sending access code cover letter to respondent {} ",
+                    "SOS: Exception occurred in sending access code cover letter to respondent {} {}",
                     respondent.getId(),
-                    e
+                    e.getMessage()
                 );
                 return null;
             }

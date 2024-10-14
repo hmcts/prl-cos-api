@@ -65,7 +65,7 @@ public class CitizenDocumentService {
                 ))
                 .toList();
 
-            if (category.equals(DocumentCategory.FM5_STATEMENTS)) {
+            if (DocumentCategory.FM5_STATEMENTS.equals(category)) {
                 for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
                     String userRole = CaseUtils.getUserRole(userDetails);
                     manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(

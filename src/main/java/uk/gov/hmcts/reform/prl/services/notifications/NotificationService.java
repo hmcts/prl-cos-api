@@ -51,12 +51,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.*;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C7_NOTIFICATION_APPLICANT;
@@ -375,19 +384,7 @@ public class NotificationService {
                     responseDocuments,
                     applicant.getValue().getLabelForDynamicList()
                 );
-                List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
-                documentsNotifications.add(element(DocumentsNotification.builder()
-                                                       .notification(NotificationDetails.builder()
-                                                                         .bulkPrintId(String.valueOf(bulkPrintId))
-                                                                         .notificationType(NotificationType.BULK_PRINT)
-                                                                         .partyId(String.valueOf(applicant.getId()))
-                                                                         .partyType(PartyType.APPLICANT)
-                                                                         .sentDateTime(LocalDateTime.now(ZoneId.of(
-                                                                             PrlAppsConstants.LONDON_TIME_ZONE)))
-                                                                         .build())
-                                                       .documents(ElementUtils.wrapElements(coverLetters))
-                                                       .build()));
-                caseDataMap.put("accessCodeNotifications", documentsNotifications);
+                CaseUtils.updateAccessCodeNotifications(caseData, applicant, caseDataMap, coverLetters, bulkPrintId);
                 log.info(
                     "Response documents are sent to applicant {} in the case {} - via post {}",
                     applicant.getId(),
@@ -401,6 +398,24 @@ public class NotificationService {
         } else {
             log.warn("Couldn't post response documents - address is null/empty for applicant {} in the case {}", applicant.getId(), caseData.getId());
         }
+    }
+
+    private void UpdateAccessCodeNotifications(CaseData caseData, Element<PartyDetails> party, Map<String, Object> caseDataMap,
+                                               List<Document> coverLetters, UUID bulkPrintId) {
+        List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(
+            caseData);
+        documentsNotifications.add(element(DocumentsNotification.builder()
+                                               .notification(NotificationDetails.builder()
+                                                                 .bulkPrintId(String.valueOf(bulkPrintId))
+                                                                 .notificationType(NotificationType.BULK_PRINT)
+                                                                 .partyId(String.valueOf(party.getId()))
+                                                                 .partyType(PartyType.APPLICANT)
+                                                                 .sentDateTime(LocalDateTime.now(ZoneId.of(
+                                                                     PrlAppsConstants.LONDON_TIME_ZONE)))
+                                                                 .build())
+                                               .documents(ElementUtils.wrapElements(coverLetters))
+                                               .build()));
+        caseDataMap.put("accessCodeNotifications", documentsNotifications);
     }
 
     private Map<String, Object> fetchApplicantResponseDataMap(CaseData caseData,
@@ -433,16 +448,21 @@ public class NotificationService {
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             for (Element<ServedApplicationDetails> soaPack : caseData.getFinalServedApplicationDetailsList()) {
                 if (CollectionUtils.isNotEmpty(soaPack.getValue().getEmailNotificationDetails())) {
-                    for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
-                        if (PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
-                            cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
-                            break;
-                        }
-                    }
+                    cafcassCymruEmail = checkAndFetchCafcassCymruEmail(cafcassCymruEmail, soaPack);
                 }
                 if (null != cafcassCymruEmail) {
                     break;
                 }
+            }
+        }
+        return cafcassCymruEmail;
+    }
+
+    private String checkAndFetchCafcassCymruEmail(String cafcassCymruEmail, Element<ServedApplicationDetails> soaPack) {
+        for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
+            if (SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
+                cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
+                break;
             }
         }
         return cafcassCymruEmail;

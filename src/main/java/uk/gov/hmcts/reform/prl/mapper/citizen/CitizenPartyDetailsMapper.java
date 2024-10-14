@@ -587,11 +587,15 @@ public class CitizenPartyDetailsMapper {
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(existingPartyDetails.getResponse().toBuilder()
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
-                          .safeToCallOption(null != citizenProvidedPartyDetails.getResponse()
-                                                ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
-                                                : null)
+                          .safeToCallOption(fetchSafeToCallOption(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
+        return null != citizenProvidedPartyDetails.getResponse()
+            ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
+            : null;
     }
 
     private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {

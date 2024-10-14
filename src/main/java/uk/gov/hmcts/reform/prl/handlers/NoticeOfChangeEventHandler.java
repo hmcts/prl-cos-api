@@ -254,7 +254,6 @@ public class NoticeOfChangeEventHandler {
                                             Element<PartyDetails> party, String accessCode) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
-            log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
             if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
@@ -285,8 +284,10 @@ public class NoticeOfChangeEventHandler {
             //generate cover sheets & add to documents
             generateCoverSheets(caseData, party.getValue(), documents);
             //generate cover letter with access code & add to documents
-            generateCoverLetter(caseData, party, documents, accessCode);
-
+            Document coverLetter = generateCoverLetter(caseData, party, documents, accessCode);
+            if (isNotEmpty(coverLetter)) {
+                documents.add(coverLetter);
+            }
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 systemUserService.getSysUserToken(),
@@ -294,6 +295,9 @@ public class NoticeOfChangeEventHandler {
                 documents,
                 party.getValue().getLabelForDynamicList()
             );
+            Map<String, Object> caseDataMap = new HashMap<>();
+            CaseUtils.updateAccessCodeNotifications(caseData, party, caseDataMap, List.of(coverLetter), bulkPrintId);
+
             log.info("Remove legal rep -> Sent cover letter with access code to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
         } else {
             log.info(
@@ -314,25 +318,22 @@ public class NoticeOfChangeEventHandler {
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
-            log.error("Error occurred in generating cover sheets", e);
+            log.error("Error occurred in generating cover sheets {}", e.getMessage());
         }
         if (CollectionUtils.isNotEmpty(coverSheets)) {
             documents.addAll(coverSheets);
         }
     }
 
-    private void generateCoverLetter(CaseData caseData,
+    private Document generateCoverLetter(CaseData caseData,
                                      Element<PartyDetails> party,
                                      List<Document> documents, String accessCode) {
-        Document coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
+        return serviceOfApplicationService.generateAccessCodeLetter(
             systemUserService.getSysUserToken(),
             caseData,
             party,
             CaseInvite.builder().accessCode(accessCode).build(),
             PRL_LEGAL_REP_COVER_LETTER_TEMPLATE
             );
-        if (isNotEmpty(coverLetterWithAccessCode)) {
-            documents.add(coverLetterWithAccessCode);
-        }
     }
 }
