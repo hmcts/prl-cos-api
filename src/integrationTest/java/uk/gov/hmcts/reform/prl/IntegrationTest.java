@@ -214,7 +214,7 @@ public abstract class IntegrationTest {
                 throw new IOException();
             }
         } catch (IOException e) {
-            log.error("Error setting up proxy - are you connected to the VPN?", e);
+            log.error("Error setting up proxy - are you connected to the VPN? {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
