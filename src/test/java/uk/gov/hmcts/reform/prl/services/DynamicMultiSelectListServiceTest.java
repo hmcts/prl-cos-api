@@ -55,6 +55,7 @@ public class DynamicMultiSelectListServiceTest {
                                                     .value(Child.builder().build()).build());
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
                                                              .value(PartyDetails.builder()
+                                                                        .partyId(UUID.fromString(TEST_UUID))
                                                                         .doTheyHaveLegalRepresentation(
                                                                  YesNoDontKnow.yes)
                                                                         .representativeFirstName("test")
