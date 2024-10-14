@@ -52,6 +52,12 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
 
+    public static final List<String> VALID_CHILD_ABUSES = List.of(ChildAbuseEnum.physicalAbuse.getId(),
+                                                            ChildAbuseEnum.psychologicalAbuse.getId(),
+                                                            ChildAbuseEnum.sexualAbuse.getId(),
+                                                            ChildAbuseEnum.emotionalAbuse.getId(),
+                                                            ChildAbuseEnum.financialAbuse.getId());
+
     private CaseDataSafetyConcernsElementsMapper() {
     }
 
@@ -148,7 +154,8 @@ public class CaseDataSafetyConcernsElementsMapper {
             return allegationOfHarmRevised;
         }
 
-        if (null != c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()) {
+        if (null != c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()
+            && isValidChildAbuseOptions(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())) {
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
                 .childAbuses(getChildAbuses(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()))
                 .build();
@@ -187,6 +194,10 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
 
         return allegationOfHarmRevised;
+    }
+
+    private static boolean isValidChildAbuseOptions(String[] childAbuses) {
+        return Arrays.stream(childAbuses).anyMatch(VALID_CHILD_ABUSES::contains);
     }
 
     private static List<ChildAbuseEnum> getChildAbuses(String[] citizenChildAbuses) {
