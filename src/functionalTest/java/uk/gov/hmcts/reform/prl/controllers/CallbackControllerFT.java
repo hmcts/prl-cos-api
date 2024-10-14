@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +20,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
-@Ignore
 public class CallbackControllerFT {
 
     @Autowired
