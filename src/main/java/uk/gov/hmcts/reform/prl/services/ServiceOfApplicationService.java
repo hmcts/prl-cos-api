@@ -3161,8 +3161,12 @@ public class ServiceOfApplicationService {
                                                                                                   c100StaticDocs));
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
             List<Document> respondentPackDocs = new ArrayList<>();
+            List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                respondentPackDocs.add(generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5));
+                Document coverLetter = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5);
+                respondentPackDocs.add(coverLetter);
+                coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
+                    .coverLetters(wrapElements(List.of(coverLetter))).build()));
             }
             respondentPackDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs));
             log.info("Respondent pack for applicant Lip {}", respondentPackDocs);
@@ -3172,6 +3176,7 @@ public class ServiceOfApplicationService {
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(CaseUtils.getCurrentDate())
+                    .coverLettersMap(coverLetterMap)
                 .build());
         } else if (SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
