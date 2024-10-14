@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -56,6 +58,7 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
@@ -124,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -194,6 +198,9 @@ public class SendAndReplyService {
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private final SendgridService sendgridService;
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -599,7 +606,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
         } catch (Exception e) {
-            log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
+            log.error("Error while calling Ref data api in getRefDataMap method --->  {}", e.getMessage());
         }
         return emptyMap();
     }
@@ -719,7 +726,7 @@ public class SendAndReplyService {
                 return getDynamicList(judiciaryTierDynamicElementList);
             }
         } catch (Exception e) {
-            log.error("Error in getJudiciaryTierDynamicList method", e);
+            log.error("Error in getJudiciaryTierDynamicList method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -735,7 +742,7 @@ public class SendAndReplyService {
             );
             return createDynamicList(categoriesAndDocuments);
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -856,7 +863,7 @@ public class SendAndReplyService {
                                            ? getSendAttachedDocs(caseData, message, authorization) : emptyList())
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
-            .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
+            .senderRole(null != userDetails ? getUserRole(authorization, userDetails) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
@@ -924,7 +931,20 @@ public class SendAndReplyService {
         return null;
     }
 
-    private String getUserRole(List<String> roles) {
+    private String getUserRole(String authorization,
+                               UserDetails userDetails) {
+        List<String> roles = userDetails.getRoles();
+        //PRL-6477 - fetch & map AM roles
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorization,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorization, userDetails);
+        }
+
         if (isNotEmpty(roles)) {
             if (roles.contains(COURT_ADMIN_ROLE)) {
                 return COURT_ADMIN;
@@ -932,11 +952,9 @@ public class SendAndReplyService {
                 return JUDICIARY;
             } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
                 return LEGAL_ADVISER;
-            } else {
-                return "";
             }
         }
-        return "";
+        return null;
     }
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,

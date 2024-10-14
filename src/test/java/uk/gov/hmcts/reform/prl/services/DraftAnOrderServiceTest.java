@@ -4731,6 +4731,7 @@ public class DraftAnOrderServiceTest {
         CaseData updatedCaseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
+            .isCafcass(Yes)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
         when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());

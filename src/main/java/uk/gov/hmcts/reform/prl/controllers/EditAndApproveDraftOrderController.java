@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -99,6 +101,10 @@ public class EditAndApproveDraftOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
+                caseData = caseData.toBuilder()
+                    .state(ObjectUtils.isEmpty(caseData.getState()) && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetails())
+                               ? State.fromValue(callbackRequest.getCaseDetails().getState()) : caseData.getState())
+                    .build();
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.getDraftOrderDynamicList(
                         caseData,
@@ -520,7 +526,7 @@ public class EditAndApproveDraftOrderController {
                         draftOrder
                     );
                 } catch (Exception e) {
-                    log.error("Failed to send email to solicitor :", e);
+                    log.error("Failed to send email to solicitor : {}", e.getMessage());
                 }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
