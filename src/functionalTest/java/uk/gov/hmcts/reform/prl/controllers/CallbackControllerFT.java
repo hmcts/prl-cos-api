@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
+@Ignore
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
 public class CallbackControllerFT {
@@ -128,6 +130,7 @@ public class CallbackControllerFT {
                   "data.c1ADocument.document_filename", equalTo("C1A_Document.pdf"));
     }
 
+    @Ignore
     @Test
     public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);

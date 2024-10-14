@@ -217,12 +217,14 @@ public class UploadAdditionalApplicationService {
                 c2DocumentBundle,
                 otherApplicationsBundle
             );
-            paymentServiceResponse = Optional.of(paymentRequestService.createServiceRequestForAdditionalApplications(
-                caseData,
-                authorisation,
-                feeResponse,
-                serviceReferenceResponsibleParty
-            ));
+            //create dummy caseData for payment fields
+            CaseData paymentCaseData = CaseData.builder()
+                .id(caseData.getId())
+                .applicantCaseName(serviceReferenceResponsibleParty)
+                .build();
+            paymentServiceResponse = Optional.of(paymentRequestService.getPaymentServiceResponse(authorisation,
+                                                                                                 paymentCaseData,
+                                                                                                 feeResponse));
         }
         return paymentServiceResponse;
     }

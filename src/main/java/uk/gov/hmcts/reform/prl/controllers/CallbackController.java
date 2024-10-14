@@ -873,7 +873,7 @@ public class CallbackController {
                 }
             }
         } catch (Exception e) {
-            log.error("Error while fetching User or Org details for the logged in user ", e);
+            log.error("Error while fetching User or Org details for the logged in user {}", e.getMessage());
         }
 
         return caseDataUpdated;
