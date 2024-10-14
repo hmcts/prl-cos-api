@@ -266,7 +266,6 @@ public class SendAndReplyServiceTest {
             ))
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
             .senderEmail("sender@email.com")
@@ -404,6 +403,7 @@ public class SendAndReplyServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = getRoleAssignmentServiceResponse();
         when(roleAssignmentApi.getRoleAssignments(auth, serviceAuthToken, null, null)).thenReturn(roleAssignmentServiceResponse);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
     }
