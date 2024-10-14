@@ -40,10 +40,14 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCEL_HEARING_DATE;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORCDER;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum.FL403;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
+import static uk.gov.hmcts.reform.prl.models.FeeType.CHILD_ARRANGEMENTS_ORDER;
 import static uk.gov.hmcts.reform.prl.models.FeeType.FL403_EXTEND_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.models.FeeType.NO_FEE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMapForCitizen;
@@ -139,7 +143,7 @@ public class FeeService {
                 if (isBlank(feeRequest.getHearingDate())
                     && isBlank(feeRequest.getOtherPartyConsent())
                     && isBlank(feeRequest.getNotice())) {
-                    return C2_WITH_NOTICE;
+                    return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
                 }
 
                 // For C2 - Adjourn Hearing
@@ -155,7 +159,11 @@ public class FeeService {
                 }
 
                 // For C2 - All other requests
-                return getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(), feeRequest.getNotice());
+                return getFeeTypeByPartyConsentAndNotice(
+                    feeRequest.getOtherPartyConsent(),
+                    feeRequest.getNotice(),
+                    isc2WithOrder(feeRequest.getApplicationReason())
+                );
 
             } else {
 
@@ -174,13 +182,19 @@ public class FeeService {
         return feeType;
     }
 
+    public boolean isc2WithOrder(String applicationReason) {
+        return applicationReason.equals(CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId())
+            || applicationReason.equals(PROHIBITED_STEPS_ORDER.getId())
+            || applicationReason.equals(SPECIFIC_ISSUE_ORCDER.getId());
+    }
+
     public static boolean isFl403ApplicationAlreadyPresent(CaseData caseData) {
         boolean fl403ApplicationAlreadyPresent = false;
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
                 if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
                     && OtherApplicationType.FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER.equals(
-                        additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())
+                    additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())
                     && PartyEnum.respondent.equals(additionalApplicationsBundle.getValue().getPartyType())) {
                     fl403ApplicationAlreadyPresent = true;
                     break;
@@ -196,8 +210,8 @@ public class FeeService {
         return feeType.orElse(null);
     }
 
-    private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
-        return fromOtherPartyConsentAndNotice(partyConsent, notice);
+    private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice, boolean isOrder) {
+        return fromOtherPartyConsentAndNotice(partyConsent, notice, isOrder);
     }
 
     private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
@@ -210,7 +224,7 @@ public class FeeService {
         }
     }
 
-    private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
+    private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice, boolean isOrder) {
 
         if (YES.equals(otherPartyConsent)) {
             return C2_WITHOUT_NOTICE;
@@ -218,7 +232,7 @@ public class FeeService {
             if (NO.equals(notice)) {
                 return C2_WITHOUT_NOTICE;
             } else if (YES.equals(notice)) {
-                return C2_WITH_NOTICE;
+                return isOrder ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
             } else {
                 return null;
             }
