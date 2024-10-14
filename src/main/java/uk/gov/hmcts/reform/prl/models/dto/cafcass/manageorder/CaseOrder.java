@@ -56,6 +56,7 @@ public class CaseOrder {
 
     public void setManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
         this.manageOrderHearingDetails = manageOrderHearingDetails;
+        setHearingIdFromManageOrderHearingDetails(manageOrderHearingDetails);
         CaseHearing caseHearing = null;
         if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
             caseHearing = CaseHearing.caseHearingWith()
@@ -71,14 +72,33 @@ public class CaseOrder {
 
     }
 
+    private void setHearingIdFromManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
+        final String[] hearingId = {""};
+        manageOrderHearingDetails.stream().forEach(
+            manageOrderHearingDetailElement -> {
+                if (null != manageOrderHearingDetailElement.getValue().getConfirmedHearingDates()) {
+                    if (hearingId[0].equals("")) {
+                        hearingId[0] = manageOrderHearingDetailElement.getValue()
+                            .getConfirmedHearingDates().getValue().getCode();
+                    } else {
+                        hearingId[0] = hearingId[0].concat(", ").concat(manageOrderHearingDetailElement.getValue()
+                                                                            .getConfirmedHearingDates().getValue().getCode());
+                    }
+                }
+            }
+        );
+        setHearingId(hearingId[0]);
+
+    }
+
     public void setHearingDetails(CaseHearing caseHearing) {
         this.hearingDetails = caseHearing;
     }
 
-    private  ServeOrderDetails serveOrderDetails;
+    private ServeOrderDetails serveOrderDetails;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private  String selectedHearingType;
+    private String selectedHearingType;
 
     private String hearingId;
 

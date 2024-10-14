@@ -61,7 +61,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final AllTabServiceImpl allTabService;
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
-    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
+    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
     public static final String MESSAGES = "messages";
 
     @Autowired
@@ -318,6 +318,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
+
+        sendAndReplyService.closeAwPTask(caseData);
 
         return ok(SubmittedCallbackResponse.builder().build());
     }

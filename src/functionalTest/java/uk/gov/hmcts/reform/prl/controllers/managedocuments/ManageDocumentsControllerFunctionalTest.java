@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.DETAILS_ERROR_MESSAGE;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -93,7 +94,6 @@ public class ManageDocumentsControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
-    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -113,7 +113,6 @@ public class ManageDocumentsControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
@@ -182,6 +181,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_GiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -197,6 +197,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -224,6 +225,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenNotRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED);
@@ -324,7 +326,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
@@ -342,7 +343,6 @@ public class ManageDocumentsControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);

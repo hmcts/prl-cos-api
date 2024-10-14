@@ -26,7 +26,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -48,7 +48,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {

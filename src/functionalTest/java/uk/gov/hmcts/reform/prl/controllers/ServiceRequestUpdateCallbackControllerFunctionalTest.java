@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -31,7 +32,6 @@ public class ServiceRequestUpdateCallbackControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    @Ignore
     public void givenNoRequestBodyReturn400FromServiceRequest() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request

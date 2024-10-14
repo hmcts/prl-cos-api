@@ -14,6 +14,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -36,13 +40,16 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -71,12 +78,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -102,6 +111,7 @@ public class SendAndReplyService {
     private final ElementUtils elementUtils;
 
     private final Time dateTime;
+    private final AllTabServiceImpl allTabService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -128,6 +138,10 @@ public class SendAndReplyService {
     private final HearingService hearingService;
 
     private final CaseDocumentClient caseDocumentClient;
+
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -454,7 +468,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
         } catch (Exception e) {
-            log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
+            log.error("Error while calling Ref data api in getRefDataMap method --->  {}", e.getMessage());
         }
         return Collections.emptyMap();
     }
@@ -537,6 +551,8 @@ public class SendAndReplyService {
                                                       .concat(UNDERSCORE)
                                                       .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .label(otherApplicationLabel
+                                                       .concat(otherApplicationsBundle.getApplicationType().getDisplayedValue())
+                                                       .concat(HYPHEN_SEPARATOR)
                                                        .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .build());
             }
@@ -572,7 +588,7 @@ public class SendAndReplyService {
                 return getDynamicList(judiciaryTierDynamicElementList);
             }
         } catch (Exception e) {
-            log.error("Error in getJudiciaryTierDynamicList method", e);
+            log.error("Error in getJudiciaryTierDynamicList method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -588,7 +604,7 @@ public class SendAndReplyService {
             );
             return createDynamicList(categoriesAndDocuments);
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -704,7 +720,7 @@ public class SendAndReplyService {
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
-            .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
+            .senderRole(null != userDetails ? getUserRole(authorization, userDetails) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
@@ -727,7 +743,20 @@ public class SendAndReplyService {
         return null;
     }
 
-    private String getUserRole(List<String> roles) {
+    private String getUserRole(String authorization,
+                               UserDetails userDetails) {
+        List<String> roles = userDetails.getRoles();
+        //PRL-6477 - fetch & map AM roles
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorization,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorization, userDetails);
+        }
+
         if (isNotEmpty(roles)) {
             if (roles.contains(COURT_ADMIN_ROLE)) {
                 return COURT_ADMIN;
@@ -735,11 +764,9 @@ public class SendAndReplyService {
                 return JUDICIARY;
             } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
                 return LEGAL_ADVISER;
-            } else {
-                return "";
             }
         }
-        return "";
+        return null;
     }
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
@@ -1174,5 +1201,32 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    public void closeAwPTask(CaseData caseData) {
+        if (SEND.equals(caseData.getChooseSendOrReply())
+            && caseData.getSendOrReplyMessage() != null
+            && doesThisMessageCloseAwpTasks(caseData)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(caseData.getId()),
+                CaseEvent.ALL_AWP_IN_REVIEW.getValue()
+            );
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+            log.info("close AWP task event triggered");
+        }
+    }
+
+    private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
+        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
+        return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
+            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 }

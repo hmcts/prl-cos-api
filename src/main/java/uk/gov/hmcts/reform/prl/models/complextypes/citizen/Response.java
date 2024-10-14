@@ -39,7 +39,7 @@ public class Response {
 
     // TODO: Add safety Concerns here
     private final CitizenInternationalElements citizenInternationalElements;
-    private final CitizenFlags citizenFlags;
+    private CitizenFlags citizenFlags;
     private final String safeToCallOption;
     private final SafetyConcerns safetyConcerns;
     private final ReasonableAdjustmentsSupport supportYouNeed;
@@ -54,6 +54,7 @@ public class Response {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+    private String respondingCitizenAoH;
 
     @JsonUnwrapped
     @Builder.Default

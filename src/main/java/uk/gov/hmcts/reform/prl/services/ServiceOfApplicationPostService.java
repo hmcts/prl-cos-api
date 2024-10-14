@@ -4,20 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -31,22 +32,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANNEX1_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -69,155 +73,150 @@ public class ServiceOfApplicationPostService {
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,
-                                                        PartyDetails partyDetails,
-                                                        List<Document> docs, String servedParty) {
+                                                        Element<PartyDetails> party,
+                                                        List<Document> docs,
+                                                        String servedParty) {
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, partyDetails, servedParty);
+        return sendBulkPrint(caseData, authorisation, docs, party, servedParty);
     }
 
-    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        List<Document> coversheets = new ArrayList<>();
         if (null != address && null != address.getAddressLine1()) {
-            generatedDocumentInfo = dgsService.generateDocument(
-                auth,
-
-                CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
-                    ServiceOfApplication.builder().coverPageAddress(Address.builder()
-                                                                        .addressLine1(address.getAddressLine1())
-                                                                        .addressLine2(address.getAddressLine2())
-                                                                        .addressLine3(address.getAddressLine3())
-                                                                        .county(address.getCounty())
-                                                                        .postCode(address.getPostCode())
-                                                                        .postTown(address.getPostTown())
-                                                                        .build())
-                        .coverPagePartyName(null != name ? name : " ").build()
-                ).build()).build(),
-                documentGenService.getTemplate(
-                    caseData,
-                    DOCUMENT_COVER_SHEET_HINT,
-                    documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
-                )
-            );
+            if (documentLanguage.isGenEng()) {
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
+                                                                                 coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet.pdf"));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
+                                                                                 coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet_welsh.pdf"));
+            }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
+        return coversheets;
+    }
+
+    private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
+                                                                           Address address, String name,
+                                                                           boolean isWelsh, String coverSheetTemplate) throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverPagePartyName", null != name ? name : " ");
+        dataMap.put("coverPageAddress", address);
+        dataMap.put("id", String.valueOf(caseData.getId()));
+        GeneratedDocumentInfo generatedDocumentInfo;
+        generatedDocumentInfo = dgsService.generateDocument(
+            auth, String.valueOf(caseData.getId()),
+            documentGenService.getTemplate(
+                caseData,
+                coverSheetTemplate, isWelsh
+            ), dataMap
+        );
         return generatedDocumentInfo;
     }
 
-    public List<Document> getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, Object> dataMap = new HashMap<>();
-        List<Document> coverLetterDocs = new ArrayList<>();
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (null != address && null != address.getAddressLine1()) {
-            dataMap.put("coverPagePartyName", name);
-            dataMap.put("coverPageAddress", address);
-            dataMap.put("id", String.valueOf(caseData.getId()));
-            if (documentLanguage.isGenEng()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth, String.valueOf(caseData.getId()),
-                    documentGenService.getTemplate(
-                        caseData,
-                        DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
-                    ), dataMap
-                );
-                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth, String.valueOf(caseData.getId()),
-                    documentGenService.getTemplate(
-                        caseData,
-                        DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
-                    ), dataMap
-                );
-                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
-            }
-        } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
-        }
-        return coverLetterDocs;
-    }
-
-    public List<Document> getStaticDocs(String auth, String caseType) {
+    public List<Document> getStaticDocs(String auth, String caseType, CaseData caseData) {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_MEDIATION_VOUCHER_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_NOTICE_SAFETY,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C7_BLANK_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_C9_PERSONAL_SERVICE_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C1A_BLANK_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
-                    )
-                )
-            );
+            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage, caseData);
         } else {
-
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_FL415_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-                    )
-                )
-            );
+            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage);
         }
         if (null != uploadResponse) {
-            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
-                Collectors.toList());
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
         return Collections.emptyList();
+    }
+
+    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage) {
+        List<MultipartFile> files = new ArrayList<>();
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                SOA_FL415_FILENAME,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+            ));
+        }
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
+    }
+
+    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage, CaseData caseData) {
+        List<MultipartFile> files = new ArrayList<>();
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
+        // FPET-1056 Annex 1 file inclusion
+        if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
+        }
+        //PRL-5360 - Remove mediation voucher & add new President note
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_FAMILY_PRESIDENTS_NOTE, SOA_FAMILY_PRESIDENTS_NOTE_WELSH);
+
+        files.addAll(
+            List.of(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    C7_BLANK_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+                ),
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_C9_PERSONAL_SERVICE_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                )
+            )
+        );
+
+        attachStaticFileToTheDocuments(documentLanguage, files, C1A_BLANK_DOCUMENT_FILENAME, C1A_BLANK_DOCUMENT_WELSH_FILENAME);
+
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
+    }
+
+    private void attachStaticFileToTheDocuments(DocumentLanguage documentLanguage,
+                                                List<MultipartFile> files,
+                                                String fileName,
+                                                String fileNameWelsh) {
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                fileName,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + fileName)
+            ));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                fileNameWelsh,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + fileNameWelsh)
+            ));
+        }
     }
 
     public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
@@ -264,10 +263,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                           List<Document> docs, PartyDetails partyDetails, String servedParty) {
+                                           List<Document> docs, Element<PartyDetails> party, String servedParty) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
+        PartyDetails partyDetails = party.getValue();
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
@@ -284,7 +284,7 @@ public class ServiceOfApplicationPostService {
                 bulkPrintedId = String.valueOf(bulkPrintId);
             }
         } catch (Exception e) {
-            log.error("The bulk print service has failed", e);
+            log.error("The bulk print service has failed {}", e.getMessage());
         }
         Address address = Yes.equals(partyDetails.getIsAddressConfidential())
             ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
@@ -293,11 +293,13 @@ public class ServiceOfApplicationPostService {
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+            .printedDocs(String.join(",", docs.stream().filter(Objects::nonNull).map(Document::getDocumentFileName).toList()))
             .recipientsName(partyDetails.getLabelForDynamicList())
             .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
-            .timeStamp(currentDate).build();
+            .timeStamp(currentDate)
+            .partyIds(String.valueOf(party.getId()))
+            .build();
     }
 
 }

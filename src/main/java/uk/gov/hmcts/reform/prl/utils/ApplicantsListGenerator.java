@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -96,7 +95,8 @@ public class ApplicantsListGenerator {
         List<Element<ApplicantOfAdditionalApplication>> parties = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                    || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
                 List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
                 children.forEach(child -> parties.add(
                     element(ApplicantOfAdditionalApplication.builder().code(child.getId().toString())
@@ -117,7 +117,7 @@ public class ApplicantsListGenerator {
             if (applicantChildDetails.isPresent()) {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 children.forEach(child -> parties.add(
                     element(ApplicantOfAdditionalApplication.builder().code("Child " + i.getAndIncrement())
                                 .name(child.getFullName() + ", Child " + i.getAndIncrement())

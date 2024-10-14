@@ -51,7 +51,8 @@ public class DynamicMultiSelectListService {
 
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getNewChildDetails() != null) {
+        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             IncrementalInteger i = new IncrementalInteger(1);
             caseData.getNewChildDetails().forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
@@ -105,13 +106,16 @@ public class DynamicMultiSelectListService {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
                 + " (Respondent)";
+            String code = caseData.getRespondentsFL401().getPartyId().toString();
             respondentSolicitorList.add(DynamicMultiselectListElement.builder()
-                                            .code(name)
+                                            .code(code)
                                             .label(caseData.getRespondentsFL401().getRepresentativeFirstName() + " "
                                                        + caseData.getRespondentsFL401().getRepresentativeLastName()
                                                        + " (Respondent solicitor)")
                                             .build());
-            listItems.add(DynamicMultiselectListElement.builder().code(name).label(name).build());
+            listItems.add(DynamicMultiselectListElement.builder()
+                              .code(String.valueOf(caseData.getRespondentsFL401().getPartyId()))
+                                        .label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> respondentdetails = new HashMap<>();
         respondentdetails.put("respondents", listItems);
@@ -142,11 +146,14 @@ public class DynamicMultiSelectListService {
             String name = caseData.getApplicantsFL401().getFirstName() + " "
                 + caseData.getApplicantsFL401().getLastName()
                 + "(Applicant)";
-            applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(name)
+            String code = caseData.getApplicantsFL401().getPartyId().toString();
+            applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(code)
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
                                                       + caseData.getApplicantsFL401().getRepresentativeLastName()
                                                       + "(Applicant solicitor)").build());
-            listItems.add(DynamicMultiselectListElement.builder().code(name).label(name).build());
+            listItems.add(DynamicMultiselectListElement.builder()
+                              .code(String.valueOf(caseData.getApplicantsFL401().getPartyId()))
+                              .label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> applicantdetails = new HashMap<>();
         applicantdetails.put("applicants", listItems);
@@ -157,7 +164,9 @@ public class DynamicMultiSelectListService {
     public List<DynamicMultiselectListElement> getOtherPeopleMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
 
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getOtherPartyInTheCaseRevised() != null) {
+        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion()))
+                && caseData.getOtherPartyInTheCaseRevised() != null) {
             caseData.getOtherPartyInTheCaseRevised().forEach(others ->
                     otherPeopleList.add(DynamicMultiselectListElement.builder()
                             .code(others.getId().toString())
@@ -227,7 +236,8 @@ public class DynamicMultiSelectListService {
     public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
         List<Element<Child>> childList = new ArrayList<>();
         if (null != caseData.getManageOrders()
-            && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+            && (YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()
+        ) || YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren()))
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
             caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
@@ -261,7 +271,8 @@ public class DynamicMultiSelectListService {
     private Child getChildDetails(CaseData caseData, String id) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
 
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                    || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
 
                 Optional<ChildDetailsRevised> childRevised = caseData.getNewChildDetails().stream()
                         .filter(element -> element.getId().toString().equalsIgnoreCase(id))

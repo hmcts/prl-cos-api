@@ -96,6 +96,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -786,13 +787,26 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private StatementOfService statementOfService;
 
     @JsonUnwrapped
-    private final AllPartyFlags allPartyFlags;
+    private AllPartyFlags allPartyFlags;
     /**
      * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
      */
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
+    /**
+     * PRL-4044 - This is store citizen awp payment data for temp & will be removed once awp is submitted successfully.
+     */
+    @JsonProperty("citizenAwpPayments")
+    private List<Element<CitizenAwpPayment>> citizenAwpPayments;
+
     //For case documents tab
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
+
+    @JsonUnwrapped
+    private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
+
+    @JsonUnwrapped
+    private RemoveDraftOrderFields removeDraftOrderFields;
+
 }

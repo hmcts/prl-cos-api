@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -216,15 +217,27 @@ public class EditReturnedOrderServiceTest {
 
     @Test
     public void  testAboutToSubmitHandlerForDraftedOrder() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+            .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
+            .orderSelectionType(ManageOrdersOptionsEnum.createAnOrder.toString())
+            .otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build()).build();
+        draftOrderCollection.add(Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
+                                     .value(draftOrder)
+                                     .build());
+        caseDataMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
                                                              .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
                                                                         .build())
                                                              .build()).build())
+            .draftOrderCollection(draftOrderCollection)
             .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+            .thenReturn(draftOrder);
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
         Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
@@ -238,7 +251,7 @@ public class EditReturnedOrderServiceTest {
             .orderType(CreateSelectOrderOptionsEnum.generalForm)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())
-            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build();
+            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").dateCreated(LocalDateTime.now()).build()).build();
         draftOrderCollection.add(Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
                                      .value(draftOrder)
                                      .build());
