@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.courtnav.mappers;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -86,6 +87,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -684,6 +686,7 @@ public class FL401ApplicationMapper {
             .respondentLivedWithApplicant(respondent.isRespondentLivesWithApplicant() ? YesOrNo.Yes : YesOrNo.No)
             .applicantContactInstructions(null)
             .applicantPreferredContact(null)
+            .partyId(UUID.randomUUID())
             .build();
     }
 
@@ -699,12 +702,15 @@ public class FL401ApplicationMapper {
                              ? applicant.getApplicantGenderOther() : null)
             .address(null != applicant.getApplicantAddress()
                          ? getAddress(applicant.getApplicantAddress()) : null)
-            .isAddressConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+            .isAddressConfidential(ObjectUtils.isNotEmpty(applicant.getApplicantAddress())
+                                       && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getApplicantEmailAddress() ? "Yes" : "No"))
             .email(applicant.getApplicantEmailAddress())
-            .isEmailAddressConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+            .isEmailAddressConfidential(StringUtils.isNotEmpty(applicant.getApplicantEmailAddress())
+                                            && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
             .phoneNumber(applicant.getApplicantPhoneNumber())
-            .isPhoneNumberConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+            .isPhoneNumberConfidential(StringUtils.isNotEmpty(applicant.getApplicantPhoneNumber())
+                                           && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
             .applicantPreferredContact(applicant.getApplicantPreferredContact())
             .applicantContactInstructions(applicant.getApplicantContactInstructions())
             .representativeFirstName(applicant.getLegalRepresentativeFirstName())
@@ -718,6 +724,7 @@ public class FL401ApplicationMapper {
             .solicitorAddress(null != applicant.getLegalRepresentativeAddress()
                                   ? getAddress(applicant.getLegalRepresentativeAddress()) : null)
             .dxNumber(applicant.getLegalRepresentativeDx())
+            .partyId(UUID.randomUUID())
             .build();
     }
 }
