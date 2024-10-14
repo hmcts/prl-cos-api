@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
-@Ignore
 public class CitizenCallbackControllerFunctionalTest {
 
     private final String targetInstance =

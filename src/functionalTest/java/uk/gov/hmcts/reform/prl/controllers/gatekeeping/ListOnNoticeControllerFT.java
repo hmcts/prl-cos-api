@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIA
 @SpringBootTest
 @ContextConfiguration
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Ignore
 public class ListOnNoticeControllerFT {
 
     @Autowired

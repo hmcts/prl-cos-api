@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Ignore
 public class EditReturnedOrderControllerFunctionalTest {
 
     @Autowired
