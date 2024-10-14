@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -36,6 +38,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 @Slf4j
 @Component
@@ -49,6 +52,7 @@ public class NoticeOfChangeEventHandler {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
     private final SystemUserService systemUserService;
+    private final AllTabServiceImpl allTabService;
 
     @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
@@ -297,12 +301,23 @@ public class NoticeOfChangeEventHandler {
             );
             Map<String, Object> caseDataMap = new HashMap<>();
             CaseUtils.updateAccessCodeNotifications(caseData, party, caseDataMap, List.of(coverLetter), bulkPrintId);
-
+            updateCaseDataWithAccessCodeNotification(String.valueOf(caseData.getId()), caseDataMap);
             log.info("Remove legal rep -> Sent cover letter with access code to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
         } else {
-            log.info(
-                "Couldn't post letters to party address, as address is null/empty for {}", party.getId());
+            log.info("Couldn't post letters to party address, as address is null/empty for {}", party.getId());
         }
+    }
+
+    private void updateCaseDataWithAccessCodeNotification(String caseId, Map<String, Object> caseDataMap) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService
+            .getStartUpdateForSpecificEvent(caseId, CITIZEN_CASE_UPDATE.getValue());
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
     }
 
     private void generateCoverSheets(CaseData caseData,
