@@ -344,7 +344,7 @@ public class ConfidentialityTabService {
         if (APPLICANTS.equals(party)) {
             log.info("setting for applicants");
             partyDetails.setIsAddressConfidential(YesOrNo.Yes);
-            if (YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+            if (YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
                 log.info("current address is known");
                 partyDetails.setIsEmailAddressConfidential(YesOrNo.Yes);
             }
