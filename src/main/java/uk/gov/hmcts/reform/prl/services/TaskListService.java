@@ -314,7 +314,9 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
+                log.info("executing expected code");
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                log.info("geenerated document {}",caseDataUpdated.get("c1ADraftDocument"));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
@@ -330,6 +332,7 @@ public class TaskListService {
                     .c1AWelshDraftDocument(SUBMITTED_STATE.equalsIgnoreCase(state)
                                                ? updatedCaseData.getC1AWelshDraftDocument() : caseData.getC1AWelshDraftDocument())
                     .build();
+                log.info("c1a draft doccument in the case {}",caseData.getC1ADraftDocument());
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }

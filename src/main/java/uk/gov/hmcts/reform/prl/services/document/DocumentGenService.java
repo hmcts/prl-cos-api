@@ -465,6 +465,7 @@ public class DocumentGenService {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
+                log.info("generating draft document for C1A");
                 updatedCaseData.put(
                     DOCUMENT_FIELD_DRAFT_C1A,
                     getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
