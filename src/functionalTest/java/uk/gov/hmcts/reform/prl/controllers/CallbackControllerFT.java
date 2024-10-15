@@ -130,7 +130,6 @@ public class CallbackControllerFT {
                   "data.c1ADocument.document_filename", equalTo("C1A_Document.pdf"));
     }
 
-    @Ignore
     @Test
     public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
@@ -147,7 +146,6 @@ public class CallbackControllerFT {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
     public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
