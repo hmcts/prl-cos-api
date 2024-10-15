@@ -223,6 +223,7 @@ public class ServiceOfApplicationService {
     public static final String SEND_GRID_TEMPLATE = "sendGridTemplate";
     public static final String CONFIRMATION_BODY = "confirmationBody";
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
+    public static final String TEMPLATE = "template";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -1363,6 +1364,7 @@ public class ServiceOfApplicationService {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
+                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_AP7);
                     sendEmailToCitizenLipByCheckingDashboardAccess(caseData,
                                                              emailNotificationDetails,
                                                              selectedApplicant,
@@ -1374,6 +1376,21 @@ public class ServiceOfApplicationService {
                                                                  : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
+                    Document coverLetter;
+                    if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(selectedApplicant.getValue())) {
+                        coverLetter = generateAccessCodeLetter(
+                            authorization,
+                            caseData,
+                            selectedApplicant,
+                            null,
+                            Templates.PRL_LET_ENG_AP7
+                        );
+                    } else {
+                        coverLetter = CaseUtils.getCoverLettersForParty(
+                            selectedApplicant.getId(),
+                            coverLetterMap
+                        ).get(0);
+                    }
                     //Post packs to applicants
                     sendPostWithAccessCodeLetterToParty(
                         caseData,
@@ -1381,7 +1398,7 @@ public class ServiceOfApplicationService {
                         applicantDocs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
-                        CaseUtils.getCoverLettersForParty(selectedApplicant.getId(), coverLetterMap).get(0),
+                        coverLetter,
                         SERVED_PARTY_APPLICANT
                     );
                 }
@@ -1445,6 +1462,7 @@ public class ServiceOfApplicationService {
                     //Notify applicants via email, if dashboard access then via gov notify email else via send grid
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
+                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_AP8);
                     sendEmailToCitizenLipByCheckingDashboardAccess(
                         caseData,
                         emailNotificationDetails,
@@ -1455,6 +1473,21 @@ public class ServiceOfApplicationService {
                         EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT
                     );
                 } else {
+                    Document coverLetter;
+                    if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(applicant.getValue())) {
+                        coverLetter = generateAccessCodeLetter(
+                            authorization,
+                            caseData,
+                            applicant,
+                            null,
+                            PRL_LET_ENG_AP8
+                        );
+                    } else {
+                        coverLetter = CaseUtils.getCoverLettersForParty(applicant.getId(),
+                                                          caseData.getServiceOfApplication()
+                                                              .getUnServedApplicantPack()
+                                                              .getCoverLettersMap()).get(0);
+                    }
                     //Post packs to applicants
                     sendPostWithAccessCodeLetterToParty(
                         caseData,
@@ -1462,10 +1495,7 @@ public class ServiceOfApplicationService {
                         packDocs,
                         bulkPrintDetails,
                         applicant,
-                        CaseUtils.getCoverLettersForParty(applicant.getId(),
-                                                          caseData.getServiceOfApplication()
-                                                              .getUnServedApplicantPack()
-                                                              .getCoverLettersMap()).get(0),
+                        coverLetter,
                         SERVED_PARTY_APPLICANT
                     );
                 }
@@ -1639,9 +1669,15 @@ public class ServiceOfApplicationService {
                                                           Map<String, String> fieldMap,
                                                           EmailTemplateNames notifyTemplate) {
         EmailNotificationDetails emailNotification;
-        List<Element<CoverLetterMap>> coverLettersPack = caseData.getServiceOfApplication().getUnServedApplicantPack().getCoverLettersMap();
         List<Document> packDocs = new ArrayList<>();
-        List<Document> coverLetters = CaseUtils.getCoverLettersForParty(party.getId(), coverLettersPack);
+        List<Document> coverLetters = new ArrayList<>();
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(party.getValue())
+            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && null != fieldMap.get(TEMPLATE)) {
+            coverLetters.add(generateAccessCodeLetter(fieldMap.get(AUTHORIZATION), caseData, party, null, fieldMap.get(TEMPLATE)));
+        } else {
+            List<Element<CoverLetterMap>> coverLettersPack = caseData.getServiceOfApplication().getUnServedApplicantPack().getCoverLettersMap();
+            coverLetters.addAll(CaseUtils.getCoverLettersForParty(party.getId(), coverLettersPack));
+        }
         if (CollectionUtils.isNotEmpty(coverLetters)) {
             packDocs.addAll(coverLetters);
         }
@@ -2074,6 +2110,7 @@ public class ServiceOfApplicationService {
                 if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
+                    fieldsMap.put(TEMPLATE, Templates.PRL_LET_ENG_AP6);
                     sendEmailToCitizenLipByCheckingDashboardAccess(caseData,
                                                              emailNotificationDetails,
                                                                    applicant,
@@ -2085,15 +2122,21 @@ public class ServiceOfApplicationService {
                                                                  : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
+                    Document coverLetter;
+                    if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(applicant.getValue())) {
+                        coverLetter = generateAccessCodeLetter(authorization, caseData, applicant, null, Templates.PRL_LET_ENG_AP6);
+                    } else {
+                        coverLetter = CaseUtils.getCoverLettersForParty(applicant.getId(),
+                                                                        caseData.getServiceOfApplication()
+                                                                            .getUnServedApplicantPack()
+                                                                            .getCoverLettersMap()).get(0);
+                    }
                     sendPostWithAccessCodeLetterToParty(caseData,
                                                         authorization,
                                                         packDocs,
                                                         bulkPrintDetails,
                                                         applicant,
-                                                        CaseUtils.getCoverLettersForParty(applicant.getId(),
-                                                                                          caseData.getServiceOfApplication()
-                                                                                              .getUnServedApplicantPack()
-                                                                                              .getCoverLettersMap()).get(0),
+                                                        coverLetter,
                                                         SERVED_PARTY_APPLICANT
                     );
                 }
