@@ -1259,7 +1259,7 @@ public class ServiceOfApplicationService {
                 List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5);
                 coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
                     .coverLetters(wrapElements(coverLetters)).build()));
-                respondentCoverLetters.add(coverLetters);
+                respondentCoverLetters.addAll(coverLetters);
             }
             List<Document> packLdocs = new ArrayList<>(respondentCoverLetters);
             packLdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs));
@@ -1358,7 +1358,7 @@ public class ServiceOfApplicationService {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_AP7);
+                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_C100_AP7);
                     sendEmailToCitizenLipByCheckingDashboardAccess(caseData,
                                                              emailNotificationDetails,
                                                              selectedApplicant,
@@ -1377,7 +1377,7 @@ public class ServiceOfApplicationService {
                             caseData,
                             selectedApplicant,
                             null,
-                            Templates.PRL_LET_ENG_AP7
+                            PRL_LET_ENG_C100_AP7
                         );
                     } else {
                         coverLetters = CaseUtils.getCoverLettersForParty(
@@ -1457,7 +1457,7 @@ public class ServiceOfApplicationService {
                     //Notify applicants via email, if dashboard access then via gov notify email else via send grid
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_AP8);
+                    fieldsMap.put(TEMPLATE, PRL_LET_ENG_C100_AP8);
                     sendEmailToCitizenLipByCheckingDashboardAccess(
                         caseData,
                         emailNotificationDetails,
@@ -1475,7 +1475,7 @@ public class ServiceOfApplicationService {
                             caseData,
                             applicant,
                             null,
-                            PRL_LET_ENG_AP8
+                            PRL_LET_ENG_C100_AP8
                         );
                     } else {
                         coverLetters = CaseUtils.getCoverLettersForParty(applicant.getId(),
@@ -1647,7 +1647,7 @@ public class ServiceOfApplicationService {
         List<Document> coverLetters = new ArrayList<>();
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(party.getValue())
             && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && null != fieldMap.get(TEMPLATE)) {
-            coverLetters.add(generateAccessCodeLetter(fieldMap.get(AUTHORIZATION), caseData, party, null, fieldMap.get(TEMPLATE)));
+            coverLetters.addAll(generateAccessCodeLetter(fieldMap.get(AUTHORIZATION), caseData, party, null, fieldMap.get(TEMPLATE)));
         } else {
             List<Element<CoverLetterMap>> coverLettersPack = caseData.getServiceOfApplication().getUnServedApplicantPack().getCoverLettersMap();
             coverLetters.addAll(CaseUtils.getCoverLettersForParty(party.getId(), coverLettersPack));
@@ -2083,7 +2083,7 @@ public class ServiceOfApplicationService {
                 if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    fieldsMap.put(TEMPLATE, Templates.PRL_LET_ENG_AP6);
+                    fieldsMap.put(TEMPLATE, Templates.PRL_LET_ENG_C100_AP6);
                     sendEmailToCitizenLipByCheckingDashboardAccess(caseData,
                                                              emailNotificationDetails,
                                                                    applicant,
@@ -2095,9 +2095,9 @@ public class ServiceOfApplicationService {
                                                                  : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
-                    List<Document> coverLetter;
+                    List<Document> coverLetters;
                     if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) && CaseUtils.isCitizenAccessEnabled(applicant.getValue())) {
-                        coverLetters = generateAccessCodeLetter(authorization, caseData, applicant, null, Templates.PRL_LET_ENG_AP6);
+                        coverLetters = generateAccessCodeLetter(authorization, caseData, applicant, null, Templates.PRL_LET_ENG_C100_AP6);
                     } else {
                         coverLetters = CaseUtils.getCoverLettersForParty(applicant.getId(),
                                                                         caseData.getServiceOfApplication()
@@ -3170,7 +3170,7 @@ public class ServiceOfApplicationService {
             List<Document> respondentPackDocs = new ArrayList<>();
             List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_RE5);
+                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5);
                 respondentPackDocs.addAll(coverLetters);
                 coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
                     .coverLetters(wrapElements(coverLetters)).build()));
@@ -3609,17 +3609,15 @@ public class ServiceOfApplicationService {
         List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
         for (String partyId : selectedPartyIds) {
             Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
-            if (party.isPresent()) {
-                if (!CaseUtils.hasLegalRepresentation(party.get().getValue())) {
-                    List<Document> coverLetters = new ArrayList<>(generateCoverLetterBasedOnCaseAccess(
-                        authorization,
-                        caseData,
-                        party.get(),
-                        Templates.PRL_LET_ENG_C100_AP6
-                    ));
-                    packDocs.addAll(wrapElements(coverLetters));
-                    CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
-                }
+            if (party.isPresent() && !CaseUtils.hasLegalRepresentation(party.get().getValue())) {
+                List<Document> coverLetters = new ArrayList<>(generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    party.get(),
+                    Templates.PRL_LET_ENG_C100_AP6
+                ));
+                packDocs.addAll(wrapElements(coverLetters));
+                CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
             }
         }
         packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
