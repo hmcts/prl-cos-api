@@ -32,6 +32,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService.COURT_LIST;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseInitiationServiceTest {
@@ -80,6 +82,7 @@ public class CaseInitiationServiceTest {
             .user(User.builder().email("").idamId("").build())
             .build();
 
+        caseDataMap.put("caseTypeOfApplication",C100_CASE_TYPE);
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicant).build()))
@@ -102,11 +105,27 @@ public class CaseInitiationServiceTest {
     }
 
     @Test
-    public void testHandlePrePopulateCourtDetails() {
+    public void testHandlePrePopulateCourtDetailsC100() {
+        caseData = CaseData.builder()
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        Assertions.assertTrue(caseInitiationService.prePopulateCourtDetails(AUTHORISATION, caseDataMap).containsKey(COURT_LIST));
+    }
 
-        Assertions.assertNotNull(caseInitiationService.prePopulateCourtDetails(AUTHORISATION, caseDataMap));
+    @Test
+    public void testHandlePrePopulateCourtDetailsFL401() {
+        caseDataMap.put("caseTypeOfApplication",FL401_CASE_TYPE);
+        caseData = CaseData.builder()
+                .caseTypeOfApplication(FL401_CASE_TYPE)
+                .build();
+        List<DynamicListElement> courts = List.of(DynamicListElement.builder().label("123").build());
+        when(locationRefDataService.getDaCourtLocations(AUTHORISATION))
+                .thenReturn(courts);
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getDaCourtLocations(Mockito.anyString())).thenReturn(courts);
+        Assertions.assertTrue(caseInitiationService.prePopulateCourtDetails(AUTHORISATION, caseDataMap).containsKey(COURT_LIST));
     }
 
 }
