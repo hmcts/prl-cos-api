@@ -1662,8 +1662,6 @@ public class ReviewDocumentServiceTest {
                                                                             .isGenWelsh(true)
                                                                             .isGenEng(true)
                                                                             .build());
-        when(serviceOfApplicationService.getCoverLetters(
-            anyString(), any(CaseData.class), anyString(), anyMap())).thenReturn(coverLetterDocs);
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
