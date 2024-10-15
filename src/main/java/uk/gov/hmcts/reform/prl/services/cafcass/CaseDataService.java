@@ -250,7 +250,6 @@ public class CaseDataService {
         if (caseStateList != null && !caseStateList.isEmpty()) {
             for (String caseState : caseStateList) {
                 shoulds.add(Should.builder().match(Match.builder().state(caseState).build()).build());
-                shoulds.add(Should.builder().match(Match.builder().cafcassServedOptions(YesOrNo.Yes).build()).build());
             }
         }
         return shoulds;
