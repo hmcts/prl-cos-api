@@ -2961,7 +2961,7 @@ public class ServiceOfApplicationService {
 
     public List<Document> generateAccessCodeLetter(String authorisation, CaseData caseData, Element<PartyDetails> party,
                                                    CaseInvite caseInvite, String template) {
-
+        log.info("CAse Invite {}", caseInvite);
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         return fetchCoverLetter(authorisation, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
@@ -2970,6 +2970,7 @@ public class ServiceOfApplicationService {
     public List<Document> fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap, boolean english,
                                      boolean welsh) {
         List<Document> coverLetters = new ArrayList<>();
+        log.info("Data map {}", dataMap);
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             if (english) {
