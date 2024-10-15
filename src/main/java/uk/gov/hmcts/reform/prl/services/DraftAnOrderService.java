@@ -283,7 +283,6 @@ public class DraftAnOrderService {
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            log.info("populate hearing state " + caseData.getState());
             caseDataMap.put(
                 "isInHearingState",
                 (PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
@@ -293,7 +292,6 @@ public class DraftAnOrderService {
             if (Yes.equals(caseData.getIsCafcass())) {
                 caseDataMap.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
             }
-            log.info("caseDataMap isInHearingState " + caseDataMap.get("isInHearingState"));
         }
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
@@ -653,6 +651,8 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
+            //PRL-6046 - persist FL404 data
+            .fl404CustomFields(draftOrder.getFl404CustomFields())
             .build();
     }
 

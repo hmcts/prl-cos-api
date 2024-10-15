@@ -30,15 +30,21 @@ public class CitizenDocuments {
 
     // Attributes for SOA
     private List<Document> applicantSoaPack; // if personal service - CA/CB -> Either applicant pack //
-    //private List<Document> unservedRespondentPack; // if personal service - CA/CB -> Either applicant pack //
     private List<Document> respondentSoaPack;
     private String servedParty;
+    private String whoIsResponsible;
     private boolean wasCafcassServed;
+    private boolean wasCafcassCymruServed;
+    private boolean isPersonalService;
+    private boolean isSosCompleted;
 
     private String orderType;
+    private String orderTypeId;
     private LocalDate createdDate;
-    private LocalDate servedDate;
+    private LocalDate madeDate;
+    private LocalDateTime servedDateTime;
     private boolean isNew;
     private boolean isFinal;
+    private boolean isMultiple;
     private String documentLanguage;
 }

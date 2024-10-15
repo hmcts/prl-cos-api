@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -37,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -55,9 +55,9 @@ public class ReviewDocumentService {
     public static final String CAFCASS_QUARANTINE_DOCS_LIST = "cafcassQuarantineDocsList";
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
+    public static final String COURTNAV_QUARANTINE_DOCUMENT_LIST = "courtNavQuarantineDocumentList";
 
     private final AllTabServiceImpl allTabService;
-    private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -86,30 +86,30 @@ public class ReviewDocumentService {
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"
             + "<ul class='govuk-list govuk-list--bullet'> <li>%s</li></ul></label>";
-    public static final String  CONFIDENTIAL_INFO_LABEL =
+    public static final String CONFIDENTIAL_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
-    public static final String  RESTRICTED_INFO_LABEL =
+    public static final String RESTRICTED_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
-    public static final String  RESTRICTION_REASON_LABEL =
+    public static final String RESTRICTION_REASON_LABEL =
         "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
-    public static final String  BULK_SCAN_TYPE_LABEL =
+    public static final String BULK_SCAN_TYPE_LABEL =
         "<h3 class='govuk-heading-s'>Type</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
-    public static final String  BULK_SCAN_SUB_TYPE_LABEL =
+    public static final String BULK_SCAN_SUB_TYPE_LABEL =
         "<h3 class='govuk-heading-s'>Sub type</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
-    public static final String  BULK_SCAN_EXCEPTION_RECORD_REF_LABEL =
+    public static final String BULK_SCAN_EXCEPTION_RECORD_REF_LABEL =
         "<h3 class='govuk-heading-s'>Exception record reference</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
-    public static final String  BULK_SCAN_SCANNED_DATE_LABEL =
+    public static final String BULK_SCAN_SCANNED_DATE_LABEL =
         "<h3 class='govuk-heading-s'>Scanned date</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
-    public static final String  BULK_SCAN_DELIVERY_DATE_LABEL =
+    public static final String BULK_SCAN_DELIVERY_DATE_LABEL =
         "<h3 class='govuk-heading-s'>Delivery date</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
@@ -128,9 +128,9 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                       element.getValue().getUploaderRole(),
-                                                       element.getValue()
-                                                   ).getDocumentFileName()
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -144,9 +144,9 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                       element.getValue().getUploaderRole(),
-                                                       element.getValue()
-                                                   ).getDocumentFileName()
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -160,9 +160,9 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                       element.getValue().getUploaderRole(),
-                                                       element.getValue()
-                                                   ).getDocumentFileName()
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
                                                    element.getValue().getDocumentUploadedDate()
@@ -200,6 +200,26 @@ public class ReviewDocumentService {
                                                .build()).toList());
             tempQuarantineDocumentList.addAll(convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments()));
         }
+        //Courtnav uploaded docs
+        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
+            log.info("inside prepare for courtnav uploaded docs");
+            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
+                                               .build())
+                                           .toList());
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList());
+            log.info("dynamicListElements " + dynamicListElements);
+            log.info("tempQuarantineDocumentList " + tempQuarantineDocumentList);
+            log.info("exit prepare for courtnav uploaded docs");
+        }
         caseDataUpdated.put("tempQuarantineDocumentList", tempQuarantineDocumentList);
         return dynamicListElements;
     }
@@ -208,19 +228,34 @@ public class ReviewDocumentService {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-            log.info("** uuid ** {}", uuid);
             List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
+
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
+            quarantineLegalDocElement = resetUploaderRoleForCourtNavUploadedDocs(quarantineLegalDocElement);
 
             quarantineLegalDocElement = resetUploaderRoleForCafcassUploadedDocs(quarantineLegalDocElement);
 
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                    caseDataUpdated,
-                    legalDocElement,
-                    legalDocElement.getValue().getUploaderRole()
+                caseDataUpdated,
+                legalDocElement,
+                null != legalDocElement.getValue().getUploaderRole()
+                    ? legalDocElement.getValue().getUploaderRole()
+                    : CITIZEN //TEMP FIX TO RESOLVE UPLOADER_ROLE NULL FROM XUI ISSUE
             ));
         }
+    }
+
+    private static Optional<Element<QuarantineLegalDoc>> resetUploaderRoleForCourtNavUploadedDocs(Optional<Element<QuarantineLegalDoc>>
+                                                                                                      quarantineLegalDocElement) {
+        if (quarantineLegalDocElement.isPresent() && COURTNAV.equals(quarantineLegalDocElement.get().getValue().getUploadedBy())) {
+            quarantineLegalDocElement = Optional.of(element(
+                quarantineLegalDocElement.get().getId(),
+                quarantineLegalDocElement.get().getValue().toBuilder().uploaderRole(
+                    COURTNAV).build()
+            ));
+        }
+        return quarantineLegalDocElement;
     }
 
     private static Optional<Element<QuarantineLegalDoc>> resetUploaderRoleForCafcassUploadedDocs(
@@ -241,13 +276,13 @@ public class ReviewDocumentService {
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
-
+        log.info("submittedBy " + submittedBy);
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
         String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-        caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT);
+        caseDataUpdated.put(DOC_LABEL, LABEL_WITH_HINT);
 
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
@@ -260,10 +295,14 @@ public class ReviewDocumentService {
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             //solicitor uploaded docs
             if (null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                isDocumentFound = processReviewDocument(caseData,
+                                                        caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
-                                                        uuid, UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
-                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST);
+                                                        uuid,
+                                                        UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
+                                                        SOLICITOR,
+                                                        LEGAL_PROF_QUARANTINE_DOCS_LIST
+                );
 
             }
             //cafcass uploaded docs
@@ -271,25 +310,36 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(CAFCASS)).build(),
-                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST);
+                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST
+                );
 
             }
             //court staff uploaded docs
             if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()) {
-                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                isDocumentFound = processReviewDocument(caseData,
+                                                        caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
-                                                        uuid, UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
-                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST);
+                                                        uuid,
+                                                        UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
+                                                        COURT_STAFF,
+                                                        COURT_STAFF_QUARANTINE_DOCS_LIST
+                );
 
             }
             //citizen uploaded docs
             if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
-                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                isDocumentFound = processReviewDocument(caseData,
+                                                        caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
-                                                        uuid, UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
-                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST);
+                                                        uuid,
+                                                        UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
+                                                        CITIZEN,
+                                                        CITIZEN_QUARANTINE_DOCS_LIST
+                );
 
             }
+            //courtnav uploaded docs
+            isDocumentFound = processCourtNavDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
             //Bulk scan
             processBulkScanDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
         }
@@ -316,12 +366,23 @@ public class ReviewDocumentService {
                 userDetails,
                 userRole
             );
-
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
         return isDocumentFound;
+    }
+
+    private boolean processCourtNavDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
+        if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList()) {
+            isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                    caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList(),
+                                                    uuid, UserDetails.builder().roles(List.of(Roles.COURTNAV.getValue())).build(),
+                                                    COURTNAV, COURTNAV_QUARANTINE_DOCUMENT_LIST);
+
+        }
+        return isDocumentFound;
+
     }
 
     private void processDocumentsAfterReviewNew(CaseData caseData,
@@ -378,12 +439,14 @@ public class ReviewDocumentService {
     private List<Element<QuarantineLegalDoc>> convertScannedDocumentsToQuarantineDocList(
         List<Element<ScannedDocument>> scannedDocumentElements) {
         return scannedDocumentElements.stream().map(
-                scannedDocumentElement -> {
-                    ScannedDocument scannedDocument = scannedDocumentElement.getValue();
-                    return element(scannedDocumentElement.getId(),
-                                   getBulkScanQuarantineDoc(scannedDocument)
-                            .build());
-                }).toList();
+            scannedDocumentElement -> {
+                ScannedDocument scannedDocument = scannedDocumentElement.getValue();
+                return element(
+                    scannedDocumentElement.getId(),
+                    getBulkScanQuarantineDoc(scannedDocument)
+                        .build()
+                );
+            }).toList();
     }
 
     private static Optional<Element<QuarantineLegalDoc>> getQuarantineBulkScanDocElement(CaseData caseData, UUID uuid) {
@@ -423,6 +486,7 @@ public class ReviewDocumentService {
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 String.valueOf(
@@ -485,50 +549,74 @@ public class ReviewDocumentService {
                                                  QuarantineLegalDoc quarantineDoc,
                                                  String submittedBy) {
         if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
-            reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL,
-                                               quarantineDoc.getCategoryName()));
+            reviewDetailsBuilder.append(format(
+                DOCUMENT_CATEGORY_LABEL,
+                quarantineDoc.getCategoryName()
+            ));
         }
         if (CommonUtils.isNotEmpty(quarantineDoc.getNotes())) {
-            reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL,
-                                               quarantineDoc.getNotes()));
+            reviewDetailsBuilder.append(format(
+                DOCUMENT_COMMENTS_LABEL,
+                quarantineDoc.getNotes()
+            ));
         }
         if (null != quarantineDoc.getIsConfidential() && !BULK_SCAN.equals(submittedBy)) {
-            reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL,
-                                               quarantineDoc.getIsConfidential().getDisplayedValue()));
+            reviewDetailsBuilder.append(format(
+                CONFIDENTIAL_INFO_LABEL,
+                quarantineDoc.getIsConfidential().getDisplayedValue()
+            ));
         }
         if (null != quarantineDoc.getIsRestricted() && !BULK_SCAN.equals(submittedBy)) {
-            reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL,
-                                               quarantineDoc.getIsRestricted().getDisplayedValue()));
+            reviewDetailsBuilder.append(format(
+                RESTRICTED_INFO_LABEL,
+                quarantineDoc.getIsRestricted().getDisplayedValue()
+            ));
         }
         if (CommonUtils.isNotEmpty(quarantineDoc.getRestrictedDetails())) {
-            reviewDetailsBuilder.append(format(RESTRICTION_REASON_LABEL,
-                                               quarantineDoc.getRestrictedDetails()));
+            reviewDetailsBuilder.append(format(
+                RESTRICTION_REASON_LABEL,
+                quarantineDoc.getRestrictedDetails()
+            ));
         }
     }
 
     private void appendBulkScanDocumentDetails(StringBuilder reviewDetailsBuilder,
                                                QuarantineLegalDoc quarantineDoc) {
         if (CommonUtils.isNotEmpty(quarantineDoc.getType())) {
-            reviewDetailsBuilder.append(format(BULK_SCAN_TYPE_LABEL,
-                                               quarantineDoc.getType()));
+            reviewDetailsBuilder.append(format(
+                BULK_SCAN_TYPE_LABEL,
+                quarantineDoc.getType()
+            ));
         }
         if (CommonUtils.isNotEmpty(quarantineDoc.getSubtype())) {
-            reviewDetailsBuilder.append(format(BULK_SCAN_SUB_TYPE_LABEL,
-                                               quarantineDoc.getSubtype()));
+            reviewDetailsBuilder.append(format(
+                BULK_SCAN_SUB_TYPE_LABEL,
+                quarantineDoc.getSubtype()
+            ));
         }
         if (CommonUtils.isNotEmpty(quarantineDoc.getExceptionRecordReference())) {
-            reviewDetailsBuilder.append(format(BULK_SCAN_EXCEPTION_RECORD_REF_LABEL,
-                                               quarantineDoc.getExceptionRecordReference()));
+            reviewDetailsBuilder.append(format(
+                BULK_SCAN_EXCEPTION_RECORD_REF_LABEL,
+                quarantineDoc.getExceptionRecordReference()
+            ));
         }
         if (null != quarantineDoc.getScannedDate()) {
-            reviewDetailsBuilder.append(format(BULK_SCAN_SCANNED_DATE_LABEL,
-                                               formatDateTime(DATE_TIME_PATTERN,
-                                                              quarantineDoc.getScannedDate())));
+            reviewDetailsBuilder.append(format(
+                BULK_SCAN_SCANNED_DATE_LABEL,
+                formatDateTime(
+                    DATE_TIME_PATTERN,
+                    quarantineDoc.getScannedDate()
+                )
+            ));
         }
         if (null != quarantineDoc.getDeliveryDate()) {
-            reviewDetailsBuilder.append(format(BULK_SCAN_DELIVERY_DATE_LABEL,
-                                               formatDateTime(DATE_TIME_PATTERN,
-                                                              quarantineDoc.getDeliveryDate())));
+            reviewDetailsBuilder.append(format(
+                BULK_SCAN_DELIVERY_DATE_LABEL,
+                formatDateTime(
+                    DATE_TIME_PATTERN,
+                    quarantineDoc.getDeliveryDate()
+                )
+            ));
         }
     }
 

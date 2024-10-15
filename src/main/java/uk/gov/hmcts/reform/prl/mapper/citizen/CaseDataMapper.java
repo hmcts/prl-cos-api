@@ -143,6 +143,7 @@ public class CaseDataMapper {
                                                     c100RebuildChildDetailsElements);
         }
 
+
         return caseDataBuilder.build();
     }
 }

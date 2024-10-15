@@ -134,7 +134,7 @@ public class CaseDataService {
                 }
             }
         } catch (Exception e) {
-            log.error("Error in search cases {}", e);
+            log.error("Error in search cases {}", e.getMessage());
             throw e;
         }
         return cafCassResponse;
@@ -250,7 +250,6 @@ public class CaseDataService {
         if (caseStateList != null && !caseStateList.isEmpty()) {
             for (String caseState : caseStateList) {
                 shoulds.add(Should.builder().match(Match.builder().state(caseState).build()).build());
-                shoulds.add(Should.builder().match(Match.builder().cafcassServedOptions(YesOrNo.Yes).build()).build());
             }
         }
         return shoulds;
@@ -261,6 +260,7 @@ public class CaseDataService {
         List<Should> shoulds = new ArrayList<>();
         for (String caseType : caseTypeList) {
             shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
+            shoulds.add(Should.builder().match(Match.builder().cafcassServedOptions(YesOrNo.Yes).build()).build());
         }
         return shoulds;
     }
