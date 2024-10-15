@@ -3594,8 +3594,7 @@ public class ServiceOfApplicationService {
             Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
             if (party.isPresent() && !CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 List<Document> coverLetters = new ArrayList<>();
-                coverLetters.add(generateAccessCodeLetter(authorization, caseData, party.get(),
-                                                          null, PRL_LET_ENG_RE5));
+                coverLetters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party.get(), PRL_LET_ENG_RE5));
                 finalDocs.addAll(coverLetters);
                 CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
             }
@@ -3631,9 +3630,9 @@ public class ServiceOfApplicationService {
                     packDocs.add(element(coverLetters.get(0)));
                     CaseUtils.mapCoverLetterToTheParty(UUID.fromString(partyId), coverLetterMap, coverLetters);
                 }
-                packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
             }
         }
+        packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
