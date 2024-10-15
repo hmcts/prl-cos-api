@@ -2163,7 +2163,6 @@ public class ServiceOfApplicationServiceTest {
                                  .build())
             .respondentsFL401(parties.get(0).getValue())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .manageOrders(ManageOrders.builder().build())
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaCafcassCymruServedOptions(Yes)
