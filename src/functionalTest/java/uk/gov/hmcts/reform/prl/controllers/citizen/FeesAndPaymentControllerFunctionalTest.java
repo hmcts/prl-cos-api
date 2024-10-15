@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration

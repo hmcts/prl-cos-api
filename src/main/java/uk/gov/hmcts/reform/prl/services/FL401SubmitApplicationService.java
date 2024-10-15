@@ -135,7 +135,7 @@ public class FL401SubmitApplicationService {
                 .build();
 
         } catch (Exception e) {
-            log.error("Notification could not be sent due to ", e);
+            log.error("Notification could not be sent due to {}", e.getMessage());
             caseData = caseData.toBuilder()
                 .isNotificationSent("No")
                 .build();
