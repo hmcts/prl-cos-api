@@ -1244,7 +1244,7 @@ public class DocumentGenService {
                                                                              .build()).build();
 
         } catch (Exception e) {
-            log.error("Error while uploading document .", e);
+            log.error("Error while uploading document .{}", e.getMessage());
             throw e;
         }
     }
@@ -1259,7 +1259,7 @@ public class DocumentGenService {
             return DocumentResponse.builder().status("Success").build();
 
         } catch (Exception e) {
-            log.error("Error while deleting  document .", e);
+            log.error("Error while deleting  document . {}", e.getMessage());
             throw e;
         }
     }

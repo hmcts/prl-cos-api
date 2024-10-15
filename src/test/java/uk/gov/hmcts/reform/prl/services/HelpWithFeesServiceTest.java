@@ -113,23 +113,6 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitApplicationsWithinProceedings() {
-        casedata = casedata.toBuilder()
-            .state(State.SUBMITTED_PAID)
-            .build();
-
-        caseDetails = caseDetails.toBuilder()
-            .state(State.SUBMITTED_PAID.getValue())
-            .data(new HashMap<>())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
-        assertNotNull(response);
-    }
-
-    @Test
     public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
@@ -148,24 +131,6 @@ public class HelpWithFeesServiceTest {
 
     @Test
     public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsNull() {
-        casedata = casedata.toBuilder()
-            .state(State.SUBMITTED_PAID)
-            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())
-            .build();
-
-        caseDetails = caseDetails.toBuilder()
-            .state(State.SUBMITTED_PAID.getValue())
-            .data(new HashMap<>())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        Map<String, Object> response = helpWithFeesService
-            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
-        assertNotNull(response);
-    }
-
-    @Test
-    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmpty() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
             .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder().build())

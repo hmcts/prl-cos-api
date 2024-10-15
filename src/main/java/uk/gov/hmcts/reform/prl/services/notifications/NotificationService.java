@@ -307,7 +307,7 @@ public class NotificationService {
                     .build()
             );
         } catch (IOException e) {
-            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage(), e);
+            log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -373,8 +373,8 @@ public class NotificationService {
                     bulkPrintId
                 );
             } catch (Exception e) {
-                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId(), e);
-                throw new RuntimeException(e);
+                log.error("Failed to send response documents to applicant {} in the case {}", applicant.getId(), caseData.getId());
+                throw (new RuntimeException(e));
             }
         } else {
             log.warn("Couldn't post response documents - address is null/empty for applicant {} in the case {}", applicant.getId(), caseData.getId());
@@ -411,16 +411,21 @@ public class NotificationService {
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             for (Element<ServedApplicationDetails> soaPack : caseData.getFinalServedApplicationDetailsList()) {
                 if (CollectionUtils.isNotEmpty(soaPack.getValue().getEmailNotificationDetails())) {
-                    for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
-                        if (SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
-                            cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
-                            break;
-                        }
-                    }
+                    cafcassCymruEmail = checkAndFetchCafcassCymruEmail(cafcassCymruEmail, soaPack);
                 }
                 if (null != cafcassCymruEmail) {
                     break;
                 }
+            }
+        }
+        return cafcassCymruEmail;
+    }
+
+    private String checkAndFetchCafcassCymruEmail(String cafcassCymruEmail, Element<ServedApplicationDetails> soaPack) {
+        for (Element<EmailNotificationDetails> soaEmail : soaPack.getValue().getEmailNotificationDetails()) {
+            if (SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(soaEmail.getValue().getServedParty())) {
+                cafcassCymruEmail = soaEmail.getValue().getEmailAddress();
+                break;
             }
         }
         return cafcassCymruEmail;

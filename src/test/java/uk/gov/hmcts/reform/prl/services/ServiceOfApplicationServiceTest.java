@@ -170,6 +170,9 @@ public class ServiceOfApplicationServiceTest {
     private UserService userService;
 
     @Mock
+    private ConfidentialityCheckService confidentialityCheckService;
+
+    @Mock
     CoreCaseDataApi coreCaseDataApi;
 
     @Mock
