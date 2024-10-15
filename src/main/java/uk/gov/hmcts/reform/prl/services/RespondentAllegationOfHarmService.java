@@ -63,27 +63,32 @@ public class RespondentAllegationOfHarmService {
 
                     switch (eachBehavior.name()) {
                         case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
-                                                                               checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                                                                               checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                     childAbuseBehaviourList, eachBehavior, abuse)
 
                         );
                             break;
                         case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
-                                                                                         checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                                                                                         checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                               childAbuseBehaviourList, eachBehavior, abuse)
 
                         );
                             break;
                         case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
-                                                                           checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                                                                           checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                 childAbuseBehaviourList, eachBehavior, abuse)
 
                         );
                             break;
                         case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
-                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior, abuse)
 
                         );
                             break;
                         case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
-                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior, abuse)
 
                         );
                             break;
