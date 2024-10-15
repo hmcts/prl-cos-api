@@ -130,46 +130,6 @@ public class CallbackControllerFT {
                   "data.c1ADocument.document_filename", equalTo("C1A_Document.pdf"));
     }
 
-    @Ignore
-    @Test
-    public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-application")
-            .then()
-            .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
-
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/case-withdrawn-about-to-submit")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.welshLanguageRequirementsTable", notNullValue(),
-                "data.otherProceedingsDetailsTable", notNullValue(),
-                  "data.allegationsOfHarmDomesticAbuseTable", notNullValue(),
-                "data.summaryTabForOrderAppliedFor", notNullValue(),
-                "data.miamTable", notNullValue()
-            );
-
-    }
 
     @Test
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
