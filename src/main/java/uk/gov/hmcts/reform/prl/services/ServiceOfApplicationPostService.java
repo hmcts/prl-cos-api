@@ -87,12 +87,12 @@ public class ServiceOfApplicationPostService {
             if (documentLanguage.isGenEng()) {
                 GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
                                                                                  coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet.pdf"));
             }
             if (documentLanguage.isGenWelsh()) {
                 GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
                                                                                  coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo, "coversheet_welsh.pdf"));
             }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
@@ -123,82 +123,9 @@ public class ServiceOfApplicationPostService {
         UploadResponse uploadResponse = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            List<MultipartFile> files = new ArrayList<>();
-            attachStaticFileToTheDocuments(
-                documentLanguage,
-                files,
-                PRIVACY_DOCUMENT_FILENAME,
-                PRIVACY_DOCUMENT_FILENAME_WELSH
-            );
-            // FPET-1056 Annex 1 file inclusion
-            if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
-                attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
-            }
-            //PRL-5360 - Remove mediation voucher & add new President note
-            attachStaticFileToTheDocuments(
-                documentLanguage,
-                files,
-                SOA_FAMILY_PRESIDENTS_NOTE,
-                SOA_FAMILY_PRESIDENTS_NOTE_WELSH
-            );
-            files.addAll(
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        C7_BLANK_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_C9_PERSONAL_SERVICE_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
-                    )
-                )
-            );
-            attachStaticFileToTheDocuments(
-                documentLanguage,
-                files,
-                C1A_BLANK_DOCUMENT_FILENAME,
-                C1A_BLANK_DOCUMENT_WELSH_FILENAME
-            );
-
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                files
-            );
+            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage, caseData);
         } else {
-
-            List<MultipartFile> files = new ArrayList<>(List.of(
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    PRIVACY_DOCUMENT_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                ),
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    SOA_FL415_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-                )
-            ));
-
-            // FPET-1056 Annex 1 file inclusion
-            if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
-                attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
-            }
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                files
-            );
+            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage, caseData);
         }
         if (null != uploadResponse) {
             List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
@@ -208,7 +135,76 @@ public class ServiceOfApplicationPostService {
         return Collections.emptyList();
     }
 
-    private void attachStaticFileToTheDocuments(DocumentLanguage documentLanguage, List<MultipartFile> files, String fileName, String fileNameWelsh) {
+    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage, CaseData caseData) {
+        List<MultipartFile> files = new ArrayList<>();
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
+        if (documentLanguage.isGenEng()) {
+            files.add(new InMemoryMultipartFile(
+                SOA_MULTIPART_FILE,
+                SOA_FL415_FILENAME,
+                APPLICATION_PDF_VALUE,
+                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+            ));
+        }
+        // FPET-1147 Annex 1 file inclusion
+        if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
+        }
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
+    }
+
+    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage, CaseData caseData) {
+        List<MultipartFile> files = new ArrayList<>();
+
+        attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+
+        // FPET-1056 Annex 1 file inclusion
+        if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
+        }
+        //PRL-5360 - Remove mediation voucher & add new President note
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_FAMILY_PRESIDENTS_NOTE, SOA_FAMILY_PRESIDENTS_NOTE_WELSH);
+
+        files.addAll(
+            List.of(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    C7_BLANK_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+                ),
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_C9_PERSONAL_SERVICE_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                )
+            )
+        );
+
+        attachStaticFileToTheDocuments(documentLanguage, files, C1A_BLANK_DOCUMENT_FILENAME, C1A_BLANK_DOCUMENT_WELSH_FILENAME);
+
+        return caseDocumentClient.uploadDocuments(
+            auth,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            files
+        );
+    }
+
+    private void attachStaticFileToTheDocuments(DocumentLanguage documentLanguage,
+                                                List<MultipartFile> files,
+                                                String fileName,
+                                                String fileNameWelsh) {
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(
                 SOA_MULTIPART_FILE,
@@ -292,7 +288,7 @@ public class ServiceOfApplicationPostService {
                 bulkPrintedId = String.valueOf(bulkPrintId);
             }
         } catch (Exception e) {
-            log.error("The bulk print service has failed", e);
+            log.error("The bulk print service has failed {}", e.getMessage());
         }
         Address address = Yes.equals(partyDetails.getIsAddressConfidential())
             ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
@@ -301,7 +297,7 @@ public class ServiceOfApplicationPostService {
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+            .printedDocs(String.join(",", docs.stream().filter(Objects::nonNull).map(Document::getDocumentFileName).toList()))
             .recipientsName(partyDetails.getLabelForDynamicList())
             .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
