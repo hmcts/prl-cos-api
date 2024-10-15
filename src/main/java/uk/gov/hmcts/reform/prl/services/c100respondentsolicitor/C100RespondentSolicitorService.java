@@ -1907,8 +1907,9 @@ public class C100RespondentSolicitorService {
                 partyDetailsBuilder.address(citizenDetails.getAddress());
                 partyDetailsBuilder.isCurrentAddressKnown(Yes);
                 boolean isEmail = Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
-                        || solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
-                        .contains(ConfidentialityListEnum.address);
+                        || (solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList() != null
+                    && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
+                        .contains(ConfidentialityListEnum.address));
                 partyDetailsBuilder.isAddressConfidential(isEmail ? Yes : No);
 
                 updateRespondentContactDetailsForDoc(solicitorRepresentedRespondent, citizenDetails, partyDetailsBuilder);
@@ -1923,8 +1924,9 @@ public class C100RespondentSolicitorService {
         if (citizenDetails.getContact() != null && citizenDetails.getContact().getPhoneNumber() != null) {
             partyDetailsBuilder.phoneNumber(citizenDetails.getContact().getPhoneNumber());
             boolean isPhone = Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())
-                    || solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
-                    .contains(ConfidentialityListEnum.phoneNumber);
+                    || (solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList() != null
+                && solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList()
+                    .contains(ConfidentialityListEnum.phoneNumber));
             partyDetailsBuilder.isPhoneNumberConfidential(isPhone ? Yes : No);
 
         }
