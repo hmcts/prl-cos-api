@@ -327,7 +327,7 @@ public class TaskListService {
                         .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
                         .build();
             } catch (Exception e) {
-                log.error("Error regenerating the document", e);
+                log.error("Error regenerating the document {}", e.getMessage());
             }
         }
 

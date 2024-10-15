@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -44,6 +45,10 @@ public class ConfidentialityCheckController {
 
     private final ObjectMapper objectMapper;
 
+    private final ConfidentialityCheckService confidentialityCheckService;
+
+
+
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
     @ApiResponses(value = {
@@ -58,8 +63,10 @@ public class ConfidentialityCheckController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             if (CaseUtils.unServedPacksPresent(caseData)) {
+                Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+                confidentialityCheckService.processRespondentsC8Documents(caseDataMap,caseData);
                 log.info("Packs present to serve");
-                return AboutToStartOrSubmitCallbackResponse.builder().build();
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
@@ -69,6 +76,7 @@ public class ConfidentialityCheckController {
         }
 
     }
+
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Confidentiality check about to submit event")
@@ -87,6 +95,8 @@ public class ConfidentialityCheckController {
                 caseData,
                 callbackRequest.getEventId()
             ));
+            //PRL-3466 - auto link citizen case if conf check is approved
+            serviceOfApplicationService.autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {

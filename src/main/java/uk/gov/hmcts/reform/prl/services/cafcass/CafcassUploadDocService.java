@@ -223,7 +223,7 @@ public class CafcassUploadDocService {
                 caseId
             );
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }
         return null;
     }
