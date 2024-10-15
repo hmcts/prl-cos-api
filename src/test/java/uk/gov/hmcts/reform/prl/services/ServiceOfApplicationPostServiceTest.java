@@ -455,7 +455,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
                                                                                     .isGenWelsh(true)
                                                                                     .isGenEng(true).build());
-        List<Document> docs= serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData);
+        List<Document> docs = serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData);
         assertNotNull(docs);
     }
 
