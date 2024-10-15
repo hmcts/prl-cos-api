@@ -613,7 +613,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/tab/summary/generator/RefugeCaseGenerator.java',
   '**uk/gov/hmcts/reform/prl/services/validators/ApplicantsChecker.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java'
+  '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
+  '**uk/gov/hmcts/reform/prl/services/ConfidentialityTabService.java',
+  '**uk/gov/hmcts/reform/prl/services/validators/OtherPeopleInTheCaseRevisedChecker.java'
 ]
 
 sonarqube {

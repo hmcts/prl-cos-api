@@ -105,6 +105,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -120,7 +121,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
@@ -343,6 +346,7 @@ public class CallbackController {
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
+            cleanUpC8RefugeFields(caseData, caseDataUpdated);
 
             Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
             // updating Summary tab to update case status
@@ -382,6 +386,29 @@ public class CallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+        log.info("Start cleaning up on submit");
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            ofNullable(caseData.getApplicants()),
+            updatedCaseData,
+            APPLICANTS,
+            true
+        );
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            ofNullable(caseData.getRespondents()),
+            updatedCaseData,
+            RESPONDENTS,
+            true
+        );
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+            updatedCaseData,
+            OTHER_PARTY,
+            true
+        );
+        log.info("close cleaning up on submit");
     }
 
     private CaseData populateMiamPolicyUpgradeDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
