@@ -115,8 +115,6 @@ public class StmtOfServImplService {
                                                                                         .label(ALL_RESPONDENTS).build())
                                                                              .build())
                                                   .build()));
-
-        log.info("Statement of service dynamic list value:: {}", stmtOfServiceAddRecipient);
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
     }
@@ -124,9 +122,7 @@ public class StmtOfServImplService {
     public Map<String, Object> handleSosAboutToSubmit(CaseDetails caseDetails, String authorisation) {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("*** Statement of service, about-to-submit callback *** {}",
-                 caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
-        log.info("SOS request {}", caseData.getStatementOfService().getStmtOfServiceAddRecipient());
+        log.info("*** Statement of service, about-to-submit callback ***");
         if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
             .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
             //Application packs
@@ -221,7 +217,7 @@ public class StmtOfServImplService {
                                                              CaseData caseData,
                                                              StmtOfServiceAddRecipient recipient,
                                                              List<Element<OrderDetails>> orderCollection) {
-        log.info("Inside *getUpdatedSosRecipient*, sosRecipient {}", recipient);
+        log.info("Inside *getUpdatedSosRecipient*");
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
                 List<String> respondentNamesList = CaseUtils.getPartyNameList(caseData.getRespondents());
@@ -268,7 +264,7 @@ public class StmtOfServImplService {
     private void updateOrdersServedParties(CaseData caseData,
                                            List<Element<OrderDetails>> orderCollection,
                                            List<Element<ServedParties>> servedParties) {
-        log.info("Inside *updateOrdersServedParties*, servedParties {}", servedParties);
+        log.info("Inside *updateOrdersServedParties*");
         if (CollectionUtils.isNotEmpty(orderCollection)) {
             //PRL-6122 served parties in order collection
             nullSafeCollection(orderCollection)
@@ -369,7 +365,6 @@ public class StmtOfServImplService {
                                                            .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue()
                                                                                                                    .getDocumentFileName()))
                                                            .toList());
-        log.info("Pack Docs {}", docs);
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String partyId = String.valueOf(caseData.getRespondentsFL401().getPartyId());
@@ -417,7 +412,6 @@ public class StmtOfServImplService {
                                                                               caseData.getServiceOfApplication().getUnServedRespondentPack()
                                                 .getCoverLettersMap())));
             }
-            log.info("Docs after adding cover letter {} {}", partyId, docs);
             if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 emailNotificationDetails.add(element(getEmailNotificationDetailsForaParty(docs, partyId)));
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
