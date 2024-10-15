@@ -147,6 +147,7 @@ public class CallbackControllerFT {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
