@@ -99,7 +99,7 @@ public class EditAndApproveDraftOrderController {
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 caseData = caseData.toBuilder()
                     .state(ObjectUtils.isEmpty(caseData.getState()) && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetails())
-                           ? State.fromValue(callbackRequest.getCaseDetails().getState()) : caseData.getState())
+                               ? State.fromValue(callbackRequest.getCaseDetails().getState()) : caseData.getState())
                     .build();
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.getDraftOrderDynamicList(
@@ -472,7 +472,7 @@ public class EditAndApproveDraftOrderController {
                         draftOrder
                     );
                 } catch (Exception e) {
-                    log.error("Failed to send email to solicitor :", e);
+                    log.error("Failed to send email to solicitor : {}", e.getMessage());
                 }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
