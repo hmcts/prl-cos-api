@@ -308,7 +308,7 @@ public class NotificationService {
             );
         } catch (IOException e) {
             log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage());
-            throw new RuntimeException(e);
+            throw (new RuntimeException(e));
         }
     }
 
