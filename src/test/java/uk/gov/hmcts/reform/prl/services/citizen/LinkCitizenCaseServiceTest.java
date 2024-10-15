@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -285,5 +287,16 @@ public class LinkCitizenCaseServiceTest {
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testInValidAccessCode() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class))
+            .thenReturn(caseData.toBuilder().caseTypeOfApplication(FL401_CASE_TYPE).build());
+        when(launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)).thenReturn(false);
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 }

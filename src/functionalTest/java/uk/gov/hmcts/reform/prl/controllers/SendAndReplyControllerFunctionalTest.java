@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 
+@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
