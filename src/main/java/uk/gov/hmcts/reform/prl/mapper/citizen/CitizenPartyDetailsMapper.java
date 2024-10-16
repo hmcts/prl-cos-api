@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -75,6 +77,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHelpWithFeesElementsMapper.updateHelpWithFeesDetailsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
@@ -226,7 +229,8 @@ public class CitizenPartyDetailsMapper {
                                  oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
                                      : oldCaseData.getCourtSeal());
         if (oldCaseData.getTaskListVersion() != null
-            && TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())) {
+            && (TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(oldCaseData.getTaskListVersion()))) {
             List<Element<ChildDetailsRevised>> listOfChildren = oldCaseData.getNewChildDetails();
             dataMapForC8Document.put(CHILDREN, listOfChildren);
 
@@ -558,7 +562,12 @@ public class CitizenPartyDetailsMapper {
             .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
-            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .isAtAddressLessThan5Years(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()
+                ? mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5Years())
+            .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow()
+                ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
+                : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
@@ -578,8 +587,31 @@ public class CitizenPartyDetailsMapper {
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(existingPartyDetails.getResponse().toBuilder()
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
+                          .safeToCallOption(fetchSafeToCallOption(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
+        return null != citizenProvidedPartyDetails.getResponse()
+            ? citizenProvidedPartyDetails.getResponse().getSafeToCallOption()
+            : null;
+    }
+
+    private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
+            return Yes;
+        } else {
+            return No;
+        }
+    }
+
+    private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
+        if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
+            return YesNoDontKnow.yes;
+        } else {
+            return YesNoDontKnow.no;
+        }
     }
 
     private CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
@@ -817,6 +849,8 @@ public class CitizenPartyDetailsMapper {
                                                     c100C100RebuildSafetyConcernsElements,
                                                     c100RebuildChildDetailsElements);
         }
+
+        updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
 

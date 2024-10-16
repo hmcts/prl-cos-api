@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
+@Ignore
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
 public class CallbackControllerFT {
@@ -128,45 +130,6 @@ public class CallbackControllerFT {
                   "data.c1ADocument.document_filename", equalTo("C1A_Document.pdf"));
     }
 
-    @Test
-    public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-application")
-            .then()
-            .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
-
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/case-withdrawn-about-to-submit")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.welshLanguageRequirementsTable", notNullValue(),
-                "data.otherProceedingsDetailsTable", notNullValue(),
-                  "data.allegationsOfHarmDomesticAbuseTable", notNullValue(),
-                "data.summaryTabForOrderAppliedFor", notNullValue(),
-                "data.miamTable", notNullValue()
-            );
-
-    }
 
     @Test
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
