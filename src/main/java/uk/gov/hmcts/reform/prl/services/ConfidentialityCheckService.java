@@ -3,7 +3,10 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -30,10 +33,15 @@ public class ConfidentialityCheckService {
 
                 switch (caseData.getRespondents().indexOf(eachRes)) {
                     case 0 -> {
-                        ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
+                        if (eachRes.getValue().getLiveInRefuge() != null
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, findLatestC8RefugeDocument(eachRes));
+                        } else {
+                            ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 0));
-                        caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
-                        caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
+                            caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
+                            caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
+                        }
                     }
                     case 1 -> {
                         ResponseDocuments responseDocumentB = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
@@ -85,6 +93,14 @@ public class ConfidentialityCheckService {
             return ResponseDocuments.builder().respondentC8Document(engFromDoc).respondentC8DocumentWelsh(welFromDoc).build();
         }
         return ResponseDocuments.builder().build();
+    }
+
+    private Document findLatestC8RefugeDocument(Element<PartyDetails> eachRes) {
+        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+            return null;
+        } else {
+            return eachRes.getValue().getRefugeConfidentialityC8Form();
+        }
     }
 
 
