@@ -135,9 +135,9 @@ public class CaseDataService {
                     searchResult,
                     CafCassResponse.class
                 );
-
+                log.info("Initial cafCassResponse --> {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-                    addSpecificDocumnetsFromCaseFileViewBasedOnCategories(cafCassResponse, authorisation, serviceAuthorisation);
+                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse, authorisation, serviceAuthorisation);
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
@@ -157,7 +157,7 @@ public class CaseDataService {
         return cafCassResponse;
     }
 
-    private void addSpecificDocumnetsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse,
+    private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse,
                                                                       String authorisation,
                                                                       String serviceAuthorisation) {
 
