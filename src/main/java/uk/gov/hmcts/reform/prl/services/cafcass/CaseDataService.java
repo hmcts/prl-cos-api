@@ -212,12 +212,15 @@ public class CaseDataService {
     }
 
     private boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+        log.info("documentFilename " + documentFilename);
+        boolean isExcluded = false;
         for (String excludedDocumentName : excludedDocumentList) {
-            if (documentFilename.startsWith(excludedDocumentName)) {
-                return true;
+            if (documentFilename.contains(excludedDocumentName)) {
+                isExcluded = true;
             }
         }
-        return false;
+        log.info("isExcluded " + isExcluded);
+        return isExcluded;
     }
 
     public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) {
