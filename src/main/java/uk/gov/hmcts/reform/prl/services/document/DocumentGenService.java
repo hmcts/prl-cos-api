@@ -489,13 +489,28 @@ public class DocumentGenService {
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            if (isAohPresent(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, getDocument(authorisation, caseData, C1A_DRAFT_HINT, false));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
+            }
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            if (isAohPresent(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, getDocument(authorisation, caseData, C1A_DRAFT_HINT, true));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+            }
         }
 
         return updatedCaseData;
+    }
+
+    private static boolean isAohPresent(CaseData caseData) {
+        return caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo());
     }
 
     public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
