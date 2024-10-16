@@ -546,6 +546,62 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
+    public void testRefugeApplicantConfidentialDetails() {
+
+        refugePartyDetails1 = refugePartyDetails1.toBuilder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails2 = refugePartyDetails2.toBuilder()
+            .firstName("ABC 2")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .phoneNumber("12345678900")
+            .email("abc2@xyz.com")
+            .build();
+
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build(),
+                Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 2")
+                               .lastName("XYZ 2")
+                               .email("abc2@xyz.com")
+                               .phoneNumber("12345678900")
+                               .address(address)
+                               .build()).build());
+
+        assertEquals(
+            expectedOutput,
+            confidentialityTabService.getConfidentialApplicantDetails(List.of(refugePartyDetails1, refugePartyDetails2))
+        );
+
+    }
+
+    @Test
     public void testApplicantRefuge() {
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
