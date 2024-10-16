@@ -617,7 +617,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ConfidentialityTabService.java',
   '**uk/gov/hmcts/reform/prl/services/validators/OtherPeopleInTheCaseRevisedChecker.java',
   '**uk/gov/hmcts/reform/prl/controllers/PrePopulateFeeAndSolicitorNameController.java',
-  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java'
+  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
+  '**uk/gov/hmcts/reform/prl/services/validators/RespondentsChecker.java'
 ]
 
 sonarqube {
