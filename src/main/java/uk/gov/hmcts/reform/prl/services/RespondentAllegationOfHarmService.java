@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -57,39 +58,50 @@ public class RespondentAllegationOfHarmService {
                     ofNullable(respondentAllegationsOfHarm.get().getRespChildFinancialAbuse());
 
 
+            if (CollectionUtils.isNotEmpty(respondentAllegationsOfHarm.get().getRespChildAbuses())) {
+                for (ChildAbuseEnum eachBehavior : respondentAllegationsOfHarm.get().getRespChildAbuses()) {
 
-            for (ChildAbuseEnum eachBehavior : respondentAllegationsOfHarm.get().getRespChildAbuses()) {
+                    switch (eachBehavior.name()) {
+                        case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
+                                                                               checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                     childAbuseBehaviourList, eachBehavior,
+                                                                                                     abuse)
 
-                switch (eachBehavior.name()) {
-                    case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
+                                                                                         checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                               childAbuseBehaviourList, eachBehavior,
+                                                                                                               abuse)
 
-                    );
-                        break;
-                    case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
+                                                                           checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                 childAbuseBehaviourList, eachBehavior, abuse)
 
-                    );
-                        break;
-                    case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior,
+                                                                                                       abuse)
 
-                    );
-                        break;
-                    case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior,
+                                                                                                       abuse)
 
-                    );
-                        break;
-                    case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                        break;
-                    default : {
-                        //
+                        );
+                            break;
+                        default : {
+                            //
+                        }
                     }
                 }
+
             }
             respondentAllegationsOfHarmData.toBuilder().respChildAbuseBehavioursDocmosis(childAbuseBehaviourList);
 
