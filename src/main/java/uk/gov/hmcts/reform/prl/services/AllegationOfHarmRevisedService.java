@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +125,6 @@ public class AllegationOfHarmRevisedService {
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
         }
-
         return caseData;
     }
 
@@ -316,5 +316,21 @@ public class AllegationOfHarmRevisedService {
 
 
         return caseDataMap;
+    }
+
+    public void resetFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
+        if (Objects.nonNull(allegationOfHarmRevised)) {
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
+                caseDataUpdated.put("newAllegationsOfHarmSubstanceAbuseDetails", "");
+            }
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmOtherConcerns())) {
+                caseDataUpdated.put("newAllegationsOfHarmOtherConcernsDetails", "");
+            }
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
+                caseDataUpdated.put("childAbuses", Collections.emptyList());
+            }
+
+        }
     }
 }

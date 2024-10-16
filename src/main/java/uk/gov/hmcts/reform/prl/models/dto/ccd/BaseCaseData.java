@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
 
@@ -43,6 +44,11 @@ public class BaseCaseData {
     private String caseSubmittedTimeStamp;
 
     private String courtSeal;
+
+    @JsonProperty("c1ADraftDocument")
+    private  Document c1ADraftDocument;
+    @JsonProperty("c1AWelshDraftDocument")
+    private  Document c1AWelshDraftDocument;
 
     /**
      * Case Type Of Application.
