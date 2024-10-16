@@ -161,10 +161,10 @@ public class CaseDataService {
                                                                       String authorisation,
                                                                       String serviceAuthorisation) {
 
-
+        String systemAuthorisation = systemUserService.getSysUserToken();
         cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
-                authorisation,
+                systemAuthorisation,
                 serviceAuthorisation,
                 String.valueOf(cafCassCaseDetail.getId())
             );
