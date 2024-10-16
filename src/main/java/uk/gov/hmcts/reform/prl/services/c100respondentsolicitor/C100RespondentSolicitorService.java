@@ -229,6 +229,9 @@ public class C100RespondentSolicitorService {
                                     .firstName(ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
                                     .lastName(ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
                                     .placeOfBirth(ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
+                                    .liveInRefuge(ofNullable(citizenDetails.getLiveInRefuge()).orElse(partyDetails.getLiveInRefuge()))
+                                    .refugeConfidentialityC8Form(ofNullable(citizenDetails.getRefugeConfidentialityC8Form())
+                                                                     .orElse(partyDetails.getRefugeConfidentialityC8Form()))
                                     .previousName(ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
                                     .build()
                     );
@@ -680,6 +683,8 @@ public class C100RespondentSolicitorService {
                                 .dateOfBirth(citizenDetails.getDateOfBirth())
                                 .previousName(citizenDetails.getPreviousName())
                                 .placeOfBirth(citizenDetails.getPlaceOfBirth())
+                                .liveInRefuge(citizenDetails.getLiveInRefuge())
+                                .refugeConfidentialityC8Form(citizenDetails.getRefugeConfidentialityC8Form())
                                 .address(citizenDetails.getAddress())
                                 .addressHistory(citizenDetails.getAddressHistory())
                                 .contact(citizenDetails.getContact())

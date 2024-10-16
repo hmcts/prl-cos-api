@@ -34,6 +34,9 @@ public class ConfidentialityCheckService {
                                 caseData.getRespondentC8(), 0));
                         caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
                         caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
+                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                            caseDataMap.put("respAC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        }
                     }
                     case 1 -> {
                         ResponseDocuments responseDocumentB = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
