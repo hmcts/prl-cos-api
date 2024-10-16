@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -241,6 +242,11 @@ public class CallbackController {
         @RequestBody @Parameter(name = "CaseData") CallbackRequest request
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            try {
+                log.info("callbackRequest while submitting the case is ===>" + objectMapper.writeValueAsString(request.getCaseDetails()));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
