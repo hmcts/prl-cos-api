@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -61,8 +60,8 @@ public class ConfidentialityTabServiceTest {
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
 
-    PartyDetails C8PartyDetails1;
-    PartyDetails C8PartyDetails2;
+    PartyDetails refugePartyDetails1;
+    PartyDetails refugePartyDetails2;
 
     @Before
     public void setUp() {
@@ -73,7 +72,7 @@ public class ConfidentialityTabServiceTest {
             .postCode("AB1 2YZ")
             .build();
 
-        C8PartyDetails1 = PartyDetails.builder()
+        refugePartyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
             .dateOfBirth(LocalDate.of(2000, 01, 01))
@@ -91,7 +90,7 @@ public class ConfidentialityTabServiceTest {
             .liveInRefuge(YesOrNo.Yes)
             .build();
 
-        C8PartyDetails2 = PartyDetails.builder()
+        refugePartyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
             .dateOfBirth(LocalDate.of(2000, 01, 01))
@@ -548,8 +547,7 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testApplicantRefuge() {
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(C8PartyDetails1).build();
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -566,8 +564,7 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testRefugeNoApplicant() {
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(C8PartyDetails1).build();
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -576,8 +573,7 @@ public class ConfidentialityTabServiceTest {
                 Optional.of(partyDetailsWrappedList),
                 updatedCaseData,
                 " ",
-                false
-            );
+                false);
 
         assertTrue(updatedCaseData.containsKey(" "));
 
@@ -586,10 +582,10 @@ public class ConfidentialityTabServiceTest {
     @Test
     public void testRefugeCleanup() {
 
-        C8PartyDetails1 = C8PartyDetails1.toBuilder()
+        refugePartyDetails1 = refugePartyDetails1.toBuilder()
             .liveInRefuge(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(C8PartyDetails1).build();
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -598,8 +594,7 @@ public class ConfidentialityTabServiceTest {
                 Optional.of(partyDetailsWrappedList),
                 updatedCaseData,
                 " ",
-                true
-            );
+                true);
 
         assertTrue(updatedCaseData.containsKey(" "));
 
