@@ -105,6 +105,7 @@ public class RespondentsChecker implements EventChecker {
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             isGenderCompleted(respondent, fields);
             isPlaceOfBirthCompleted(respondent, fields);
+            isRefugeInformationCompleted(respondent, fields);
             isAtAddressLessThan5YearsCompleted(respondent, fields);
             isDoTheyHaveLegalRepresentationCompleted(respondent, fields);
         }
@@ -166,6 +167,14 @@ public class RespondentsChecker implements EventChecker {
         fields.add(isPlaceOfBirthKnown);
         if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getPlaceOfBirth()));
+        }
+    }
+
+    public void isRefugeInformationCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesOrNo> isLivingInRefuge = ofNullable(respondent.getLiveInRefuge());
+        fields.add(isLivingInRefuge);
+        if (isLivingInRefuge.isPresent() && Yes.equals(isLivingInRefuge)) {
+            fields.add(ofNullable(respondent.getRefugeConfidentialityC8Form()));
         }
     }
 
