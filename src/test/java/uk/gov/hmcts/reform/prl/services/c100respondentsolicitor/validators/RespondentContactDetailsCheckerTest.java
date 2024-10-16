@@ -60,6 +60,7 @@ public class RespondentContactDetailsCheckerTest {
                                               .builder()
                                               .firstName("Test")
                                               .lastName("Test")
+                                              .liveInRefuge(No)
                                               .dateOfBirth(LocalDate.of(2000, 8, 20))
                                               .address(address)
                                               .contact(Contact.builder()
