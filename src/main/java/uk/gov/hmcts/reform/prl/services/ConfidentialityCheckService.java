@@ -30,7 +30,8 @@ public class ConfidentialityCheckService {
 
                 switch (caseData.getRespondents().indexOf(eachRes)) {
                     case 0 -> {
-                        ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData..getRespondentC8Document(),
+                        log.info("inside Mary Richards");
+                        ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 0));
                         caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
                         caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
@@ -91,16 +92,20 @@ public class ConfidentialityCheckService {
     private ResponseDocuments findLatestC8Document(RespondentC8Document respondentC8Document, RespondentC8 respondentC8, int index) {
         ResponseDocuments respondentDocument = getRespondentC8Document(respondentC8Document, index);
         ResponseDocuments respondentDoc = getRespondentC8(respondentC8, index);
+        log.info("Inside findLatestC8Document");
 
         if (respondentDocument != null && respondentDoc != null) {
+            log.info("Inside null checker 1");
             if (respondentDoc.getDateTimeCreated().isAfter(respondentDocument.getDateTimeCreated())) {
                 return respondentDoc;
             }
             return respondentDocument;
         } else if (respondentDocument != null) {
+            log.info("Inside null checker 2");
             return respondentDocument;
 
         } else if (respondentDoc != null) {
+            log.info("Inside null checker 3");
             return respondentDoc;
         }
         return null;
