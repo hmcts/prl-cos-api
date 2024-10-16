@@ -211,11 +211,15 @@ public class CaseDataService {
         });
     }
 
-    private boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+    public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
         log.info("documentFilename " + documentFilename);
+        log.info("excludedDocumentList " + excludedDocumentList);
         boolean isExcluded = false;
         for (String excludedDocumentName : excludedDocumentList) {
+            log.info("excludedDocumentName " + excludedDocumentName);
+            log.info("documentFilename.contains(excludedDocumentName) " + documentFilename.contains(excludedDocumentName));
             if (documentFilename.contains(excludedDocumentName)) {
+                log.info("set isExcluded true");
                 isExcluded = true;
             }
         }
