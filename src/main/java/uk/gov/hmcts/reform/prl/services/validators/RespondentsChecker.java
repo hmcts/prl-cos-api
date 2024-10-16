@@ -105,7 +105,7 @@ public class RespondentsChecker implements EventChecker {
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             isGenderCompleted(respondent, fields);
             isPlaceOfBirthCompleted(respondent, fields);
-            isRefugeInformationCompleted(respondent, fields);
+            //isRefugeInformationCompleted(respondent, fields);
             isAtAddressLessThan5YearsCompleted(respondent, fields);
             isDoTheyHaveLegalRepresentationCompleted(respondent, fields);
         }
