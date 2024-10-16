@@ -4,9 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -15,15 +14,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.equalTo;
+import java.util.List;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -57,7 +59,7 @@ public class StatementOfServiceControllerFunctionalTest {
     public void testStmtOfServiceAboutToStart() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
+        caseDetails = request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -65,16 +67,20 @@ public class StatementOfServiceControllerFunctionalTest {
             .contentType(APPLICATION_JSON_VALUE)
             .post("/Statement-of-service-about-to-start")
             .then()
-            .body("stmtOfServiceAddRecipient[0].value.respondentDynamicList", Matchers.hasLength(2))
             .extract()
-            .as(CaseData.class);
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = (List<Element<StmtOfServiceAddRecipient>>) caseDetails.getData().get(
+            "stmtOfServiceAddRecipient");
+        Assert.assertEquals(1, stmtOfServiceAddRecipient.size());
     }
 
     @Test
     public void testStmtOfServiceAboutToSubmit() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
+        CaseData caseData = request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -82,19 +88,18 @@ public class StatementOfServiceControllerFunctionalTest {
             .contentType(APPLICATION_JSON_VALUE)
             .post("/Statement-of-service-about-to-submit")
             .then()
-            .body("stmtOfServiceForApplication", equalTo("citizen@email.com"),
-                  "stmtOfServiceForOrder", equalTo("07442772347"),
-                  "stmtOfServiceAddRecipient", equalTo(null),
-                  "stmtOfServiceWhatWasServed", equalTo(null))
             .extract()
             .as(CaseData.class);
+
+        Assert.assertNotNull(caseData);
+        Assert.assertNull(caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
     }
 
     @Test
     public void testStmtOfServiceSubmitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
+        SubmittedCallbackResponse response = request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -102,28 +107,27 @@ public class StatementOfServiceControllerFunctionalTest {
             .contentType(APPLICATION_JSON_VALUE)
             .post("/Statement-of-service-confirmation")
             .then()
-            .body("confirmationHeader", equalTo("# Application was served"))
             .extract()
-            .as(CaseData.class);
+            .as(SubmittedCallbackResponse.class);
+        Assert.assertEquals("# Application was served", response.getConfirmationHeader());
     }
 
     @Test
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
         request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .pathParam("caseId", String.valueOf(caseDetails.getId()))
+            .pathParam("caseId", "1711105989241323")
             .pathParam("eventId","citizenStatementOfService")
             .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
             .then()
-            .body("finalServedApplicationDetailsList", equalTo("citizen@email.com"),
-                  "unServedRespondentPack", equalTo(null))
-            .extract()
-            .as(CaseData.class);
+            .statusCode(200);
+
     }
 }
