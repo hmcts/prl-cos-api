@@ -3020,12 +3020,15 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
+        dataMap.put("isCitizen", false);
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
-            dataMap.put("isCitizen", CaseUtils.isCitizenCase(caseData));
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+            }
             // This check is added to disable or enable DA citizen journey as needed
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", false);
+                && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
+                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
         }
         return dataMap;
