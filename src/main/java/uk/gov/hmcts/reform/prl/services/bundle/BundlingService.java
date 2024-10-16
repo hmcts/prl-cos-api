@@ -48,9 +48,7 @@ public class BundlingService {
                                               BundleCreateRequest bundleCreateRequest) {
         BundleCreateResponse bundleCreateResponse = null;
         try {
-            log.info("Bundle create request: {}", bundleCreateRequest);
             bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
-            log.info("Bundle create response: {}", bundleCreateResponse);
         } catch (Exception e) {
             log.error("Error in creating bundle service request",e);
         }
