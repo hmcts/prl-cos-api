@@ -21,7 +21,7 @@ public class CitizenDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final String placeOfBirth;
-    private YesOrNo liveInRefuge;
+    private final YesOrNo liveInRefuge;
     private Document refugeConfidentialityC8Form;
     private final Address address;
     private AddressHistory addressHistory;
