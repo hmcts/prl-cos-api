@@ -32,7 +32,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -549,10 +554,11 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(Optional.of(partyDetailsWrappedList),
-                                                               updatedCaseData,
-                                                               "applicants",
-                                                               false);
+            .processForcePartiesConfidentialityIfLivesInRefuge(
+                Optional.of(partyDetailsWrappedList),
+                updatedCaseData,
+                "applicants",
+                false);
 
         assertTrue(updatedCaseData.containsKey("applicants"));
 
@@ -566,10 +572,12 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(Optional.of(partyDetailsWrappedList),
-                                                               updatedCaseData,
-                                                               " ",
-                                                               false);
+            .processForcePartiesConfidentialityIfLivesInRefuge(
+                Optional.of(partyDetailsWrappedList),
+                updatedCaseData,
+                " ",
+                false
+            );
 
         assertTrue(updatedCaseData.containsKey(" "));
 
@@ -586,10 +594,12 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(Optional.of(partyDetailsWrappedList),
-                                                               updatedCaseData,
-                                                               " ",
-                                                               true);
+            .processForcePartiesConfidentialityIfLivesInRefuge(
+                Optional.of(partyDetailsWrappedList),
+                updatedCaseData,
+                " ",
+                true
+            );
 
         assertTrue(updatedCaseData.containsKey(" "));
 
