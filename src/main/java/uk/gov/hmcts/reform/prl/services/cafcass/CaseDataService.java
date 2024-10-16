@@ -200,10 +200,11 @@ public class CaseDataService {
                 category.getDocuments().forEach(document -> {
                     if (CollectionUtils.isEmpty(excludedDocumentList)
                         || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
+                        log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
                         otherDocsList.add(Element.<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>builder().id(
                             UUID.randomUUID()).value(uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments.builder().documentOther(
-                            buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).docCategory(
-                            category.getCategoryId()).build()).build());
+                            buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
+                            DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
                     }
                 });
             }

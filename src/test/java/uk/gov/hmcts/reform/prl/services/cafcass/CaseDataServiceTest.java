@@ -221,7 +221,7 @@ public class CaseDataServiceTest {
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
-        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+        Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
 
         CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(coreCaseDataApi.getCategoriesAndDocuments(

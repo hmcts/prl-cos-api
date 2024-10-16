@@ -26,5 +26,4 @@ public class OtherDocuments {
     private Document documentOther;
     private DocTypeOtherDocumentsEnum documentTypeOther;
     private List<RestrictToCafcassHmcts> restrictCheckboxOtherDocuments;
-    private String docCategory;
 }
