@@ -86,6 +86,7 @@
               "dateOfBirth": null,
               "placeOfBirth": null,
               "previousName": null,
+              "liveInRefuge": "No",
               "addressHistory": {
                 "previousAddressHistory": [
 
@@ -662,7 +663,6 @@
           "dateOfBirth": null,
           "otherGender": null,
           "phoneNumber": null,
-          "liveInRefuge": null,
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
@@ -2203,6 +2203,7 @@
               "firstName": null,
               "dateOfBirth": null,
               "placeOfBirth": null,
+              "liveInRefuge": "No",
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
@@ -2640,7 +2641,6 @@
           "dateOfBirth": "1980-11-12",
           "otherGender": null,
           "phoneNumber": "07405123456",
-          "liveInRefuge": "No",
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
@@ -2782,6 +2782,7 @@
               "dateOfBirth": null,
               "placeOfBirth": null,
               "previousName": null,
+              "liveInRefuge": "No",
               "addressHistory": {
                 "previousAddressHistory": [
 
@@ -3218,7 +3219,6 @@
           "dateOfBirth": "1988-02-29",
           "otherGender": null,
           "phoneNumber": "07405987654",
-          "liveInRefuge": "No",
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
@@ -3449,6 +3449,7 @@
               "dateOfBirth": null,
               "placeOfBirth": null,
               "previousName": null,
+              "liveInRefuge": "No",
               "addressHistory": {
                 "previousAddressHistory": [
 
@@ -3885,7 +3886,6 @@
           "dateOfBirth": "1985-02-15",
           "otherGender": null,
           "phoneNumber": "7405999999",
-          "liveInRefuge": null,
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
@@ -4020,6 +4020,7 @@
               "dateOfBirth": null,
               "placeOfBirth": null,
               "previousName": null,
+              "liveInRefuge": "No",
               "addressHistory": {
                 "previousAddressHistory": [
 
@@ -4456,7 +4457,6 @@
           "dateOfBirth": null,
           "otherGender": null,
           "phoneNumber": "7405111111",
-          "liveInRefuge": null,
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
