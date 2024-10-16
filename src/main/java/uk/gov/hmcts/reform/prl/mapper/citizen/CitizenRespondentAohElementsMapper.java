@@ -166,7 +166,8 @@ public class CitizenRespondentAohElementsMapper {
                                                                RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         if (YesOrNo.No.equals(respondentAllegationsOfHarmData.getRespAohChildAbuseYesNo())
-            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild()) {
             return respondentAllegationsOfHarmData;
         }
 
