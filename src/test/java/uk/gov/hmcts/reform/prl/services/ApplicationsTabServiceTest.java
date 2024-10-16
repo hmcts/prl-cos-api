@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
@@ -1117,6 +1118,24 @@ public class ApplicationsTabServiceTest {
         when(objectMapper.convertValue(welshLanguageRequirements, Map.class)).thenReturn(welshMap);
         assertEquals(welshMap, applicationsTabService.getWelshLanguageRequirementsTable(caseDataWithParties));
 
+    }
+
+    @Test
+    public void testWelshLanguageTableMapperWhenWelshLanguageRequirementIsNo() {
+        CaseData welshLanguageCaseData = CaseData.builder().welshLanguageRequirement(No)
+            .languageRequirementApplicationNeedWelsh(No)
+            .welshLanguageRequirementApplication(LanguagePreference.welsh)
+            .build();
+
+        WelshLanguageRequirements welshLanguageRequirements = WelshLanguageRequirements.builder()
+            .welshLanguageRequirement(No)
+            .build();
+
+        Map<String, Object> welshMap = Map.of(
+            "welshLanguageRequirement", No
+        );
+        when(objectMapper.convertValue(welshLanguageRequirements, Map.class)).thenReturn(welshMap);
+        assertEquals(welshMap, applicationsTabService.getWelshLanguageRequirementsTable(welshLanguageCaseData));
     }
 
     @Test
