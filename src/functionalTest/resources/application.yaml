@@ -613,8 +613,8 @@ cafcaas:
   caseTypeOfApplicationList: C100
   caseState: DECISION_OUTCOME,PREPARE_FOR_HEARING_CONDUCT_HEARING,ALL_FINAL_ORDERS_ISSUED
   hearingStatus: LISTED, CANCELLED
-  excludedDocumentCategories: draftOrders, judgeNotesFromHearing, previousOrdersSubmittedWithApplication, ordersFromOtherProceedings, safeguardingLetter, 16aRiskAssessment, guardianReport, otherDocs, emailsToCourtToRequestHearingsAdjourned, publicFundingCertificates, requestForFASFormsToBeChanged, witnessAvailability, lettersOfComplaint, internalCorrespondence, importantInfoAboutAddressAndContact, privacyNotice, MIAMCertificate
-  excludedDocuments: Draft_C100_application,C8Document, C1A_Document, C100FinalDocument
+  excludedDocumentCategories: draftOrders,judgeNotesFromHearing,previousOrdersSubmittedWithApplication,ordersFromOtherProceedings,safeguardingLetter,16aRiskAssessment,guardianReport,otherDocs,emailsToCourtToRequestHearingsAdjourned,publicFundingCertificates,requestForFASFormsToBeChanged,witnessAvailability,lettersOfComplaint,internalCorrespondence,importantInfoAboutAddressAndContact,privacyNotice,MIAMCertificate
+  excludedDocuments: Draft_C100_application,C8Document,C1A_Document,C100FinalDocument
 
 ccd:
   elastic-search-api:
