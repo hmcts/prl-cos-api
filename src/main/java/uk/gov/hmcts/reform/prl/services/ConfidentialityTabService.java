@@ -13,13 +13,17 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -368,6 +372,35 @@ public class ConfidentialityTabService {
             }
         }
         log.info("end forceConfidentialityChangeForRefuge");
+    }
+
+    public List<Element<RefugeConfidentialDocuments>> listRefugeDocumentsForConfidentialTab(
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        List<Element<PartyDetails>> partyDetailsWrappedList,
+        String party) {
+        log.info("start listRefugeDocumentsForConfidentialTab");
+        log.info("party we got now: " + party);
+        if (partyDetailsWrappedList != null) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.stream().map(Element::getValue).toList();
+            log.info("inside party details list");
+            for (PartyDetails partyDetails : partyDetailsList) {
+                log.info("inside party details for loop");
+                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                    RefugeConfidentialDocuments refugeConfidentialDocuments
+                        = RefugeConfidentialDocuments
+                        .builder()
+                        .partyType(party)
+                        .partyName(partyDetails.getLabelForDynamicList())
+                        .documentDetails(DocumentDetails.builder()
+                                             .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
+                                             .documentUploadedDate(String.valueOf(LocalDate.now())).build())
+                        .document(partyDetails.getRefugeConfidentialityC8Form()).build();
+                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                }
+            }
+        }
+        log.info("end listRefugeDocumentsForConfidentialTab");
+        return refugeDocuments;
     }
 
 }
