@@ -180,7 +180,7 @@ public class PrlAppsConstants {
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
 
-    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness Statements";
+    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
 
@@ -196,7 +196,10 @@ public class PrlAppsConstants {
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
 
     public static final String DRUG_AND_ALCOHOL_TESTS_DOCUMENT = "Drug and alcohol test (toxicology)";
+    public static final String RESULTS_OF_HAIR_STRAND_BLOOD_TESTS = "Results of hair strand/blood tests";
+    public static final String DNA_REPORTS = "DNA reports";
     public static final String POLICE_REPORTS = "Police reports";
+    public static final String POLICE_DISCLOSURES = "Police disclosures";
 
     public static final String POLICE_REPORT_DOCUMENT = "Police report";
     public static final String OTHER_DOCUMENTS = "Other documents";
@@ -591,6 +594,26 @@ public class PrlAppsConstants {
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
     public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
+    public static final String APPLICANT_C1A_RESPONSE = "Applicant C1A response";
+    public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
+    public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
+    public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
+    public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
+    public static final String CASE_SUMMARY = "Case summary";
+    public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts of judgements";
+    public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
+    public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
+    public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
+    public static final String SECTION_37_REPORT = "Section 37 report";
+    public static final String SIXTEENA_RISK_ASSESSMENT = "16a risk assessment";
+    public static final String GUARDIAN_REPORT = "Guardian report";
+    public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
+    public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
+    public static final String LA_OTHER_DOCUMENTS = "Local Authority other documents";
+    public static final String MIAM_CERTIFICATE = "MIAM certificate/Exemption";
+    public static final String PREVIOUS_ORDERS = "Orders from other proceedings";
+    public static final String ANY_OTHER_DOCUMENTS = "Any other documents";
 
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
@@ -609,7 +632,7 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
 
-    public static final String COURTNAV = "COURTNAV";
+    public static final String COURTNAV = "CourtNav";
     public static final String NA_COURTNAV = "NA_COURTNAV";
 
     public static final String DISTRICT_JUDGE = "districtJudge";
@@ -838,6 +861,8 @@ public class PrlAppsConstants {
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
+    public static final String ANNEX1_FILENAME = "Annex 1 - Confidential contact details notice.pdf";
+    public static final String ANNEX1_FILENAME_WELSH = "Annex 1 - Confidential contact details notice - welsh.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
     public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";
@@ -901,6 +926,7 @@ public class PrlAppsConstants {
 
     public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
     public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
+    public static final String DD_MMM_YYYY_HH_MM_SS_AM_PM = "d-MMM-yyyy hh:mm:ss a";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";
@@ -951,6 +977,7 @@ public class PrlAppsConstants {
 
     public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
     public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+    public static final String AWP_HWF_REF_NUMBER = "awpHwfRefNo";
 
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
@@ -991,6 +1018,8 @@ public class PrlAppsConstants {
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+    public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
+    public static final String WA_PRODUCT_HEARING_BUNDLE_ON = "productHearingBundleOn";
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
@@ -1032,4 +1061,21 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
+    public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
+
+    public static final String COURTNAV_USER = "courtnav";
+
+    //Order SOS statuses
+    public static final String SOS_PENDING = "PENDING";
+    public static final String SOS_COMPLETED = "COMPLETED";
+    public static final String SOS_NOT_REQUIRED = "NOT_REQUIRED";
+    //Flag to enable citizen DA journey
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
+
+    public static final String HWF_APP_LIST = "hwfAppList";
+    public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
+
+    public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
 }

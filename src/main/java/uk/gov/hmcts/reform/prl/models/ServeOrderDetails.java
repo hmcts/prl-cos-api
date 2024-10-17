@@ -44,4 +44,7 @@ public class ServeOrderDetails {
     private final String servingRecipientName;
     private final String organisationsName;
     private final SoaSolicitorServingRespondentsEnum courtPersonalService;
+
+    private String whoIsResponsibleToServe;
+    private YesOrNo multipleOrdersServed;
 }
