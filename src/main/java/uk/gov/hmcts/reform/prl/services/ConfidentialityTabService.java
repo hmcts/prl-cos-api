@@ -325,7 +325,10 @@ public class ConfidentialityTabService {
             log.info("inside party details list");
             for (PartyDetails partyDetails : partyDetailsList) {
                 log.info("inside party details for loop");
-                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                if ((YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()))
+                    || (null != partyDetails.getResponse()
+                    && null != partyDetails.getResponse().getCitizenDetails()
+                    && YesOrNo.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()))) {
                     log.info("says yes to refuge for the party::" + party);
                     forceConfidentialityChangeForRefuge(party, partyDetails);
                 } else if (cleanUpNeeded) {
