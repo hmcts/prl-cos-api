@@ -390,7 +390,6 @@ public class C100RespondentSolicitorService {
                 confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
                 confidentialityListEnums.add(ConfidentialityListEnum.address);
 
-                respondent.getValue().setLiveInRefuge(Yes);
                 respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
                 respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
             }
@@ -935,6 +934,19 @@ public class C100RespondentSolicitorService {
                             .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
                             .build())
                     .build();
+
+            if ((YesOrNo.Yes.equals(representedRespondent.getValue().getLiveInRefuge()))
+                || (null != representedRespondent.getValue().getResponse()
+                && null != representedRespondent.getValue().getResponse().getCitizenDetails()
+                && YesOrNo.Yes.equals(representedRespondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge()))) {
+                amended = representedRespondent.getValue().toBuilder()
+                    .liveInRefuge(Yes)
+                    .refugeConfidentialityC8Form(representedRespondent
+                        .getValue().getResponse().getCitizenDetails()
+                        .getRefugeConfidentialityC8Form())
+                    .build();
+            }
+
             String party = representedRespondent.getValue().getLabelForDynamicList();
 
             caseData.getRespondents().set(
