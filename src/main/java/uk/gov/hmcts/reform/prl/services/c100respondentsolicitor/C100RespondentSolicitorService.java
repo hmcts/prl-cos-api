@@ -348,7 +348,7 @@ public class C100RespondentSolicitorService {
 
         if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
                 || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
-            CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, true);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
 

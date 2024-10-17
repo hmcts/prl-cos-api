@@ -70,7 +70,6 @@ public class ConfidentialDetailsMapper {
                 || (null != respondent.getResponse()
                 && null != respondent.getResponse().getCitizenDetails()
                 && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge()))) {
-                log.info("within lives in refuge");
                 addressSet = true;
                 emailSet = true;
                 phoneSet = true;
@@ -91,7 +90,6 @@ public class ConfidentialDetailsMapper {
                     .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
             }
         }
-        log.info("tempConfidentialApplicants is {}", tempConfidentialApplicants);
         return tempConfidentialApplicants;
     }
 
