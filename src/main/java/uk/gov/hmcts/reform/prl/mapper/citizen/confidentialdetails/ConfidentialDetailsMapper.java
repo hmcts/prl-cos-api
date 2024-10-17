@@ -30,12 +30,9 @@ public class ConfidentialDetailsMapper {
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
-        log.info("inside map confidential data");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("inside c100 case");
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
             if (respondentsList.isPresent()) {
-                log.info("has respondents");
                 List<PartyDetails> respondents = caseData.getRespondents()
                     .stream()
                     .map(Element::getValue)
@@ -66,12 +63,14 @@ public class ConfidentialDetailsMapper {
     private List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(List<PartyDetails> currentRespondents) {
         List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants = new ArrayList<>();
         for (PartyDetails respondent : currentRespondents) {
-            log.info("current respondent is: {}", respondent);
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            log.info("respondent lives in refuge: {}", respondent.getLiveInRefuge());
-            if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())) {
+            if ((YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
+                || null != respondent.getResponse()
+                && null != respondent.getResponse().getCitizenDetails()
+                && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+                log.info("within lives in refuge");
                 addressSet = true;
                 emailSet = true;
                 phoneSet = true;

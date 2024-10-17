@@ -325,7 +325,6 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest) {
-        log.info("inside about to submit casedata");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
                 updatedCaseData,
@@ -349,7 +348,6 @@ public class C100RespondentSolicitorService {
 
         if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
                 || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
-            log.info("inside edit contact details");
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
