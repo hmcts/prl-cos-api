@@ -25,10 +25,10 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CaseApplicationResponseControllerFunctionalTest {
 

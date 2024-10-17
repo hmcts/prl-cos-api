@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -214,5 +216,46 @@ public class AllegationOfHarmRevisedServiceTest {
 
     }
 
+    @Test
+    public void testResetFields1() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails", "test");
+        caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", "test");
+        caseDataMap.put("childAbuses", List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse));
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .allChildrenAreRiskFinancialAbuse(YesOrNo.No)
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.No)
+            .newAllegationsOfHarmSubstanceAbuseYesNo(YesOrNo.No)
+            .newAllegationsOfHarmOtherConcerns(YesOrNo.No)
+            .build();
+        allegationOfHarmService
+            .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(), caseDataMap);
+        Assert.assertEquals(StringUtils.EMPTY, caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
+    }
+
+    @Test
+    public void testResetFields2() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails","test");
+        caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", "test");
+        caseDataMap.put("childAbuses",List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse));
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .allChildrenAreRiskFinancialAbuse(YesOrNo.No)
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .newAllegationsOfHarmSubstanceAbuseYesNo(YesOrNo.Yes)
+            .newAllegationsOfHarmOtherConcerns(YesOrNo.Yes)
+            .build();
+        allegationOfHarmService
+            .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(),caseDataMap);
+        Assert.assertNotNull(caseDataMap.get("childAbuses"));
+        Assert.assertEquals("test",caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
+    }
+
+    @Test
+    public void testResetFields3() {
+        allegationOfHarmService
+            .resetFields(CaseData.builder().allegationOfHarmRevised(null).build(),null);
+        Assert.assertNull(null);
+    }
 
 }
