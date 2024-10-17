@@ -61,7 +61,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
@@ -160,7 +159,6 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
-    private final ConfidentialityTabService confidentialityTabService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -340,10 +338,11 @@ public class C100RespondentSolicitorService {
         }
         String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         Element<PartyDetails> finalSolicitorRepresentedRespondent = solicitorRepresentedRespondent;
+        List<Element<PartyDetails>> finalRespondents = respondents;
         RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
                 .ifPresent(event -> buildResponseForRespondent(
                         caseData,
-                        respondents,
+                        finalRespondents,
                         finalSolicitorRepresentedRespondent,
                         event
                 ));
@@ -352,16 +351,12 @@ public class C100RespondentSolicitorService {
                 || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
-                ofNullable(caseData.getRespondents()),
-                updatedCaseData,
-                RESPONDENTS,
-                false
-            );
+            respondents = setRefugeData(respondents);
         }
 
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
+        log.info("respondents is {}", respondents);
         updatedCaseData.put(RESPONDENTS, respondents);
         Map<String, Object> data = objectMapper
                 .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
@@ -382,6 +377,28 @@ public class C100RespondentSolicitorService {
 
         return updatedCaseData;
     }
+
+    private List<Element<PartyDetails>> setRefugeData(List<Element<PartyDetails>> respondents) {
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        for (Element<PartyDetails> respondent : respondents) {
+            if (null != respondent.getValue().getResponse()
+                && null != respondent.getValue().getResponse().getCitizenDetails()
+                && YesOrNo.Yes.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
+
+                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+                confidentialityListEnums.add(ConfidentialityListEnum.email);
+                confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+                confidentialityListEnums.add(ConfidentialityListEnum.address);
+
+                respondent.getValue().setLiveInRefuge(Yes);
+                respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
+            }
+            respondentList.add(respondent);
+        }
+
+        return respondentList;
+    }
+
 
     private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
         //miam
