@@ -48,6 +48,7 @@ spring:
     name: Prl cos api
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -251,6 +252,7 @@ idam:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    scope: openid profile roles manage-user
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
