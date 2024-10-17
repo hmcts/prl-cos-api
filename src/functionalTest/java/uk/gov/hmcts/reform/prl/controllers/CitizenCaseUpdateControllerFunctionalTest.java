@@ -25,8 +25,8 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Ignore
 @Slf4j
+@Ignore
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
