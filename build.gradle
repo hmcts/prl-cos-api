@@ -608,11 +608,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/Fm5ReminderController.java',
   '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
-  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**uk/gov/hmcts/reform/prl/services/ConfidentialityCheckService.java',
-  '**uk/gov/hmcts/reform/prl/services/tab/summary/generator/RefugeCaseGenerator.java',
-  '**/uk/gov/hmcts/reform/prl/services/ConfidentialityTabService.java'
+  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java'
 ]
 
 sonarqube {
