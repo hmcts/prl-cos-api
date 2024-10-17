@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
@@ -59,7 +58,8 @@ public class ConfidentialityTabService {
                     applicants);
             }
 
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(
+                caseData);
 
             Optional<List<Element<PartyDetails>>> respondentList = ofNullable(caseData.getRespondents());
             if (respondentList.isPresent()) {
@@ -92,7 +92,8 @@ public class ConfidentialityTabService {
                     fl401Respondent);
             }
 
-            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
+                caseData);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -121,7 +122,7 @@ public class ConfidentialityTabService {
                 List<Child> children = caseData.getChildren().stream()
                     .map(Element::getValue)
                     .toList();
-                elementList =  getChildrenConfidentialDetails(children);
+                elementList = getChildrenConfidentialDetails(children);
             }
         }
         return elementList;
@@ -197,7 +198,7 @@ public class ConfidentialityTabService {
                     .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsRevisedList) {
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
-                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
+                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList, objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
                     Element<ChildConfidentialityDetails> childElement = Element
                         .<ChildConfidentialityDetails>builder()
@@ -374,14 +375,51 @@ public class ConfidentialityTabService {
         log.info("end forceConfidentialityChangeForRefuge");
     }
 
-    public List<Element<RefugeConfidentialDocuments>> listRefugeDocumentsForConfidentialTab(
-        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
-        List<Element<PartyDetails>> partyDetailsWrappedList,
-        String party) {
+    public List<Element<RefugeConfidentialDocuments>> listRefugeDocumentsForConfidentialTab(CaseData caseData) {
         log.info("start listRefugeDocumentsForConfidentialTab");
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments
+            = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            refugeDocuments = listRefugeDocumentsPartyWiseForC100(
+                refugeDocuments,
+                ofNullable(caseData.getApplicants()),
+                SERVED_PARTY_APPLICANT
+            );
+            refugeDocuments = listRefugeDocumentsPartyWiseForC100(
+                refugeDocuments,
+                ofNullable(caseData.getRespondents()),
+                SERVED_PARTY_RESPONDENT
+            );
+            refugeDocuments = listRefugeDocumentsPartyWiseForC100(
+                refugeDocuments,
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                SERVED_PARTY_OTHER
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            refugeDocuments = listRefugeDocumentsPartyWiseForFl401(
+                refugeDocuments,
+                ofNullable(caseData.getApplicantsFL401()),
+                SERVED_PARTY_APPLICANT
+            );
+            refugeDocuments = listRefugeDocumentsPartyWiseForFl401(
+                refugeDocuments,
+                ofNullable(caseData.getRespondentsFL401()),
+                SERVED_PARTY_RESPONDENT
+            );
+        }
+        log.info("end listRefugeDocumentsForConfidentialTab");
+        return refugeDocuments;
+    }
+
+    private static List<Element<RefugeConfidentialDocuments>> listRefugeDocumentsPartyWiseForC100(
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        String party) {
+        log.info("start listRefugeDocumentsPartyWise");
         log.info("party we got now: " + party);
-        if (partyDetailsWrappedList != null) {
-            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.stream().map(Element::getValue).toList();
+        if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             log.info("inside party details list");
             for (PartyDetails partyDetails : partyDetailsList) {
                 log.info("inside party details for loop");
@@ -395,13 +433,52 @@ public class ConfidentialityTabService {
                                              .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
                                              .documentUploadedDate(String.valueOf(LocalDate.now())).build())
                         .document(partyDetails.getRefugeConfidentialityC8Form()).build();
-                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+
+                    if (refugeDocuments != null) {
+                        refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                    } else {
+                        refugeDocuments = new ArrayList<>();
+                        refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                    }
                 }
+                log.info("refugeDocuments are now :: " + refugeDocuments.size());
             }
         }
-        log.info("end listRefugeDocumentsForConfidentialTab");
+        log.info("end listRefugeDocumentsPartyWise");
         return refugeDocuments;
     }
 
+    private static List<Element<RefugeConfidentialDocuments>> listRefugeDocumentsPartyWiseForFl401(
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        Optional<PartyDetails> partyDetailsOptional,
+        String party) {
+        log.info("start listRefugeDocumentsPartyWise");
+        log.info("party we got now: " + party);
+        if (partyDetailsOptional.isPresent() && partyDetailsOptional.get() != null) {
+            log.info("inside party details for loop");
+            PartyDetails partyDetails = partyDetailsOptional.get();
+            if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                RefugeConfidentialDocuments refugeConfidentialDocuments
+                    = RefugeConfidentialDocuments
+                    .builder()
+                    .partyType(party)
+                    .partyName(partyDetails.getLabelForDynamicList())
+                    .documentDetails(DocumentDetails.builder()
+                                         .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
+                                         .documentUploadedDate(String.valueOf(LocalDate.now())).build())
+                    .document(partyDetails.getRefugeConfidentialityC8Form()).build();
+
+                if (refugeDocuments != null) {
+                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                } else {
+                    refugeDocuments = new ArrayList<>();
+                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                }
+            }
+            log.info("refugeDocuments are now :: " + refugeDocuments.size());
+        }
+        log.info("end listRefugeDocumentsPartyWise");
+        return refugeDocuments;
+    }
 }
 
