@@ -37,6 +37,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
+import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
@@ -978,5 +982,31 @@ public class CaseUtils {
             && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && null != createPaymentRequest.getFeeType()
             && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
+    }
+
+    public static List<Element<DocumentsNotification>> getExistingAccessCodeNotifications(CaseData caseData) {
+        return null != caseData.getDocumentsNotifications()
+            && CollectionUtils.isNotEmpty(caseData.getDocumentsNotifications()
+                                              .getAccessCodeNotifications())
+            ? caseData.getDocumentsNotifications().getAccessCodeNotifications()
+            : new ArrayList<>();
+    }
+
+    public static void updateAccessCodeNotifications(CaseData caseData, Element<PartyDetails> party, Map<String, Object> caseDataMap,
+                                               List<Document> coverLetters, UUID bulkPrintId) {
+        List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(
+            caseData);
+        documentsNotifications.add(element(DocumentsNotification.builder()
+                                               .notification(NotificationDetails.builder()
+                                                                 .bulkPrintId(String.valueOf(bulkPrintId))
+                                                                 .notificationType(NotificationType.BULK_PRINT)
+                                                                 .partyId(String.valueOf(party.getId()))
+                                                                 .partyType(PartyType.APPLICANT)
+                                                                 .sentDateTime(LocalDateTime.now(ZoneId.of(
+                                                                     PrlAppsConstants.LONDON_TIME_ZONE)))
+                                                                 .build())
+                                               .documents(ElementUtils.wrapElements(coverLetters))
+                                               .build()));
+        caseDataMap.put("accessCodeNotifications", documentsNotifications);
     }
 }

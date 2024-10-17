@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -132,10 +131,7 @@ public class CitizenDocumentService {
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .categoryId(category.getCategoryId())
             .categoryName(category.getDisplayedValue())
-            .isConfidential(!DocumentCategory.FM5_STATEMENTS.equals(category)
-                                && YesOrNo.No.equals(documentRequest.getIsConfidential())
-                                && YesOrNo.No.equals(documentRequest.getIsRestricted())
-                                ? YesOrNo.Yes : documentRequest.getIsConfidential())
+            .isConfidential(documentRequest.getIsConfidential())
             .isRestricted(documentRequest.getIsRestricted())
             .restrictedDetails(documentRequest.getRestrictDocumentDetails())
             .uploadedBy(documentRequest.getPartyName())

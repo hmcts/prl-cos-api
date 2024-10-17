@@ -801,6 +801,7 @@ public class CaseServiceTest {
                                    .serveOnRespondent(Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
+            .sosStatus(SOS_COMPLETED)
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)

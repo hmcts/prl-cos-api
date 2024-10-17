@@ -638,7 +638,7 @@ public class StmtOfServImplService {
     private List<Element<DocumentsNotification>> sendAccessCodesToRespondentsByCourtLegalRep(String authorization,
                                                                                              CaseData caseData,
                                                                                              StmtOfServiceAddRecipient recipient) {
-        List<Element<DocumentsNotification>> documentsNotifications = getExistingAccessCodeNotifications(caseData);
+        List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
         //PRL-5979 - Send cover letter with access code to respondent only if LD flag is enabled
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -687,7 +687,7 @@ public class StmtOfServImplService {
     private List<Element<DocumentsNotification>> sendAccessCodesToRespondentsByLip(String authorization,
                                                                                    CaseData caseData,
                                                                                    List<String> partiesList) {
-        List<Element<DocumentsNotification>> documentsNotifications = getExistingAccessCodeNotifications(caseData);
+        List<Element<DocumentsNotification>> documentsNotifications = CaseUtils.getExistingAccessCodeNotifications(caseData);
         //PRL-5979 - Send cover letter with access code to respondent only if LD flag is enabled
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -714,14 +714,6 @@ public class StmtOfServImplService {
             documentsNotifications.add(getNoAccessCodeDocumentsNotification());
         }
         return documentsNotifications.stream().filter(Objects::nonNull).toList();
-    }
-
-    private List<Element<DocumentsNotification>> getExistingAccessCodeNotifications(CaseData caseData) {
-        return null != caseData.getDocumentsNotifications()
-            && CollectionUtils.isNotEmpty(caseData.getDocumentsNotifications()
-                                              .getAccessCodeNotifications())
-            ? caseData.getDocumentsNotifications().getAccessCodeNotifications()
-            : new ArrayList<>();
     }
 
     private Element<DocumentsNotification> sendAccessCodeCoverLetter(String authorization,
