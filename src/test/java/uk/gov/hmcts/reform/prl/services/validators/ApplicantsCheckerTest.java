@@ -124,6 +124,22 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
     public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
