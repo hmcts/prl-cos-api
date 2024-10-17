@@ -2192,6 +2192,8 @@ public class C100RespondentSolicitorServiceTest {
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName("test")
                                 .lastName("test")
+                                .address(Address.builder().postCode("MK8 1DY").build())
+                                .contact(Contact.builder().phoneNumber("123").build())
                                 .build())
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
