@@ -345,12 +345,7 @@ public class CallbackController {
                     caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-                .refugeDocuments(confidentialityTabService.listRefugeDocumentsForConfidentialTab(
-                    caseData,
-                    caseData.getRefugeDocuments(),
-                    caseData.getApplicants(),
-                    APPLICANTS
-                ))
+                .refugeDocuments(confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData))
                 .build();
 
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
