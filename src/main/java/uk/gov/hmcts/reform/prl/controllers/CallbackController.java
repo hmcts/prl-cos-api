@@ -346,6 +346,7 @@ public class CallbackController {
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .refugeDocuments(confidentialityTabService.listRefugeDocumentsForConfidentialTab(
+                    caseData,
                     caseData.getRefugeDocuments(),
                     caseData.getApplicants(),
                     APPLICANTS
