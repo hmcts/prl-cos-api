@@ -67,9 +67,9 @@ public class ConfidentialDetailsMapper {
             boolean emailSet = false;
             boolean phoneSet = false;
             if ((YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
-                || null != respondent.getResponse()
+                || (null != respondent.getResponse()
                 && null != respondent.getResponse().getCitizenDetails()
-                && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+                && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge()))) {
                 log.info("within lives in refuge");
                 addressSet = true;
                 emailSet = true;
