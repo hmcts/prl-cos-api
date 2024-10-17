@@ -391,6 +391,7 @@ public class C100RespondentSolicitorService {
                 confidentialityListEnums.add(ConfidentialityListEnum.address);
 
                 respondent.getValue().setLiveInRefuge(Yes);
+                respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
                 respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
             }
             respondentList.add(respondent);
