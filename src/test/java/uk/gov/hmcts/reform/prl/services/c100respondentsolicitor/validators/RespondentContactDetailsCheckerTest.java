@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -88,6 +89,7 @@ public class RespondentContactDetailsCheckerTest {
                                               .lastName("Test")
                                               .dateOfBirth(LocalDate.of(2000, 8, 20))
                                               .address(noAddress)
+                                              .liveInRefuge(YesOrNo.Yes)
                                               .contact(Contact.builder()
                                                            .email("Test")
                                                            .phoneNumber("0785544").build())
