@@ -76,13 +76,11 @@ public class UpdateHearingActualsService {
     }
 
     private Map<String, String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
-        log.info("Fetching hearings for list of cases {}", listOfCaseidsForHearings);
         List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
             listOfCaseidsForHearings
         );
-        log.info("Hearings details for the list of cases {}", hearingsList);
         return filterCaseIdAndHearingsForTodaysDate(hearingsList);
     }
 
@@ -92,7 +90,6 @@ public class UpdateHearingActualsService {
             caseId)).forEach(caseDetails -> {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    log.info("Triggering update hearing actual WA task event for the case {}", caseId);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
                     Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -141,7 +138,6 @@ public class UpdateHearingActualsService {
         Map<String, String> caseIdHearingIdMapping = new HashMap<>();
         if (isNotEmpty(hearingsForAllCaseIds)) {
             hearingsForAllCaseIds.forEach(hearings -> {
-                log.info("Filtering hearings for case {}, with case hearings {}", hearings.getCaseRef(), hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
                     .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
@@ -150,9 +146,7 @@ public class UpdateHearingActualsService {
                                 && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
                         ))
                     .map(CaseHearing::getHearingID).toList();
-                log.info("Filtered hearings ids {}", filteredHearingIds);
                 if (isNotEmpty(filteredHearingIds)) {
-                    log.info("Found a hearing is listed for today for the case {}, & hearing {}", hearings.getCaseRef(), filteredHearingIds.get(0));
                     caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
                 }
             });
@@ -162,10 +156,6 @@ public class UpdateHearingActualsService {
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
-        log.info("*** List of cases retrieved ***");
-        for (CaseDetails caseDetails : caseDetailsList) {
-            log.info("Case ID: {} & State: {}", caseDetails.getId(), caseDetails.getState());
-        }
         return caseDetailsList.stream().map(CaseDetails::getId).map(String::valueOf).toList();
 
     }
@@ -182,7 +172,6 @@ public class UpdateHearingActualsService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("Hearing actual -> searchString " + searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
@@ -193,7 +182,6 @@ public class UpdateHearingActualsService {
         }
 
         if (null != response) {
-            log.info("Total no. of cases retrieved {}", response.getTotal());
             return response.getCases();
         }
         return Collections.emptyList();

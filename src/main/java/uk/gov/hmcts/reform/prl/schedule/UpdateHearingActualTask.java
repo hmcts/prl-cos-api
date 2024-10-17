@@ -14,10 +14,7 @@ public class UpdateHearingActualTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("*** Update hearing actual scheduled task is started ***");
         //Invoke fm5 reminder service to evaluate & notify if needed
         updateHearingActualsService.updateHearingActuals();
-
-        log.info("*** Update hearing actual scheduled task is completed ***");
     }
 }
