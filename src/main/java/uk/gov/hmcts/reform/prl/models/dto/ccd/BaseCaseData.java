@@ -13,9 +13,12 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -46,9 +49,9 @@ public class BaseCaseData {
     private String courtSeal;
 
     @JsonProperty("c1ADraftDocument")
-    private  Document c1ADraftDocument;
+    private Document c1ADraftDocument;
     @JsonProperty("c1AWelshDraftDocument")
-    private  Document c1AWelshDraftDocument;
+    private Document c1AWelshDraftDocument;
 
     /**
      * Case Type Of Application.
@@ -84,4 +87,6 @@ public class BaseCaseData {
 
     @JsonProperty("isApplicantRepresented")
     private String isApplicantRepresented;
+
+    private List<Element<RefugeConfidentialDocuments>> refugeDocuments;
 }

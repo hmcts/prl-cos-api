@@ -71,6 +71,7 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isAddressConfidential(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .currentRespondent(YesOrNo.Yes)
