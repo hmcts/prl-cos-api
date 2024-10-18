@@ -223,7 +223,7 @@ public class RestrictedCaseAccessService {
                 caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
             } else if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
                 caseDataUpdated.put("errors", "No user got access to this case right now, "
-                    + "Please provide access to the users with right permissions before proceeding.");
+                    + "please provide access to the users with right permissions before proceeding.");
             }
         }
         return caseDataUpdated;
