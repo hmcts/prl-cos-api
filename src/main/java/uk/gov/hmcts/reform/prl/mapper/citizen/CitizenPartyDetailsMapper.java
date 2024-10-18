@@ -599,7 +599,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private YesOrNo mapApplicantHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
-        if ("Yes".equalsIgnoreCase(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().getDisplayedValue())) {
+        if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return Yes;
         } else {
             return No;
@@ -607,7 +607,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private YesNoDontKnow mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(PartyDetails citizenProvidedPartyDetails) {
-        if (citizenProvidedPartyDetails.getIsAtAddressLessThan5Years().equals(Yes)) {
+        if (Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())) {
             return YesNoDontKnow.yes;
         } else {
             return YesNoDontKnow.no;
@@ -751,10 +751,6 @@ public class CitizenPartyDetailsMapper {
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
-            //Save service request & payment request references
-            caseDataMapToBeUpdated.put("paymentServiceRequestReferenceNumber",
-                                       citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber());
-            caseDataMapToBeUpdated.put("paymentReferenceNumber", citizenUpdatedCaseData.getPaymentReferenceNumber());
         }
         return caseDataMapToBeUpdated;
     }
