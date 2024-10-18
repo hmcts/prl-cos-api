@@ -259,6 +259,7 @@ public class FeeServiceTest {
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
         assertEquals("167.0",response.getAmount());
     }
+
     @Test
     public void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
@@ -281,6 +282,7 @@ public class FeeServiceTest {
         assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
         assertEquals("255.0",response.getAmount());
     }
+
     @Test
     public void testFetchFeeCodeC2ChildArrangemenetOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
