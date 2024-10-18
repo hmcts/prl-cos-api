@@ -90,6 +90,7 @@ public class CaseDataApplicantElementsMapper {
                 .gender(Gender.getDisplayedValueFromEnumString(applicantDto.getPersonalDetails().getGender()))
                 .otherGender(applicantDto.getPersonalDetails().getOtherGenderDetails())
                 .liveInRefuge(applicantDto.getApplicantLivesInRefuge())
+                .refugeConfidentialityC8Form(applicantDto.getRefuge_certificate())
                 .dateOfBirth(buildDateOfBirth(applicantDto.getPersonalDetails().getDateOfBirth()))
                 .placeOfBirth(applicantDto.getPersonalDetails().getApplicantPlaceOfBirth())
                 .phoneNumber(isNotEmpty(applicantDto.getApplicantContactDetail().getTelephoneNumber())
