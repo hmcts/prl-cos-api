@@ -191,7 +191,7 @@ public class CaseDataService {
         log.info("excludedDocumentList {} --> {}", excludedDocumentList);
         parentCategories.forEach(category -> {
             if (CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(
-                categoryId)) {
+                category.getCategoryId())) {
                 if (category.getSubCategories() != null) {
                     parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
                 }
