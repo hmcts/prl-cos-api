@@ -260,9 +260,53 @@ public class FeeServiceTest {
         assertEquals("167.0",response.getAmount());
     }
     @Test
-    public void testFetchFeeCodeC2Order() throws Exception {
+    public void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER.getId()).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
+    }
+    @Test
+    public void testFetchFeeCodeC2ChildArrangemenetOrder() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId()).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
+    }
+    @Test
+    public void testFetchFeeCodeC2SpecificIssueOrder() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORCDER.getId()).build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
 
