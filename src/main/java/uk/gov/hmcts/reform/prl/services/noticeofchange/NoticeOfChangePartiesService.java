@@ -89,8 +89,8 @@ public class NoticeOfChangePartiesService {
 
     public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
     public static final String IS_NO_LONGER_REPRESENTING = " is no longer representing ";
-    public static final String IN_THIS_CASE = " in this case.";
-    public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = " All other parties have been notified about this change\n\n";
+    public static final String IN_THIS_CASE = " in this case. ";
+    public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = "All other parties have been notified about this change\n\n";
     public static final String CASE_INVITES = "caseInvites";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
