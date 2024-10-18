@@ -69,6 +69,9 @@ public class BaseCaseData {
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
 
+    @JsonProperty("isPathfinderCase")
+    private YesOrNo isPathfinderCase;
+
     @JsonUnwrapped
     private DocumentsNotifications documentsNotifications;
 
@@ -84,4 +87,5 @@ public class BaseCaseData {
 
     @JsonProperty("isApplicantRepresented")
     private String isApplicantRepresented;
+
 }
