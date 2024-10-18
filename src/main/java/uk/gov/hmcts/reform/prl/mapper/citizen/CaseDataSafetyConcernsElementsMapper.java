@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -452,7 +453,9 @@ public class CaseDataSafetyConcernsElementsMapper {
 
         List<ChildDetail> childDetails = c100RebuildChildDetailsElements.getChildDetails();
 
-        if (childDetails != null && abusedChildren.length != childDetails.size()) {
+        if (ObjectUtils.isNotEmpty(abusedChildren)
+            && ObjectUtils.isNotEmpty(childDetails)
+            && abusedChildren.length != childDetails.size()) {
             List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             childDetails.forEach(s -> {
