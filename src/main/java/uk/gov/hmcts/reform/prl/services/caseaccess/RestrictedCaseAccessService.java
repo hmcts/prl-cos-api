@@ -130,12 +130,13 @@ public class RestrictedCaseAccessService {
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
             applicantCaseName = applicantCaseName + PRIVATE_CASE;
         }
-
-        caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName);
-        caseDataUpdated.put("caseNameHmctsInternal", applicantCaseName);
-        if (caseDataUpdated.containsKey(APPLICANT_OR_RESPONDENT_CASE_NAME)) {
-            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, applicantCaseName);
-        }
+        final String caseName = applicantCaseName;
+        caseDataUpdated.put(APPLICANT_CASE_NAME, caseName);
+        caseDataUpdated.put("caseNameHmctsInternal", caseName);
+        caseDataUpdated.computeIfPresent(
+            APPLICANT_OR_RESPONDENT_CASE_NAME,
+            (k, v) -> caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, caseName)
+        );
     }
 
     public ResponseEntity<SubmittedCallbackResponse> changeCaseAccessRequestSubmitted(CallbackRequest callbackRequest) {
