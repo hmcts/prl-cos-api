@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.caseaccess;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -66,7 +65,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test
-    public void testChangeCaseAccess() throws JsonProcessingException {
+    public void testChangeCaseAccess() {
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         restrictedCaseAccessController
@@ -77,7 +76,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testChangeCaseAccessError() throws JsonProcessingException {
+    public void testChangeCaseAccessError() {
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
         restrictedCaseAccessController
@@ -111,7 +110,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testRestrictedCaseAccessAboutToStartError() throws JsonProcessingException {
+    public void testRestrictedCaseAccessAboutToStartError() {
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
         restrictedCaseAccessController
