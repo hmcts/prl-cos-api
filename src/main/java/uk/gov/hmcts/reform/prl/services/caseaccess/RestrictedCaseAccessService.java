@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -56,10 +54,11 @@ public class RestrictedCaseAccessService {
     public static final String PRIVATE_CASE = " (Private case)";
     public static final String REASONS_TO_PRIVATE_TAB = "reasonsToPrivateTab";
     public static final String REASONS_TO_RESTRICT_TAB = "reasonsToRestrictTab";
+    public static final String TD_START_CELL = "<td class=\"govuk-table__cell\">";
+    public static final String TD_CLOSURE = "</td>";
     private final AllTabServiceImpl allTabService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final ExtendedCaseDataService caseDataService;
-    private final ObjectMapper objectMapper;
     public static final String MARK_AS_PRIVATE_REASON = "markAsPrivateReason";
     public static final String MARK_AS_PUBLIC_REASON = "markAsPublicReason";
     public static final String MARK_AS_RESTRICTED_REASON = "markAsRestrictedReason";
@@ -92,7 +91,6 @@ public class RestrictedCaseAccessService {
                                                      "ADMIN");
 
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
-        log.info("** restrictedCaseAccessAboutToSubmit event started");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
@@ -115,7 +113,6 @@ public class RestrictedCaseAccessService {
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
         }
         updateCaseName(caseDataUpdated, caseEvent);
-        log.info("** restrictedCaseAccessAboutToSubmit abs done");
         return caseDataUpdated;
     }
 
@@ -133,61 +130,40 @@ public class RestrictedCaseAccessService {
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
             applicantCaseName = applicantCaseName + PRIVATE_CASE;
         }
-
-        caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName);
-        caseDataUpdated.put("caseNameHmctsInternal", applicantCaseName);
-        if (caseDataUpdated.containsKey(APPLICANT_OR_RESPONDENT_CASE_NAME)) {
-            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, applicantCaseName);
-        }
+        final String caseName = applicantCaseName;
+        caseDataUpdated.put(APPLICANT_CASE_NAME, caseName);
+        caseDataUpdated.put("caseNameHmctsInternal", caseName);
+        caseDataUpdated.computeIfPresent(
+            APPLICANT_OR_RESPONDENT_CASE_NAME,
+            (k, v) -> caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, caseName)
+        );
     }
 
     public ResponseEntity<SubmittedCallbackResponse> changeCaseAccessRequestSubmitted(CallbackRequest callbackRequest) {
-        log.info("** restrictedCaseAccess event started");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("** caseDataUpdated:: " + caseDataUpdated);
-        log.info("** caseDataUpdated, ID is :: " + callbackRequest.getCaseDetails().getId());
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
-        log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificEvent(
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
             );
-        log.info("Case event started for case id::" + callbackRequest.getCaseDetails().getId());
-        CaseDataContent caseDataContent = null;
+        CaseDataContent caseDataContent;
         switch (caseSecurityClassification) {
-            case RESTRICTED -> {
-                log.info("** inside restricted:: ");
-                caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    Classification.RESTRICTED
-                );
-            }
-            case PRIVATE -> {
-                log.info("** inside private:: ");
-                caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    Classification.PRIVATE
-                );
-            }
-            case PUBLIC -> {
-                log.info("** inside public:: ");
-                caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    Classification.PUBLIC
-                );
-            }
-            default -> {
-                log.info("** inside default:: ");
-                caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    Classification.PUBLIC
-                );
-            }
+            case RESTRICTED -> caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                startAllTabsUpdateDataContent.startEventResponse(),
+                Classification.RESTRICTED
+            );
+            case PRIVATE -> caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                startAllTabsUpdateDataContent.startEventResponse(),
+                Classification.PRIVATE
+            );
+            default -> caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                startAllTabsUpdateDataContent.startEventResponse(),
+                Classification.PUBLIC
+            );
         }
-        log.info("Case event start submitted for case id::" + callbackRequest.getCaseDetails().getId());
         coreCaseDataService.submitUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             startAllTabsUpdateDataContent.eventRequestData(),
@@ -195,9 +171,7 @@ public class RestrictedCaseAccessService {
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             true
         );
-        log.info("Case event submitted for case id::" + callbackRequest.getCaseDetails().getId());
 
-        log.info("** restrictedCaseAccess submitUpdate done");
         return setConformationMessages(callbackRequest, caseSecurityClassification);
     }
 
@@ -226,27 +200,20 @@ public class RestrictedCaseAccessService {
         }
     }
 
-    public AboutToStartOrSubmitCallbackResponse changeCaseAccess(CallbackRequest callbackRequest) throws JsonProcessingException {
-        log.info("Case details before for changeCaseAccess:: " + objectMapper.writeValueAsString(callbackRequest));
+    public AboutToStartOrSubmitCallbackResponse changeCaseAccess(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("caseDataUpdated::" + caseDataUpdated);
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
-        log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        log.info("dataClassification for changeCaseAccess::" + dataClassification);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
+        return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .dataClassification(dataClassification)
             .securityClassification(String.valueOf(caseSecurityClassification))
             .build();
-        log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
-        return aboutToStartOrSubmitCallbackResponse;
     }
 
     public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
-        log.info("** retrieveAssignedUserRoles event started");
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
@@ -259,7 +226,6 @@ public class RestrictedCaseAccessService {
                     + "Please provide access to the users with right permissions before proceeding.");
             }
         }
-        log.info("** retrieveAssignedUserRoles done");
         return caseDataUpdated;
     }
 
@@ -272,7 +238,6 @@ public class RestrictedCaseAccessService {
                             .build())
             .validAt(LocalDateTime.now())
             .build();
-        log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
         String systemAuthorisation = systemUserService.getSysUserToken();
 
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
@@ -281,14 +246,12 @@ public class RestrictedCaseAccessService {
             null,
             roleAssignmentQueryRequest
         );
-        log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
 
         if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
             && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
             roleAssignmentServiceResponse.getRoleAssignmentResponse()
                 .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
                 .forEach(roleAssignmentResponse -> {
-                    log.info("** Fetching user details from idam for actorId {} " + roleAssignmentResponse.getActorId());
                     UserDetails userDetails = idamApi.getUserByUserId(
                         systemAuthorisation,
                         roleAssignmentResponse.getActorId()
@@ -301,36 +264,31 @@ public class RestrictedCaseAccessService {
                     }
                 });
         }
-        log.info("** AssignedUserDetails " + assignedUserDetails);
         if (!assignedUserDetails.isEmpty()) {
             assignedUserDetailsHtml.add("<div class='width-100'>");
             assignedUserDetailsHtml.add(
                 "<h2 class=\"govuk-heading-m\">Users with access</h2>");
             assignedUserDetailsHtml.add("<table class=\"govuk-table\">");
-            // assignedUserDetailsHtml.add(
-            // "<caption class=\"govuk-table__caption govuk-table__caption--m\">Users with access</caption>");
             assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
             assignedUserDetailsHtml.add(
                 "<tr class=\"govuk-table__row\"><th scope=\"col\" class=\"govuk-table__header govuk-table-column-header\">User</th>"
                     + "<th scope=\"col\" class=\"govuk-table__header govuk-table-column-header\">Case role</th>"
                     + "<th scope=\"col\" class=\"govuk-table__header govuk-table-column-actions\">Email address</th></tr>");
             assignedUserDetailsHtml.add("</thead>");
-            // assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
             assignedUserDetailsHtml.add("<tbody class=\"govuk-table__body\">");
             for (Map.Entry<String, String> entry : assignedUserDetails.entrySet()) {
                 assignedUserDetailsHtml.add("<tr class=\"govuk-table__row\">");
                 String name = entry.getKey().split(HYPHEN_SEPARATOR)[0];
                 String email = entry.getKey().split(HYPHEN_SEPARATOR)[1];
-                assignedUserDetailsHtml.add("<td class=\"govuk-table__cell\">" + name + "</td>"
-                                                + "<td class=\"govuk-table__cell\">" + entry.getValue() + "</td>"
-                                                + "<td class=\"govuk-table__cell\">" + email + "</td>");
+                assignedUserDetailsHtml.add(TD_START_CELL + name + TD_CLOSURE
+                                                + TD_START_CELL + entry.getValue() + TD_CLOSURE
+                                                + TD_START_CELL + email + TD_CLOSURE);
                 assignedUserDetailsHtml.add("</tr>");
             }
             assignedUserDetailsHtml.add("</tbody>");
             assignedUserDetailsHtml.add("</table>");
             assignedUserDetailsHtml.add("</div>");
         }
-        log.info("** assignedUserDetailsText " + assignedUserDetailsHtml);
         return assignedUserDetailsHtml;
     }
 

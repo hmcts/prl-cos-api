@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.caseaccess;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -113,7 +112,7 @@ public class RestrictedCaseAccessController {
     public AboutToStartOrSubmitCallbackResponse changeCaseAccess(
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-            @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+            @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return restrictedCaseAccessService.changeCaseAccess(
                 callbackRequest);
