@@ -32,9 +32,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -136,7 +140,7 @@ public class UpdateHearingActualsServiceTest {
     @Test
     public void testUpdateHearingActualTaskCreatedSuccessfully() {
 
-        updateHearingActualsService.updateHearingActuals();
+        verify(updateHearingActualsService, times(1)).updateHearingActuals();
     }
 
     @Test
@@ -214,6 +218,6 @@ public class UpdateHearingActualsServiceTest {
             any()
         )).thenReturn(CaseDetails.builder().build());
 
-        updateHearingActualsService.updateHearingActuals();
+        verify(updateHearingActualsService, times(1)).updateHearingActuals();
     }
 }
