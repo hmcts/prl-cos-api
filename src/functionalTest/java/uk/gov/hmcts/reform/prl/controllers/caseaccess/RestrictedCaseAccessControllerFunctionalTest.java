@@ -56,7 +56,7 @@ public class RestrictedCaseAccessControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200)
             .body("errors[0]", equalTo("No user got access to this case right now, "
-                                           + "Please provide access to the users with right permissions before proceeding."));
+                                           + "please provide access to the users with right permissions before proceeding."));
 
     }
 
