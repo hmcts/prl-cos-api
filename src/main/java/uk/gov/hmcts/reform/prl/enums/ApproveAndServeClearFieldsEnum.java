@@ -3,7 +3,8 @@ package uk.gov.hmcts.reform.prl.enums;
 public enum ApproveAndServeClearFieldsEnum {
     whatToDoWithOrderSolicitor("whatToDoWithOrderSolicitor"),
     draftOrdersDynamicList("draftOrdersDynamicList"),
-    whatToDoWithOrderCourtAdmin("whatToDoWithOrderCourtAdmin");
+    whatToDoWithOrderCourtAdmin("whatToDoWithOrderCourtAdmin"),
+    draftOrderCollectionId("draftOrderCollectionId");
 
     private final String value;
 
