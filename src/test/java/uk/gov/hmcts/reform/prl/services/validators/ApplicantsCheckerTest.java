@@ -57,6 +57,22 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
+    public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalseForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.isFinished(caseData));
+    }
+
+    @Test
     public void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
 
         caseData = caseData.toBuilder()
