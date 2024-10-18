@@ -111,7 +111,7 @@ public class RestrictedCaseAccessControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testRestrictedCaseAccessAboutToStartError() throws JsonProcessingException {
+    public void testRestrictedCaseAccessAboutToStartError() {
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
         restrictedCaseAccessController
