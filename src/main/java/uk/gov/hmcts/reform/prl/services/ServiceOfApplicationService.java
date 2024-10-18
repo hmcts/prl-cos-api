@@ -1005,8 +1005,6 @@ public class ServiceOfApplicationService {
             .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        log.info("** appplicant fl401 {}", applicantFl401);
-        log.info("** respondent fl401 {}", respondentFl401);
         sendNotificationsDaNonPersonalApplicant(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, applicantFl401);
         sendNotificationsDaNonPersonalRespondent(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, respondentFl401);
     }
@@ -1024,17 +1022,12 @@ public class ServiceOfApplicationService {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put(SEND_GRID_TEMPLATE, SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB);
             if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
-                log.info("Legal rep present for respondent");
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
-                log.info("respondent is unrepresented");
-                log.info(" Case Invites {}", CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
-                                                                     caseData.getCaseInvites()));
                 coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
                                                                     CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
                                                                                             caseData.getCaseInvites()));
                 sendEmail = false;
-                log.info(" ** cover letter {}", coverLetter);
                 docs.add(coverLetter);
             }
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
