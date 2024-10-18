@@ -303,7 +303,8 @@
         }
       ],
       "doYouWantToServeOrder": "Yes",
-      "whatDoWithOrder": "finalizeSaveToServeLater"
+      "whatDoWithOrder": "finalizeSaveToServeLater",
+      "personallyServeRespondentsOptions": "courtAdmin"
     }
   },
   "event_id": "litigationCapacity"
