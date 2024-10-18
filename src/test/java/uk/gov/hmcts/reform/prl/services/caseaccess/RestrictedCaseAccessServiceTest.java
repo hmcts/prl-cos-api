@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -137,14 +136,13 @@ public class RestrictedCaseAccessServiceTest {
     }
 
     @Test
-    public void testChangeCaseAccess() throws JsonProcessingException {
+    public void testChangeCaseAccess() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith" + RESTRICTED_CASE);
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PRIVATE.getValue());
 
         Map<String, Object> dataClassification = new HashMap<>();
         dataClassification.put("draftConsentOrderFile", "PUBLIC");
-        dataClassification.put("effortsMadeWithRespondents", "PUBLIC");
         dataClassification.put("effortsMadeWithRespondents", "PUBLIC");
         when(caseDataService.getDataClassification(anyString())).thenReturn(dataClassification);
 
