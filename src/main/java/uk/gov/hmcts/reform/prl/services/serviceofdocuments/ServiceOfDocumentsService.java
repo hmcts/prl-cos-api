@@ -96,6 +96,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.AUTHO
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -197,7 +198,8 @@ public class ServiceOfDocumentsService {
             }
         }
         //other persons
-        if (null != caseData.getServiceOfApplication().getSoaOtherParties()) {
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+                && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()) {
             List<String> otherPersonIds = new ArrayList<>();
             caseData.getServiceOfApplication().getSoaOtherParties().getValue()
                 .forEach(element -> {
@@ -880,7 +882,7 @@ public class ServiceOfDocumentsService {
         List<EmailInformation> emailList = new ArrayList<>();
         List<PostalInformation> postList = new ArrayList<>();
         //get email and postal information
-        unServedPack.getAdditionalRecipients().stream()
+        nullSafeCollection(unServedPack.getAdditionalRecipients()).stream()
             .map(Element::getValue)
             .forEach(addRecipient -> {
                 if (DeliveryByEnum.email.equals(addRecipient.getServeByPostOrEmail())) {
