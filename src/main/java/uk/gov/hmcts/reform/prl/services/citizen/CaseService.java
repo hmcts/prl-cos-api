@@ -1522,30 +1522,27 @@ public class CaseService {
         servedDocumentsDetailsList.stream()
             .map(Element::getValue)
             .forEach(servedDetails -> {
-                if (null != servedDetails.getModeOfService()) {
-                    switch (servedDetails.getModeOfService()) {
-                        case SOA_BY_EMAIL_AND_POST -> {
-                            otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
-                                servedDetails,
-                                partyIdAndType
-                            ));
-
-                            otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
-                                servedDetails,
-                                partyIdAndType
-                            ));
-                        }
-                        case SOA_BY_EMAIL -> otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
-                            servedDetails,
-                            partyIdAndType
-                        ));
-                        case SOA_BY_POST -> otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                if (null != servedDetails) {
+                    if (SOA_BY_EMAIL_AND_POST.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
                             servedDetails,
                             partyIdAndType
                         ));
 
-                        default -> {
-                        }
+                        otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                    } else if (SOA_BY_EMAIL.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                    } else if (SOA_BY_POST.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
                     }
                 }
             });
@@ -1611,7 +1608,9 @@ public class CaseService {
                                                    String timeStamp) {
         return nullSafeCollection(documents).stream()
             .map(Element::getValue)
-            .filter(document -> !"coversheet".equalsIgnoreCase(document.getDocumentFileName()))
+            .filter(document -> null != document
+                && null != document.getDocumentFileName()
+                && !document.getDocumentFileName().startsWith("coversheet"))
             .map(document -> CitizenDocuments.builder()
                 .categoryId(ANY_OTHER_DOC)
                 .partyId(partyId)
