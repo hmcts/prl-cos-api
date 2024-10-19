@@ -28,6 +28,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -462,7 +464,7 @@ public class CaseService {
 
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
         //Retrieve citizen documents with other docs segregated
-        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments);
+        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments, partyIdAndType);
         //Retrieve citizen orders for the party
         List<CitizenDocuments> citizenOrders = getCitizenOrders(userDetails, caseData, partyIdAndType, citizenDocuments);
         //Add additional documents served along with order
@@ -693,7 +695,8 @@ public class CaseService {
 
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
                                                        CaseData caseData,
-                                                       List<CitizenDocuments> otherDocuments) {
+                                                       List<CitizenDocuments> otherDocuments,
+                                                       Map<String, String> partyIdAndType) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
@@ -743,6 +746,9 @@ public class CaseService {
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
+
+        //PRL-6319 - service of documents
+        otherDocuments.addAll(getAllServiceOfDocuments(caseData, partyIdAndType));
 
         return citizenDocuments;
     }
@@ -1032,6 +1038,8 @@ public class CaseService {
 
         //Respondent response notification to applicant
         addRespondentResponseNotification(caseData, citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
+
+        //PRL-6319 - Service of documents
 
         return citizenNotifications;
     }
@@ -1436,7 +1444,7 @@ public class CaseService {
             ).toList();
     }
 
-    private Collection<? extends CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
+    private List<CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
         List<CitizenDocuments> statementOfServiceDocuments = new ArrayList<>();
         if (null != caseData.getStatementOfService()) {
             //SOS for SOA
@@ -1466,6 +1474,131 @@ public class CaseService {
                          .uploadedDate(sos.getSubmittedDateTime())
                          .uploadedBy(sos.getUploadedBy().getDisplayedValue())
                          .build()
+            ).toList();
+    }
+
+    private List<CitizenDocuments> getAllServiceOfDocuments(CaseData caseData,
+                                                            Map<String, String> partyIdAndType) {
+        if (null != caseData.getServiceOfDocuments()
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())) {
+            return fetchDocumentsForParty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList(), partyIdAndType);
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> fetchDocumentsForParty(List<Element<ServedApplicationDetails>> servedDocumentsDetailsList,
+                                                          Map<String, String> partyIdAndType) {
+        List<CitizenDocuments> otherDocuments = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(servedDocumentsDetailsList)) {
+            //sort in descending order
+            servedDocumentsDetailsList
+                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            servedDocumentsDetailsList.stream()
+                .map(Element::getValue)
+                .forEach(servedDetails -> {
+                    if (null != servedDetails.getModeOfService()) {
+                        switch (servedDetails.getModeOfService()) {
+                            case SOA_BY_EMAIL_AND_POST -> {
+                                otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                                    servedDetails,
+                                    partyIdAndType
+                                ));
+
+                                otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                                    servedDetails,
+                                    partyIdAndType
+                                ));
+                            }
+                            case SOA_BY_EMAIL -> otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                                servedDetails,
+                                partyIdAndType
+                            ));
+                            case SOA_BY_POST -> otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                                servedDetails,
+                                partyIdAndType
+                            ));
+
+                            default -> { }
+                        }
+                    }
+                });
+        }
+        return otherDocuments;
+    }
+
+    private List<CitizenDocuments> retrieveDocumentsFromEmailNotifications(ServedApplicationDetails servedDetails,
+                                                                           Map<String, String> partyIdAndType) {
+        if (CollectionUtils.isNotEmpty(servedDetails.getEmailNotificationDetails())) {
+            //sort in descending order
+            servedDetails.getEmailNotificationDetails()
+                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            return servedDetails.getEmailNotificationDetails().stream()
+                .map(Element::getValue)
+                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .map(emailNotification ->
+                    getSodDocuments(
+                        emailNotification.getDocs(),
+                        partyIdAndType.get(PARTY_ID),
+                        emailNotification.getServedParty(),
+                        servedDetails.getServedBy(),
+                        servedDetails.getWhoIsResponsible(),
+                        emailNotification.getTimeStamp()
+                    )
+                ).flatMap(Collection::stream)
+                .toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> retrieveDocumentsFromPostNotifications(ServedApplicationDetails servedDetails,
+                                                                          Map<String, String> partyIdAndType) {
+        if (CollectionUtils.isNotEmpty(servedDetails.getBulkPrintDetails())) {
+            //sort in descending order
+            servedDetails.getBulkPrintDetails()
+                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            return servedDetails.getBulkPrintDetails().stream()
+                .map(Element::getValue)
+                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .map(postNotification ->
+                         getSodDocuments(
+                             postNotification.getPrintDocs(),
+                             partyIdAndType.get(PARTY_ID),
+                             postNotification.getServedParty(),
+                             servedDetails.getServedBy(),
+                             servedDetails.getWhoIsResponsible(),
+                             postNotification.getTimeStamp()
+                         )
+                ).flatMap(Collection::stream)
+                .toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> getSodDocuments(List<Element<Document>> documents,
+                                                   String partyId,
+                                                   String servedParty,
+                                                   String servedBy,
+                                                   String responsibleToServe,
+                                                   String timeStamp) {
+        return nullSafeCollection(documents).stream()
+            .map(Element::getValue)
+            .map(document -> CitizenDocuments.builder()
+                .categoryId(ANY_OTHER_DOC)
+                .partyId(partyId)
+                .partyType(servedParty)
+                .document(document)
+                .uploadedBy(servedBy)
+                .whoIsResponsible(responsibleToServe)
+                .isPersonalService(SodCitizenServingRespondentsEnum.unrepresentedApplicant
+                                       .getDisplayedValue().equals(responsibleToServe)
+                                       || SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                    .getDisplayedValue().equals(responsibleToServe))
+                .uploadedDate(LocalDateTime.parse(timeStamp, DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
+                .build()
             ).toList();
     }
 
