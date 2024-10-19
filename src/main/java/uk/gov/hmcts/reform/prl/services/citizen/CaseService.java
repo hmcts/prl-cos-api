@@ -1040,6 +1040,7 @@ public class CaseService {
         addRespondentResponseNotification(caseData, citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
         //PRL-6319 - Service of documents
+        addServiceOfDocumentsNotification(caseData, citizenDocumentsManagement, citizenNotifications);
 
         return citizenNotifications;
     }
@@ -1232,6 +1233,31 @@ public class CaseService {
 
             citizenNotifications.addAll(getNotifications(caseData, notificationName, notifMap));
         }
+    }
+
+    private void addServiceOfDocumentsNotification(CaseData caseData,
+                                                   CitizenDocumentsManagement citizenDocumentsManagement,
+                                                   List<CitizenNotification> citizenNotifications) {
+        CitizenDocuments servedDocument = getLatestServedDocument(citizenDocumentsManagement.getCitizenOtherDocuments());
+        if (null != servedDocument
+            && !isAnyOrderServedPostDate(citizenDocumentsManagement.getCitizenOrders(),
+                                         servedDocument.getUploadedDate())) {
+            Map<String, Object> notifMap = new HashMap<>();
+            notifMap.put(IS_PERSONAL, servedDocument.isPersonalService());
+            citizenNotifications.addAll(getNotifications(
+                caseData,
+                NotificationNames.SOD_APPLICANT_RESPONDENT,
+                notifMap
+            ));
+        }
+    }
+
+    private CitizenDocuments getLatestServedDocument(List<CitizenDocuments> otherDocuments) {
+
+        return nullSafeCollection(otherDocuments).stream()
+            .filter(CitizenDocuments::isServedDocument)
+            .findFirst()
+            .orElse(null);
     }
 
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
@@ -1489,42 +1515,41 @@ public class CaseService {
     private List<CitizenDocuments> fetchDocumentsForParty(List<Element<ServedApplicationDetails>> servedDocumentsDetailsList,
                                                           Map<String, String> partyIdAndType) {
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
+        //sort in descending order
+        servedDocumentsDetailsList
+            .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
-        if (CollectionUtils.isNotEmpty(servedDocumentsDetailsList)) {
-            //sort in descending order
-            servedDocumentsDetailsList
-                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
-
-            servedDocumentsDetailsList.stream()
-                .map(Element::getValue)
-                .forEach(servedDetails -> {
-                    if (null != servedDetails.getModeOfService()) {
-                        switch (servedDetails.getModeOfService()) {
-                            case SOA_BY_EMAIL_AND_POST -> {
-                                otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
-                                    servedDetails,
-                                    partyIdAndType
-                                ));
-
-                                otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
-                                    servedDetails,
-                                    partyIdAndType
-                                ));
-                            }
-                            case SOA_BY_EMAIL -> otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
-                                servedDetails,
-                                partyIdAndType
-                            ));
-                            case SOA_BY_POST -> otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+        servedDocumentsDetailsList.stream()
+            .map(Element::getValue)
+            .forEach(servedDetails -> {
+                if (null != servedDetails.getModeOfService()) {
+                    switch (servedDetails.getModeOfService()) {
+                        case SOA_BY_EMAIL_AND_POST -> {
+                            otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
                                 servedDetails,
                                 partyIdAndType
                             ));
 
-                            default -> { }
+                            otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                                servedDetails,
+                                partyIdAndType
+                            ));
+                        }
+                        case SOA_BY_EMAIL -> otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                        case SOA_BY_POST -> otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+
+                        default -> {
                         }
                     }
-                });
-        }
+                }
+            });
+
         return otherDocuments;
     }
 
@@ -1586,6 +1611,7 @@ public class CaseService {
                                                    String timeStamp) {
         return nullSafeCollection(documents).stream()
             .map(Element::getValue)
+            .filter(document -> !"coversheet".equalsIgnoreCase(document.getDocumentFileName()))
             .map(document -> CitizenDocuments.builder()
                 .categoryId(ANY_OTHER_DOC)
                 .partyId(partyId)
@@ -1598,6 +1624,7 @@ public class CaseService {
                                        || SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .getDisplayedValue().equals(responsibleToServe))
                 .uploadedDate(LocalDateTime.parse(timeStamp, DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
+                .isServedDocument(true)
                 .build()
             ).toList();
     }
