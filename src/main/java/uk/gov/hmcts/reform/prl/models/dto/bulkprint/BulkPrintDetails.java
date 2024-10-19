@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.bulkprint;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,10 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS;
 
 @Data
 @Builder(toBuilder = true)
@@ -41,4 +45,10 @@ public class BulkPrintDetails {
      */
     @JsonProperty("partyIds")
     private String partyIds;
+
+    @JsonIgnore
+    public LocalDateTime getServedDateTime() {
+        return LocalDateTime.parse(timeStamp,
+                                   DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS);
+    }
 }
