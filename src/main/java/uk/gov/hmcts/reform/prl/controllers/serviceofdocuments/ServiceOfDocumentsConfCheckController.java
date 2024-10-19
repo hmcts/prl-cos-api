@@ -21,9 +21,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -65,9 +62,8 @@ public class ServiceOfDocumentsConfCheckController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataMap = new HashMap<>();
-
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

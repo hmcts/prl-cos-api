@@ -992,8 +992,7 @@ public class ServiceOfDocumentsService {
             && null != caseData.getServiceOfDocuments().getSodUnServedPack()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-            //UNCOMMENT WHEN PET TEAM FIXES RESPONDENT C8 ISSUES
-            //confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
+            confidentialityCheckService.processRespondentsC8Documents(caseDataMap, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         }
 
@@ -1018,21 +1017,20 @@ public class ServiceOfDocumentsService {
             );
 
             response = ok(SubmittedCallbackResponse.builder()
-                          .confirmationHeader("# Document(s) will be served")
-                          .build());
+                    .confirmationHeader("# Document(s) will be served")
+                    .build());
         } else {
             //Reset unserved packs
             caseDataMap.put("sodUnServedPack", null);
 
             response = ok(SubmittedCallbackResponse.builder()
-                          .confirmationHeader("# Document(s) reject, Refer to court admin")
+                    .confirmationHeader("# Document(s) reject, Refer to court admin")
                           .build());
         }
 
         //Clean up the fields
         cleanUpSelections(caseDataMap);
-        //UNCOMMENT WHEN PET TEAM FIXES RESPONDENT C8 ISSUES
-        //confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
+        confidentialityCheckService.clearRespondentsC8Documents(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
