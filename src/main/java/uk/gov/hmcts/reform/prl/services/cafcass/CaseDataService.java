@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -20,8 +22,8 @@ import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -44,11 +46,17 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 
 @Slf4j
 @Service
@@ -86,7 +94,15 @@ public class CaseDataService {
 
     private final OrganisationService organisationService;
 
-    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
+    private final CoreCaseDataApi coreCaseDataApi;
+
+    @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
+    private List<String> excludedDocumentCategoryList;
+
+    @Value("#{'${cafcaas.excludedDocuments}'.split(',')}")
+    private List<String> excludedDocumentList;
+
+    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate, String serviceAuthorisation) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
@@ -118,9 +134,9 @@ public class CaseDataService {
                     searchResult,
                     CafCassResponse.class
                 );
-
+                log.info("Initial cafCassResponse --> {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-
+                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse, serviceAuthorisation);
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
@@ -139,6 +155,88 @@ public class CaseDataService {
         }
         return cafCassResponse;
     }
+
+    private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse,
+                                                                       String serviceAuthorisation) {
+
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                systemAuthorisation,
+                serviceAuthorisation,
+                String.valueOf(cafCassCaseDetail.getId())
+            );
+            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
+
+            List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+                .sorted(Comparator.comparing(Category::getCategoryName))
+                .toList();
+            log.info("Parent categories {}", parentCategories);
+            parseCategoryAndCreateList(parentCategories, otherDocsList);
+            parentCategories.forEach(cat -> log.info(cat.getCategoryId(), cat.getCategoryName()));
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            final CafCassCaseData cafCassCaseData = caseData.toBuilder()
+                .otherDocuments(otherDocsList)
+                .build();
+            cafCassCaseDetail.setCaseData(cafCassCaseData);
+        });
+
+
+    }
+
+    private void parseCategoryAndCreateList(List<Category> parentCategories,
+                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
+        log.info("excludedDocumentCategoryList --> {}", excludedDocumentCategoryList);
+        log.info("excludedDocumentList {} --> {}", excludedDocumentList);
+        parentCategories.forEach(category -> {
+            if (CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(
+                category.getCategoryId())) {
+                if (category.getSubCategories() != null) {
+                    parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
+                }
+                log.info("category name {} --> {}", category.getCategoryName(), category.getCategoryId());
+                category.getDocuments().forEach(document -> {
+                    if (CollectionUtils.isEmpty(excludedDocumentList)
+                        || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
+                        log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
+                        try {
+                            otherDocsList.add(Element.<OtherDocuments>builder().id(
+                                UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
+                                buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
+                                DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
+                        } catch (MalformedURLException e) {
+                            log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+        log.info("documentFilename " + documentFilename);
+        log.info("excludedDocumentList " + excludedDocumentList);
+        boolean isExcluded = false;
+        for (String excludedDocumentName : excludedDocumentList) {
+            log.info("excludedDocumentName " + excludedDocumentName);
+            log.info("documentFilename.contains(excludedDocumentName) " + documentFilename.contains(excludedDocumentName));
+            if (documentFilename.contains(excludedDocumentName)) {
+                log.info("set isExcluded true");
+                isExcluded = true;
+            }
+        }
+        log.info("isExcluded " + isExcluded);
+        return isExcluded;
+    }
+
+    public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) throws MalformedURLException {
+        URL url = new URL(cfvDocument.getDocumentURL());
+        return Document.builder()
+            .documentUrl(CafCassCaseData.getDocumentId(url))
+            .documentFileName(cfvDocument.getDocumentFilename())
+            .build();
+    }
+
 
     private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
         Map<String, Address> orgIdToAddressMap = new HashMap<>();
@@ -285,7 +383,6 @@ public class CaseDataService {
                         caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                     );
                     caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
-                    caseDetails.getCaseData().setOtherDocuments(updateOtherDocuments(caseDetails.getCaseData()));
                     caseDetails.getCaseData().setCafcassUploadedDocs(null);
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
@@ -296,31 +393,39 @@ public class CaseDataService {
             caseIdWithRegionIdMap
         );
 
+        //PRL-6431
+        filterCancelledHearingsBeforeListing(listOfHearingDetails);
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
     }
 
-    private List<Element<OtherDocuments>> updateOtherDocuments(CafCassCaseData caseData) {
-        List<Element<OtherDocuments>> otherDocsList = CollectionUtils.isNotEmpty(caseData.getOtherDocuments())
-            ? caseData.getOtherDocuments() : new ArrayList<>();
-        final @NotNull @Valid UploadedDocuments[] uploadedDocs = new UploadedDocuments[1];
-        if (caseData.getCafcassUploadedDocs() != null) {
-            caseData.getCafcassUploadedDocs().stream().forEach(
-                uploadedDocumentsElement -> {
-                    uploadedDocs[0] = uploadedDocumentsElement.getValue();
-                    otherDocsList.add(Element.<OtherDocuments>builder()
-                                          .id(uploadedDocumentsElement.getId())
-                                          .value(OtherDocuments.builder()
-                                                     .documentOther(Document.buildFromPrlDocument(uploadedDocs[0].getCafcassDocument()))
-                                                     .documentName(uploadedDocs[0].getCafcassDocument().getDocumentFileName())
-                                                     .documentTypeOther(DocTypeOtherDocumentsEnum.cafcassReports)
-                                                     .build())
-                                          .build());
-                }
-            );
-
+    public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
+        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
+        if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
+            for (Hearings hearings : listOfHearingDetails) {
+                hearings.getCaseHearings().forEach(caseHearing -> {
+                    if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
+                        filteredCaseHearings.add(caseHearing);
+                    }
+                });
+                hearings.setCaseHearings(filteredCaseHearings);
+            }
         }
-        return otherDocsList;
+    }
+
+    private static boolean checkIfHearingCancelledBeforeListing(CaseHearing caseHearing) {
+        boolean hearingCancelledBeforeListing = false;
+        if (CANCELLED.equals(caseHearing.getHmcStatus())
+            && null != caseHearing.getHearingDaySchedule()) {
+            for (HearingDaySchedule hearingDaySchedule : caseHearing.getHearingDaySchedule()) {
+                if (ObjectUtils.isEmpty(hearingDaySchedule.getHearingStartDateTime())
+                    && ObjectUtils.isEmpty(hearingDaySchedule.getHearingEndDateTime())) {
+                    hearingCancelledBeforeListing = true;
+                    break;
+                }
+            }
+        }
+        return hearingCancelledBeforeListing;
     }
 
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
