@@ -143,8 +143,7 @@ public class FeeService {
                 if (isBlank(feeRequest.getHearingDate())
                     && isBlank(feeRequest.getOtherPartyConsent())
                     && isBlank(feeRequest.getNotice())) {
-                    log.info("### AWP application reason {}", feeRequest.getApplicationReason());
-                    return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
+                    return getFeeTypeByApplicationReason(feeRequest);
                 }
 
                 // For C2 - Adjourn Hearing
@@ -181,6 +180,10 @@ public class FeeService {
             }
         }
         return feeType;
+    }
+
+    private FeeType getFeeTypeByApplicationReason(FeeRequest feeRequest) {
+        return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
     }
 
     public boolean isc2WithOrder(String applicationReason) {
