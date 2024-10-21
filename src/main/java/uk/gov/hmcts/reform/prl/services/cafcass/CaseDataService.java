@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -49,6 +46,8 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -200,10 +199,14 @@ public class CaseDataService {
                     if (CollectionUtils.isEmpty(excludedDocumentList)
                         || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
                         log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
-                        otherDocsList.add(Element.<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>builder().id(
-                            UUID.randomUUID()).value(uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments.builder().documentOther(
-                            buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
-                            DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
+                        try {
+                            otherDocsList.add(Element.<OtherDocuments>builder().id(
+                                UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
+                                buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
+                                DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
+                        } catch (MalformedURLException e) {
+                            log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+                        }
                     }
                 });
             }
@@ -226,9 +229,10 @@ public class CaseDataService {
         return isExcluded;
     }
 
-    public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) {
+    public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) throws MalformedURLException {
+        URL url = new URL(cfvDocument.getDocumentURL());
         return Document.builder()
-            .documentUrl(cfvDocument.getDocumentURL())
+            .documentUrl(CafCassCaseData.getDocumentId(url))
             .documentFileName(cfvDocument.getDocumentFilename())
             .build();
     }
@@ -379,7 +383,6 @@ public class CaseDataService {
                         caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                     );
                     caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
-                    caseDetails.getCaseData().setOtherDocuments(updateOtherDocuments(caseDetails.getCaseData()));
                     caseDetails.getCaseData().setCafcassUploadedDocs(null);
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
@@ -423,29 +426,6 @@ public class CaseDataService {
             }
         }
         return hearingCancelledBeforeListing;
-    }
-
-    private List<Element<OtherDocuments>> updateOtherDocuments(CafCassCaseData caseData) {
-        List<Element<OtherDocuments>> otherDocsList = CollectionUtils.isNotEmpty(caseData.getOtherDocuments())
-            ? caseData.getOtherDocuments() : new ArrayList<>();
-        final @NotNull @Valid UploadedDocuments[] uploadedDocs = new UploadedDocuments[1];
-        if (caseData.getCafcassUploadedDocs() != null) {
-            caseData.getCafcassUploadedDocs().stream().forEach(
-                uploadedDocumentsElement -> {
-                    uploadedDocs[0] = uploadedDocumentsElement.getValue();
-                    otherDocsList.add(Element.<OtherDocuments>builder()
-                                          .id(uploadedDocumentsElement.getId())
-                                          .value(OtherDocuments.builder()
-                                                     .documentOther(Document.buildFromPrlDocument(uploadedDocs[0].getCafcassDocument()))
-                                                     .documentName(uploadedDocs[0].getCafcassDocument().getDocumentFileName())
-                                                     .documentTypeOther(DocTypeOtherDocumentsEnum.cafcassReports)
-                                                     .build())
-                                          .build());
-                }
-            );
-
-        }
-        return otherDocsList;
     }
 
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
