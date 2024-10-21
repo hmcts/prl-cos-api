@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -36,6 +37,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 contact.getPreviousName(),
                 contact.getDateOfBirth(),
                 contact.getPlaceOfBirth(),
+                contact.getLiveInRefuge(),
+                contact.getRefugeConfidentialityC8Form(),
                 contact.getAddress(),
                 contact.getAddressHistory(),
                 null != contact.getContact() ? ofNullable(contact.getContact().getEmail()) : BLANK_STRING,
@@ -45,6 +48,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
+        boolean isFinished = false;
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -52,7 +56,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                                                                               .getCitizenDetails());
             if (citizenDetails.isPresent() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
-                return true;
+                isFinished = true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -60,7 +64,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError()
         );
-        return false;
+        return isFinished;
     }
 
     private boolean checkContactDetailsMandatoryCompleted(Optional<CitizenDetails> citizenDetails) {
@@ -69,6 +73,11 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             fields.add(ofNullable(citizenDetails.get().getFirstName()));
             fields.add(ofNullable(citizenDetails.get().getLastName()));
             fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
+            Optional<YesOrNo> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
+            fields.add(isLivingInRefuge);
+            if (isLivingInRefuge.isPresent() && Yes.equals(isLivingInRefuge.get())) {
+                fields.add(ofNullable(citizenDetails.get().getRefugeConfidentialityC8Form()));
+            }
             Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
             fields.add(address);
             if (address.isPresent() && !verifyAddressCompleted(address.get())) {

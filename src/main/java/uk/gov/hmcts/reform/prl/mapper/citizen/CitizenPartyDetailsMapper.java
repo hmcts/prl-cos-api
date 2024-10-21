@@ -199,6 +199,7 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent, childDetails);
+                    log.info("updated party details are {}", updatedPartyDetails);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -555,6 +556,9 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
+        log.info("citizen provided details, lives in refuge {}", citizenProvidedPartyDetails.getLiveInRefuge());
+        log.info("citizen provided details, lives in refuge doc {}", citizenProvidedPartyDetails.getRefugeConfidentialityC8Form());
+
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
             .email(isEmailNeedsToUpdate
@@ -583,6 +587,8 @@ public class CitizenPartyDetailsMapper {
                                     ? YesOrNo.Yes : existingPartyDetails.getIsDateOfBirthKnown())
             .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
                               ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
+            .liveInRefuge(citizenProvidedPartyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(existingPartyDetails.getResponse().toBuilder()
