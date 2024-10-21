@@ -474,11 +474,17 @@ public class DraftAnOrderService {
     private OrderDetails generateFinalOrderDocument(String auth, CaseData caseData, DraftOrder draftOrder, OrderDetails orderDetails) {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
+        log.info("----------- draftOrder.getIsOrderUploadedByJudgeOrAdmin() -----------  {}", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
                 .doesOrderDocumentNeedSeal(Yes)
                 .build();
+            try {
+                log.info("orderDetails {}", objectMapper.writeValueAsString(orderDetails));
+            } catch (JsonProcessingException e) {
+                throw new ManageOrderRuntimeException("Exception while serializing orderDetails", e);
+            }
         } else {
             caseData = updateCaseDataForDocmosis(caseData, draftOrder);
             caseData = caseData.toBuilder().manageOrders(

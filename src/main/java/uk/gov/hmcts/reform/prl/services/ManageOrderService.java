@@ -976,6 +976,7 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
+            log.info("---------- Upload an order is selected ---------------");
             return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, userDetails);
         }
     }
@@ -1038,6 +1039,12 @@ public class ManageOrderService {
                                    .isOrderUploaded(Yes)
                                    .doesOrderDocumentNeedSeal(Yes)
                                    .build()));
+
+        try {
+            log.info("newOrderDetails : {} ", objectMapper.writeValueAsString(newOrderDetails));
+        } catch (JsonProcessingException e) {
+            throw new ManageOrderRuntimeException("Error while serializing newOrderDetails", e);
+        }
         return newOrderDetails;
     }
 
@@ -1153,6 +1160,7 @@ public class ManageOrderService {
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             } else {
+                log.info("Court admin logged in and setFinalOrderCollection is called");
                 return setFinalOrderCollection(authorisation, caseData, userDetails);
             }
         }
