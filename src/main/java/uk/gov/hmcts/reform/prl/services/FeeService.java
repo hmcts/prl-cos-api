@@ -143,6 +143,7 @@ public class FeeService {
                 if (isBlank(feeRequest.getHearingDate())
                     && isBlank(feeRequest.getOtherPartyConsent())
                     && isBlank(feeRequest.getNotice())) {
+                    log.info("### AWP application reason {}", feeRequest.getApplicationReason());
                     return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
                 }
 
