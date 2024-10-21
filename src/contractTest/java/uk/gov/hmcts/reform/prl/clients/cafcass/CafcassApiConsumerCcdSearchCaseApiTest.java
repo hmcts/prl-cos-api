@@ -66,7 +66,8 @@ import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CCD_STORE_SEARC
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
-        "amRoleAssignment.api.url="
+        "amRoleAssignment.api.url=",
+        "core_case_data.api.url="
     }
 )
 
