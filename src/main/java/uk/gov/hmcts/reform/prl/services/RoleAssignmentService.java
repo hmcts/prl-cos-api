@@ -211,7 +211,6 @@ public class RoleAssignmentService {
     }
 
     public void removeRoleAssignment(String roleAssignmentId) {
-        log.info("Remove role assignment for - {}", roleAssignmentId);
         String systemUserToken = systemUserService.getSysUserToken();
         roleAssignmentApi.removeRoleAssignments(
             systemUserToken,

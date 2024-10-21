@@ -93,7 +93,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("*****clientContext in /populate-draft-order-dropdown****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -131,7 +130,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("*****clientContext in about to start****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -177,7 +175,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("*****clientContext in about to submit****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
@@ -295,7 +292,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("*****clientContext in judge-or-admin-populate-draft-order-custom-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -361,7 +357,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("*****clientContext in judge-or-admin-populate-draft-order-common-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             DraftOrder selectedOrder;
             CaseData caseData = objectMapper.convertValue(
@@ -420,7 +415,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("*****clientContext in pre-populate-standard-direction-order-other-fields****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -503,7 +497,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("*****clientContext in /edit-and-approve/submitted****{}", clientContext);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent

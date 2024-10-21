@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -257,14 +256,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
-        try {
-            log.info(
-                "casedata from submitted callback for snr callbackRequest {}",
-                objectMapper.writeValueAsString(callbackRequest)
-            );
-        } catch (JsonProcessingException e) {
-            log.info("Json processing Exception as been thrown");
-        }
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();

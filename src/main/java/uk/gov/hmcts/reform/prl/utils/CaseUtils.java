@@ -889,21 +889,22 @@ public class CaseUtils {
     }
 
     public static WaMapper getWaMapper(String clientContext) {
-        byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-        String decodedString = new String(decodedBytes);
-        try {
-            return new ObjectMapper().readValue(decodedString, WaMapper.class);
-        } catch (Exception ex) {
-            log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+        if (clientContext != null) {
+            log.info("clientContext is present");
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+            String decodedString = new String(decodedBytes);
+            try {
+                return new ObjectMapper().readValue(decodedString, WaMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
         }
         return null;
     }
 
     public static String getDraftOrderId(WaMapper waMapper) {
         if (null != waMapper) {
-            log.info("***Inside getDraftOrderId {}", waMapper);
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
-                log.info("***draftOrderId {}", waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId());
                 return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId();
             }
         }
@@ -920,7 +921,7 @@ public class CaseUtils {
         }
         return null;
     }
-  
+
     public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
         Optional<Element<PartyDetails>> party = Optional.empty();
         if (CollectionUtils.isNotEmpty(parties)) {

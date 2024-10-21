@@ -145,8 +145,6 @@ public class EditReturnedOrderService {
             WA_ORDER_NAME_SOLICITOR_CREATED,
             draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId(), clientContext)
         );
-        log.info("****order collection id****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
-        log.info("****orderNameSolresubmitted****", caseDataMap.get(WA_ORDER_COLLECTION_ID));
         DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(
             caseData.getDraftOrderCollection(),
             caseData.getManageOrders().getRejectedOrdersDynamicList(),

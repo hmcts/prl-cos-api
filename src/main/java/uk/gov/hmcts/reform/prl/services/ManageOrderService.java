@@ -3279,8 +3279,6 @@ public class ManageOrderService {
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
-        log.info("eventId " + eventId);
-        log.info("waFieldsMap " + waFieldsMap);
         return waFieldsMap;
     }
 

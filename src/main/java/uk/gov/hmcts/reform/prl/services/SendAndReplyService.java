@@ -341,11 +341,8 @@ public class SendAndReplyService {
     private void removeAllocatedJudgeIfAddedAsPartOfSendAndReply(CaseData caseData,
                                                                  Map<String, Object> caseDataMap,
                                                                  Message closingMessage) {
-        log.info("*** Inside removeAllocatedJudgeIfAddedAsPartOfSendAndReply ***");
-        log.info("Remove judge -> Closed message identifier {}", closingMessage.getMessageIdentifier());
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReplyList = caseData
             .getSendOrReplyDto().getAllocatedJudgeForSendAndReply();
-        log.info("Remove judge -> Existing allocated judge details {}", allocatedJudgeForSendAndReplyList);
 
         //Get allocated judge details for the closed message if any
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeDetailsForClosedMessage =
@@ -354,7 +351,6 @@ public class SendAndReplyService {
                             allocatedJudgeForSendAndReplyElement.getValue().getMessageIdentifier().equals(
                                 closingMessage.getMessageIdentifier()))
                 .toList();
-        log.info("Remove judge -> Allocated judge details for closed message {}", allocatedJudgeDetailsForClosedMessage);
 
         if (isNotEmpty(allocatedJudgeDetailsForClosedMessage)) {
             //Remove allocated judge details from caseData for the closed message
@@ -379,7 +375,6 @@ public class SendAndReplyService {
                             );
                     }
                 });
-            log.info("Remove judge -> Allocated judge details after removal {}", allocatedJudgeForSendAndReplyList);
         }
     }
 
@@ -1320,7 +1315,6 @@ public class SendAndReplyService {
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .toList();
-        log.info("Reply message {}", replyMessage);
         allocateJudgeIfMessageSentToJudge(authorization, caseData, replyMessage, caseDataMap);
 
         return messages;
@@ -1358,7 +1352,6 @@ public class SendAndReplyService {
     }
 
     private String getExternalSentTo(Message message) {
-        log.info("external messages sent to {}",message.getExternalMessageWhoToSendTo());
         Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(message.getExternalMessageWhoToSendTo());
         String externalOrInternalWhoSendTO = externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
             .getValue().stream()
@@ -1504,7 +1497,6 @@ public class SendAndReplyService {
                                                    Map<String, Object> caseDataMap) {
         if (InternalMessageWhoToSendToEnum.JUDICIARY.equals(newMessage.getInternalMessageWhoToSendTo())
             || InternalMessageReplyToEnum.JUDICIARY.equals(newMessage.getInternalMessageReplyTo())) {
-            log.info("*** Inside allocateJudgeIfMessageSentToJudge ***");
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getSendOrReplyDto()
                 .getAllocatedJudgeForSendAndReply();
             if (allocatedJudgeForSendAndReply == null) {
@@ -1519,21 +1511,13 @@ public class SendAndReplyService {
                     allocatedJudgeForSendAndReply,
                     judgeIdamId
                 );
-                log.info(
-                    "Allocate judge -> existing allocated judge details for the Judge idam id {} - {}",
-                    judgeIdamId, allocatedJudgeForSendAndReplyOptional
-                );
+
                 if (allocatedJudgeForSendAndReplyOptional.isPresent()) {
-                    log.info("Allocate judge -> case is already allocated to judge as part of another message");
                     if (!checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
                         allocatedJudgeForSendAndReply,
                         judgeIdamId,
                         newMessage.getMessageIdentifier()
                     )) {
-                        log.info(
-                            "Allocate judge -> add judge details for the new message {}",
-                            newMessage.getMessageIdentifier()
-                        );
                         //Check if the Judge is already allocated to this message
                         allocatedJudgeForSendAndReply
                             .add(element(AllocatedJudgeForSendAndReply.builder()
@@ -1569,7 +1553,6 @@ public class SendAndReplyService {
                                              .build()));
                     }
                 }
-                log.info("Allocate judge -> allocated judge details {}", allocatedJudgeForSendAndReply);
                 caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReply);
             }
         }
@@ -1781,9 +1764,6 @@ public class SendAndReplyService {
     }
 
     private boolean isContactPreferenceMatched(PartyDetails partyDetails, ContactPreferences contactPreferences) {
-        log.info("contact preference  for party {}",partyDetails.getContactPreferences());
-        log.info("actual contact preference {}",contactPreferences);
-
         return contactPreferences.equals(partyDetails.getContactPreferences());
     }
 
@@ -1794,15 +1774,10 @@ public class SendAndReplyService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         try {
-            log.info("Sending the post message to external parties in case for caseId {}", caseData.getId());
 
             List<Document> docs = new ArrayList<>();
             if (null != partyDetails && null != partyDetails.getAddress()
                 && null != partyDetails.getAddress().getAddressLine1()) {
-                log.info("Post triggered for party {} to postal address {}",
-                         partyDetails.getEmail() + partyDetails.getLastName(),
-                         partyDetails.getAddress().getAddressLine1());
-
                 List<Document> attachedDocs = getExternalMessageSelectedDocumentList(caseData, authorization, message);
                 if (documentLanguage.isGenEng()) {
                     docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
@@ -1836,9 +1811,6 @@ public class SendAndReplyService {
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
-        log.info("Email triggered for party {} to email address {}",
-                 partyDetails.getEmail() + partyDetails.getLastName(),
-                 emailAddress);
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
