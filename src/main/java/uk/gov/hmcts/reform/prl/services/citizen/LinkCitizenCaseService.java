@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -131,13 +132,23 @@ public class LinkCitizenCaseService {
             caseDataUpdated.putAll(getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId));
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
-                User user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
+                User user;
+                if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())) {
+                    user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
+                } else {
+                    user = User.builder().email(emailId).idamId(userId).build();
+                }
                 caseData.getApplicantsFL401().setUser(user);
                 caseDataUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             } else {
-                User user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
+                User user;
+                if (ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser())) {
+                    user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
+                } else {
+                    user = User.builder().email(emailId).idamId(userId).build();
+                }
                 caseData.getRespondentsFL401().setUser(user);
                 caseDataUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
 

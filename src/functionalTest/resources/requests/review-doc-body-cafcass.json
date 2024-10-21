@@ -1392,6 +1392,7 @@
             "fileName": null,
             "categoryId": "applicantApplication",
             "uploadedBy": "AAT Solicitor",
+            "uploaderRole": "Cafcass",
             "scannedDate": null,
             "categoryName": "Applicant application",
             "deliveryDate": null,
