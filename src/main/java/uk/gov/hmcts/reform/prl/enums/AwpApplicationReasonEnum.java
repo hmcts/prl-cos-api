@@ -43,8 +43,8 @@ public enum AwpApplicationReasonEnum {
     ),
     @JsonProperty("SPECIFIC_ISSUE_ORCDER")
     SPECIFIC_ISSUE_ORCDER(
-        "specfic-issue-order",
-        "specfic-issue-order"
+        "specific-issue-order",
+        "specific-issue-order"
     ),
     @JsonProperty("SUBMIT_EVIDENCE_COURT_NOT_REQUESTED")
     SUBMIT_EVIDENCE_COURT_NOT_REQUESTED(
