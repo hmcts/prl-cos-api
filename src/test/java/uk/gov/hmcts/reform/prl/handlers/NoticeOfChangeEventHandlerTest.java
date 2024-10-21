@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -141,9 +142,13 @@ public class NoticeOfChangeEventHandlerTest {
             .representing(CAAPPLICANT)
             .accessCode("ABCD1234")
             .build();
-
+        List<Document> documents = new ArrayList<>();
+        documents.add(Document.builder().build());
         when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
         when(systemUserService.getSysUserToken()).thenReturn("test auth");
+        when(serviceOfApplicationService.generateAccessCodeLetter(Mockito.anyString(), Mockito.any(), Mockito.any(),
+                                                                  Mockito.any(), Mockito.anyString()))
+            .thenReturn(documents);
     }
 
     @Test
@@ -306,7 +311,7 @@ public class NoticeOfChangeEventHandlerTest {
                 CaseInvite.class),
             anyString()
         )).thenReturn(
-            Document.builder().build());
+            List.of(Document.builder().build()));
         when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString())).thenReturn(UUID.randomUUID());
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);

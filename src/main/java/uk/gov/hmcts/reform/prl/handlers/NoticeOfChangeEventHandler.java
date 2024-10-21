@@ -323,7 +323,7 @@ public class NoticeOfChangeEventHandler {
     private void generateCoverLetter(CaseData caseData,
                                      Element<PartyDetails> party,
                                      List<Document> documents, String accessCode) {
-        Document coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
+        List<Document> coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
             systemUserService.getSysUserToken(),
             caseData,
             party,
@@ -331,7 +331,7 @@ public class NoticeOfChangeEventHandler {
             PRL_LEGAL_REP_COVER_LETTER_TEMPLATE
             );
         if (isNotEmpty(coverLetterWithAccessCode)) {
-            documents.add(coverLetterWithAccessCode);
+            documents.addAll(coverLetterWithAccessCode);
         }
     }
 }
