@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,4 +90,7 @@ public class BaseCaseData {
     private String isApplicantRepresented;
 
     private List<Element<RefugeConfidentialDocuments>> refugeDocuments;
+  
+    @JsonUnwrapped
+    private CaseAccessStatusAndReason caseAccessStatusAndReason;
 }
