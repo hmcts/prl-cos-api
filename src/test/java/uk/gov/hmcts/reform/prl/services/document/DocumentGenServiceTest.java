@@ -560,7 +560,8 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -571,7 +572,8 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateDraftDocumentWelsh() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
