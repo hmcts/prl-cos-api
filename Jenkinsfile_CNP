@@ -96,7 +96,6 @@ withPipeline(type, product, component) {
   before('functionalTest:aat') {
     env.test_environment = 'aat'
   }
-
   afterAlways('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
@@ -106,7 +105,6 @@ withPipeline(type, product, component) {
   before('functionalTest:preview') {
     env.test_environment = 'aat'
   }
-
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
