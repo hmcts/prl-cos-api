@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -100,6 +101,7 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -199,7 +201,6 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent, childDetails);
-                    log.info("updated party details are {}", updatedPartyDetails);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -210,6 +211,8 @@ public class CitizenPartyDetailsMapper {
                     }
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
+            log.info("updating casedata - james");
+            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
             caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
 
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -555,9 +558,6 @@ public class CitizenPartyDetailsMapper {
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
-
-        log.info("citizen provided details, lives in refuge {}", citizenProvidedPartyDetails.getLiveInRefuge());
-        log.info("citizen provided details, lives in refuge doc {}", citizenProvidedPartyDetails.getRefugeConfidentialityC8Form());
 
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
