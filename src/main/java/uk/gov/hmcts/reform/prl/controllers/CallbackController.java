@@ -413,19 +413,19 @@ public class CallbackController {
 
     private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getApplicants()),
             updatedCaseData,
             APPLICANTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getRespondents()),
             updatedCaseData,
             RESPONDENTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getOtherPartyInTheCaseRevised()),
             updatedCaseData,
             OTHER_PARTY,
