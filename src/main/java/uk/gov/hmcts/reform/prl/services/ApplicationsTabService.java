@@ -153,7 +153,10 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             caseData = upTabForMiam(caseData, applicationTab);
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
-            applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
+            List<Element<OtherProceedingsDetails>> otherProceedingsDetailsTable = getOtherProceedingsDetailsTable(caseData);
+            if (CollectionUtils.isNotEmpty(otherProceedingsDetailsTable)) {
+                applicationTab.put("otherProceedingsDetailsTable", otherProceedingsDetailsTable);
+            }
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
