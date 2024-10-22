@@ -317,7 +317,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.8'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.0.3'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.0'
@@ -337,9 +337,9 @@ dependencies {
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.1'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.0.3'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.0.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
