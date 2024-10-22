@@ -140,7 +140,6 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
-
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
@@ -5679,7 +5678,7 @@ public class ManageOrderServiceTest {
         assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
 
     }
-  
+
     @Test
     public void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());

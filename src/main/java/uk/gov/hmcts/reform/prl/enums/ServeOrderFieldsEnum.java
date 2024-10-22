@@ -33,7 +33,7 @@ public enum ServeOrderFieldsEnum {
     isOrderCompleteToServe("isOrderCompleteToServe"),
     doesOrderClosesCase("doesOrderClosesCase"),
     requestSafeGuardingLetterUpdate("requestSafeGuardingLetterUpdate"),
-    safeGuardingLetterUploadDueDate("safeGuardingLetterUploadDueDate");
+    safeGuardingLetterUploadDueDate("safeGuardingLetterUploadDueDate"),
     draftOrderCollectionId("draftOrderCollectionId");
 
     private final String value;
