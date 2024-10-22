@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.RefugeConfidentialDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 
