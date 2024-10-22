@@ -75,6 +75,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutc
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -102,6 +103,7 @@ public class FL401ApplicationMapper {
     private final CourtFinderService courtFinderService;
     private final LaunchDarklyClient launchDarklyClient;
     private final LocationRefDataService locationRefDataService;
+    private final CourtSealFinderService courtSealFinderService;
 
     private Court court = null;
 
@@ -260,6 +262,7 @@ public class FL401ApplicationMapper {
         }
         //3. if court details found then populate court information and case management location.
         if (!courtVenue.isEmpty()) {
+            log.info("----------Inside new condition to add seal for court----------");
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
@@ -269,7 +272,9 @@ public class FL401ApplicationMapper {
                                             .baseLocationName(courtVenue.get().getCourtName()).build())
                 .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
                 .courtId(epimsId)
+                .courtSeal(courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId()))
                 .build();
+            log.info("---------- court seal is -----------  {}", caseData.getCourtSeal());
         } else {
             // 4. populate court details from fact-finder Api.
             caseData = caseData.toBuilder()
