@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.text.DateFormat;
@@ -240,5 +241,12 @@ public class CommonUtils {
 
     public static boolean isNotEmpty(@Nullable String string) {
         return !isEmpty(string);
+    }
+
+    public static Response getPartyResponse(PartyDetails partyDetails) {
+        if (null != partyDetails.getResponse()) {
+            return partyDetails.getResponse();
+        }
+        return Response.builder().build();
     }
 }
