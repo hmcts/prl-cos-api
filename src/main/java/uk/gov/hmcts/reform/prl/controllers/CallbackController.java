@@ -389,7 +389,7 @@ public class CallbackController {
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
-            caseDataUpdated.put("refugeDocuments", confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData));
+            // caseDataUpdated.put("refugeDocuments", confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData));
             try {
                 log.info("case data while submitting the case ===>" + objectMapper.writeValueAsString(caseData));
             } catch (JsonProcessingException e) {
