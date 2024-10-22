@@ -1369,7 +1369,9 @@ public class C100RespondentSolicitorService {
                 null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
                         ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
-        dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        if (null != response.getSupportYouNeed()) {
+            dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        }
 
         if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
             populateCitizenAttendingTheHearingDataMap(response, dataMap);
