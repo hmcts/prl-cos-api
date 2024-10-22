@@ -588,9 +588,11 @@ public class CitizenPartyDetailsMapperTest {
         PartyDetails partyDetails2 = partyDetails.toBuilder()
             .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder().build()).build())
             .build();
-        citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(partyDetails2, partyDetails1,
+        PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(partyDetails2, partyDetails1,
                                                                      CaseEvent.CITIZEN_RESPONSE_TO_AOH,
                                                                      List.of(element(ChildDetailsRevised.builder().build())));
+        assertNotNull(updatedPartyDetailsBasedOnEvent);
+
     }
 }
 
