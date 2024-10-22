@@ -116,13 +116,13 @@ public class UpdatePartyDetailsService {
             confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getApplicantsFL401()),
                 updatedCaseData,
-                APPLICANTS,
+                FL401_APPLICANTS,
                 false
             );
             confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getRespondentsFL401()),
                 updatedCaseData,
-                RESPONDENTS,
+                FL401_RESPONDENTS,
                 false
             );
             try {
