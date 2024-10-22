@@ -1038,7 +1038,6 @@ public class ManageOrderService {
                                    .isOrderUploaded(Yes)
                                    .doesOrderDocumentNeedSeal(Yes)
                                    .build()));
-
         return newOrderDetails;
     }
 
