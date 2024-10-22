@@ -346,9 +346,9 @@ public class CallbackController {
                     caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-                .refugeDocuments(confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData))
                 .build();
 
+            caseData = confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(caseData);
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
                 && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {

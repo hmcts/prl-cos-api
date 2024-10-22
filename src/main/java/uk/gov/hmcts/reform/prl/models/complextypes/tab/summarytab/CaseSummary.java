@@ -14,9 +14,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOf
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OrderAppliedFor;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 
 import java.util.List;
 

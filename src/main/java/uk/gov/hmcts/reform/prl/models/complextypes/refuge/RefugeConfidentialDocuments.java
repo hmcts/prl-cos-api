@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.complextypes;
+package uk.gov.hmcts.reform.prl.models.complextypes.refuge;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
