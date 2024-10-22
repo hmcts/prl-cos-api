@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
@@ -325,7 +327,7 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
-    public void processForcePartiesConfidentialityIfLivesInRefuge(
+    public void processForcePartiesConfidentialityIfLivesInRefugeForC100(
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
         Map<String, Object> updatedCaseData,
         String party,
@@ -354,10 +356,36 @@ public class ConfidentialityTabService {
         log.info("end processForcePartiesConfidentialityIfLivesInRefuge");
     }
 
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+        Optional<PartyDetails> optionalPartyDetails,
+        Map<String, Object> updatedCaseData,
+        String party,
+        boolean cleanUpNeeded) {
+        log.info("start processForcePartiesConfidentialityIfLivesInRefugeForFL401");
+        log.info("party we got now: " + party);
+        log.info("cleanUpNeeded we got now: " + cleanUpNeeded);
+        if (optionalPartyDetails.isPresent()) {
+            PartyDetails partyDetails = optionalPartyDetails.get();
+            log.info("inside party details for loop");
+            if ((YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()))
+                || (null != partyDetails.getResponse()
+                && null != partyDetails.getResponse().getCitizenDetails()
+                && YesOrNo.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()))) {
+                log.info("says yes to refuge for the party::" + party);
+                forceConfidentialityChangeForRefuge(party, partyDetails);
+            } else if (cleanUpNeeded) {
+                log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                partyDetails.setRefugeConfidentialityC8Form(null);
+            }
+            updatedCaseData.put(party, optionalPartyDetails);
+        }
+        log.info("end processForcePartiesConfidentialityIfLivesInRefuge");
+    }
+
     private void forceConfidentialityChangeForRefuge(String party, PartyDetails partyDetails) {
         log.info("start forceConfidentialityChangeForRefuge");
         log.info("start forceConfidentialityChangeForRefuge for the party:" + party);
-        if (APPLICANTS.equals(party)) {
+        if (APPLICANTS.equals(party) || FL401_APPLICANTS.equalsIgnoreCase(party)) {
             log.info("setting for applicants");
             partyDetails.setIsAddressConfidential(YesOrNo.Yes);
             if (YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
@@ -520,7 +548,8 @@ public class ConfidentialityTabService {
             log.info("refugeDocuments is present and size is " + refugeDocuments.size());
             log.info("historicalRefugeDocuments is present and size is " + historicalRefugeDocuments.size());
 
-            for (Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped : refugeDocuments) {
+            for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext();) {
+                Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
                 log.info(
                     "refugeConfidentialDocumentsWrapped is present and now iterating through items, position:: "
                         + refugeDocuments.indexOf(refugeConfidentialDocumentsWrapped));
@@ -529,7 +558,7 @@ public class ConfidentialityTabService {
                     log.info("If condition satisfied for party type. doc is present");
                     historicalRefugeDocuments.add(refugeConfidentialDocumentsWrapped);
                     log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
-                    refugeDocuments.remove(refugeConfidentialDocumentsWrapped);
+                    itr.remove();
                     log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
                 }
             }
