@@ -262,7 +262,6 @@ public class FL401ApplicationMapper {
         }
         //3. if court details found then populate court information and case management location.
         if (!courtVenue.isEmpty()) {
-            log.info("----------Inside new condition to add seal for court----------");
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
@@ -274,7 +273,6 @@ public class FL401ApplicationMapper {
                 .courtId(epimsId)
                 .courtSeal(courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId()))
                 .build();
-            log.info("---------- court seal is -----------  {}", caseData.getCourtSeal());
         } else {
             // 4. populate court details from fact-finder Api.
             caseData = caseData.toBuilder()

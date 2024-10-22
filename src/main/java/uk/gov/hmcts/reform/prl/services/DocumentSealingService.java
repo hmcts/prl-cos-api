@@ -60,7 +60,6 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        log.info("--------caseData.getCourtSeal()-------- {}", caseData.getCourtSeal());
         byte[] seal = readBytes(getCourtSealImage(caseData.getCourtSeal()));
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
