@@ -90,6 +90,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsEl
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -399,7 +400,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenResponseToAohDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .responseToAllegationsOfHarm(citizenProvidedPartyDetails.getResponse()
                                                            .getResponseToAllegationsOfHarm().toBuilder()
@@ -426,7 +427,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenHearingNeedsDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .supportYouNeed(citizenProvidedPartyDetails.getResponse().getSupportYouNeed())
                           .build())
@@ -450,7 +451,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenInternationalElementDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .citizenInternationalElements(citizenProvidedPartyDetails.getResponse().getCitizenInternationalElements())
                           .build())
@@ -460,7 +461,7 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails,
                                                            List<Element<ChildDetailsRevised>> childDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
                           .respondentAllegationsOfHarmData(citizenAllegationOfHarmMapper
@@ -472,7 +473,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenLegalRepresentationDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
                           .build())
@@ -481,7 +482,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenMiamDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .miam(citizenProvidedPartyDetails.getResponse().getMiam())
                           .build())
@@ -490,7 +491,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenConsentDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .consent(citizenProvidedPartyDetails.getResponse().getConsent())
                           .build())
@@ -499,7 +500,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenResponseForProceedings(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
@@ -511,7 +512,7 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenResponseDataForFlagUpdates(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
         return existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
+            .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .citizenFlags(isCitizenFlagsPresent
                                             ? updateCitizenFlags(
@@ -591,7 +592,7 @@ public class CitizenPartyDetailsMapper {
             .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
-            .response(existingPartyDetails.getResponse().toBuilder()
+            .response(getPartyResponse(existingPartyDetails).toBuilder()
                           .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
                           .safeToCallOption(fetchSafeToCallOption(citizenProvidedPartyDetails))
                           .build())
@@ -649,7 +650,7 @@ public class CitizenPartyDetailsMapper {
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList()) {
             return existingPartyDetails.toBuilder()
-                .response(existingPartyDetails.getResponse().toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate())
                               .build())
                 .isPhoneNumberConfidential(
@@ -661,7 +662,7 @@ public class CitizenPartyDetailsMapper {
                     ConfidentialityListEnum.email) ? Yes : No).build();
         } else {
             return existingPartyDetails.toBuilder()
-                .response(existingPartyDetails.getResponse().toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate())
                               .build())
                 .isPhoneNumberConfidential(No)
@@ -897,7 +898,7 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenC7Response(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (null != citizenProvidedPartyDetails.getResponse()) {
             return existingPartyDetails.toBuilder()
-                    .response(existingPartyDetails.getResponse().toBuilder()
+                    .response(getPartyResponse(existingPartyDetails).toBuilder()
                             .c7ResponseSubmitted(Yes)
                             .build())
                     .currentRespondent(null)
