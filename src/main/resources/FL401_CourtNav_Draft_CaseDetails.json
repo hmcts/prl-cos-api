@@ -271,7 +271,6 @@
       "anySpecialMeasures": [
         "separateWaitingRoom"
       ]
-    },
-    "courtSeal": "[userImage:familycourtseal-bilingual.png]"
+    }
   }
 }
