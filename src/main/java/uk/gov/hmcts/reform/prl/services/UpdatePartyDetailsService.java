@@ -113,14 +113,14 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                ofNullable(caseData.getApplicants()),
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getApplicantsFL401()),
                 updatedCaseData,
                 APPLICANTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                ofNullable(caseData.getRespondents()),
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getRespondentsFL401()),
                 updatedCaseData,
                 RESPONDENTS,
                 false
