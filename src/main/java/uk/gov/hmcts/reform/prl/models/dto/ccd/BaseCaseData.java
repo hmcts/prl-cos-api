@@ -89,8 +89,12 @@ public class BaseCaseData {
     @JsonProperty("isApplicantRepresented")
     private String isApplicantRepresented;
 
+    @JsonProperty("refugeDocuments")
     private List<Element<RefugeConfidentialDocuments>> refugeDocuments;
-  
+
+    @JsonProperty("historicalRefugeDocuments")
+    private List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments;
+
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
 }
