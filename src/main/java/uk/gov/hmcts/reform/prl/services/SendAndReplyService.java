@@ -1698,7 +1698,7 @@ public class SendAndReplyService {
         }
         List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
 
-        if (message.getExternalMessageWhoToSendTo() != null) {
+        if (message.getExternalMessageWhoToSendTo() != null && CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())) {
             List<DynamicMultiselectListElement> dynamicMultiselectListElementList = message.getExternalMessageWhoToSendTo().getValue();
             dynamicMultiselectListElementList.forEach(selectedElement -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
