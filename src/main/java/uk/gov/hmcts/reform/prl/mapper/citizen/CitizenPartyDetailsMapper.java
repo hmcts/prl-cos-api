@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
@@ -90,6 +89,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsEl
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -900,12 +900,5 @@ public class CitizenPartyDetailsMapper {
         }
 
         return existingPartyDetails;
-    }
-
-    private Response getPartyResponse(PartyDetails existingPartyDetails) {
-        if (null != existingPartyDetails.getResponse()) {
-            return existingPartyDetails.getResponse();
-        }
-        return Response.builder().build();
     }
 }
