@@ -1295,9 +1295,18 @@ public class C100RespondentSolicitorService {
                                               Map<String, Object> dataMap,
                                               Response response,
                                               String requestOriginatedFrom) {
-        dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         populateAohDataMap(response, dataMap);
         populateRespondToAohDataMap(response, dataMap);
+        if (null != response.getConsent()) {
+            dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
+            dataMap.put(
+                "consentToTheApplication",
+                getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
+            );
+            dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
+            dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
+            dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
+        }
         //citizen current or previous proceeding data
         if (null != response.getCurrentOrPreviousProceedings()) {
             dataMap.put(
@@ -1312,16 +1321,12 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("signedBy", solicitorRepresentedRespondent.getValue().getLabelForDynamicList());
         dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-        dataMap.put(
-                "consentToTheApplication",
-                getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
-        );
-        dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
-        dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
-        dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
-        dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+
+        if (null != response.getMiam()) {
+            dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
+            dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
+            dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+        }
 
         if (response.getCitizenInternationalElements() != null) {
             dataMap.put(
