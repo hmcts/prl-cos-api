@@ -69,23 +69,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.TypeOfApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.WelshLanguageRequirements;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
@@ -337,6 +321,20 @@ public class ApplicationsTabServiceTest {
         emptyCaseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .build()).build();
+        when(applicationsTabServiceHelper.getChildAndApplicantsRelationTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndApplicantRelation.builder().build())));
+        when(applicationsTabServiceHelper.getChildAndOtherPeopleRelationsTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndOtherPeopleRelation.builder().build())));
+        when(applicationsTabServiceHelper.getChildAndRespondentRelationsTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndRespondentRelation.builder().build())));
+        when(applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherChildrenNotInTheCase.builder().build())));
+        when(applicationsTabServiceHelper.getChildRevisedDetails(Mockito.any()))
+            .thenReturn(List.of(element(ChildDetailsRevised.builder().build())));
+        when(applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherPersonInTheCaseRevised.builder().build())));
+        when(applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherChildrenNotInTheCase.builder().build())));
     }
 
     @Test
