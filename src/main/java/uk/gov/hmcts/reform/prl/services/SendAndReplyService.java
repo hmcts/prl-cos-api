@@ -1353,10 +1353,13 @@ public class SendAndReplyService {
 
     private String getExternalSentTo(Message message) {
         Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(message.getExternalMessageWhoToSendTo());
-        String externalOrInternalWhoSendTO = externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
-            .getValue().stream()
-            .map(DynamicMultiselectListElement::getLabel)
-            .collect(Collectors.joining(","))).orElse("");
+        String externalOrInternalWhoSendTO = StringUtils.EMPTY;
+        if (externalMessageWhoToSendToList.isPresent() && CollectionUtils.isNotEmpty(externalMessageWhoToSendToList.get().getValue())) {
+            externalOrInternalWhoSendTO = externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+                .getValue().stream()
+                .map(DynamicMultiselectListElement::getLabel)
+                .collect(Collectors.joining(","))).orElse("");
+        }
         externalOrInternalWhoSendTO =
             generateExternalOrInternalWhoSendTO(message.getCafcassEmailAddress(), externalOrInternalWhoSendTO);
         externalOrInternalWhoSendTO =
@@ -1695,7 +1698,7 @@ public class SendAndReplyService {
         }
         List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
 
-        if (message.getExternalMessageWhoToSendTo() != null) {
+        if (message.getExternalMessageWhoToSendTo() != null && CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())) {
             List<DynamicMultiselectListElement> dynamicMultiselectListElementList = message.getExternalMessageWhoToSendTo().getValue();
             dynamicMultiselectListElementList.forEach(selectedElement -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
