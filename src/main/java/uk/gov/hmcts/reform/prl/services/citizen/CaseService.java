@@ -911,7 +911,6 @@ public class CaseService {
 
     private LocalDateTime getServedDateTime(OrderDetails order,
                                             String partyId) {
-
         return nullSafeCollection(order.getServeOrderDetails().getServedParties())
             .stream()
             .map(Element::getValue)
@@ -949,7 +948,8 @@ public class CaseService {
 
     private boolean isOrderServedForParty(OrderDetails order,
                                           String partyId) {
-        return nullSafeCollection(order.getServeOrderDetails().getServedParties()).stream()
+        return null != order.getServeOrderDetails()
+            && nullSafeCollection(order.getServeOrderDetails().getServedParties()).stream()
             .map(Element::getValue)
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
