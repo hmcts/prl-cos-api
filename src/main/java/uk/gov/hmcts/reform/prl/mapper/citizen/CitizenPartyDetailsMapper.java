@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
-import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -101,7 +100,6 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
-    private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -211,8 +209,6 @@ public class CitizenPartyDetailsMapper {
                     }
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
-            log.info("updating casedata - james");
-            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
             caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
 
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -559,6 +555,11 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
+        if (null != citizenProvidedPartyDetails.getLiveInRefuge() && citizenProvidedPartyDetails.getLiveInRefuge().equals(Yes)) {
+            log.info("updating casedata - james");
+            existingPartyDetails = updateCitizenConfidentialData(existingPartyDetails, citizenProvidedPartyDetails);
+        }
+
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
             .email(isEmailNeedsToUpdate
@@ -644,6 +645,15 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (null != citizenProvidedPartyDetails.getLiveInRefuge() && citizenProvidedPartyDetails.getLiveInRefuge().equals(Yes)) {
+            log.info("setting confidential data");
+            return existingPartyDetails.toBuilder()
+                .isPhoneNumberConfidential(Yes)
+                .isAddressConfidential(Yes)
+                .isEmailAddressConfidential(Yes)
+                .build();
+        }
+
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
