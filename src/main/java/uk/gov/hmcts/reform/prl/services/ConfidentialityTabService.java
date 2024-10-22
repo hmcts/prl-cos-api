@@ -80,13 +80,24 @@ public class ConfidentialityTabService {
                     respondents);
             }
 
+            Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
+                = listRefugeDocumentsForConfidentialTab(caseData);
+            List<Element<RefugeConfidentialDocuments>> refugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
+                ? refugeConfidentialDocumentsRecord.get().refugeDocuments() : Collections.emptyList();
+            List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
+                ? refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments() : Collections.emptyList();
+
             return Map.of(
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "childrenConfidentialDetails",
                 childrenConfidentialDetails,
                 "respondentConfidentialDetails",
-                respondentsConfidentialDetails
+                respondentsConfidentialDetails,
+                "refugeDocuments",
+                refugeDocuments,
+                "historicalRefugeDocuments",
+                historicalRefugeDocuments
             );
 
         } else {
@@ -104,6 +115,12 @@ public class ConfidentialityTabService {
 
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
                 caseData);
+            Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
+                = listRefugeDocumentsForConfidentialTab(caseData);
+            List<Element<RefugeConfidentialDocuments>> refugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
+                ? refugeConfidentialDocumentsRecord.get().refugeDocuments() : Collections.emptyList();
+            List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
+                ? refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments() : Collections.emptyList();
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -111,7 +128,11 @@ public class ConfidentialityTabService {
                 "fl401ChildrenConfidentialDetails",
                 childrenConfidentialDetails,
                 "respondentConfidentialDetails",
-                respondentsConfidentialDetails
+                respondentsConfidentialDetails,
+                "refugeDocuments",
+                refugeDocuments,
+                "historicalRefugeDocuments",
+                historicalRefugeDocuments
             );
 
         }
