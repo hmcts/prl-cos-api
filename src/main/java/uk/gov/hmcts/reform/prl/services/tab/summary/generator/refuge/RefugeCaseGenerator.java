@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
+package uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -6,8 +6,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.RefugeCase;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 
 import java.util.List;
 import java.util.Optional;
