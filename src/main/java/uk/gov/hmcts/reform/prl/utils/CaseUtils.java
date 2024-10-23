@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -51,6 +53,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -883,6 +886,62 @@ public class CaseUtils {
             return respondent1.getDateOfBirth();
         }
         return null;
+    }
+
+    public static WaMapper getWaMapper(String clientContext) {
+        if (clientContext != null) {
+            log.info("clientContext is present");
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+            String decodedString = new String(decodedBytes);
+            try {
+                return new ObjectMapper().readValue(decodedString, WaMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public static String getDraftOrderId(WaMapper waMapper) {
+        if (null != waMapper) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getOrderId();
+            }
+        }
+        return null;
+    }
+
+    public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
+        if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
+            return draftOrderCollection.stream()
+                .filter(element -> element.getId().equals(draftOrderId))
+                .map(Element::getValue)
+                .findFirst()
+                .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+        }
+        return null;
+    }
+
+    public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
+        Optional<Element<PartyDetails>> party = Optional.empty();
+        if (CollectionUtils.isNotEmpty(parties)) {
+            party = parties.stream()
+                .filter(element -> code.equalsIgnoreCase(String.valueOf(element.getId()))).findFirst();
+        }
+        return party;
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForC100(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                                List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
+                                                                                                 List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
+            element.getCode())).collect(Collectors.toList());
     }
 
     public static String formatAddress(Address address) {
