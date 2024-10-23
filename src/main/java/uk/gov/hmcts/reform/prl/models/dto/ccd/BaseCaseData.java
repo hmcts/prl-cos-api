@@ -13,6 +13,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 
@@ -46,6 +48,11 @@ public class BaseCaseData {
 
     private String courtSeal;
 
+    @JsonProperty("c1ADraftDocument")
+    private  Document c1ADraftDocument;
+    @JsonProperty("c1AWelshDraftDocument")
+    private  Document c1AWelshDraftDocument;
+
     /**
      * Case Type Of Application.
      */
@@ -64,6 +71,25 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
+
+    @JsonUnwrapped
+    private DocumentsNotifications documentsNotifications;
+
+    private YesOrNo hwfRequestedForAdditionalApplicationsFlag;
+    private String awpWaTaskName;
+    private String awpHwfRefNo;
+
+    /**
+     * Process urgent help with fees.
+     */
+    @JsonUnwrapped
+    private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
+
+    @JsonProperty("isApplicantRepresented")
+    private String isApplicantRepresented;
+
+    @JsonUnwrapped
+    private CaseAccessStatusAndReason caseAccessStatusAndReason;
 
     @JsonUnwrapped
     private ClosingCaseOptions closingCaseOptions;

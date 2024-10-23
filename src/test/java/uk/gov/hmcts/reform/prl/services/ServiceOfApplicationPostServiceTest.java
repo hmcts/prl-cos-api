@@ -330,6 +330,45 @@ public class ServiceOfApplicationPostServiceTest {
             .applicantCaseName("test")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicant)))
+            .serviceOfApplication(ServiceOfApplication.builder().isConfidential(Yes).build())
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100", caseData));
+    }
+
+
+    @Test
+    public void testStaticDocsForC100ApplicantNonConfidential() {
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
+
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(caseDocumentClient.uploadDocuments(Mockito.anyString(), Mockito.anyString(),
+                                                Mockito.anyString(), Mockito.anyString(),
+                                                Mockito.anyList())).thenReturn(uploadResponse);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .serviceOfApplication(ServiceOfApplication.builder().isConfidential(No).build())
             .respondents(List.of(element(PartyDetails.builder()
                                              .solicitorEmail("test@gmail.com")
                                              .representativeLastName("LastName")
@@ -351,29 +390,28 @@ public class ServiceOfApplicationPostServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@applicant.com")
             .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
-            .respondentsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .build())
-            .build();
-
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
 
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(AUTH, s2sToken, CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
-
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("test@gmail.com")
+                                  .representativeLastName("LastName")
+                                  .representativeFirstName("FirstName")
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .build())
+            .build();
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
 
