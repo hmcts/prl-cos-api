@@ -60,18 +60,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -130,10 +129,15 @@ public class ServiceOfDocumentsService {
 
     public Map<String, Object> handleAboutToStart(String authorisation,
                                                   CallbackRequest callbackRequest) {
-
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        //Check if unserved documents exist
+        if (isNotEmpty(caseData.getServiceOfDocuments())
+            && isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack())) {
+            caseDataMap.put("errors", List.of("Can not serve documents, as unserved document(s) already present pending review"));
+            return caseDataMap;
+        }
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(DISPLAY_LEGAL_REP_OPTION, CaseUtils.isCitizenCase(caseData) ? "No" : "Yes");
         caseDataMap.put(
@@ -153,7 +157,6 @@ public class ServiceOfDocumentsService {
             CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No
         );
         caseDataMap.put(SOA_RECIPIENT_OPTIONS, serviceOfApplicationService.getCombinedRecipients(caseData));
-        //ADD DATA CHECK TO HANDLE REPLACING EXISTING SOD DOCUMENTS PENDING MANAGER CHECK
 
         return caseDataMap;
     }
@@ -220,7 +223,7 @@ public class ServiceOfDocumentsService {
         }
         //Add parties to be served
         unServedPack = unServedPack.toBuilder()
-            .partiesToBeServed(String.join(COMMA, partiesToBeServed))
+            .partiesToBeServed(String.join(", ", partiesToBeServed))
             .build();
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
@@ -909,7 +912,7 @@ public class ServiceOfDocumentsService {
                     authorisation, docsDynamicList.getDocumentsList()))
                 .toList();
         }
-        return Collections.emptyList();
+        return emptyList();
     }
 
     private List<Document> getUploadedDocuments(CaseData caseData) {
@@ -919,7 +922,7 @@ public class ServiceOfDocumentsService {
                 .map(Element::getValue)
                 .toList();
         }
-        return Collections.emptyList();
+        return emptyList();
     }
 
     private List<Element<String>> getSelectedPartyIds(CaseData caseData,
@@ -975,9 +978,18 @@ public class ServiceOfDocumentsService {
     }
 
     private List<String> getPartiesToBeServedForPersonalService(CaseData caseData) {
-        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? CaseUtils.getPartyNameList(true, caseData.getApplicants())
-            : List.of(caseData.getApplicantsFL401().getLabelForDynamicList() + " (Applicant)");
+        if (SodSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(
+            caseData.getServiceOfDocuments().getSodSolicitorServingRespondentsOptions())) {
+            return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? List.of(caseData.getApplicants().get(0).getValue().getRepresentativeFullName() + " (Applicant solicitor)")
+                : List.of(caseData.getApplicantsFL401().getRepresentativeFullName() + " (Applicant solicitor)");
+        } else if (SodCitizenServingRespondentsEnum.unrepresentedApplicant.equals(
+            caseData.getServiceOfDocuments().getSodCitizenServingRespondentsOptions())) {
+            return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? CaseUtils.getPartyNameList(true, caseData.getApplicants())
+                : List.of(caseData.getApplicantsFL401().getLabelForDynamicList() + " (Applicant)");
+        }
+        return emptyList();
     }
 
     private List<String> getPartiesToBeServedForNonPersonalService(CaseData caseData) {

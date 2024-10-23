@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
 
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -47,9 +48,13 @@ public class ServiceOfDocumentsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(serviceOfDocumentsService.handleAboutToStart(authorisation, callbackRequest))
-                .build();
+            Map<String, Object> caseDataMap = serviceOfDocumentsService.handleAboutToStart(authorisation, callbackRequest);
+            if (caseDataMap.containsKey("errors")) {
+                List<String> errorList = (List<String>) caseDataMap.get("errors");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
