@@ -300,11 +300,19 @@ public class RestrictedCaseAccessServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(authTokenGenerator.generate()).thenReturn("test");
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleLabel("SOLICITOR");
         roleAssignmentResponse.setRoleCategory("PROFESSIONAL");
         roleAssignmentResponse.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8a");
         RoleAssignmentResponse roleAssignmentResponse1 = new RoleAssignmentResponse();
+        roleAssignmentResponse1.setRoleLabel("Allocated Legal Adviser");
+        roleAssignmentResponse1.setGrantType("SPECIFIC");
         roleAssignmentResponse1.setRoleCategory("LEGAL_OPERATIONS");
         roleAssignmentResponse1.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8b");
+        RoleAssignmentResponse roleAssignmentResponse2 = new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleLabel("Conflict of Interest");
+        roleAssignmentResponse2.setGrantType("EXCLUDED");
+        roleAssignmentResponse2.setRoleCategory("ADMIN");
+        roleAssignmentResponse2.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8b");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()
             .roleAssignmentResponse(List.of(roleAssignmentResponse, roleAssignmentResponse1))
             .build();
