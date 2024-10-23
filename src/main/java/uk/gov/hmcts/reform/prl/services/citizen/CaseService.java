@@ -1504,6 +1504,7 @@ public class CaseService {
                                                             Map<String, String> partyIdAndType) {
         if (null != caseData.getServiceOfDocuments()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())) {
+            log.info("*** SOD -> served documents list {}", caseData.getServiceOfDocuments().getServedDocumentsDetailsList());
             return fetchDocumentsForParty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList(), partyIdAndType);
         }
         return Collections.emptyList();
@@ -1511,6 +1512,7 @@ public class CaseService {
 
     private List<CitizenDocuments> fetchDocumentsForParty(List<Element<ServedApplicationDetails>> servedDocumentsDetailsList,
                                                           Map<String, String> partyIdAndType) {
+        log.info("*** SOD -> Fetch served documents for the party {}", partyIdAndType.get(PARTY_ID));
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
         //sort in descending order
         servedDocumentsDetailsList
@@ -1521,6 +1523,7 @@ public class CaseService {
             .forEach(servedDetails -> {
                 if (null != servedDetails) {
                     if (SOA_BY_EMAIL_AND_POST.equals(servedDetails.getModeOfService())) {
+                        log.info("Getting served documents from both email & post notifications");
                         otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
                             servedDetails,
                             partyIdAndType
@@ -1531,11 +1534,13 @@ public class CaseService {
                             partyIdAndType
                         ));
                     } else if (SOA_BY_EMAIL.equals(servedDetails.getModeOfService())) {
+                        log.info("Getting served documents from email notifications");
                         otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
                             servedDetails,
                             partyIdAndType
                         ));
                     } else if (SOA_BY_POST.equals(servedDetails.getModeOfService())) {
+                        log.info("Getting served documents from post notifications");
                         otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
                             servedDetails,
                             partyIdAndType
@@ -1544,15 +1549,20 @@ public class CaseService {
                 }
             });
 
+        log.info("*** Served documents for the party *** {}", otherDocuments);
+
         return otherDocuments;
     }
 
     private List<CitizenDocuments> retrieveDocumentsFromEmailNotifications(ServedApplicationDetails servedDetails,
                                                                            Map<String, String> partyIdAndType) {
+        log.info("*** SOD -> email notifications before sort {}", servedDetails.getEmailNotificationDetails());
         if (CollectionUtils.isNotEmpty(servedDetails.getEmailNotificationDetails())) {
             //sort in descending order
             servedDetails.getEmailNotificationDetails()
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            log.info("*** SOD -> email notifications after sorting {}", servedDetails.getEmailNotificationDetails());
 
             return servedDetails.getEmailNotificationDetails().stream()
                 .map(Element::getValue)
@@ -1574,10 +1584,13 @@ public class CaseService {
 
     private List<CitizenDocuments> retrieveDocumentsFromPostNotifications(ServedApplicationDetails servedDetails,
                                                                           Map<String, String> partyIdAndType) {
+        log.info("*** SOD -> post notifications before sort {}", servedDetails.getBulkPrintDetails());
         if (CollectionUtils.isNotEmpty(servedDetails.getBulkPrintDetails())) {
             //sort in descending order
             servedDetails.getBulkPrintDetails()
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            log.info("*** SOD -> post notifications after sorting {}", servedDetails.getBulkPrintDetails());
 
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
