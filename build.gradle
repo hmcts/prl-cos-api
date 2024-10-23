@@ -388,6 +388,11 @@ dependencies {
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
 
+  implementation(group: 'joda-time', name: 'joda-time'){
+    version{
+      strictly "2.13.0"
+    }
+  }
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
 
