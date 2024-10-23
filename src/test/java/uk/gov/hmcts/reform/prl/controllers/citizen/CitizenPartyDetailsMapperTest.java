@@ -17,10 +17,12 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -580,5 +582,17 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
+    @Test
+    public void testUpdatedPartyDetailsBasedOnEvent() {
+        PartyDetails partyDetails1 = partyDetails.toBuilder().response(null).build();
+        PartyDetails partyDetails2 = partyDetails.toBuilder()
+            .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder().build()).build())
+            .build();
+        PartyDetails updatedPartyDetailsBasedOnEvent = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(partyDetails2, partyDetails1,
+                                                                     CaseEvent.CITIZEN_RESPONSE_TO_AOH,
+                                                                     List.of(element(ChildDetailsRevised.builder().build())));
+        assertNotNull(updatedPartyDetailsBasedOnEvent);
+
+    }
 }
 
