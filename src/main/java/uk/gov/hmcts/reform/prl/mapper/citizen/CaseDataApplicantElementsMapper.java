@@ -82,7 +82,6 @@ public class CaseDataApplicantElementsMapper {
                 .toList();
         List<String> contactDetailsPrivateList = Stream.concat(contactDetailsPrivateList1.stream(),
                 contactDetailsPrivateList2.stream()).toList();
-
         return PartyDetails
                 .builder()
                 .firstName(applicantDto.getApplicantFirstName())
