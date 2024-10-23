@@ -104,9 +104,12 @@ public class CaseDataApplicantElementsMapper {
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
-                .isAddressConfidential(buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
-                .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-                .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+                .isAddressConfidential(applicantDto.getLiveInRefuge().equals(Yes) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
+                .isEmailAddressConfidential(applicantDto.getLiveInRefuge().equals(Yes) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
+                .isPhoneNumberConfidential(applicantDto.getLiveInRefuge().equals(Yes) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
                 .build();
