@@ -91,6 +91,7 @@ public class CitizenDocumentService {
                     updatedCaseDataMap
                 );
             }
+            
             //update all tabs
             return allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
