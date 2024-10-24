@@ -104,6 +104,7 @@ public class CaseDataService {
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                log.info("searchString --> {}", searchString);
 
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
@@ -113,6 +114,7 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
+                log.info("searchResult total --> {}", searchResult.getTotal());
 
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
