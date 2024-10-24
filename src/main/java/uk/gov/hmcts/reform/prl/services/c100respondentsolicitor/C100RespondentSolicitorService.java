@@ -1903,7 +1903,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails() != null) {
             CitizenDetails citizenDetails = solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails();
             PartyDetails.PartyDetailsBuilder partyDetailsBuilder = solicitorRepresentedRespondent.getValue().toBuilder();
-            if (citizenDetails.getAddress() != null) {
+            if (citizenDetails.getAddress() != null && citizenDetails.getAddress().getPostCode() != null) {
                 partyDetailsBuilder.address(citizenDetails.getAddress());
                 partyDetailsBuilder.isCurrentAddressKnown(Yes);
                 boolean isEmail = Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
