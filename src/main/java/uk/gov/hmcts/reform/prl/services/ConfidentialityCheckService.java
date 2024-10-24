@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -97,8 +98,12 @@ public class ConfidentialityCheckService {
             caseData.getApplicants().forEach(eachApp -> {
                 switch (caseData.getApplicants().indexOf(eachApp)) {
                     case 0 -> {
-                        if (eachApp.getValue().getRefugeConfidentialityC8Form() != null) {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
                             caseDataMap.put("appAC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appAC8RefugeDocument", null);
                         }
                     }
                     case 1 -> {
