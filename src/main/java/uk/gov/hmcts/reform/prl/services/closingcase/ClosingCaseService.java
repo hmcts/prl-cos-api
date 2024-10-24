@@ -191,6 +191,7 @@ public class ClosingCaseService {
                                             ));
         if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
             || getChildrenMultiSelectListForFinalDecisions(caseData).isEmpty()) {
+            unAllocateCourtStaffs(caseData, caseDataUpdated);
             markTheCaseAsClosed(caseDataUpdated, finalDecisionResolutionDate, caseData);
         }
         updateChildDetailsInTab(caseDataUpdated, caseData);
@@ -199,14 +200,16 @@ public class ClosingCaseService {
     }
 
     public void unAllocateCourtStaffs(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("inside unAllocateCourtStaffs");
         String systemAuthorisation = systemUserService.getSysUserToken();
         String s2sToken = authTokenGenerator.generate();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(QueryAttributes.builder()
-                            .caseId(List.of(Long.toString(caseData.getId())))
+                            .caseId(List.of("1729768737269175"))
                             .build())
             .validAt(LocalDateTime.now())
             .build();
+        log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
             systemAuthorisation,
             s2sToken,
@@ -222,7 +225,7 @@ public class ClosingCaseService {
                 .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
             roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
                 .attributes(QueryAttributes.builder()
-                                .caseId(List.of(Long.toString(caseData.getId())))
+                                .caseId(List.of("1729768737269175"))
                                 .build())
                 .roleCategory(roleCategories)
                 .validAt(LocalDateTime.now())
@@ -242,7 +245,7 @@ public class ClosingCaseService {
             log.info("** RoleAssignmentDeleteQueryResponse " + status);
             if (Integer.valueOf(status).equals(HttpStatus.OK.value())) {
                 caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-
+                //Checks for Send & Reply
                 caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
                     && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
                     ? caseData.getLegalAdviserList().toBuilder()

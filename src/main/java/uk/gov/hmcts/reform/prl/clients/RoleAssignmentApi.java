@@ -48,7 +48,7 @@ public interface RoleAssignmentApi {
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @RequestBody RoleAssignmentQueryRequest roleAssignmentQueryRequest);
 
-    @PostMapping(path = "/am/role-assignments/query", consumes = "application/json")
+    @PostMapping(path = "/am/role-assignments/query/delete", consumes = "application/json")
     String deleteQueryRoleAssignments(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
