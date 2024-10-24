@@ -314,7 +314,7 @@ public class RestrictedCaseAccessServiceTest {
         roleAssignmentResponse2.setRoleCategory("ADMIN");
         roleAssignmentResponse2.setActorId("d4c3ec30-cc11-4503-89d1-46b6875b0b8b");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = RoleAssignmentServiceResponse.builder()
-            .roleAssignmentResponse(List.of(roleAssignmentResponse, roleAssignmentResponse1))
+            .roleAssignmentResponse(List.of(roleAssignmentResponse, roleAssignmentResponse1, roleAssignmentResponse2))
             .build();
         when(roleAssignmentApi.queryRoleAssignments(anyString(), anyString(), any(), any(
             RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
