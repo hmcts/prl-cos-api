@@ -261,7 +261,11 @@ public class ClosingCaseService {
                 }
             }
         } catch (Exception exp) {
-            log.info("Error occurred while un-alloacting users for closed case {} ", caseData.getId());
+            log.info(
+                "Error occurred while un-alloacting users for closed case {} exception {}",
+                caseData.getId(),
+                exp.getMessage()
+            );
         }
     }
 
