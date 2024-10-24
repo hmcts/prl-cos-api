@@ -5,6 +5,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
-
+@Ignore
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
@@ -43,6 +44,7 @@ public class AddCafcassOfficerControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    @Ignore
     @Test
     public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);

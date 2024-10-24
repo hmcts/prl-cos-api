@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
@@ -1714,18 +1715,30 @@ public class ServiceOfApplicationService {
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (ObjectUtils.isNotEmpty(caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags())) {
-                    caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                if (ObjectUtils.isNotEmpty(caseData.getApplicants().get(0).getValue().getResponse())) {
+                    if (ObjectUtils.isNotEmpty(caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags())) {
+                        caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                    } else {
+                        caseData.getApplicants().get(0).getValue().getResponse()
+                            .setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                    }
                 } else {
-                    caseData.getApplicants().get(0).getValue().getResponse()
-                        .setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                    caseData.getApplicants().get(0).getValue().setResponse(Response.builder()
+                                                                               .citizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes)
+                                                                                                 .build())
+                                                                               .build());
                 }
                 caseDataMap.put(APPLICANTS, caseData.getApplicants());
             } else {
-                if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getResponse().getCitizenFlags())) {
-                    caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getResponse())) {
+                    if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getResponse().getCitizenFlags())) {
+                        caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                    } else {
+                        caseData.getApplicantsFL401().getResponse().setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                    }
                 } else {
-                    caseData.getApplicantsFL401().getResponse().setCitizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes).build());
+                    caseData.getApplicantsFL401().setResponse(Response.builder().citizenFlags(CitizenFlags.builder().isApplicationToBeServed(Yes)
+                                                                                    .build()).build());
                 }
                 caseDataMap.put(PrlAppsConstants.FL401_APPLICANTS, caseData.getApplicantsFL401());
             }
@@ -1850,8 +1863,10 @@ public class ServiceOfApplicationService {
         Map<String,String> confirmationBanner = new HashMap<>();
         getConfirmationBanner(caseData, confirmationBanner);
         String confirmationBody = confirmationBanner.get(CONFIRMATION_BODY);
-        confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
-            + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+        if (StringUtils.isNotEmpty(confirmationBody)) {
+            confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+        }
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
@@ -1883,7 +1898,8 @@ public class ServiceOfApplicationService {
             && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
             confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
-        } else {
+        } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+            && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
@@ -1920,6 +1936,8 @@ public class ServiceOfApplicationService {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
                 }
             }
+        } else {
+            confirmationBanner.put(CONFIRMATION_BODY, "");
         }
     }
 
