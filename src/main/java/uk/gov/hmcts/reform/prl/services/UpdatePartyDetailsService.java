@@ -154,12 +154,6 @@ public class UpdatePartyDetailsService {
                 RESPONDENTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
-                updatedCaseData,
-                OTHER_PARTY,
-                false
-            );
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -250,6 +244,8 @@ public class UpdatePartyDetailsService {
             .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
             .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
+            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                                             ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .build();
 
         return partyDetails;
@@ -261,6 +257,10 @@ public class UpdatePartyDetailsService {
             .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
             .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
             .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
+            .liveInRefuge(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getLiveInRefuge() : null)
+            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
+                                             && YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                                             ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
                                        ? partyDetails.getIsAddressConfidential() : null)
             .addressLivedLessThan5YearsDetails(YesNoDontKnow.yes.equals(partyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
@@ -699,5 +699,22 @@ public class UpdatePartyDetailsService {
         }
 
         return address;
+    }
+
+    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest,
+                                                                     String authorisation) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                updatedCaseData,
+                OTHER_PARTY,
+                false
+            );
+        }
+        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        return updatedCaseData;
     }
 }
