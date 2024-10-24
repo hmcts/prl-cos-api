@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +50,7 @@ public interface RoleAssignmentApi {
         @RequestBody RoleAssignmentQueryRequest roleAssignmentQueryRequest);
 
     @PostMapping(path = "/am/role-assignments/query/delete", consumes = "application/json")
-    String deleteQueryRoleAssignments(
+    HttpStatus deleteQueryRoleAssignments(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("x-correlation-id") String xcorrelationId,

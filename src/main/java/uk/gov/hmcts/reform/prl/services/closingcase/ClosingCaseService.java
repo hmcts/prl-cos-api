@@ -81,6 +81,8 @@ public class ClosingCaseService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
 
+    public static final String SPECIFIC_ACCESS_GRANT = "SPECIFIC";
+
     public static final List<String> ROLE_CATEGORIES = List.of(
         "JUDICIAL",
         "LEGAL_OPERATIONS",
@@ -201,57 +203,63 @@ public class ClosingCaseService {
 
     public void unAllocateCourtStaffs(CaseData caseData, Map<String, Object> caseDataUpdated) {
         log.info("inside unAllocateCourtStaffs");
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String s2sToken = authTokenGenerator.generate();
-        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
-            .attributes(QueryAttributes.builder()
-                            .caseId(List.of("1729768737269175"))
-                            .build())
-            .validAt(LocalDateTime.now())
-            .build();
-        log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
-            systemAuthorisation,
-            s2sToken,
-            null,
-            roleAssignmentQueryRequest
-        );
-        log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
-        if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
-            && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
-            List<String> roleCategories = new ArrayList<>();
-            roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
-                .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
-            roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+        try {
+            String systemAuthorisation = systemUserService.getSysUserToken();
+            String s2sToken = authTokenGenerator.generate();
+            RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
                 .attributes(QueryAttributes.builder()
                                 .caseId(List.of("1729768737269175"))
                                 .build())
-                .roleCategory(roleCategories)
                 .validAt(LocalDateTime.now())
                 .build();
-            List<RoleAssignmentQueryRequest> queryRequests = new ArrayList<>();
-            queryRequests.add(roleAssignmentQueryRequest);
-            RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
-                .queryRequests(queryRequests)
-                .build();
-            log.info("** RoleAssignmentDeleteQueryRequest " + roleAssignmentDeleteQueryRequest);
-            String status = roleAssignmentApi.deleteQueryRoleAssignments(
+            log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
                 systemAuthorisation,
                 s2sToken,
                 null,
-                roleAssignmentDeleteQueryRequest
+                roleAssignmentQueryRequest
             );
-            log.info("** RoleAssignmentDeleteQueryResponse " + status);
-            if (Integer.valueOf(status).equals(HttpStatus.OK.value())) {
-                caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-                //Checks for Send & Reply
-                caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
-                    && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
-                    ? caseData.getLegalAdviserList().toBuilder()
-                    .value(null)
-                    .build() : caseData.getLegalAdviserList());
+            log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
+            if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
+                && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
+                List<String> roleCategories = new ArrayList<>();
+                roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                    .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory())
+                        && SPECIFIC_ACCESS_GRANT.equalsIgnoreCase(roleAssignmentResponse.getGrantType()))
+                    .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
+                roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+                    .attributes(QueryAttributes.builder()
+                                    .caseId(List.of("1729768737269175"))
+                                    .build())
+                    .roleCategory(roleCategories)
+                    .grantType(List.of(SPECIFIC_ACCESS_GRANT))
+                    .validAt(LocalDateTime.now())
+                    .build();
+                List<RoleAssignmentQueryRequest> queryRequests = new ArrayList<>();
+                queryRequests.add(roleAssignmentQueryRequest);
+                RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
+                    .queryRequests(queryRequests)
+                    .build();
+                log.info("** RoleAssignmentDeleteQueryRequest " + objectMapper.writeValueAsString(roleAssignmentDeleteQueryRequest));
+                HttpStatus status = roleAssignmentApi.deleteQueryRoleAssignments(
+                    systemAuthorisation,
+                    s2sToken,
+                    null,
+                    roleAssignmentDeleteQueryRequest
+                );
+                log.info("** RoleAssignmentDeleteQueryResponse " + status);
+                if (status.equals(HttpStatus.OK)) {
+                    caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
+                    //Checks for Send & Reply
+                    caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
+                        && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
+                        ? caseData.getLegalAdviserList().toBuilder()
+                        .value(null)
+                        .build() : caseData.getLegalAdviserList());
+                }
             }
+        } catch (Exception exp) {
+            log.info("Error occurred while un-alloacting users for closed case {} ", caseData.getId());
         }
     }
 
