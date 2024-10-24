@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -241,16 +243,16 @@ public class ClosingCaseService {
                     .queryRequests(queryRequests)
                     .build();
                 log.info("** RoleAssignmentDeleteQueryRequest " + objectMapper.writeValueAsString(roleAssignmentDeleteQueryRequest));
-                HttpStatus status = roleAssignmentApi.deleteQueryRoleAssignments(
+                ResponseEntity<HttpStatus> status = roleAssignmentApi.deleteQueryRoleAssignments(
                     systemAuthorisation,
                     s2sToken,
                     null,
                     roleAssignmentDeleteQueryRequest
                 );
                 log.info("** RoleAssignmentDeleteQueryResponse " + status);
-                if (status.equals(HttpStatus.OK)) {
+                if (null != status && status.getStatusCode().is2xxSuccessful()) {
                     caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-                    //Checks for Send & Reply
+                    caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.EMPTY_LIST);
                     caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
                         && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
                         ? caseData.getLegalAdviserList().toBuilder()

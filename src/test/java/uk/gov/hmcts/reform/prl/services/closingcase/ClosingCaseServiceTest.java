@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -512,7 +513,7 @@ public class ClosingCaseServiceTest {
             RoleAssignmentQueryRequest.class))).thenReturn(roleAssignmentServiceResponse);
 
         when(roleAssignmentApi.deleteQueryRoleAssignments(anyString(), anyString(), any(),
-            any(RoleAssignmentDeleteQueryRequest.class))).thenReturn(HttpStatus.OK);
+            any(RoleAssignmentDeleteQueryRequest.class))).thenReturn(ResponseEntity.status(OK).body(OK));
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
