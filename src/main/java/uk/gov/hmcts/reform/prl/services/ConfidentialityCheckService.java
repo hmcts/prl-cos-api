@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -34,8 +35,12 @@ public class ConfidentialityCheckService {
                                 caseData.getRespondentC8(), 0));
                         caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
                         caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
-                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                        if (null != eachRes.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachRes.getValue().getLiveInRefuge()
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
                             caseDataMap.put("respAC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("respAC8RefugeDocument", null);
                         }
                     }
                     case 1 -> {
@@ -43,24 +48,52 @@ public class ConfidentialityCheckService {
                                 caseData.getRespondentC8(), 1));
                         caseDataMap.put("respBC8EngDocument", responseDocumentB.getRespondentC8Document());
                         caseDataMap.put("respBC8WelDocument", responseDocumentB.getRespondentC8DocumentWelsh());
+                        if (null != eachRes.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachRes.getValue().getLiveInRefuge()
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("respBC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("respBC8RefugeDocument", null);
+                        }
                     }
                     case 2 -> {
                         ResponseDocuments responseDocumentC = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 2));
                         caseDataMap.put("respCC8EngDocument", responseDocumentC.getRespondentC8Document());
                         caseDataMap.put("respCC8WelDocument", responseDocumentC.getRespondentC8DocumentWelsh());
+                        if (null != eachRes.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachRes.getValue().getLiveInRefuge()
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("respCC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("respCC8RefugeDocument", null);
+                        }
                     }
                     case 3 -> {
                         ResponseDocuments responseDocumentD = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 3));
                         caseDataMap.put("respDC8EngDocument", responseDocumentD.getRespondentC8Document());
                         caseDataMap.put("respDC8WelDocument", responseDocumentD.getRespondentC8DocumentWelsh());
+                        if (null != eachRes.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachRes.getValue().getLiveInRefuge()
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("respDC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("respDC8RefugeDocument", null);
+                        }
                     }
                     case 4 -> {
                         ResponseDocuments responseDocumentE = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 4));
                         caseDataMap.put("respEC8EngDocument", responseDocumentE.getRespondentC8Document());
                         caseDataMap.put("respEC8WelDocument", responseDocumentE.getRespondentC8DocumentWelsh());
+                        if (null != eachRes.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachRes.getValue().getLiveInRefuge()
+                            && eachRes.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("respEC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("respEC8RefugeDocument", null);
+                        }
                     }
 
                     default -> log.info("no respondent found here");
@@ -68,6 +101,13 @@ public class ConfidentialityCheckService {
                 }
             });
         } else {
+            if (null != caseData.getRespondentsFL401().getRefugeConfidentialityC8Form()
+                && null != caseData.getRespondentsFL401().getLiveInRefuge()
+                && caseData.getRespondentsFL401().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                caseDataMap.put("respAC8RefugeDocument", caseData.getRespondentsFL401().getRefugeConfidentialityC8Form());
+            } else {
+                caseDataMap.put("respAC8RefugeDocument", null);
+            }
             ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                     caseData.getRespondentC8(), 0));
             caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
@@ -75,6 +115,128 @@ public class ConfidentialityCheckService {
 
         }
 
+    }
+
+    public void processApplicantC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getApplicants().forEach(eachApp -> {
+                switch (caseData.getApplicants().indexOf(eachApp)) {
+                    case 0 -> {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("appAC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appAC8RefugeDocument", null);
+                        }
+                    }
+                    case 1 -> {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("appBC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appBC8RefugeDocument", null);
+                        }
+                    }
+                    case 2 -> {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("appCC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appCC8RefugeDocument", null);
+                        }
+                    }
+                    case 3 -> {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("appDC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appDC8RefugeDocument", null);
+                        }
+                    }
+                    case 4 -> {
+                        if (null != eachApp.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachApp.getValue().getLiveInRefuge()
+                            && eachApp.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("appEC8RefugeDocument", eachApp.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("appEC8RefugeDocument", null);
+                        }
+                    }
+
+                    default -> log.info("no applicant found here");
+
+                }
+            });
+        } else {
+            if (null != caseData.getApplicantsFL401().getRefugeConfidentialityC8Form()
+                && null != caseData.getApplicantsFL401().getLiveInRefuge()
+                && caseData.getApplicantsFL401().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                caseDataMap.put("appAC8RefugeDocument", caseData.getApplicantsFL401().getRefugeConfidentialityC8Form());
+            } else {
+                caseDataMap.put("appAC8RefugeDocument", null);
+            }
+        }
+    }
+
+    public void processOtherC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getOtherPartyInTheCaseRevised().forEach(eachOther -> {
+                switch (caseData.getOtherPartyInTheCaseRevised().indexOf(eachOther)) {
+                    case 0 -> {
+                        if (null != eachOther.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachOther.getValue().getLiveInRefuge()
+                            && eachOther.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("otherAC8RefugeDocument", eachOther.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("otherAC8RefugeDocument", null);
+                        }
+                    }
+                    case 1 -> {
+                        if (null != eachOther.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachOther.getValue().getLiveInRefuge()
+                            && eachOther.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("otherBC8RefugeDocument", eachOther.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("otherBC8RefugeDocument", null);
+                        }
+                    }
+                    case 2 -> {
+                        if (null != eachOther.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachOther.getValue().getLiveInRefuge()
+                            && eachOther.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("otherCC8RefugeDocument", eachOther.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("otherCC8RefugeDocument", null);
+                        }
+                    }
+                    case 3 -> {
+                        if (null != eachOther.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachOther.getValue().getLiveInRefuge()
+                            && eachOther.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("otherDC8RefugeDocument", eachOther.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("otherDC8RefugeDocument", null);
+                        }
+                    }
+                    case 4 -> {
+                        if (null != eachOther.getValue().getRefugeConfidentialityC8Form()
+                            && null != eachOther.getValue().getLiveInRefuge()
+                            && eachOther.getValue().getLiveInRefuge().equals(YesOrNo.Yes)) {
+                            caseDataMap.put("otherEC8RefugeDocument", eachOther.getValue().getRefugeConfidentialityC8Form());
+                        } else {
+                            caseDataMap.put("otherEC8RefugeDocument", null);
+                        }
+                    }
+
+                    default -> log.info("no other person found here");
+
+                }
+            });
+        }
     }
 
     private ResponseDocuments getRespondentDoc(ResponseDocuments latestC8Document) {
