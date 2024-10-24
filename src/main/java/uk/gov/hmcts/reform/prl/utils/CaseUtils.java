@@ -621,6 +621,21 @@ public class CaseUtils {
         return applicantList;
     }
 
+    public static List<String> getPartyNameList(boolean isApplicant,
+                                                List<Element<PartyDetails>> parties) {
+        List<String> partyList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            partyList = parties.stream()
+                .map(Element::getValue)
+                .map(party -> party.getLabelForDynamicList() + (isApplicant
+                    ? " (Applicant " + i.getAndIncrement() + ")"
+                    : " (Respondent " + i.getAndIncrement() + ")"))
+                .toList();
+        }
+        return partyList;
+    }
+
     public static List<String> getApplicantSolicitorNameList(List<Element<PartyDetails>> parties) {
         List<String> applicantSolicitorList = new ArrayList<>();
         if (isNotEmpty(parties)) {
@@ -813,11 +828,6 @@ public class CaseUtils {
             return LanguagePreference.getLanguagePreference(caseData).getDisplayedValue();
         }
         return "English";
-    }
-
-    public static boolean isAccessEnabled(Element<PartyDetails> party) {
-        return party.getValue() != null && party.getValue().getUser() != null
-            && party.getValue().getUser().getIdamId() != null;
     }
 
     public static List<String> mapAmUserRolesToIdamRoles(RoleAssignmentServiceResponse roleAssignmentServiceResponse,
@@ -1037,5 +1047,44 @@ public class CaseUtils {
             && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && null != createPaymentRequest.getFeeType()
             && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
+    }
+
+    public static List<String> getSelectedPartyIds(String caseTypeOfApplication,
+                                                   List<Element<PartyDetails>> parties,
+                                                   PartyDetails fl401Party,
+                                                   List<DynamicMultiselectListElement> selectedParties) {
+        //FL401
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return selectedParties.stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .filter(code -> fl401Party.getPartyId().toString().equals(code))
+                .toList();
+        }
+        //C100
+        return nullSafeCollection(parties)
+            .stream()
+            .map(Element::getId)
+            .filter(id ->
+                        selectedParties.stream().anyMatch(
+                            party -> id.toString().equals(party.getCode()))
+            )
+            .map(Objects::toString)
+            .toList();
+    }
+
+    public static PartyDetails getOtherPerson(String id, CaseData caseData) {
+        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised()
+            : caseData.getOthersToNotify();
+        if (null != otherPartiesToNotify) {
+            Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
+                .filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                .findFirst();
+            if (otherPerson.isPresent()) {
+                return otherPerson.get().getValue();
+            }
+        }
+        return null;
     }
 }
