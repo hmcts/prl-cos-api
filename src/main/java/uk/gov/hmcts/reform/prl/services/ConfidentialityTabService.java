@@ -360,15 +360,23 @@ public class ConfidentialityTabService {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             log.info("inside party details list");
             for (PartyDetails partyDetails : partyDetailsList) {
-                log.info("inside party details for loop");
-                if ((YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()))
-                    || (null != partyDetails.getResponse()
-                    && null != partyDetails.getResponse().getCitizenDetails()
-                    && YesOrNo.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()))) {
-                    log.info("says yes to refuge for the party::" + party);
-                    forceConfidentialityChangeForRefuge(party, partyDetails);
+                log.info("Is current address known: " + partyDetails.getIsCurrentAddressKnown());
+                if (partyDetails.getIsCurrentAddressKnown() == null
+                    || YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                    log.info("inside party details for loop");
+                    if ((YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()))
+                        || (null != partyDetails.getResponse()
+                        && null != partyDetails.getResponse().getCitizenDetails()
+                        && YesOrNo.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()))) {
+                        log.info("says yes to refuge for the party::" + party);
+                        forceConfidentialityChangeForRefuge(party, partyDetails);
+                    } else if (cleanUpNeeded) {
+                        log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                        partyDetails.setRefugeConfidentialityC8Form(null);
+                    }
                 } else if (cleanUpNeeded) {
-                    log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                    log.info("says no to address knows::" + party);
+                    partyDetails.setLiveInRefuge(null);
                     partyDetails.setRefugeConfidentialityC8Form(null);
                 }
             }
