@@ -43,24 +43,36 @@ public class ConfidentialityCheckService {
                                 caseData.getRespondentC8(), 1));
                         caseDataMap.put("respBC8EngDocument", responseDocumentB.getRespondentC8Document());
                         caseDataMap.put("respBC8WelDocument", responseDocumentB.getRespondentC8DocumentWelsh());
+                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                            caseDataMap.put("respBC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        }
                     }
                     case 2 -> {
                         ResponseDocuments responseDocumentC = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 2));
                         caseDataMap.put("respCC8EngDocument", responseDocumentC.getRespondentC8Document());
                         caseDataMap.put("respCC8WelDocument", responseDocumentC.getRespondentC8DocumentWelsh());
+                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                            caseDataMap.put("respCC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        }
                     }
                     case 3 -> {
                         ResponseDocuments responseDocumentD = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 3));
                         caseDataMap.put("respDC8EngDocument", responseDocumentD.getRespondentC8Document());
                         caseDataMap.put("respDC8WelDocument", responseDocumentD.getRespondentC8DocumentWelsh());
+                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                            caseDataMap.put("respDC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        }
                     }
                     case 4 -> {
                         ResponseDocuments responseDocumentE = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 4));
                         caseDataMap.put("respEC8EngDocument", responseDocumentE.getRespondentC8Document());
                         caseDataMap.put("respEC8WelDocument", responseDocumentE.getRespondentC8DocumentWelsh());
+                        if (eachRes.getValue().getRefugeConfidentialityC8Form() != null) {
+                            caseDataMap.put("respEC8RefugeDocument", eachRes.getValue().getRefugeConfidentialityC8Form());
+                        }
                     }
 
                     default -> log.info("no respondent found here");
