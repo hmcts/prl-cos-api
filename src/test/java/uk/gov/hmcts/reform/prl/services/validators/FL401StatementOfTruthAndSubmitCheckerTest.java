@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
@@ -141,6 +142,8 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
             .lastName("fl401applicantlast")
             .dateOfBirth(localDate)
             .gender(Gender.female)
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
             .address(Address.builder()
                          .addressLine1("Test")
                          .addressLine2("Test")

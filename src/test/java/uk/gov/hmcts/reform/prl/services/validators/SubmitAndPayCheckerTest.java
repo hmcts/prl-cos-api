@@ -159,6 +159,8 @@ public class SubmitAndPayCheckerTest {
             .dateOfBirth(LocalDate.of(1989, 11, 30))
             .gender(female)
             .placeOfBirth("London")
+            .liveInRefuge(Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
             .address(address)
             .isAddressConfidential(Yes)
             .isAtAddressLessThan5Years(Yes)

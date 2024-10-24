@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -49,13 +48,18 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -73,8 +77,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
-    private static final String APPLICANTS = "applicants";
-    private static final String RESPONDENTS = "respondents";
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -111,6 +113,18 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getApplicantsFL401()),
+                updatedCaseData,
+                FL401_APPLICANTS,
+                false
+            );
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getRespondentsFL401()),
+                updatedCaseData,
+                FL401_RESPONDENTS,
+                false
+            );
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -128,6 +142,24 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+                ofNullable(caseData.getApplicants()),
+                updatedCaseData,
+                APPLICANTS,
+                false
+            );
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+                ofNullable(caseData.getRespondents()),
+                updatedCaseData,
+                RESPONDENTS,
+                false
+            );
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                updatedCaseData,
+                OTHER_PARTY,
+                false
+            );
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -558,7 +590,7 @@ public class UpdatePartyDetailsService {
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
                     .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)).build());
                 children.add(childDetails);
-                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
+                caseDataUpdated.put(NEW_CHILDREN, children);
             } else {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
@@ -571,7 +603,7 @@ public class UpdatePartyDetailsService {
                                     ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
                                 .build())
                         .build())));
-                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildrenRevised);
+                caseDataUpdated.put(NEW_CHILDREN, listOfChildrenRevised);
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
@@ -579,9 +611,9 @@ public class UpdatePartyDetailsService {
                 children = new ArrayList<>();
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
-                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
+                caseDataUpdated.put(CHILDREN, children);
             } else {
-                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
+                caseDataUpdated.put(CHILDREN, caseData.getChildren());
             }
         }
         return caseDataUpdated;

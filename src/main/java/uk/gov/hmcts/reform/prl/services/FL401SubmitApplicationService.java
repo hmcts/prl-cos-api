@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -35,6 +36,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
@@ -50,6 +53,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -117,6 +121,13 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        cleanUpC8RefugeFields(caseData, caseDataUpdated);
+        Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
+            = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData);
+        if (refugeConfidentialDocumentsRecord.isPresent()) {
+            caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.get().refugeDocuments());
+            caseDataUpdated.put("historicalRefugeDocuments", refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments());
+        }
         return caseDataUpdated;
     }
 
@@ -158,5 +169,22 @@ public class FL401SubmitApplicationService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .userDetails(userDetails)
             .build();
+    }
+
+    private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+        log.info("Start cleaning up on submit");
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getApplicantsFL401()),
+            updatedCaseData,
+            FL401_APPLICANTS,
+            true
+        );
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getRespondentsFL401()),
+            updatedCaseData,
+            FL401_RESPONDENTS,
+            true
+        );
+        log.info("close cleaning up on submit");
     }
 }

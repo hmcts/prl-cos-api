@@ -556,6 +556,10 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
+        if (null != citizenProvidedPartyDetails.getLiveInRefuge()) {
+            existingPartyDetails = updateCitizenConfidentialData(existingPartyDetails, citizenProvidedPartyDetails);
+        }
+
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
             .email(isEmailNeedsToUpdate
@@ -584,6 +588,8 @@ public class CitizenPartyDetailsMapper {
                                     ? YesOrNo.Yes : existingPartyDetails.getIsDateOfBirthKnown())
             .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
                               ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
+            .liveInRefuge(citizenProvidedPartyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(getPartyResponse(existingPartyDetails).toBuilder()
@@ -639,6 +645,18 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (null != citizenProvidedPartyDetails.getLiveInRefuge()) {
+            if (citizenProvidedPartyDetails.getLiveInRefuge().equals(Yes)) {
+                log.info("setting refuge confidential data as yes");
+                return existingPartyDetails.toBuilder()
+                    .isPhoneNumberConfidential(Yes)
+                    .isAddressConfidential(Yes)
+                    .isEmailAddressConfidential(Yes)
+                    .build();
+            }
+        }
+
+        log.info("setting refuge confidential data as no");
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())

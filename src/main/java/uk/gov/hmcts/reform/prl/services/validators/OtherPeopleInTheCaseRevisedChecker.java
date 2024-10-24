@@ -88,7 +88,7 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
         Optional<YesOrNo> isDateOfBirthKnown = ofNullable(applicant.getIsDateOfBirthKnown());
-        if (!isDateOfBirthKnown.isEmpty() && Yes.equals(isDateOfBirthKnown.get())) {
+        if (isDateOfBirthKnown.isPresent() && Yes.equals(isDateOfBirthKnown.get())) {
             fields.add(ofNullable(applicant.getDateOfBirth()));
         }
         Optional<Gender> gender = ofNullable(applicant.getGender());
@@ -97,20 +97,10 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
         Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(applicant.getIsPlaceOfBirthKnown());
-        if (!isPlaceOfBirthKnown.isEmpty() && Yes.equals(isPlaceOfBirthKnown.get())) {
+        if (isPlaceOfBirthKnown.isPresent() && Yes.equals(isPlaceOfBirthKnown.get())) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
-        Optional<YesOrNo> isCurrentAddressKnown = ofNullable(applicant.getIsCurrentAddressKnown());
-        if (!isCurrentAddressKnown.isEmpty() && Yes.equals(isCurrentAddressKnown.get())) {
-            fields.add(ofNullable(applicant.getAddress()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
-        }
-
-        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
-        fields.add(isAtAddressLessThan5Years);
-        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
-            fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
-        }
+        validateAddress(applicant, fields);
 
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
@@ -125,6 +115,25 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    }
+
+    private static void validateAddress(PartyDetails applicant, List<Optional<?>> fields) {
+        Optional<YesOrNo> isCurrentAddressKnown = ofNullable(applicant.getIsCurrentAddressKnown());
+        if (isCurrentAddressKnown.isPresent() && Yes.equals(isCurrentAddressKnown.get())) {
+            Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
+            fields.add(liveInRefuge);
+            if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
+                fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
+            }
+            fields.add(ofNullable(applicant.getAddress()));
+            fields.add(ofNullable(applicant.getIsAddressConfidential()));
+        }
+
+        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
+        fields.add(isAtAddressLessThan5Years);
+        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
+            fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
+        }
     }
 
     public boolean verifyAddressCompleted(Address address) {
