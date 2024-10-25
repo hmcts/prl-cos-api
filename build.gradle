@@ -50,7 +50,7 @@ def versions = [
   reformsJavaLogging           : '6.1.6',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.2.0',
-  serenityCucumber             : '4.2.0',
+  serenityCucumber             : '4.2.6',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.14',
@@ -61,7 +61,7 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.32',
-  springFramework    : '6.1.12'
+  springFramework    : '6.1.14'
 ]
 
 allprojects {
@@ -316,7 +316,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
-  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.8'
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.10'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
@@ -334,7 +334,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.1'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'

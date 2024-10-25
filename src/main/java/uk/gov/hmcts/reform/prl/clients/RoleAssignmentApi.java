@@ -43,7 +43,7 @@ public interface RoleAssignmentApi {
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @PathVariable("assignmentId") String assignmentId);
 
-    @PostMapping(path = "/am/role-assignments/query", consumes = "application/json")
+    @PostMapping(path = "/am/role-assignments/query?includeLabels=true", consumes = "application/json")
     RoleAssignmentServiceResponse queryRoleAssignments(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
