@@ -146,6 +146,31 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
 
     }
 
+    @Test
+    public void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalseNoDetailsKnown() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .gender(Gender.male)
+            .dateOfBirth(LocalDate.of(1989, 10, 20))
+            .address(Address.builder()
+                .addressLine1("add1")
+                .postCode("postcode")
+                .build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email("email@email.com")
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("02086656656")
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(partyDetails));
+
+    }
+
 
     @Test
     public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
@@ -245,6 +270,45 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
+
+    }
+
+    @Test
+    public void whenCompletePartyDetailsThenFinishedReturnsTrueLiveInRefugeNotPresent() {
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .gender(Gender.male)
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1989, 10, 20))
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .placeOfBirth("London")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.No)
+            .address(Address.builder()
+                .addressLine1("add1")
+                .postCode("postcode")
+                .build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email("email@email.com")
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .phoneNumber("02086656656")
+            .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .otherPartyInTheCaseRevised(List.of(element(partyDetails)))
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
 
     }
 
