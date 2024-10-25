@@ -385,7 +385,7 @@ public class CaseDataServiceTest {
 
     @Test
     public void testBuildFromCfvDocument() throws MalformedURLException {
-       String documentUrl ="http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7";
+        String documentUrl = "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7";
         uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument = new uk.gov.hmcts.reform.ccd.client.model.Document(
             documentUrl,
             "test",
