@@ -47,6 +47,10 @@ public class CafCassControllerTest {
     private static final String jsonInString =
         "classpath:response/CafCaasResponse.json";
 
+    private String startDate = "2022-08-22T10:54:43.49";
+
+    private String endDate = "2022-08-22T11:00:43.49";
+
     @Test
     public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
@@ -58,13 +62,13 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData("authorisation", "startDate", "endDate"))
+        when(caseDataService.getCaseData("authorisation", startDate, endDate, "Bearer serviceAuthorisation"))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
             "authorisation",
             "serviceAuthorisation",
-            "startDate",
-            "endDate"
+            startDate,
+            endDate
         );
 
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
@@ -96,14 +100,14 @@ public class CafCassControllerTest {
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate"
+        when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
+                                         endDate, "Bearer " + TEST_SERVICE_AUTHORIZATION
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
-            "startDate",
-            "endDate"
+            startDate,
+            endDate
         );
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -112,14 +116,14 @@ public class CafCassControllerTest {
     public void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate"
+        when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
+                                         endDate, "Bearer " + TEST_SERVICE_AUTHORIZATION
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
-            "startDate",
-            "endDate"
+            startDate,
+            endDate
         );
         assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
@@ -129,7 +133,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate"
+                                         "endDate", "Bearer " + TEST_SERVICE_AUTHORIZATION
         )).thenThrow(new RuntimeException());
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
@@ -140,6 +144,21 @@ public class CafCassControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
+    @Test
+    public void testExceptionInternalServerErrorForDateTimeRange() throws IOException {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        final ResponseEntity response = cafCassController.searcCasesByDates(
+            TEST_AUTHORIZATION,
+            TEST_SERVICE_AUTHORIZATION,
+            "2022-08-22T10:54:43.49",
+            "2022-08-22T11:54:43.49"
+        );
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Difference between end date and start date should not be more than 15 minutes",
+                     ((ApiError)response.getBody()).getMessage());
+    }
+
     public static FeignException feignException(int status, String message) {
         return FeignException.errorStatus(message, Response.builder()
             .status(status)
@@ -147,4 +166,3 @@ public class CafCassControllerTest {
             .build());
     }
 }
-

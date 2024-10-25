@@ -14,6 +14,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -74,6 +77,9 @@ public class CaseDataServiceTest {
     @Mock
     private OrganisationService organisationService;
 
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -109,7 +115,7 @@ public class CaseDataServiceTest {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
-                                                                    SearchResult.class);
+                                                           SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
@@ -139,9 +145,15 @@ public class CaseDataServiceTest {
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, new ArrayList<>(), new ArrayList<>());
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -206,9 +218,20 @@ public class CaseDataServiceTest {
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -221,7 +244,7 @@ public class CaseDataServiceTest {
         objectMapper.registerModule(new ParameterNamesModule());
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNoData.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
-                                                                    SearchResult.class);
+                                                           SearchResult.class);
         final CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
@@ -231,7 +254,7 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
+                                                                          "start", "end", "tests2s"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 
@@ -281,9 +304,54 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
-                                                                               "start", "end"
+                                                                               "start", "end", "tests2s"
         ));
 
     }
-}
 
+    @Test
+    public void testFilterCancelledHearingsBeforeListing() {
+
+        final List<CaseHearing> caseHearings = new ArrayList();
+
+
+        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+            .hmcStatus("CANCELLED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004660")).hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                            "2023-05-09T09:45:00")).build())).build();
+
+        final CaseHearing caseHearing1 = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                            "2023-05-09T09:45:00")).build())).build();
+
+        final CaseHearing caseHearing2 = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+            .hmcStatus("CANCELLED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004661")).hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .build())).build();
+
+        caseHearings.add(caseHearing);
+        caseHearings.add(caseHearing1);
+        caseHearings.add(caseHearing2);
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(caseHearings);
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
+
+        assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
+
+    }
+}
