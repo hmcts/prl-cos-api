@@ -195,12 +195,12 @@ public class CaseDataService {
                     parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
                 }
                 log.info("category name {} --> {}", category.getCategoryName(), category.getCategoryId());
-                parseCfvDocuemnts(otherDocsList, category);
+                parseCfvDocuments(otherDocsList, category);
             }
         });
     }
 
-    private void parseCfvDocuemnts(List<Element<OtherDocuments>> otherDocsList, Category category) {
+    private void parseCfvDocuments(List<Element<OtherDocuments>> otherDocsList, Category category) {
         category.getDocuments().forEach(document -> {
             if (CollectionUtils.isEmpty(excludedDocumentList)
                 || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
