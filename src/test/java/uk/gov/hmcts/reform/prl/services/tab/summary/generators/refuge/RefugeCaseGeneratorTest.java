@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.tab.summary.generators;
+package uk.gov.hmcts.reform.prl.services.tab.summary.generators.refuge;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -6,9 +6,9 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.RefugeCase;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.RefugeCaseGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge.RefugeCaseGenerator;
 
 import java.time.LocalDate;
 import java.util.Collections;

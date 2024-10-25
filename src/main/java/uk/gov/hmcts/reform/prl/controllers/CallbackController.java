@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -346,7 +347,6 @@ public class CallbackController {
                     caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-                .refugeDocuments(confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData))
                 .build();
 
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -389,7 +389,12 @@ public class CallbackController {
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
-            caseDataUpdated.put("refugeDocuments", confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData));
+            Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
+                = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData);
+            if (refugeConfidentialDocumentsRecord.isPresent()) {
+                caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.get().refugeDocuments());
+                caseDataUpdated.put("historicalRefugeDocuments", refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments());
+            }
             try {
                 log.info("case data while submitting the case ===>" + objectMapper.writeValueAsString(caseData));
             } catch (JsonProcessingException e) {
@@ -408,19 +413,19 @@ public class CallbackController {
 
     private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getApplicants()),
             updatedCaseData,
             APPLICANTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getRespondents()),
             updatedCaseData,
             RESPONDENTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getOtherPartyInTheCaseRevised()),
             updatedCaseData,
             OTHER_PARTY,

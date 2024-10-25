@@ -608,7 +608,7 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(
+            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 Optional.of(partyDetailsWrappedList),
                 updatedCaseData,
                 "applicants",
@@ -625,7 +625,7 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(
+            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 Optional.of(partyDetailsWrappedList),
                 updatedCaseData,
                 " ",
@@ -646,7 +646,7 @@ public class ConfidentialityTabServiceTest {
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefuge(
+            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 Optional.of(partyDetailsWrappedList),
                 updatedCaseData,
                 " ",

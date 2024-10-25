@@ -124,6 +124,9 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     private EventService eventPublisher;
 
+    @Mock
+    private ConfidentialityTabService confidentialityTabService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;

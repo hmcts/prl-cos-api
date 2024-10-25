@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -289,11 +291,16 @@ public class ManageOrdersController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
             UUID newDraftOrderCollectionId = null;
-            if (caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION) && null != caseDataUpdated.get(
-                DRAFT_ORDER_COLLECTION)) {
+            //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+                && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
                 List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
                     DRAFT_ORDER_COLLECTION);
-                newDraftOrderCollectionId = draftOrderCollection.get(0).getId();
+                newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                    ? draftOrderCollection.get(0).getId() : null;
             }
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,

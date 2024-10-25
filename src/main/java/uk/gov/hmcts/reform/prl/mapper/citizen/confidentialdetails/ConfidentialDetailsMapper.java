@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
@@ -54,6 +56,7 @@ public class ConfidentialDetailsMapper {
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
         }
+        caseData = confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(caseData);
         if (updateTabs) {
             allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData.getId()));
         }

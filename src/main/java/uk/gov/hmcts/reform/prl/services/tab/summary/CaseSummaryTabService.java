@@ -18,10 +18,10 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGe
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.RefugeCaseGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.TypeOfApplicationGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge.RefugeCaseGenerator;
 
 import java.util.HashMap;
 import java.util.List;

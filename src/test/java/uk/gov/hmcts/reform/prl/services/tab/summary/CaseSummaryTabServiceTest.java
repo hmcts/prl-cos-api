@@ -18,9 +18,9 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetail
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.RefugeCaseGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge.RefugeCaseGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
