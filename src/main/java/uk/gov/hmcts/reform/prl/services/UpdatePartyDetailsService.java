@@ -78,7 +78,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 public class UpdatePartyDetailsService {
 
-    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    // public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()};
     public static final String C_8_OF = "C8 of ";
@@ -240,6 +240,16 @@ public class UpdatePartyDetailsService {
                 );
                 updatedCaseData.put(APPLICANTS, updatedApplicants);
             }
+            if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
+                List<Element<PartyDetails>> updatedOtherParties = new ArrayList<>();
+                caseData.getOtherPartyInTheCaseRevised().forEach(otherParties ->
+                                                                     updatedOtherParties.add(element(
+                                                                         otherParties.getId(),
+                                                                         resetOtherParties(otherParties.getValue())
+                                                                     ))
+                );
+                updatedCaseData.put(OTHER_PARTY, updatedOtherParties);
+            }
             if (CollectionUtils.isNotEmpty(caseData.getChildren())
                 && YesNoDontKnow.no.equals(caseData.getChildrenKnownToLocalAuthority())) {
                 updatedCaseData.put("childrenKnownToLocalAuthorityTextArea", null);
@@ -290,6 +300,30 @@ public class UpdatePartyDetailsService {
             .response(getPartyResponse(partyDetails).toBuilder()
                           .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
                           .build())
+            .build();
+
+        return partyDetails;
+    }
+
+    private PartyDetails resetOtherParties(PartyDetails partyDetails) {
+        partyDetails = partyDetails.toBuilder()
+            .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
+            .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
+            .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
+            .liveInRefuge(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getLiveInRefuge() : null)
+            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
+                                             && YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                                             ? partyDetails.getRefugeConfidentialityC8Form() : null)
+            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
+                                       ? partyDetails.getIsAddressConfidential() : null)
+            .addressLivedLessThan5YearsDetails(YesNoDontKnow.yes.equals(partyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())
+                                           ? partyDetails.getIsPhoneNumberConfidential() : null)
             .build();
 
         return partyDetails;
@@ -711,8 +745,7 @@ public class UpdatePartyDetailsService {
         return address;
     }
 
-    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest,
-                                                                     String authorisation) {
+    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
