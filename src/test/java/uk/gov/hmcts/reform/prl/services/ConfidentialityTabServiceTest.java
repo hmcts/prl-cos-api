@@ -407,7 +407,7 @@ public class ConfidentialityTabServiceTest {
             .children(listOfChild)
             .respondents(listOfPartyDetails)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
-        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData, false);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
@@ -489,7 +489,7 @@ public class ConfidentialityTabServiceTest {
             .respondentsFL401(partyDetails1)
             .home(home)
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
-        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData, false);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
@@ -503,7 +503,7 @@ public class ConfidentialityTabServiceTest {
             .applicants(null)
             .children(null)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
-        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData, false);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
@@ -538,7 +538,7 @@ public class ConfidentialityTabServiceTest {
                       .build())
 
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
-        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData, false);
 
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));

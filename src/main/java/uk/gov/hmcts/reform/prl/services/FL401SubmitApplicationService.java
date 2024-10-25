@@ -123,7 +123,7 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         cleanUpC8RefugeFields(caseData, caseDataUpdated);
         Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-            = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData);
+            = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, false);
         if (refugeConfidentialDocumentsRecord.isPresent()) {
             caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.get().refugeDocuments());
             caseDataUpdated.put("historicalRefugeDocuments", refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments());
