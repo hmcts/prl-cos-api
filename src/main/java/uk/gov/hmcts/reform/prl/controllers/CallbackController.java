@@ -1076,7 +1076,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest, authorisation))
+                .data(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
