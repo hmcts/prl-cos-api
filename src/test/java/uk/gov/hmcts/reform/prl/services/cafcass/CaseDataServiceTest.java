@@ -222,10 +222,17 @@ public class CaseDataServiceTest {
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        List<String> excludedDocumentCategoryList = new ArrayList<>();
+        excludedDocumentCategoryList.add("draftOrders");
+        ReflectionTestUtils.setField(caseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        List<String> excludedDocumentList = new ArrayList<>();
+        excludedDocumentList.add("Draft_C100_application");
+        ReflectionTestUtils.setField(caseDataService, "excludedDocumentList", excludedDocumentList);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
-        Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
+        Category subCategory = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), null);
+        Category category = new Category("applicantC1AResponse", "categoryName", 2, List.of(documents), List.of(subCategory));
 
         CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(coreCaseDataApi.getCategoriesAndDocuments(

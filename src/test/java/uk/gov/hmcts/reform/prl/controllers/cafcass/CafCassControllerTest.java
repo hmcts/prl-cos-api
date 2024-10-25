@@ -66,7 +66,7 @@ public class CafCassControllerTest {
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
             "authorisation",
-            "serviceAuthorisation",
+            "Bearer serviceAuthorisation",
             startDate,
             endDate
         );
@@ -145,7 +145,7 @@ public class CafCassControllerTest {
     }
 
     @Test
-    public void testExceptionInternalServerErrorForDateTimeRange() throws IOException {
+    public void testExceptionInternalServerErrorForDateTimeRange() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         final ResponseEntity response = cafCassController.searcCasesByDates(
