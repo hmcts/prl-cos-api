@@ -107,7 +107,9 @@ public class CaseDataService {
                 log.info("searchString --> {}", searchString);
 
                 String userToken = systemUserService.getSysUserToken();
+                log.info("userToken --> {}", userToken);
                 final String s2sToken = authTokenGenerator.generate();
+                log.info("s2sToken --> {}", s2sToken);
                 SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
                     userToken,
                     searchString,
