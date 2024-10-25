@@ -481,6 +481,17 @@ public class FL401SubmitApplicationServiceTest {
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .build();
 
+        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+            .thenReturn(stringObjectMap);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -497,26 +508,9 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
-            .thenReturn(stringObjectMap);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(123L)
-                .data(stringObjectMap)
-                .build())
-            .build();
-
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();;
-
         RefugeConfidentialDocumentsRecord refugeConfidentialDocument = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
-
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
         when(confidentialityTabService.listRefugeDocumentsForConfidentialTab(any())).thenReturn(Optional.of(refugeConfidentialDocument));
 
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
@@ -525,7 +519,6 @@ public class FL401SubmitApplicationServiceTest {
         )))
             .thenReturn(court);
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
