@@ -27,7 +27,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -227,7 +226,8 @@ public class ConfidentialDetailsMapperTest {
 
     @Test
     public void testChildAndPartyConfidentialDetailsF401WhenRespondentNotPresent() {
-        CaseData caseData = CaseData.builder().respondentsFL401(null).caseTypeOfApplication(FL401_CASE_TYPE).build();        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
+        CaseData caseData = CaseData.builder().respondentsFL401(null).caseTypeOfApplication(FL401_CASE_TYPE).build();
+        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNull(caseDataCheck.getRespondentConfidentialDetails());
