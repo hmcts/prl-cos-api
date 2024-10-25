@@ -26,11 +26,13 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +40,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -354,4 +358,43 @@ public class CaseDataServiceTest {
         assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
 
     }
+
+    @Test
+    public void testCheckIfDocumentsNeedToExcludeScenario1() {
+        List<String> excludedDocumentList = List.of(
+            "Draft_C100_application",
+            "C8Document",
+            "C1A_Document",
+            "C100FinalDocument"
+        );
+        String documentFilename = "Draft_C100_application.pdf";
+        assertTrue(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+    }
+
+    @Test
+    public void testCheckIfDocumentsNeedToExcludeScenario2() {
+        List<String> excludedDocumentList = List.of(
+            "Draft_C100_application",
+            "C8Document",
+            "C1A_Document",
+            "C100FinalDocument"
+        );
+        String documentFilename = "abc.pdf";
+        assertFalse(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+    }
+
+    @Test
+    public void testBuildFromCfvDocument() throws MalformedURLException {
+       String documentUrl ="http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7";
+        uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            documentUrl,
+            "test",
+            "test",
+            "test",
+            null
+        );
+        Document document = caseDataService.buildFromCfvDocument(cfvDocument);
+        assertEquals("test", document.getDocumentFileName());
+    }
+
 }
