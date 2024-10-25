@@ -116,7 +116,7 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-                log.info("searchResult total --> {}", searchResult.getTotal());
+                log.info("searchResult total ---> {}", searchResult.getTotal());
 
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
