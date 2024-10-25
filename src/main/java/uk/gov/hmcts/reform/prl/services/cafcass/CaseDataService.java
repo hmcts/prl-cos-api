@@ -195,20 +195,24 @@ public class CaseDataService {
                     parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
                 }
                 log.info("category name {} --> {}", category.getCategoryName(), category.getCategoryId());
-                category.getDocuments().forEach(document -> {
-                    if (CollectionUtils.isEmpty(excludedDocumentList)
-                        || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
-                        log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
-                        try {
-                            otherDocsList.add(Element.<OtherDocuments>builder().id(
-                                UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
-                                buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
-                                DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
-                        } catch (MalformedURLException e) {
-                            log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
-                        }
-                    }
-                });
+                parseCfvDocuemnts(otherDocsList, category);
+            }
+        });
+    }
+
+    private void parseCfvDocuemnts(List<Element<OtherDocuments>> otherDocsList, Category category) {
+        category.getDocuments().forEach(document -> {
+            if (CollectionUtils.isEmpty(excludedDocumentList)
+                || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
+                log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
+                try {
+                    otherDocsList.add(Element.<OtherDocuments>builder().id(
+                        UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
+                        buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
+                        DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
+                } catch (MalformedURLException e) {
+                    log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+                }
             }
         });
     }
