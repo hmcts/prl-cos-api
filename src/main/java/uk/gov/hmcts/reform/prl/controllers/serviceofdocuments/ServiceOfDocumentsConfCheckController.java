@@ -63,7 +63,8 @@ public class ServiceOfDocumentsConfCheckController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData()).build();
+                .data(serviceOfDocumentsService.handleConfCheckAboutToSubmit(callbackRequest))
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

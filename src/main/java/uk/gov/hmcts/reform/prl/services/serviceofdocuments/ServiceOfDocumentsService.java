@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -79,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
@@ -88,6 +90,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SOA_C8_CHECK_APPROVED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SOA_C8_CHECK_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_ADDITIONAL_RECIPIENTS;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.SOD_APPLICANT_RESPONDENT_SOLICITOR;
@@ -133,9 +138,10 @@ public class ServiceOfDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         //Check if unserved documents exist
-        if (isNotEmpty(caseData.getServiceOfDocuments())
-            && isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack())) {
-            caseDataMap.put("errors", List.of("Can not serve documents, as unserved document(s) already present pending review"));
+        if (null != caseData.getServiceOfDocuments()
+            && null != caseData.getServiceOfDocuments().getSodUnServedPack()
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
+            caseDataMap.put("errors", List.of("Can not execute service of documents, there are unserved document(s) pending review"));
             return caseDataMap;
         }
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -229,6 +235,8 @@ public class ServiceOfDocumentsService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         //Add un-served documents to caseData
         caseDataMap.put("sodUnServedPack", unServedPack);
+        //set WA fields
+        caseDataMap.putAll(setWaFieldsForServiceOfDocuments(caseData, callbackRequest.getEventId()));
 
         return caseDataMap;
     }
@@ -1010,7 +1018,16 @@ public class ServiceOfDocumentsService {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         }
 
-        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no documents available for confidential check")).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no document(s) available for confidential check")).build();
+    }
+
+    public Map<String, Object> handleConfCheckAboutToSubmit(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        //set WA fields
+        caseDataMap.putAll(setWaFieldsForServiceOfDocuments(caseData, callbackRequest.getEventId()));
+
+        return caseDataMap;
     }
 
     public ResponseEntity<SubmittedCallbackResponse> handleConfCheckSubmitted(String authorisation,
@@ -1055,5 +1072,25 @@ public class ServiceOfDocumentsService {
         );
 
         return response;
+    }
+
+    public Map<String, Object> setWaFieldsForServiceOfDocuments(CaseData caseData, String eventId) {
+        Map<String, Object> sodWaMap = new HashMap<>();
+        String isC8CheckNeeded = NO;
+        String isC8CheckApproved = NO;
+        if (Event.SERVICE_OF_DOCUMENTS.getId().equals(eventId)) {
+            if (ServiceOfDocumentsCheckEnum.managerCheck.equals(
+                caseData.getServiceOfDocuments().getSodDocumentsCheckOptions())) {
+                isC8CheckNeeded = YES;
+            }
+            sodWaMap.put(WA_SOA_C8_CHECK_NEEDED, isC8CheckNeeded);
+        } else if (Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId().equals(eventId)) {
+            if (Yes.equals(caseData.getServiceOfDocuments().getCanDocumentsBeServed())) {
+                isC8CheckApproved = YES;
+            }
+            sodWaMap.put(WA_SOA_C8_CHECK_APPROVED, isC8CheckApproved);
+        }
+
+        return sodWaMap;
     }
 }
