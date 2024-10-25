@@ -41,27 +41,27 @@ def versions = [
   jacksonDatatypeJsr     : '2.17.2',
   jsonAssert             : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                  : '5.10.3',
-  junitPlatform          : '5.7.2',
-  lombok                 : '1.18.34',
-  pact                   : '4.1.11',
-  pitest                 : '1.16.3',
-  puppyCrawl             : '8.45.1',
-  reformsJavaLogging     : '6.1.6',
-  sendLetterClient       : '4.0.4',
-  serenity               : '4.2.0',
-  serenityCucumber       : '4.2.0',
-  serviceTokenGenerator  : '4.1.2',
-  sonarPitest            : '0.5',
-  springSecurityCrypto   : '5.8.14',
-  springSecurityRsa      : '1.1.5',
-  springBoot             : '3.3.3',
-  springCloud            : '4.1.4',
-  tomcat                 : '10.1.26',
-  unirest                : '1.4.9',
-  ccdCaseDocumentAmClient: '1.7.3',
-  pdfbox                 : '2.0.32',
-  springFramework        : '6.1.12'
+  junit                        : '5.10.3',
+  junitPlatform                : '5.7.2',
+  lombok                       : '1.18.34',
+  pact                         : '4.1.11',
+  pitest                       : '1.16.3',
+  puppyCrawl                   : '8.45.1',
+  reformsJavaLogging           : '6.1.6',
+  sendLetterClient             : '4.0.4',
+  serenity                     : '4.2.0',
+  serenityCucumber             : '4.2.6',
+  serviceTokenGenerator        : '4.1.2',
+  sonarPitest                  : '0.5',
+  springSecurityCrypto         : '5.8.14',
+  springSecurityRsa            : '1.1.5',
+  springBoot                   : '3.3.3',
+  springCloud                  : '4.1.4',
+  tomcat                       : '10.1.26',
+  unirest                      : '1.4.9',
+  ccdCaseDocumentAmClient      : '1.7.3',
+  pdfbox                       : '2.0.32',
+  springFramework    : '6.1.14'
 ]
 
 allprojects {
@@ -142,16 +142,16 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-      // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.113.Final') {
-        entry 'netty-buffer'
-        entry 'netty-codec'
-        entry 'netty-codec-http'
-        entry 'netty-common'
-        entry 'netty-handler'
-        entry 'netty-resolver'
-        entry 'netty-transport'
-      }
+        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+        dependencySet(group: 'io.netty', version: '4.1.114.Final') {
+            entry 'netty-buffer'
+            entry 'netty-codec'
+            entry 'netty-codec-http'
+            entry 'netty-common'
+            entry 'netty-handler'
+            entry 'netty-resolver'
+            entry 'netty-transport'
+        }
 
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
@@ -316,12 +316,12 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
-  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.8'
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.10'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.0'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.24.0'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.1'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.24.1'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
   implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
@@ -334,11 +334,11 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.1'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
+  implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
@@ -375,15 +375,15 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
     force = true
   }
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.113.Final'
-  constraints {
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.114.Final'
+  constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.8') {
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'){
     force = true
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.8') {
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.11'){
     force = true
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
@@ -487,7 +487,7 @@ dependencies {
 
 
   integrationTestImplementation(sourceSets.test.output)
-  testImplementation 'com.github.hmcts:fortify-client:1.4.4:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.5:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
