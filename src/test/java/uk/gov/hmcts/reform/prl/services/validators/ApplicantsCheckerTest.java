@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -138,7 +139,7 @@ public class ApplicantsCheckerTest {
         caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
-            .applicants(null)
+            .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
             .build();
 
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
