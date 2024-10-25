@@ -36,6 +36,6 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
-    private YesOrNo applicantLivesInRefuge;
-    private Document refugeCertificate;
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
 }

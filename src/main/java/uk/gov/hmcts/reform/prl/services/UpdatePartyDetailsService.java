@@ -113,6 +113,18 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getApplicantsFL401()),
+                updatedCaseData,
+                FL401_APPLICANTS,
+                false
+            );
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+                ofNullable(caseData.getRespondentsFL401()),
+                updatedCaseData,
+                FL401_RESPONDENTS,
+                false
+            );
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -130,19 +142,19 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getApplicants()),
                 updatedCaseData,
                 APPLICANTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getRespondents()),
                 updatedCaseData,
                 RESPONDENTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefuge(
+            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getOtherPartyInTheCaseRevised()),
                 updatedCaseData,
                 OTHER_PARTY,
