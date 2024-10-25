@@ -390,7 +390,7 @@ public class CallbackController {
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
             Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-                = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData);
+                = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, false);
             if (refugeConfidentialDocumentsRecord.isPresent()) {
                 caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.get().refugeDocuments());
                 caseDataUpdated.put("historicalRefugeDocuments", refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments());

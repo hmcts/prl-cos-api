@@ -66,7 +66,9 @@ public enum CaseEvent {
     HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
 
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
-    CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate");
+    CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate"),
+    AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
+    AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails");
 
     private final String value;
 

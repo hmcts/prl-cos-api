@@ -537,7 +537,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(Map.of(
             "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
@@ -562,7 +562,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(Map.of(
             "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
@@ -586,7 +586,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(Map.of(
             "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
@@ -609,7 +609,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(Map.of(
             "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",
@@ -634,7 +634,7 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(Map.of(
             "applicantsConfidentialDetails",
             List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
             "childrenConfidentialDetails",

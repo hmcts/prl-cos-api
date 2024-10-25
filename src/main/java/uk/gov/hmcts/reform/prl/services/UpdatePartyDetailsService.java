@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,6 +79,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
+        CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()};
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -96,9 +100,15 @@ public class UpdatePartyDetailsService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
-        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
-        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+        // CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+        // updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+
+        boolean addToHistoricalC8RefugeDocList = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(
+            callbackRequest.getEventId()));
+        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(
+            caseData,
+            addToHistoricalC8RefugeDocList
+        ));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 

@@ -53,7 +53,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
-    public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
+    public Map<String, Object> updateConfidentialityDetails(CaseData caseData, boolean addToHistoricalC8RefugeDocList) {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
@@ -81,7 +81,7 @@ public class ConfidentialityTabService {
             }
 
             Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-                = listRefugeDocumentsForConfidentialTab(caseData);
+                = listRefugeDocumentsForConfidentialTab(caseData, addToHistoricalC8RefugeDocList);
             List<Element<RefugeConfidentialDocuments>> refugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
                 ? refugeConfidentialDocumentsRecord.get().refugeDocuments() : Collections.emptyList();
             List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
@@ -116,7 +116,7 @@ public class ConfidentialityTabService {
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
                 caseData);
             Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-                = listRefugeDocumentsForConfidentialTab(caseData);
+                = listRefugeDocumentsForConfidentialTab(caseData, addToHistoricalC8RefugeDocList);
             List<Element<RefugeConfidentialDocuments>> refugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
                 ? refugeConfidentialDocumentsRecord.get().refugeDocuments() : Collections.emptyList();
             List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments = refugeConfidentialDocumentsRecord.isPresent()
@@ -440,10 +440,12 @@ public class ConfidentialityTabService {
         log.info("end forceConfidentialityChangeForRefuge");
     }
 
-    public CaseData listRefugeDocumentsForConfidentialityWithCaseData(CaseData caseData) {
+    public CaseData listRefugeDocumentsForConfidentialityWithCaseData(CaseData caseData,
+                                                                      boolean addToHistoricalC8RefugeDocList,
+                                                                      boolean buildRefugeDocs) {
         Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-            = listRefugeDocumentsForConfidentialTab(caseData);
-        if (refugeConfidentialDocumentsRecord.isPresent()) {
+            = listRefugeDocumentsForConfidentialTab(caseData, addToHistoricalC8RefugeDocList);
+        if (refugeConfidentialDocumentsRecord.isPresent() && buildRefugeDocs) {
             caseData = caseData
                 .toBuilder()
                 .refugeDocuments(refugeConfidentialDocumentsRecord.get().refugeDocuments() != null
@@ -455,7 +457,8 @@ public class ConfidentialityTabService {
         return caseData;
     }
 
-    public Optional<RefugeConfidentialDocumentsRecord> listRefugeDocumentsForConfidentialTab(CaseData caseData) {
+    public Optional<RefugeConfidentialDocumentsRecord> listRefugeDocumentsForConfidentialTab(CaseData caseData,
+                                                                                             boolean addToHistoricalC8RefugeDocList) {
         log.info("start listRefugeDocumentsForConfidentialTab");
         List<Element<RefugeConfidentialDocuments>> refugeDocuments
             = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
@@ -470,7 +473,8 @@ public class ConfidentialityTabService {
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getApplicants()),
-                SERVED_PARTY_APPLICANT
+                SERVED_PARTY_APPLICANT,
+                addToHistoricalC8RefugeDocList
             );
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 1111:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 1111:: " + historicalRefugeDocuments.size());
@@ -478,7 +482,8 @@ public class ConfidentialityTabService {
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getRespondents()),
-                SERVED_PARTY_RESPONDENT
+                SERVED_PARTY_RESPONDENT,
+                addToHistoricalC8RefugeDocList
             );
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 22222:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 22222:: " + historicalRefugeDocuments.size());
@@ -486,7 +491,8 @@ public class ConfidentialityTabService {
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getOtherPartyInTheCaseRevised()),
-                SERVED_PARTY_OTHER
+                SERVED_PARTY_OTHER,
+                addToHistoricalC8RefugeDocList
             ));
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 33333:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 3333:: " + historicalRefugeDocuments.size());
@@ -497,7 +503,8 @@ public class ConfidentialityTabService {
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getApplicantsFL401()),
-                SERVED_PARTY_APPLICANT
+                SERVED_PARTY_APPLICANT,
+                addToHistoricalC8RefugeDocList
             );
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 555555:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 5555555:: " + historicalRefugeDocuments.size());
@@ -505,7 +512,8 @@ public class ConfidentialityTabService {
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getRespondentsFL401()),
-                SERVED_PARTY_RESPONDENT
+                SERVED_PARTY_RESPONDENT,
+                addToHistoricalC8RefugeDocList
             ));
         }
         log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 6666666:: " + refugeDocuments.size());
@@ -518,7 +526,8 @@ public class ConfidentialityTabService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
-        String party) {
+        String party,
+        boolean addToHistoricalC8RefugeDocList) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("party we got now: " + party);
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
@@ -531,7 +540,9 @@ public class ConfidentialityTabService {
                     int partyIndex = partyDetailsList.indexOf(partyDetails);
                     String partyType = String.format(party, EMPTY_SPACE_STRING, partyIndex);
                     log.info("partyType found = " + partyType);
-                    findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
+                    if (addToHistoricalC8RefugeDocList) {
+                        findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
+                    }
                     log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
                     refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                         refugeDocuments,
@@ -577,7 +588,7 @@ public class ConfidentialityTabService {
             log.info("refugeDocuments is present and size is " + refugeDocuments.size());
             log.info("historicalRefugeDocuments is present and size is " + historicalRefugeDocuments.size());
 
-            for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext();) {
+            for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext(); ) {
                 Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
                 log.info(
                     "refugeConfidentialDocumentsWrapped is present and now iterating through items, position:: "
@@ -598,7 +609,8 @@ public class ConfidentialityTabService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         Optional<PartyDetails> partyDetailsOptional,
-        String party) {
+        String party,
+        boolean addToHistoricalC8RefugeDocList) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("refugeDocuments are at the start :: " + refugeDocuments.size());
         log.info("historicalRefugeDocuments are at the start :: " + historicalRefugeDocuments.size());
@@ -608,12 +620,14 @@ public class ConfidentialityTabService {
             PartyDetails partyDetails = partyDetailsOptional.get();
             if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
                 log.info("Yes to refuge");
-                findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, party);
+                if (addToHistoricalC8RefugeDocList) {
+                    findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, party);
+                }
                 log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
                 buildAndListRefugeDocumentsForConfidentialityTab(
-                        refugeDocuments,
-                        partyDetails,
-                        party
+                    refugeDocuments,
+                    partyDetails,
+                    party
                 );
             }
             log.info("refugeDocuments are now :: " + refugeDocuments.size());
