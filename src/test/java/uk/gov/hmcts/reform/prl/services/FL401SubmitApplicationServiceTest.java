@@ -492,7 +492,7 @@ public class FL401SubmitApplicationServiceTest {
                 .build())
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
@@ -509,7 +509,7 @@ public class FL401SubmitApplicationServiceTest {
             .build();
 
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();;
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
         RefugeConfidentialDocumentsRecord refugeConfidentialDocument = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
         when(confidentialityTabService.listRefugeDocumentsForConfidentialTab(any())).thenReturn(Optional.of(refugeConfidentialDocument));
 
