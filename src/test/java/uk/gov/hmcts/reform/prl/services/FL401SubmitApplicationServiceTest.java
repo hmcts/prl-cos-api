@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -410,6 +412,113 @@ public class FL401SubmitApplicationServiceTest {
             .thenReturn(court);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        fl401SubmitApplicationService
+            .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
+
+        verify(documentGenService, times(1)).generateDocuments(
+            Mockito.anyString(),
+            any(CaseData.class)
+        );
+
+    }
+
+    @Test
+    public void testC8FormGenerationBasedConfidentialityRefuge() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder()
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.No)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home homefull = Home.builder()
+            .address(Address.builder().addressLine1("123").build())
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .isPropertyRented(YesOrNo.No)
+            .isThereMortgageOnProperty(YesOrNo.No)
+            .isPropertyAdapted(YesOrNo.No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(List.of(FamilyHomeEnum.payForRepairs))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .build();
+
+        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+            .thenReturn(stringObjectMap);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .draftOrderDoc(Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("FL401-Final.docx")
+                .build())
+            .applicantsFL401(applicant)
+            .home(homefull)
+            .submitCountyCourtSelection(dynamicList)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .build();
+
+        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocument = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
+        when(confidentialityTabService.listRefugeDocumentsForConfidentialTab(any())).thenReturn(Optional.of(refugeConfidentialDocument));
+
+        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )))
+            .thenReturn(court);
+
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
