@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -220,7 +221,7 @@ public class CafcassUploadDocServiceTest {
     }
 
     @Test
-    public void shouldUploadDocumentWhenAllFieldsAreCorrectForPathFinderCases() throws Exception {
+    public void shouldUploadDocumentWhenAllFieldsAreCorrectForPathFinderCases() {
 
         uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
             .Document.builder()
@@ -283,6 +284,26 @@ public class CafcassUploadDocServiceTest {
             Mockito.any(),
             Mockito.any(),
             Mockito.any()
+        );
+    }
+
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldUploadDocumentForInvalidCaseScenario1() {
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(null);
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
+                                               TEST_CASE_ID
+        );
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldUploadDocumentForInvalidCaseScenario2() {
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenThrow(new ResponseStatusException(
+            HttpStatus.NOT_FOUND));
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
+                                               TEST_CASE_ID
         );
     }
 }
