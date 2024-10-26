@@ -263,8 +263,6 @@ public class CafcassUploadDocServiceTest {
         )).build());
         caseData = caseData.toBuilder().isPathfinderCase(YesOrNo.Yes).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            Long.valueOf(TEST_CASE_ID)).data(stringObjectMap).build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
