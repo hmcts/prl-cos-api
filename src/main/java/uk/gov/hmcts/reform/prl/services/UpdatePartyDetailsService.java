@@ -192,7 +192,7 @@ public class UpdatePartyDetailsService {
         if (onlyForApplicant) {
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
-                    .onlyForApplicant(onlyForApplicant)
+                    .onlyForApplicant(true)
                     .build();
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             Optional<List<Element<PartyDetails>>> applicantListBefore = ofNullable(caseDataBefore.getApplicants());
@@ -205,7 +205,7 @@ public class UpdatePartyDetailsService {
         } else if (onlyForRespondent) {
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
-                    .onlyForRespondent(onlyForRespondent)
+                    .onlyForRespondent(true)
                     .build();
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
             Optional<List<Element<PartyDetails>>> respondentsListBefore = ofNullable(caseDataBefore.getRespondents());
@@ -251,8 +251,8 @@ public class UpdatePartyDetailsService {
             int index = partyDetailsList.indexOf(partyDetails);
             if (indexExists(partyDetailsListBefore, index)) {
                 PartyDetails partyDetailsBefore = partyDetailsListBefore.get(index);
-                if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
                     log.info("Refuge status changed from No to Yes");
                     RefugeDocumentHandlerParameters handler =
                         RefugeDocumentHandlerParameters.builder()
@@ -261,8 +261,8 @@ public class UpdatePartyDetailsService {
                             .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
                             .listDocument(true).build();
                     confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
-                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
                     log.info("Refuge status changed from Yes to No");
                     RefugeDocumentHandlerParameters handler =
                         RefugeDocumentHandlerParameters.builder()
