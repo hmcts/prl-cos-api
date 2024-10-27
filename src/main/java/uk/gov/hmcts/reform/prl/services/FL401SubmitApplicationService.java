@@ -52,7 +52,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -167,13 +167,13 @@ public class FL401SubmitApplicationService {
 
     private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             ofNullable(caseData.getApplicantsFL401()),
             updatedCaseData,
             FL401_APPLICANTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             ofNullable(caseData.getRespondentsFL401()),
             updatedCaseData,
             FL401_RESPONDENTS,

@@ -33,10 +33,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -600,61 +598,4 @@ public class ConfidentialityTabServiceTest {
         );
 
     }
-
-    @Test
-    public void testApplicantRefuge() {
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                "applicants",
-                false);
-
-        assertTrue(updatedCaseData.containsKey("applicants"));
-
-    }
-
-    @Test
-    public void testRefugeNoApplicant() {
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                " ",
-                false);
-
-        assertTrue(updatedCaseData.containsKey(" "));
-
-    }
-
-    @Test
-    public void testRefugeCleanup() {
-
-        refugePartyDetails1 = refugePartyDetails1.toBuilder()
-            .liveInRefuge(YesOrNo.No)
-            .build();
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityTabService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                " ",
-                true);
-
-        assertTrue(updatedCaseData.containsKey(" "));
-
-    }
-
-
 }

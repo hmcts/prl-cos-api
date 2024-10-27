@@ -86,6 +86,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
@@ -277,6 +278,9 @@ public class CallbackControllerTest {
 
     @Mock
     private ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;

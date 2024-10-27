@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
-import uk.gov.hmcts.reform.prl.models.refuge.RefugeDocumentHandlerParameters;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -82,7 +81,7 @@ public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
-        CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()};
+        CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue(), CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()};
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -90,6 +89,7 @@ public class UpdatePartyDetailsService {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentLanguageService documentLanguageService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
@@ -112,7 +112,7 @@ public class UpdatePartyDetailsService {
         boolean addToHistoricalC8RefugeDocList
             = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
         if (addToHistoricalC8RefugeDocList) {
-            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = processC8RefugeDocuments(
+            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
                 callbackRequest,
                 caseData
             );
@@ -138,13 +138,13 @@ public class UpdatePartyDetailsService {
 
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getApplicantsFL401()),
                 updatedCaseData,
                 FL401_APPLICANTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
                 ofNullable(caseData.getRespondentsFL401()),
                 updatedCaseData,
                 FL401_RESPONDENTS,
@@ -169,13 +169,13 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getApplicants()),
                 updatedCaseData,
                 APPLICANTS,
                 false
             );
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getRespondents()),
                 updatedCaseData,
                 RESPONDENTS,
@@ -200,160 +200,6 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
-    }
-
-    private RefugeConfidentialDocumentsRecord processC8RefugeDocuments(CallbackRequest callbackRequest, CaseData caseData) {
-        boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(callbackRequest.getEventId());
-        boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(callbackRequest.getEventId());
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        if (onlyForApplicant) {
-            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
-                RefugeDocumentHandlerParameters.builder()
-                    .onlyForApplicant(true)
-                    .build();
-            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-            Optional<List<Element<PartyDetails>>> applicantListBefore = ofNullable(caseDataBefore.getApplicants());
-            return processC8RefugeDocumentsChanges(
-                caseData,
-                applicantList,
-                applicantListBefore,
-                refugeDocumentHandlerParameters
-            );
-        } else if (onlyForRespondent) {
-            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
-                RefugeDocumentHandlerParameters.builder()
-                    .onlyForRespondent(true)
-                    .build();
-            Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
-            Optional<List<Element<PartyDetails>>> respondentsListBefore = ofNullable(caseDataBefore.getRespondents());
-            return processC8RefugeDocumentsChanges(
-                caseData,
-                respondentsList,
-                respondentsListBefore,
-                refugeDocumentHandlerParameters
-            );
-        }
-        return null;
-    }
-
-    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChanges(
-        CaseData caseData,
-        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
-        Optional<List<Element<PartyDetails>>> partyDetailsListWrappedBefore,
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
-        if (partyDetailsWrappedList.isPresent()) {
-            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream()
-                .map(Element::getValue)
-                .toList();
-
-            if (partyDetailsListWrappedBefore.isPresent()) {
-                List<PartyDetails> partyDetailsListBefore = partyDetailsListWrappedBefore.get().stream()
-                    .map(Element::getValue)
-                    .toList();
-
-                refugeConfidentialDocumentsRecord = compareAndCallService(
-                    caseData,
-                    partyDetailsList,
-                    partyDetailsListBefore,
-                    refugeDocumentHandlerParameters,
-                    refugeConfidentialDocumentsRecord
-                );
-            }
-        }
-        return refugeConfidentialDocumentsRecord;
-    }
-
-    private RefugeConfidentialDocumentsRecord compareAndCallService(CaseData caseData,
-                                                                    List<PartyDetails> partyDetailsList,
-                                                                    List<PartyDetails> partyDetailsListBefore,
-                                                                    RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
-                                                                    RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
-        for (PartyDetails partyDetails : partyDetailsList) {
-            int index = partyDetailsList.indexOf(partyDetails);
-            if (indexExists(partyDetailsListBefore, index)) {
-                PartyDetails partyDetailsBefore = partyDetailsListBefore.get(index);
-                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
-                    log.info("Refuge status changed from No to Yes");
-                    RefugeDocumentHandlerParameters handler =
-                        RefugeDocumentHandlerParameters.builder()
-                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
-                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
-                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
-                            .listDocument(true).build();
-                    refugeConfidentialDocumentsRecord = confidentialityTabService.listRefugeDocumentsForConfidentialTab(
-                        caseData,
-                        handler,
-                        refugeConfidentialDocumentsRecord
-                    );
-                } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
-                    log.info("Refuge status changed from Yes to No");
-                    RefugeDocumentHandlerParameters handler =
-                        RefugeDocumentHandlerParameters.builder()
-                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
-                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
-                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
-                            .listDocument(false)
-                            .removeDocument(true)
-                            .listHistoricalDocument(true)
-                            .build();
-                    refugeConfidentialDocumentsRecord = confidentialityTabService.listRefugeDocumentsForConfidentialTab(
-                        caseData,
-                        handler,
-                        refugeConfidentialDocumentsRecord
-                    );
-                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
-                    log.info("Refuge status remained from yes to yes");
-                    if (partyDetails.getRefugeConfidentialityC8Form() != null
-                        && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName() != null
-                        && partyDetailsBefore.getRefugeConfidentialityC8Form() != null
-                        && partyDetailsBefore.getRefugeConfidentialityC8Form().getDocumentFileName() != null
-                        && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName()
-                        .equalsIgnoreCase(partyDetailsBefore.getRefugeConfidentialityC8Form().getDocumentFileName())) {
-                        log.info("Refuge document file name is same, not listing again");
-                    } else {
-                        log.info("Refuge document file name is same, not listing again");
-                        RefugeDocumentHandlerParameters handler =
-                            RefugeDocumentHandlerParameters.builder()
-                                .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
-                                .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
-                                .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
-                                .listDocument(true)
-                                .removeDocument(true)
-                                .listHistoricalDocument(true)
-                                .build();
-                        refugeConfidentialDocumentsRecord = confidentialityTabService.listRefugeDocumentsForConfidentialTab(
-                            caseData,
-                            handler,
-                            refugeConfidentialDocumentsRecord
-                        );
-                    }
-                } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
-                    log.info("Refuge status remained same, no to no");
-                }
-            } else {
-                log.info("New Party added");
-                RefugeDocumentHandlerParameters handler =
-                    RefugeDocumentHandlerParameters.builder()
-                        .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
-                        .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
-                        .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
-                        .listDocument(false)
-                        .removeDocument(true)
-                        .listHistoricalDocument(true)
-                        .build();
-                refugeConfidentialDocumentsRecord = confidentialityTabService.listRefugeDocumentsForConfidentialTab(
-                    caseData,
-                    handler,
-                    refugeConfidentialDocumentsRecord
-                );
-            }
-        }
-        return refugeConfidentialDocumentsRecord;
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
@@ -930,18 +776,31 @@ public class UpdatePartyDetailsService {
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
                 ofNullable(caseData.getOtherPartyInTheCaseRevised()),
                 updatedCaseData,
                 OTHER_PARTY,
                 false
             );
+
+            boolean addToHistoricalC8RefugeDocList
+                = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
+
+            if (addToHistoricalC8RefugeDocList) {
+                RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
+                    callbackRequest,
+                    caseData
+                );
+                if (refugeConfidentialDocumentsRecord != null) {
+                    updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+                    updatedCaseData.put(
+                        "historicalRefugeDocuments",
+                        refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+                    );
+                }
+            }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
-    }
-
-    public boolean indexExists(final List<?> list, final int index) {
-        return index >= 0 && index < list.size();
     }
 }

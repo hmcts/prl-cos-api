@@ -67,6 +67,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -169,6 +170,7 @@ public class CallbackController {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final PaymentRequestService paymentRequestService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
@@ -407,19 +409,19 @@ public class CallbackController {
 
     private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getApplicants()),
             updatedCaseData,
             APPLICANTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getRespondents()),
             updatedCaseData,
             RESPONDENTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
             ofNullable(caseData.getOtherPartyInTheCaseRevised()),
             updatedCaseData,
             OTHER_PARTY,
