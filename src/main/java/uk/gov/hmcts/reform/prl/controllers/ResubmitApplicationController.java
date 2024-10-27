@@ -186,7 +186,7 @@ public class ResubmitApplicationController {
                     caseData
                 ));
             }
-            caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData, true));
+            caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
             caseDataUpdated.put(

@@ -130,7 +130,7 @@ public class AllTabServiceImplTest {
         verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
         verify(applicationsTabService, Mockito.times(1)).updateTab(caseData);
         verify(caseSummaryTabService, Mockito.times(1)).updateTab(caseData);
-        verify(confidentialityTabService, Mockito.times(1)).updateConfidentialityDetails(caseData,false);
+        verify(confidentialityTabService, Mockito.times(1)).updateConfidentialityDetails(caseData);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class AllTabServiceImplTest {
         verify(ccdCoreCaseDataService, Mockito.never()).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
         verify(applicationsTabService, Mockito.never()).updateTab(caseData);
         verify(caseSummaryTabService, Mockito.never()).updateTab(caseData);
-        verify(confidentialityTabService, Mockito.never()).updateConfidentialityDetails(caseData, false);
+        verify(confidentialityTabService, Mockito.never()).updateConfidentialityDetails(caseData);
     }
 
     @Test

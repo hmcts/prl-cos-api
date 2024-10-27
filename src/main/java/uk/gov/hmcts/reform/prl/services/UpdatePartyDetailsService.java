@@ -39,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -103,11 +102,10 @@ public class UpdatePartyDetailsService {
         // CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         // updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
 
-        boolean addToHistoricalC8RefugeDocList = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(
-            callbackRequest.getEventId()));
+        // boolean addToHistoricalC8RefugeDocList = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(
+        //    callbackRequest.getEventId()));
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(
-            caseData,
-            addToHistoricalC8RefugeDocList
+            caseData
         ));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
