@@ -68,7 +68,8 @@ public enum CaseEvent {
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
     CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate"),
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
-    AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails");
+    AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
+    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised");
 
     private final String value;
 

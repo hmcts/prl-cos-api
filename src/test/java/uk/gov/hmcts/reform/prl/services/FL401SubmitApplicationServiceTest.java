@@ -127,6 +127,9 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     private ConfidentialityTabService confidentialityTabService;
 
+    @Mock
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
