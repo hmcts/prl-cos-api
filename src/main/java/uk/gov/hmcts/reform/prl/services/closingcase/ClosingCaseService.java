@@ -210,7 +210,7 @@ public class ClosingCaseService {
             String s2sToken = authTokenGenerator.generate();
             RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
                 .attributes(QueryAttributes.builder()
-                                .caseId(List.of("1729768737269175"))
+                                .caseId(List.of(Long.toString(caseData.getId())))
                                 .build())
                 .validAt(LocalDateTime.now())
                 .build();
@@ -231,7 +231,7 @@ public class ClosingCaseService {
                     .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
                 roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
                     .attributes(QueryAttributes.builder()
-                                    .caseId(List.of("1729768737269175"))
+                                    .caseId(List.of(Long.toString(caseData.getId())))
                                     .build())
                     .roleCategory(roleCategories)
                     .grantType(List.of(SPECIFIC_ACCESS_GRANT))
@@ -252,7 +252,7 @@ public class ClosingCaseService {
                 log.info("** RoleAssignmentDeleteQueryResponse " + status);
                 if (null != status && status.getStatusCode().is2xxSuccessful()) {
                     caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-                    caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.EMPTY_LIST);
+                    caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.emptyList());
                     caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
                         && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
                         ? caseData.getLegalAdviserList().toBuilder()
