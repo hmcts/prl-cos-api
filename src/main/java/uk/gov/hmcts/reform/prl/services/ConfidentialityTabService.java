@@ -515,23 +515,21 @@ public class ConfidentialityTabService {
             log.info("inside party details list");
             for (PartyDetails partyDetails : partyDetailsList) {
                 log.info("inside party details for loop");
-                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
-                    log.info("Yes to refuge");
-                    int partyIndex = partyDetailsList.indexOf(partyDetails);
-                    String partyType = String.format(party, EMPTY_SPACE_STRING, partyIndex);
-                    log.info("partyType found = " + partyType);
-                    if (refugeDocumentHandlerParameters.removeDocument
-                        || refugeDocumentHandlerParameters.listHistoricalDocument) {
-                        findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
-                    }
-                    if (refugeDocumentHandlerParameters.listDocument) {
-                        log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
-                        refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
-                            refugeDocuments,
-                            partyDetails,
-                            partyType
-                        );
-                    }
+                log.info("Yes to refuge");
+                int partyIndex = partyDetailsList.indexOf(partyDetails);
+                String partyType = String.format(party, EMPTY_SPACE_STRING, partyIndex);
+                log.info("partyType found = " + partyType);
+                if (refugeDocumentHandlerParameters.removeDocument
+                    || refugeDocumentHandlerParameters.listHistoricalDocument) {
+                    findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
+                }
+                if (refugeDocumentHandlerParameters.listDocument) {
+                    log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
+                    refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
+                        refugeDocuments,
+                        partyDetails,
+                        partyType
+                    );
                 }
                 log.info("historicalRefugeDocuments are now :: " + historicalRefugeDocuments.size());
                 log.info("refugeDocuments are now :: " + refugeDocuments.size());
