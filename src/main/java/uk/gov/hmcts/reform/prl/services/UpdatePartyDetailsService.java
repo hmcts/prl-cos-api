@@ -253,6 +253,7 @@ public class UpdatePartyDetailsService {
                 PartyDetails partyDetailsBefore = partyDetailsListBefore.get(index);
                 if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                     && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    log.info("Refuge status changed from No to Yes");
                     RefugeDocumentHandlerParameters handler =
                         RefugeDocumentHandlerParameters.builder()
                             .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
@@ -262,6 +263,7 @@ public class UpdatePartyDetailsService {
                     confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
                 } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                     && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    log.info("Refuge status changed from Yes to No");
                     RefugeDocumentHandlerParameters handler =
                         RefugeDocumentHandlerParameters.builder()
                             .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
@@ -272,20 +274,29 @@ public class UpdatePartyDetailsService {
                             .listHistoricalDocument(true)
                             .build();
                     confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
-                    log.info("Refuge status changed from Yes to No");
                 } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                     && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
-                    RefugeDocumentHandlerParameters handler =
-                        RefugeDocumentHandlerParameters.builder()
-                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
-                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
-                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
-                            .listDocument(true)
-                            .removeDocument(true)
-                            .listHistoricalDocument(true)
-                            .build();
-                    confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
                     log.info("Refuge status remained from yes to yes");
+                    if (partyDetails.getRefugeConfidentialityC8Form() != null
+                        && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName() != null
+                        && partyDetailsBefore.getRefugeConfidentialityC8Form() != null
+                        && partyDetailsBefore.getRefugeConfidentialityC8Form().getDocumentFileName() != null
+                        && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName()
+                        .equalsIgnoreCase(partyDetailsBefore.getRefugeConfidentialityC8Form().getDocumentFileName())) {
+                        log.info("Refuge document file name is same, not listing again");
+                    } else {
+                        log.info("Refuge document file name is same, not listing again");
+                        RefugeDocumentHandlerParameters handler =
+                            RefugeDocumentHandlerParameters.builder()
+                                .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
+                                .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
+                                .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
+                                .listDocument(true)
+                                .removeDocument(true)
+                                .listHistoricalDocument(true)
+                                .build();
+                        confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
+                    }
                 } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                     && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
                     log.info("Refuge status remained same, no to no");
