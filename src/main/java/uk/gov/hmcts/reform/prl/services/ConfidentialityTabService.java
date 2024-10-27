@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 public class ConfidentialityTabService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
@@ -423,71 +424,76 @@ public class ConfidentialityTabService {
         log.info("end forceConfidentialityChangeForRefuge");
     }
 
-    public Optional<RefugeConfidentialDocumentsRecord> listRefugeDocumentsForConfidentialTab(
+    public RefugeConfidentialDocumentsRecord listRefugeDocumentsForConfidentialTab(
         CaseData caseData,
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
         log.info("start listRefugeDocumentsForConfidentialTab");
         List<Element<RefugeConfidentialDocuments>> refugeDocuments
             = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments
             = caseData.getHistoricalRefugeDocuments() != null ? caseData.getHistoricalRefugeDocuments() : new ArrayList<>();
 
-        Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord = Optional.empty();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab:: " + historicalRefugeDocuments.size());
             if (refugeDocumentHandlerParameters.forAllParties || refugeDocumentHandlerParameters.onlyForApplicant) {
-                listRefugeDocumentsPartyWiseForC100(
+                refugeConfidentialDocumentsRecord = listRefugeDocumentsPartyWiseForC100(
                     refugeDocuments,
                     historicalRefugeDocuments,
                     ofNullable(caseData.getApplicants()),
                     SERVED_PARTY_APPLICANT,
-                    refugeDocumentHandlerParameters
+                    refugeDocumentHandlerParameters,
+                    refugeConfidentialDocumentsRecord
                 );
             }
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 1111:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 1111:: " + historicalRefugeDocuments.size());
             if (refugeDocumentHandlerParameters.forAllParties || refugeDocumentHandlerParameters.onlyForRespondent) {
-                listRefugeDocumentsPartyWiseForC100(
+                refugeConfidentialDocumentsRecord = listRefugeDocumentsPartyWiseForC100(
                     refugeDocuments,
                     historicalRefugeDocuments,
                     ofNullable(caseData.getRespondents()),
                     SERVED_PARTY_RESPONDENT,
-                    refugeDocumentHandlerParameters
+                    refugeDocumentHandlerParameters,
+                    refugeConfidentialDocumentsRecord
                 );
             }
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 22222:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 22222:: " + historicalRefugeDocuments.size());
             if (refugeDocumentHandlerParameters.forAllParties || refugeDocumentHandlerParameters.onlyForOtherPeople) {
-                refugeConfidentialDocumentsRecord = Optional.of(listRefugeDocumentsPartyWiseForC100(
+                refugeConfidentialDocumentsRecord = listRefugeDocumentsPartyWiseForC100(
                     refugeDocuments,
                     historicalRefugeDocuments,
                     ofNullable(caseData.getOtherPartyInTheCaseRevised()),
                     SERVED_PARTY_OTHER,
-                    refugeDocumentHandlerParameters
-                ));
+                    refugeDocumentHandlerParameters,
+                    refugeConfidentialDocumentsRecord
+                );
             }
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 33333:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 3333:: " + historicalRefugeDocuments.size());
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 444444:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 44444:: " + historicalRefugeDocuments.size());
-            listRefugeDocumentsPartyWiseForFl401(
+            refugeConfidentialDocumentsRecord = listRefugeDocumentsPartyWiseForFl401(
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getApplicantsFL401()),
                 SERVED_PARTY_APPLICANT,
-                refugeDocumentHandlerParameters
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
             );
             log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 555555:: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 5555555:: " + historicalRefugeDocuments.size());
-            refugeConfidentialDocumentsRecord = Optional.of(listRefugeDocumentsPartyWiseForFl401(
+            refugeConfidentialDocumentsRecord = listRefugeDocumentsPartyWiseForFl401(
                 refugeDocuments,
                 historicalRefugeDocuments,
                 ofNullable(caseData.getRespondentsFL401()),
                 SERVED_PARTY_RESPONDENT,
-                refugeDocumentHandlerParameters
-            ));
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
+            );
         }
         log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 6666666:: " + refugeDocuments.size());
         log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 6666666:: " + historicalRefugeDocuments.size());
@@ -500,7 +506,8 @@ public class ConfidentialityTabService {
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
         String party,
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("party we got now: " + party);
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
@@ -531,7 +538,17 @@ public class ConfidentialityTabService {
             }
         }
         log.info("end listRefugeDocumentsPartyWise");
-        return new RefugeConfidentialDocumentsRecord(refugeDocuments, historicalRefugeDocuments);
+
+        if (refugeConfidentialDocumentsRecord != null) {
+            refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
+        } else {
+            refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
+                refugeDocuments,
+                historicalRefugeDocuments
+            );
+        }
+        return refugeConfidentialDocumentsRecord;
     }
 
     private List<Element<RefugeConfidentialDocuments>> buildAndListRefugeDocumentsForConfidentialityTab(
@@ -545,7 +562,8 @@ public class ConfidentialityTabService {
             .partyName(partyDetails.getLabelForDynamicList())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
-                                 .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter)).build())
+                                 .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                                     dateTimeFormatter)).build())
             .document(partyDetails.getRefugeConfidentialityC8Form()).build();
 
         if (refugeDocuments != null) {
@@ -586,7 +604,9 @@ public class ConfidentialityTabService {
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         Optional<PartyDetails> partyDetailsOptional,
         String party,
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+    ) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("refugeDocuments are at the start :: " + refugeDocuments.size());
         log.info("historicalRefugeDocuments are at the start :: " + historicalRefugeDocuments.size());
@@ -613,7 +633,16 @@ public class ConfidentialityTabService {
             log.info("historicalRefugeDocuments are now :: " + historicalRefugeDocuments.size());
         }
         log.info("end listRefugeDocumentsPartyWise");
-        return new RefugeConfidentialDocumentsRecord(refugeDocuments, historicalRefugeDocuments);
+        if (refugeConfidentialDocumentsRecord != null) {
+            refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
+        } else {
+            refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
+                refugeDocuments,
+                historicalRefugeDocuments
+            );
+        }
+        return refugeConfidentialDocumentsRecord;
     }
 }
 
