@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeDocumentHandlerParameters;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -39,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,7 +79,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 public class UpdatePartyDetailsService {
 
-    // public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()};
     public static final String C_8_OF = "C8 of ";
@@ -99,14 +101,18 @@ public class UpdatePartyDetailsService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
-        // CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        // updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+        updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
 
-        // boolean addToHistoricalC8RefugeDocList = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(
-        //    callbackRequest.getEventId()));
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(
             caseData
         ));
+
+        boolean addToHistoricalC8RefugeDocList
+            = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
+        if (addToHistoricalC8RefugeDocList) {
+            processC8RefugeDocuments(callbackRequest, caseData);
+        }
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
@@ -177,6 +183,115 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    private void processC8RefugeDocuments(CallbackRequest callbackRequest, CaseData caseData) {
+        boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(callbackRequest.getEventId());
+        boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(callbackRequest.getEventId());
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        if (onlyForApplicant) {
+            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
+                RefugeDocumentHandlerParameters.builder()
+                    .onlyForApplicant(onlyForApplicant)
+                    .build();
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            Optional<List<Element<PartyDetails>>> applicantListBefore = ofNullable(caseDataBefore.getApplicants());
+            processC8RefugeDocumentsChanges(
+                caseData,
+                applicantList,
+                applicantListBefore,
+                refugeDocumentHandlerParameters
+            );
+        } else if (onlyForRespondent) {
+            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
+                RefugeDocumentHandlerParameters.builder()
+                    .onlyForRespondent(onlyForRespondent)
+                    .build();
+            Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
+            Optional<List<Element<PartyDetails>>> respondentsListBefore = ofNullable(caseDataBefore.getRespondents());
+            processC8RefugeDocumentsChanges(
+                caseData,
+                respondentsList,
+                respondentsListBefore,
+                refugeDocumentHandlerParameters
+            );
+        }
+    }
+
+    private void processC8RefugeDocumentsChanges(
+        CaseData caseData,
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        Optional<List<Element<PartyDetails>>> partyDetailsListWrappedBefore,
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
+        if (partyDetailsWrappedList.isPresent()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream()
+                .map(Element::getValue)
+                .toList();
+
+            if (partyDetailsListWrappedBefore.isPresent()) {
+                List<PartyDetails> partyDetailsListBefore = partyDetailsListWrappedBefore.get().stream()
+                    .map(Element::getValue)
+                    .toList();
+
+                compareAndCallService(
+                    caseData,
+                    partyDetailsList,
+                    partyDetailsListBefore,
+                    refugeDocumentHandlerParameters
+                );
+            }
+        }
+    }
+
+    private void compareAndCallService(CaseData caseData,
+                                       List<PartyDetails> partyDetailsList,
+                                       List<PartyDetails> partyDetailsListBefore,
+                                       RefugeDocumentHandlerParameters refugeDocumentHandlerParameters) {
+        for (PartyDetails partyDetails : partyDetailsList) {
+            int index = partyDetailsList.indexOf(partyDetails);
+            if (indexExists(partyDetailsListBefore, index)) {
+                PartyDetails partyDetailsBefore = partyDetailsListBefore.get(index);
+                if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    RefugeDocumentHandlerParameters handler =
+                        RefugeDocumentHandlerParameters.builder()
+                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
+                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
+                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
+                            .listDocument(true).build();
+                    confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
+                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    RefugeDocumentHandlerParameters handler =
+                        RefugeDocumentHandlerParameters.builder()
+                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
+                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
+                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
+                            .listDocument(false)
+                            .removeDocument(true)
+                            .listHistoricalDocument(true)
+                            .build();
+                    confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
+                    log.info("Refuge status changed from Yes to No");
+                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    RefugeDocumentHandlerParameters handler =
+                        RefugeDocumentHandlerParameters.builder()
+                            .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
+                            .onlyForRespondent(refugeDocumentHandlerParameters.onlyForRespondent)
+                            .onlyForOtherPeople(refugeDocumentHandlerParameters.onlyForOtherPeople)
+                            .listDocument(true)
+                            .removeDocument(true)
+                            .listHistoricalDocument(true)
+                            .build();
+                    confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData, handler);
+                    log.info("Refuge status remained from yes to yes");
+                } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                    log.info("Refuge status remained same, no to no");
+                }
+            }
+        }
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
@@ -567,7 +682,7 @@ public class UpdatePartyDetailsService {
                                                                                     .build());
                 return getC8DocumentReverseOrderList(c8Documents, newC8Document);
             } else {
-                return  c8Documents;
+                return c8Documents;
             }
         } else {
             return Collections.emptyList();
@@ -728,7 +843,7 @@ public class UpdatePartyDetailsService {
             //Adding comma to address line 2 if the postcode is there
             if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
                 addressLine2 = !StringUtils.isBlank(postcode)
-                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
+                    ? parties.getValue().getAddress().getAddressLine2().concat(", ")
                     : parties.getValue().getAddress().getAddressLine2();
             }
 
@@ -757,5 +872,9 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    public boolean indexExists(final List<?> list, final int index) {
+        return index >= 0 && index < list.size();
     }
 }
