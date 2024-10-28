@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -75,7 +74,9 @@ public class CaseDataOtherPersonsElementsMapper {
                 .dateOfBirth(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
                         ? buildDateOfBirth(personalDetails.getApproxDateOfBirth())
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
-                .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
+                .isAddressConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
+                .isEmailAddressConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
+                .isPhoneNumberConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
