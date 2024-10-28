@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
@@ -26,7 +24,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -42,9 +39,6 @@ public class ConfidentialDetailsMapperTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
-
-    @Mock
-    ConfidentialityTabService confidentialityTabService;
 
     Address address;
     PartyDetails partyDetails1;
@@ -177,7 +171,6 @@ public class ConfidentialDetailsMapperTest {
         CaseData caseData = CaseData.builder().respondents(listOfPartyDetails)
             .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
             .caseTypeOfApplication(C100_CASE_TYPE).build();
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
         assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
@@ -188,9 +181,8 @@ public class ConfidentialDetailsMapperTest {
     @Test
     public void testChildAndPartyConfidentialDetailsWhenRespondentsNotPresent() {
         CaseData caseData = CaseData.builder().respondents(null).caseTypeOfApplication(C100_CASE_TYPE).build();
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        assertNull(caseDataCheck.getRespondentConfidentialDetails());
+        assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
     }
 
     @Test
@@ -220,7 +212,6 @@ public class ConfidentialDetailsMapperTest {
             .respondentsFL401(partyDetails)
             .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
         assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
@@ -266,9 +257,7 @@ public class ConfidentialDetailsMapperTest {
     @Test
     public void testChildAndPartyConfidentialDetailsF401WhenRespondentNotPresent() {
         CaseData caseData = CaseData.builder().respondentsFL401(null).caseTypeOfApplication(FL401_CASE_TYPE).build();
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
-        assertNull(caseDataCheck.getRespondentConfidentialDetails());
+        assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
     }
 }
