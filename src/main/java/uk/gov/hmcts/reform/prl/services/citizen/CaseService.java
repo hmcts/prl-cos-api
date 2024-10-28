@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -68,6 +69,8 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
@@ -325,11 +329,11 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        UserInfo userInfo = idamClient.getUserInfo(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
             caseEvent,
-            userDetails.getId()
+            userInfo.getUid()
         );
 
         StartEventResponse startEventResponse =
@@ -907,7 +911,6 @@ public class CaseService {
 
     private LocalDateTime getServedDateTime(OrderDetails order,
                                             String partyId) {
-
         return nullSafeCollection(order.getServeOrderDetails().getServedParties())
             .stream()
             .map(Element::getValue)
@@ -945,7 +948,8 @@ public class CaseService {
 
     private boolean isOrderServedForParty(OrderDetails order,
                                           String partyId) {
-        return nullSafeCollection(order.getServeOrderDetails().getServedParties()).stream()
+        return null != order.getServeOrderDetails()
+            && nullSafeCollection(order.getServeOrderDetails().getServedParties()).stream()
             .map(Element::getValue)
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
@@ -1279,9 +1283,8 @@ public class CaseService {
             .categoryId(categoryId)
             .document(isWelsh ? null : document)
             .documentWelsh(isWelsh ? document : null)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(submittedDate,
-                                                           DATE_FORMATTER_YYYY_MM_DD),
-                                           LocalTime.of(0, 0)))
+            .uploadedDate(null == submittedDate ? ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime()
+                : LocalDateTime.of(LocalDate.parse(submittedDate, DATE_FORMATTER_YYYY_MM_DD), LocalTime.of(0, 0)))
             .documentLanguage(isWelsh ? WELSH : ENGLISH)
             .uploadedBy(SYSTEM)
             .build();
@@ -1376,9 +1379,10 @@ public class CaseService {
             .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(),
-                                                           DATE_FORMATTER_YYYY_MM_DD),
-                                           LocalTime.of(0, 0)))
+            .uploadedDate(null == caseData.getDateSubmitted()
+                              ? ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime()
+                              : LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(), DATE_FORMATTER_YYYY_MM_DD),
+                                                 LocalTime.of(0, 0)))
             .build();
     }
 

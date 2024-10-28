@@ -51,6 +51,10 @@ public enum CaseEvent {
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
     ALL_AWP_IN_REVIEW("allAwPInReview"),
     CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
+    MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
+    MARK_CASE_AS_PRIVATE("privateCaseAccess"),
+    MARK_CASE_AS_PUBLIC("publicCaseAccess"),
+    CHANGE_CASE_ACCESS_AS_SYSUSER("changeCaseAccess"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
@@ -74,7 +78,7 @@ public enum CaseEvent {
         return value;
     }
 
-    public static uk.gov.hmcts.reform.prl.enums.CaseEvent fromValue(String value) {
+    public static CaseEvent fromValue(String value) {
         return Arrays.stream(values())
             .filter(event -> event.value.equals(value))
             .findFirst()

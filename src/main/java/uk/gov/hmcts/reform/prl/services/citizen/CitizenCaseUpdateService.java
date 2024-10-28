@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -179,7 +180,8 @@ public class CitizenCaseUpdateService {
         allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
-
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        caseDataMapToBeUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
@@ -197,13 +199,9 @@ public class CitizenCaseUpdateService {
 
     private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
         caseDataToSubmit = caseDataToSubmit.toBuilder()
-            .helpWithFeesNumber(isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
-                                    && YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+            .helpWithFeesNumber(YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+                                    && isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
                                     ? citizenUpdatedCaseData.getHelpWithFeesNumber() : null)
-            .paymentServiceRequestReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber())
-                                                      ? citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber() : null)
-            .paymentReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentReferenceNumber())
-                                        ? citizenUpdatedCaseData.getPaymentReferenceNumber() : null)
             .build();
         return caseDataToSubmit;
     }

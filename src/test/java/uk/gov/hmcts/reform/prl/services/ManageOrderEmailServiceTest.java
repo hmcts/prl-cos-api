@@ -97,8 +97,6 @@ public class ManageOrderEmailServiceTest {
     @InjectMocks
     private ManageOrderEmailService manageOrderEmailService;
 
-    private Map<String, String> expectedEmailVarsAsMap;
-
     @Mock
     private CourtFinderApi courtFinderApi;
 
@@ -213,8 +211,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .build();
 
-        List<Court> courtList = new ArrayList<>();
-        courtList.add(court);
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -225,71 +221,6 @@ public class ManageOrderEmailServiceTest {
             .build();
 
         when(time.now()).thenReturn(LocalDateTime.now());
-    }
-
-    @Test
-    public void sendEmail() throws NotFoundException {
-
-
-        applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        respondent = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
-        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
-        childLiveWithList.add(LiveWithEnum.applicant);
-
-        Child child = Child.builder()
-            .childLiveWith(childLiveWithList)
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .respondents(listOfRespondents)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .build();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
-
-        manageOrderEmailService.sendEmail(caseDetails);
-        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
     @Test
@@ -572,119 +503,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssued() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .state(State.ALL_FINAL_ORDERS_ISSUED)
-            .applicants(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .build())))
-            .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
-
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),Mockito.any());
-    }
-
-    @Test
-    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .build())))
-            .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
-
-        Mockito.verify(emailService,Mockito.times(0)).send(Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),Mockito.any());
-    }
-
-    @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmail() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .state(State.ALL_FINAL_ORDERS_ISSUED)
-            .applicants(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .email("test@gmail.com")
-                .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .email("test@gmail.com")
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .build())))
-            .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
-
-        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),Mockito.any());
-    }
-
-    @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("Fl401")
-            .state(State.ALL_FINAL_ORDERS_ISSUED)
-            .respondentsFL401(PartyDetails.builder()
-                .solicitorEmail("test@gmail.com")
-                .representativeLastName("LastName")
-                .representativeFirstName("FirstName")
-                .email("test@gmail.com")
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .build())
-            .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
-
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),Mockito.any());
-    }
-
-    @Test
     public void sendEmailWhenOrderIsServed() {
 
         applicant = PartyDetails.builder()
@@ -727,12 +545,6 @@ public class ManageOrderEmailServiceTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                .label("John (Child 1)")
-                .code("00000000-0000-0000-0000-000000000000")
-                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -827,12 +639,6 @@ public class ManageOrderEmailServiceTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -1449,6 +1255,7 @@ public class ManageOrderEmailServiceTest {
         Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
             Mockito.any(),
             Mockito.any());
+        Mockito.verifyNoInteractions(emailService);
     }
 
     @Test

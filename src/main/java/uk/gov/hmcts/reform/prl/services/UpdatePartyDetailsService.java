@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -117,7 +118,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}", e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -137,7 +138,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e);
+                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
@@ -244,7 +245,7 @@ public class UpdatePartyDetailsService {
             .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
             .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
             .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
-            .response(partyDetails.getResponse().toBuilder()
+            .response(getPartyResponse(partyDetails).toBuilder()
                           .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
                           .build())
             .build();
@@ -316,7 +317,7 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
-            PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(respondent.getValue().getResponse().toBuilder()
+            PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
                                                                                               .keepDetailsPrivate(
                                                                                                   updateRespondentKeepYourDetailsPrivateInformation(
                                                                                                       respondent.getValue()))

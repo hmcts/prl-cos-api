@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S5665"})
 public class ManageCafcassAccessController {
     private final AuthorisationService authorisationService;
 

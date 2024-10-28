@@ -40,8 +40,8 @@ public class ManageCafcassAccessControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String serviceAuth = "serviceAuth";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String SERVICE_AUTH = "serviceAuth";
 
     @Test
     public void testManageCafcassAccessAllowed() throws Exception {
@@ -59,9 +59,9 @@ public class ManageCafcassAccessControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH)).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
-            manageCafcassAccessController.manageCafcassAccessSubmitted(authToken,serviceAuth,callbackRequest);
+            manageCafcassAccessController.manageCafcassAccessSubmitted(AUTH_TOKEN, SERVICE_AUTH, callbackRequest);
         assertEquals(CAFCASS_ALLOWED_HEADER, submittedCallbackResponse.getBody().getConfirmationHeader());
     }
 
@@ -81,9 +81,9 @@ public class ManageCafcassAccessControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH)).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
-            manageCafcassAccessController.manageCafcassAccessSubmitted(authToken,serviceAuth,callbackRequest);
+            manageCafcassAccessController.manageCafcassAccessSubmitted(AUTH_TOKEN, SERVICE_AUTH, callbackRequest);
         assertEquals(CAFCASS_NOT_ALLOWED_HEADER, submittedCallbackResponse.getBody().getConfirmationHeader());
     }
 
@@ -102,9 +102,9 @@ public class ManageCafcassAccessControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH)).thenReturn(false);
         assertExpectedException(() -> {
-            manageCafcassAccessController.manageCafcassAccessSubmitted(authToken,serviceAuth,callbackRequest);
+            manageCafcassAccessController.manageCafcassAccessSubmitted(AUTH_TOKEN, SERVICE_AUTH, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }

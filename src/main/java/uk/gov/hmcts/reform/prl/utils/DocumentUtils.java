@@ -40,12 +40,12 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo) {
+    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName("coversheet.pdf")
+                .documentFileName(fileName)
                 .build();
         }
         return null;
