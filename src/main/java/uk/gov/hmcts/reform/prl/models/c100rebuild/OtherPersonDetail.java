@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @Builder(toBuilder = true)
@@ -27,5 +29,8 @@ public class OtherPersonDetail {
     private RelationshipDetails relationshipDetails;
     @JsonProperty("address")
     private OtherPersonAddress otherPersonAddress;
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
+
 
 }
