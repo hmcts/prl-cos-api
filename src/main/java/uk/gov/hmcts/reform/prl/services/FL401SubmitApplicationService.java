@@ -121,7 +121,7 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         cleanUpC8RefugeFields(caseData, caseDataUpdated);
-
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(caseData, caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -165,7 +165,7 @@ public class FL401SubmitApplicationService {
             .build();
     }
 
-    private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+    public void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
         confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             ofNullable(caseData.getApplicantsFL401()),

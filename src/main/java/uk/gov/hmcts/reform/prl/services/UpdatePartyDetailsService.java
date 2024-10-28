@@ -775,12 +775,15 @@ public class UpdatePartyDetailsService {
     }
 
     private void findAndListRefugeDocs(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         boolean addToHistoricalC8RefugeDocList
             = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
         if (addToHistoricalC8RefugeDocList) {
-            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
-                callbackRequest,
-                caseData
+            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                caseDataBefore,
+                caseData,
+                callbackRequest.getEventId()
             );
             if (refugeConfidentialDocumentsRecord != null) {
                 updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
