@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -87,6 +88,7 @@ public class ResubmitApplicationController {
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     private final SystemUserService systemUserService;
+    private final FL401SubmitApplicationService fl401SubmitApplicationService;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
@@ -127,8 +129,8 @@ public class ResubmitApplicationController {
                 ResubmitApplicationController::getPreviousState).findFirst();
 
             updateCaseDataBasedOnState(authorisation, callbackRequest, caseData, caseDataUpdated, previousStates);
-
-            confidentialityC8RefugeService.processRefugeDocumentsForC100OnReSubmit(caseData, caseDataUpdated);
+            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, callbackRequest.getEventId());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -287,6 +289,9 @@ public class ResubmitApplicationController {
             caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+            fl401SubmitApplicationService.cleanUpC8RefugeFields(caseData, caseDataUpdated);
+            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+            //confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, callbackRequest.getEventId());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
