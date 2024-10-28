@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -367,7 +368,7 @@ public class ConfidentialityC8RefugeService {
                     .build();
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             Optional<List<Element<PartyDetails>>> applicantListBefore = ofNullable(caseDataBefore.getApplicants());
-            return processC8RefugeDocumentsChanges(
+            return processC8RefugeDocumentsChangesForC100(
                 caseData,
                 applicantList,
                 applicantListBefore,
@@ -381,7 +382,7 @@ public class ConfidentialityC8RefugeService {
                     .build();
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
             Optional<List<Element<PartyDetails>>> respondentsListBefore = ofNullable(caseDataBefore.getRespondents());
-            return processC8RefugeDocumentsChanges(
+            return processC8RefugeDocumentsChangesForC100(
                 caseData,
                 respondentsList,
                 respondentsListBefore,
@@ -395,7 +396,7 @@ public class ConfidentialityC8RefugeService {
                     .build();
             Optional<List<Element<PartyDetails>>> otherPartyList = ofNullable(caseData.getOtherPartyInTheCaseRevised());
             Optional<List<Element<PartyDetails>>> otherPartyListBefore = ofNullable(caseDataBefore.getOtherPartyInTheCaseRevised());
-            return processC8RefugeDocumentsChanges(
+            return processC8RefugeDocumentsChangesForC100(
                 caseData,
                 otherPartyList,
                 otherPartyListBefore,
@@ -409,7 +410,7 @@ public class ConfidentialityC8RefugeService {
                     .build();
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             Optional<List<Element<PartyDetails>>> applicantListBefore = ofNullable(caseDataBefore.getApplicants());
-            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChanges(
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForC100(
                 caseData,
                 applicantList,
                 applicantListBefore,
@@ -418,7 +419,7 @@ public class ConfidentialityC8RefugeService {
             );
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
             Optional<List<Element<PartyDetails>>> respondentsListBefore = ofNullable(caseDataBefore.getRespondents());
-            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChanges(
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForC100(
                 caseData,
                 respondentsList,
                 respondentsListBefore,
@@ -427,7 +428,7 @@ public class ConfidentialityC8RefugeService {
             );
             Optional<List<Element<PartyDetails>>> otherPartyList = ofNullable(caseData.getOtherPartyInTheCaseRevised());
             Optional<List<Element<PartyDetails>>> otherPartyListBefore = ofNullable(caseDataBefore.getOtherPartyInTheCaseRevised());
-            return processC8RefugeDocumentsChanges(
+            return processC8RefugeDocumentsChangesForC100(
                 caseData,
                 otherPartyList,
                 otherPartyListBefore,
@@ -437,7 +438,7 @@ public class ConfidentialityC8RefugeService {
         }
     }
 
-    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChanges(
+    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChangesForC100(
         CaseData caseData,
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
         Optional<List<Element<PartyDetails>>> partyDetailsListWrappedBefore,
@@ -594,6 +595,82 @@ public class ConfidentialityC8RefugeService {
                 refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
             );
         }
+    }
+
+    public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForFL401(CaseData caseDataBefore, CaseData caseData, String eventId) {
+        boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
+        boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+        if (onlyForApplicant) {
+            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
+                RefugeDocumentHandlerParameters.builder()
+                    .onlyForApplicant(true)
+                    .build();
+            Optional<PartyDetails> applicantsFL401 = ofNullable(caseData.getApplicantsFL401());
+            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseData.getApplicantsFL401());
+            return processC8RefugeDocumentsChangesForFL401(
+                caseData,
+                applicantsFL401,
+                applicantsFL401Before,
+                refugeDocumentHandlerParameters,
+                null
+            );
+        } else if (onlyForRespondent) {
+            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
+                RefugeDocumentHandlerParameters.builder()
+                    .onlyForRespondent(true)
+                    .build();
+            Optional<PartyDetails> respondentsList = ofNullable(caseData.getRespondentsFL401());
+            Optional<PartyDetails> respondentsListBefore = ofNullable(caseDataBefore.getRespondentsFL401());
+            return processC8RefugeDocumentsChangesForFL401(
+                caseData,
+                respondentsList,
+                respondentsListBefore,
+                refugeDocumentHandlerParameters,
+                null
+            );
+        } else {
+            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
+                RefugeDocumentHandlerParameters.builder()
+                    .forAllParties(true)
+                    .build();
+            Optional<PartyDetails> applicantsFL401 = ofNullable(caseData.getApplicantsFL401());
+            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseData.getApplicantsFL401());
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForFL401(
+                caseData,
+                applicantsFL401,
+                applicantsFL401Before,
+                refugeDocumentHandlerParameters,
+                null
+            );
+            Optional<PartyDetails> respondentsList = ofNullable(caseData.getRespondentsFL401());
+            Optional<PartyDetails> respondentsListBefore = ofNullable(caseDataBefore.getRespondentsFL401());
+            return processC8RefugeDocumentsChangesForFL401(
+                caseData,
+                respondentsList,
+                respondentsListBefore,
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
+            );
+        }
+    }
+
+    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChangesForFL401(
+        CaseData caseData,
+        Optional<PartyDetails> optionalPartyDetails,
+        Optional<PartyDetails> optionalPartyDetailsBefore,
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
+        if (optionalPartyDetails.isPresent() && optionalPartyDetailsBefore.isPresent()) {
+            refugeConfidentialDocumentsRecord = compareAndCallService(
+                caseData,
+                Arrays.asList(optionalPartyDetails.get()),
+                Arrays.asList(optionalPartyDetailsBefore.get()),
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
+            );
+        }
+        return refugeConfidentialDocumentsRecord;
     }
 
     public boolean indexExists(final List<?> list, final int index) {
