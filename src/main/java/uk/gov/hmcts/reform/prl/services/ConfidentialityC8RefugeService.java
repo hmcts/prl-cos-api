@@ -607,7 +607,7 @@ public class ConfidentialityC8RefugeService {
                     .onlyForApplicant(true)
                     .build();
             Optional<PartyDetails> applicantsFL401 = ofNullable(caseData.getApplicantsFL401());
-            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseData.getApplicantsFL401());
+            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseDataBefore.getApplicantsFL401());
             return processC8RefugeDocumentsChangesForFL401(
                 caseData,
                 applicantsFL401,
@@ -635,7 +635,7 @@ public class ConfidentialityC8RefugeService {
                     .forAllParties(true)
                     .build();
             Optional<PartyDetails> applicantsFL401 = ofNullable(caseData.getApplicantsFL401());
-            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseData.getApplicantsFL401());
+            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseDataBefore.getApplicantsFL401());
             refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForFL401(
                 caseData,
                 applicantsFL401,
