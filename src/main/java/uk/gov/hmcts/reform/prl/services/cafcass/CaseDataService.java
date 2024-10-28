@@ -135,10 +135,9 @@ public class CaseDataService {
                     searchResult,
                     CafCassResponse.class
                 );
-                log.info("Initial cafCassResponse --> {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
@@ -172,9 +171,7 @@ public class CaseDataService {
             List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
                 .sorted(Comparator.comparing(Category::getCategoryName))
                 .toList();
-            log.info("Parent categories {}", parentCategories);
             parseCategoryAndCreateList(parentCategories, otherDocsList);
-            parentCategories.forEach(cat -> log.info(cat.getCategoryId(), cat.getCategoryName()));
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             final CafCassCaseData cafCassCaseData = caseData.toBuilder()
                 .otherDocuments(otherDocsList)
@@ -187,15 +184,12 @@ public class CaseDataService {
 
     private void parseCategoryAndCreateList(List<Category> parentCategories,
                                             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
-        log.info("excludedDocumentCategoryList --> {}", excludedDocumentCategoryList);
-        log.info("excludedDocumentList {} --> {}", excludedDocumentList);
         parentCategories.forEach(category -> {
             if (CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(
                 category.getCategoryId())) {
                 if (category.getSubCategories() != null) {
                     parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
                 }
-                log.info("category name {} --> {}", category.getCategoryName(), category.getCategoryId());
                 parseCfvDocuments(otherDocsList, category);
             }
         });
@@ -205,7 +199,6 @@ public class CaseDataService {
         category.getDocuments().forEach(document -> {
             if (CollectionUtils.isEmpty(excludedDocumentList)
                 || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
-                log.info("category & document name {} --> {}", category.getCategoryName(), document.getDocumentFilename());
                 try {
                     otherDocsList.add(Element.<OtherDocuments>builder().id(
                         UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
@@ -219,18 +212,12 @@ public class CaseDataService {
     }
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
-        log.info("documentFilename " + documentFilename);
-        log.info("excludedDocumentList " + excludedDocumentList);
         boolean isExcluded = false;
         for (String excludedDocumentName : excludedDocumentList) {
-            log.info("excludedDocumentName " + excludedDocumentName);
-            log.info("documentFilename.contains(excludedDocumentName) " + documentFilename.contains(excludedDocumentName));
             if (documentFilename.contains(excludedDocumentName)) {
-                log.info("set isExcluded true");
                 isExcluded = true;
             }
         }
-        log.info("isExcluded " + isExcluded);
         return isExcluded;
     }
 
