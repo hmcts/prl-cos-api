@@ -320,6 +320,8 @@ public class Fm5ReminderService {
 
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
+            //Revert to default size 100 cases
+            .size("100")
             .build();
     }
 
