@@ -69,10 +69,7 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
-                || (null != respondent.getResponse()
-                && null != respondent.getResponse().getCitizenDetails()
-                && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge()))) {
+            if (checkIfLivesInRefuge(respondent)) {
                 addressSet = true;
                 emailSet = true;
                 phoneSet = true;
@@ -88,12 +85,28 @@ public class ConfidentialDetailsMapper {
                 }
             }
 
-            if (addressSet || emailSet || phoneSet) {
-                tempConfidentialApplicants
-                    .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
-            }
+            tempConfidentialApplicants = setTempConfidentialApplicants(tempConfidentialApplicants, addressSet, emailSet, phoneSet, respondent);
         }
         return tempConfidentialApplicants;
+    }
+
+    private List<Element<ApplicantConfidentialityDetails>> setTempConfidentialApplicants(
+        List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants, boolean addressSet,
+        boolean emailSet, boolean phoneSet, PartyDetails respondent) {
+        if (addressSet || emailSet || phoneSet) {
+            tempConfidentialApplicants
+                .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
+
+        }
+        return tempConfidentialApplicants;
+    }
+
+    private boolean checkIfLivesInRefuge(PartyDetails respondent) {
+        return ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown())
+            && YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
+            || (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
