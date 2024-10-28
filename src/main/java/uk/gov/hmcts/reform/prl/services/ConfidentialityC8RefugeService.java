@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -360,7 +359,7 @@ public class ConfidentialityC8RefugeService {
         boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForOtherPeople = CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue().equalsIgnoreCase(
             eventId);
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
         if (onlyForApplicant) {
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
@@ -492,8 +491,7 @@ public class ConfidentialityC8RefugeService {
                         handler,
                         refugeConfidentialDocumentsRecord
                     );
-                }
-                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                     && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
                     log.info("Refuge status changed from No to Yes");
                     RefugeDocumentHandlerParameters handler =
@@ -524,8 +522,7 @@ public class ConfidentialityC8RefugeService {
                         handler,
                         refugeConfidentialDocumentsRecord
                     );
-                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
                     log.info("Refuge status remained from yes to yes");
                     if (partyDetails.getRefugeConfidentialityC8Form() != null
                         && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName() != null
@@ -551,8 +548,7 @@ public class ConfidentialityC8RefugeService {
                             refugeConfidentialDocumentsRecord
                         );
                     }
-                } else if (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+                } else {
                     log.info("Refuge status remained same, no to no");
                 }
             } else {
@@ -600,7 +596,7 @@ public class ConfidentialityC8RefugeService {
     public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForFL401(CaseData caseDataBefore, CaseData caseData, String eventId) {
         boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
         if (onlyForApplicant) {
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
@@ -664,8 +660,8 @@ public class ConfidentialityC8RefugeService {
         if (optionalPartyDetails.isPresent() && optionalPartyDetailsBefore.isPresent()) {
             refugeConfidentialDocumentsRecord = compareAndCallService(
                 caseData,
-                Arrays.asList(optionalPartyDetails.get()),
-                Arrays.asList(optionalPartyDetailsBefore.get()),
+                List.of(optionalPartyDetails.get()),
+                List.of(optionalPartyDetailsBefore.get()),
                 refugeDocumentHandlerParameters,
                 refugeConfidentialDocumentsRecord
             );
