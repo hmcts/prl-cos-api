@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 
@@ -73,6 +73,10 @@ public class ConfidentialityC8RefugeServiceTest {
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document
+                                             .builder()
+                                             .documentFileName("C8Refuge1")
+                                             .build())
             .build();
 
         refugePartyDetails2 = PartyDetails.builder()
@@ -91,6 +95,10 @@ public class ConfidentialityC8RefugeServiceTest {
             .phoneNumber("12345678900")
             .liveInRefuge(YesOrNo.Yes)
             .email("abc2@xyz.com")
+            .refugeConfidentialityC8Form(Document
+                                             .builder()
+                                             .documentFileName("C8Refuge2")
+                                             .build())
             .build();
 
         Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
@@ -169,6 +177,53 @@ public class ConfidentialityC8RefugeServiceTest {
     }
 
     @Test
+    public void testApplicantRefugeForSubmitFL401() {
+
+        refugePartyDetails1 = refugePartyDetails1
+            .toBuilder()
+            .isCurrentAddressKnown(YesOrNo.No)
+            .liveInRefuge(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails2 = refugePartyDetails2
+            .toBuilder()
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants2 = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
+        List<Element<PartyDetails>> partyDetailsWrappedList2 = Collections.singletonList(wrappedApplicants2);
+
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicants(partyDetailsWrappedList2)
+            .applicantsFL401(refugePartyDetails2)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails2).build();
+        List<Element<PartyDetails>> partyDetailsWrappedList1 = Collections.singletonList(wrappedApplicants1);
+
+
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+
+        caseData1 = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicants(partyDetailsWrappedList1)
+            .applicantsFL401(refugePartyDetails2)
+            .build();
+
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+            updatedCaseData,
+            caseData,
+            caseData1,
+            AMEND_APPLICANTS_DETAILS);
+
+        assertTrue(updatedCaseData.isEmpty());
+
+    }
+
+    @Test
     public void testApplicantRefugeForApplicantC100() {
 
         refugePartyDetails2 = refugePartyDetails2
@@ -233,26 +288,33 @@ public class ConfidentialityC8RefugeServiceTest {
             confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
                 caseData,
                 caseData1,
-                " ");
+                AMEND_APPLICANTS_DETAILS);
 
         assertNotNull(refugeConfidentialDocumentsRecord);
 
     }
 
-    @Ignore
-    @Test //test case need to modify with index not getting null
-    public void testApplicantRefugeForNoEventApplicantC100() {
+    @Test
+    public void testApplicantC8RefugeApplicantC100() {
 
         refugePartyDetails1 = refugePartyDetails1
             .toBuilder()
             .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document
+                                             .builder()
+                                             .documentFileName("C8Refuge")
+                                             .build())
             .liveInRefuge(YesOrNo.Yes)
             .build();
 
         refugePartyDetails2 = refugePartyDetails2
             .toBuilder()
             .isCurrentAddressKnown(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.No)
+            .refugeConfidentialityC8Form(Document
+                                             .builder()
+                                             .documentFileName("C8Refuge2")
+                                             .build())
+            .liveInRefuge(YesOrNo.Yes)
             .build();
 
         Element<PartyDetails> wrappedApplicants2 = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
@@ -278,7 +340,7 @@ public class ConfidentialityC8RefugeServiceTest {
             confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
                 caseData,
                 caseData1,
-                " ");
+                AMEND_APPLICANTS_DETAILS);
 
         assertNotNull(refugeConfidentialDocumentsRecord);
 
