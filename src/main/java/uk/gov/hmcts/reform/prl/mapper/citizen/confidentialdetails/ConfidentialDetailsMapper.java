@@ -57,7 +57,6 @@ public class ConfidentialDetailsMapper {
                 .build();
         }
 
-        // caseData = confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(caseData);
         if (updateTabs) {
             allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData.getId()));
         }
