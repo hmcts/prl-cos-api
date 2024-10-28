@@ -10,9 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -127,6 +130,17 @@ public class ServiceOfDocumentsControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
         assertEquals(NO_DOCUMENTS_SELECTED_ERROR, aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testHandleSubmitted() {
+        ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.ok().build();
+        when(serviceOfDocumentsService.handleSubmitted(anyString(), Mockito.any(CallbackRequest.class))).thenReturn(submittedCallbackResponse);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsController.handleSubmitted(anyString(), anyString(), callbackRequest);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
