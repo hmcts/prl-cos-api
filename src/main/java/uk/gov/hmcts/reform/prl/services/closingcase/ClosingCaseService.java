@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAssignmentDeleteQueryRequest;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -85,12 +85,11 @@ public class ClosingCaseService {
 
     public static final String SPECIFIC_ACCESS_GRANT = "SPECIFIC";
 
-    public static final List<String> ROLE_CATEGORIES = List.of(
-        "JUDICIAL",
-        "LEGAL_OPERATIONS",
-        "CTSC",
-        "ADMIN"
-    );
+    @Value("#{'${closing_case.unallocated_roleCategory}'.split(',')}")
+    private List<String> roleCategories;
+
+    @Value("#{'${closing_case.unallocated_roleName}'.split(',')}")
+    private List<String> roleNames;
 
 
     public Map<String, Object> prePopulateChildData(CallbackRequest callbackRequest) {
@@ -212,53 +211,33 @@ public class ClosingCaseService {
                 .attributes(QueryAttributes.builder()
                                 .caseId(List.of(Long.toString(caseData.getId())))
                                 .build())
+                .roleCategory(CollectionUtils.isNotEmpty(roleCategories) ? roleCategories : null)
+                .roleName(CollectionUtils.isNotEmpty(roleNames) ? roleNames : null)
+                .grantType(List.of(SPECIFIC_ACCESS_GRANT))
                 .validAt(LocalDateTime.now())
                 .build();
-            log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
+            List<RoleAssignmentQueryRequest> queryRequests = new ArrayList<>();
+            queryRequests.add(roleAssignmentQueryRequest);
+            RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
+                .queryRequests(queryRequests)
+                .build();
+            log.info("** RoleAssignmentDeleteQueryRequest " + objectMapper.writeValueAsString(
+                roleAssignmentDeleteQueryRequest));
+            ResponseEntity<HttpStatus> status = roleAssignmentApi.deleteQueryRoleAssignments(
                 systemAuthorisation,
                 s2sToken,
                 null,
-                roleAssignmentQueryRequest
+                roleAssignmentDeleteQueryRequest
             );
-            log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
-            if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
-                && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
-                List<String> roleCategories = new ArrayList<>();
-                roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                    .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory())
-                        && SPECIFIC_ACCESS_GRANT.equalsIgnoreCase(roleAssignmentResponse.getGrantType()))
-                    .forEach(roleAssignmentResponse -> roleCategories.add(roleAssignmentResponse.getRoleCategory()));
-                roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
-                    .attributes(QueryAttributes.builder()
-                                    .caseId(List.of(Long.toString(caseData.getId())))
-                                    .build())
-                    .roleCategory(roleCategories)
-                    .grantType(List.of(SPECIFIC_ACCESS_GRANT))
-                    .validAt(LocalDateTime.now())
-                    .build();
-                List<RoleAssignmentQueryRequest> queryRequests = new ArrayList<>();
-                queryRequests.add(roleAssignmentQueryRequest);
-                RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
-                    .queryRequests(queryRequests)
-                    .build();
-                log.info("** RoleAssignmentDeleteQueryRequest " + objectMapper.writeValueAsString(roleAssignmentDeleteQueryRequest));
-                ResponseEntity<HttpStatus> status = roleAssignmentApi.deleteQueryRoleAssignments(
-                    systemAuthorisation,
-                    s2sToken,
-                    null,
-                    roleAssignmentDeleteQueryRequest
-                );
-                log.info("** RoleAssignmentDeleteQueryResponse " + status);
-                if (null != status && status.getStatusCode().is2xxSuccessful()) {
-                    caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
-                    caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.emptyList());
-                    caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
-                        && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
-                        ? caseData.getLegalAdviserList().toBuilder()
-                        .value(null)
-                        .build() : caseData.getLegalAdviserList());
-                }
+            log.info("** RoleAssignmentDeleteQueryResponse " + status);
+            if (null != status && status.getStatusCode().is2xxSuccessful()) {
+                caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
+                caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.emptyList());
+                caseDataUpdated.put("legalAdviserList", ObjectUtils.isNotEmpty(caseData.getLegalAdviserList())
+                    && ObjectUtils.isNotEmpty(caseData.getLegalAdviserList().getValue())
+                    ? caseData.getLegalAdviserList().toBuilder()
+                    .value(null)
+                    .build() : caseData.getLegalAdviserList());
             }
         } catch (Exception exp) {
             log.info(

@@ -23,6 +23,8 @@ public class RoleAssignmentQueryRequest {
 
     private List<String> grantType;
 
+    private List<String> roleName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private LocalDateTime validAt;
 }
