@@ -40,6 +40,7 @@ public class ConfidentialDetailsMapperTest {
     @Mock
     AllTabServiceImpl allTabsService;
 
+
     Address address;
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
@@ -246,7 +247,6 @@ public class ConfidentialDetailsMapperTest {
             .respondentsFL401(partyDetails)
             .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
-        Mockito.when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(Mockito.any())).thenReturn(caseData);
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
         assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
