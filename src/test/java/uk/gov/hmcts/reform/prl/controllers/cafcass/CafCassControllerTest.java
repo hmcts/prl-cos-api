@@ -154,7 +154,7 @@ public class CafCassControllerTest {
             "2022-08-22T10:54:43.49",
             "2022-08-22T11:54:43.49"
         );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Difference between end date and start date should not be more than 15 minutes",
                      ((ApiError)response.getBody()).getMessage());
     }
