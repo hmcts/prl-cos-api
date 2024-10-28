@@ -18,7 +18,7 @@ plugins {
   id 'org.sonarqube' version '3.5.0.2730'
   id 'org.springframework.boot' version '3.3.3'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1355'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1426'
 }
 
 def versions = [
@@ -180,7 +180,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.14'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.29') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.31') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -380,10 +380,10 @@ dependencies {
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'){
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'){
     force = true
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.11'){
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.12'){
     force = true
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
