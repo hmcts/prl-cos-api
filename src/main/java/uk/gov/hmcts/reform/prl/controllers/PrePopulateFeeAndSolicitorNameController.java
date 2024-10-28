@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -67,7 +65,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     private final OrganisationService organisationService;
     private final DocumentLanguageService documentLanguageService;
     private final AuthorisationService authorisationService;
-    private final ObjectMapper objectMapper;
 
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
@@ -90,11 +87,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            try {
-                log.info("callbackRequest while submitting the case is ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
