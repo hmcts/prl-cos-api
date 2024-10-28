@@ -488,6 +488,34 @@ public class ConfidentialityC8RefugeServiceTest {
     }
 
     @Test
+    public void testApplicantRefugeForNoEventC100ForC8Refuge() {
+
+        refugePartyDetails2 = refugePartyDetails2
+            .toBuilder()
+            .isCurrentAddressKnown(YesOrNo.No)
+            .liveInRefuge(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails2).build();
+        List<Element<PartyDetails>> partyDetailsWrappedList1 = Collections.singletonList(wrappedApplicants1);
+
+        caseData1 = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(partyDetailsWrappedList1)
+            .applicantsFL401(refugePartyDetails2)
+            .build();
+
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord =
+            confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                caseData1,
+                caseData,
+                " ");
+
+        assertNotNull(refugeConfidentialDocumentsRecord);
+
+    }
+
+    @Test
     public void testApplicantRefugeForApplicantFL401() {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
