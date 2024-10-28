@@ -112,12 +112,28 @@ public class ApplicantsCheckerTest {
     @Test
     public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
-        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesOrNo.Yes).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
             .applicants(applicantList)
             .build();
 
