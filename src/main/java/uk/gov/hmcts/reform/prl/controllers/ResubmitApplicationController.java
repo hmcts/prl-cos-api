@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -77,6 +78,7 @@ public class ResubmitApplicationController {
     private final OrganisationService organisationService;
     private final AllTabServiceImpl allTabService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final AuthorisationService authorisationService;
     private final EventService eventPublisher;
 
@@ -125,6 +127,8 @@ public class ResubmitApplicationController {
                 ResubmitApplicationController::getPreviousState).findFirst();
 
             updateCaseDataBasedOnState(authorisation, callbackRequest, caseData, caseDataUpdated, previousStates);
+
+            confidentialityC8RefugeService.processRefugeDocumentsForC100OnReSubmit(caseData, caseDataUpdated);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)

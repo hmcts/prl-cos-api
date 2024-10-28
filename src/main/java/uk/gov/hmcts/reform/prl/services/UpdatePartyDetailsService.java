@@ -109,22 +109,6 @@ public class UpdatePartyDetailsService {
             caseData
         ));
 
-        boolean addToHistoricalC8RefugeDocList
-            = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
-        if (addToHistoricalC8RefugeDocList) {
-            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
-                callbackRequest,
-                caseData
-            );
-            if (refugeConfidentialDocumentsRecord != null) {
-                updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
-                updatedCaseData.put(
-                    "historicalRefugeDocuments",
-                    refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
-                );
-            }
-        }
-
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -199,6 +183,7 @@ public class UpdatePartyDetailsService {
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        findAndListRefugeDocs(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
@@ -783,24 +768,27 @@ public class UpdatePartyDetailsService {
                 false
             );
 
-            boolean addToHistoricalC8RefugeDocList
-                = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
-
-            if (addToHistoricalC8RefugeDocList) {
-                RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
-                    callbackRequest,
-                    caseData
-                );
-                if (refugeConfidentialDocumentsRecord != null) {
-                    updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
-                    updatedCaseData.put(
-                        "historicalRefugeDocuments",
-                        refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
-                    );
-                }
-            }
+            findAndListRefugeDocs(callbackRequest, caseData, updatedCaseData);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    private void findAndListRefugeDocs(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
+        boolean addToHistoricalC8RefugeDocList
+            = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
+        if (addToHistoricalC8RefugeDocList) {
+            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = confidentialityC8RefugeService.processC8RefugeDocuments(
+                callbackRequest,
+                caseData
+            );
+            if (refugeConfidentialDocumentsRecord != null) {
+                updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+                updatedCaseData.put(
+                    "historicalRefugeDocuments",
+                    refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+                );
+            }
+        }
     }
 }
