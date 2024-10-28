@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -366,6 +368,18 @@ public class CitizenPartyDetailsMapperTest {
                                                                                                                        CaseEvent.CONFIRM_YOUR_DETAILS,
                                                                                                                        authToken);
         assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+
+    @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsForC8() throws IOException {
+        setUpCA();
+        PartyDetails partyDetails1 = partyDetails.toBuilder().liveInRefuge(YesOrNo.Yes).build();
+        PartyDetails updatedPartyDetails = citizenPartyDetailsMapper
+            .getUpdatedPartyDetailsBasedOnEvent(partyDetails1, partyDetails, CaseEvent.CONFIRM_YOUR_DETAILS, List.of(element(
+                ChildDetailsRevised.builder().build())));
+
+        assertEquals(YesOrNo.Yes, updatedPartyDetails.getLiveInRefuge());
     }
 
     @Test
