@@ -513,8 +513,7 @@ public class FL401SubmitApplicationServiceTest {
 
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocument = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
-        // when(confidentialityTabService.listRefugeDocumentsForConfidentialTab(any())).thenReturn(Optional.of(refugeConfidentialDocument));
+        new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
 
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
