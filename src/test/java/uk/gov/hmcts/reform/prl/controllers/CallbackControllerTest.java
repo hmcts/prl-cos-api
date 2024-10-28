@@ -3020,6 +3020,9 @@ public class CallbackControllerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails
+            .builder().firstName("Abc").lastName("Xyz").build();
+
         CaseData caseData = CaseData.builder().children(listOfChildren)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
@@ -3034,7 +3037,8 @@ public class CallbackControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
+            .applicantsConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
+            .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
             .id(123L)
             .build();
