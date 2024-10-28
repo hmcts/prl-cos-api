@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -81,12 +83,12 @@ public class ConfidentialityC8RefugeServiceTest {
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityC8RefugeService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                "applicants",
-                false);
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            Optional.of(partyDetailsWrappedList),
+            updatedCaseData,
+            "applicants",
+            false
+        );
 
         assertTrue(updatedCaseData.containsKey("applicants"));
 
@@ -98,12 +100,12 @@ public class ConfidentialityC8RefugeServiceTest {
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityC8RefugeService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                " ",
-                false);
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            Optional.of(partyDetailsWrappedList),
+            updatedCaseData,
+            " ",
+            false
+        );
 
         assertTrue(updatedCaseData.containsKey(" "));
 
@@ -119,16 +121,102 @@ public class ConfidentialityC8RefugeServiceTest {
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
 
         HashMap<String, Object> updatedCaseData = new HashMap<>();
-        confidentialityC8RefugeService
-            .processForcePartiesConfidentialityIfLivesInRefugeForC100(
-                Optional.of(partyDetailsWrappedList),
-                updatedCaseData,
-                " ",
-                true);
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            Optional.of(partyDetailsWrappedList),
+            updatedCaseData,
+            " ",
+            true
+        );
 
         assertTrue(updatedCaseData.containsKey(" "));
 
     }
 
+    @Test
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401Null() {
+        Optional<PartyDetails> partyDetails = Optional.empty();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            null,
+            null,
+            false
+        );
+        assertTrue(true);
+    }
 
+    @Test
+    public void processForcePartiesConfidentialityIfDoesNotLivesInRefugeForFL401() {
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder().build());
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            updatedCaseData,
+            "applicant",
+            false
+        );
+        assertTrue(true);
+    }
+
+    @Test
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401() {
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build());
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            updatedCaseData,
+            "applicant",
+            false
+        );
+        assertTrue(true);
+    }
+
+    @Test
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithResponse() {
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
+                                                                      .liveInRefuge(YesOrNo.No)
+                                                                      .response(Response.builder().build())
+                                                                      .build());
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            updatedCaseData,
+            "applicant",
+            true
+        );
+        assertTrue(true);
+    }
+
+    @Test
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithCitizenDetails() {
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
+                                                                      .liveInRefuge(YesOrNo.No)
+                                                                      .response(Response.builder().citizenDetails(
+                                                                          CitizenDetails.builder().build()).build())
+                                                                      .build());
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            updatedCaseData,
+            "applicant",
+            true
+        );
+        assertTrue(true);
+    }
+
+    @Test
+    public void processForcePartiesConfidentialityIfLivesInRefugeForFL401InResponse() {
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
+                                                                      .liveInRefuge(YesOrNo.No)
+                                                                      .response(Response.builder().citizenDetails(
+                                                                          CitizenDetails.builder().liveInRefuge(YesOrNo.Yes).build()).build())
+                                                                      .build());
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            partyDetails,
+            updatedCaseData,
+            "applicant",
+            true
+        );
+        assertTrue(true);
+    }
 }
