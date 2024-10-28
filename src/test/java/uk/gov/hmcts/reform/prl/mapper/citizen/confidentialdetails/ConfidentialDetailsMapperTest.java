@@ -40,6 +40,7 @@ public class ConfidentialDetailsMapperTest {
     @Mock
     AllTabServiceImpl allTabsService;
 
+
     Address address;
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
@@ -174,6 +175,7 @@ public class ConfidentialDetailsMapperTest {
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
         assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+        assertEquals(partyDetails1.getLiveInRefuge(),caseDataCheck.getRespondents().get(0).getValue().getLiveInRefuge());
 
     }
 
@@ -196,6 +198,8 @@ public class ConfidentialDetailsMapperTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -212,6 +216,41 @@ public class ConfidentialDetailsMapperTest {
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
         assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+        assertEquals(partyDetails.getLiveInRefuge(),caseDataCheck.getRespondentsFL401().getLiveInRefuge());
+
+    }
+
+    @Test
+    public void testChildAndPartyConfidentialDetailsF401ForNoC8() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isCurrentAddressKnown(YesOrNo.No)
+            .liveInRefuge(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .currentRespondent(YesOrNo.Yes)
+            .build();
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails
+            .builder().firstName("ABC 1").lastName("XYZ 2").build();
+
+        CaseData caseData = CaseData.builder()
+            .respondentsFL401(partyDetails)
+            .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
+            .caseTypeOfApplication(FL401_CASE_TYPE).build();
+        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
+        assertNotNull(caseDataCheck.getRespondentConfidentialDetails());
+        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+        assertEquals(partyDetails.getLiveInRefuge(),caseDataCheck.getRespondentsFL401().getLiveInRefuge());
 
     }
 
