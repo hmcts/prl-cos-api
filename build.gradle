@@ -16,9 +16,9 @@ plugins {
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '9.2.0'
   id 'org.sonarqube' version '3.5.0.2730'
-  id 'org.springframework.boot' version '3.3.3'
+  id 'org.springframework.boot' version '3.3.5'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.1425'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.1427'
 }
 
 def versions = [
@@ -53,9 +53,9 @@ def versions = [
   serenityCucumber             : '4.2.6',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '5.8.14',
+  springSecurityCrypto         : '5.8.15',
   springSecurityRsa            : '1.1.5',
-  springBoot                   : '3.3.3',
+  springBoot                   : '3.3.5',
   springCloud                  : '4.1.4',
   tomcat                       : '10.1.26',
   unirest                      : '1.4.9',
@@ -177,7 +177,7 @@ allprojects {
       }
 
       //CVE-2023-34034
-      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.14'
+      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.15'
 
       //CVE-2023-42795, CVE-2023-45648
       dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.31') {
@@ -343,10 +343,10 @@ dependencies {
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.8.14'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.8.15'
 //  implementation group: 'org.springframework.security', name: 'spring-security-config'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.8.14'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.8.15'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
@@ -380,10 +380,10 @@ dependencies {
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'){
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'){
     force = true
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.11'){
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.12'){
     force = true
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
