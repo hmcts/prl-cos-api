@@ -24,10 +24,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
@@ -403,6 +406,10 @@ public class ConfidentialityTabServiceTest {
         CaseData caseData = CaseData.builder()
             .applicants(listOfPartyDetails)
             .children(listOfChild)
+            .refugeDocuments(List.of(Element.<RefugeConfidentialDocuments>builder()
+                .value(RefugeConfidentialDocuments.builder().build()).build()))
+            .historicalRefugeDocuments(List.of(Element.<RefugeConfidentialDocuments>builder()
+                .value(RefugeConfidentialDocuments.builder().build()).build()))
             .respondents(listOfPartyDetails)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
