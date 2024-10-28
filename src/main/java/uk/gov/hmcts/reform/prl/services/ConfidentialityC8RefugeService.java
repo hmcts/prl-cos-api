@@ -640,18 +640,14 @@ public class ConfidentialityC8RefugeService {
         return refugeConfidentialDocumentsRecord;
     }
 
-    public void processRefugeDocumentsOnSubmit(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public void processRefugeDocumentsOnSubmit(Map<String, Object> caseDataUpdated, CaseData caseDataBefore, CaseData caseData, String eventId) {
         RefugeDocumentHandlerParameters handler =
             RefugeDocumentHandlerParameters.builder()
                 .forAllParties(true)
                 .listDocument(true)
                 .build();
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
-            = listRefugeDocumentsForConfidentialTab(
-            caseData,
-            handler,
-            null
-        );
+            = processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, eventId);
         if (refugeConfidentialDocumentsRecord != null) {
             caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
             caseDataUpdated.put(
