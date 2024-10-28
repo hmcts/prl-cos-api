@@ -96,13 +96,14 @@ public class CaseDataService {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
+
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
 
     @Value("#{'${cafcaas.excludedDocuments}'.split(',')}")
     private List<String> excludedDocumentList;
 
-    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate, String serviceAuthorisation) throws IOException {
+    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
@@ -136,7 +137,7 @@ public class CaseDataService {
                 );
                 log.info("Initial cafCassResponse --> {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse, serviceAuthorisation);
+                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
@@ -156,10 +157,10 @@ public class CaseDataService {
         return cafCassResponse;
     }
 
-    private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse,
-                                                                       String serviceAuthorisation) {
+    private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
 
         String systemAuthorisation = systemUserService.getSysUserToken();
+        String serviceAuthorisation = authTokenGenerator.generate();
         cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 systemAuthorisation,

@@ -157,8 +157,7 @@ public class CaseDataServiceTest {
         )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end", "tests2s"
-        );
+                                                                          "start", "end");
         assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
 
     }
@@ -242,7 +241,7 @@ public class CaseDataServiceTest {
         )).thenReturn(categoriesAndDocuments);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end", "tests2s"
+                                                                          "start", "end"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -265,7 +264,7 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end", "tests2s"
+                                                                          "start", "end"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 
@@ -315,7 +314,7 @@ public class CaseDataServiceTest {
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
         assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
-                                                                               "start", "end", "tests2s"
+                                                                               "start", "end"
         ));
 
     }

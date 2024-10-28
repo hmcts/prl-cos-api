@@ -62,7 +62,7 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData("authorisation", startDate, endDate, "Bearer serviceAuthorisation"))
+        when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
             "authorisation",
@@ -101,7 +101,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                         endDate, "Bearer " + TEST_SERVICE_AUTHORIZATION
+                                         endDate
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
@@ -117,7 +117,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                         endDate, "Bearer " + TEST_SERVICE_AUTHORIZATION
+                                         endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
@@ -133,7 +133,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate", "Bearer " + TEST_SERVICE_AUTHORIZATION
+                                         "endDate"
         )).thenThrow(new RuntimeException());
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
