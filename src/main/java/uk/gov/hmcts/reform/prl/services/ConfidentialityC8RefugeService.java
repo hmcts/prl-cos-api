@@ -216,7 +216,7 @@ public class ConfidentialityC8RefugeService {
         return refugeConfidentialDocumentsRecord;
     }
 
-    private RefugeConfidentialDocumentsRecord listRefugeDocumentsPartyWiseForC100(
+    public RefugeConfidentialDocumentsRecord listRefugeDocumentsPartyWiseForC100(
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
@@ -528,6 +528,42 @@ public class ConfidentialityC8RefugeService {
             }
         }
         return refugeConfidentialDocumentsRecord;
+    }
+
+    public void processRefugeDocumentsForC100OnSubmit(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        RefugeDocumentHandlerParameters handler =
+            RefugeDocumentHandlerParameters.builder()
+                .forAllParties(true)
+                .listDocument(true)
+                .build();
+        processForC100Cases(caseData, caseDataUpdated, handler);
+    }
+
+    public void processRefugeDocumentsForC100OnReSubmit(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        RefugeDocumentHandlerParameters handler =
+            RefugeDocumentHandlerParameters.builder()
+                .forAllParties(true)
+                .listDocument(true)
+                .removeDocument(true)
+                .listHistoricalDocument(true)
+                .build();
+        processForC100Cases(caseData, caseDataUpdated, handler);
+    }
+
+    private void processForC100Cases(CaseData caseData, Map<String, Object> caseDataUpdated, RefugeDocumentHandlerParameters handler) {
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+            = listRefugeDocumentsForConfidentialTab(
+            caseData,
+            handler,
+            null
+        );
+        if (refugeConfidentialDocumentsRecord != null) {
+            caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+            caseDataUpdated.put(
+                "historicalRefugeDocuments",
+                refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+            );
+        }
     }
 
     public boolean indexExists(final List<?> list, final int index) {
