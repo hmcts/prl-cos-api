@@ -244,9 +244,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 
@@ -301,8 +305,12 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .data(stringObjectMap)
                              .build())
             .build();
@@ -398,9 +406,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                                             .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 
@@ -489,9 +501,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                 .id(123L)
                 .data(stringObjectMap)
+                 .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                 .build())
             .build();
 
@@ -513,8 +529,7 @@ public class FL401SubmitApplicationServiceTest {
 
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocument = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
-        // when(confidentialityTabService.listRefugeDocumentsForConfidentialTab(any())).thenReturn(Optional.of(refugeConfidentialDocument));
+        new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
 
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
@@ -610,9 +625,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 
@@ -710,8 +729,12 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
                              .data(stringObjectMap)
                              .build())
             .build();
@@ -792,9 +815,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 
@@ -867,9 +894,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 
@@ -948,9 +979,13 @@ public class FL401SubmitApplicationServiceTest {
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
                              .build())
             .build();
 

@@ -324,8 +324,6 @@ public class UpdatePartyDetailsService {
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
                                        ? partyDetails.getIsAddressConfidential() : null)
-            .addressLivedLessThan5YearsDetails(YesNoDontKnow.yes.equals(partyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
-                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
             .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
             .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
