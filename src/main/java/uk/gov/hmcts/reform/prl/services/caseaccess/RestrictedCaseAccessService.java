@@ -56,6 +56,7 @@ public class RestrictedCaseAccessService {
     public static final String REASONS_TO_RESTRICT_TAB = "reasonsToRestrictTab";
     public static final String TD_START_CELL = "<td class=\"govuk-table__cell\">";
     public static final String TD_CLOSURE = "</td>";
+    public static final String SPECIFIC_ACCESS_GRANT = "SPECIFIC";
     private final AllTabServiceImpl allTabService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final ExtendedCaseDataService caseDataService;
@@ -250,7 +251,8 @@ public class RestrictedCaseAccessService {
         if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
             && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
             roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory()))
+                .stream().filter(roleAssignmentResponse -> ROLE_CATEGORIES.contains(roleAssignmentResponse.getRoleCategory())
+                && SPECIFIC_ACCESS_GRANT.equalsIgnoreCase(roleAssignmentResponse.getGrantType()))
                 .forEach(roleAssignmentResponse -> {
                     UserDetails userDetails = idamApi.getUserByUserId(
                         systemAuthorisation,
@@ -259,7 +261,7 @@ public class RestrictedCaseAccessService {
                     if (ObjectUtils.isNotEmpty(userDetails)) {
                         assignedUserDetails.put(
                             userDetails.getFullName() + HYPHEN_SEPARATOR + userDetails.getEmail(),
-                            roleAssignmentResponse.getRoleCategory()
+                            roleAssignmentResponse.getRoleLabel()
                         );
                     }
                 });
