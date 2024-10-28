@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -74,12 +76,20 @@ public class CaseDataOtherPersonsElementsMapper {
                 .dateOfBirth(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
                         ? buildDateOfBirth(personalDetails.getApproxDateOfBirth())
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
-                .isAddressConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
-                .isEmailAddressConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
-                .isPhoneNumberConfidential(Yes.equals(otherPersonDetail.getLiveInRefuge()) ? Yes : null)
+                .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
+                .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
+                    ? dataIsConfidentialBecauseLivingInRefuge(otherPersonDetail.getLiveInRefuge()) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
+    }
+
+    private static YesOrNo dataIsConfidentialBecauseLivingInRefuge(YesOrNo livesInRefuge) {
+        if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(livesInRefuge))) {
+            return Yes;
+        }
+
+        return null;
     }
 
     private static Address buildAddress(OtherPersonAddress address) {
