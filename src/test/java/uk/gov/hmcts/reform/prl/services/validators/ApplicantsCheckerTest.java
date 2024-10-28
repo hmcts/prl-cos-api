@@ -155,7 +155,7 @@ public class ApplicantsCheckerTest {
         caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
-            .applicants(null)
+            .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
             .build();
 
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
