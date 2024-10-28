@@ -24,9 +24,16 @@ public class RefugeCaseGeneratorTest {
 
     PartyDetails refugePartDetails;
 
-
     @Test
-    public void testGenerateForC100() {
+    public void testGenerateForNoCaseType() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.No)
+                .build())
+            .build());
+    }
 
         Address address = Address.builder()
             .addressLine1("test")
@@ -45,12 +52,10 @@ public class RefugeCaseGeneratorTest {
         Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(refugePartDetails).build();
         List<Element<PartyDetails>> refugePartDetailsList = Collections.singletonList(wrappedPartyDetails);
 
-
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .caseTypeOfApplication("C100")
                                                          .applicants(refugePartDetailsList)
                                                          .build());
-
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                                                                                .builder()
                                                                                .isRefugeCase(YesOrNo.No)
@@ -59,13 +64,11 @@ public class RefugeCaseGeneratorTest {
     }
 
     @Test
-    public void testGenerateForFL401() {
-
+    public void testGenerateForC100NotRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .caseTypeOfApplication("FL401")
-                                                         .applicantsFL401(refugePartDetails)
+                                                         .caseTypeOfApplication("C100")
+                                                         .applicants(refugePartDetailsList)
                                                          .build());
-
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                                                                                .builder()
                                                                                .isRefugeCase(YesOrNo.No)
@@ -73,4 +76,84 @@ public class RefugeCaseGeneratorTest {
                                               .build());
     }
 
+    @Test
+    public void testGenerateForC100ApplicantLivesInReguge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
+                .liveInRefuge(YesOrNo.Yes).build()).build()))
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.Yes)
+                .build())
+            .build());
+    }
+
+    @Test
+    public void testGenerateForC100RespondentLivesInReguge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .respondents(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
+                .liveInRefuge(YesOrNo.Yes).build()).build()))
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.Yes)
+                .build())
+            .build());
+    }
+
+    @Test
+    public void testGenerateForC100OtherPartyLivesInReguge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .otherPartyInTheCaseRevised(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
+                .liveInRefuge(YesOrNo.Yes).build()).build()))
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.Yes)
+                .build())
+            .build());
+    }
+
+    @Test
+    public void testGenerateForFL401NotRefuge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+                                                         .caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(refugePartDetails)
+                                                         .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                                                                               .builder()
+                                                                               .isRefugeCase(YesOrNo.No)
+                                                                               .build())
+                                              .build());
+    }
+
+    @Test
+    public void testGenerateForFL401ApplicantRefuge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .caseTypeOfApplication("FL401")
+                .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.Yes)
+                .build())
+            .build());
+    }
+
+    @Test
+    public void testGenerateForFL401RespondentRefuge() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .respondentsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
+            .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                .builder()
+                .isRefugeCase(YesOrNo.Yes)
+                .build())
+            .build());
+    }
 }
