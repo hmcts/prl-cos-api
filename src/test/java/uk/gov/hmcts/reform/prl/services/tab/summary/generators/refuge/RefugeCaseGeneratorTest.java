@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 
 public class RefugeCaseGeneratorTest {
 
@@ -46,7 +45,7 @@ public class RefugeCaseGeneratorTest {
         refugePartyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("Test")
-            .liveInRefuge(No)
+            .liveInRefuge(YesOrNo.Yes)
             .dateOfBirth(LocalDate.of(2000, 8, 20))
             .address(address)
             .build();
@@ -60,23 +59,39 @@ public class RefugeCaseGeneratorTest {
                                                          .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                                                                                .builder()
-                                                                               .isRefugeCase(YesOrNo.No)
+                                                                               .isRefugeCase(YesOrNo.Yes)
                                                                                .build())
                                               .build());
     }
 
-    //    @Test
-    //    public void testGenerateForC100NotRefuge() {
-    //        CaseSummary caseSummary = generator.generate(CaseData.builder()
-    //                                                         .caseTypeOfApplication("C100")
-    //                                                         .applicants(refugePartyDetailsList)
-    //                                                         .build());
-    //        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
-    //                                                                               .builder()
-    //                                                                               .isRefugeCase(YesOrNo.No)
-    //                                                                               .build())
-    //                                              .build());
-    //    }
+    @Test
+    public void testGenerateForC100NotRefuge() {
+        Address address = Address.builder()
+            .addressLine1("test")
+            .postCode("test")
+            .build();
+
+
+        refugePartyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("Test")
+            .liveInRefuge(YesOrNo.No)
+            .dateOfBirth(LocalDate.of(2000, 8, 20))
+            .address(address)
+            .build();
+
+        Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(refugePartyDetails).build();
+        List<Element<PartyDetails>> refugePartDetailsList = Collections.singletonList(wrappedPartyDetails);
+        CaseSummary caseSummary = generator.generate(CaseData.builder()
+                                                         .caseTypeOfApplication("C100")
+                                                         .applicants(refugePartDetailsList)
+                                                         .build());
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
+                                                                               .builder()
+                                                                               .isRefugeCase(YesOrNo.No)
+                                                                               .build())
+                                              .build());
+    }
 
     @Test
     public void testGenerateForC100ApplicantLivesInReguge() {
