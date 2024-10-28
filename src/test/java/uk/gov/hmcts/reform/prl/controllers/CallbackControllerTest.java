@@ -86,6 +86,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
@@ -277,6 +278,9 @@ public class CallbackControllerTest {
 
     @Mock
     private ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -1524,7 +1528,6 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1686,8 +1689,6 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
-
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -1785,7 +1786,6 @@ public class CallbackControllerTest {
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(
             childConfidentialityDetails);
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -1975,7 +1975,6 @@ public class CallbackControllerTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(childConfidentialityDetails);
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -2169,7 +2168,6 @@ public class CallbackControllerTest {
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any(CaseData.class))).thenReturn(
             childConfidentialityDetails);
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -3080,7 +3078,6 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(confidentialityTabService.listRefugeDocumentsForConfidentialityWithCaseData(any())).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
