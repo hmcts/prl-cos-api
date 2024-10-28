@@ -13,10 +13,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class RoleAssignmentResponse {
 
+    private String id;
     private String actorId;
     private String actorIdType;
     private String roleType;
     private String roleName;
+    private String roleLabel;
     private String classification;
     private String grantType;
     private String roleCategory;
