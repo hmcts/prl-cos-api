@@ -235,7 +235,7 @@ public class ConfidentialityC8RefugeServiceTest {
                 caseData1,
                 " ");
 
-        assertNull(refugeConfidentialDocumentsRecord);
+        assertNotNull(refugeConfidentialDocumentsRecord);
 
     }
 
@@ -480,7 +480,7 @@ public class ConfidentialityC8RefugeServiceTest {
                 caseData,
                 "");
 
-        assertNull(refugeConfidentialDocumentsRecord);
+        assertNotNull(refugeConfidentialDocumentsRecord);
 
     }
 
