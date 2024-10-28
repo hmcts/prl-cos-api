@@ -145,6 +145,8 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
+            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+            findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
@@ -181,9 +183,9 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
+            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
-        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        findAndListRefugeDocs(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
@@ -768,19 +770,40 @@ public class UpdatePartyDetailsService {
                 false
             );
 
-            findAndListRefugeDocs(callbackRequest, caseData, updatedCaseData);
+            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
     }
 
-    private void findAndListRefugeDocs(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
+    private void findAndListRefugeDocsForC100(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        boolean addToHistoricalC8RefugeDocList
+        boolean eligibleForDocumentProcessing
             = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
-        if (addToHistoricalC8RefugeDocList) {
+        if (eligibleForDocumentProcessing) {
             RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
                 = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                caseDataBefore,
+                caseData,
+                callbackRequest.getEventId()
+            );
+            if (refugeConfidentialDocumentsRecord != null) {
+                updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+                updatedCaseData.put(
+                    "historicalRefugeDocuments",
+                    refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+                );
+            }
+        }
+    }
+
+    private void findAndListRefugeDocsForFL401(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> updatedCaseData) {
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        boolean eligibleForDocumentProcessing
+            = Arrays.stream(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS).anyMatch(s -> s.equalsIgnoreCase(callbackRequest.getEventId()));
+        if (eligibleForDocumentProcessing) {
+            RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForFL401(
                 caseDataBefore,
                 caseData,
                 callbackRequest.getEventId()
