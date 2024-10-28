@@ -237,7 +237,7 @@ public class ConfidentialityC8RefugeService {
                     || refugeDocumentHandlerParameters.listHistoricalDocument) {
                     findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
                 }
-                if (refugeDocumentHandlerParameters.listDocument) {
+                if (refugeDocumentHandlerParameters.listDocument && null != partyDetails.getRefugeConfidentialityC8Form()) {
                     log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
                     refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                         refugeDocuments,
@@ -267,6 +267,7 @@ public class ConfidentialityC8RefugeService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         PartyDetails partyDetails,
         String partyType) {
+        log.info("refuge documents citizen submitted case {}", refugeDocuments);
         RefugeConfidentialDocuments refugeConfidentialDocuments
             = RefugeConfidentialDocuments
             .builder()
