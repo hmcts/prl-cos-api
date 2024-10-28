@@ -22,24 +22,24 @@ plugins {
 }
 
 def versions = [
-  awaitility             : '4.2.2',
-  bcpkixJdk18on          : '1.78.1',
-  ccdClient              : '4.9.2',
-  commonsBeanUtils       : '1.9.4',
-  commonsIo              : '2.16.1',
-  commonsLang3           : '3.17.0',
-  commonsMath3           : '3.6.1',
-  dumbster               : '1.7.1',
+  awaitility                   : '4.2.2',
+  bcpkixJdk18on                : '1.78.1',
+  ccdClient                    : '4.9.2',
+  commonsBeanUtils             : '1.9.4',
+  commonsIo                    : '2.16.1',
+  commonsLang3                 : '3.17.0',
+  commonsMath3                 : '3.6.1',
+  dumbster                     : '1.7.1',
   //feignHttpClient              : '10.3.0',
-  googleAuth             : '1.5.0',
-  gradlePitest           : '1.15.0',
-  guava                  : '32.1.3-jre',
-  hmctsNotify            : '3.19.2-RELEASE',
+  googleAuth                   : '1.5.0',
+  gradlePitest                 : '1.15.0',
+  guava                        : '32.1.3-jre',
+  hmctsNotify                  : '3.19.2-RELEASE',
   //  idamClient                   : '1.3.0',
-  httpComponents         : '4.5.14',
-  jackson                : '2.17.2',
-  jacksonDatatypeJsr     : '2.17.2',
-  jsonAssert             : '1.5.3',
+  httpComponents               : '4.5.14',
+  jackson                      : '2.17.2',
+  jacksonDatatypeJsr           : '2.17.2',
+  jsonAssert                   : '1.5.3',
   //  jsonPathAssert               : '2.2.0',
   junit                        : '5.10.3',
   junitPlatform                : '5.7.2',
@@ -142,16 +142,16 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-        dependencySet(group: 'io.netty', version: '4.1.114.Final') {
-            entry 'netty-buffer'
-            entry 'netty-codec'
-            entry 'netty-codec-http'
-            entry 'netty-common'
-            entry 'netty-handler'
-            entry 'netty-resolver'
-            entry 'netty-transport'
-        }
+      // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+      dependencySet(group: 'io.netty', version: '4.1.114.Final') {
+        entry 'netty-buffer'
+        entry 'netty-codec'
+        entry 'netty-codec-http'
+        entry 'netty-common'
+        entry 'netty-handler'
+        entry 'netty-resolver'
+        entry 'netty-transport'
+      }
 
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
@@ -330,7 +330,7 @@ dependencies {
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.1'
-  implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
+  implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.5.0'
@@ -386,7 +386,7 @@ dependencies {
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.12'){
     force = true
   }
-  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
+  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
@@ -411,6 +411,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
   testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
+
 
 
   // integration test
@@ -451,7 +452,7 @@ dependencies {
   functionalTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   functionalTestImplementation group: 'org.springframework', name: 'spring-context-support'
   functionalTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  functionalTestImplementation(group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator)
+  functionalTestImplementation (group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'
@@ -491,11 +492,11 @@ dependencies {
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
-  implementation group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
-  implementation group: 'org.codehaus.sonar-plugins', name: 'sonar-pitest-plugin', version: versions.sonarPitest
+  implementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
+  implementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
 }
 
-task fortifyScan(type: JavaExec) {
+task fortifyScan(type: JavaExec)  {
   main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
@@ -537,7 +538,7 @@ task functional(type: Test, description: 'Runs functional tests.', group: 'Verif
 }
 
 task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functional tests.', group: 'Verification') {
-  doFirst() {
+  doFirst(){
     printf("::::::::::  Running  nightlyFunctional ::::::::::")
   }
 
@@ -653,7 +654,7 @@ task contract(type: Test, description: 'Runs the consumer Pact tests.', group: '
   environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
 }
 
-task runAndPublishConsumerPactTests(type: Test) {
+task runAndPublishConsumerPactTests(type: Test){
   logger.lifecycle("Runs pact Tests")
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
@@ -675,7 +676,7 @@ pact {
   publish {
     pactDirectory = 'pacts'
     pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
-    tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
+    tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
     version = project.pactVersion
   }
 }
