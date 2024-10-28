@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -53,7 +52,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -122,12 +121,7 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         cleanUpC8RefugeFields(caseData, caseDataUpdated);
-        Optional<RefugeConfidentialDocumentsRecord> refugeConfidentialDocumentsRecord
-            = confidentialityTabService.listRefugeDocumentsForConfidentialTab(caseData);
-        if (refugeConfidentialDocumentsRecord.isPresent()) {
-            caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.get().refugeDocuments());
-            caseDataUpdated.put("historicalRefugeDocuments", refugeConfidentialDocumentsRecord.get().historicalRefugeDocuments());
-        }
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(caseData, caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -171,15 +165,15 @@ public class FL401SubmitApplicationService {
             .build();
     }
 
-    private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+    public void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
         log.info("Start cleaning up on submit");
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             ofNullable(caseData.getApplicantsFL401()),
             updatedCaseData,
             FL401_APPLICANTS,
             true
         );
-        confidentialityTabService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             ofNullable(caseData.getRespondentsFL401()),
             updatedCaseData,
             FL401_RESPONDENTS,
