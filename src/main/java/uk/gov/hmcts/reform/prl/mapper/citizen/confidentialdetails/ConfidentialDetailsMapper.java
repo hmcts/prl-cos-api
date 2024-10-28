@@ -90,7 +90,7 @@ public class ConfidentialDetailsMapper {
         return tempConfidentialApplicants;
     }
 
-    private  List<Element<ApplicantConfidentialityDetails>> setTempConfidentialApplicants(
+    private List<Element<ApplicantConfidentialityDetails>> setTempConfidentialApplicants(
         List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants, boolean addressSet,
         boolean emailSet, boolean phoneSet, PartyDetails respondent) {
         if (addressSet || emailSet || phoneSet) {
@@ -102,10 +102,11 @@ public class ConfidentialDetailsMapper {
     }
 
     private boolean checkIfLivesInRefuge(PartyDetails respondent) {
-        return (YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
+        return ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown())
+            && YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
             || (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge()));
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
