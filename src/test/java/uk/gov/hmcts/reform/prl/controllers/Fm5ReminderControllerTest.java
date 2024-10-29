@@ -5,8 +5,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.Fm5ReminderService;
+
+import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +43,29 @@ public class Fm5ReminderControllerTest {
     public void test_Fm5ReminderNotificationThrowsException() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         fm5ReminderController.sendFm5ReminderNotifications(18L, authToken, s2sToken);
+        verifyNoInteractions(fm5ReminderService);
+    }
+
+    @Test
+    public void test_Fm5ReminderFetchEligibleCases() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders())
+            .thenReturn(List.of(CaseDetails.builder().build()));
+        fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
+        verify(fm5ReminderService, times(1)).retrieveCasesInHearingStatePendingFm5Reminders();
+    }
+
+    @Test
+    public void test_Fm5ReminderFetchNoEligibleCases() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
+        verify(fm5ReminderService, times(1)).retrieveCasesInHearingStatePendingFm5Reminders();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void test_Fm5ReminderFetchEligibleCasesThrowsException() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
         verifyNoInteractions(fm5ReminderService);
     }
 

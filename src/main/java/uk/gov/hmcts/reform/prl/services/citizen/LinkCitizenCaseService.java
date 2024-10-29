@@ -68,13 +68,13 @@ public class LinkCitizenCaseService {
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
 
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            UserDetails userDetails = idamClient.getUserByUserId(idamClient.getUserInfo(authorisation).getUid(), authorisation);
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
             caseAccessApi.grantAccessToCase(
                 startAllTabsUpdateDataContent.authorisation(),
                 authTokenGenerator.generate(),
-                idamClient.getUserDetails(startAllTabsUpdateDataContent.authorisation()).getId(),
+                idamClient.getUserInfo(startAllTabsUpdateDataContent.authorisation()).getUid(),
                 PrlAppsConstants.JURISDICTION,
                 PrlAppsConstants.CASE_TYPE,
                 caseId,
@@ -151,7 +151,6 @@ public class LinkCitizenCaseService {
                 }
                 caseData.getRespondentsFL401().setUser(user);
                 caseDataUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-
             }
         }
         return caseDataUpdated;

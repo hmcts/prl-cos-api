@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -168,5 +169,43 @@ public class ResponseSubmitCheckerTest {
         Boolean bool = responseSubmitChecker.isFinished(respondent, true);
 
         assertTrue(bool);
+    }
+
+    @Test
+    public void hasMandatoryCompletedFalseForOptionalEvents() {
+
+        when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
+        when(consentToApplicationChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
+        when(keepDetailsPrivateChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentMiamChecker()).thenReturn(respondentMiamChecker);
+        when(respondentMiamChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
+        when(abilityToParticipateChecker.isFinished(Mockito.any(), Mockito.anyBoolean())).thenReturn(false);
+
+        when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
+        when(attendToCourtChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
+        when(currentOrPastProceedingsChecker.isFinished(Mockito.any(), Mockito.anyBoolean())).thenReturn(false);
+
+        when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
+        when(respondentContactDetailsChecker.isFinished(respondent, true)).thenReturn(true);
+
+        when(respondentEventsChecker.getInternationalElementsChecker()).thenReturn(internationalElementsChecker);
+        when(internationalElementsChecker.isFinished(Mockito.any(), Mockito.anyBoolean())).thenReturn(false);
+        when(internationalElementsChecker.isStarted(Mockito.any(), Mockito.anyBoolean())).thenReturn(true);
+
+        when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
+        when(responseToAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
+
+        Boolean bool = responseSubmitChecker.isFinished(respondent, true);
+        assertFalse(bool);
     }
 }

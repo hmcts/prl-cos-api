@@ -552,6 +552,16 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOrderAdditionalDocuments(List.of(element(Document.builder().documentFileName("testDoc").build())))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                                     .serveByPostOrEmail(DeliveryByEnum.post)
+                                                     .postalInformation(PostalInformation.builder()
+                                                                            .postalAddress(Address.builder()
+                                                                                               .addressLine1("test")
+                                                                                               .build())
+                                                                            .postalName("postalName")
+                                                                            .build()).build())))
             .build();
 
         childLiveWithList.add(LiveWithEnum.applicant);
@@ -2447,11 +2457,11 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesOrNo.Yes)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
-                .courtAdmin)
+                .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                 .emailInformation(EmailInformation.builder().emailName("").build())
@@ -2499,50 +2509,20 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void sendServeOrderEmailWhenCourtAdminOptionSelectedWelsh() throws IOException {
-        applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        respondent = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .solicitorEmail("test@test.com")
-            .build();
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
         List<LiveWithEnum> childLiveWithList = new ArrayList<>();
         childLiveWithList.add(LiveWithEnum.applicant);
-
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-
         DynamicMultiSelectList dynamicMultiSelectListCourtAdmin = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
                 .label("John (Child 1)")
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectListCourtAdmin)
+            .serveToRespondentOptions(YesOrNo.Yes)
             .serveOrderDynamicList(dynamicMultiSelectListCourtAdmin)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
@@ -2557,15 +2537,10 @@ public class ManageOrderEmailServiceTest {
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("FL401")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
-                .solicitorEmail("t")
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
-            .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
@@ -2588,7 +2563,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCourtAdmin, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
