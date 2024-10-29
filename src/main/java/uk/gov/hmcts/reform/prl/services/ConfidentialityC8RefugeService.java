@@ -273,6 +273,7 @@ public class ConfidentialityC8RefugeService {
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("party we got now: " + party);
+        boolean newFileAdded = false;
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             log.info("inside party details list");
@@ -294,6 +295,7 @@ public class ConfidentialityC8RefugeService {
                             partyDetails,
                             partyType
                         );
+                        newFileAdded = true;
                     }
                 }
                 log.info("historicalRefugeDocuments are now :: " + historicalRefugeDocuments.size());
@@ -303,7 +305,9 @@ public class ConfidentialityC8RefugeService {
         log.info("end listRefugeDocumentsPartyWise");
 
         if (refugeConfidentialDocumentsRecord != null) {
-            refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            if (newFileAdded) {
+                refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            }
             refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
         } else {
             refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
@@ -408,12 +412,14 @@ public class ConfidentialityC8RefugeService {
     }
 
     public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForC100(CaseData caseDataBefore, CaseData caseData, String eventId) {
+        log.info("Inside processC8RefugeDocumentsOnAmendForC100");
         boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForOtherPeople = CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue().equalsIgnoreCase(
             eventId);
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
         if (onlyForApplicant) {
+            log.info("Its for applicant only");
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForApplicant(true)
@@ -428,6 +434,7 @@ public class ConfidentialityC8RefugeService {
                 null
             );
         } else if (onlyForRespondent) {
+            log.info("Its for respondent only");
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForRespondent(true)
@@ -442,6 +449,7 @@ public class ConfidentialityC8RefugeService {
                 null
             );
         } else if (onlyForOtherPeople) {
+            log.info("Its for other people only");
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForOtherPeople(true)
@@ -456,6 +464,7 @@ public class ConfidentialityC8RefugeService {
                 null
             );
         } else {
+            log.info("Its for anything else");
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .forAllParties(true)
@@ -548,7 +557,7 @@ public class ConfidentialityC8RefugeService {
                     partyDetails,
                     partyDetailsBefore
                 );
-            } else {
+            } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
                 log.info("New Party added. may be submit or resubmission");
                 RefugeDocumentHandlerParameters handler =
                     RefugeDocumentHandlerParameters.builder()
@@ -566,6 +575,7 @@ public class ConfidentialityC8RefugeService {
                     refugeConfidentialDocumentsRecord
                 );
             }
+
         }
         return refugeConfidentialDocumentsRecord;
     }
