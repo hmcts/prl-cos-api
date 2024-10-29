@@ -10,7 +10,7 @@ public class TestConstants {
     public static final String CAFCASS_END_DATE_PARAM = "end_date";
     public static final String CAFCASS_END_DATE_PARAM_VALUE = "2022-08-26T11:00:54.055";
     public static final String CAFCASS_START_DATE_PARAM = "start_date";
-    public static final String CAFCASS_START_DATE_PARAM_VALUE = "2022-08-22T10:44:43.49";
+    public static final String CAFCASS_START_DATE_PARAM_VALUE = "2022-08-22T10:54:43.49";
     public static final String CREATE_SERVICE_RESPONSE = "classpath:response/cafcass-search-response.json";
     public static final String SEARCH_CASE_ENDPOINT = "/cases/searchCases";
     public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
