@@ -69,8 +69,7 @@ public class CaseDataOtherPersonsElementsMapper {
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
                 .liveInRefuge(livingInRefuge(otherPersonDetail))
-                .refugeConfidentialityC8Form(null != otherPersonDetail.getRefugeConfidentialityC8Form()
-                    ? otherPersonDetail.getRefugeConfidentialityC8Form() : null)
+                .refugeConfidentialityC8Form(otherPersonDetail.getRefugeConfidentialityC8Form())
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
                 .otherGender(PrlAppsConstants.OTHER.equalsIgnoreCase(personalDetails.getGender()) ? personalDetails.getOtherGenderDetails() : null)
                 .dateOfBirth(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
@@ -87,14 +86,14 @@ public class CaseDataOtherPersonsElementsMapper {
     }
 
     private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
-        if (null != otherPersonDetails.getAddressUnknown()
-            && YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
-            && YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+        if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
             return No;
-        } else if (YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+        } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
+            && YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
             return Yes;
+        } else {
+            return No;
         }
-        return No;
     }
 
     private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
