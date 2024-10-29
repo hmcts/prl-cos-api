@@ -85,6 +85,7 @@ public class CaseDataOtherPersonsElementsMapper {
                     ? livingInRefuge(otherPersonDetail) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
+
     }
 
     private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
