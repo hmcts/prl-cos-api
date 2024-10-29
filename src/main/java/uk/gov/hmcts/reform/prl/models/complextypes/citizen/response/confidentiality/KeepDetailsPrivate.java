@@ -14,6 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class KeepDetailsPrivate {
     private final YesNoIDontKnow otherPeopleKnowYourContactDetails;
-    private final YesOrNo confidentiality;
+    private YesOrNo confidentiality;
     private List<ConfidentialityListEnum> confidentialityList;
 }

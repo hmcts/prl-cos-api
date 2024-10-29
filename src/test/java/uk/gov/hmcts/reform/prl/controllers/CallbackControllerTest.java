@@ -86,6 +86,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
@@ -277,6 +278,9 @@ public class CallbackControllerTest {
 
     @Mock
     private ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -1498,8 +1502,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetailsBefore((uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
+                .data(stringObjectMap).build()))
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -1660,8 +1669,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetailsBefore((uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
+                .data(stringObjectMap).build()))
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -1685,7 +1699,6 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
-
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -1773,8 +1786,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetailsBefore((uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
+                .data(stringObjectMap).build())).caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+                    123L)
+                                                                 .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel())
+                                                                 .data(stringObjectMap).build()).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
@@ -1954,8 +1972,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                             .data(stringObjectMap).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -2145,7 +2168,12 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+            .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build()).caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                                                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(
+                    123L)
                                                        .data(stringObjectMap).build()).build();
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -3017,6 +3045,9 @@ public class CallbackControllerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails
+            .builder().firstName("Abc").lastName("Xyz").build();
+
         CaseData caseData = CaseData.builder().children(listOfChildren)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
@@ -3031,7 +3062,8 @@ public class CallbackControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
+            .applicantsConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
+            .respondentConfidentialDetails(List.of(element(applicantConfidentialityDetails)))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
             .id(123L)
             .build();
@@ -3045,8 +3077,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                             .data(stringObjectMap).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);

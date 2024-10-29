@@ -35,6 +35,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
@@ -50,6 +52,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -117,6 +120,14 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        cleanUpC8RefugeFields(caseData, caseDataUpdated);
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+            caseDataUpdated,
+            caseDataBefore,
+            caseData,
+            callbackRequest.getEventId()
+        );
         return caseDataUpdated;
     }
 
@@ -158,5 +169,22 @@ public class FL401SubmitApplicationService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .userDetails(userDetails)
             .build();
+    }
+
+    public void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+        log.info("Start cleaning up on submit");
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getApplicantsFL401()),
+            updatedCaseData,
+            FL401_APPLICANTS,
+            true
+        );
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getRespondentsFL401()),
+            updatedCaseData,
+            FL401_RESPONDENTS,
+            true
+        );
+        log.info("close cleaning up on submit");
     }
 }

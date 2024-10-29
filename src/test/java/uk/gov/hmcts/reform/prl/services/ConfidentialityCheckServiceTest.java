@@ -34,7 +34,7 @@ public class ConfidentialityCheckServiceTest {
     public void processRespondentsC8Documents() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName")
-                .lastName("lastName").build()).build();
+                .lastName("lastName").refugeConfidentialityC8Form(Document.builder().build()).build()).build();
         Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName1")
                 .lastName("lastName").build()).build();
         Element<PartyDetails> partyDetailsElement2 = Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName2")

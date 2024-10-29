@@ -54,7 +54,8 @@ public class ConfidentialityTabService {
                     applicants);
             }
 
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(
+                caseData);
 
             Optional<List<Element<PartyDetails>>> respondentList = ofNullable(caseData.getRespondents());
             if (respondentList.isPresent()) {
@@ -87,7 +88,8 @@ public class ConfidentialityTabService {
                     fl401Respondent);
             }
 
-            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
+                caseData);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -106,17 +108,17 @@ public class ConfidentialityTabService {
         List<Element<ChildConfidentialityDetails>> elementList = new ArrayList<>();
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-            Optional<List<Element<ChildDetailsRevised>>> chiildList = ofNullable(caseData.getNewChildDetails());
-            if (chiildList.isPresent()) {
+            Optional<List<Element<ChildDetailsRevised>>> childList = ofNullable(caseData.getNewChildDetails());
+            if (childList.isPresent()) {
                 elementList = getChildrenConfidentialDetailsV2(caseData);
             }
         } else {
-            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
-            if (chiildList.isPresent()) {
+            Optional<List<Element<Child>>> childList = ofNullable(caseData.getChildren());
+            if (childList.isPresent()) {
                 List<Child> children = caseData.getChildren().stream()
                     .map(Element::getValue)
                     .toList();
-                elementList =  getChildrenConfidentialDetails(children);
+                elementList = getChildrenConfidentialDetails(children);
             }
         }
         return elementList;
@@ -174,25 +176,25 @@ public class ConfidentialityTabService {
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
         Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
-        List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
+        List<ChildDetailsRevised> childDetailsRevisedList = new ArrayList<>();
         if (children.isPresent()) {
-            childDetailsReviseds = children.get()
+            childDetailsRevisedList = children.get()
                 .stream()
                 .map(Element::getValue)
                 .toList();
         }
-        if (!childrenAndOtherPeopleRelations.isEmpty()) {
+        if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
                     .toList()
-                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
+                    .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
-            for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
+            for (ChildDetailsRevised childDetailsRevised : childDetailsRevisedList) {
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
-                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
+                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList, objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
                     Element<ChildConfidentialityDetails> childElement = Element
                         .<ChildConfidentialityDetails>builder()
@@ -238,14 +240,25 @@ public class ConfidentialityTabService {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential()) && isNotEmpty(applicant.getAddress())) {
-                addressSet = true;
+            if (isNotEmpty(applicant.getAddress())) {
+                addressSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsAddressConfidential()
+                );
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential()) && isNotEmpty(applicant.getEmail())) {
-                emailSet = true;
+
+            if (isNotEmpty(applicant.getEmail())) {
+                emailSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsEmailAddressConfidential()
+                );
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential()) && isNotEmpty(applicant.getPhoneNumber())) {
-                phoneSet = true;
+
+            if (isNotEmpty(applicant.getPhoneNumber())) {
+                phoneSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsPhoneNumberConfidential()
+                );
             }
             if (addressSet || emailSet || phoneSet) {
                 tempConfidentialApplicants
@@ -254,6 +267,14 @@ public class ConfidentialityTabService {
         }
 
         return tempConfidentialApplicants;
+    }
+
+    private boolean findIsConfidentialField(YesOrNo liveInRefuge, YesOrNo isFieldConfidential) {
+        if ((YesOrNo.Yes).equals(liveInRefuge)) {
+            return true;
+        } else {
+            return (YesOrNo.Yes).equals(isFieldConfidential);
+        }
     }
 
     private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,
@@ -291,6 +312,5 @@ public class ConfidentialityTabService {
 
         return childrenConfidentialDetails;
     }
-
 }
 
