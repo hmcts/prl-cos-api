@@ -78,7 +78,7 @@ public class CaseDataOtherPersonsElementsMapper {
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
                 .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
                 .isCurrentAddressKnown(null != otherPersonDetail.getAddressUnknown()
-                    ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : null)
+                    ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : Yes)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
                 .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
                     ? livingInRefuge(otherPersonDetail) : null)
