@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -32,7 +31,6 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@Slf4j
 public class CaseDataOtherPersonsElementsMapper {
 
     private CaseDataOtherPersonsElementsMapper() {
@@ -70,7 +68,8 @@ public class CaseDataOtherPersonsElementsMapper {
                 .firstName(otherPersonDetail.getFirstName())
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
-                .liveInRefuge(livingInRefuge(otherPersonDetail))
+                .liveInRefuge(PrlAppsConstants.YES
+                    .equalsIgnoreCase(String.valueOf(livingInRefuge(otherPersonDetail))) ? Yes : No)
                 .refugeConfidentialityC8Form(null != otherPersonDetail.getRefugeConfidentialityC8Form()
                     ? otherPersonDetail.getRefugeConfidentialityC8Form() : null)
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
@@ -89,27 +88,20 @@ public class CaseDataOtherPersonsElementsMapper {
     }
 
     private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
-        log.info("inside living in refuge");
-        log.info("otherPersonDetail {}", otherPersonDetails);
         if (null != otherPersonDetails.getAddressUnknown()
             && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getAddressUnknown()))
             && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
-            log.info("address is unknown but saying live in refuge");
             return No;
         } else if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
-            log.info("live in refuge but address is known");
             return Yes;
         }
-        log.info("address is unknown");
         return No;
     }
 
     private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
         if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(isCurrentAddressUnknown))) {
-            log.info("current address is unknown");
             return No;
         } else {
-            log.info("current address is known");
             return Yes;
         }
     }
