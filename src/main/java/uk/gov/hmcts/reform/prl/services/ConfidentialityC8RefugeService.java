@@ -273,6 +273,7 @@ public class ConfidentialityC8RefugeService {
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
         log.info("start listRefugeDocumentsPartyWise");
         log.info("party we got now: " + party);
+        boolean newFileAdded = false;
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             log.info("inside party details list");
@@ -294,6 +295,7 @@ public class ConfidentialityC8RefugeService {
                             partyDetails,
                             partyType
                         );
+                        newFileAdded = true;
                     }
                 }
                 log.info("historicalRefugeDocuments are now :: " + historicalRefugeDocuments.size());
@@ -303,7 +305,9 @@ public class ConfidentialityC8RefugeService {
         log.info("end listRefugeDocumentsPartyWise");
 
         if (refugeConfidentialDocumentsRecord != null) {
-            refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            if (newFileAdded) {
+                refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            }
             refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
         } else {
             refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
