@@ -22,7 +22,6 @@ public class RefugeCaseGenerator implements FieldGenerator {
 
     @Override
     public CaseSummary generate(CaseData caseData) {
-        log.info("Inside refuge case generator");
         YesOrNo isRefugeCase = YesOrNo.No;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getApplicants());
@@ -41,7 +40,6 @@ public class RefugeCaseGenerator implements FieldGenerator {
                 isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
             }
         }
-        log.info("Is refuge case {}", isRefugeCase);
         return CaseSummary.builder().refugeCase(RefugeCase.builder().isRefugeCase(isRefugeCase).build()).build();
     }
 

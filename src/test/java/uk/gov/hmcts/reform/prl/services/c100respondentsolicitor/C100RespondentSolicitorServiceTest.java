@@ -87,6 +87,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -147,6 +148,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    CaseSummaryTabService caseSummaryTab;
 
 
     @Mock

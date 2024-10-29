@@ -84,9 +84,6 @@ public class C100RespondentSolicitorControllerTest {
     C100RespondentSolicitorService respondentSolicitorService;
 
     @Mock
-    CaseSummaryTabService caseSummaryTabService;
-
-    @Mock
     private AuthorisationService authorisationService;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -334,7 +331,6 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
             authToken, callbackRequest
         )).thenReturn(stringObjectMap);
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
