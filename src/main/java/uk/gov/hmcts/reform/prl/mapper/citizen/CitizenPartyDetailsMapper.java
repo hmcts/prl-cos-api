@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -556,8 +557,28 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
-        if (null != citizenProvidedPartyDetails.getLiveInRefuge()) {
-            existingPartyDetails = updateCitizenConfidentialData(existingPartyDetails, citizenProvidedPartyDetails);
+        boolean livingInRefuge = isNotEmpty(citizenProvidedPartyDetails.getLiveInRefuge());
+
+        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+            log.info("Citizen lives in refuge");
+            existingPartyDetails = existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .isPhoneNumberConfidential(Yes)
+                .isAddressConfidential(Yes)
+                .isEmailAddressConfidential(Yes)
+                .build();
         }
 
         return existingPartyDetails.toBuilder()
@@ -588,8 +609,10 @@ public class CitizenPartyDetailsMapper {
                                     ? YesOrNo.Yes : existingPartyDetails.getIsDateOfBirthKnown())
             .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
                               ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
-            .liveInRefuge(citizenProvidedPartyDetails.getLiveInRefuge())
-            .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
+            .liveInRefuge(livingInRefuge ? citizenProvidedPartyDetails.getLiveInRefuge() : existingPartyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+                                                        ? citizenProvidedPartyDetails.getRefugeConfidentialityC8Form()
+                                             : existingPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(getPartyResponse(existingPartyDetails).toBuilder()
@@ -645,15 +668,10 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        if (null != citizenProvidedPartyDetails.getLiveInRefuge()) {
-            if (citizenProvidedPartyDetails.getLiveInRefuge().equals(Yes)) {
-                log.info("setting refuge confidential data as yes");
-                return existingPartyDetails.toBuilder()
-                    .isPhoneNumberConfidential(Yes)
-                    .isAddressConfidential(Yes)
-                    .isEmailAddressConfidential(Yes)
-                    .build();
-            }
+        log.info("Verifying refuge information first");
+        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+            log.info("Party living in refuge, information must remain confidential");
+            return existingPartyDetails;
         }
 
         log.info("setting refuge confidential data as no");
