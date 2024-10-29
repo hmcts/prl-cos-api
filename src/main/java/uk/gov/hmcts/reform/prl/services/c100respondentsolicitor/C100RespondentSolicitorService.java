@@ -69,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -159,6 +160,7 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
+    private final CaseSummaryTabService caseSummaryTab;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -352,6 +354,7 @@ public class C100RespondentSolicitorService {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
             respondents = setRefugeData(respondents);
+            updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
         }
 
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());

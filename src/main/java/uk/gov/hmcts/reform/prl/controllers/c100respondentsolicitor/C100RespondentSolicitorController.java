@@ -28,8 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +44,13 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     private final C100RespondentSolicitorService respondentSolicitorService;
     private final AuthorisationService authorisationService;
 
-    private final CaseSummaryTabService caseSummaryTab;
-
     @Autowired
     public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
                                              C100RespondentSolicitorService respondentSolicitorService,
-                                             AuthorisationService authorisationService, CaseSummaryTabService caseSummaryTab) {
+                                             AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.respondentSolicitorService = respondentSolicitorService;
         this.authorisationService = authorisationService;
-        this.caseSummaryTab = caseSummaryTab;
     }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -182,19 +177,14 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-            caseDataUpdated.putAll(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                authorisation,
-                callbackRequest
-            ));
-            log.info("caseDataUpdated is {}", caseDataUpdated);
             List<String> errorList = new ArrayList<>();
+            log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(caseDataUpdated)
+                .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                    authorisation,
+                    callbackRequest
+                ))
                 .errors(errorList)
                 .build();
         } else {
