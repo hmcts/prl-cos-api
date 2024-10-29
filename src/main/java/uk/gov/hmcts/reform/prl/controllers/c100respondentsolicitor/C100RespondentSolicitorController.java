@@ -190,6 +190,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
                 authorisation,
                 callbackRequest
             ));
+            log.info("caseDataUpdated is {}", caseDataUpdated);
             List<String> errorList = new ArrayList<>();
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
