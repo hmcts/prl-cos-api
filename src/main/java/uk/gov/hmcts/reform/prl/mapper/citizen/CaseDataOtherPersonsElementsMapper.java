@@ -88,17 +88,17 @@ public class CaseDataOtherPersonsElementsMapper {
 
     private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
         if (null != otherPersonDetails.getAddressUnknown()
-            && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getAddressUnknown()))
-            && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
+            && YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
+            && YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
             return No;
-        } else if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
+        } else if (YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
             return Yes;
         }
         return No;
     }
 
     private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
-        if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(isCurrentAddressUnknown))) {
+        if (YesOrNo.Yes.equals(isCurrentAddressUnknown)) {
             return No;
         } else {
             return Yes;
