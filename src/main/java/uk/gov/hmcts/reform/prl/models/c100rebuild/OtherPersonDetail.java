@@ -29,6 +29,7 @@ public class OtherPersonDetail {
     private RelationshipDetails relationshipDetails;
     @JsonProperty("address")
     private OtherPersonAddress otherPersonAddress;
+    private YesOrNo addressUnknown;
     private YesOrNo liveInRefuge;
     private Document refugeConfidentialityC8Form;
 

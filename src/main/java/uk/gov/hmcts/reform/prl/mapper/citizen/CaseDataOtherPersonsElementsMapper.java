@@ -77,6 +77,8 @@ public class CaseDataOtherPersonsElementsMapper {
                         ? buildDateOfBirth(personalDetails.getApproxDateOfBirth())
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
                 .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
+                .isCurrentAddressKnown(null != otherPersonDetail.getAddressUnknown()
+                    ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
                 .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
                     ? dataIsConfidentialBecauseLivingInRefuge(otherPersonDetail.getLiveInRefuge()) : null)
@@ -88,8 +90,15 @@ public class CaseDataOtherPersonsElementsMapper {
         if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(livesInRefuge))) {
             return Yes;
         }
-
         return null;
+    }
+
+    private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
+        if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(isCurrentAddressUnknown))) {
+            return No;
+        } else {
+            return Yes;
+        }
     }
 
     private static Address buildAddress(OtherPersonAddress address) {
