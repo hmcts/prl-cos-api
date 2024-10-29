@@ -394,6 +394,7 @@ public class C100RespondentSolicitorService {
 
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
+                    respondent.getValue().getResponse().getCitizenDetails().setRefugeConfidentialityC8Form(null);
                     respondent.getValue().setLiveInRefuge(Yes);
                     respondent.getValue().setRefugeConfidentialityC8Form(respondent
                         .getValue().getResponse().getCitizenDetails().getRefugeConfidentialityC8Form());
