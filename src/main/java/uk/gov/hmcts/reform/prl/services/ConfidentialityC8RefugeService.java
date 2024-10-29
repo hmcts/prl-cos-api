@@ -94,11 +94,18 @@ public class ConfidentialityC8RefugeService {
         if (optionalPartyDetails.isPresent()) {
             PartyDetails partyDetails = optionalPartyDetails.get();
             log.info("inside party details for loop");
-            if (eligibleForRefuge(partyDetails)) {
-                log.info("says yes to refuge for the party::" + party);
-                forceConfidentialityChangeForRefuge(party, partyDetails);
+            if (partyDetails.getIsCurrentAddressKnown() == null
+                || YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                if (eligibleForRefuge(partyDetails)) {
+                    log.info("says yes to refuge for the party::" + party);
+                    forceConfidentialityChangeForRefuge(party, partyDetails);
+                } else if (cleanUpNeeded) {
+                    log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                    partyDetails.setRefugeConfidentialityC8Form(null);
+                }
             } else if (cleanUpNeeded) {
-                log.info("says no to refuge for the party and clean up is marked as Yes::" + party);
+                log.info("says no to address knows::" + party);
+                partyDetails.setLiveInRefuge(null);
                 partyDetails.setRefugeConfidentialityC8Form(null);
             }
             updatedCaseData.put(party, optionalPartyDetails);
