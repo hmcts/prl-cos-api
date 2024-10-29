@@ -688,6 +688,7 @@ public class ConfidentialityC8RefugeService {
                 eventId
             );
         }
+        log.info("refugeConfidentialDocumentRecord {}", refugeConfidentialDocumentsRecord);
         if (refugeConfidentialDocumentsRecord != null) {
             caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
             caseDataUpdated.put(
