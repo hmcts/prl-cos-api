@@ -644,9 +644,7 @@ public class CitizenPartyDetailsMapper {
             .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
                               ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
             .liveInRefuge(livingInRefuge ? citizenProvidedPartyDetails.getLiveInRefuge() : existingPartyDetails.getLiveInRefuge())
-            .refugeConfidentialityC8Form(Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
-                                                        ? citizenProvidedPartyDetails.getRefugeConfidentialityC8Form()
-                                             : existingPartyDetails.getRefugeConfidentialityC8Form())
+            .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(getPartyResponse(existingPartyDetails).toBuilder()
