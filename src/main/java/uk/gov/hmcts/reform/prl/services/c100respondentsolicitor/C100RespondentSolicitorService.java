@@ -391,7 +391,11 @@ public class C100RespondentSolicitorService {
 
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
+                    respondent.getValue().setLiveInRefuge(Yes);
+                    respondent.getValue().setRefugeConfidentialityC8Form(respondent
+                        .getValue().getResponse().getCitizenDetails().getRefugeConfidentialityC8Form());
                 } else if (YesOrNo.No.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
+                    log.info("deleting respondent form from response");
                     respondent.getValue().getResponse().getCitizenDetails().setRefugeConfidentialityC8Form(null);
                 }
             }
