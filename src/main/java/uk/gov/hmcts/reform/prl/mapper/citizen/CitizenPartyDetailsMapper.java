@@ -41,6 +41,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -63,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -102,6 +105,7 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -127,11 +131,61 @@ public class CitizenPartyDetailsMapper {
             if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
+                findAndProcessRefugeFiles(dbCaseData, citizenUpdatedCaseData, citizenUpdatePartyDataContent.get());
             }
         } else {
             throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
         }
         return citizenUpdatePartyDataContent.get();
+    }
+
+    private void findAndProcessRefugeFiles(CaseData dbCaseData,
+                                           CitizenUpdatedCaseData citizenUpdatedCaseData,
+                                           CitizenUpdatePartyDataContent citizenUpdatePartyDataContent) {
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+        if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+            );
+        } else if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForFL401(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForFL401(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+            );
+        }
+        if (refugeConfidentialDocumentsRecord != null) {
+            citizenUpdatePartyDataContent.updatedCaseDataMap().put(
+                "refugeDocuments",
+                refugeConfidentialDocumentsRecord.refugeDocuments()
+            );
+            citizenUpdatePartyDataContent.updatedCaseDataMap().put(
+                "historicalRefugeDocuments",
+                refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+            );
+        }
     }
 
     private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
@@ -559,27 +613,7 @@ public class CitizenPartyDetailsMapper {
 
         boolean livingInRefuge = isNotEmpty(citizenProvidedPartyDetails.getLiveInRefuge());
 
-        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
-            log.info("Citizen lives in refuge");
-            existingPartyDetails = existingPartyDetails.toBuilder()
-                .response(getPartyResponse(existingPartyDetails).toBuilder()
-                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
-                                                      .getKeepDetailsPrivate()
-                                                      .toBuilder()
-                                                      .confidentiality(Yes)
-                                                      .confidentialityList(
-                                                          Arrays.asList(
-                                                              ConfidentialityListEnum.email,
-                                                              ConfidentialityListEnum.address,
-                                                              ConfidentialityListEnum.phoneNumber
-                                                          ))
-                                                      .build())
-                              .build())
-                .isPhoneNumberConfidential(Yes)
-                .isAddressConfidential(Yes)
-                .isEmailAddressConfidential(Yes)
-                .build();
-        }
+        existingPartyDetails = forceConfidentiality(existingPartyDetails, citizenProvidedPartyDetails);
 
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
@@ -620,6 +654,31 @@ public class CitizenPartyDetailsMapper {
                           .safeToCallOption(fetchSafeToCallOption(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+            log.info("Citizen lives in refuge");
+            existingPartyDetails = existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .isPhoneNumberConfidential(Yes)
+                .isAddressConfidential(Yes)
+                .isEmailAddressConfidential(Yes)
+                .build();
+        }
+        return existingPartyDetails;
     }
 
     private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
