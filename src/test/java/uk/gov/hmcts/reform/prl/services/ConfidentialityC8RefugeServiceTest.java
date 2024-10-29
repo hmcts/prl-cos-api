@@ -12,11 +12,15 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeDocumentHandlerParameters;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +31,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,6 +52,10 @@ public class ConfidentialityC8RefugeServiceTest {
 
     CaseData caseData;
     CaseData caseData1;
+
+    RefugeDocumentHandlerParameters refugeDocumentHandlerParameters;
+    RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
+    RefugeConfidentialDocuments refugeConfidentialDocuments;
 
     @Before
     public void setUp() {
@@ -102,13 +111,29 @@ public class ConfidentialityC8RefugeServiceTest {
             .build();
 
         Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
-        List<Element<PartyDetails>> partyDetailsWrappedList1 = Collections.singletonList(wrappedApplicants1);
+        List<Element<PartyDetails>> partyDetailsWrappedList1 = new ArrayList<>();
+        partyDetailsWrappedList1.add(wrappedApplicants1);
 
+        refugeConfidentialDocuments = RefugeConfidentialDocuments
+            .builder()
+            .partyType("C8Refuge")
+            .partyName("C8Refuge")
+            .document(Document.builder().documentFileName("C8Refuge").build())
+            .documentDetails(DocumentDetails.builder().documentName("C8Refuge").build())
+            .build();
+        List<Element<RefugeConfidentialDocuments>> refugeConfDocs = new ArrayList<>();
+        refugeConfDocs.addAll(wrapElements(refugeConfidentialDocuments));
         caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(partyDetailsWrappedList1)
             .applicantsFL401(refugePartyDetails1)
+            .refugeDocuments(refugeConfDocs)
+            .build();
+
+        refugeDocumentHandlerParameters = RefugeDocumentHandlerParameters
+            .builder()
+            .removeDocument(false)
             .build();
     }
 
@@ -126,6 +151,57 @@ public class ConfidentialityC8RefugeServiceTest {
         );
 
         assertTrue(updatedCaseData.containsKey("applicants"));
+
+    }
+
+    @Test
+    public void testApplicantRefugeDocument() {
+
+
+        RefugeConfidentialDocuments refugeConfidentialDocuments1 =
+            RefugeConfidentialDocuments
+            .builder()
+            .build();
+
+        refugeDocumentHandlerParameters = refugeDocumentHandlerParameters
+            .toBuilder()
+            .removeDocument(true)
+            .listDocument(true)
+            .build();
+
+        Element<RefugeConfidentialDocuments> refugeDocument = Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments).build();
+        List<Element<RefugeConfidentialDocuments>> refugeDocumentList =  new ArrayList<>();
+        refugeDocumentList.add(refugeDocument);
+
+        Element<RefugeConfidentialDocuments> refugeDocument1 =
+            Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments1).build();
+
+        List<Element<RefugeConfidentialDocuments>> refugeDocumentList1 = new ArrayList<>();
+        refugeDocumentList1.add(refugeDocument1);
+
+        refugePartyDetails1 = refugePartyDetails1
+            .toBuilder()
+            .isCurrentAddressKnown(YesOrNo.No)
+            .liveInRefuge(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants2 = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList2 =
+            Optional.of(Collections.singletonList(wrappedApplicants2));
+
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord1 =
+            confidentialityC8RefugeService
+                .listRefugeDocumentsPartyWiseForC100(
+                    refugeDocumentList,
+                    refugeDocumentList1,
+                    partyDetailsWrappedList2,
+                    "C8Refuge",
+                    refugeDocumentHandlerParameters,
+                    refugeConfidentialDocumentsRecord);
+
+        assertNotNull(refugeConfidentialDocumentsRecord1);
 
     }
 
@@ -358,6 +434,7 @@ public class ConfidentialityC8RefugeServiceTest {
         Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails2).build();
         List<Element<PartyDetails>> partyDetailsWrappedList1 = Collections.singletonList(wrappedApplicants1);
 
+
         caseData1 = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(partyDetailsWrappedList1)
@@ -497,7 +574,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .build();
 
         Element<PartyDetails> wrappedApplicants1 = Element.<PartyDetails>builder().value(refugePartyDetails2).build();
-        List<Element<PartyDetails>> partyDetailsWrappedList1 = Collections.singletonList(wrappedApplicants1);
+        List<Element<PartyDetails>> partyDetailsWrappedList1 = new ArrayList<>();
+        partyDetailsWrappedList1.add(wrappedApplicants1);
 
         caseData1 = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
