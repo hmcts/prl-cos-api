@@ -48,7 +48,6 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
-        boolean isFinished = false;
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -56,7 +55,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                                                                               .getCitizenDetails());
             if (citizenDetails.isPresent() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
-                isFinished = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -64,7 +63,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError()
         );
-        return isFinished;
+        return false;
     }
 
     private boolean checkContactDetailsMandatoryCompleted(Optional<CitizenDetails> citizenDetails) {
