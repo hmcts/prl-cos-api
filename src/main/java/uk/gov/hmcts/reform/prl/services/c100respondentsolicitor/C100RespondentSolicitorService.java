@@ -382,17 +382,20 @@ public class C100RespondentSolicitorService {
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         for (Element<PartyDetails> respondent : respondents) {
             if (null != respondent.getValue().getResponse()
-                && null != respondent.getValue().getResponse().getCitizenDetails()
-                && YesOrNo.Yes.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
+                && null != respondent.getValue().getResponse().getCitizenDetails()) {
+                if (YesOrNo.Yes.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
+                    List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+                    confidentialityListEnums.add(ConfidentialityListEnum.email);
+                    confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+                    confidentialityListEnums.add(ConfidentialityListEnum.address);
 
-                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
-                confidentialityListEnums.add(ConfidentialityListEnum.email);
-                confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
-                confidentialityListEnums.add(ConfidentialityListEnum.address);
-
-                respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
-                respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
+                    respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
+                    respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
+                } else if (YesOrNo.No.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
+                    respondent.getValue().getResponse().getCitizenDetails().setRefugeConfidentialityC8Form(null);
+                }
             }
+
             respondentList.add(respondent);
         }
 
