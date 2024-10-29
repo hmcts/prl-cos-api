@@ -68,7 +68,7 @@ public class CaseDataOtherPersonsElementsMapper {
                 .firstName(otherPersonDetail.getFirstName())
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
-                .liveInRefuge(null != otherPersonDetail.getLiveInRefuge() ? otherPersonDetail.getLiveInRefuge() : null)
+                .liveInRefuge(livingInRefuge(otherPersonDetail))
                 .refugeConfidentialityC8Form(null != otherPersonDetail.getRefugeConfidentialityC8Form()
                     ? otherPersonDetail.getRefugeConfidentialityC8Form() : null)
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
@@ -81,16 +81,20 @@ public class CaseDataOtherPersonsElementsMapper {
                     ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
                 .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
-                    ? dataIsConfidentialBecauseLivingInRefuge(otherPersonDetail.getLiveInRefuge()) : null)
+                    ? livingInRefuge(otherPersonDetail) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
     }
 
-    private static YesOrNo dataIsConfidentialBecauseLivingInRefuge(YesOrNo livesInRefuge) {
-        if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(livesInRefuge))) {
+    private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
+        if (null != otherPersonDetails.getAddressUnknown()
+            && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getAddressUnknown()))
+            && PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
+            return No;
+        } else if (PrlAppsConstants.YES.equalsIgnoreCase(String.valueOf(otherPersonDetails.getLiveInRefuge()))) {
             return Yes;
         }
-        return null;
+        return No;
     }
 
     private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
