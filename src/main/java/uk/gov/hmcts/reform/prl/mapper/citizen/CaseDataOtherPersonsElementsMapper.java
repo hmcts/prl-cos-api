@@ -68,8 +68,7 @@ public class CaseDataOtherPersonsElementsMapper {
                 .firstName(otherPersonDetail.getFirstName())
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
-                .liveInRefuge(PrlAppsConstants.YES
-                    .equalsIgnoreCase(String.valueOf(livingInRefuge(otherPersonDetail))) ? Yes : No)
+                .liveInRefuge(livingInRefuge(otherPersonDetail))
                 .refugeConfidentialityC8Form(null != otherPersonDetail.getRefugeConfidentialityC8Form()
                     ? otherPersonDetail.getRefugeConfidentialityC8Form() : null)
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
@@ -85,7 +84,6 @@ public class CaseDataOtherPersonsElementsMapper {
                     ? livingInRefuge(otherPersonDetail) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
-
     }
 
     private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
