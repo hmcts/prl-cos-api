@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,6 +82,9 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
+
+    @Mock
+    CaseSummaryTabService caseSummaryTabService;
 
     @Mock
     private AuthorisationService authorisationService;
@@ -330,6 +334,7 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
             authToken, callbackRequest
         )).thenReturn(stringObjectMap);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
