@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -66,6 +67,8 @@ public class CitizenPartyDetailsMapperTest {
     NoticeOfChangePartiesService noticeOfChangePartiesService;
     @Mock
     CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    @Mock
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     @Mock
     ObjectMapper objectMapper;
