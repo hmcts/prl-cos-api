@@ -680,28 +680,95 @@ public class ConfidentialityC8RefugeService {
         return refugeConfidentialDocumentsRecord;
     }
 
-    public void processRefugeDocumentsOnSubmit(Map<String, Object> caseDataUpdated, CaseData caseDataBefore, CaseData caseData, String eventId) {
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+    public void processRefugeDocumentsOnSubmit(Map<String, Object> caseDataUpdated,
+                                               CaseData caseData) {
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments = null;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsOnAmendForC100(
-                caseDataBefore,
-                caseData,
-                eventId
+            log.info("Its for case submission");
+            String partyType = SERVED_PARTY_APPLICANT;
+            refugeDocuments = findAndAddRefugeDocsForC100OnSubmit(
+                ofNullable(caseData.getApplicants()),
+                partyType,
+                refugeDocuments
+            );
+            partyType = SERVED_PARTY_OTHER;
+            refugeDocuments = findAndAddRefugeDocsForC100OnSubmit(
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                partyType,
+                refugeDocuments
             );
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsOnAmendForFL401(
-                caseDataBefore,
-                caseData,
-                eventId
+            log.info("Its for case submission");
+            String partyType = SERVED_PARTY_APPLICANT;
+            refugeDocuments = findAndAddRefugeDocsForFl401OnSubmit(
+                ofNullable(caseData.getApplicantsFL401()),
+                partyType,
+                refugeDocuments
             );
         }
-        if (refugeConfidentialDocumentsRecord != null) {
-            caseDataUpdated.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
-            caseDataUpdated.put(
-                "historicalRefugeDocuments",
-                refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
-            );
+        if (refugeDocuments != null) {
+            caseDataUpdated.put("refugeDocuments", refugeDocuments);
         }
+    }
+
+    private List<Element<RefugeConfidentialDocuments>> findAndAddRefugeDocsForC100OnSubmit(
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments) {
+        if (partyDetailsWrappedList.isPresent()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream()
+                .map(Element::getValue)
+                .toList();
+            for (PartyDetails partyDetails : partyDetailsList) {
+                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                    && partyDetails.getRefugeConfidentialityC8Form() != null) {
+                    RefugeConfidentialDocuments refugeConfidentialDocuments
+                        = RefugeConfidentialDocuments
+                        .builder()
+                        .partyType(partyType)
+                        .partyName(partyDetails.getLabelForDynamicList())
+                        .documentDetails(DocumentDetails.builder()
+                                             .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
+                                             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                                                 dateTimeFormatter)).build())
+                        .document(partyDetails.getRefugeConfidentialityC8Form()).build();
+
+                    if (refugeDocuments == null) {
+                        refugeDocuments = new ArrayList<>();
+                    }
+                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+                }
+            }
+        }
+        return refugeDocuments;
+    }
+
+    private List<Element<RefugeConfidentialDocuments>> findAndAddRefugeDocsForFl401OnSubmit(
+        Optional<PartyDetails> partyDetailsWrapped,
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments) {
+        if (partyDetailsWrapped.isPresent()) {
+            PartyDetails partyDetails = partyDetailsWrapped.get();
+            if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                && partyDetails.getRefugeConfidentialityC8Form() != null) {
+                RefugeConfidentialDocuments refugeConfidentialDocuments
+                    = RefugeConfidentialDocuments
+                    .builder()
+                    .partyType(partyType)
+                    .partyName(partyDetails.getLabelForDynamicList())
+                    .documentDetails(DocumentDetails.builder()
+                                         .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
+                                         .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                                             dateTimeFormatter)).build())
+                    .document(partyDetails.getRefugeConfidentialityC8Form()).build();
+
+                if (refugeDocuments == null) {
+                    refugeDocuments = new ArrayList<>();
+                }
+                refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+            }
+        }
+        return refugeDocuments;
     }
 
     public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForFL401(CaseData caseDataBefore, CaseData caseData, String eventId) {
