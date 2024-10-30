@@ -38,7 +38,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -85,9 +84,6 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
-
-    @Mock
-    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -337,8 +333,6 @@ public class C100RespondentSolicitorControllerTest {
             authToken, callbackRequest
         )).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper
-            .convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
             s2sToken,

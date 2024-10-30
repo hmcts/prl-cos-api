@@ -410,7 +410,6 @@ public class C100RespondentSolicitorService {
                         .setRefugeConfidentialityC8Form(respondent.getValue().getResponse().getCitizenDetails().getRefugeConfidentialityC8Form());
                     respondent.getValue().setLiveInRefuge(Yes);
                 } else if (YesOrNo.No.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
-                    log.info("deleting respondent form from response");
                     respondent.getValue().getResponse().getCitizenDetails().setRefugeConfidentialityC8Form(null);
                     respondent.getValue().setLiveInRefuge(No);
                     respondent.getValue().setRefugeConfidentialityC8Form(null);
@@ -958,22 +957,6 @@ public class C100RespondentSolicitorService {
                             .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
                             .build())
                     .build();
-
-            if ((YesOrNo.Yes.equals(representedRespondent.getValue().getLiveInRefuge()))
-                || (null != representedRespondent.getValue().getResponse()
-                && null != representedRespondent.getValue().getResponse().getCitizenDetails()
-                && YesOrNo.Yes.equals(representedRespondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge()))) {
-                amended = representedRespondent.getValue().toBuilder()
-                    .response(representedRespondent.getValue().getResponse()
-                        .toBuilder()
-                        .citizenDetails(representedRespondent.getValue().getResponse()
-                            .getCitizenDetails()
-                            .toBuilder()
-                            .refugeConfidentialityC8Form(null)
-                            .build())
-                        .build())
-                    .build();
-            }
 
             String party = representedRespondent.getValue().getLabelForDynamicList();
 

@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 
@@ -48,8 +47,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     @Autowired
     public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
                                              C100RespondentSolicitorService respondentSolicitorService,
-                                             AuthorisationService authorisationService,
-                                             ConfidentialityC8RefugeService confidentialityC8RefugeService) {
+                                             AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.respondentSolicitorService = respondentSolicitorService;
         this.authorisationService = authorisationService;
@@ -179,10 +177,8 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
-
             List<String> errorList = new ArrayList<>();
+            log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
