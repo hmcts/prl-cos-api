@@ -132,6 +132,9 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     ReviewDocumentService reviewDocumentService;
 
+    @Mock
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
     CaseData caseData;
 
     CaseData caseData2;
