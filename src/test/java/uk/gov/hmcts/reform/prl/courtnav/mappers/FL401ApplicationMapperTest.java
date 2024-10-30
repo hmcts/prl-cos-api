@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedR
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
@@ -98,6 +99,9 @@ public class FL401ApplicationMapperTest {
     private LaunchDarklyClient launchDarklyClient;
     @Mock
     private LocationRefDataService locationRefDataService;
+
+    @Mock
+    private CourtSealFinderService courtSealFinderService;
 
     @Before
     public void setUp() {
