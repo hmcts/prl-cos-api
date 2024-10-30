@@ -313,8 +313,8 @@ public class ConfidentialityC8RefugeService {
 
         if (refugeConfidentialDocumentsRecord != null) {
             if (newFileAdded) {
-                refugeConfidentialDocumentsRecord.refugeDocuments()
-                .addAll(refugeDocuments);
+                refugeConfidentialDocumentsRecord.refugeDocuments().clear();
+                refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
             }
             refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
         } else {
