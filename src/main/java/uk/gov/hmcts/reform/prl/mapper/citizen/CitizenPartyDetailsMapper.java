@@ -726,9 +726,29 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         log.info("Verifying refuge information first");
-        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+            && null != citizenProvidedPartyDetails.getResponse()
+            && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
             log.info("Party living in refuge, information must remain confidential");
-            return existingPartyDetails;
+            return existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .otherPeopleKnowYourContactDetails(citizenProvidedPartyDetails
+                                                                                             .getResponse()
+                                                                                             .getKeepDetailsPrivate()
+                                                                                             .getOtherPeopleKnowYourContactDetails())
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .build();
         }
 
         log.info("setting refuge confidential data as no");
