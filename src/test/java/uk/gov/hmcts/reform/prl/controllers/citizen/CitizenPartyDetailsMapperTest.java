@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.utils.TestUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -111,7 +114,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
@@ -153,7 +156,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
@@ -184,7 +187,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.respondent)
@@ -234,7 +237,7 @@ public class CitizenPartyDetailsMapperTest {
                                         .solicitorRepresented(YesOrNo.Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.respondent)
@@ -366,6 +369,62 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsYes() throws IOException {
+        setUpCA();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                .firstName("Test")
+                .lastName("User")
+                .isAtAddressLessThan5Years(YesOrNo.Yes)
+                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+                .response(Response.builder().build())
+                .user(User.builder()
+                    .email("test@gmail.com")
+                    .idamId("123")
+                    .solicitorRepresented(YesOrNo.Yes)
+                    .build())
+                .citizenSosObject(CitizenSos.builder()
+                    .partiesServed(List.of("123,234,1234"))
+                    .build())
+                .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsCaseEventConfirmDetailsAddressIsNo() throws IOException {
+        setUpCA();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                .firstName("Test")
+                .lastName("User")
+                .isAtAddressLessThan5Years(YesOrNo.No)
+                .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.no)
+                .response(Response.builder().build())
+                .user(User.builder()
+                    .email("test@gmail.com")
+                    .idamId("123")
+                    .solicitorRepresented(YesOrNo.Yes)
+                    .build())
+                .citizenSosObject(CitizenSos.builder()
+                    .partiesServed(List.of("123,234,1234"))
+                    .build())
+                .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
+            CaseEvent.CONFIRM_YOUR_DETAILS,
+            authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
     public void testMapUpdatedPartyDetailsCaseEventLinkCitizen() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, updateCaseData,
@@ -399,6 +458,34 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .applicantPcqId("123")
+            .c100RebuildHelpWithFeesDetails(TestUtil.readFileFrom("classpath:c100-rebuild/hwf.json"))
+            .build();
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+        assertNotNull(caseDataResult);
+    }
+
+    @Test
+    public void testBuildUpdatedCaseDataWhereAddressIsDontKnow() throws IOException {
+        c100RebuildData = C100RebuildData.builder()
+            .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
+            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
+            .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
+            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam.json"))
+            .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
+            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
+            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp2.json"))
+            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .applicantPcqId("123")
             .build();
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -429,7 +516,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
             .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
             .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
-            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .build();
         caseData = CaseData.builder()
@@ -439,6 +526,58 @@ public class CitizenPartyDetailsMapperTest {
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
+    }
+
+    @Test
+    public void testMapUpdatedPartyDetailsDaRespondentForV3() throws Exception {
+        setUpDa();
+        updateCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .response(Response.builder().build())
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed(List.of("123", "234", "1234"))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.respondent)
+            .build();
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("af1").lastName("al1")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("afl11@test.com")
+            .response(Response.builder().build())
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(Arrays.asList(element(applicant1)))
+            .c100RebuildData(c100RebuildData)
+            .build();
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
+                                                                                            anyString()
+        );
+        when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(), any())).thenReturn(true);
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            caseData,
+            updateCaseData,
+            CaseEvent.KEEP_DETAILS_PRIVATE,
+            authToken
+        );
+        assertNotNull(citizenUpdatePartyDataContent);
     }
 
 }
