@@ -495,13 +495,13 @@ public class ConfidentialityC8RefugeService {
                 refugeDocumentHandlerParameters,
                 null
             );
-            processC8RefugeDocumentsChangesForC100OnSubmit(
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForC100OnSubmit(
                 caseData,
                 ofNullable(caseData.getRespondents()),
                 refugeDocumentHandlerParameters,
                 refugeConfidentialDocumentsRecord
             );
-            processC8RefugeDocumentsChangesForC100OnSubmit(
+            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForC100OnSubmit(
                 caseData,
                 ofNullable(caseData.getOtherPartyInTheCaseRevised()),
                 refugeDocumentHandlerParameters,
