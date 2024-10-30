@@ -28,7 +28,7 @@ public class CafCassFilter {
      * @param cafCassResponse - CafCassResponse
      */
     private void setNonNullEmptyElementList(CafCassResponse cafCassResponse) {
-        cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
+        cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
 
             final CafCassCaseData cafCassCaseData = caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))

@@ -137,12 +137,12 @@ public class CaseDataService {
                 );
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
-                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     updateSolicitorAddressForParties(filteredCafcassData);
+                    addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -160,7 +160,7 @@ public class CaseDataService {
 
         String systemAuthorisation = systemUserService.getSysUserToken();
         String serviceAuthorisation = authTokenGenerator.generate();
-        cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
+        cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 systemAuthorisation,
                 serviceAuthorisation,
@@ -196,7 +196,7 @@ public class CaseDataService {
     }
 
     private void parseCfvDocuments(List<Element<OtherDocuments>> otherDocsList, Category category) {
-        category.getDocuments().forEach(document -> {
+        category.getDocuments().stream().forEach(document -> {
             if (CollectionUtils.isEmpty(excludedDocumentList)
                 || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
                 try {
@@ -395,7 +395,7 @@ public class CaseDataService {
         List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
-                hearings.getCaseHearings().forEach(caseHearing -> {
+                hearings.getCaseHearings().stream().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
                     }
@@ -432,7 +432,7 @@ public class CaseDataService {
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
-                    filteredHearing.getCaseHearings().forEach(
+                    filteredHearing.getCaseHearings().stream().forEach(
                         caseHearing -> caseHearing.getHearingDaySchedule().forEach(
                             hearingDaySchedule -> {
                                 hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
