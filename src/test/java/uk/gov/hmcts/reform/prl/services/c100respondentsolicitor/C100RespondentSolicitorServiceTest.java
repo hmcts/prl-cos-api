@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
@@ -188,6 +189,9 @@ public class C100RespondentSolicitorServiceTest {
     OrganisationService organisationService;
     @Mock
     LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
@@ -562,12 +566,17 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
@@ -1567,12 +1576,17 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(

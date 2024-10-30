@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
@@ -161,6 +162,7 @@ public class C100RespondentSolicitorService {
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
     private final CaseSummaryTabService caseSummaryTab;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -353,8 +355,18 @@ public class C100RespondentSolicitorService {
                 || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+        }
+
+        if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)) {
             respondents = setRefugeData(respondents);
             updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
+
+            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+                updatedCaseData,
+                caseDataBefore,
+                caseData,
+                callbackRequest.getEventId());
         }
 
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());

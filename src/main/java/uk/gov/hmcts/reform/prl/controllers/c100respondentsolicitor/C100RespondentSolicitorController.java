@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +45,6 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     private final C100RespondentSolicitorService respondentSolicitorService;
     private final AuthorisationService authorisationService;
 
-    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
-
     @Autowired
     public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
                                              C100RespondentSolicitorService respondentSolicitorService,
@@ -56,7 +53,6 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         super(objectMapper, eventPublisher);
         this.respondentSolicitorService = respondentSolicitorService;
         this.authorisationService = authorisationService;
-        this.confidentialityC8RefugeService = confidentialityC8RefugeService;
     }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -185,23 +181,14 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
             log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.putAll(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                authorisation,
-                callbackRequest
-            ));
-            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
-                caseDataUpdated,
-                caseDataBefore,
-                caseData,
-                callbackRequest.getEventId());
 
             List<String> errorList = new ArrayList<>();
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(caseDataUpdated)
+                .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                    authorisation,
+                    callbackRequest
+                ))
                 .errors(errorList)
                 .build();
         } else {
