@@ -393,9 +393,7 @@ public class CallbackController {
             CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
             confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
                 caseDataUpdated,
-                caseDataBefore,
-                caseData,
-                callbackRequest.getEventId()
+                caseData
             );
             try {
                 log.info("case data while submitting the case ===>" + objectMapper.writeValueAsString(caseData));
