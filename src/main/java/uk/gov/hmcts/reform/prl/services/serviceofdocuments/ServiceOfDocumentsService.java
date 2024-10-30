@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
@@ -1048,15 +1049,17 @@ public class ServiceOfDocumentsService {
             );
 
             response = ok(SubmittedCallbackResponse.builder()
-                    .confirmationHeader("# Document(s) will be served")
-                    .build());
+                              .confirmationHeader("# Document(s) will be served")
+                              .confirmationBody(EMPTY_SPACE_STRING)
+                              .build());
         } else {
             //Reset unserved packs
             caseDataMap.put("sodUnServedPack", null);
 
             response = ok(SubmittedCallbackResponse.builder()
-                    .confirmationHeader("# Document(s) reject, Refer to court admin")
-                          .build());
+                              .confirmationHeader("# Document(s) reject, Refer to court admin")
+                              .confirmationBody(EMPTY_SPACE_STRING)
+                              .build());
         }
 
         //Clean up the fields
