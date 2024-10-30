@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
@@ -129,6 +130,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ReviewDocumentService reviewDocumentService;
+
+    @Mock
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     CaseData caseData;
 

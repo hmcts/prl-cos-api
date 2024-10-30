@@ -300,7 +300,8 @@ public class ConfidentialityC8RefugeService {
                         refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                             refugeDocuments,
                             partyDetails,
-                            partyType
+                            partyType,
+                            partyDetailsList.indexOf(partyDetails)
                         );
                         newFileAdded = true;
                     }
@@ -328,26 +329,13 @@ public class ConfidentialityC8RefugeService {
     private List<Element<RefugeConfidentialDocuments>> buildAndListRefugeDocumentsForConfidentialityTab(
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         PartyDetails partyDetails,
-        String partyType) {
-        if (partyDetails.getRefugeConfidentialityC8Form() != null) {
-            RefugeConfidentialDocuments refugeConfidentialDocuments
-                = RefugeConfidentialDocuments
-                .builder()
-                .partyType(partyType)
-                .partyName(partyDetails.getLabelForDynamicList())
-                .documentDetails(DocumentDetails.builder()
-                                     .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
-                                     .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
-                                         dateTimeFormatter)).build())
-                .document(partyDetails.getRefugeConfidentialityC8Form()).build();
-
-            if (refugeDocuments != null) {
-                refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
-            } else {
-                refugeDocuments = new ArrayList<>();
-                refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
-            }
-        }
+        String partyType,
+        int partyIndex) {
+        refugeDocuments = addToRefugeDocument(
+            String.format(partyType, EMPTY_SPACE_STRING, partyIndex + 1),
+            refugeDocuments,
+            partyDetails
+        );
         return refugeDocuments;
     }
 
@@ -357,7 +345,6 @@ public class ConfidentialityC8RefugeService {
         if (refugeDocuments != null && !refugeDocuments.isEmpty()) {
             log.info("refugeDocuments is present and size is " + refugeDocuments.size());
             log.info("historicalRefugeDocuments is present and size is " + historicalRefugeDocuments.size());
-
             for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext(); ) {
                 Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
                 log.info(
@@ -402,7 +389,8 @@ public class ConfidentialityC8RefugeService {
                     refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                         refugeDocuments,
                         partyDetails,
-                        party
+                        party,
+                        0
                     );
                     newFileAdded = true;
                 }
@@ -720,24 +708,11 @@ public class ConfidentialityC8RefugeService {
                 .map(Element::getValue)
                 .toList();
             for (PartyDetails partyDetails : partyDetailsList) {
-                if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                    && partyDetails.getRefugeConfidentialityC8Form() != null) {
-                    RefugeConfidentialDocuments refugeConfidentialDocuments
-                        = RefugeConfidentialDocuments
-                        .builder()
-                        .partyType(partyType)
-                        .partyName(partyDetails.getLabelForDynamicList())
-                        .documentDetails(DocumentDetails.builder()
-                                             .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
-                                             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
-                                                 dateTimeFormatter)).build())
-                        .document(partyDetails.getRefugeConfidentialityC8Form()).build();
-
-                    if (refugeDocuments == null) {
-                        refugeDocuments = new ArrayList<>();
-                    }
-                    refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
-                }
+                refugeDocuments = addToRefugeDocument(String.format(
+                    partyType,
+                    EMPTY_SPACE_STRING,
+                    partyDetailsList.indexOf(partyDetails) + 1
+                ), refugeDocuments, partyDetails);
             }
         }
         return refugeDocuments;
@@ -749,43 +724,198 @@ public class ConfidentialityC8RefugeService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments) {
         if (partyDetailsWrapped.isPresent()) {
             PartyDetails partyDetails = partyDetailsWrapped.get();
-            if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-                && partyDetails.getRefugeConfidentialityC8Form() != null) {
-                RefugeConfidentialDocuments refugeConfidentialDocuments
-                    = RefugeConfidentialDocuments
-                    .builder()
-                    .partyType(partyType)
-                    .partyName(partyDetails.getLabelForDynamicList())
-                    .documentDetails(DocumentDetails.builder()
-                                         .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
-                                         .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
-                                             dateTimeFormatter)).build())
-                    .document(partyDetails.getRefugeConfidentialityC8Form()).build();
-
-                if (refugeDocuments == null) {
-                    refugeDocuments = new ArrayList<>();
-                }
-                refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
-            }
+            refugeDocuments = addToRefugeDocument(
+                String.format(partyType, EMPTY_SPACE_STRING, 1),
+                refugeDocuments,
+                partyDetails
+            );
         }
         return refugeDocuments;
+    }
+
+    public void processRefugeDocumentsOnReSubmit(Map<String, Object> caseDataUpdated,
+                                                 CaseData caseData) {
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments = caseData.getRefugeDocuments() != null
+            ? caseData.getRefugeDocuments() : new ArrayList<>();
+        List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments = caseData.getHistoricalRefugeDocuments() != null
+            ? caseData.getHistoricalRefugeDocuments() : new ArrayList<>();
+        log.info("historical list size check 11111" + historicalRefugeDocuments.size());
+        log.info("refugeDocuments list size check 11111" + refugeDocuments.size());
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("Its for case submission");
+            String partyType = SERVED_PARTY_APPLICANT;
+            findAndAddRefugeDocsForC100OnReSubmit(
+                ofNullable(caseData.getApplicants()),
+                partyType,
+                refugeDocuments,
+                historicalRefugeDocuments
+            );
+            log.info("historical list size check 22222" + historicalRefugeDocuments.size());
+            log.info("refugeDocuments list size check 2222" + refugeDocuments.size());
+            partyType = SERVED_PARTY_OTHER;
+            findAndAddRefugeDocsForC100OnReSubmit(
+                ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+                partyType,
+                refugeDocuments,
+                historicalRefugeDocuments
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("Its for case submission");
+            String partyType = SERVED_PARTY_APPLICANT;
+            findAndAddRefugeDocsForFl401OnReSubmit(
+                ofNullable(caseData.getApplicantsFL401()),
+                partyType,
+                refugeDocuments,
+                historicalRefugeDocuments
+            );
+            log.info("historical list size check 33333" + historicalRefugeDocuments.size());
+            log.info("refugeDocuments list size check 33333" + refugeDocuments.size());
+        }
+        log.info("historical list size check 44444" + historicalRefugeDocuments.size());
+        log.info("refugeDocuments list size check 44444" + refugeDocuments.size());
+        caseDataUpdated.put("refugeDocuments", refugeDocuments);
+        caseDataUpdated.put("historicalRefugeDocuments", historicalRefugeDocuments);
+    }
+
+    public void processRefugeDocumentsC7ResponseSubmission(Map<String, Object> caseDataUpdated,
+                                                           PartyDetails partyDetails,
+                                                           List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+                                                           List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
+                                                           int partyIndex) {
+        log.info("historical list size check 55555" + historicalRefugeDocuments.size());
+        log.info("refugeDocuments list size check 5555" + refugeDocuments.size());
+        log.info("Its for response submission");
+        String partyType = SERVED_PARTY_RESPONDENT;
+        findAndAddRefugeDocsForSolicitorResponseSubmit(
+            partyDetails,
+            partyType,
+            refugeDocuments,
+            historicalRefugeDocuments,
+            partyIndex
+        );
+        log.info("historical list size check 666666" + historicalRefugeDocuments.size());
+        log.info("refugeDocuments list size check 66666" + refugeDocuments.size());
+        caseDataUpdated.put("refugeDocuments", refugeDocuments);
+        caseDataUpdated.put("historicalRefugeDocuments", historicalRefugeDocuments);
+    }
+
+    private void findAndAddRefugeDocsForSolicitorResponseSubmit(
+        PartyDetails partyDetails,
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
+        int partyIndex) {
+        partyType = String.format(partyType, EMPTY_SPACE_STRING, partyIndex);
+        historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(partyType, refugeDocuments, historicalRefugeDocuments);
+        log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
+        log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+        refugeDocuments = addToRefugeDocument(
+            partyType,
+            refugeDocuments,
+            partyDetails
+        );
+        log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+    }
+
+    private void findAndAddRefugeDocsForC100OnReSubmit(
+        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments) {
+        if (partyDetailsWrappedList.isPresent()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream()
+                .map(Element::getValue)
+                .toList();
+            for (PartyDetails partyDetails : partyDetailsList) {
+                partyType = String.format(partyType, EMPTY_SPACE_STRING, partyDetailsList.indexOf(partyDetails) + 1);
+                historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(partyType, refugeDocuments, historicalRefugeDocuments);
+                log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
+                log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+                refugeDocuments = addToRefugeDocument(
+                    partyType,
+                    refugeDocuments,
+                    partyDetails
+                );
+                log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+            }
+        }
+    }
+
+    private void findAndAddRefugeDocsForFl401OnReSubmit(
+        Optional<PartyDetails> partyDetailsWrapped,
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments) {
+        if (partyDetailsWrapped.isPresent()) {
+            partyType = String.format(partyType, EMPTY_SPACE_STRING, 1);
+            historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(partyType, refugeDocuments, historicalRefugeDocuments);
+            log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
+            log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+            PartyDetails partyDetails = partyDetailsWrapped.get();
+            refugeDocuments = addToRefugeDocument(partyType, refugeDocuments, partyDetails);
+            log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
+        }
+    }
+
+    private List<Element<RefugeConfidentialDocuments>> addToRefugeDocument(String partyType,
+                                                                           List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+                                                                           PartyDetails partyDetails) {
+        if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+            && partyDetails.getRefugeConfidentialityC8Form() != null) {
+            RefugeConfidentialDocuments refugeConfidentialDocuments
+                = RefugeConfidentialDocuments
+                .builder()
+                .partyType(partyType)
+                .partyName(partyDetails.getLabelForDynamicList())
+                .documentDetails(DocumentDetails.builder()
+                                     .documentName(partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName())
+                                     .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                                         dateTimeFormatter)).build())
+                .document(partyDetails.getRefugeConfidentialityC8Form()).build();
+
+            if (refugeDocuments == null) {
+                refugeDocuments = new ArrayList<>();
+            }
+            refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+        }
+        return refugeDocuments;
+    }
+
+    private static List<Element<RefugeConfidentialDocuments>> updateHistoricalDocsAndRemoveFromCurrentList(
+        String partyType,
+        List<Element<RefugeConfidentialDocuments>> refugeDocuments,
+        List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments) {
+        for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext(); ) {
+            Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
+            log.info(
+                "refugeConfidentialDocumentsWrapped is present and now iterating through items, position:: "
+                    + refugeDocuments.indexOf(refugeConfidentialDocumentsWrapped));
+            if (refugeConfidentialDocumentsWrapped.getValue() != null
+                && partyType.equalsIgnoreCase(refugeConfidentialDocumentsWrapped.getValue().getPartyType())) {
+                log.info("If condition satisfied for party type. doc is present");
+                if (historicalRefugeDocuments == null) {
+                    historicalRefugeDocuments = new ArrayList<>();
+                }
+                historicalRefugeDocuments.add(refugeConfidentialDocumentsWrapped);
+                itr.remove();
+            }
+        }
+        return historicalRefugeDocuments;
     }
 
     public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForFL401(CaseData caseDataBefore, CaseData caseData, String eventId) {
         boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
         if (onlyForApplicant) {
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForApplicant(true)
                     .build();
-            Optional<PartyDetails> applicantsFL401 = ofNullable(caseData.getApplicantsFL401());
-            Optional<PartyDetails> applicantsFL401Before = ofNullable(caseDataBefore.getApplicantsFL401());
             refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForFL401(
                 caseData,
-                applicantsFL401,
-                applicantsFL401Before,
+                ofNullable(caseData.getApplicantsFL401()),
+                ofNullable(caseDataBefore.getApplicantsFL401()),
                 refugeDocumentHandlerParameters,
                 null
             );
@@ -794,32 +924,12 @@ public class ConfidentialityC8RefugeService {
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForRespondent(true)
                     .build();
-            Optional<PartyDetails> respondentsList = ofNullable(caseData.getRespondentsFL401());
-            Optional<PartyDetails> respondentsListBefore = ofNullable(caseDataBefore.getRespondentsFL401());
             refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForFL401(
                 caseData,
-                respondentsList,
-                respondentsListBefore,
-                refugeDocumentHandlerParameters,
-                null
-            );
-        } else {
-            log.info("Its for anything else");
-            RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
-                RefugeDocumentHandlerParameters.builder()
-                    .forAllParties(true)
-                    .build();
-            refugeConfidentialDocumentsRecord = processC8RefugeDocumentsChangesForFL401OnSubmit(
-                caseData,
-                ofNullable(caseData.getApplicantsFL401()),
-                refugeDocumentHandlerParameters,
-                null
-            );
-            processC8RefugeDocumentsChangesForFL401OnSubmit(
-                caseData,
                 ofNullable(caseData.getRespondentsFL401()),
+                ofNullable(caseDataBefore.getRespondentsFL401()),
                 refugeDocumentHandlerParameters,
-                refugeConfidentialDocumentsRecord
+                null
             );
         }
         return refugeConfidentialDocumentsRecord;
