@@ -88,6 +88,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -151,6 +152,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    CaseSummaryTabService caseSummaryTab;
 
 
     @Mock
@@ -562,12 +566,17 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
@@ -1218,6 +1227,10 @@ public class C100RespondentSolicitorServiceTest {
                             .id(123L)
                             .data(stringObjectMap)
                             .build())
+                    .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
                     .build();
 
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
@@ -1567,12 +1580,17 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
@@ -2309,6 +2327,10 @@ public class C100RespondentSolicitorServiceTest {
                                  .id(123L)
                                  .data(stringObjectMap)
                                  .build())
+                .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                    .id(123L)
+                    .data(stringObjectMap)
+                    .build())
                 .build();
             callbackRequest.setEventId(event);
 
