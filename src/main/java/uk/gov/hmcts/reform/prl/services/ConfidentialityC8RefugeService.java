@@ -386,6 +386,7 @@ public class ConfidentialityC8RefugeService {
         RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
     ) {
+        boolean newFileAdded = false;
         log.info("start listRefugeDocumentsPartyWise");
         log.info("refugeDocuments are at the start :: " + refugeDocuments.size());
         log.info("historicalRefugeDocuments are at the start :: " + historicalRefugeDocuments.size());
@@ -397,20 +398,26 @@ public class ConfidentialityC8RefugeService {
                 || refugeDocumentHandlerParameters.listHistoricalDocument) {
                 findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, party);
             }
-            if (refugeDocumentHandlerParameters.listDocument) {
-                log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
-                buildAndListRefugeDocumentsForConfidentialityTab(
-                    refugeDocuments,
-                    partyDetails,
-                    party
-                );
+            if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+                log.info("Yes to refuge");
+                if (refugeDocumentHandlerParameters.listDocument) {
+                    log.info("Now building the new item for the refugeDocuments and current size is " + refugeDocuments.size());
+                    refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
+                        refugeDocuments,
+                        partyDetails,
+                        party
+                    );
+                    newFileAdded = true;
+                }
             }
             log.info("refugeDocuments are now :: " + refugeDocuments.size());
             log.info("historicalRefugeDocuments are now :: " + historicalRefugeDocuments.size());
         }
         log.info("end listRefugeDocumentsPartyWise");
         if (refugeConfidentialDocumentsRecord != null) {
-            refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            if (newFileAdded) {
+                refugeConfidentialDocumentsRecord.refugeDocuments().addAll(refugeDocuments);
+            }
             refugeConfidentialDocumentsRecord.historicalRefugeDocuments().addAll(historicalRefugeDocuments);
         } else {
             refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
@@ -734,6 +741,7 @@ public class ConfidentialityC8RefugeService {
                 null
             );
         } else {
+            log.info("Its for anything else");
             RefugeDocumentHandlerParameters refugeDocumentHandlerParameters =
                 RefugeDocumentHandlerParameters.builder()
                     .forAllParties(true)
