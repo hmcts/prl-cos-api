@@ -211,6 +211,7 @@ public class ConfidentialityC8RefugeService {
         log.info("refugeDocuments are now in listRefugeDocumentsForConfidentialTab 6666666:: " + refugeDocuments.size());
         log.info("historicalRefugeDocuments are now in listRefugeDocumentsForConfidentialTab 6666666:: " + historicalRefugeDocuments.size());
         log.info("end listRefugeDocumentsForConfidentialTab");
+        log.info("refugeConfidentialDocuments 222222: ", refugeConfidentialDocumentsRecord);
         return refugeConfidentialDocumentsRecord;
     }
 
@@ -310,6 +311,7 @@ public class ConfidentialityC8RefugeService {
             }
         }
         log.info("end listRefugeDocumentsPartyWise");
+        log.info("refuge documents is {}", refugeDocuments);
 
         if (refugeConfidentialDocumentsRecord != null) {
             if (newFileAdded) {
@@ -322,6 +324,7 @@ public class ConfidentialityC8RefugeService {
                 historicalRefugeDocuments
             );
         }
+        log.info("refuge documents Record is {}", refugeConfidentialDocumentsRecord);
         return refugeConfidentialDocumentsRecord;
     }
 
