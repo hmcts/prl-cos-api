@@ -184,7 +184,6 @@ public class ClosingCaseService {
 
         List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren =
             caseData.getClosingCaseOptions().getFinalOutcomeForChildren();
-        log.info("finalOutcomeForChildren " + finalOutcomeForChildren);
         finalOutcomeForChildren.forEach(finalOutcomeForChildrenElement ->
                                             updateChildDetails(
                                                 caseDataUpdated,
@@ -221,15 +220,12 @@ public class ClosingCaseService {
             RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest = RoleAssignmentDeleteQueryRequest.builder()
                 .queryRequests(queryRequests)
                 .build();
-            log.info("** RoleAssignmentDeleteQueryRequest " + objectMapper.writeValueAsString(
-                roleAssignmentDeleteQueryRequest));
             ResponseEntity<HttpStatus> status = roleAssignmentApi.deleteQueryRoleAssignments(
                 systemAuthorisation,
                 s2sToken,
                 null,
                 roleAssignmentDeleteQueryRequest
             );
-            log.info("** RoleAssignmentDeleteQueryResponse " + status);
             if (null != status && status.getStatusCode().is2xxSuccessful()) {
                 caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().build());
                 caseDataUpdated.put("allocatedJudgeForSendAndReply", Collections.emptyList());
@@ -256,7 +252,6 @@ public class ClosingCaseService {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             caseData.getNewChildDetails().forEach(child -> {
                 if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
-                    log.info("found ChildDetailsRevised");
                     ChildDetailsRevised updatedChildDetails = child.getValue().toBuilder()
                         .finalDecisionResolutionDate(finalDecisionResolutionDate)
                         .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -269,7 +264,6 @@ public class ClosingCaseService {
             List<Element<Child>> children = caseData.getChildren();
             caseData.getChildren().forEach(child -> {
                 if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
-                    log.info("found Child");
                     Child updatedChildDetails = child.getValue().toBuilder()
                         .finalDecisionResolutionDate(finalDecisionResolutionDate)
                         .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
@@ -282,7 +276,6 @@ public class ClosingCaseService {
             List<Element<ApplicantChild>> children = caseData.getApplicantChildDetails();
             caseData.getApplicantChildDetails().forEach(child -> {
                 if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
-                    log.info("found ApplicantChild");
                     ApplicantChild updatedChildDetails = child.getValue().toBuilder()
                         .finalDecisionResolutionDate(finalDecisionResolutionDate)
                         .finalDecisionResolutionReason(finalOutcomeForChildrenElement.getValue().getCaseClosingReason().getDisplayedValue())
