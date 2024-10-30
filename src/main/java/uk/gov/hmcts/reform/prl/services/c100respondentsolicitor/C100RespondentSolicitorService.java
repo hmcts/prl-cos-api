@@ -79,6 +79,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -700,15 +701,14 @@ public class C100RespondentSolicitorService {
             .build();
 
         if (YesOrNo.Yes.equals(citizenDetails.getLiveInRefuge())) {
-            List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
-            confidentialityListEnums.add(ConfidentialityListEnum.email);
-            confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
-            confidentialityListEnums.add(ConfidentialityListEnum.address);
-
             buildResponseForRespondent = buildResponseForRespondent
                 .toBuilder().keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
                                                     .confidentiality(Yes)
-                                                    .confidentialityList(confidentialityListEnums).build())
+                                                    .confidentialityList(Arrays.asList(
+                                                        ConfidentialityListEnum.email,
+                                                        ConfidentialityListEnum.address,
+                                                        ConfidentialityListEnum.phoneNumber
+                                                    )).build())
                 .build();
         }
         return buildResponseForRespondent;
@@ -989,14 +989,6 @@ public class C100RespondentSolicitorService {
         }
 
         updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
-            updatedCaseData,
-            caseDataBefore,
-            caseData,
-            callbackRequest.getEventId());
-
-
         moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
 
         return updatedCaseData;

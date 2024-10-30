@@ -193,9 +193,6 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     LaunchDarklyClient launchDarklyClient;
 
-    @Mock
-    ConfidentialityC8RefugeService confidentialityC8RefugeService;
-
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm2;
