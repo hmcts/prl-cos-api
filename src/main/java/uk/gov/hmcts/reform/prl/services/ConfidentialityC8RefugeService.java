@@ -433,6 +433,7 @@ public class ConfidentialityC8RefugeService {
 
     public RefugeConfidentialDocumentsRecord processC8RefugeDocumentsOnAmendForC100(CaseData caseDataBefore, CaseData caseData, String eventId) {
         log.info("Inside processC8RefugeDocumentsOnAmendForC100");
+        log.info("eventId is {}", eventId);
         boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForRespondent = CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForOtherPeople = CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue().equalsIgnoreCase(
