@@ -24,7 +24,12 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklis
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -723,5 +728,21 @@ public class CafCassCaseData {
     private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
 
     private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
+
+    private ReviewDocuments reviewDocuments;
+
+    private RespondentC8Document respondentC8Document;
+
+    private List<uk.gov.hmcts.reform.prl.models.documents.Document> c8FormDocumentsUploaded;
+
+    private BundlingInformation bundleInformation;
+
+    private List<uk.gov.hmcts.reform.prl.models.documents.Document> otherDocumentsUploaded;
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc;
+
+    private ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
+
+    private StatementOfService statementOfService;
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -12,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
-import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,6 +22,8 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +61,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDataService {
+    public static final String CONFIDENTIAL = "confidential";
+    public static final String ANY_OTHER_DOC = "anyOtherDoc";
     @Value("${cafcaas.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
 
@@ -93,8 +94,6 @@ public class CaseDataService {
     private final RefDataService refDataService;
 
     private final OrganisationService organisationService;
-
-    private final CoreCaseDataApi coreCaseDataApi;
 
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
@@ -157,24 +156,32 @@ public class CaseDataService {
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
-
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String serviceAuthorisation = authTokenGenerator.generate();
-        cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
-            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
-                systemAuthorisation,
-                serviceAuthorisation,
-                String.valueOf(cafCassCaseDetail.getId())
-            );
+        cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
-
-            List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-                .sorted(Comparator.comparing(Category::getCategoryName))
-                .toList();
-            parseCategoryAndCreateList(parentCategories, otherDocsList);
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            populateReviewDocuments(otherDocsList, caseData);
+            populateRespondentC1AResponseDoc(caseData.getRespondents(), otherDocsList);
+            populateConfidentialDoc(caseData, otherDocsList);
+            populateBundleDoc(caseData, otherDocsList);
+            populateAnyOtherDoc(caseData, otherDocsList);
+
+            List<Element<ApplicantDetails>> respondents = new ArrayList<>();
+            caseData.getRespondents().parallelStream().forEach(applicantDetailsElement ->  {
+                ApplicantDetails applicantDetails = applicantDetailsElement.getValue().toBuilder().response(null).build();
+                respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(applicantDetails).build());
+            });
+
             final CafCassCaseData cafCassCaseData = caseData.toBuilder()
                 .otherDocuments(otherDocsList)
+                .reviewDocuments(null)
+                .respondentC8Document(null)
+                .c8FormDocumentsUploaded(null)
+                .bundleInformation(null)
+                .otherDocumentsUploaded(null)
+                .uploadOrderDoc(null)
+                .serviceOfApplicationUploadDocs(null)
+                .statementOfService(null)
+                .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
         });
@@ -182,34 +189,375 @@ public class CaseDataService {
 
     }
 
-    private void parseCategoryAndCreateList(List<Category> parentCategories,
-                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
-        parentCategories.forEach(category -> {
-            if (CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(
-                category.getCategoryId())) {
-                if (category.getSubCategories() != null) {
-                    parseCategoryAndCreateList(category.getSubCategories(), otherDocsList);
-                }
-                parseCfvDocuments(otherDocsList, category);
+    private void populateAnyOtherDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (CollectionUtils.isNotEmpty(caseData.getOtherDocumentsUploaded())) {
+            caseData.getOtherDocumentsUploaded().parallelStream().forEach(document -> addInOtherDocuments(
+                ANY_OTHER_DOC,
+                document,
+                otherDocsList
+            ));
+        }
+        if (null != caseData.getUploadOrderDoc()) {
+            addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
+        }
+        if (null != caseData.getServiceOfApplicationUploadDocs()) {
+            populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
+        }
+        if (null != caseData.getStatementOfService()) {
+            populateStatementOfServiceDocs(caseData, otherDocsList);
+        }
+
+    }
+
+    private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+            caseData.getStatementOfService().getStmtOfServiceForOrder().parallelStream().forEach(
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+            caseData.getStatementOfService().getStmtOfServiceForApplication().parallelStream().forEach(
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient().parallelStream().forEach(
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
+        }
+    }
+
+    private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (null != caseData.getServiceOfApplicationUploadDocs().getSpecialArrangementsLetter()) {
+            addInOtherDocuments(ANY_OTHER_DOC,
+                                caseData.getServiceOfApplicationUploadDocs().getSpecialArrangementsLetter(),
+                                otherDocsList
+            );
+        }
+        if (null != caseData.getServiceOfApplicationUploadDocs().getAdditionalDocuments()) {
+            addInOtherDocuments(ANY_OTHER_DOC, caseData.getServiceOfApplicationUploadDocs().getAdditionalDocuments(),
+                                otherDocsList
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplicationUploadDocs().getAdditionalDocumentsList())) {
+            caseData.getServiceOfApplicationUploadDocs().getAdditionalDocumentsList().parallelStream().forEach(
+                documentElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    documentElement.getValue(),
+                    otherDocsList
+                ));
+        }
+    }
+
+    private void populateBundleDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (null != caseData.getBundleInformation()
+            && null != caseData.getBundleInformation().getCaseBundles()
+            && CollectionUtils.isNotEmpty(caseData.getBundleInformation().getCaseBundles())) {
+            caseData.getBundleInformation().getCaseBundles().parallelStream().forEach(bundle -> {
+                uk.gov.hmcts.reform.prl.models.documents.Document document = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentFileName(bundle.getValue().getStitchedDocument().documentFilename)
+                    .documentUrl(bundle.getValue().getStitchedDocument().getDocumentUrl())
+                    .build();
+                addInOtherDocuments("courtBundle", document, otherDocsList);
+            });
+        }
+    }
+
+    private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
+        if (ObjectUtils.isNotEmpty(caseData.getReviewDocuments())) {
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab())) {
+                parseQuarantineLegalDocs(
+                    otherDocsList,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
+                );
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())) {
+                parseQuarantineLegalDocs(
+                    otherDocsList,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
+                );
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCafcassUploadDocListDocTab())) {
+                parseQuarantineLegalDocs(
+                    otherDocsList,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
+                );
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab())) {
+                parseQuarantineLegalDocs(
+                    otherDocsList,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
+                );
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
+                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getBulkScannedDocListDocTab())) {
+                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
+                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
+            }
+        }
+    }
+
+    private void populateConfidentialDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (null != caseData.getRespondentC8Document()) {
+            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
+                caseData.getRespondentC8Document().getRespondentAc8Documents().parallelStream().forEach(
+                    responseDocumentsElement ->
+                        populateRespondentDocument(
+                            responseDocumentsElement.getValue().getRespondentC8Document(),
+                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                            CONFIDENTIAL,
+                            otherDocsList
+                        ));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
+                caseData.getRespondentC8Document().getRespondentBc8Documents().parallelStream().forEach(
+                    responseDocumentsElement ->
+                        populateRespondentDocument(
+                            responseDocumentsElement.getValue().getRespondentC8Document(),
+                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                            CONFIDENTIAL,
+                            otherDocsList
+                        ));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
+                caseData.getRespondentC8Document().getRespondentCc8Documents().parallelStream().forEach(
+                    responseDocumentsElement ->
+                        populateRespondentDocument(
+                            responseDocumentsElement.getValue().getRespondentC8Document(),
+                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                            CONFIDENTIAL,
+                            otherDocsList
+                        ));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
+                caseData.getRespondentC8Document().getRespondentDc8Documents().parallelStream().forEach(
+                    responseDocumentsElement ->
+                        populateRespondentDocument(
+                            responseDocumentsElement.getValue().getRespondentC8Document(),
+                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                            CONFIDENTIAL,
+                            otherDocsList
+                        ));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
+                caseData.getRespondentC8Document().getRespondentEc8Documents().parallelStream().forEach(
+                    responseDocumentsElement ->
+                        populateRespondentDocument(
+                            responseDocumentsElement.getValue().getRespondentC8Document(),
+                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                            CONFIDENTIAL,
+                            otherDocsList
+                        ));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getC8FormDocumentsUploaded())) {
+            caseData.getC8FormDocumentsUploaded().parallelStream().forEach(c8FormDocumentsUploaded ->
+                                                                               populateRespondentDocument(
+                                                                                   c8FormDocumentsUploaded,
+                                                                                   null,
+                                                                                   CONFIDENTIAL,
+                                                                                   otherDocsList
+                                                                               ));
+        }
+    }
+
+    private void populateRespondentDocument(uk.gov.hmcts.reform.prl.models.documents.Document responseDocumentEng,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document responseDocumentWelsh,
+                                            String category,
+                                            List<Element<OtherDocuments>> otherDocsList) {
+        if (null != responseDocumentEng) {
+            addInOtherDocuments(category, responseDocumentEng, otherDocsList);
+        }
+        if (null != responseDocumentWelsh) {
+            addInOtherDocuments(category, responseDocumentWelsh, otherDocsList);
+        }
+    }
+
+    private void populateRespondentC1AResponseDoc(List<Element<ApplicantDetails>> respondents, List<Element<OtherDocuments>> otherDocsList) {
+        respondents.stream().forEach(respondent -> {
+            if (null != respondent.getValue().getResponse() && null != respondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
+                ResponseToAllegationsOfHarm responseToAllegationsOfHarm = respondent.getValue().getResponse().getResponseToAllegationsOfHarm();
+                populateRespondentDocument(
+                    responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument(),
+                    responseToAllegationsOfHarm.getResponseToAllegationsOfHarmWelshDocument(),
+                    "respondentC1AResponse",
+                    otherDocsList
+                );
             }
         });
     }
 
-    private void parseCfvDocuments(List<Element<OtherDocuments>> otherDocsList, Category category) {
-        category.getDocuments().stream().forEach(document -> {
-            if (CollectionUtils.isEmpty(excludedDocumentList)
-                || !checkIfDocumentsNeedToExclude(excludedDocumentList, document.getDocumentFilename())) {
-                try {
-                    otherDocsList.add(Element.<OtherDocuments>builder().id(
-                        UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
-                        buildFromCfvDocument(document)).documentName(document.getDocumentFilename()).documentTypeOther(
-                        DocTypeOtherDocumentsEnum.getValue(category.getCategoryId())).build()).build());
-                } catch (MalformedURLException e) {
-                    log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+    private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
+                                          List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
+        quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
+            if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
+                uk.gov.hmcts.reform.prl.models.documents.Document document = getDocumentBasedOnCategories(
+                    quarantineLegalDocElement.getValue());
+                if (null != document) {
+                    parseCategoryAndCreateList(
+                        quarantineLegalDocElement.getValue().getCategoryId(),
+                        document,
+                        otherDocsList
+                    );
                 }
             }
         });
     }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document getDocumentBasedOnCategories(QuarantineLegalDoc quarantineLegalDoc) {
+        switch (quarantineLegalDoc.getCategoryId()) {
+            case "transcriptsOfJudgements":
+                return quarantineLegalDoc.getTranscriptsOfJudgementsDocument();
+            case "magistratesFactsAndReasons":
+                return quarantineLegalDoc.getMagistratesFactsAndReasonsDocument();
+            case "judgeNotesFromHearing":
+                return quarantineLegalDoc.getJudgeNotesFromHearingDocument();
+            case "positionStatements":
+                return quarantineLegalDoc.getPositionStatementsDocument();
+            case "fm5Statements":
+                return quarantineLegalDoc.getFm5StatementsDocument();
+            case "applicantApplication":
+                return quarantineLegalDoc.getApplicantApplicationDocument();
+            case "applicantC1AApplication":
+                return quarantineLegalDoc.getApplicantC1AApplicationDocument();
+            case "applicantC1AResponse":
+                return quarantineLegalDoc.getApplicantC1AResponseDocument();
+            case "applicationsWithinProceedings":
+                return quarantineLegalDoc.getApplicationsWithinProceedingsDocument();
+            case "MIAMCertificate":
+                return quarantineLegalDoc.getMiamCertificateDocument();
+            case "previousOrdersSubmittedWithApplication":
+                return quarantineLegalDoc.getPreviousOrdersSubmittedWithApplicationDocument();
+            case "respondentApplication":
+                return quarantineLegalDoc.getRespondentApplicationDocument();
+            case "respondentC1AApplication":
+                return quarantineLegalDoc.getRespondentC1AApplicationDocument();
+            case "respondentC1AResponse":
+                return quarantineLegalDoc.getRespondentC1AResponseDocument();
+            case "applicationsFromOtherProceedings":
+                return quarantineLegalDoc.getApplicationsFromOtherProceedingsDocument();
+            case "ordersFromOtherProceedings":
+                return quarantineLegalDoc.getOrdersFromOtherProceedingsDocument();
+            case "applicantStatements":
+                return quarantineLegalDoc.getApplicantStatementsDocument();
+            case "respondentStatements":
+                return quarantineLegalDoc.getRespondentStatementsDocument();
+            case "otherWitnessStatements":
+                return quarantineLegalDoc.getOtherWitnessStatementsDocument();
+            case "pathfinder":
+                return quarantineLegalDoc.getPathfinderDocument();
+            case "safeguardingLetter":
+                return quarantineLegalDoc.getSafeguardingLetterDocument();
+            case "section7Report":
+                return quarantineLegalDoc.getSection7ReportDocument();
+            case "section37Report":
+                return quarantineLegalDoc.getSection37ReportDocument();
+            case "16aRiskAssessment":
+                return quarantineLegalDoc.getSixteenARiskAssessmentDocument();
+            case "guardianReport":
+                return quarantineLegalDoc.getGuardianReportDocument();
+            case "specialGuardianshipReport":
+                return quarantineLegalDoc.getSpecialGuardianshipReportDocument();
+            case "otherDocs":
+                return quarantineLegalDoc.getOtherDocsDocument();
+            case "sec37Report":
+                return quarantineLegalDoc.getSection37ReportDocument();
+            case "localAuthorityOtherDoc":
+                return quarantineLegalDoc.getLocalAuthorityOtherDocDocument();
+            case "medicalReports":
+                return quarantineLegalDoc.getMedicalRecordsDocument();
+            case "DNAReports_expertReport":
+                return quarantineLegalDoc.getDnaReportsExpertReportDocument();
+            case "resultsOfHairStrandBloodTests":
+                return quarantineLegalDoc.getResultsOfHairStrandBloodTestsDocument();
+            case "policeDisclosures":
+                return quarantineLegalDoc.getPoliceDisclosuresDocument();
+            case "medicalRecords":
+                return quarantineLegalDoc.getMedicalRecordsDocument();
+            case "drugAndAlcoholTest(toxicology)":
+                return quarantineLegalDoc.getDrugAndAlcoholTestDocument();
+            case "policeReport":
+                return quarantineLegalDoc.getPoliceReportDocument();
+            case "emailsToCourtToRequestHearingsAdjourned":
+                return quarantineLegalDoc.getEmailsToCourtToRequestHearingsAdjournedDocument();
+            case "publicFundingCertificates":
+                return quarantineLegalDoc.getPublicFundingCertificatesDocument();
+            case "noticesOfActingDischarge":
+                return quarantineLegalDoc.getNoticeOfHearingDocument();
+            case "requestForFASFormsToBeChanged":
+                return quarantineLegalDoc.getRequestForFasFormsToBeChangedDocument();
+            case "witnessAvailability":
+                return quarantineLegalDoc.getWitnessAvailabilityDocument();
+            case "lettersOfComplaint":
+                return quarantineLegalDoc.getLettersOfComplaintDocument();
+            case "SPIPReferralRequests":
+                return quarantineLegalDoc.getSpipReferralRequestsDocument();
+            case "homeOfficeDWPResponses":
+                return quarantineLegalDoc.getHomeOfficeDwpResponsesDocument();
+            case "internalCorrespondence":
+                return quarantineLegalDoc.getInternalCorrespondenceDocument();
+            case "importantInfoAboutAddressAndContact":
+                return quarantineLegalDoc.getImportantInfoAboutAddressAndContactDocument();
+            case "privacyNotice":
+                return quarantineLegalDoc.getPrivacyNoticeDocument();
+            case "specialMeasures":
+                return quarantineLegalDoc.getSpecialMeasuresDocument();
+            case ANY_OTHER_DOC:
+                return quarantineLegalDoc.getAnyOtherDocDocument();
+            case "noticeOfHearing":
+                return quarantineLegalDoc.getNoticeOfHearingDocument();
+            case "courtBundle":
+                return quarantineLegalDoc.getCourtBundleDocument();
+            case "caseSummary":
+                return quarantineLegalDoc.getCaseSummaryDocument();
+            default:
+                log.info("Unable to fetch document for category {}" + quarantineLegalDoc.getCategoryId());
+                return null;
+        }
+    }
+
+    private void parseCategoryAndCreateList(String category,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
+                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
+        if ((CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(category))
+            && (CollectionUtils.isEmpty(excludedDocumentList) || !checkIfDocumentsNeedToExclude(
+            excludedDocumentList,
+            caseDocument.getDocumentFileName()
+        ))) {
+            addInOtherDocuments(category, caseDocument, otherDocsList);
+
+        }
+
+    }
+
+    private void addInOtherDocuments(String category,
+                                     uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
+                                     List<Element<OtherDocuments>> otherDocsList) {
+        try {
+            if (null != caseDocument) {
+                otherDocsList.add(Element.<OtherDocuments>builder().id(
+                    UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
+                    buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
+                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
+            }
+        } catch (MalformedURLException e) {
+            log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+        }
+    }
+
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
         boolean isExcluded = false;
@@ -221,11 +569,11 @@ public class CaseDataService {
         return isExcluded;
     }
 
-    public Document buildFromCfvDocument(uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument) throws MalformedURLException {
-        URL url = new URL(cfvDocument.getDocumentURL());
+    public Document buildFromCaseDocument(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument) throws MalformedURLException {
+        URL url = new URL(caseDocument.getDocumentUrl());
         return Document.builder()
             .documentUrl(CafCassCaseData.getDocumentId(url))
-            .documentFileName(cfvDocument.getDocumentFilename())
+            .documentFileName(caseDocument.getDocumentFileName())
             .build();
     }
 
