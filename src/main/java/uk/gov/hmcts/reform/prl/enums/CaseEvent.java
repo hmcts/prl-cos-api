@@ -69,7 +69,12 @@ public enum CaseEvent {
     CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate"),
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
-    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised");
+    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
+    RESPONDENT_SOLICITOR_A_SUBMIT("c100ResSolSubmitA"),
+    RESPONDENT_SOLICITOR_B_SUBMIT("c100ResSolSubmitB"),
+    RESPONDENT_SOLICITOR_C_SUBMIT("c100ResSolSubmitC"),
+    RESPONDENT_SOLICITOR_D_SUBMIT("c100ResSolSubmitD"),
+    RESPONDENT_SOLICITOR_E_SUBMIT("c100ResSolSubmitE");
 
     private final String value;
 
