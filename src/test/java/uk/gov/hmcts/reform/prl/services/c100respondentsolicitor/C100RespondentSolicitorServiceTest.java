@@ -1227,6 +1227,10 @@ public class C100RespondentSolicitorServiceTest {
                             .id(123L)
                             .data(stringObjectMap)
                             .build())
+                    .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
                     .build();
 
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
@@ -2323,6 +2327,10 @@ public class C100RespondentSolicitorServiceTest {
                                  .id(123L)
                                  .data(stringObjectMap)
                                  .build())
+                .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                    .id(123L)
+                    .data(stringObjectMap)
+                    .build())
                 .build();
             callbackRequest.setEventId(event);
 

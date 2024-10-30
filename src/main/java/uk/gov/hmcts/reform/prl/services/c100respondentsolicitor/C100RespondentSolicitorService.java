@@ -359,14 +359,6 @@ public class C100RespondentSolicitorService {
 
         if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)) {
             respondents = setRefugeData(respondents);
-            updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
-
-            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
-                updatedCaseData,
-                caseDataBefore,
-                caseData,
-                callbackRequest.getEventId());
         }
 
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
@@ -406,9 +398,6 @@ public class C100RespondentSolicitorService {
 
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentiality(Yes);
                     respondent.getValue().getResponse().getKeepDetailsPrivate().setConfidentialityList(confidentialityListEnums);
-                    respondent.getValue()
-                        .setRefugeConfidentialityC8Form(respondent.getValue().getResponse().getCitizenDetails().getRefugeConfidentialityC8Form());
-                    respondent.getValue().setLiveInRefuge(Yes);
                 } else if (YesOrNo.No.equals(respondent.getValue().getResponse().getCitizenDetails().getLiveInRefuge())) {
                     respondent.getValue().getResponse().getCitizenDetails().setRefugeConfidentialityC8Form(null);
                     respondent.getValue().setLiveInRefuge(No);
@@ -958,8 +947,9 @@ public class C100RespondentSolicitorService {
                             .build())
                     .build();
 
-            String party = representedRespondent.getValue().getLabelForDynamicList();
+            amended = updatedRefugeData(amended);
 
+            String party = representedRespondent.getValue().getLabelForDynamicList();
             caseData.getRespondents().set(
                     caseData.getRespondents().indexOf(representedRespondent),
                     element(representedRespondent.getId(), amended)
@@ -986,8 +976,29 @@ public class C100RespondentSolicitorService {
                     dataMap
             );
         }
+
+        updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+            updatedCaseData,
+            caseDataBefore,
+            caseData,
+            callbackRequest.getEventId());
+
+
         moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
         return updatedCaseData;
+    }
+
+    private PartyDetails updatedRefugeData(PartyDetails respondent) {
+        if (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+            respondent
+                .setRefugeConfidentialityC8Form(respondent.getResponse().getCitizenDetails().getRefugeConfidentialityC8Form());
+            respondent.setLiveInRefuge(Yes);
+        }
+        return  respondent;
     }
 
     private List<Element<RespondentProceedingDetails>> getAmendedProceedings(Element<PartyDetails> representedRespondent) {
