@@ -166,7 +166,8 @@ public class CitizenRespondentAohElementsMapper {
                                                                RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         if (YesOrNo.No.equals(respondentAllegationsOfHarmData.getRespAohChildAbuseYesNo())
-            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild()) {
             return respondentAllegationsOfHarmData;
         }
 
@@ -458,7 +459,9 @@ public class CitizenRespondentAohElementsMapper {
     private DynamicMultiSelectList buildWhichChildrenAreRiskAbuses(String[] abusedChildren,
                                                                    List<Element<ChildDetailsRevised>> newChildDetails) {
 
-        if (newChildDetails != null && abusedChildren.length != newChildDetails.size()) {
+        if (ObjectUtils.isNotEmpty(abusedChildren)
+            && ObjectUtils.isNotEmpty(newChildDetails)
+            && abusedChildren.length != newChildDetails.size()) {
             List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             newChildDetails.forEach(s -> {
