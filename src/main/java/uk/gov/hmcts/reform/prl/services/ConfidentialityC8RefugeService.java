@@ -437,11 +437,11 @@ public class ConfidentialityC8RefugeService {
         boolean onlyForApplicant = CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForRespondent =
             CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue().equalsIgnoreCase(eventId)
-            || CaseEvent.RESPONDENT_SOLICITOR_A_SUBMIT.getValue().equalsIgnoreCase(eventId)
-            || CaseEvent.RESPONDENT_SOLICITOR_B_SUBMIT.getValue().equalsIgnoreCase(eventId)
-            || CaseEvent.RESPONDENT_SOLICITOR_C_SUBMIT.getValue().equalsIgnoreCase(eventId)
-            || CaseEvent.RESPONDENT_SOLICITOR_D_SUBMIT.getValue().equalsIgnoreCase(eventId)
-            || CaseEvent.RESPONDENT_SOLICITOR_E_SUBMIT.getValue().equalsIgnoreCase(eventId);
+            || CaseEvent.RESPONDENT_SOLICITOR_A_EDIT_DETAILS.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.RESPONDENT_SOLICITOR_B_EDIT_DETAILS.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.RESPONDENT_SOLICITOR_C_EDIT_DETAILS.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.RESPONDENT_SOLICITOR_D_EDIT_DETAILS.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.RESPONDENT_SOLICITOR_E_EDIT_DETAILS.getValue().equalsIgnoreCase(eventId);
         boolean onlyForOtherPeople = CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue().equalsIgnoreCase(
             eventId);
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord;
