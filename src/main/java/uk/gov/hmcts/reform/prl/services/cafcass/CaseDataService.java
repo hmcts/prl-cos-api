@@ -129,7 +129,7 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-
+                log.info("searchResult --> {}", searchResult);
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
                     CafCassResponse.class
@@ -157,6 +157,7 @@ public class CaseDataService {
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
+            log.info("processing cafCassResponse " + cafCassResponse);
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             populateReviewDocuments(otherDocsList, caseData);
@@ -273,6 +274,7 @@ public class CaseDataService {
     }
 
     private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
+        log.info("inside populateReviewDocuments");
         if (ObjectUtils.isNotEmpty(caseData.getReviewDocuments())) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab())) {
                 parseQuarantineLegalDocs(
@@ -402,11 +404,13 @@ public class CaseDataService {
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
+        log.info("inside parseQuarantineLegalDocs");
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
                 uk.gov.hmcts.reform.prl.models.documents.Document document = getDocumentBasedOnCategories(
                     quarantineLegalDocElement.getValue());
                 if (null != document) {
+                    log.info("found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
                     parseCategoryAndCreateList(
                         quarantineLegalDocElement.getValue().getCategoryId(),
                         document,
@@ -532,6 +536,7 @@ public class CaseDataService {
     private void parseCategoryAndCreateList(String category,
                                             uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
+        log.info("parseCategoryAndCreateList {}", category);
         if ((CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(category))
             && (CollectionUtils.isEmpty(excludedDocumentList) || !checkIfDocumentsNeedToExclude(
             excludedDocumentList,
@@ -548,10 +553,13 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
+                log.info("caseDocument is not null for category {}", category);
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
                     DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
+            } else {
+                log.info("caseDocument is null for category {}", category);
             }
         } catch (MalformedURLException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
