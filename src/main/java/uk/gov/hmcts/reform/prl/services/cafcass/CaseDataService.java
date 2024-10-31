@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -94,6 +95,8 @@ public class CaseDataService {
     private final RefDataService refDataService;
 
     private final OrganisationService organisationService;
+
+    private final ObjectMapper objMapper;
 
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
@@ -415,131 +418,26 @@ public class CaseDataService {
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
         log.info("inside parseQuarantineLegalDocs");
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
+            uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
-                uk.gov.hmcts.reform.prl.models.documents.Document document = getDocumentBasedOnCategories(
-                    quarantineLegalDocElement.getValue());
-                if (null != document) {
-                    log.info("found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
-                    parseCategoryAndCreateList(
-                        quarantineLegalDocElement.getValue().getCategoryId(),
-                        document,
-                        otherDocsList
-                    );
-                }
+                String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    null
+                );
+                document = objMapper.convertValue(
+                    objMapper.convertValue(quarantineLegalDocElement.getValue(), Map.class).get(attributeName),
+                    uk.gov.hmcts.reform.prl.models.documents.Document.class
+                );
+            }
+            if (null != document) {
+                log.info("found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
+                parseCategoryAndCreateList(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    document,
+                    otherDocsList
+                );
             }
         });
-    }
-
-    private uk.gov.hmcts.reform.prl.models.documents.Document getDocumentBasedOnCategories(QuarantineLegalDoc quarantineLegalDoc) {
-        switch (quarantineLegalDoc.getCategoryId()) {
-            case "transcriptsOfJudgements":
-                return quarantineLegalDoc.getTranscriptsOfJudgementsDocument();
-            case "magistratesFactsAndReasons":
-                return quarantineLegalDoc.getMagistratesFactsAndReasonsDocument();
-            case "judgeNotesFromHearing":
-                return quarantineLegalDoc.getJudgeNotesFromHearingDocument();
-            case "positionStatements":
-                return quarantineLegalDoc.getPositionStatementsDocument();
-            case "fm5Statements":
-                return quarantineLegalDoc.getFm5StatementsDocument();
-            case "applicantApplication":
-                return quarantineLegalDoc.getApplicantApplicationDocument();
-            case "applicantC1AApplication":
-                return quarantineLegalDoc.getApplicantC1AApplicationDocument();
-            case "applicantC1AResponse":
-                return quarantineLegalDoc.getApplicantC1AResponseDocument();
-            case "applicationsWithinProceedings":
-                return quarantineLegalDoc.getApplicationsWithinProceedingsDocument();
-            case "MIAMCertificate":
-                return quarantineLegalDoc.getMiamCertificateDocument();
-            case "previousOrdersSubmittedWithApplication":
-                return quarantineLegalDoc.getPreviousOrdersSubmittedWithApplicationDocument();
-            case "respondentApplication":
-                return quarantineLegalDoc.getRespondentApplicationDocument();
-            case "respondentC1AApplication":
-                return quarantineLegalDoc.getRespondentC1AApplicationDocument();
-            case "respondentC1AResponse":
-                return quarantineLegalDoc.getRespondentC1AResponseDocument();
-            case "applicationsFromOtherProceedings":
-                return quarantineLegalDoc.getApplicationsFromOtherProceedingsDocument();
-            case "ordersFromOtherProceedings":
-                return quarantineLegalDoc.getOrdersFromOtherProceedingsDocument();
-            case "applicantStatements":
-                return quarantineLegalDoc.getApplicantStatementsDocument();
-            case "respondentStatements":
-                return quarantineLegalDoc.getRespondentStatementsDocument();
-            case "otherWitnessStatements":
-                return quarantineLegalDoc.getOtherWitnessStatementsDocument();
-            case "pathfinder":
-                return quarantineLegalDoc.getPathfinderDocument();
-            case "safeguardingLetter":
-                return quarantineLegalDoc.getSafeguardingLetterDocument();
-            case "section7Report":
-                return quarantineLegalDoc.getSection7ReportDocument();
-            case "section37Report":
-                return quarantineLegalDoc.getSection37ReportDocument();
-            case "16aRiskAssessment":
-                return quarantineLegalDoc.getSixteenARiskAssessmentDocument();
-            case "guardianReport":
-                return quarantineLegalDoc.getGuardianReportDocument();
-            case "specialGuardianshipReport":
-                return quarantineLegalDoc.getSpecialGuardianshipReportDocument();
-            case "otherDocs":
-                return quarantineLegalDoc.getOtherDocsDocument();
-            case "sec37Report":
-                return quarantineLegalDoc.getSection37ReportDocument();
-            case "localAuthorityOtherDoc":
-                return quarantineLegalDoc.getLocalAuthorityOtherDocDocument();
-            case "medicalReports":
-                return quarantineLegalDoc.getMedicalRecordsDocument();
-            case "DNAReports_expertReport":
-                return quarantineLegalDoc.getDnaReportsExpertReportDocument();
-            case "resultsOfHairStrandBloodTests":
-                return quarantineLegalDoc.getResultsOfHairStrandBloodTestsDocument();
-            case "policeDisclosures":
-                return quarantineLegalDoc.getPoliceDisclosuresDocument();
-            case "medicalRecords":
-                return quarantineLegalDoc.getMedicalRecordsDocument();
-            case "drugAndAlcoholTest(toxicology)":
-                return quarantineLegalDoc.getDrugAndAlcoholTestDocument();
-            case "policeReport":
-                return quarantineLegalDoc.getPoliceReportDocument();
-            case "emailsToCourtToRequestHearingsAdjourned":
-                return quarantineLegalDoc.getEmailsToCourtToRequestHearingsAdjournedDocument();
-            case "publicFundingCertificates":
-                return quarantineLegalDoc.getPublicFundingCertificatesDocument();
-            case "noticesOfActingDischarge":
-                return quarantineLegalDoc.getNoticeOfHearingDocument();
-            case "requestForFASFormsToBeChanged":
-                return quarantineLegalDoc.getRequestForFasFormsToBeChangedDocument();
-            case "witnessAvailability":
-                return quarantineLegalDoc.getWitnessAvailabilityDocument();
-            case "lettersOfComplaint":
-                return quarantineLegalDoc.getLettersOfComplaintDocument();
-            case "SPIPReferralRequests":
-                return quarantineLegalDoc.getSpipReferralRequestsDocument();
-            case "homeOfficeDWPResponses":
-                return quarantineLegalDoc.getHomeOfficeDwpResponsesDocument();
-            case "internalCorrespondence":
-                return quarantineLegalDoc.getInternalCorrespondenceDocument();
-            case "importantInfoAboutAddressAndContact":
-                return quarantineLegalDoc.getImportantInfoAboutAddressAndContactDocument();
-            case "privacyNotice":
-                return quarantineLegalDoc.getPrivacyNoticeDocument();
-            case "specialMeasures":
-                return quarantineLegalDoc.getSpecialMeasuresDocument();
-            case ANY_OTHER_DOC:
-                return quarantineLegalDoc.getAnyOtherDocDocument();
-            case "noticeOfHearing":
-                return quarantineLegalDoc.getNoticeOfHearingDocument();
-            case "courtBundle":
-                return quarantineLegalDoc.getCourtBundleDocument();
-            case "caseSummary":
-                return quarantineLegalDoc.getCaseSummaryDocument();
-            default:
-                log.info("Unable to fetch document for category {}" + quarantineLegalDoc.getCategoryId());
-                return null;
-        }
     }
 
     private void parseCategoryAndCreateList(String category,
