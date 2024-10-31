@@ -390,12 +390,9 @@ public class CallbackController {
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
-            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
             confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
                 caseDataUpdated,
-                caseDataBefore,
-                caseData,
-                callbackRequest.getEventId()
+                caseData
             );
             try {
                 log.info("case data while submitting the case ===>" + objectMapper.writeValueAsString(caseData));

@@ -726,9 +726,29 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         log.info("Verifying refuge information first");
-        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+            && null != citizenProvidedPartyDetails.getResponse()
+            && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
             log.info("Party living in refuge, information must remain confidential");
-            return existingPartyDetails;
+            return existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .otherPeopleKnowYourContactDetails(citizenProvidedPartyDetails
+                                                                                             .getResponse()
+                                                                                             .getKeepDetailsPrivate()
+                                                                                             .getOtherPeopleKnowYourContactDetails())
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .build();
         }
 
         log.info("setting refuge confidential data as no");
@@ -974,7 +994,11 @@ public class CitizenPartyDetailsMapper {
                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
         String caseName = null;
         if (null != c100RebuildApplicantDetailsElements
-            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            && null != c100RebuildApplicantDetailsElements.getApplicants()
+            && null != c100RebuildApplicantDetailsElements.getApplicants().get(0)
+            && null != c100RebuildRespondentDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails().get(0)) {
             caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
                 + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
         }
