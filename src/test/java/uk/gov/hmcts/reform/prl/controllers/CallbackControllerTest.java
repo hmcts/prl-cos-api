@@ -58,7 +58,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
