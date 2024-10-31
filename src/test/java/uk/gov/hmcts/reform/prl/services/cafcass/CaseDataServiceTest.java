@@ -418,7 +418,6 @@ public class CaseDataServiceTest {
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
         when(objMapper.convertValue(anyMap(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class))).thenReturn(
             document);
-        List<CafCassCaseDetail> cases = new ArrayList<>();
         Bundle caseBundles = Bundle.builder()
             .value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().documentUrl("http://test.link")
                                                                 .documentFilename("test").build()).build())
