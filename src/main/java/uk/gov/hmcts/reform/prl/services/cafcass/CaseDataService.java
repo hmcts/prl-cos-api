@@ -167,21 +167,36 @@ public class CaseDataService {
             populateAnyOtherDoc(caseData, otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
-            caseData.getRespondents().parallelStream().forEach(applicantDetailsElement ->  {
+            caseData.getRespondents().parallelStream().forEach(applicantDetailsElement -> {
                 ApplicantDetails applicantDetails = applicantDetailsElement.getValue().toBuilder().response(null).build();
-                respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(applicantDetails).build());
+                respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(
+                    applicantDetails).build());
             });
 
             final CafCassCaseData cafCassCaseData = caseData.toBuilder()
                 .otherDocuments(otherDocsList)
-                .reviewDocuments(null)
-                .respondentC8Document(null)
+                .legalProfUploadDocListDocTab(null)
+                .bulkScannedDocListDocTab(null)
+                .cafcassUploadDocListDocTab(null)
+                .bulkScannedDocListDocTab(null)
+                .citizenUploadedDocListDocTab(null)
+                .restrictedDocuments(null)
+                .confidentialDocuments(null)
+                .respondentAc8Documents(null)
+                .respondentBc8Documents(null)
+                .respondentCc8Documents(null)
+                .respondentDc8Documents(null)
+                .respondentEc8Documents(null)
                 .c8FormDocumentsUploaded(null)
                 .bundleInformation(null)
                 .otherDocumentsUploaded(null)
                 .uploadOrderDoc(null)
-                .serviceOfApplicationUploadDocs(null)
-                .statementOfService(null)
+                .specialArrangementsLetter(null)
+                .additionalDocuments(null)
+                .additionalDocumentsList(null)
+                .stmtOfServiceAddRecipient(null)
+                .stmtOfServiceForOrder(null)
+                .stmtOfServiceForApplication(null)
                 .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
@@ -201,34 +216,31 @@ public class CaseDataService {
         if (null != caseData.getUploadOrderDoc()) {
             addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
         }
-        if (null != caseData.getServiceOfApplicationUploadDocs()) {
-            populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
-        }
-        if (null != caseData.getStatementOfService()) {
-            populateStatementOfServiceDocs(caseData, otherDocsList);
-        }
+        populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
+        populateStatementOfServiceDocs(caseData, otherDocsList);
+
 
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
-            caseData.getStatementOfService().getStmtOfServiceForOrder().parallelStream().forEach(
+        if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceForOrder())) {
+            caseData.getStmtOfServiceForOrder().parallelStream().forEach(
                 stmtOfServiceAddRecipientElement -> addInOtherDocuments(
                     ANY_OTHER_DOC,
                     stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
                     otherDocsList
                 ));
         }
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
-            caseData.getStatementOfService().getStmtOfServiceForApplication().parallelStream().forEach(
+        if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceForApplication())) {
+            caseData.getStmtOfServiceForApplication().parallelStream().forEach(
                 stmtOfServiceAddRecipientElement -> addInOtherDocuments(
                     ANY_OTHER_DOC,
                     stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
                     otherDocsList
                 ));
         }
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
-            caseData.getStatementOfService().getStmtOfServiceAddRecipient().parallelStream().forEach(
+        if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceAddRecipient())) {
+            caseData.getStmtOfServiceAddRecipient().parallelStream().forEach(
                 stmtOfServiceAddRecipientElement -> addInOtherDocuments(
                     ANY_OTHER_DOC,
                     stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
@@ -238,19 +250,20 @@ public class CaseDataService {
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        if (null != caseData.getServiceOfApplicationUploadDocs().getSpecialArrangementsLetter()) {
-            addInOtherDocuments(ANY_OTHER_DOC,
-                                caseData.getServiceOfApplicationUploadDocs().getSpecialArrangementsLetter(),
+        if (null != caseData.getSpecialArrangementsLetter()) {
+            addInOtherDocuments(
+                ANY_OTHER_DOC,
+                caseData.getSpecialArrangementsLetter(),
+                otherDocsList
+            );
+        }
+        if (null != caseData.getAdditionalDocuments()) {
+            addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(),
                                 otherDocsList
             );
         }
-        if (null != caseData.getServiceOfApplicationUploadDocs().getAdditionalDocuments()) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseData.getServiceOfApplicationUploadDocs().getAdditionalDocuments(),
-                                otherDocsList
-            );
-        }
-        if (CollectionUtils.isNotEmpty(caseData.getServiceOfApplicationUploadDocs().getAdditionalDocumentsList())) {
-            caseData.getServiceOfApplicationUploadDocs().getAdditionalDocumentsList().parallelStream().forEach(
+        if (CollectionUtils.isNotEmpty(caseData.getAdditionalDocumentsList())) {
+            caseData.getAdditionalDocumentsList().parallelStream().forEach(
                 documentElement -> addInOtherDocuments(
                     ANY_OTHER_DOC,
                     documentElement.getValue(),
@@ -275,95 +288,91 @@ public class CaseDataService {
 
     private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
         log.info("inside populateReviewDocuments");
-        if (ObjectUtils.isNotEmpty(caseData.getReviewDocuments())) {
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab())) {
-                parseQuarantineLegalDocs(
-                    otherDocsList,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-                );
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())) {
-                parseQuarantineLegalDocs(
-                    otherDocsList,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-                );
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCafcassUploadDocListDocTab())) {
-                parseQuarantineLegalDocs(
-                    otherDocsList,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-                );
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab())) {
-                parseQuarantineLegalDocs(
-                    otherDocsList,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-                );
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
-                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getBulkScannedDocListDocTab())) {
-                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
-                parseQuarantineLegalDocs(otherDocsList, caseData.getReviewDocuments().getConfidentialDocuments());
-            }
+        if (CollectionUtils.isNotEmpty(caseData.getCourtStaffUploadDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getCourtStaffUploadDocListDocTab()
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getCourtStaffUploadDocListDocTab()
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getCourtStaffUploadDocListDocTab()
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getCourtStaffUploadDocListDocTab()
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
+            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
+            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
+            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
     }
 
     private void populateConfidentialDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        if (null != caseData.getRespondentC8Document()) {
-            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
-                caseData.getRespondentC8Document().getRespondentAc8Documents().parallelStream().forEach(
-                    responseDocumentsElement ->
-                        populateRespondentDocument(
-                            responseDocumentsElement.getValue().getRespondentC8Document(),
-                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
-                            CONFIDENTIAL,
-                            otherDocsList
-                        ));
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
-                caseData.getRespondentC8Document().getRespondentBc8Documents().parallelStream().forEach(
-                    responseDocumentsElement ->
-                        populateRespondentDocument(
-                            responseDocumentsElement.getValue().getRespondentC8Document(),
-                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
-                            CONFIDENTIAL,
-                            otherDocsList
-                        ));
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
-                caseData.getRespondentC8Document().getRespondentCc8Documents().parallelStream().forEach(
-                    responseDocumentsElement ->
-                        populateRespondentDocument(
-                            responseDocumentsElement.getValue().getRespondentC8Document(),
-                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
-                            CONFIDENTIAL,
-                            otherDocsList
-                        ));
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
-                caseData.getRespondentC8Document().getRespondentDc8Documents().parallelStream().forEach(
-                    responseDocumentsElement ->
-                        populateRespondentDocument(
-                            responseDocumentsElement.getValue().getRespondentC8Document(),
-                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
-                            CONFIDENTIAL,
-                            otherDocsList
-                        ));
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
-                caseData.getRespondentC8Document().getRespondentEc8Documents().parallelStream().forEach(
-                    responseDocumentsElement ->
-                        populateRespondentDocument(
-                            responseDocumentsElement.getValue().getRespondentC8Document(),
-                            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
-                            CONFIDENTIAL,
-                            otherDocsList
-                        ));
-            }
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentAc8Documents())) {
+            caseData.getRespondentAc8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentBc8Documents())) {
+            caseData.getRespondentBc8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentCc8Documents())) {
+            caseData.getRespondentCc8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentDc8Documents())) {
+            caseData.getRespondentDc8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentEc8Documents())) {
+            caseData.getRespondentEc8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
         }
         if (CollectionUtils.isNotEmpty(caseData.getC8FormDocumentsUploaded())) {
             caseData.getC8FormDocumentsUploaded().parallelStream().forEach(c8FormDocumentsUploaded ->

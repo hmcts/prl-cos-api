@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,13 +24,11 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklis
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -731,11 +728,6 @@ public class CafCassCaseData {
 
     private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
 
-    @JsonUnwrapped
-    private ReviewDocuments reviewDocuments;
-
-    private RespondentC8Document respondentC8Document;
-
     private List<uk.gov.hmcts.reform.prl.models.documents.Document> c8FormDocumentsUploaded;
 
     private BundlingInformation bundleInformation;
@@ -744,10 +736,28 @@ public class CafCassCaseData {
 
     private uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc;
 
-    private ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
-
-    private StatementOfService statementOfService;
-
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> restrictedDocuments;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> confidentialDocuments;
+
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentAc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentBc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentCc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentDc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentEc8Documents;
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document specialArrangementsLetter;
+    private uk.gov.hmcts.reform.prl.models.documents.Document additionalDocuments;
+    private List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> additionalDocumentsList;
+
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
 
 }
