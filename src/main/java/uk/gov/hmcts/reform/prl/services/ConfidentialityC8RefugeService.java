@@ -374,10 +374,10 @@ public class ConfidentialityC8RefugeService {
         if (partyDetailsOptional.isPresent()) {
             log.info("inside party details for loop");
             PartyDetails partyDetails = partyDetailsOptional.get();
-            party = String.format(PrlAppsConstants.FORMAT, party, 1);
+            String partyType = String.format(PrlAppsConstants.FORMAT, party, 1);
             if (refugeDocumentHandlerParameters.removeDocument
                 || refugeDocumentHandlerParameters.listHistoricalDocument) {
-                findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, party);
+                findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
             }
             if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
                 log.info("Yes to refuge");
@@ -386,7 +386,7 @@ public class ConfidentialityC8RefugeService {
                     refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                         refugeDocuments,
                         partyDetails,
-                        party
+                        partyType
                     );
                     newFileAdded = true;
                 }
@@ -811,16 +811,16 @@ public class ConfidentialityC8RefugeService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments,
         int partyIndex) {
-        partyType = String.format(PrlAppsConstants.FORMAT, partyType, partyIndex);
+        String party = String.format(PrlAppsConstants.FORMAT, partyType, partyIndex);
         historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(
-            partyType,
+            party,
             refugeDocuments,
             historicalRefugeDocuments
         );
         log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
         log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
         refugeDocuments = addToRefugeDocument(
-            partyType,
+            party,
             refugeDocuments,
             partyDetails
         );
@@ -837,12 +837,20 @@ public class ConfidentialityC8RefugeService {
                 .map(Element::getValue)
                 .toList();
             for (PartyDetails partyDetails : partyDetailsList) {
-                partyType = String.format(PrlAppsConstants.FORMAT,partyType, partyDetailsList.indexOf(partyDetails) + 1);
-                historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(partyType, refugeDocuments, historicalRefugeDocuments);
+                String party = String.format(
+                    PrlAppsConstants.FORMAT,
+                    partyType,
+                    partyDetailsList.indexOf(partyDetails) + 1
+                );
+                historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(
+                    party,
+                    refugeDocuments,
+                    historicalRefugeDocuments
+                );
                 log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
                 log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
                 refugeDocuments = addToRefugeDocument(
-                    partyType,
+                    party,
                     refugeDocuments,
                     partyDetails
                 );
@@ -857,16 +865,16 @@ public class ConfidentialityC8RefugeService {
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments) {
         if (partyDetailsWrapped.isPresent()) {
-            partyType = String.format(PrlAppsConstants.FORMAT, partyType, 1);
+            String party = String.format(PrlAppsConstants.FORMAT, partyType, 1);
             historicalRefugeDocuments = updateHistoricalDocsAndRemoveFromCurrentList(
-                partyType,
+                party,
                 refugeDocuments,
                 historicalRefugeDocuments
             );
             log.info("Added to historical list and now the size is " + historicalRefugeDocuments.size());
             log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
             PartyDetails partyDetails = partyDetailsWrapped.get();
-            refugeDocuments = addToRefugeDocument(partyType, refugeDocuments, partyDetails);
+            refugeDocuments = addToRefugeDocument(party, refugeDocuments, partyDetails);
             log.info("removed from refugeDocuments and the size is now " + refugeDocuments.size());
         }
     }
