@@ -3480,4 +3480,67 @@ public class CallbackControllerTest {
             .populateChildInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("children"));
     }
+
+    @Test
+    public void testUpdateOtherPeopleDetails() {
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "test");
+        caseDetails.put("caseTypeOfApplication", "C100");
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDetails).build()).build();
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .liveInRefuge(No)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .address(Address.builder()
+                         .addressLine1("addressLine1")
+                         .addressLine2("addressLine2")
+                         .addressLine3("addressLine3")
+                         .postCode("SW1A 1AA")
+                         .country("country").build())
+            .build();
+
+        Element<PartyDetails> wrappedOtherPerson = Element.<PartyDetails>builder().value(otherPerson).build();
+        List<Element<PartyDetails>> otherPersonList = Collections.singletonList(wrappedOtherPerson);
+        Map<String, Object> caseDetailsWithOtherPerson = new HashMap<>();
+        caseDetailsWithOtherPerson.put("otherPartyInTheCaseRevised", otherPersonList);
+
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
+            .caseTypeOfApplication(C100_CASE_TYPE).otherPartyInTheCaseRevised(otherPersonList).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest)).thenReturn(
+            caseDetailsWithOtherPerson);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherPartyInTheCaseRevised"));
+    }
+
+    @Test
+    public void testExceptionForupdateOtherPeoplePartyDetails() throws Exception {
+        Map<String, Object> caseDetails = new HashMap<>();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDetails).build()).build();
+
+        assertExpectedException(() -> {
+            callbackController.updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
 }
