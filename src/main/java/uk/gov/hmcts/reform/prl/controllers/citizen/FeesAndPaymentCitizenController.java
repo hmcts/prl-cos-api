@@ -175,6 +175,7 @@ public class FeesAndPaymentCitizenController {
     ) {
         FeeResponseForCitizen feeResponseForCitizen = null;
         try {
+            log.info("#### FeeRequest {}", feeRequest);
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
             } else {

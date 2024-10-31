@@ -53,12 +53,22 @@ public enum CaseEvent {
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
     ALL_AWP_IN_REVIEW("allAwPInReview"),
     CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
+    MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
+    MARK_CASE_AS_PRIVATE("privateCaseAccess"),
+    MARK_CASE_AS_PUBLIC("publicCaseAccess"),
+    CHANGE_CASE_ACCESS_AS_SYSUSER("changeCaseAccess"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
     CITIZEN_RESPONSE_TO_AOH("citizenResponseToAoH"),
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
-    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
+    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
+
+    HWF_PROCESS_CASE_UPDATE("hwfProcessCaseUpdate"),
+    HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
+
+    CITIZEN_AWP_CREATE("citizenAwpCreate"),
+    CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate");
 
     private final String value;
 
@@ -70,7 +80,7 @@ public enum CaseEvent {
         return value;
     }
 
-    public static uk.gov.hmcts.reform.prl.enums.CaseEvent fromValue(String value) {
+    public static CaseEvent fromValue(String value) {
         return Arrays.stream(values())
             .filter(event -> event.value.equals(value))
             .findFirst()

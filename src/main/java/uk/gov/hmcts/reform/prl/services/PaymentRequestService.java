@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
@@ -22,14 +24,21 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCitizenAwpPaymentIfPresent;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -67,14 +76,14 @@ public class PaymentRequestService {
                                                 String returnUrl,
                                                 BigDecimal feeAmount) {
         return paymentApi
-            .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
-                                  OnlineCardPaymentRequest.builder()
-                                      .amount(feeAmount)
-                                      .currency(GBP_CURRENCY)
-                                      .language(ENG_LANGUAGE)
-                                      .returnUrl(returnUrl)
-                                      .build()
-            );
+                .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                        OnlineCardPaymentRequest.builder()
+                                .amount(feeAmount)
+                                .currency(GBP_CURRENCY)
+                                .language(ENG_LANGUAGE)
+                                .returnUrl(returnUrl)
+                                .build()
+                );
     }
 
     public PaymentStatusResponse fetchPaymentStatus(String authorization,
@@ -95,6 +104,7 @@ public class PaymentRequestService {
                 CITIZEN_CASE_UPDATE.getValue()
             );
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (null == caseData) {
             log.info(
                 "Retrieved caseData is null for caseId {}, please provide a valid caseId",
@@ -119,14 +129,17 @@ public class PaymentRequestService {
                 caseData.getPaymentReferenceNumber(),
                 feeResponse
             );
+            //update service request & payment request reference
+            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
         } else {
-            log.info("*** Citizen awp payment *** ** call awp method here");
+            log.info("*** Citizen awp payment ***");
+            paymentResponse = handleCitizenAwpPayment(authorization,
+                                                      caseData,
+                                                      caseDataMap,
+                                                      createPaymentRequest,
+                                                      feeResponse);
         }
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        //update service request & payment request reference
-        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
 
         //update case
         allTabService.submitAllTabsUpdate(
@@ -264,28 +277,97 @@ public class PaymentRequestService {
             );
     }
 
-    public PaymentServiceResponse createServiceRequestForAdditionalApplications(
-        CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
+    private PaymentResponse handleCitizenAwpPayment(String authorization,
+                                                    CaseData caseData,
+                                                    Map<String, Object> caseDataMap,
+                                                    CreatePaymentRequest createPaymentRequest,
+                                                    FeeResponse feeResponse) {
+        Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
+            getCitizenAwpPaymentIfPresent(
+                caseData.getCitizenAwpPayments(),
+                createPaymentRequest
+            );
+        Element<CitizenAwpPayment> citizenAwpPaymentElement = optionalCitizenAwpPaymentElement.orElse(null);
+
+        paymentResponse = createPayment(
+            authorization,
+            createPaymentRequest,
+            null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getServiceReqRef() : null,
+            null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getPaymentReqRef() : null,
+            feeResponse
+        );
+
+        //save service req & payment req ref into caseData
+        updateCitizenAwpPayments(
+            caseData,
+            caseDataMap,
+            createPaymentRequest,
+            paymentResponse,
+            citizenAwpPaymentElement,
+            feeResponse
+        );
+
+        return paymentResponse;
+    }
+
+    private void updateCitizenAwpPayments(CaseData caseData,
+                                          Map<String, Object> caseDataMap,
+                                          CreatePaymentRequest createPaymentRequest,
+                                          PaymentResponse paymentResponse,
+                                          Element<CitizenAwpPayment> existingCitizenAwpPayment,
+                                          FeeResponse feeResponse) {
+        //Remove existing citizen awp payment before adding/updating with new details
+        if (null != existingCitizenAwpPayment) {
+            log.info("Remove existing citizen awp payment from caseData");
+            caseData.getCitizenAwpPayments().remove(existingCitizenAwpPayment);
+        }
+
+        Element<CitizenAwpPayment> citizenAwpPayment = null != existingCitizenAwpPayment
+            ? updateCitizenAwpPayment(existingCitizenAwpPayment, paymentResponse)
+            : createCitizenAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
+
+        caseDataMap.put("citizenAwpPayments", getCitizenAwpPayments(caseData, citizenAwpPayment));
+    }
+
+    private List<Element<CitizenAwpPayment>> getCitizenAwpPayments(CaseData caseData,
+                                                                   Element<CitizenAwpPayment> citizenAwpPayment) {
+        List<Element<CitizenAwpPayment>> citizenAwpPayments =
+            isNotEmpty(caseData.getCitizenAwpPayments())
+                ? caseData.getCitizenAwpPayments()
+                : new ArrayList<>();
+
+        citizenAwpPayments.add(citizenAwpPayment);
+
+        return citizenAwpPayments;
+    }
+
+    private Element<CitizenAwpPayment> updateCitizenAwpPayment(Element<CitizenAwpPayment> existingCitizenAwpElement,
+                                                               PaymentResponse paymentResponse) {
+        return element(
+            existingCitizenAwpElement.getValue().toBuilder()
+                .paymentReqRef(paymentResponse.getPaymentReference())
+                .build()
+        );
+    }
+
+    private Element<CitizenAwpPayment> createCitizenAwpPayment(CreatePaymentRequest createPaymentRequest,
+                                                               PaymentResponse paymentResponse,
+                                                               FeeResponse feeResponse) {
+        return element(CitizenAwpPayment.builder()
+                           .awpType(createPaymentRequest.getAwpType())
+                           .partType(createPaymentRequest.getPartyType())
+                           .feeType(createPaymentRequest.getFeeType().name())
+                           .fee(String.valueOf(feeResponse.getAmount()))
+                           .serviceReqRef(paymentResponse.getServiceRequestReference())
+                           .paymentReqRef(paymentResponse.getPaymentReference())
+                           .build());
+    }
+
+    public ServiceRequestReferenceStatusResponse fetchServiceRequestReferenceStatus(String authorization,
+                                                                                    String serviceRequestReference) {
         return paymentApi
-            .createPaymentServiceRequest(
-                authorisation,
-                authTokenGenerator.generate(),
-                PaymentServiceRequest
-                    .builder()
-                    .callBackUrl(callBackUrl)
-                    .casePaymentRequest(CasePaymentRequestDto.builder()
-                                            .action(PAYMENT_ACTION)
-                                            .responsibleParty(serviceReferenceResponsibleParty).build())
-                    .caseReference(String.valueOf(caseData.getId()))
-                    .ccdCaseNumber(String.valueOf(caseData.getId()))
-                    .fees(new FeeDto[]{
-                        FeeDto.builder()
-                            .calculatedAmount(response.getAmount())
-                            .code(response.getCode())
-                            .version(response.getVersion())
-                            .volume(1).build()
-                    })
-                    .build()
+            .fetchPaymentGroupReferenceStatus(authorization, authTokenGenerator.generate(),
+                                              serviceRequestReference
             );
     }
 
