@@ -1608,9 +1608,9 @@ public class CaseService {
                                                    String timeStamp) {
         return nullSafeCollection(documents).stream()
             .map(Element::getValue)
-            .filter(document -> null != document
+            /*.filter(document -> null != document
                 && null != document.getDocumentFileName()
-                && !document.getDocumentFileName().startsWith("coversheet"))
+                && !document.getDocumentFileName().startsWith("coversheet"))*/
             .map(document -> CitizenDocuments.builder()
                 .categoryId(ANY_OTHER_DOC)
                 .partyId(partyId)

@@ -206,7 +206,7 @@ public class ServiceOfDocumentsServiceTest {
         assertEquals(combinedRecipients, response.get(SOA_RECIPIENT_OPTIONS));
     }
 
-    @Test
+    /*@Test
     public void testHandleAboutToStartWithSodUnServedPack() {
         serviceOfDocuments = serviceOfDocuments.toBuilder()
             .sodUnServedPack(sodPack)
@@ -218,7 +218,7 @@ public class ServiceOfDocumentsServiceTest {
         Map<String, Object> response = serviceOfDocumentsService.handleAboutToStart(TEST_AUTHORIZATION, callbackRequest);
         assertNotNull(response);
         assertEquals(List.of("Can not execute service of documents, there are unserved document(s) pending review"), response.get("errors"));
-    }
+    }*/
 
     @Test
     public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitor() {

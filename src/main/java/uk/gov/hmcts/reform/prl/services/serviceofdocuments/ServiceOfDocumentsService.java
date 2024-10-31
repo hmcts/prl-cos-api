@@ -75,7 +75,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
@@ -139,12 +138,12 @@ public class ServiceOfDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         //Check if unserved documents exist
-        if (null != caseData.getServiceOfDocuments()
+        /*if (null != caseData.getServiceOfDocuments()
             && null != caseData.getServiceOfDocuments().getSodUnServedPack()
             && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodUnServedPack().getDocuments())) {
             caseDataMap.put("errors", List.of("Can not execute service of documents, there are unserved document(s) pending review"));
             return caseDataMap;
-        }
+        }*/
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(DISPLAY_LEGAL_REP_OPTION, CaseUtils.isCitizenCase(caseData) ? "No" : "Yes");
         caseDataMap.put(
@@ -1050,7 +1049,7 @@ public class ServiceOfDocumentsService {
 
             response = ok(SubmittedCallbackResponse.builder()
                               .confirmationHeader("# Document(s) will be served")
-                              .confirmationBody(EMPTY_SPACE_STRING)
+                              .confirmationBody("\n\n")
                               .build());
         } else {
             //Reset unserved packs
@@ -1058,7 +1057,7 @@ public class ServiceOfDocumentsService {
 
             response = ok(SubmittedCallbackResponse.builder()
                               .confirmationHeader("# Document(s) reject, Refer to court admin")
-                              .confirmationBody(EMPTY_SPACE_STRING)
+                              .confirmationBody("\n\n")
                               .build());
         }
 
