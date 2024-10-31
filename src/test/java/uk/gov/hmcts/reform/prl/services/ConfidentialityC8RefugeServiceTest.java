@@ -323,12 +323,21 @@ public class ConfidentialityC8RefugeServiceTest {
         CaseData caseData = CaseData
             .builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder()
+                .liveInRefuge(YesOrNo.Yes)
+                .refugeConfidentialityC8Form(Document
+                    .builder()
+                    .build())
+                .build())
             .build();
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = new RefugeDocumentHandlerParameters();
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = RefugeDocumentHandlerParameters.builder().forAllParties(true)
+            .listDocument(true).build();
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
+        list.add(element);
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
-            = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
+            = new RefugeConfidentialDocumentsRecord(list, list);
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
             .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
         assertNotNull(returnedRefuge);
