@@ -64,9 +64,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.isAccessEnabled;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getOtherPerson;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -478,7 +477,7 @@ public class ManageOrderEmailService {
     private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail,
                                                        EmailTemplateNames template) {
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-            && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.isAccessEnabled(party)) {
+            && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.hasDashboardAccess(party)) {
             emailService.send(
                 party.getValue().getEmail(),
                 template,
@@ -501,7 +500,7 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            if (isAccessEnabled(party)) {
+            if (hasDashboardAccess(party)) {
                 //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
@@ -874,22 +873,6 @@ public class ManageOrderEmailService {
             cafcassCymruEmail = manageOrders.getCafcassCymruEmail();
         }
         return cafcassCymruEmail;
-    }
-
-    private PartyDetails getOtherPerson(String id, CaseData caseData) {
-        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
-            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
-            ? caseData.getOtherPartyInTheCaseRevised()
-            : caseData.getOthersToNotify();
-        if (null != otherPartiesToNotify) {
-            Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
-                .filter(element -> element.getId().toString().equalsIgnoreCase(id))
-                .findFirst();
-            if (otherPerson.isPresent()) {
-                return otherPerson.get().getValue();
-            }
-        }
-        return null;
     }
 
     private void sendEmailToSolicitorOrNotifyParties(List<DynamicMultiselectListElement> value,
