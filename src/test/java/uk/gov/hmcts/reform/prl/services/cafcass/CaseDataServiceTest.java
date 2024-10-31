@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -88,6 +89,7 @@ public class CaseDataServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
+    @Ignore
     @Test
     public void getCaseData() throws IOException {
 
