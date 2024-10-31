@@ -3099,12 +3099,10 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("allocatedJudgeDetails", AllocatedJudge.builder()
                 .emailAddress("test").build());
-        //caseData = objectMapper.convertValue(stringObjectMap, CaseData.class);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        //when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(callbackRequest.getCaseDetails());
         AboutToStartOrSubmitCallbackResponse response =  callbackController
             .transferCourtConfirmation(authToken, callbackRequest);
         Assertions.assertNotNull(response);
