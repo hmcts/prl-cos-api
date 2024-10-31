@@ -178,7 +178,7 @@ public class CaseDataService {
                 .legalProfUploadDocListDocTab(null)
                 .bulkScannedDocListDocTab(null)
                 .cafcassUploadDocListDocTab(null)
-                .bulkScannedDocListDocTab(null)
+                .courtStaffUploadDocListDocTab(null)
                 .citizenUploadedDocListDocTab(null)
                 .restrictedDocuments(null)
                 .confidentialDocuments(null)
