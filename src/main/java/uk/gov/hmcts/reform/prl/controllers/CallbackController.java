@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,7 +50,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -111,7 +109,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -897,7 +894,7 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         //Approach-1
-        AllocatedJudge  allocatedJudgeDetails = (AllocatedJudge) caseDataUpdated.get("allocatedJudgeDetails");
+        /* AllocatedJudge  allocatedJudgeDetails = objectMapper.convertValue(caseDataUpdated.get("allocatedJudgeDetails"), AllocatedJudge.class);
         try {
             log.info("BEFORE update court details: {}", objectMapper.writeValueAsString(allocatedJudgeDetails));
             allocatedJudgeDetails = allocatedJudgeDetails.toBuilder()
@@ -907,11 +904,11 @@ public class CallbackController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        caseDataUpdated.put("allocatedJudgeDetails", allocatedJudgeDetails);
+        caseDataUpdated.put("allocatedJudgeDetails", allocatedJudgeDetails);*/
 
         //Approach-2
         // updating Summary tab to update case status
-        //caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()
