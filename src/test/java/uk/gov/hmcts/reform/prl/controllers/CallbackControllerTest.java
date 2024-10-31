@@ -3097,8 +3097,6 @@ public class CallbackControllerTest {
             .courtCodeFromFact("123")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("allocatedJudgeDetails", AllocatedJudge.builder()
-                .emailAddress("test").build());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();

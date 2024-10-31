@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
@@ -77,7 +78,7 @@ public class CaseSummaryTabService implements TabService {
             log.info("caseSummary: {}", objectMapper.writeValueAsString(caseSummary));
             log.info("summaryTabFields: {}", objectMapper.writeValueAsString(summaryTabFields));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new CoreCaseDataStoreException("Logger error: ", e);
         }
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
