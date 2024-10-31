@@ -28,7 +28,6 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -950,23 +949,6 @@ public class ConfidentialityC8RefugeService {
                 caseData,
                 List.of(optionalPartyDetails.get()),
                 List.of(optionalPartyDetailsBefore.get()),
-                refugeDocumentHandlerParameters,
-                refugeConfidentialDocumentsRecord
-            );
-        }
-        return refugeConfidentialDocumentsRecord;
-    }
-
-    private RefugeConfidentialDocumentsRecord processC8RefugeDocumentsChangesForFL401OnSubmit(
-        CaseData caseData,
-        Optional<PartyDetails> optionalPartyDetails,
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters,
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord) {
-        if (optionalPartyDetails.isPresent()) {
-            refugeConfidentialDocumentsRecord = compareAndCallService(
-                caseData,
-                List.of(optionalPartyDetails.get()),
-                null,
                 refugeDocumentHandlerParameters,
                 refugeConfidentialDocumentsRecord
             );
