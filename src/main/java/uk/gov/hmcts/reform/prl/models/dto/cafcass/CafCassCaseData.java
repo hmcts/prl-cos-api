@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChe
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
@@ -729,6 +731,7 @@ public class CafCassCaseData {
 
     private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
 
+    @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
     private RespondentC8Document respondentC8Document;
@@ -744,5 +747,7 @@ public class CafCassCaseData {
     private ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
     private StatementOfService statementOfService;
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
 
 }
