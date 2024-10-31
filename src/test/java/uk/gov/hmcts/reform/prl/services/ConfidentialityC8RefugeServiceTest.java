@@ -19,7 +19,11 @@ import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeDocumentHandlerParameters;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -323,7 +327,8 @@ public class ConfidentialityC8RefugeServiceTest {
         RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = new RefugeDocumentHandlerParameters();
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+            = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
             .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
         assertNotNull(returnedRefuge);
@@ -337,7 +342,8 @@ public class ConfidentialityC8RefugeServiceTest {
         RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = new RefugeDocumentHandlerParameters();
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
         Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
+            = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
             .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
 
