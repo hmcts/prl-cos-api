@@ -132,7 +132,6 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-                log.info("searchResult --> {}", searchResult);
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
                     CafCassResponse.class
@@ -160,7 +159,6 @@ public class CaseDataService {
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
-            log.info("processing cafCassResponse " + cafCassResponse);
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             populateReviewDocuments(otherDocsList, caseData);
@@ -170,12 +168,15 @@ public class CaseDataService {
             populateAnyOtherDoc(caseData, otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
-            caseData.getRespondents().parallelStream().forEach(applicantDetailsElement -> {
-                ApplicantDetails applicantDetails = applicantDetailsElement.getValue().toBuilder().response(null).build();
-                respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(
-                    applicantDetails).build());
-            });
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                caseData.getRespondents().parallelStream().forEach(applicantDetailsElement -> {
+                    ApplicantDetails applicantDetails = applicantDetailsElement.getValue().toBuilder().response(null).build();
+                    respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(
+                        applicantDetails).build());
+                });
+            }
 
+            //Setting the new fields value to null once documents are processed
             final CafCassCaseData cafCassCaseData = caseData.toBuilder()
                 .otherDocuments(otherDocsList)
                 .legalProfUploadDocListDocTab(null)
@@ -290,7 +291,6 @@ public class CaseDataService {
     }
 
     private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
-        log.info("inside populateReviewDocuments");
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
@@ -401,22 +401,23 @@ public class CaseDataService {
     }
 
     private void populateRespondentC1AResponseDoc(List<Element<ApplicantDetails>> respondents, List<Element<OtherDocuments>> otherDocsList) {
-        respondents.stream().forEach(respondent -> {
-            if (null != respondent.getValue().getResponse() && null != respondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
-                ResponseToAllegationsOfHarm responseToAllegationsOfHarm = respondent.getValue().getResponse().getResponseToAllegationsOfHarm();
-                populateRespondentDocument(
-                    responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument(),
-                    responseToAllegationsOfHarm.getResponseToAllegationsOfHarmWelshDocument(),
-                    "respondentC1AResponse",
-                    otherDocsList
-                );
-            }
-        });
+        if (CollectionUtils.isNotEmpty(respondents)) {
+            respondents.stream().forEach(respondent -> {
+                if (null != respondent.getValue().getResponse() && null != respondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
+                    ResponseToAllegationsOfHarm responseToAllegationsOfHarm = respondent.getValue().getResponse().getResponseToAllegationsOfHarm();
+                    populateRespondentDocument(
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument(),
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmWelshDocument(),
+                        "respondentC1AResponse",
+                        otherDocsList
+                    );
+                }
+            });
+        }
     }
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
-        log.info("inside parseQuarantineLegalDocs");
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -430,7 +431,7 @@ public class CaseDataService {
                 );
             }
             if (null != document) {
-                log.info("found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
+                log.info("Found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
                 parseCategoryAndCreateList(
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     document,
@@ -443,7 +444,6 @@ public class CaseDataService {
     private void parseCategoryAndCreateList(String category,
                                             uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
-        log.info("parseCategoryAndCreateList {}", category);
         if ((CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(category))
             && (CollectionUtils.isEmpty(excludedDocumentList) || !checkIfDocumentsNeedToExclude(
             excludedDocumentList,
@@ -460,13 +460,11 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                log.info("caseDocument is not null for category {}", category);
+                log.info("Document is not null for category {}", category);
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
                     DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
-            } else {
-                log.info("caseDocument is null for category {}", category);
             }
         } catch (MalformedURLException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
