@@ -129,8 +129,7 @@ public class ResubmitApplicationController {
                 ResubmitApplicationController::getPreviousState).findFirst();
 
             updateCaseDataBasedOnState(authorisation, callbackRequest, caseData, caseDataUpdated, previousStates);
-            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(caseDataUpdated, caseDataBefore, caseData, callbackRequest.getEventId());
+            confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -290,8 +289,7 @@ public class ResubmitApplicationController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             fl401SubmitApplicationService.cleanUpC8RefugeFields(caseData, caseDataUpdated);
-            CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(caseDataUpdated, caseDataBefore, caseData, callbackRequest.getEventId());
+            confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
