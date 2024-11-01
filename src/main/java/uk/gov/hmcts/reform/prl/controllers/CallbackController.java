@@ -894,22 +894,6 @@ public class CallbackController {
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //Approach-1
-        /* AllocatedJudge  allocatedJudgeDetails = objectMapper.convertValue(caseDataUpdated.get("allocatedJudgeDetails"), AllocatedJudge.class);
-        try {
-            log.info("BEFORE update court details: {}", objectMapper.writeValueAsString(allocatedJudgeDetails));
-            allocatedJudgeDetails = allocatedJudgeDetails.toBuilder()
-                .courtName(String.valueOf(caseDataUpdated.get(COURT_NAME_FIELD)))
-                .build();
-            log.info("AFTER update court details: {}", objectMapper.writeValueAsString(allocatedJudgeDetails));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        caseDataUpdated.put("allocatedJudgeDetails", allocatedJudgeDetails);*/
-
-        //Approach-2
-        // updating Summary tab to update case status
-        //caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()
@@ -920,9 +904,6 @@ public class CallbackController {
             CONFIRMATION_BODY_PREFIX + caseData.getCourtName()
                 + CONFIRMATION_BODY_SUFFIX
         ).build());
-        /*return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();*/
     }
 
     private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation, CaseData newCaseData,

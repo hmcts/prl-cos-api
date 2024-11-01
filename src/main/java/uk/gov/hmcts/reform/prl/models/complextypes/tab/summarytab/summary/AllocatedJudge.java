@@ -5,7 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 
-@Builder(toBuilder = true)
+@Builder
 @Data
 public class AllocatedJudge {
     private final String judgePersonalCode;
