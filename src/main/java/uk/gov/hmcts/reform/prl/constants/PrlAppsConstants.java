@@ -1087,5 +1087,7 @@ public class PrlAppsConstants {
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
 
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+    public static final String REFUGE_DOCUMENTS = "refugeDocuments";
+    public static final String HISTORICAL_REFUGE_DOCUMENTS = "historicalRefugeDocuments";
 
 }
