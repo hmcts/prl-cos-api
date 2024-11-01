@@ -59,9 +59,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -95,7 +97,7 @@ public class UpdatePartyDetailsService {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     @Qualifier("caseSummaryTab")
-    private final CaseSummaryTabService caseSummaryTabService;
+    private final  CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
@@ -104,10 +106,7 @@ public class UpdatePartyDetailsService {
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
-
-        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(
-            caseData
-        ));
+        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
@@ -135,13 +134,11 @@ public class UpdatePartyDetailsService {
                 false
             );
             try {
-                generateC8DocumentsForRespondents(
-                    updatedCaseData,
-                    callbackRequest,
-                    authorisation,
-                    caseData,
-                    List.of(ElementUtils.element(fl401respondent))
-                );
+                generateC8DocumentsForRespondents(updatedCaseData,
+                                                  callbackRequest,
+                                                  authorisation,
+                                                  caseData,
+                                                  List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -168,18 +165,14 @@ public class UpdatePartyDetailsService {
                 false
             );
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-            applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(
-                updatedCaseData,
-                ElementUtils.unwrapElements(elements).get(0)
-            ));
+            applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
+                    ElementUtils.unwrapElements(elements).get(0)));
             try {
-                generateC8DocumentsForRespondents(
-                    updatedCaseData,
-                    callbackRequest,
-                    authorisation,
-                    caseData,
-                    caseData.getRespondents()
-                );
+                generateC8DocumentsForRespondents(updatedCaseData,
+                                                  callbackRequest,
+                                                  authorisation,
+                                                  caseData,
+                                                  caseData.getRespondents());
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -231,20 +224,20 @@ public class UpdatePartyDetailsService {
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
                 List<Element<PartyDetails>> updatedRespondents = new ArrayList<>();
                 caseData.getRespondents().forEach(eachRespondent ->
-                                                      updatedRespondents.add(element(
-                                                          eachRespondent.getId(),
-                                                          resetRespondent(eachRespondent.getValue())
-                                                      ))
+                    updatedRespondents.add(element(
+                        eachRespondent.getId(),
+                        resetRespondent(eachRespondent.getValue())
+                    ))
                 );
                 updatedCaseData.put(RESPONDENTS, updatedRespondents);
             }
             if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
                 List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
                 caseData.getApplicants().forEach(eachApplicant ->
-                                                     updatedApplicants.add(element(
-                                                         eachApplicant.getId(),
-                                                         resetApplicant(eachApplicant.getValue())
-                                                     ))
+                    updatedApplicants.add(element(
+                        eachApplicant.getId(),
+                        resetApplicant(eachApplicant.getValue())
+                    ))
                 );
                 updatedCaseData.put(APPLICANTS, updatedApplicants);
             }
@@ -393,12 +386,12 @@ public class UpdatePartyDetailsService {
     }
 
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
-                                                   CaseData caseData, List<Element<PartyDetails>> currentRespondents)
+                                                       CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
-        for (Element<PartyDetails> respondent : currentRespondents) {
+        for (Element<PartyDetails> respondent: currentRespondents) {
             PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
                                                                                               .keepDetailsPrivate(
                                                                                                   updateRespondentKeepYourDetailsPrivateInformation(
@@ -473,60 +466,56 @@ public class UpdatePartyDetailsService {
     }
 
 
+
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
-                                    Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
-                                    Element<PartyDetails> respondent) throws Exception {
+                                      Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
+                                      Element<PartyDetails> respondent) throws Exception {
         log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
                     updatedCaseData
-                        .put("respondentAc8Documents", getOrCreateC8DocumentList(authorisation, caseData, dataMap,
-                                                                                 caseData.getRespondentC8Document()
-                                                                                     .getRespondentAc8Documents(),
-                                                                                 isDetailsChanged,
-                                                                                 respondent
-                        ));
+                        .put("respondentAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentAc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 1:
                     updatedCaseData
-                        .put("respondentBc8Documents", getOrCreateC8DocumentList(authorisation, caseData,
-                                                                                 dataMap,
-                                                                                 caseData.getRespondentC8Document()
-                                                                                     .getRespondentBc8Documents(),
-                                                                                 isDetailsChanged,
-                                                                                 respondent
-                        ));
+                        .put("respondentBc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentBc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 2:
                     updatedCaseData
-                        .put("respondentCc8Documents", getOrCreateC8DocumentList(authorisation, caseData,
-                                                                                 dataMap,
-                                                                                 caseData.getRespondentC8Document()
-                                                                                     .getRespondentCc8Documents(),
-                                                                                 isDetailsChanged,
-                                                                                 respondent
-                        ));
+                        .put("respondentCc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentCc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 3:
                     updatedCaseData
-                        .put("respondentDc8Documents", getOrCreateC8DocumentList(authorisation, caseData,
-                                                                                 dataMap,
-                                                                                 caseData.getRespondentC8Document()
-                                                                                     .getRespondentDc8Documents(),
-                                                                                 isDetailsChanged,
-                                                                                 respondent
-                        ));
+                        .put("respondentDc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentDc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 4:
                     updatedCaseData
-                        .put("respondentEc8Documents", getOrCreateC8DocumentList(authorisation, caseData,
-                                                                                 dataMap,
-                                                                                 caseData.getRespondentC8Document()
-                                                                                     .getRespondentEc8Documents(),
-                                                                                 isDetailsChanged,
-                                                                                 respondent
-                        ));
+                        .put("respondentEc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentEc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 default:
                     break;
@@ -539,7 +528,7 @@ public class UpdatePartyDetailsService {
                                                                        List<Element<ResponseDocuments>> c8Documents,
                                                                        boolean isDetailsChanged,
                                                                        Element<PartyDetails> respondent)
-        throws Exception {
+        throws  Exception {
         Document c8FinalDocument;
         Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
@@ -549,25 +538,25 @@ public class UpdatePartyDetailsService {
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    caseData.getCaseTypeOfApplication()
-                        .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                        : C8_RESP_FL401_FINAL_HINT,
-                    false,
-                    dataMap
+                        authorisation,
+                        caseData,
+                        caseData.getCaseTypeOfApplication()
+                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                : C8_RESP_FL401_FINAL_HINT,
+                        false,
+                        dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 if (documentLanguage.isGenWelsh()) {
                     c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                        authorisation,
-                        caseData,
-                        caseData.getCaseTypeOfApplication()
-                            .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                            : C8_RESP_FL401_FINAL_HINT,
-                        true,
-                        dataMap
+                            authorisation,
+                            caseData,
+                            caseData.getCaseTypeOfApplication()
+                                    .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                    : C8_RESP_FL401_FINAL_HINT,
+                            true,
+                            dataMap
                     );
                 }
                 Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
@@ -579,7 +568,7 @@ public class UpdatePartyDetailsService {
                                                                                     .build());
                 return getC8DocumentReverseOrderList(c8Documents, newC8Document);
             } else {
-                return c8Documents;
+                return  c8Documents;
             }
         } else {
             return Collections.emptyList();
@@ -642,8 +631,7 @@ public class UpdatePartyDetailsService {
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
-                                                                        .whoDoesTheChildLiveWith(
-                                                                            populateWhoDoesTheChildLiveWith(caseData)).build());
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)).build());
                 children.add(childDetails);
                 caseDataUpdated.put(NEW_CHILDREN, children);
             } else {
@@ -655,7 +643,7 @@ public class UpdatePartyDetailsService {
                             populateWhoDoesTheChildLiveWith(caseData)
                                 .toBuilder()
                                 .value(null != child.getValue().getWhoDoesTheChildLiveWith()
-                                           ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
+                                    ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
                                 .build())
                         .build())));
                 caseDataUpdated.put(NEW_CHILDREN, listOfChildrenRevised);
@@ -695,16 +683,16 @@ public class UpdatePartyDetailsService {
 
                 if (null != name && null != address) {
                     whoDoesTheChildLiveWith.add(DynamicListElement
-                                                    .builder()
-                                                    .code(parties.getId())
-                                                    .label(name + address)
-                                                    .build());
+                        .builder()
+                        .code(parties.getId())
+                        .label(name + address)
+                        .build());
                 } else if (null != name) {
                     whoDoesTheChildLiveWith.add(DynamicListElement
-                                                    .builder()
-                                                    .code(parties.getId())
-                                                    .label(name)
-                                                    .build());
+                        .builder()
+                        .code(parties.getId())
+                        .label(name)
+                        .build());
                 }
             }
         }
@@ -715,7 +703,7 @@ public class UpdatePartyDetailsService {
             .build();
     }
 
-    private String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
+    private  String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
         String name = null;
         if (!StringUtils.isBlank(parties.getValue().getFirstName())
             && !StringUtils.isBlank(parties.getValue().getLastName())) {
@@ -741,7 +729,7 @@ public class UpdatePartyDetailsService {
             //Adding comma to address line 2 if the postcode is there
             if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
                 addressLine2 = !StringUtils.isBlank(postcode)
-                    ? parties.getValue().getAddress().getAddressLine2().concat(", ")
+                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
                     : parties.getValue().getAddress().getAddressLine2();
             }
 
@@ -786,9 +774,9 @@ public class UpdatePartyDetailsService {
                 callbackRequest.getEventId()
             );
             if (refugeConfidentialDocumentsRecord != null) {
-                updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+                updatedCaseData.put(REFUGE_DOCUMENTS, refugeConfidentialDocumentsRecord.refugeDocuments());
                 updatedCaseData.put(
-                    "historicalRefugeDocuments",
+                    HISTORICAL_REFUGE_DOCUMENTS,
                     refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
                 );
             }
@@ -807,9 +795,9 @@ public class UpdatePartyDetailsService {
                 callbackRequest.getEventId()
             );
             if (refugeConfidentialDocumentsRecord != null) {
-                updatedCaseData.put("refugeDocuments", refugeConfidentialDocumentsRecord.refugeDocuments());
+                updatedCaseData.put(REFUGE_DOCUMENTS, refugeConfidentialDocumentsRecord.refugeDocuments());
                 updatedCaseData.put(
-                    "historicalRefugeDocuments",
+                    HISTORICAL_REFUGE_DOCUMENTS,
                     refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
                 );
             }

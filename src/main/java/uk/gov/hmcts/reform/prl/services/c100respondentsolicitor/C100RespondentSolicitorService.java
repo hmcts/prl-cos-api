@@ -361,7 +361,6 @@ public class C100RespondentSolicitorService {
 
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
-        log.info("respondents is {}", respondents);
         updatedCaseData.put(RESPONDENTS, respondents);
         Map<String, Object> data = objectMapper
                 .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
