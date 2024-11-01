@@ -187,9 +187,9 @@ public class FeeService {
     }
 
     public boolean isc2WithOrder(String applicationReason) {
-        return applicationReason.equals(CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId())
-            || applicationReason.equals(PROHIBITED_STEPS_ORDER.getId())
-            || applicationReason.equals(SPECIFIC_ISSUE_ORCDER.getId());
+        return CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId().equals(applicationReason)
+                || PROHIBITED_STEPS_ORDER.getId().equals(applicationReason)
+                || SPECIFIC_ISSUE_ORCDER.getId().equals(applicationReason);
     }
 
     public static boolean isFl403ApplicationAlreadyPresent(CaseData caseData) {
