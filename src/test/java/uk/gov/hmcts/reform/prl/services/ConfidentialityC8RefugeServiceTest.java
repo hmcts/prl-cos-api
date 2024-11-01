@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
@@ -621,5 +622,55 @@ public class ConfidentialityC8RefugeServiceTest {
             .build();
         assertNull(confidentialityC8RefugeService
             .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+    }
+
+    @Test
+    public void processRefugeDocumentsOnSubmitC100() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        Map<String, Object> map = new HashMap<>();
+        CaseData caseData = CaseData
+            .builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .otherPartyInTheCaseRevised(applicantList)
+            .build();
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        assertTrue(true);
+    }
+
+    @Test
+    public void processRefugeDocumentsOnSubmitFL401() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Map<String, Object> map = new HashMap<>();
+        CaseData caseData = CaseData
+            .builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .build();
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        assertTrue(true);
+    }
+
+    @Test
+    public void processRefugeDocumentsOnSubmitEmpty() {
+        Map<String, Object> map = new HashMap<>();
+        CaseData caseData = CaseData
+            .builder()
+            .build();
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        assertTrue(true);
     }
 }
