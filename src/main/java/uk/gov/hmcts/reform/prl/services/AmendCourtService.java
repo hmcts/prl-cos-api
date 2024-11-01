@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class AmendCourtService {
     private final ObjectMapper objectMapper;
     private final EmailService emailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
+    private final CaseSummaryTabService caseSummaryTab;
 
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
@@ -46,6 +48,7 @@ public class AmendCourtService {
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
             caseDataUpdated.put(STATE_FIELD, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+            caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         } else {
 
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];

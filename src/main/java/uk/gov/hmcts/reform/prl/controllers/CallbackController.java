@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -887,7 +888,7 @@ public class CallbackController {
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse transferCourtConfirmation(
+    public ResponseEntity<SubmittedCallbackResponse> transferCourtConfirmation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -908,20 +909,20 @@ public class CallbackController {
 
         //Approach-2
         // updating Summary tab to update case status
-        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+        //caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()
             );
         eventPublisher.publishEvent(event);
-        /*return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX + caseData.getCourtName()
                 + CONFIRMATION_BODY_SUFFIX
-        ).build());*/
-        return AboutToStartOrSubmitCallbackResponse.builder()
+        ).build());
+        /*return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            .build();
+            .build();*/
     }
 
     private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation, CaseData newCaseData,
