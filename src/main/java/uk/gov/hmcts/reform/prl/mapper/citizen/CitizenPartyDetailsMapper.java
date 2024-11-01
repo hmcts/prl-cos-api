@@ -995,9 +995,11 @@ public class CitizenPartyDetailsMapper {
         String caseName = null;
         if (null != c100RebuildApplicantDetailsElements
             && null != c100RebuildApplicantDetailsElements.getApplicants()
+            && !c100RebuildApplicantDetailsElements.getApplicants().isEmpty()
             && null != c100RebuildApplicantDetailsElements.getApplicants().get(0)
             && null != c100RebuildRespondentDetailsElements
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails()
+            && !c100RebuildRespondentDetailsElements.getRespondentDetails().isEmpty()
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails().get(0)) {
             caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
                 + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
