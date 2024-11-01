@@ -121,7 +121,6 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         cleanUpC8RefugeFields(caseData, caseDataUpdated);
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
             caseDataUpdated,
             caseData

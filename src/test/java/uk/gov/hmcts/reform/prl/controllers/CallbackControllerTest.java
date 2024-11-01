@@ -3529,7 +3529,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testExceptionForupdateOtherPeoplePartyDetails() throws Exception {
+    public void testExceptionForupdateOtherPeoplePartyDetails() {
         Map<String, Object> caseDetails = new HashMap<>();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);

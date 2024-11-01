@@ -54,8 +54,7 @@ public class ConfidentialityTabService {
                     applicants);
             }
 
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(
-                caseData);
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
 
             Optional<List<Element<PartyDetails>>> respondentList = ofNullable(caseData.getRespondents());
             if (respondentList.isPresent()) {
@@ -88,8 +87,7 @@ public class ConfidentialityTabService {
                     fl401Respondent);
             }
 
-            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
-                caseData);
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -108,17 +106,17 @@ public class ConfidentialityTabService {
         List<Element<ChildConfidentialityDetails>> elementList = new ArrayList<>();
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-            Optional<List<Element<ChildDetailsRevised>>> childList = ofNullable(caseData.getNewChildDetails());
-            if (childList.isPresent()) {
+            Optional<List<Element<ChildDetailsRevised>>> chiildList = ofNullable(caseData.getNewChildDetails());
+            if (chiildList.isPresent()) {
                 elementList = getChildrenConfidentialDetailsV2(caseData);
             }
         } else {
-            Optional<List<Element<Child>>> childList = ofNullable(caseData.getChildren());
-            if (childList.isPresent()) {
+            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
+            if (chiildList.isPresent()) {
                 List<Child> children = caseData.getChildren().stream()
                     .map(Element::getValue)
                     .toList();
-                elementList = getChildrenConfidentialDetails(children);
+                elementList =  getChildrenConfidentialDetails(children);
             }
         }
         return elementList;
@@ -312,5 +310,6 @@ public class ConfidentialityTabService {
 
         return childrenConfidentialDetails;
     }
+
 }
 

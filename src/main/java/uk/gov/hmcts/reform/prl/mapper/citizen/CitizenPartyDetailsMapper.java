@@ -67,7 +67,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
@@ -178,11 +180,11 @@ public class CitizenPartyDetailsMapper {
         }
         if (refugeConfidentialDocumentsRecord != null) {
             citizenUpdatePartyDataContent.updatedCaseDataMap().put(
-                "refugeDocuments",
+                REFUGE_DOCUMENTS,
                 refugeConfidentialDocumentsRecord.refugeDocuments()
             );
             citizenUpdatePartyDataContent.updatedCaseDataMap().put(
-                "historicalRefugeDocuments",
+                HISTORICAL_REFUGE_DOCUMENTS,
                 refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
             );
         }
@@ -656,7 +658,6 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
-            log.info("Citizen lives in refuge");
             existingPartyDetails = existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
@@ -725,11 +726,9 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        log.info("Verifying refuge information first");
         if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
             && null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
-            log.info("Party living in refuge, information must remain confidential");
             return existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
@@ -751,7 +750,6 @@ public class CitizenPartyDetailsMapper {
                 .build();
         }
 
-        log.info("setting refuge confidential data as no");
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())

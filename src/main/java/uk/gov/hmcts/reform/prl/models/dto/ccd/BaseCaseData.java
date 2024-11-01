@@ -51,9 +51,9 @@ public class BaseCaseData {
     private String courtSeal;
 
     @JsonProperty("c1ADraftDocument")
-    private Document c1ADraftDocument;
+    private  Document c1ADraftDocument;
     @JsonProperty("c1AWelshDraftDocument")
-    private Document c1AWelshDraftDocument;
+    private  Document c1AWelshDraftDocument;
 
     /**
      * Case Type Of Application.
@@ -98,7 +98,7 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
-  
+
     @JsonUnwrapped
     private ServiceOfDocuments serviceOfDocuments;
 }
