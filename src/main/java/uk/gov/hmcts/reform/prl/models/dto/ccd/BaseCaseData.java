@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
+import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDateTime;
 
@@ -88,4 +89,7 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
+  
+    @JsonUnwrapped
+    private ServiceOfDocuments serviceOfDocuments;
 }
