@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -374,5 +375,186 @@ public class ConfidentialityC8RefugeServiceTest {
             true
         );
         assertTrue(true);
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithEmptyData() {
+        CaseData caseDataBefore = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().build();
+        confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "");
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicant() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicantAddressIsKnown() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicantAddressIsKnownBefore() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        PartyDetails applicantBefore = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicantBefore = Element.<PartyDetails>builder().value(applicantBefore).build();
+        List<Element<PartyDetails>> applicantListBefore = new ArrayList<>();
+        applicantListBefore.add(wrappedApplicantBefore);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantListBefore)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicantRefugeHasChangedFromNoToYes() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        PartyDetails applicantBefore = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.No)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicantBefore = Element.<PartyDetails>builder().value(applicantBefore).build();
+        List<Element<PartyDetails>> applicantListBefore = new ArrayList<>();
+        applicantListBefore.add(wrappedApplicantBefore);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantListBefore)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicantRefugeHasChangedFromYesToNo() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.No)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        PartyDetails applicantBefore = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicantBefore = Element.<PartyDetails>builder().value(applicantBefore).build();
+        List<Element<PartyDetails>> applicantListBefore = new ArrayList<>();
+        applicantListBefore.add(wrappedApplicantBefore);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantListBefore)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForApplicantRefugeDocumentIsSame() {
+        Document document = Document.builder().documentFileName("test").build();
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(document)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        PartyDetails applicantBefore = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(document)
+            .build();
+        Element<PartyDetails> wrappedApplicantBefore = Element.<PartyDetails>builder().value(applicantBefore).build();
+        List<Element<PartyDetails>> applicantListBefore = new ArrayList<>();
+        applicantListBefore.add(wrappedApplicantBefore);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantListBefore)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
     }
 }
