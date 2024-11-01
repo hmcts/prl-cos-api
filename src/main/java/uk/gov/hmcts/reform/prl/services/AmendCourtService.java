@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -72,7 +74,13 @@ public class AmendCourtService {
             }
         }
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
-        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        try {
+            log.info("Amend Court case data: {}", objectMapper.writeValueAsString(updatedCaseData));
+        } catch (JsonProcessingException e) {
+            throw new ManageOrderRuntimeException("Error while serializing case data", e);
+        }
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(updatedCaseData));
         return caseDataUpdated;
     }
 
