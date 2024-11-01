@@ -163,6 +163,7 @@ public class CaseService {
     public static final String ORDER_TYPE_ID = "orderTypeId";
     public static final String OCCUPATION_ORDER = "occupation";
     public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
+    private static final String IDAM_ID = "ID";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -742,7 +743,7 @@ public class CaseService {
         citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
 
         //Applications within proceedings
-        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
+        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData, partyIdAndType));
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
@@ -963,6 +964,7 @@ public class CaseService {
     private Map<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
         Map<String, String> partyIdAndTypeMap = new HashMap<>();
+        partyIdAndTypeMap.put(IDAM_ID, userDetails.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
             if (applicantOptional.isPresent()) {
@@ -1420,12 +1422,14 @@ public class CaseService {
             .build();
     }
 
-    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData) {
+    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData,
+                                                                               Map<String, String> partyIdAndType) {
         List<CitizenDocuments> applicationsWithinProceedings = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             caseData.getAdditionalApplicationsBundle().stream()
                 .map(Element::getValue)
+                .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
                     if (null != awp.getC2DocumentBundle()
@@ -1449,6 +1453,17 @@ public class CaseService {
                 });
         }
         return applicationsWithinProceedings;
+    }
+
+    private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
+                                               String partyId) {
+        if (null != addlAppBundle
+            && CollectionUtils.isNotEmpty(addlAppBundle.getSelectedParties())) {
+            return addlAppBundle.getSelectedParties().stream()
+                .map(Element::getValue)
+                .anyMatch(servedParty -> partyId.equals(servedParty.getPartyId()));
+        }
+        return false;
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
