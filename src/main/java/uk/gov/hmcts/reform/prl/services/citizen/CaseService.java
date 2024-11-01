@@ -163,7 +163,6 @@ public class CaseService {
     public static final String ORDER_TYPE_ID = "orderTypeId";
     public static final String OCCUPATION_ORDER = "occupation";
     public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
-    private static final String IDAM_ID = "ID";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -964,7 +963,6 @@ public class CaseService {
     private Map<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
         Map<String, String> partyIdAndTypeMap = new HashMap<>();
-        partyIdAndTypeMap.put(IDAM_ID, userDetails.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
             if (applicantOptional.isPresent()) {
