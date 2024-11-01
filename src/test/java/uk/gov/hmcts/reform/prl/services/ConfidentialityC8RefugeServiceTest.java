@@ -382,6 +382,24 @@ public class ConfidentialityC8RefugeServiceTest {
 
     @Test
     public void processC8RefugeDocumentsOnAmendForC100WithEmptyData() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        CaseData caseDataBefore = CaseData.builder().build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100OnSubmit() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
         assertNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
@@ -407,6 +425,50 @@ public class ConfidentialityC8RefugeServiceTest {
             .build();
         assertNull(confidentialityC8RefugeService
             .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForRespondent() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        assertNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()));
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForC100WithForOtherPeople() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicants(applicantList)
+            .build();
+        assertNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()));
     }
 
     @Test
