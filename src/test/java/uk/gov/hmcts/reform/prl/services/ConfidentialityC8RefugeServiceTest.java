@@ -381,7 +381,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithEmptyData() {
         CaseData caseDataBefore = CaseData.builder().build();
         CaseData caseData = CaseData.builder().build();
-        confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, "");
+        assertNotNull(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, ""));
     }
 
     @Test
@@ -402,8 +402,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 
     @Test
@@ -425,8 +425,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 
     @Test
@@ -457,8 +457,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 
     @Test
@@ -489,8 +489,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 
     @Test
@@ -521,8 +521,8 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 
     @Test
@@ -554,7 +554,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .applicants(applicantList)
             .build();
-        confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue());
+        assertNotNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
     }
 }
