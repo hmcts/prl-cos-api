@@ -229,10 +229,10 @@ public class ConfidentialityC8RefugeServiceTest {
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithKnownAddress() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails
-            .builder()
-            .liveInRefuge(YesOrNo.Yes)
-            .isCurrentAddressKnown(YesOrNo.Yes)
-            .build());
+                                                                      .builder()
+                                                                      .liveInRefuge(YesOrNo.Yes)
+                                                                      .isCurrentAddressKnown(YesOrNo.Yes)
+                                                                      .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             partyDetails,
@@ -246,10 +246,10 @@ public class ConfidentialityC8RefugeServiceTest {
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithKnownAddressCleanUpFalse() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails
-            .builder()
-            .liveInRefuge(YesOrNo.Yes)
-            .isCurrentAddressKnown(YesOrNo.No)
-            .build());
+                                                                      .builder()
+                                                                      .liveInRefuge(YesOrNo.Yes)
+                                                                      .isCurrentAddressKnown(YesOrNo.No)
+                                                                      .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             partyDetails,
@@ -303,8 +303,10 @@ public class ConfidentialityC8RefugeServiceTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = new ArrayList<>();
         applicantList.add(wrappedApplicant);
-        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType("Applicant").build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType(
+            "Applicant").build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments).build();
         List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
         list.add(element);
         CaseData caseData = CaseData
@@ -317,9 +319,18 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder().forAllParties(true)
             .removeDocument(true)
             .build();
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(list, list);
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
+            list,
+            list
+        );
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
-            .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
+            .listRefugeDocumentsForConfidentialTab(
+                caseData,
+                applicant,
+                0,
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
+            );
         assertNotNull(returnedRefuge);
     }
 
@@ -329,22 +340,26 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder()
-                .liveInRefuge(YesOrNo.Yes)
-                .refugeConfidentialityC8Form(Document
-                    .builder()
-                    .build())
-                .build())
+                                 .liveInRefuge(YesOrNo.Yes)
+                                 .refugeConfidentialityC8Form(Document
+                                                                  .builder()
+                                                                  .build())
+                                 .build())
             .build();
-        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = RefugeDocumentHandlerParameters.builder().forAllParties(true)
+        RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = RefugeDocumentHandlerParameters.builder().forAllParties(
+                true)
             .listDocument(true).build();
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments).build();
         List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
         list.add(element);
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
             = new RefugeConfidentialDocumentsRecord(list, list);
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
-            .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
+            .listRefugeDocumentsForConfidentialTab(caseData, caseData.getApplicantsFL401(), 0,
+                                                   refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord
+            );
         assertNotNull(returnedRefuge);
     }
 
@@ -353,13 +368,24 @@ public class ConfidentialityC8RefugeServiceTest {
         CaseData caseData = CaseData
             .builder()
             .build();
+
+        PartyDetails partyDetails = PartyDetails
+            .builder()
+            .build();
         RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = new RefugeDocumentHandlerParameters();
         RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments).build();
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord
             = new RefugeConfidentialDocumentsRecord(List.of(element), List.of(element));
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
-            .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
+            .listRefugeDocumentsForConfidentialTab(
+                caseData,
+                partyDetails,
+                0,
+                refugeDocumentHandlerParameters,
+                refugeConfidentialDocumentsRecord
+            );
 
         assertNotNull(returnedRefuge);
     }
@@ -425,7 +451,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -444,7 +474,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicantsFL401(applicant)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForFL401(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForFL401(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -463,7 +497,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .respondentsFL401(applicant)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForFL401(caseDataBefore, caseData, CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForFL401(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -485,7 +523,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -507,7 +549,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()
+                       ));
     }
 
     @Test
@@ -530,7 +576,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -562,7 +612,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -594,7 +648,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -626,7 +684,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -659,7 +721,11 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .build();
         assertNull(confidentialityC8RefugeService
-            .processC8RefugeDocumentsOnAmendForC100(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+                       .processC8RefugeDocumentsOnAmendForC100(
+                           caseDataBefore,
+                           caseData,
+                           CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+                       ));
     }
 
     @Test
@@ -680,7 +746,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .otherPartyInTheCaseRevised(applicantList)
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -698,7 +764,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(applicant)
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -708,7 +774,7 @@ public class ConfidentialityC8RefugeServiceTest {
         CaseData caseData = CaseData
             .builder()
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -730,7 +796,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .applicants(applicantList)
             .otherPartyInTheCaseRevised(applicantList)
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -748,7 +814,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(applicant)
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -758,7 +824,7 @@ public class ConfidentialityC8RefugeServiceTest {
         CaseData caseData = CaseData
             .builder()
             .build();
-        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map,caseData);
+        confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(map, caseData);
         assertTrue(true);
     }
 
@@ -771,8 +837,10 @@ public class ConfidentialityC8RefugeServiceTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
-        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType("Applicant").build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType(
+            "Applicant").build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(
+            refugeConfidentialDocuments).build();
         List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
         list.add(element);
         confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(map, applicant, list, list, 0);
