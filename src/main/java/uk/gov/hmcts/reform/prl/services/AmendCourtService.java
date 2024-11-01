@@ -48,7 +48,6 @@ public class AmendCourtService {
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
             caseDataUpdated.put(STATE_FIELD, State.PROCEEDS_IN_HERITAGE_SYSTEM);
-            caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         } else {
 
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
@@ -73,6 +72,7 @@ public class AmendCourtService {
             }
         }
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         return caseDataUpdated;
     }
 
