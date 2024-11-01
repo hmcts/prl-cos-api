@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -243,5 +244,208 @@ public class ConfidentialityCheckServiceTest {
         Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
         Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+    }
+
+    @Test
+    public void processApplicantC8DocumentsForC100() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
+        Document applicant2RefugeDocument = Document.builder().documentFileName("applicant 2 C8 Refuge Form").build();
+        Document applicant3RefugeDocument = Document.builder().documentFileName("applicant 3 C8 Refuge Form").build();
+        Document applicant4RefugeDocument = Document.builder().documentFileName("applicant 4 C8 Refuge Form").build();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant1RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName1")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant2RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement2 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName2")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(
+                           applicant3RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement3 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName3")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant4RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement4 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName4")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(null)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement5 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName5")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(null)
+                       .build())
+            .build();
+
+        applicants.add(partyDetailsElement);
+        applicants.add(partyDetailsElement1);
+        applicants.add(partyDetailsElement2);
+        applicants.add(partyDetailsElement3);
+        applicants.add(partyDetailsElement4);
+        applicants.add(partyDetailsElement5);
+
+        CaseData caseData = CaseData.builder().id(12345L).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE).build();
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("appBC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("appCC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("appDC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("appEC8RefugeDocument"));
+
+        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
+        Assert.assertEquals(applicant2RefugeDocument, caseDetails.get("appBC8RefugeDocument"));
+        Assert.assertEquals(applicant3RefugeDocument, caseDetails.get("appCC8RefugeDocument"));
+        Assert.assertEquals(applicant4RefugeDocument, caseDetails.get("appDC8RefugeDocument"));
+        Assert.assertEquals(null, caseDetails.get("appEC8RefugeDocument"));
+    }
+
+    @Test
+    public void processApplicantC8DocumentsForFL401() {
+        Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
+        PartyDetails partyDetails = PartyDetails.builder().firstName("firstName").lastName("lastName")
+            .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(applicant1RefugeDocument).build();
+
+        CaseData caseData = CaseData.builder().id(12345L).applicantsFL401(partyDetails).caseTypeOfApplication(
+            FL401_CASE_TYPE).build();
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processApplicantC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("appAC8RefugeDocument"));
+        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("appAC8RefugeDocument"));
+    }
+
+    @Test
+    public void processOtherPeopleC8Documents() {
+        List<Element<PartyDetails>> otherPeople = new ArrayList<>();
+        Document applicant1RefugeDocument = Document.builder().documentFileName("other person 1 C8 Refuge Form").build();
+        Document applicant2RefugeDocument = Document.builder().documentFileName("other person 2 C8 Refuge Form").build();
+        Document applicant3RefugeDocument = Document.builder().documentFileName("other person 3 C8 Refuge Form").build();
+        Document applicant4RefugeDocument = Document.builder().documentFileName("other person 4 C8 Refuge Form").build();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant1RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName1")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant2RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement2 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName2")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant3RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement3 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName3")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(applicant4RefugeDocument)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement4 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName4")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(null)
+                       .build())
+            .build();
+        Element<PartyDetails> partyDetailsElement5 = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                       .firstName("firstName5")
+                       .lastName("lastName")
+                       .liveInRefuge(YesOrNo.Yes)
+                       .refugeConfidentialityC8Form(null)
+                       .build())
+            .build();
+
+        otherPeople.add(partyDetailsElement);
+        otherPeople.add(partyDetailsElement1);
+        otherPeople.add(partyDetailsElement2);
+        otherPeople.add(partyDetailsElement3);
+        otherPeople.add(partyDetailsElement4);
+        otherPeople.add(partyDetailsElement5);
+
+        CaseData caseData = CaseData.builder().id(12345L).otherPartyInTheCaseRevised(otherPeople).caseTypeOfApplication(C100_CASE_TYPE).build();
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
+
+        Assert.assertTrue(caseDetails.containsKey("otherAC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("otherBC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("otherCC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("otherDC8RefugeDocument"));
+        Assert.assertTrue(caseDetails.containsKey("otherEC8RefugeDocument"));
+
+        Assert.assertEquals(applicant1RefugeDocument, caseDetails.get("otherAC8RefugeDocument"));
+        Assert.assertEquals(applicant2RefugeDocument, caseDetails.get("otherBC8RefugeDocument"));
+        Assert.assertEquals(applicant3RefugeDocument, caseDetails.get("otherCC8RefugeDocument"));
+        Assert.assertEquals(applicant4RefugeDocument, caseDetails.get("otherDC8RefugeDocument"));
+        Assert.assertEquals(null, caseDetails.get("otherEC8RefugeDocument"));
+    }
+
+    @Test
+    public void processOtherPeopleC8DocumentsForFl401() {
+        List<Element<PartyDetails>> otherPeople = new ArrayList<>();
+        Document applicant1RefugeDocument = Document.builder().documentFileName("other person 1 C8 Refuge Form").build();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
+            .value(PartyDetails.builder()
+                .firstName("firstName")
+                .lastName("lastName")
+                .liveInRefuge(YesOrNo.Yes)
+                .refugeConfidentialityC8Form(applicant1RefugeDocument)
+                .build())
+            .build();
+
+        otherPeople.add(partyDetailsElement);
+        CaseData caseData = CaseData.builder().id(12345L).otherPartyInTheCaseRevised(otherPeople).caseTypeOfApplication(FL401_CASE_TYPE).build();
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
+
+        Assert.assertFalse(caseDetails.containsKey("otherAC8RefugeDocument"));
+        Assert.assertFalse(caseDetails.containsKey("otherBC8RefugeDocument"));
+        Assert.assertFalse(caseDetails.containsKey("otherCC8RefugeDocument"));
+        Assert.assertFalse(caseDetails.containsKey("otherDC8RefugeDocument"));
+        Assert.assertFalse(caseDetails.containsKey("otherEC8RefugeDocument"));
+
+        Assert.assertEquals(null, caseDetails.get("otherAC8RefugeDocument"));
     }
 }
