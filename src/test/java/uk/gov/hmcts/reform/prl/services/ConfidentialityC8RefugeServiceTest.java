@@ -429,6 +429,44 @@ public class ConfidentialityC8RefugeServiceTest {
     }
 
     @Test
+    public void processC8RefugeDocumentsOnAmendForFL401ForApplicant() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .applicantsFL401(applicant)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .applicantsFL401(applicant)
+            .build();
+        assertNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForFL401(caseDataBefore, caseData, CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()));
+    }
+
+    @Test
+    public void processC8RefugeDocumentsOnAmendForFL401ForRespondent() {
+        PartyDetails applicant = PartyDetails
+            .builder()
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder().build())
+            .build();
+        CaseData caseDataBefore = CaseData
+            .builder()
+            .respondentsFL401(applicant)
+            .build();
+        CaseData caseData = CaseData
+            .builder()
+            .respondentsFL401(applicant)
+            .build();
+        assertNull(confidentialityC8RefugeService
+            .processC8RefugeDocumentsOnAmendForFL401(caseDataBefore, caseData, CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()));
+    }
+
+    @Test
     public void processC8RefugeDocumentsOnAmendForC100WithForRespondent() {
         PartyDetails applicant = PartyDetails
             .builder()
