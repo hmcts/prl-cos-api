@@ -906,8 +906,6 @@ public class PrlAppsConstants {
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
-        + "The court will contact the people in the case with details of the first court hearing. "
-        + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
@@ -1065,6 +1063,7 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
     public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
     public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
 
@@ -1085,4 +1084,7 @@ public class PrlAppsConstants {
     public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+
 }
