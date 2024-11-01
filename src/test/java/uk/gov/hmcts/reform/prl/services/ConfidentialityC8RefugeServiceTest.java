@@ -302,18 +302,20 @@ public class ConfidentialityC8RefugeServiceTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = new ArrayList<>();
         applicantList.add(wrappedApplicant);
+        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().partyType("Applicant").build();
+        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
+        List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
+        list.add(element);
         CaseData caseData = CaseData
             .builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .refugeDocuments(list)
             .applicants(applicantList)
             .build();
         RefugeDocumentHandlerParameters refugeDocumentHandlerParameters = RefugeDocumentHandlerParameters
             .builder().forAllParties(true)
+            .removeDocument(true)
             .build();
-        RefugeConfidentialDocuments refugeConfidentialDocuments = RefugeConfidentialDocuments.builder().build();
-        Element<RefugeConfidentialDocuments> element = Element.<RefugeConfidentialDocuments>builder().value(refugeConfidentialDocuments).build();
-        List<Element<RefugeConfidentialDocuments>> list = new ArrayList<>();
-        list.add(element);
         RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(list, list);
         RefugeConfidentialDocumentsRecord returnedRefuge = confidentialityC8RefugeService
             .listRefugeDocumentsForConfidentialTab(caseData, refugeDocumentHandlerParameters, refugeConfidentialDocumentsRecord);
