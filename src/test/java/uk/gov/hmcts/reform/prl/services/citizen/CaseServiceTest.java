@@ -662,6 +662,8 @@ public class CaseServiceTest {
     @Test
     public void testGetCitizenDocuments() {
         //Action
+        citizenCaseData = citizenCaseData.toBuilder()
+            .applicants(List.of(element(partyDetails.toBuilder().user(User.builder().build()).build()))).build();
         CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
@@ -775,7 +777,7 @@ public class CaseServiceTest {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
-            .applicantsFL401(partyDetails)
+            .applicantsFL401(partyDetails.toBuilder().user(User.builder().build()).build())
             .respondentsFL401(partyDetails)
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
@@ -790,7 +792,7 @@ public class CaseServiceTest {
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        assertEquals(DA_SOA_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
+        assertEquals(DA_SOA_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test

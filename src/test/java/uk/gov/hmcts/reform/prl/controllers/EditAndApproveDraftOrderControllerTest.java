@@ -433,6 +433,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
@@ -447,7 +448,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("test")
+            .eventId(Event.EDIT_RETURNED_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -747,7 +748,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("test")
+            .eventId(Event.EDIT_RETURNED_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -1231,7 +1232,6 @@ public class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
         Assert.assertNotNull(response);
-
     }
 
 
@@ -1897,5 +1897,12 @@ public class EditAndApproveDraftOrderControllerTest {
         Map<String, Object> updatedCaseDataMap = response.getData();
         Assert.assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
         Assert.assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
+    }
+
+    @Test
+    public void testPopulateSdoOtherFieldsException() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", CallbackRequest.builder().build()), RuntimeException.class, "Invalid Client");
     }
 }
