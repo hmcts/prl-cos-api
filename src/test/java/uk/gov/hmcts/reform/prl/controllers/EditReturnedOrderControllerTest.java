@@ -67,7 +67,9 @@ public class EditReturnedOrderControllerTest {
 
     @Before
     public void setUp() {
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),
+                                                              Mockito.any(), Mockito.anyString(),
+                                                              Mockito.anyString())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
@@ -113,7 +115,7 @@ public class EditReturnedOrderControllerTest {
     @Test
     public void testPopulateInstructions() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any()))
+        when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("error1")).build());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

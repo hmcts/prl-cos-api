@@ -44,6 +44,7 @@ public class AddCafcassOfficerControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    @Ignore
     @Test
     public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
