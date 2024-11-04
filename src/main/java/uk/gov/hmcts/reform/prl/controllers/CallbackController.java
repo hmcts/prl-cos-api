@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -409,7 +411,15 @@ public class CallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> courtList;
             if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+                courtList = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? locationRefDataService.getFilteredCourtLocations(authorisation) :
+                    locationRefDataService.getDaFilteredCourtLocations(authorisation);
+                log.info("Case type: {}", CaseUtils.getCaseTypeOfApplication(caseData));
+                try {
+                    log.info("Court list: filterOnboardedCourtList: AFTER {}", objectMapper.writeValueAsString(courtList));
+                } catch (JsonProcessingException e) {
+                    throw new ManageOrderRuntimeException("Failed to convert court list to JSON", e);
+                }
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
