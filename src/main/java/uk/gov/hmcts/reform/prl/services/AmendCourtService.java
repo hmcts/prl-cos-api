@@ -6,20 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
@@ -65,9 +61,6 @@ public class AmendCourtService {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             }
-            if (caseData.getCourtEmailAddress() != null) {
-                sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
-            }
         }
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
         return caseDataUpdated;
@@ -87,18 +80,5 @@ public class AmendCourtService {
             return true;
         }
         return false;
-    }
-
-    private void sendCourtAdminEmail(CaseData caseData, CaseDetails caseDetails) {
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
-            emailService.send(
-                caseData.getCourtEmailAddress(),
-                EmailTemplateNames.COURTADMIN,
-                caseWorkerEmailService.buildCourtAdminEmail(caseDetails),
-                LanguagePreference.english
-            );
-        } else {
-            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-        }
     }
 }
