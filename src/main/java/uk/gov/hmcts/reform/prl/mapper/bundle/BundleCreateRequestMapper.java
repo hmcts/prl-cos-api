@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
@@ -602,5 +603,12 @@ public class BundleCreateRequestMapper {
             .documentLink(doc.getCaseSummaryDocument())
             .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.caseSummary).build() : null);
+        bundleMap.put(
+            FM5_STATEMENTS,
+            Objects.nonNull(doc.getFm5StatementsDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getFm5StatementsDocument())
+                .documentFileName(doc.getFm5StatementsDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.fm5Statements).build() : null
+        );
     }
 }
