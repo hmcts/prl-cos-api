@@ -349,7 +349,7 @@ public class CafCassCaseData {
                 && StringUtils.hasText(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl())) {
                 Document documentOther = mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                 URL url = new URL(documentOther.getDocumentUrl());
-                documentOther.setDocumentUrl(getDocumentId(url));
+                documentOther.setDocumentId(getDocumentId(url));
                 mpuDomesticAbuseEvidenceDocument.getValue().setDomesticAbuseDocument(documentOther);
             }
         } catch (Exception e) {

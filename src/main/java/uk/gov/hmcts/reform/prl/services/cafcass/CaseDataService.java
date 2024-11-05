@@ -485,7 +485,7 @@ public class CaseDataService {
     public Document buildFromCaseDocument(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument) throws MalformedURLException {
         URL url = new URL(caseDocument.getDocumentUrl());
         return Document.builder()
-            .documentUrl(CafCassCaseData.getDocumentId(url))
+            .documentId(CafCassCaseData.getDocumentId(url))
             .documentFileName(caseDocument.getDocumentFileName())
             .build();
     }
