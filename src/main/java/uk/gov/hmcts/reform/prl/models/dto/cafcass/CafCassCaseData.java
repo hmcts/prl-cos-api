@@ -299,12 +299,18 @@ public class CafCassCaseData {
 
 
         this.miamExemptionsTable = MiamExemptions.builder()
-            .childProtectionEvidence(childProtectionEvidence[0])
-            .domesticViolenceEvidence(domesticViolenceEvidence[0])
-            .reasonsForMiamExemption(reasonsForMiamExemption[0])
-            .otherGroundsEvidence(otherGroundsEvidence[0])
-            .previousAttendenceEvidence(previousAttendenceEvidence[0])
-            .urgencyEvidence(urgencyEvidence[0])
+            .childProtectionEvidence(null != childProtectionEvidence[0] && !childProtectionEvidence[0].trim().isEmpty()
+                                         ? childProtectionEvidence[0] : null)
+            .domesticViolenceEvidence(null != domesticViolenceEvidence[0] && !domesticViolenceEvidence[0].trim().isEmpty()
+                                          ? domesticViolenceEvidence[0] : null)
+            .reasonsForMiamExemption(null != reasonsForMiamExemption[0] && !reasonsForMiamExemption[0].trim().isEmpty()
+                                         ? reasonsForMiamExemption[0] : null)
+            .otherGroundsEvidence(null != otherGroundsEvidence[0] && !otherGroundsEvidence[0].trim().isEmpty()
+                                      ? otherGroundsEvidence[0] : null)
+            .previousAttendenceEvidence(null != previousAttendenceEvidence[0] && !previousAttendenceEvidence[0].trim().isEmpty()
+                                            ? previousAttendenceEvidence[0] : null)
+            .urgencyEvidence(null != urgencyEvidence[0] && !urgencyEvidence[0].trim().isEmpty()
+                                 ? urgencyEvidence[0] : null)
             .build();
     }
 
@@ -350,6 +356,7 @@ public class CafCassCaseData {
                 Document documentOther = mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                 URL url = new URL(documentOther.getDocumentUrl());
                 documentOther.setDocumentId(getDocumentId(url));
+                documentOther.setDocumentUrl(null);
                 mpuDomesticAbuseEvidenceDocument.getValue().setDomesticAbuseDocument(documentOther);
             }
         } catch (Exception e) {
