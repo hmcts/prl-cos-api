@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +32,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -91,6 +94,9 @@ public class CitizenCaseUpdateServiceTest {
 
     @Mock
     private CitizenAwpMapper citizenAwpMapper;
+
+    @Mock
+    private CourtFinderService courtLocatorService;
 
     private CaseData caseData;
     private Map<String, Object> caseDetails;
@@ -263,7 +269,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testSubmitApplication() throws IOException {
+    public void testSubmitApplication() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
@@ -301,6 +307,8 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenReturn(Court.builder().courtName("Test court").build());
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
