@@ -1262,7 +1262,7 @@ public class ServiceOfApplicationService {
             List<Document> respondentCoverLetters = new ArrayList<>();
             List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5);
+                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE6);
                 coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
                     .coverLetters(wrapElements(coverLetters)).build()));
                 respondentCoverLetters.addAll(coverLetters);
@@ -3195,7 +3195,7 @@ public class ServiceOfApplicationService {
             List<Document> respondentPackDocs = new ArrayList<>();
             List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
             for (Element<PartyDetails> party : caseData.getRespondents()) {
-                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE5);
+                List<Document> coverLetters = generateAccessCodeLetter(authorization, caseData, party, null, PRL_LET_ENG_C100_RE6);
                 respondentPackDocs.addAll(coverLetters);
                 coverLetterMap.add(element(party.getId(), CoverLetterMap.builder()
                     .coverLetters(wrapElements(coverLetters)).build()));
