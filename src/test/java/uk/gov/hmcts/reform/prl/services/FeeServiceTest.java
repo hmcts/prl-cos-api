@@ -309,7 +309,7 @@ public class FeeServiceTest {
     @Test
     public void testFetchFeeCodeC2SpecificIssueOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
-            AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORCDER.getId()).build();
+            AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORDER.getId()).build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
 

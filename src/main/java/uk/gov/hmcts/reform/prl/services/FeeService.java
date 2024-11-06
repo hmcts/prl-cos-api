@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCEL_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER;
-import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORCDER;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum.FL403;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
@@ -189,7 +189,7 @@ public class FeeService {
     public boolean isc2WithOrder(String applicationReason) {
         return CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId().equals(applicationReason)
                 || PROHIBITED_STEPS_ORDER.getId().equals(applicationReason)
-                || SPECIFIC_ISSUE_ORCDER.getId().equals(applicationReason);
+                || SPECIFIC_ISSUE_ORDER.getId().equals(applicationReason);
     }
 
     public static boolean isFl403ApplicationAlreadyPresent(CaseData caseData) {

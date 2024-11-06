@@ -41,8 +41,8 @@ public enum AwpApplicationReasonEnum {
         "prohibited-steps-order",
         "prohibited-steps-order"
     ),
-    @JsonProperty("SPECIFIC_ISSUE_ORCDER")
-    SPECIFIC_ISSUE_ORCDER(
+    @JsonProperty("SPECIFIC_ISSUE_ORDER")
+    SPECIFIC_ISSUE_ORDER(
         "specific-issue-order",
         "specific-issue-order"
     ),
@@ -126,8 +126,8 @@ public enum AwpApplicationReasonEnum {
         "change-extend-or-cancel-non-molestation-order-or-occupation-order",
         "change-extend-or-cancel-non-molestation-order-or-occupation-order"
     ),
-    @JsonProperty("REQUEST_FOR_ARREST_WARRENT")
-    REQUEST_FOR_ARREST_WARRENT(
+    @JsonProperty("REQUEST_FOR_ARREST_WARRANT")
+    REQUEST_FOR_ARREST_WARRANT(
         "request-the-court-issues-an-arrest-warrant",
         "request-the-court-issues-an-arrest-warrant"
     );
