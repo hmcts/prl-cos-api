@@ -5,7 +5,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -68,5 +67,6 @@ public class AddCafcassOfficerControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
         Assert.assertNotNull(response.getData().get("newChildDetails"));
+
     }
 }
