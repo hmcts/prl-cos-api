@@ -70,7 +70,6 @@ public class AmendCourtService {
             if (caseData.getCourtEmailAddress() != null) {
                 sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
             }
-            //caseDataUpdated.put(STATE_FIELD, caseData.getState());
             log.info("caseDataUpdated state: ===> {}", caseDataUpdated.get(STATE_FIELD));
         }
         // log casedata state
