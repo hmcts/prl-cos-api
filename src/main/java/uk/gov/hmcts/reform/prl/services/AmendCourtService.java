@@ -71,6 +71,8 @@ public class AmendCourtService {
                 sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
             }
         }
+        // log casedata state
+        log.info("case data state: ===> {}", caseData.getState());
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
         caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
         return caseDataUpdated;
