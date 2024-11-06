@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
@@ -35,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Qualifier("caseSummaryTab")
+@Slf4j
 public class CaseSummaryTabService implements TabService {
 
     private final AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
@@ -73,6 +77,12 @@ public class CaseSummaryTabService implements TabService {
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
+        try {
+            log.info("----caseSummary:----- " + objectMapper.writeValueAsString(caseSummary));
+            log.info("----summaryTabFields:----- " + objectMapper.writeValueAsString(summaryTabFields));
+        } catch (JsonProcessingException e) {
+            throw new ManageOrderRuntimeException("Error while serializing caseSummary", e);
+        }
         return summaryTabFields;
     }
 
