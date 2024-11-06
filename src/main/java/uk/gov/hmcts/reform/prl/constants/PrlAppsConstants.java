@@ -79,6 +79,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
     public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
     public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_EXTERNAL = "External";
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
@@ -133,6 +134,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
+    public static final String DOCUMENT_SEND_REPLY_MESSAGE = "SEND_REPLY_MESSAGE";
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
@@ -796,6 +798,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
     public static final String COMMA = ",";
@@ -903,8 +906,6 @@ public class PrlAppsConstants {
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
-        + "The court will contact the people in the case with details of the first court hearing. "
-        + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
@@ -981,6 +982,7 @@ public class PrlAppsConstants {
 
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
+    public static final String WA_ORDER_COLLECTION_ID = "draftOrderCollectionId";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
     public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
     public static final String HEARING_JUDGE_ROLE = "hearing-judge";
@@ -1062,6 +1064,11 @@ public class PrlAppsConstants {
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
 
+    public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
+    public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
+
+    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
     public static final String COURTNAV_USER = "courtnav";
@@ -1077,5 +1084,7 @@ public class PrlAppsConstants {
     public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
 
 }
