@@ -49,6 +49,7 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
+        log.info("Datamap James is {}", dataMap);
         return generatedDocumentInfo;
     }
 
@@ -96,6 +97,7 @@ public class DgsService {
                 welshDataMap.put(k, updatedWelshObj);
             }
         });
+        log.info("data Map James is {}", welshDataMap);
         return generateDocument(authorisation, caseId, templateName,
                                 welshDataMap
         );
