@@ -166,7 +166,6 @@ public class DgsService {
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
-            log.info("Generating case details James {}", tempCaseDetails);
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
