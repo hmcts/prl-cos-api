@@ -55,12 +55,14 @@ public class DynamicMultiSelectListServiceTest {
                                                     .value(Child.builder().build()).build());
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
                                                              .value(PartyDetails.builder()
+                                                                        .partyId(UUID.fromString(TEST_UUID))
                                                                         .doTheyHaveLegalRepresentation(
                                                                  YesNoDontKnow.yes)
                                                                         .representativeFirstName("test")
                                                                         .representativeLastName("test")
                                                                         .user(User.builder().solicitorRepresented(Yes)
                                                                                   .build())
+                                                                        .partyId(UUID.fromString(TEST_UUID))
                                                                         .build()).build());
         List<Element<OrderDetails>> orders = List.of(Element.<OrderDetails>builder().id(UUID.fromString(TEST_UUID))
                                                          .value(OrderDetails.builder()

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,28 +23,33 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 
 @Slf4j
 @Service
@@ -51,7 +57,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
-    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET", "C8_DOCUMENT"};
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -60,7 +66,9 @@ public class CourtNavCaseService {
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final SystemUserService systemUserService;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+
+    private final ManageDocumentsService manageDocumentsService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -105,9 +113,9 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-            if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
-                && Integer.parseInt(tempCaseData.getNumberOfAttachments())
-                <= tempCaseData.getCourtNavUploadedDocs().size()) {
+            int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
+            if (tempCaseData.getNumberOfAttachments() != null
+                && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
@@ -119,16 +127,35 @@ public class CourtNavCaseService {
                 List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
-                document.getOriginalFilename(),
-                typeOfDocument,
-                tempCaseData,
-                uploadResponse.getDocuments().get(0)
-            );
 
             Map<String, Object> fields = new HashMap<>();
 
-            fields.put("courtNavUploadedDocs", updatedCaseData.getCourtNavUploadedDocs());
+            QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
+                document.getOriginalFilename(),
+                tempCaseData,
+                uploadResponse.getDocuments().get(0),
+                typeOfDocument
+            );
+
+            manageDocumentsService.moveDocumentsToQuarantineTab(
+                courtNavQuarantineLegalDoc,
+                tempCaseData,
+                fields,
+                COURTNAV
+            );
+
+            manageDocumentsService.setFlagsForWaTask(
+                tempCaseData,
+                fields,
+                COURTNAV,
+                courtNavQuarantineLegalDoc
+            );
+
+            //Changes to generate one WA task for courtnav upload document
+            if (!fields.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
+                fields.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+            }
+
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
@@ -136,11 +163,13 @@ public class CourtNavCaseService {
                            .build())
                 .data(fields).build();
 
-            coreCaseDataService.submitUpdate(authorisation,
-                                             eventRequestData,
-                                             caseDataContent,
-                                             caseId,
-                                             true);
+            coreCaseDataService.submitUpdate(
+                authorisation,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                true
+            );
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
         } else {
@@ -149,44 +178,58 @@ public class CourtNavCaseService {
         }
     }
 
+    private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
+        int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
+            ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
+        if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
+            for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
+                if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
+                    alreadyUploadedCourtNavDocSize++;
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(tempCaseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
+            alreadyUploadedCourtNavDocSize = alreadyUploadedCourtNavDocSize
+                + tempCaseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().size();
+        }
+        return alreadyUploadedCourtNavDocSize;
+    }
+
     public StartEventResponse checkIfCasePresent(String caseId, String authorisation, EventRequestData eventRequestData) {
         try {
             return coreCaseDataService.startUpdate(authorisation, eventRequestData, caseId, true);
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }
         return null;
     }
 
-    private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
-                                                CaseData tempCaseData, Document document) {
-        String partyName = tempCaseData.getApplicantCaseName() != null
-            ? tempCaseData.getApplicantCaseName() : COURTNAV;
-        List<Element<UploadedDocuments>> uploadedDocumentsList;
-        Element<UploadedDocuments> uploadedDocsElement =
-            element(UploadedDocuments.builder().dateCreated(LocalDate.now())
-                        .documentType(typeOfDocument)
-                        .uploadedBy(COURTNAV)
-                        .documentDetails(DocumentDetails.builder().documentName(fileName)
-                                             .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant(NA_COURTNAV)
-                        .parentDocumentType(NA_COURTNAV)
-                        .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                             .documentUrl(document.links.self.href)
-                                             .documentBinaryUrl(document.links.binary.href)
-                                             .documentHash(document.hashToken)
-                                             .documentFileName(fileName).build()).build());
-        if (tempCaseData.getCourtNavUploadedDocs() != null) {
-            uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
-            uploadedDocumentsList.add(uploadedDocsElement);
-        } else {
-            uploadedDocumentsList = new ArrayList<>();
-            uploadedDocumentsList.add(uploadedDocsElement);
-        }
+    private QuarantineLegalDoc getCourtNavQuarantineDocument(String fileName,
+                                                             CaseData caseData,
+                                                             Document uploadedDocument,
+                                                             String typeOfDocument) {
 
-        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        String partyName = caseData.getApplicantsFL401() != null
+            ? caseData.getApplicantsFL401().getLabelForDynamicList() : COURTNAV;
 
-        return tempCaseData;
+        uk.gov.hmcts.reform.prl.models.documents.Document courtNavDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl(uploadedDocument.links.self.href)
+            .documentBinaryUrl(uploadedDocument.links.binary.href)
+            .documentHash(uploadedDocument.hashToken)
+            .documentFileName(fileName).build();
+
+        return QuarantineLegalDoc.builder()
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .documentType(typeOfDocument)
+            .categoryId("applicantStatements")
+            .categoryName("Applicant's statements")
+            .isConfidential(Yes)
+            .fileName(fileName)
+            .uploadedBy(COURTNAV)
+            .uploaderRole(COURTNAV)
+            .courtNavQuarantineDocument(courtNavDocument)
+            .documentParty(partyName)
+            .build();
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {
@@ -215,7 +258,17 @@ public class CourtNavCaseService {
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        data.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DARESPONDENT));
+        data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                                  PartyRole.Representing.DAAPPLICANT));
+        data.put("caseFlags", Flags.builder().build());
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+
         allTabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -223,7 +276,35 @@ public class CourtNavCaseService {
             startAllTabsUpdateDataContent.eventRequestData(),
             caseData
         );
-        log.info("**********************Tab refresh and CourtNav case creation complete**************************");
+
+        /** Tech debt: need to pick this extra transaction as a tech debt.
+         *  In the previous one, case data conversion is removing multiple must to have fields.
+         **/
+        updateCommonSetUpForNoCAndCaseFlags(caseId);
+        log.info("**********************Tab refresh, CC setup and CourtNav case creation complete**************************");
+    }
+
+    public void updateCommonSetUpForNoCAndCaseFlags(String caseId) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+        caseDataMap.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DARESPONDENT));
+        caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
+                                                                           PartyRole.Representing.DAAPPLICANT));
+        caseDataMap.put("caseFlags", Flags.builder().build());
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+        log.info("Common component setup for NoC and case flags is completed");
     }
 }
 
