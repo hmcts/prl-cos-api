@@ -410,6 +410,7 @@ public class CallbackController {
             List<DynamicListElement> courtList;
             if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 courtList = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                    // TODO: Maybe this is the logic to get the WA courts
                     ? locationRefDataService.getFilteredCourtLocations(authorisation) :
                     locationRefDataService.getDaFilteredCourtLocations(authorisation);
             } else {

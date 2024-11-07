@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -57,7 +58,14 @@ public class C100IssueCaseService {
             );
             log.info("baseLocationID {}", baseLocationId);
             log.info("courtVenue {}", courtVenue);
-            log.info("CaseData {}", objectMapper.writeValueAsString(caseData));
+            // log.info("CaseData {}", objectMapper.writeValueAsString(caseData));
+            log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+
+            // Try to get list of WA approved courts
+            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
+            log.info("WA Enabled Courts {}", courtListWorkAllocated);
+            boolean isWorkAllocationEnabled = courtListWorkAllocated.contains(courtVenue.get().getCourtEpimmsId());
+            log.info("Is this a WA Enabled court? {}", isWorkAllocationEnabled);
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
