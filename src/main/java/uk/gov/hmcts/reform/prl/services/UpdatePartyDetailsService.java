@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -62,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -115,7 +118,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}", e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -135,7 +138,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e);
+                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
@@ -242,6 +245,9 @@ public class UpdatePartyDetailsService {
             .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
             .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
             .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
+            .response(getPartyResponse(partyDetails).toBuilder()
+                          .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                          .build())
             .build();
 
         return partyDetails;
@@ -311,19 +317,48 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
+            PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
+                                                                                              .keepDetailsPrivate(
+                                                                                                  updateRespondentKeepYourDetailsPrivateInformation(
+                                                                                                      respondent.getValue()))
+                                                                                              .build()).build();
+            respondent = element(respondent.getId(), updatedPartyDetails);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
                 respondent,
                 SOLICITOR
             );
             populateC8Documents(authorisation,
-                        updatedCaseData,
-                        caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
-                        respondentIndex,respondent
+                                updatedCaseData,
+                                caseData,
+                                dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
+                                respondentIndex, respondent
             );
             respondentIndex++;
         }
+    }
+
+    private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
+        KeepDetailsPrivate keepDetailsPrivate;
+        if (null != respondent.getResponse() && null != respondent.getResponse().getKeepDetailsPrivate()) {
+            keepDetailsPrivate = respondent.getResponse().getKeepDetailsPrivate();
+        } else {
+            keepDetailsPrivate = KeepDetailsPrivate.builder().build();
+        }
+        List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
+        if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.address);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.phoneNumber);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.email);
+        }
+        return keepDetailsPrivate.toBuilder()
+            .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
+            .confidentialityList(confidentialityList)
+            .build();
     }
 
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {

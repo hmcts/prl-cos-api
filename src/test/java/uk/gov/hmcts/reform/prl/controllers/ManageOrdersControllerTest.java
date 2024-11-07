@@ -1120,6 +1120,10 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isTheOrderAboutAllChildren", No);
         stringObjectMap.put("isTheOrderAboutChildren", Yes);
+        DraftOrder draftOrder = DraftOrder.builder().orderTypeId("abc").build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(element(draftOrder));
+        stringObjectMap.put("draftOrderCollection", draftOrderCollection);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
@@ -2260,6 +2264,7 @@ public class ManageOrdersControllerTest {
             .children(List.of(element(Child.builder().firstName("ch").build())))
             .courtName("testcourt")
             .caseTypeOfApplication("C100")
+            .isCafcass(Yes)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
             .build();
