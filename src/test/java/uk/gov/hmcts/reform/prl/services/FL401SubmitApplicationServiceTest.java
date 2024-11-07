@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -123,6 +124,9 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     private EventService eventPublisher;
+
+    @Mock
+    private CaseSummaryTabService caseSummaryTab;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -244,6 +248,13 @@ public class FL401SubmitApplicationServiceTest {
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
+
+        List<DynamicListElement> workAllocationEnabledCourtList = List.of(DynamicListElement.builder()
+                                                                              .code("12345")
+                                                                              .label("Swansea Civil Justice Centre "
+                                                                                         + "- Quay West, Quay Parade - SA1 1SP")
+                                                                              .build());
+        when(locationRefDataService.getDaFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledCourtList);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -904,5 +915,69 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
+    }
+
+    @Test
+    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturnedForOfflineState() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("FL401-Final.docx")
+                               .build())
+            .applicantsFL401(applicant)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(dynamicList)
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(List.of(FL401OrderTypeEnum.occupationOrder)).build())
+            .build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
+
+        List<DynamicListElement> workAllocationEnabledCourtList = List.of(DynamicListElement.builder()
+                                                                              .code("12345")
+                                                                              .label("test")
+                                                                              .build());
+        when(locationRefDataService.getDaFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledCourtList);
+
+        Map<String, Object> response = fl401SubmitApplicationService
+            .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
+
+        assertTrue(response.containsKey(COURT_EMAIL_ADDRESS_FIELD));
+        assertTrue(response.containsKey(COURT_NAME_FIELD));
+        assertTrue(response.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(response.containsKey(DOCUMENT_FIELD_FINAL));
+        assertTrue(response.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(response.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
 }
