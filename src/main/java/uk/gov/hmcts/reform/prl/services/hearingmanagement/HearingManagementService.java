@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
@@ -173,6 +174,10 @@ public class HearingManagementService {
         customFields.put(EVENT_ID, CaseEvent.UPDATE_NEXT_HEARING_DATE_IN_CCD);
         Map<String, Object> data = new HashMap<>();
         data.put("nextHearingDetails", nextHearingDateRequest.getNextHearingDetails());
+        if (nonNull(nextHearingDateRequest.getNextHearingDetails())
+            && nonNull(nextHearingDateRequest.getNextHearingDetails().getHearingDateTime())) {
+            data.put("nextHearingDate", nextHearingDateRequest.getNextHearingDetails().getHearingDateTime().toLocalDate());
+        }
         submitUpdate(data, customFields);
     }
 
