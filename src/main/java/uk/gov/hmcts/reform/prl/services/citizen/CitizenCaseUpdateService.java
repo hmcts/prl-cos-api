@@ -144,7 +144,6 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
             throws JsonProcessingException {
-        log.info("generate documents 1");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
@@ -152,7 +151,6 @@ public class CitizenCaseUpdateService {
                         authToken
                 );
 
-        log.info("generate documents 2");
         UserDetails userDetails = startAllTabsUpdateDataContent.userDetails();
         UserInfo userInfo = UserInfo
                 .builder()
@@ -161,36 +159,29 @@ public class CitizenCaseUpdateService {
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
                 .build();
-        log.info("generate documents 3");
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
                 .courtName(C100_DEFAULT_COURT_NAME)
                 .taskListVersion(TASK_LIST_VERSION_V3)
                 .build();
-        log.info("generate documents 4");
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        log.info("generate documents 5");
         caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
-        log.info("generate documents 6");
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
-        log.info("generate documents 7");
         caseDataToSubmit = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
             caseDataToSubmit,
             systemUserService.getSysUserToken()
         );
-        log.info("generate documents 8");
         allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
         caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
-        log.info("generate documents 9");
         caseDataMapToBeUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        log.info("generate documents 10");
+        log.info("generate documents 1");
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -199,7 +190,7 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
-        log.info("generate documents 11");
+        log.info("generate documents end");
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
     }
 

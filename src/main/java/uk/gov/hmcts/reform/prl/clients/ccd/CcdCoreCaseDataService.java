@@ -60,7 +60,9 @@ public class CcdCoreCaseDataService {
         String caseId,
         boolean isRepresented
     ) {
+        log.info("generate documents 4");
         if (isRepresented) {
+            log.info("generate documents caseworker");
             return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -72,6 +74,7 @@ public class CcdCoreCaseDataService {
                 caseDataContent
             );
         } else {
+            log.info("generate solicitor1");
             return coreCaseDataApi.submitEventForCitizen(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -96,6 +99,7 @@ public class CcdCoreCaseDataService {
     }
 
     public CaseDataContent createCaseDataContent(StartEventResponse startEventResponse, Object data) {
+        log.info("generate documents 3");
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()

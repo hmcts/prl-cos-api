@@ -324,6 +324,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                                         EventRequestData eventRequestData,
                                                         Map<String, Object> combinedFieldsMap,
                                                         UserDetails userDetails) {
+        log.info("generate documents 2");
         return ccdCoreCaseDataService.submitUpdate(
             authorisation,
             eventRequestData,
