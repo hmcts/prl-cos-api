@@ -57,6 +57,7 @@ public class C100IssueCaseService {
             );
             log.info("baseLocationID {}", baseLocationId);
             log.info("courtVenue {}", courtVenue);
+            log.info("CaseData {}", objectMapper.writeValueAsString(caseData));
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
