@@ -49,7 +49,6 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
-        log.info("Datamap James is {}", dataMap);
         return generatedDocumentInfo;
     }
 
@@ -97,7 +96,6 @@ public class DgsService {
                 welshDataMap.put(k, updatedWelshObj);
             }
         });
-        log.info("data Map James is {}", welshDataMap);
         return generateDocument(authorisation, caseId, templateName,
                                 welshDataMap
         );
@@ -168,6 +166,7 @@ public class DgsService {
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
+            log.info("Generating case details James {}", tempCaseDetails);
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
