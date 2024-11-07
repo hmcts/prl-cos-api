@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -62,6 +63,9 @@ public class AmendCourtServiceTest {
 
     @Mock
     private EventService eventService;
+
+    @Mock
+    private CaseSummaryTabService caseSummaryTab;
 
     private CaseData caseData;
     private CallbackRequest callbackRequest;
