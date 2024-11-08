@@ -64,12 +64,13 @@ public class C100IssueCaseService {
             log.info("WA Enabled Courts {}", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtListWorkAllocated).build());
             AtomicBoolean isWorkAllocatedCourt = new AtomicBoolean(false);
             courtListWorkAllocated.forEach(courtListElement -> {
+                log.info("INside forEach {}", courtListElement.getCode());
+                log.info("INside forEach {}", courtListElement.getLabel());
                 if (courtListElement.hasCode(baseLocationId)) {
                     log.info("Setting WA enabled to true");
                     isWorkAllocatedCourt.getAndSet(true);
                 }
             });
-            log.info("Is selected court WA enabled?: {}", isWorkAllocatedCourt.get());
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
