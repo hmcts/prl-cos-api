@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
@@ -24,14 +25,16 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 
 @Service
 @Slf4j
@@ -60,17 +63,30 @@ public class C100IssueCaseService {
             log.info("baseLocationID {}", baseLocationId);
             log.info("courtVenue {}", courtVenue);
             log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
+            List<DynamicListElement> courtListWorkAllocated = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? locationRefDataService.getFilteredCourtLocations(authorisation) :
+                locationRefDataService.getDaFilteredCourtLocations(authorisation);
             log.info("WA Enabled Courts {}", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtListWorkAllocated).build());
-            AtomicBoolean isWorkAllocatedCourt = new AtomicBoolean(false);
+
+            if (courtListWorkAllocated.stream()
+                .noneMatch(workAllocationEnabledCourt ->
+                               workAllocationEnabledCourt.getCode()
+                                   .equals(baseLocationId))) {
+                log.info("Setting state to 'Offline");
+                caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+            }
             courtListWorkAllocated.forEach(courtListElement -> {
                 log.info("INside forEach {}", courtListElement.getCode());
                 log.info("INside forEach {}", courtListElement.getLabel());
+                if (!Objects.equals(courtListElement.getCode(), baseLocationId)) {
+                    log.info("Setting state to 'Offline'");
+                }
                 if (courtListElement.hasCode(baseLocationId)) {
                     log.info("Setting WA enabled to true");
-                    isWorkAllocatedCourt.getAndSet(true);
                 }
             });
+
+            log.info("CaseDataUpdated {}", caseDataUpdated);
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
