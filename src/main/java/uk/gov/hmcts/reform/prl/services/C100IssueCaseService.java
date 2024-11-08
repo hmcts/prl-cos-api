@@ -58,7 +58,6 @@ public class C100IssueCaseService {
             );
             log.info("baseLocationID {}", baseLocationId);
             log.info("courtVenue {}", courtVenue);
-            // log.info("CaseData {}", objectMapper.writeValueAsString(caseData));
             log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
 
             // Try to get list of WA approved courts
