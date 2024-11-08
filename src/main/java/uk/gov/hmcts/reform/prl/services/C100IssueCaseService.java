@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
@@ -61,6 +62,14 @@ public class C100IssueCaseService {
             log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
             log.info("WA Enabled Courts {}", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtListWorkAllocated).build());
+            AtomicBoolean isWorkAllocatedCourt = new AtomicBoolean(false);
+            courtListWorkAllocated.forEach(courtListElement -> {
+                if (courtListElement.hasCode(baseLocationId)) {
+                    log.info("Setting WA enabled to true");
+                    isWorkAllocatedCourt.getAndSet(true);
+                }
+            });
+            log.info("Is selected court WA enabled?: {}", isWorkAllocatedCourt.get());
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
