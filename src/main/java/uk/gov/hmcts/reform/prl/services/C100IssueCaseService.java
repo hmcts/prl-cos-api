@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 public class C100IssueCaseService {
 
     private final AllTabServiceImpl allTabsService;
+    private final CaseSummaryTabService caseSummaryTab;
     private final DocumentGenService documentGenService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
@@ -60,33 +62,11 @@ public class C100IssueCaseService {
                 baseLocationId,
                 authorisation
             );
-            log.info("baseLocationID {}", baseLocationId);
-            log.info("courtVenue {}", courtVenue);
-            log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-            List<DynamicListElement> courtListWorkAllocated = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? locationRefDataService.getFilteredCourtLocations(authorisation) :
-                locationRefDataService.getDaFilteredCourtLocations(authorisation);
-            log.info("WA Enabled Courts {}", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtListWorkAllocated).build());
 
-            if (courtListWorkAllocated.stream()
-                .noneMatch(workAllocationEnabledCourt ->
-                               workAllocationEnabledCourt.getCode()
-                                   .equals(baseLocationId))) {
-                log.info("Setting state to 'Offline");
+            if (isSelectedCourtWorkAllocationEnabled(authorisation, baseLocationId, caseData)) {
                 caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
             }
-            courtListWorkAllocated.forEach(courtListElement -> {
-                log.info("INside forEach {}", courtListElement.getCode());
-                log.info("INside forEach {}", courtListElement.getLabel());
-                if (!Objects.equals(courtListElement.getCode(), baseLocationId)) {
-                    log.info("Setting state to 'Offline'");
-                }
-                if (courtListElement.hasCode(baseLocationId)) {
-                    log.info("Setting WA enabled to true");
-                }
-            });
-
-            log.info("CaseDataUpdated {}", caseDataUpdated);
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
@@ -156,5 +136,40 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
+    }
+
+    private boolean isSelectedCourtWorkAllocationEnabled(String auth, String courtLocationID, CaseData caseData) {
+        boolean isCourtWorkAllocationEnabled = true;
+        log.info("baseLocationID {}", courtLocationID);
+        log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+        List<DynamicListElement> courtListWorkAllocated = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(
+            caseData))
+            ? locationRefDataService.getFilteredCourtLocations(auth) :
+            locationRefDataService.getDaFilteredCourtLocations(auth);
+        log.info("WA Enabled Courts {}",
+                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtListWorkAllocated).build()
+        );
+
+        if (courtListWorkAllocated.stream()
+            .noneMatch(workAllocationEnabledCourt ->
+                           workAllocationEnabledCourt.getCode()
+                               .equals(courtLocationID))) {
+            log.info("Selected court is not Work Allocation enabled, setting case state to 'Offline");
+            isCourtWorkAllocationEnabled = false;
+
+        }
+
+        courtListWorkAllocated.forEach(courtListElement -> {
+            log.info("INside forEach {}", courtListElement.getCode());
+            log.info("INside forEach {}", courtListElement.getLabel());
+            if (!Objects.equals(courtListElement.getCode(), courtLocationID)) {
+                log.info("Setting state to 'Offline'");
+            }
+            if (courtListElement.hasCode(courtLocationID)) {
+                log.info("Setting WA enabled to true");
+            }
+        });
+
+        return isCourtWorkAllocationEnabled;
     }
 }
