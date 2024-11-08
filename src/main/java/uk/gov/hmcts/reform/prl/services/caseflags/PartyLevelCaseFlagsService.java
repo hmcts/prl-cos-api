@@ -651,15 +651,9 @@ public class PartyLevelCaseFlagsService {
                     updateCaseFlagsData(oldIndex.get(), index, oldCaseDataMap, updatedCaseDataMap,
                                         partyType
                     );
-                } else if (oldIndex.isEmpty()) {
-                    generateCaseFlagForNewParty(index, updatedCaseDataMap, partyType);
                 }
             });
         }
-    }
-
-    private void generateCaseFlagForNewParty(Integer index, Map<String, Object> updatedCaseDataMap, String partyType) {
-
     }
 
     private Map<String, Integer> getPartyIdToIndexMapping(List<Element<PartyDetails>> parties) {
