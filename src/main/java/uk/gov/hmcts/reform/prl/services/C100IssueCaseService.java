@@ -60,11 +60,7 @@ public class C100IssueCaseService {
             log.info("courtVenue {}", courtVenue);
             log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
 
-            // Try to get list of WA approved courts
-            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
-            log.info("WA Enabled Courts {}", courtListWorkAllocated);
-            boolean isWorkAllocationEnabled = courtListWorkAllocated.contains(courtVenue.get().getCourtEpimmsId());
-            log.info("Is this a WA Enabled court? {}", isWorkAllocationEnabled);
+
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
