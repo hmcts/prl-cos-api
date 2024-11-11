@@ -229,6 +229,7 @@ public class CitizenPartyDetailsMapper {
         dataMapForC8Document.put(COURT_SEAL_FIELD,
                                  oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
                                      : oldCaseData.getCourtSeal());
+        dataMapForC8Document.put("respondent", updatedPartyElement.getValue());
         if (oldCaseData.getTaskListVersion() != null
             && (TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())
                 || TASK_LIST_VERSION_V3.equalsIgnoreCase(oldCaseData.getTaskListVersion()))) {
