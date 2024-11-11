@@ -499,11 +499,12 @@ public class PartyLevelCaseFlagsService {
                 for (int i = 0; i < 5; i++) {
                     if (i < parties.size()) {
                         Optional<Element<PartyDetails>> partyDetailsElement = Optional.ofNullable(parties.get(i));
-                        int caseFlagsIndex = i + 1;
 
+
+                        int index = i;
                         partyDetailsElement.ifPresent(detailsElement -> representing.forEach(representing1 -> {
                             log.info("refreshing the name for party {}", partyDetailsElement.get().getId());
-                            setCaseFlagInformation(representing1,detailsElement,updatedCaseDataMap,caseFlagsIndex);
+                            setCaseFlagInformation(representing1, detailsElement, updatedCaseDataMap, index);
                         }));
 
                     } else {
@@ -523,8 +524,9 @@ public class PartyLevelCaseFlagsService {
     }
 
     private void setCaseFlagInformation(PartyRole.Representing representing1, Element<PartyDetails> partyDetailsElement,
-                                        Map<String, Object> updatedCaseDataMap, int caseFlagsIndex) {
+                                        Map<String, Object> updatedCaseDataMap, int index) {
 
+        int caseFlagsIndex = index + 1;
         String externalCaseFlagsKey = getCaseFlagsFiledKey(representing1.getCaseDataExternalField(), caseFlagsIndex);
         String internalCaseFlagsKey = getCaseFlagsFiledKey(representing1.getCaseDataInternalField(), caseFlagsIndex);
         Flags caseFlagsExternal = getCaseFlagsForParty(updatedCaseDataMap.get(externalCaseFlagsKey));
@@ -535,19 +537,21 @@ public class PartyLevelCaseFlagsService {
                     representing1,
                     partyDetailsElement,
                     updatedCaseDataMap,
-                    caseFlagsIndex,
+                    index,
                     externalCaseFlagsKey,
                     caseFlagsExternal,
-                    VISIBILITY_EXTERNAL
+                    VISIBILITY_EXTERNAL,
+                    caseFlagsIndex
                 );
                 setCaseFlagInformationForParty(
                     representing1,
                     partyDetailsElement,
                     updatedCaseDataMap,
-                    caseFlagsIndex,
+                    index,
                     internalCaseFlagsKey,
                     caseFlagsInternal,
-                    VISIBILITY_INTERNAL
+                    VISIBILITY_INTERNAL,
+                    caseFlagsIndex
                 );
                 break;
             case CAAPPLICANTSOLICITOR:
@@ -555,19 +559,21 @@ public class PartyLevelCaseFlagsService {
                     representing1,
                     partyDetailsElement,
                     updatedCaseDataMap,
-                    caseFlagsIndex,
+                    index,
                     externalCaseFlagsKey,
                     caseFlagsExternal,
-                    VISIBILITY_EXTERNAL
+                    VISIBILITY_EXTERNAL,
+                    caseFlagsIndex
                 );
                 setCaseFlagInformationSolicitor(
                     representing1,
                     partyDetailsElement,
                     updatedCaseDataMap,
-                    caseFlagsIndex,
+                    index,
                     internalCaseFlagsKey,
                     caseFlagsInternal,
-                    VISIBILITY_INTERNAL
+                    VISIBILITY_INTERNAL,
+                    caseFlagsIndex
                 );
                 break;
             default:
@@ -578,13 +584,13 @@ public class PartyLevelCaseFlagsService {
     }
 
     private void setCaseFlagInformationSolicitor(PartyRole.Representing representing1, Element<PartyDetails> partyDetailsElement,
-                                                 Map<String, Object> updatedCaseDataMap, int caseFlagsIndex, String externalCaseFlagsKey,
-                                                 Flags caseFlags, String visibility) {
-        Optional<PartyRole> partyRole = getPartyRole(representing1, caseFlagsIndex);
+                                                 Map<String, Object> updatedCaseDataMap, int index, String externalCaseFlagsKey,
+                                                 Flags caseFlags, String visibility, int caseFlagsIndex) {
+        Optional<PartyRole> partyRole = getPartyRole(representing1, index);
         Flags caseFlag = null;
         if (partyRole.isPresent() && ObjectUtils.isNotEmpty(caseFlags)) {
             caseFlag = caseFlags.toBuilder().partyName(partyDetailsElement.getValue().getRepresentativeFullName()).groupId(
-                representing1.getGroupId()).roleOnCase(partyRole.get().getCaseRoleLabel()).build();
+                String.format(representing1.getGroupId(),caseFlagsIndex)).roleOnCase(partyRole.get().getCaseRoleLabel()).build();
         } else if (partyRole.isPresent() && Objects.isNull(caseFlags)) {
 
             caseFlag = Flags
@@ -592,7 +598,7 @@ public class PartyLevelCaseFlagsService {
                 .partyName(partyDetailsElement.getValue().getRepresentativeFullName())
                 .roleOnCase(partyRole.get().getCaseRoleLabel())
                 .visibility(visibility)
-                .groupId(representing1.getGroupId())
+                .groupId(String.format(representing1.getGroupId(),caseFlagsIndex))
                 .details(Collections.emptyList())
                 .build();
         }
@@ -611,20 +617,20 @@ public class PartyLevelCaseFlagsService {
     }
 
     private void setCaseFlagInformationForParty(PartyRole.Representing representing1, Element<PartyDetails> partyDetailsElement,
-                                                Map<String, Object> updatedCaseDataMap, int caseFlagsIndex, String externalCaseFlagsKey,
-                                                Flags caseFlags, String visibilityExternal) {
-        Optional<PartyRole> partyRole = getPartyRole(representing1, caseFlagsIndex);
+                                                Map<String, Object> updatedCaseDataMap, int index, String externalCaseFlagsKey,
+                                                Flags caseFlags, String visibilityExternal, int caseFlagsIndex) {
+        Optional<PartyRole> partyRole = getPartyRole(representing1, index);
         Flags caseFlag = null;
         if (partyRole.isPresent() && ObjectUtils.isNotEmpty(caseFlags)) {
             caseFlag = caseFlags.toBuilder().partyName(partyDetailsElement.getValue().getLabelForDynamicList()).groupId(
-                representing1.getGroupId()).roleOnCase(partyRole.get().getCaseRoleLabel()).build();
+                String.format(representing1.getGroupId(),caseFlagsIndex)).roleOnCase(partyRole.get().getCaseRoleLabel()).build();
         } else if (partyRole.isPresent() && Objects.isNull(caseFlags)) {
             caseFlag = Flags
                 .builder()
                 .partyName(partyDetailsElement.getValue().getLabelForDynamicList())
                 .roleOnCase(partyRole.get().getCaseRoleLabel())
                 .visibility(visibilityExternal)
-                .groupId(representing1.getGroupId())
+                .groupId(String.format(representing1.getGroupId(),caseFlagsIndex))
                 .details(Collections.emptyList())
                 .build();
         }
@@ -677,14 +683,6 @@ public class PartyLevelCaseFlagsService {
                     log.info("old case data key {}",oldCaseDataKey);
                     String caseDataKey = String.format(key, index + 1);
                     log.info("new case data key {}",caseDataKey);
-                    Flags oldCaseFlags = objectMapper.convertValue(
-                        oldCaseDataMap.get(oldCaseDataKey),
-                        Flags.class
-                    );
-                    Flags newCaseFlags = objectMapper.convertValue(
-                        oldCaseDataMap.get(oldCaseDataKey),
-                        Flags.class
-                    );
                     updatedCaseDataMap.put(caseDataKey, oldCaseDataMap.get(oldCaseDataKey));
                 });
                 break;

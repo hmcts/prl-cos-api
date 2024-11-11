@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
@@ -65,6 +67,8 @@ public class PartyLevelCaseFlagsServiceTest {
     private  PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private CaseData caseDataSolicitorRepresent;
     private CaseData caseDataFl401SolicitorRepresent;
+
+    private static final String AMEND_APPLICANTS_DETAILS = "amendApplicantsDetails";
 
     @Before
     public void setup() {
@@ -321,4 +325,79 @@ public class PartyLevelCaseFlagsServiceTest {
         partyLevelCaseFlagsService.getPartyCaseDataExternalField(C100_CASE_TYPE,PartyRole.Representing.CAAPPLICANTSOLICITOR,1);
         Assert.assertEquals(C100_CASE_TYPE, caseData1.getCaseTypeOfApplication());
     }
+
+    @Test
+    public void testAmendApplicantDetails() {
+
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMapBefore = new HashMap<>();
+
+
+        PartyDetails partyDetailsApplicant = PartyDetails.builder()
+            .firstName("test")
+            .lastName("test")
+            .email("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
+            .user(User.builder().email("").idamId("").build())
+            .build();
+
+        PartyDetails partyDetailsApplicant2 = PartyDetails.builder()
+            .firstName("test2")
+            .lastName("test2")
+            .email("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .user(User.builder().email("").idamId("").build())
+            .build();
+
+
+        PartyDetails partyDetailsApplicant3 = PartyDetails.builder()
+            .firstName("test3")
+            .lastName("test3")
+            .email("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
+            .user(User.builder().email("").idamId("").build())
+            .build();
+        PartyDetails partyDetailsRespondent = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .email("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
+            .user(User.builder().email("").idamId("").build())
+            .build();
+
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(partyDetailsApplicant).build(),
+                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(partyDetailsApplicant2).build(),
+                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(partyDetailsApplicant3).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                     .value(partyDetailsRespondent).build()))
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(partyDetailsApplicant).build(),
+                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(partyDetailsApplicant3).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                     .value(partyDetailsRespondent).build()))
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData1);
+
+        when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
+
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_APPLICANTS_DETAILS);
+        Assert.assertNotNull(caseDataMap);
+    }
+
+
 }
