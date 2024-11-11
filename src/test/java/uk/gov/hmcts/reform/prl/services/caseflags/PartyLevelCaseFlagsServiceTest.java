@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CARESPONDENTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR;
@@ -375,19 +373,30 @@ public class PartyLevelCaseFlagsServiceTest {
         CaseData caseDataBefore = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(partyDetailsApplicant).build(),
-                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(partyDetailsApplicant2).build(),
-                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(partyDetailsApplicant3).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    partyDetailsApplicant).build(),
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000002")).value(
+                    partyDetailsApplicant2).build(),
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    partyDetailsApplicant3).build()
+            ))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
+                    "00000000-0000-0000-0000-000000000000"))
                                      .value(partyDetailsRespondent).build()))
             .build();
 
         CaseData caseData1 = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(partyDetailsApplicant).build(),
-                                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(partyDetailsApplicant3).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .applicants(List.of(
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000001")).value(
+                    partyDetailsApplicant).build(),
+                Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000003")).value(
+                    partyDetailsApplicant3).build()
+            ))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
+                    "00000000-0000-0000-0000-000000000000"))
                                      .value(partyDetailsRespondent).build()))
             .build();
 
