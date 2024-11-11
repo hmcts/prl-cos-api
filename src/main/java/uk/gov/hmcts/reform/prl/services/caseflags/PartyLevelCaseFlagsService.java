@@ -480,8 +480,7 @@ public class PartyLevelCaseFlagsService {
                     log.info("new Applicant To Index Map {}",partyToIndex);
                     updateCaseFlagDataIfPartiesRemoved(oldCaseDataMap, updatedCaseDataMap, oldPartyIdToIndex, partyToIndex,
                                                        getRepresentingForEventId(eventId), parties);
-                    refreshPartyFlags(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId), Arrays.asList(
-                        CAAPPLICANT, PartyRole.Representing.CAAPPLICANTSOLICITOR));
+                    refreshPartyFlags(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId), getRepresentingForEventId(eventId));
 
                 }
             }
@@ -535,7 +534,7 @@ public class PartyLevelCaseFlagsService {
                 representing1.getCaseDataInternalField()
             );
             switch (representing1) {
-                case CAAPPLICANT,CAAPPLICANTSOLICITOR:
+                case CAAPPLICANT, CAAPPLICANTSOLICITOR, CAOTHERPARTY, CARESPONDENTSOLICITOR, CARESPONDENT:
                     for (int i = 0; i < 5; i++) {
                         if (i >= parties.size()) {
                             int caseFlagsIndex = i + 1;
