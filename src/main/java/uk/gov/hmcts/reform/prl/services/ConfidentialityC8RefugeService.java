@@ -769,15 +769,17 @@ public class ConfidentialityC8RefugeService {
         String partyType,
         List<Element<RefugeConfidentialDocuments>> refugeDocuments,
         List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments) {
-        for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext(); ) {
-            Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
-            if (refugeConfidentialDocumentsWrapped.getValue() != null
-                && partyType.equalsIgnoreCase(refugeConfidentialDocumentsWrapped.getValue().getPartyType())) {
-                if (historicalRefugeDocuments == null) {
-                    historicalRefugeDocuments = new ArrayList<>();
+        if (null != refugeDocuments) {
+            for (Iterator<Element<RefugeConfidentialDocuments>> itr = refugeDocuments.iterator(); itr.hasNext(); ) {
+                Element<RefugeConfidentialDocuments> refugeConfidentialDocumentsWrapped = itr.next();
+                if (refugeConfidentialDocumentsWrapped.getValue() != null
+                    && partyType.equalsIgnoreCase(refugeConfidentialDocumentsWrapped.getValue().getPartyType())) {
+                    if (historicalRefugeDocuments == null) {
+                        historicalRefugeDocuments = new ArrayList<>();
+                    }
+                    historicalRefugeDocuments.add(refugeConfidentialDocumentsWrapped);
+                    itr.remove();
                 }
-                historicalRefugeDocuments.add(refugeConfidentialDocumentsWrapped);
-                itr.remove();
             }
         }
         return historicalRefugeDocuments;
