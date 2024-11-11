@@ -132,7 +132,7 @@ public class PaymentRequestService {
             //update service request & payment request reference
             caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
             caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-            caseDataMap.put("feeAmount", feeResponse.getAmount().toString());
+            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
         } else {
             log.info("*** Citizen awp payment ***");
             paymentResponse = handleCitizenAwpPayment(authorization,
