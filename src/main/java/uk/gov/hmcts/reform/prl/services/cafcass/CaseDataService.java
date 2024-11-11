@@ -120,6 +120,7 @@ public class CaseDataService {
                 objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
+                log.info("Query params : {}", ccdQueryParam);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
 
                 String userToken = systemUserService.getSysUserToken();
@@ -130,11 +131,12 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-
+                log.info("Search result response  {}", searchResult);
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
                     CafCassResponse.class
                 );
+                log.info("Cafcass response  {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
@@ -330,7 +332,8 @@ public class CaseDataService {
         Must must = Must.builder().stateFilter(stateFilter).build();
         Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(2).must(must).build();
         Query query = Query.builder().bool(bool).build();
-        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
+        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
+            .dataToReturn(fetchFieldsRequiredForCafcass()).build();
     }
 
     private List<Should> populateStatesForQuery() {
@@ -467,5 +470,86 @@ public class CaseDataService {
                 }
             }
         }
+    }
+
+    private List<String> fetchFieldsRequiredForCafcass() {
+        return List.of(
+            "submitAndPayDownloadApplicationLink",
+            "c8Document",
+            "c1ADocument",
+            "familymanCaseNumber",
+            "dateSubmitted",
+            "issueDate",
+            "caseTypeOfApplication",
+            "draftConsentOrderFile",
+            "confidentialDetails",
+            "isInterpreterNeeded",
+            "interpreterNeeds",
+            "childrenKnownToLocalAuthority",
+            "otherDocuments",
+            "finalDocument",
+            "ordersApplyingFor",
+            "children",
+            "miamCertificationDocumentUpload1",
+            "miamStatus",
+            "miamExemptionsTable",
+            "claimingExemptionMiam",
+            "applicantAttendedMiam",
+            "familyMediatorMiam",
+            "otherProceedingsMiam",
+            "applicantConsentMiam",
+            "mediatorRegistrationNumber",
+            "familyMediatorServiceName",
+            "soleTraderName",
+            "mpuChildInvolvedInMiam",
+            "mpuApplicantAttendedMiam",
+            "mpuClaimingExemptionMiam",
+            "mpuExemptionReasons",
+            "miamDomesticAbuseEvidences",
+            "mpuDomesticAbuseEvidences",
+            "mpuIsDomesticAbuseEvidenceProvided",
+            "mpuDomesticAbuseEvidenceDocument",
+            "mpuNoDomesticAbuseEvidenceReason",
+            "mpuUrgencyReason",
+            "miamUrgencyReason",
+            "mpuPreviousMiamAttendanceReason",
+            "miamPreviousAttendanceReason",
+            "mpuDocFromDisputeResolutionProvider",
+            "mpuTypeOfPreviousMiamAttendanceEvidence",
+            "miamTypeOfPreviousAttendanceEvidence",
+            "mpuCertificateByMediator",
+            "mpuMediatorDetails",
+            "mpuOtherExemptionReasons",
+            "miamOtherExemptionReasons",
+            "mpuApplicantUnableToAttendMiamReason1",
+            "mpuApplicantUnableToAttendMiamReason2",
+            "miamCertificationDocumentUpload",
+            "mpuChildProtectionConcernReason",
+            "miamChildProtectionConcernReason",
+            "miamTable",
+            "summaryTabForOrderAppliedFor",
+            "partyIdAndPartyTypeMap",
+            "applicants",
+            "respondents",
+            "applicantsConfidentialDetails",
+            "applicantSolicitorEmailAddress",
+            "solicitorName",
+            "courtEpimsId",
+            "courtTypeId",
+            "courtName",
+            "otherPeopleInTheCaseTable",
+            "ordersNonMolestationDocument",
+            "hearingOutComeDocument",
+            "manageOrderCollection",
+            "hearingData",
+            "orderCollection",
+            "caseManagementLocation",
+            "otherPartyInTheCaseRevised",
+            "newChildDetails",
+            "childAndApplicantRelations",
+            "childAndRespondentRelations",
+            "childAndOtherPeopleRelations",
+            "cafcassUploadedDocs"
+        );
     }
 }
