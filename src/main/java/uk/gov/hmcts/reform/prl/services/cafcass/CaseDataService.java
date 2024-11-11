@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -92,6 +93,8 @@ public class CaseDataService {
     private final RefDataService refDataService;
 
     private final CoreCaseDataApi coreCaseDataApi;
+
+    private final ObjectMapper objectMapper;
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
