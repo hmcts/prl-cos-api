@@ -117,7 +117,6 @@ public class PaymentRequestService {
             log.info("Error in fetching fee details for feeType {}", createPaymentRequest.getFeeType());
             return null;
         }
-        log.info("feeResponse mary {}", feeResponse);
         createPaymentRequest = createPaymentRequest.toBuilder()
             .applicantCaseName(caseData.getApplicantCaseName()).build();
 
@@ -130,11 +129,10 @@ public class PaymentRequestService {
                 caseData.getPaymentReferenceNumber(),
                 feeResponse
             );
-            log.info("paymentResponse mary {}", feeResponse);
             //update service request & payment request reference
             caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
             caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-            caseDataMap.put("feeAmount", feeResponse.getAmount());
+            caseDataMap.put("feeAmount", feeResponse.getAmount().toString());
         } else {
             log.info("*** Citizen awp payment ***");
             paymentResponse = handleCitizenAwpPayment(authorization,
