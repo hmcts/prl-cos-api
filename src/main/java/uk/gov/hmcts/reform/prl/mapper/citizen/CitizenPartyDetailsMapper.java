@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
@@ -229,7 +230,7 @@ public class CitizenPartyDetailsMapper {
         dataMapForC8Document.put(COURT_SEAL_FIELD,
                                  oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
                                      : oldCaseData.getCourtSeal());
-        dataMapForC8Document.put("respondent", updatedPartyElement.getValue());
+        dataMapForC8Document.put(RESPONDENT, updatedPartyElement.getValue());
         if (oldCaseData.getTaskListVersion() != null
             && (TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())
                 || TASK_LIST_VERSION_V3.equalsIgnoreCase(oldCaseData.getTaskListVersion()))) {
