@@ -94,7 +94,7 @@ public class CaseDataService {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objMapper;
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
