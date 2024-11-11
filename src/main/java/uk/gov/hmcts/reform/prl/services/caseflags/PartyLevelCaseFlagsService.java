@@ -585,6 +585,7 @@ public class PartyLevelCaseFlagsService {
 
                     );
                 } else if (oldIndex.isEmpty()) {
+                    log.info("generating new case flag for newly added party");
                     generateNewPartyFlags(index, updatedCaseDataMap, parties, representing);
                 }
             });
@@ -640,7 +641,7 @@ public class PartyLevelCaseFlagsService {
                 String caseDataKey = String.format(key, index + 1);
                 log.info("new case data key {}", caseDataKey);
                 Flags oldFlags = getCaseFlagsForParty(updatedCaseDataMap.get(oldCaseDataKey));
-                Flags newFlags = getCaseFlagsForParty(updatedCaseDataMap.get(oldCaseDataKey));
+                Flags newFlags = getCaseFlagsForParty(updatedCaseDataMap.get(caseDataKey));
                 PartyDetails applicant = applicants.get(index).getValue();
                 updatedCaseDataMap.put(
                     caseDataKey,
