@@ -469,7 +469,7 @@ public class PartyLevelCaseFlagsService {
         CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDataMap, CaseData.class);
         CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
         log.info("event ID {}",eventId);
-        if (StringUtils.equals(AMEND_APPLICANTS_DETAILS, eventId)) {
+        if (Arrays.asList(AMEND_APPLICANTS_DETAILS,AMEND_RESPONDENT_DETAILS,AMEND_OTHER_PEOPLE_IN_THE_CASE).contains(eventId)) {
             if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
                 List<Element<PartyDetails>> parties = getPartiesBaseOnEventID(updatedCaseData,eventId);
                 List<Element<PartyDetails>> oldParties = getPartiesBaseOnEventID(oldCaseData, eventId);
