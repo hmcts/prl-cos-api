@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -183,6 +184,13 @@ public class C100IssueCaseServiceTest {
                                         .factUrl("test/test/test/test/test")
                                         .region("test")
                                         .build()));
+
+        List<DynamicListElement> workAllocatedCourtList = List.of(DynamicListElement.builder()
+                                                                      .code("234946")
+                                                                      .label("Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP")
+                                                                      .build());
+
+        when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocatedCourtList);
     }
 
 
@@ -584,5 +592,78 @@ public class C100IssueCaseServiceTest {
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
         verify(eventPublisher,times(1)).publishEvent(Mockito.any());
+    }
+
+    @Test
+    public void checkStateIsOfflineWhenUserSelectsNonWorkAllocatedCourt() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .consentOrder(No)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .id(123L)
+            .courtList(dynamicList)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<DynamicListElement> nonWorkAllocatedCourtList = List.of(DynamicListElement.builder()
+                                                                         .code("1234")
+                                                                         .label("Somewhere up 't North")
+                                                                         .build());
+
+        when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(nonWorkAllocatedCourtList);
+
+        c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
+
+        Assertions.assertEquals(State.PROCEEDS_IN_HERITAGE_SYSTEM, stringObjectMap.get("state"));
+    }
+
+    @Test
+    public void checkStateIsSubmittedWhenUserSelectsWorkAllocatedCourt() throws Exception {
+        dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("234946:").label("Swansea")
+                                                      .build()).build();
+        CaseData caseData = CaseData.builder()
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .consentOrder(No)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .id(123L)
+            .courtList(dynamicList)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
+
+        Assertions.assertEquals(State.CASE_ISSUED, caseData.getState());
     }
 }

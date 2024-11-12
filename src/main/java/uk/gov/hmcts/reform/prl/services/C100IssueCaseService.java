@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -54,17 +53,15 @@ public class C100IssueCaseService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        // Check if the selected court is Work Allocation enabled.
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
             );
-            List<DynamicListElement> courtListWorkAllocated = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? locationRefDataService.getFilteredCourtLocations(authorisation) :
-                locationRefDataService.getDaFilteredCourtLocations(authorisation);
 
+            // Check if the selected court is Work Allocation enabled.
+            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
             if (courtListWorkAllocated.stream()
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode()
