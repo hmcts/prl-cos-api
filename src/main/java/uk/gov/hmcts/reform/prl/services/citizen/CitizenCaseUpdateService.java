@@ -167,6 +167,7 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+
         caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
 
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
