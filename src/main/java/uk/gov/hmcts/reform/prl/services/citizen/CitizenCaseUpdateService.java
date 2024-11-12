@@ -164,11 +164,14 @@ public class CitizenCaseUpdateService {
                 .courtName(C100_DEFAULT_COURT_NAME)
                 .taskListVersion(TASK_LIST_VERSION_V3)
                 .build();
+
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
         caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
+
         caseDataToSubmit = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
             caseDataToSubmit,
             systemUserService.getSysUserToken()
@@ -189,6 +192,7 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
+
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
     }
 
