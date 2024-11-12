@@ -119,8 +119,8 @@ public class CaseDataService {
                 objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-                log.info("Query params : {}", ccdQueryParam);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                log.info("Query params : {}", searchString);
 
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
