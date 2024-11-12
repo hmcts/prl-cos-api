@@ -18,6 +18,7 @@ public class RoleAssignmentResponse {
     private String actorIdType;
     private String roleType;
     private String roleName;
+    private String roleLabel;
     private String classification;
     private String grantType;
     private String roleCategory;

@@ -89,7 +89,7 @@ public class CafCassCaseData {
         this.c1ADocument = c1ADocument;
     }
 
-    private String getDocumentId(URL url) {
+    public static String getDocumentId(URL url) {
         String path = url.getPath();
         return path.split("/")[path.split("/").length - 1];
     }

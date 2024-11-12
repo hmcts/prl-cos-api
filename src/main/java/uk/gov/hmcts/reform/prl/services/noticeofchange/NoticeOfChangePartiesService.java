@@ -89,8 +89,8 @@ public class NoticeOfChangePartiesService {
 
     public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
     public static final String IS_NO_LONGER_REPRESENTING = " is no longer representing ";
-    public static final String IN_THIS_CASE = " in this case.";
-    public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = " All other parties have been notified about this change\n\n";
+    public static final String IN_THIS_CASE = " in this case. ";
+    public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = "All other parties have been notified about this change\n\n";
     public static final String CASE_INVITES = "caseInvites";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
@@ -534,7 +534,8 @@ public class NoticeOfChangePartiesService {
                 .solicitorOrg(Organisation.builder().organisationID(organisations.getOrganisationIdentifier()).organisationName(
                     organisations.getName()).build()).build();
         } else if (TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)) {
-            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build()).build();
+            partyDetails = partyDetails.toBuilder().solicitorOrg(Organisation.builder().build())
+                .solicitorReference(null).solicitorTelephone(null).build();
         }
         return partyDetails;
     }
@@ -1049,8 +1050,7 @@ public class NoticeOfChangePartiesService {
             .append(IN_THIS_CASE)
         );
         String representativeRemovedBodyPrefix = legalRepAndLipNames.append(
-                ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE)
-            .append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
+                ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE).toString();
         return SubmittedCallbackResponse.builder().confirmationHeader(
             REPRESENTATIVE_REMOVED_LABEL).confirmationBody(
             representativeRemovedBodyPrefix
