@@ -511,12 +511,7 @@ public class PartyLevelCaseFlagsServiceTest {
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
-        when(objectMapper.convertValue(caApplicant2InternalFlags,Flags.class)).thenReturn(caApplicant2InternalFlags);
-        when(objectMapper.convertValue(caApplicant3ExternalFlags,Flags.class)).thenReturn(caApplicant3ExternalFlags);
-        when(objectMapper.convertValue(caApplicant3InternalFlags,Flags.class)).thenReturn(caApplicant3InternalFlags);
-        when(objectMapper.convertValue(caApplicant2ExternalFlags,Flags.class)).thenReturn(caApplicant2ExternalFlags);
         when(objectMapper.convertValue(null,Flags.class)).thenReturn(Flags.builder().build());
-
         partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_APPLICANTS_DETAILS);
         Assert.assertNotNull(caseDataMap);
     }
