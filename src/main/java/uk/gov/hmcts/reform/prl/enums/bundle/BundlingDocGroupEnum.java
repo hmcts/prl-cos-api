@@ -155,6 +155,9 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("anyOtherDocuments")
     anyOtherDocuments("anyOtherDocuments", "anyOtherDocuments"),
 
+    @JsonProperty("fm5Statements")
+    fm5Statements("fm5Statements", "fm5Statements"),
+
     @JsonProperty("notRequiredGroup")
     notRequiredGroup("notRequiredGroup", "notRequiredGroup");
 
