@@ -579,12 +579,12 @@ public class PartyLevelCaseFlagsService {
                 Optional<Integer> oldIndex = Optional.ofNullable(oldApplicantIdToIndex.get(key));
                 log.info("old index {}", oldIndex);
                 log.info("new index {}", index);
-                if (oldIndex.isPresent() && !oldIndex.get().equals(index)) {
+                if (oldIndex.isPresent()) {
                     updateCaseFlagsData(oldIndex.get(), index, oldCaseDataMap, updatedCaseDataMap,
                                         representing, parties
 
                     );
-                } else if (oldIndex.isEmpty()) {
+                } else {
                     log.info("generating new case flag for newly added party");
                     generateNewPartyFlags(index, updatedCaseDataMap, parties, representing);
                 }
@@ -643,14 +643,25 @@ public class PartyLevelCaseFlagsService {
                 Flags oldFlags = getCaseFlagsForParty(updatedCaseDataMap.get(oldCaseDataKey));
                 Flags newFlags = getCaseFlagsForParty(updatedCaseDataMap.get(caseDataKey));
                 PartyDetails applicant = applicants.get(index).getValue();
-                updatedCaseDataMap.put(
-                    caseDataKey,
-                    oldFlags.toBuilder().partyName(getPartyName(
-                        applicant,
-                        representing
-                    )).roleOnCase(newFlags.getRoleOnCase()).groupId(
-                        newFlags.getGroupId()).build()
-                );
+                if (oldIndex == index) {
+                    updatedCaseDataMap.put(
+                        caseDataKey,
+                        newFlags.toBuilder().partyName(getPartyName(
+                            applicant,
+                            representing
+                        )).build()
+                    );
+                } else {
+                    updatedCaseDataMap.put(
+                        caseDataKey,
+                        oldFlags.toBuilder().partyName(getPartyName(
+                            applicant,
+                            representing
+                        )).roleOnCase(newFlags.getRoleOnCase()).groupId(
+                            newFlags.getGroupId()).build()
+                    );
+                }
+
             });
 
         });
