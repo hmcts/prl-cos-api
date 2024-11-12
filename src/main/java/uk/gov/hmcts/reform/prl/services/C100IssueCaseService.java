@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -42,17 +43,18 @@ public class C100IssueCaseService {
 
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
+    private final CaseSummaryTabService caseSummaryTab;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        // Check if the selected court is Work Allocation enabled.
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
@@ -69,6 +71,7 @@ public class C100IssueCaseService {
                                    .equals(baseLocationId))) {
                 log.info("Setting state to 'Offline");
                 caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
             }
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));

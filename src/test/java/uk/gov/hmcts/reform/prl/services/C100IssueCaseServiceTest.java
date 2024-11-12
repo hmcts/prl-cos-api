@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -129,6 +130,9 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     EventService eventPublisher;
+
+    @Mock
+    private CaseSummaryTabService caseSummaryTab;
 
     public static final String authToken = "Bearer TestAuthToken";
 
