@@ -723,11 +723,17 @@ public class C100RespondentSolicitorService {
         } else {
             buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                 .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                                        .otherPeopleKnowYourContactDetails(
-                                            caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
-                                                ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                                                .getOtherPeopleKnowYourContactDetails() : null)
-                                        .build()).build();
+                    .otherPeopleKnowYourContactDetails(
+                        caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
+                            ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+                            .getOtherPeopleKnowYourContactDetails() : null)
+                    .confidentiality(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
+                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+                        .getConfidentiality() : null)
+                    .confidentialityList(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
+                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+                        .getConfidentialityList() : null)
+                    .build()).build();
         }
         return buildResponseForRespondent;
     }
