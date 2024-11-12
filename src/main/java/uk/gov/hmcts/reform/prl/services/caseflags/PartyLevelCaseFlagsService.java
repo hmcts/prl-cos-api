@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerat
 public class PartyLevelCaseFlagsService {
     private static final String AMEND_APPLICANTS_DETAILS = "amendApplicantsDetails";
     private static final String AMEND_RESPONDENT_DETAILS = "amendRespondentsDetails";
-    private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCase";
+    private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE = "amendOtherPeopleInTheCaseRevised";
 
     public static final String CA_APPLICANT = "CA_APPLICANT";
     private final ObjectMapper objectMapper;
@@ -499,7 +499,7 @@ public class PartyLevelCaseFlagsService {
                     CARESPONDENT, PartyRole.Representing.CARESPONDENTSOLICITOR);
             }
             case AMEND_OTHER_PEOPLE_IN_THE_CASE -> {
-                return Arrays.asList(CAOTHERPARTY);
+                return List.of(CAOTHERPARTY);
             }
             default -> {
                 return null;
@@ -563,9 +563,9 @@ public class PartyLevelCaseFlagsService {
     }
 
 
-    private Flags getCaseFlagsForParty(Object updatedCaseDataMap) {
+    private Flags getCaseFlagsForParty(Object flags) {
         return objectMapper.convertValue(
-            updatedCaseDataMap,
+            flags,
             Flags.class
         );
     }
@@ -579,12 +579,12 @@ public class PartyLevelCaseFlagsService {
                 Optional<Integer> oldIndex = Optional.ofNullable(oldApplicantIdToIndex.get(key));
                 log.info("old index {}", oldIndex);
                 log.info("new index {}", index);
-                if (oldIndex.isPresent()) {
+                if (oldIndex.isPresent() && !oldIndex.get().equals(index)) {
                     updateCaseFlagsData(oldIndex.get(), index, oldCaseDataMap, updatedCaseDataMap,
                                         representing, parties
 
                     );
-                } else {
+                } else if (oldIndex.isEmpty()) {
                     log.info("generating new case flag for newly added party");
                     generateNewPartyFlags(index, updatedCaseDataMap, parties, representing);
                 }
@@ -643,24 +643,14 @@ public class PartyLevelCaseFlagsService {
                 Flags oldFlags = getCaseFlagsForParty(updatedCaseDataMap.get(oldCaseDataKey));
                 Flags newFlags = getCaseFlagsForParty(updatedCaseDataMap.get(caseDataKey));
                 PartyDetails applicant = applicants.get(index).getValue();
-                if (oldIndex == index) {
-                    updatedCaseDataMap.put(
-                        caseDataKey,
-                        newFlags.toBuilder().partyName(getPartyName(
-                            applicant,
-                            representing
-                        )).build()
-                    );
-                } else {
-                    updatedCaseDataMap.put(
-                        caseDataKey,
-                        oldFlags.toBuilder().partyName(getPartyName(
-                            applicant,
-                            representing
-                        )).roleOnCase(newFlags.getRoleOnCase()).groupId(
-                            newFlags.getGroupId()).build()
-                    );
-                }
+                updatedCaseDataMap.put(
+                    caseDataKey,
+                    oldFlags.toBuilder().partyName(getPartyName(
+                        applicant,
+                        representing
+                    )).roleOnCase(newFlags.getRoleOnCase()).groupId(
+                        newFlags.getGroupId()).build()
+                );
 
             });
 
