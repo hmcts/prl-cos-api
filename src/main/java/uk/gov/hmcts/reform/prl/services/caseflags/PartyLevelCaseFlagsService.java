@@ -468,22 +468,27 @@ public class PartyLevelCaseFlagsService {
     public void amendCaseFlags(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap, String eventId) {
         CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDataMap, CaseData.class);
         CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
-        log.info("event ID {}",eventId);
-        if (Arrays.asList(AMEND_APPLICANTS_DETAILS,AMEND_RESPONDENT_DETAILS,AMEND_OTHER_PEOPLE_IN_THE_CASE).contains(eventId)) {
-            if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
-                List<Element<PartyDetails>> parties = getPartiesBaseOnEventID(updatedCaseData,eventId);
-                List<Element<PartyDetails>> oldParties = getPartiesBaseOnEventID(oldCaseData, eventId);
-                if (CollectionUtils.isNotEmpty(parties) && CollectionUtils.isNotEmpty(oldParties)) {
-                    Map<String, Integer> oldPartyIdToIndex = getPartyIdToIndexMapping(oldParties);
-                    log.info("old Applicant To Index Map {}",oldPartyIdToIndex);
-                    Map<String, Integer> partyToIndex = getPartyIdToIndexMapping(parties);
-                    log.info("new Applicant To Index Map {}",partyToIndex);
-                    updateCaseFlagDataIfPartiesRemoved(oldCaseDataMap, updatedCaseDataMap, oldPartyIdToIndex, partyToIndex,
-                                                       getRepresentingForEventId(eventId), parties);
-                    refreshPartyFlags(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId), getRepresentingForEventId(eventId));
+        log.info("event ID {}", eventId);
+        if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())
+            && Arrays.asList(AMEND_APPLICANTS_DETAILS,
+                             AMEND_RESPONDENT_DETAILS,
+                             AMEND_OTHER_PEOPLE_IN_THE_CASE).contains(eventId)) {
+            List<Element<PartyDetails>> parties = getPartiesBaseOnEventID(updatedCaseData, eventId);
+            List<Element<PartyDetails>> oldParties = getPartiesBaseOnEventID(oldCaseData, eventId);
+            if (CollectionUtils.isNotEmpty(parties) && CollectionUtils.isNotEmpty(oldParties)) {
+                Map<String, Integer> oldPartyIdToIndex = getPartyIdToIndexMapping(oldParties);
+                log.info("old Applicant To Index Map {}", oldPartyIdToIndex);
+                Map<String, Integer> partyToIndex = getPartyIdToIndexMapping(parties);
+                log.info("new Applicant To Index Map {}", partyToIndex);
+                updateCaseFlagDataIfPartiesRemoved(updatedCaseDataMap, oldPartyIdToIndex, partyToIndex,
+                                                   getRepresentingForEventId(eventId), parties
+                );
+                refreshPartyFlags(updatedCaseDataMap, getPartiesBaseOnEventID(updatedCaseData, eventId),
+                                  getRepresentingForEventId(eventId)
+                );
 
-                }
             }
+
         }
     }
 
@@ -502,7 +507,7 @@ public class PartyLevelCaseFlagsService {
                 return List.of(CAOTHERPARTY);
             }
             default -> {
-                return null;
+                return Collections.emptyList();
             }
         }
 
@@ -521,7 +526,7 @@ public class PartyLevelCaseFlagsService {
                 return caseData.getOtherPartyInTheCaseRevised();
             }
             default -> {
-                return null;
+                return Collections.emptyList();
             }
         }
     }
@@ -533,33 +538,29 @@ public class PartyLevelCaseFlagsService {
                 representing1.getCaseDataExternalField(),
                 representing1.getCaseDataInternalField()
             );
-            switch (representing1) {
-                case CAAPPLICANT, CAAPPLICANTSOLICITOR, CAOTHERPARTY, CARESPONDENTSOLICITOR, CARESPONDENT:
-                    for (int i = 0; i < 5; i++) {
-                        if (i >= parties.size()) {
-                            int caseFlagsIndex = i + 1;
-                            caseFlagsToBeUpdated.forEach(key -> {
-                                String caseFlagKey = String.format(key, caseFlagsIndex);
-                                log.info("refreshing casedata key  {}", caseFlagKey);
-                                updatedCaseDataMap.put(caseFlagKey, Flags
-                                    .builder().build());
-                            });
-                        }
+            if (representing1 == CAAPPLICANT || representing1 == PartyRole.Representing.CAAPPLICANTSOLICITOR
+                || representing1 == CAOTHERPARTY || representing1 == PartyRole.Representing.CARESPONDENTSOLICITOR
+                || representing1 == CARESPONDENT) {
+                for (int i = 0; i < 5; i++) {
+                    if (i >= parties.size()) {
+                        int caseFlagsIndex = i + 1;
+                        caseFlagsToBeUpdated.forEach(key -> {
+                            String caseFlagKey = String.format(key, caseFlagsIndex);
+                            log.info("refreshing casedata key  {}", caseFlagKey);
+                            updatedCaseDataMap.put(caseFlagKey, Flags
+                                .builder().build());
+                        });
                     }
-                    break;
-                default:
-                    break;
+                }
             }
 
         });
     }
 
 
-
     private Optional<PartyRole> getPartyRole(PartyRole.Representing representing1, int caseFlagsIndex) {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing1);
-        Optional<PartyRole> partyRole = partyRoles.stream().filter(role -> role.getIndex() == caseFlagsIndex).findFirst();
-        return partyRole;
+        return partyRoles.stream().filter(role -> role.getIndex() == caseFlagsIndex).findFirst();
     }
 
 
@@ -570,7 +571,7 @@ public class PartyLevelCaseFlagsService {
         );
     }
 
-    private void updateCaseFlagDataIfPartiesRemoved(Map<String, Object> oldCaseDataMap, Map<String,
+    private void updateCaseFlagDataIfPartiesRemoved(Map<String,
         Object> updatedCaseDataMap, Map<String, Integer> oldApplicantIdToIndex, Map<String,
         Integer> applicantIdToIndex, List<PartyRole.Representing> representing, List<Element<PartyDetails>> parties) {
 
@@ -580,7 +581,7 @@ public class PartyLevelCaseFlagsService {
                 log.info("old index {}", oldIndex);
                 log.info("new index {}", index);
                 if (oldIndex.isPresent() && !oldIndex.get().equals(index)) {
-                    updateCaseFlagsData(oldIndex.get(), index, oldCaseDataMap, updatedCaseDataMap,
+                    updateCaseFlagsData(oldIndex.get(), index, updatedCaseDataMap,
                                         representing, parties
 
                     );
@@ -627,7 +628,7 @@ public class PartyLevelCaseFlagsService {
             .boxed().collect(Collectors.toMap(i -> String.valueOf(parties.get(i).getId()), i -> i));
     }
 
-    private void updateCaseFlagsData(int oldIndex, Integer index, Map<String, Object> oldCaseDataMap,
+    private void updateCaseFlagsData(int oldIndex, Integer index,
                                      Map<String, Object> updatedCaseDataMap, List<PartyRole.Representing> representingList,
                                      List<Element<PartyDetails>> applicants) {
         representingList.forEach(representing -> {

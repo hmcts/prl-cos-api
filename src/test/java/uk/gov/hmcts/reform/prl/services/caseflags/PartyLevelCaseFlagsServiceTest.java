@@ -334,7 +334,7 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testAmendApplicantDetails() {
 
 
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap1 = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
 
 
@@ -406,12 +406,12 @@ public class PartyLevelCaseFlagsServiceTest {
                                      .value(partyDetailsRespondent).build()))
             .build();
 
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData1);
+        when(objectMapper.convertValue(caseDataMap1,CaseData.class)).thenReturn(caseData1);
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
-        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_APPLICANTS_DETAILS);
-        Assert.assertNotNull(caseDataMap);
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap1,AMEND_APPLICANTS_DETAILS);
+        Assert.assertNotNull(caseDataMap1);
     }
 
 
@@ -419,7 +419,7 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testAmendApplicantDetailsWithCaseFlags() {
 
 
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
         caseDataMapBefore.put("id",Long.valueOf(1234567));
         caseDataMapBefore.put("caseTypeOfApplication","C100");
@@ -507,13 +507,13 @@ public class PartyLevelCaseFlagsServiceTest {
                                      .value(partyDetailsRespondent).build()))
             .build();
 
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData1);
+        when(objectMapper.convertValue(caseDataMapLatest,CaseData.class)).thenReturn(caseData1);
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
         when(objectMapper.convertValue(null,Flags.class)).thenReturn(Flags.builder().build());
-        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_APPLICANTS_DETAILS);
-        Assert.assertNotNull(caseDataMap);
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_APPLICANTS_DETAILS);
+        Assert.assertNotNull(caseDataMapLatest);
     }
 
     private Flags generateCaseFlag(String roleOnCase, String caApplicant3, FlagDetail flagDetail) {
@@ -527,7 +527,7 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testAmendApplicantDetailsWithCaseFlagsRespondents() {
 
 
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
         caseDataMapBefore.put("id",Long.valueOf(1234567));
         caseDataMapBefore.put("caseTypeOfApplication","C100");
@@ -615,11 +615,11 @@ public class PartyLevelCaseFlagsServiceTest {
                                      .value(partyDetailsRespondent).build()))
             .build();
 
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData1);
+        when(objectMapper.convertValue(caseDataMapLatest,CaseData.class)).thenReturn(caseData1);
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
-        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_RESPONDENT_DETAILS);
-        Assert.assertNotNull(caseDataMap);
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_RESPONDENT_DETAILS);
+        Assert.assertNotNull(caseDataMapLatest);
     }
 
 
@@ -627,7 +627,7 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testAmendApplicantDetailsWithCaseFlagsOtherPeople() {
 
 
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMapLatest = new HashMap<>();
         Map<String, Object> caseDataMapBefore = new HashMap<>();
 
 
@@ -705,12 +705,12 @@ public class PartyLevelCaseFlagsServiceTest {
                                     .value(partyDetailsRespondent).build()))
             .build();
 
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData1);
+        when(objectMapper.convertValue(caseDataMapLatest,CaseData.class)).thenReturn(caseData1);
 
         when(objectMapper.convertValue(caseDataMapBefore,CaseData.class)).thenReturn(caseDataBefore);
 
-        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMap,AMEND_OTHER_PEOPLE_IN_THE_CASE);
-        Assert.assertNotNull(caseDataMap);
+        partyLevelCaseFlagsService.amendCaseFlags(caseDataMapBefore,caseDataMapLatest,AMEND_OTHER_PEOPLE_IN_THE_CASE);
+        Assert.assertNotNull(caseDataMapLatest);
     }
 
 }
