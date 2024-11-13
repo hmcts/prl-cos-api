@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -982,6 +983,7 @@ public class C100RespondentSolicitorService {
                     .build();
 
             amended = updatedRefugeData(amended);
+            caseData = updateRefugeDocumentList(caseData, amended);
 
             String party = representedRespondent.getValue().getLabelForDynamicList();
             caseData.getRespondents().set(
@@ -1023,6 +1025,28 @@ public class C100RespondentSolicitorService {
 
         return updatedCaseData;
     }
+
+    private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
+        if (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+            RefugeConfidentialDocuments refugeConfidentialDocuments
+                = RefugeConfidentialDocuments
+                .builder()
+                .partyType("Respondent")
+                .partyName(respondent.getFirstName() + respondent.getLastName())
+                .document(respondent.getRefugeConfidentialityC8Form())
+                .build();
+
+            List<Element<RefugeConfidentialDocuments>> refugeDocuments
+                = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
+            refugeDocuments.add(element(refugeConfidentialDocuments));
+            caseData.setRefugeDocuments(refugeDocuments);
+        }
+
+        return caseData;
+    }
+
 
     private PartyDetails updatedRefugeData(PartyDetails respondent) {
         if (null != respondent.getResponse()
