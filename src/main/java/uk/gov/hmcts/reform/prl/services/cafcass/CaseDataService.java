@@ -561,9 +561,10 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-
+        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        log.info("Update hearing data for cafcass");
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
     }
