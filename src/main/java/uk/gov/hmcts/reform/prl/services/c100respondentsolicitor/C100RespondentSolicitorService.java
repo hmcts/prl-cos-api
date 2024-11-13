@@ -1051,7 +1051,7 @@ public class C100RespondentSolicitorService {
                 refugeDocuments = new ArrayList<>();
             }
             refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
-            caseData.toBuilder()
+            caseData = caseData.toBuilder()
                 .refugeDocuments(refugeDocuments)
                 .build();
         }
