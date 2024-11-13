@@ -610,14 +610,17 @@ public class CaseDataService {
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
-                    filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> caseHearing.getHearingDaySchedule().forEach(
-                            hearingDaySchedule -> {
-                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                hearingDaySchedule.setHearingVenueId(null);
+                    filteredHearing.getCaseHearings().forEach(
+                        caseHearing -> {
+                            if (CollectionUtils.isNotEmpty(caseHearing.getHearingDaySchedule())) {
+                                caseHearing.getHearingDaySchedule().forEach(
+                                    hearingDaySchedule -> {
+                                        hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                        hearingDaySchedule.setHearingVenueId(null);
+                                    }
+                                );
                             }
-                        )
-                    );
+                        });
                 }
             }
         }
