@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
@@ -1027,6 +1028,7 @@ public class C100RespondentSolicitorService {
     }
 
     private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
+        log.info("there is a response {}", respondent.getResponse());
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
             && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
@@ -1041,6 +1043,7 @@ public class C100RespondentSolicitorService {
             List<Element<RefugeConfidentialDocuments>> refugeDocuments
                 = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
             refugeDocuments.add(element(refugeConfidentialDocuments));
+            log.info("Refuge documents {}", refugeDocuments);
             caseData.setRefugeDocuments(refugeDocuments);
         }
 
