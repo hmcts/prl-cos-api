@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -306,6 +307,7 @@ public class DocumentGenService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final Time dateTime;
+    private final ObjectMapper objectMapper;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
@@ -823,6 +825,9 @@ public class DocumentGenService {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
+        if (template.equalsIgnoreCase(DRAFT_HINT)) {
+            log.info("Entire case data for above document {} ", objectMapper.writeValueAsString(caseData));
+        }
         return generatedDocumentInfo;
     }
 
