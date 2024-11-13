@@ -185,12 +185,11 @@ public class C100IssueCaseServiceTest {
                                         .region("test")
                                         .build()));
 
-        List<DynamicListElement> workAllocatedCourtList = List.of(DynamicListElement.builder()
-                                                                      .code("234946")
-                                                                      .label("Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP")
-                                                                      .build());
-
-        when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocatedCourtList);
+        List<DynamicListElement> workAllocationEnabledList = List.of(DynamicListElement.builder()
+                                                                         .code("234946")
+                                                                         .label("Swansea")
+                                                                         .build());
+        when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledList);
     }
 
 
@@ -613,6 +612,7 @@ public class C100IssueCaseServiceTest {
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
             .courtList(dynamicList)
+            .courtId("123456")
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -621,13 +621,6 @@ public class C100IssueCaseServiceTest {
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        List<DynamicListElement> nonWorkAllocatedCourtList = List.of(DynamicListElement.builder()
-                                                                         .code("1234")
-                                                                         .label("Somewhere up 't North")
-                                                                         .build());
-
-        when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(nonWorkAllocatedCourtList);
-
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
         Assertions.assertEquals(State.PROCEEDS_IN_HERITAGE_SYSTEM, stringObjectMap.get("state"));
@@ -635,8 +628,6 @@ public class C100IssueCaseServiceTest {
 
     @Test
     public void checkStateIsSubmittedWhenUserSelectsWorkAllocatedCourt() throws Exception {
-        dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("234946:").label("Swansea")
-                                                      .build()).build();
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -652,7 +643,8 @@ public class C100IssueCaseServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
-            .id(123L)
+            .id(123)
+            .courtId("234946")
             .courtList(dynamicList)
             .state(State.CASE_ISSUED)
             .build();
