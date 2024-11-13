@@ -53,26 +53,28 @@ public class C100IssueCaseService {
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("CaseUpdated {}", objectMapper.writeValueAsString(caseDataUpdated));
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
+            // Check if the selected court is Work Allocation enabled.
+            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
+            log.info("WA Enabled Courts {}", courtListWorkAllocated);
+            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
+            log.info("Selected Court ID {}", selectedCourtId);
+            if (courtListWorkAllocated.stream()
+                .noneMatch(workAllocationEnabledCourt ->
+                               workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
+                                   .equalsIgnoreCase(selectedCourtId.split(COLON_SEPERATOR)[0]))) {
+                log.info("Setting state to 'Offline'");
+                caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
+            }
+
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
             );
-
-            // Check if the selected court is Work Allocation enabled.
-            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
-            log.info("WA Enabled Courts {}", courtListWorkAllocated);
-            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
-            if (courtListWorkAllocated.stream()
-                .noneMatch(workAllocationEnabledCourt ->
-                               workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
-                                   .equalsIgnoreCase(selectedCourtId))) {
-                log.info("Setting state to 'Offline");
-                caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
-            }
 
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());

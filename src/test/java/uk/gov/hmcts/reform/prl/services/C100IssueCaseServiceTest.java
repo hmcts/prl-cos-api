@@ -644,7 +644,7 @@ public class C100IssueCaseServiceTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123)
-            .courtId("234946")
+            .courtId("234946:")
             .courtList(dynamicList)
             .state(State.CASE_ISSUED)
             .build();
