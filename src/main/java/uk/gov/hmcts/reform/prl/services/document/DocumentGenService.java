@@ -825,7 +825,7 @@ public class DocumentGenService {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
-        if (template.equalsIgnoreCase(DRAFT_HINT)) {
+        if (DRAFT_HINT.equalsIgnoreCase(template)) {
             log.info("Entire case data for above document {} ", objectMapper.writeValueAsString(caseData));
         }
         return generatedDocumentInfo;
