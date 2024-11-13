@@ -186,7 +186,7 @@ public class C100IssueCaseServiceTest {
                                         .build()));
 
         List<DynamicListElement> workAllocationEnabledList = List.of(DynamicListElement.builder()
-                                                                         .code("234946")
+                                                                         .code("234946:")
                                                                          .label("Swansea")
                                                                          .build());
         when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledList);

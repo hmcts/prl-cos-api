@@ -63,11 +63,12 @@ public class C100IssueCaseService {
 
             // Check if the selected court is Work Allocation enabled.
             List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
-            log.info("CourtList {}", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+            log.info("WA Enabled Courts {}", courtListWorkAllocated);
+            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
             if (courtListWorkAllocated.stream()
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
-                                   .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(COURT_ID_FIELD))))) {
+                                   .equalsIgnoreCase(selectedCourtId))) {
                 log.info("Setting state to 'Offline");
                 caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
