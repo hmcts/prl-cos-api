@@ -75,6 +75,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -176,6 +177,7 @@ public class C100RespondentSolicitorService {
 
     private static final String OPEN_BRACKET = "(";
     private static final String CLOSE_BRACKET = ")";
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1028,24 +1030,33 @@ public class C100RespondentSolicitorService {
     }
 
     private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
-        log.info("there is a response {}", respondent.getResponse());
-        if (null != respondent.getResponse()
-            && null != respondent.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+
+        if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())
+            && respondent.getRefugeConfidentialityC8Form() != null) {
+            log.info("Respondent lives in refuge");
+            List<Element<RefugeConfidentialDocuments>> refugeDocuments = caseData.getRefugeDocuments();
+
             RefugeConfidentialDocuments refugeConfidentialDocuments
                 = RefugeConfidentialDocuments
                 .builder()
                 .partyType("Respondent")
-                .partyName(respondent.getFirstName() + respondent.getLastName())
-                .document(respondent.getRefugeConfidentialityC8Form())
-                .build();
+                .partyName(respondent.getLabelForDynamicList())
+                .documentDetails(DocumentDetails.builder()
+                    .documentName(respondent.getRefugeConfidentialityC8Form().getDocumentFileName())
+                    .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                        dateTimeFormatter)).build())
+                .document(respondent.getRefugeConfidentialityC8Form()).build();
 
-            List<Element<RefugeConfidentialDocuments>> refugeDocuments
-                = caseData.getRefugeDocuments() != null ? caseData.getRefugeDocuments() : new ArrayList<>();
-            refugeDocuments.add(element(refugeConfidentialDocuments));
-            log.info("Refuge documents {}", refugeDocuments);
-            caseData.setRefugeDocuments(refugeDocuments);
+            if (refugeDocuments == null) {
+                refugeDocuments = new ArrayList<>();
+            }
+            refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+            caseData.toBuilder()
+                .refugeDocuments(refugeDocuments)
+                .build();
         }
+
+        log.info("Refuge documents are {}", caseData.getRefugeDocuments());
 
         return caseData;
     }
