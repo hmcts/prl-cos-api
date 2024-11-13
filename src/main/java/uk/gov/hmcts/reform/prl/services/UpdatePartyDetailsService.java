@@ -151,6 +151,13 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
+    public Map<String, Object> amendOtherPeopleInTheCase(CallbackRequest callbackRequest) {
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
+        return updatedCaseData;
+    }
+
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
