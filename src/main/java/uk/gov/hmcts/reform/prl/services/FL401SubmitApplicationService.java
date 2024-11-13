@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
@@ -87,17 +86,6 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(courtDetailsMap);
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.isPresent()) {
-            if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                caseData = caseData.toBuilder()
-                    .respondentBehaviourData(null)
-                    .build();
-            } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                caseData = caseData.toBuilder()
-                    .home(null)
-                    .build();
-            }
-        }
 
         caseData = caseData.setDateSubmittedDate();
 
