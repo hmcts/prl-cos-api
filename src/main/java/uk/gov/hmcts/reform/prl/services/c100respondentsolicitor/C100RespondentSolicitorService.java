@@ -715,24 +715,24 @@ public class C100RespondentSolicitorService {
 
     private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
                                                          Element<PartyDetails> respondent) {
-        List<ConfidentialityListEnum> confList = null;
+        List<ConfidentialityListEnum> confList = new ArrayList<>();
         if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
             && !Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
 
             buildResponseForRespondent = buildKeepDetailsPrivateForNonRefuge(caseData, buildResponseForRespondent, respondent, confList);
         } else {
+            confList.add(ConfidentialityListEnum.address);
+            confList.add(ConfidentialityListEnum.email);
+            confList.add(ConfidentialityListEnum.phoneNumber);
+
             buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                 .keepDetailsPrivate(KeepDetailsPrivate.builder()
                     .otherPeopleKnowYourContactDetails(
                         caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
                             ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
                             .getOtherPeopleKnowYourContactDetails() : null)
-                    .confidentiality(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
-                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                        .getConfidentiality() : null)
-                    .confidentialityList(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
-                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                        .getConfidentialityList() : null)
+                    .confidentiality(Yes)
+                    .confidentialityList(confList)
                     .build()).build();
         }
         return buildResponseForRespondent;
