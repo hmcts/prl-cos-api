@@ -468,7 +468,6 @@ public class PartyLevelCaseFlagsService {
     public void amendCaseFlags(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap, String eventId) {
         CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDataMap, CaseData.class);
         CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
-        log.info("event ID {}", eventId);
         if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())
             && Arrays.asList(AMEND_APPLICANTS_DETAILS,
                              AMEND_RESPONDENT_DETAILS,
@@ -477,9 +476,7 @@ public class PartyLevelCaseFlagsService {
             List<Element<PartyDetails>> oldParties = getPartiesBaseOnEventID(oldCaseData, eventId);
             if (CollectionUtils.isNotEmpty(parties) && CollectionUtils.isNotEmpty(oldParties)) {
                 Map<String, Integer> oldPartyIdToIndex = getPartyIdToIndexMapping(oldParties);
-                log.info("old Applicant To Index Map {}", oldPartyIdToIndex);
                 Map<String, Integer> partyToIndex = getPartyIdToIndexMapping(parties);
-                log.info("new Applicant To Index Map {}", partyToIndex);
                 updateCaseFlagDataIfPartiesRemoved(updatedCaseDataMap, oldPartyIdToIndex, partyToIndex,
                                                    getRepresentingForEventId(eventId), parties
                 );
@@ -546,7 +543,6 @@ public class PartyLevelCaseFlagsService {
                         int caseFlagsIndex = i + 1;
                         caseFlagsToBeUpdated.forEach(key -> {
                             String caseFlagKey = String.format(key, caseFlagsIndex);
-                            log.info("refreshing casedata key  {}", caseFlagKey);
                             updatedCaseDataMap.put(caseFlagKey, Flags
                                 .builder().build());
                         });
@@ -578,15 +574,12 @@ public class PartyLevelCaseFlagsService {
         if (MapUtils.isNotEmpty(applicantIdToIndex)) {
             applicantIdToIndex.forEach((key, index) -> {
                 Optional<Integer> oldIndex = Optional.ofNullable(oldApplicantIdToIndex.get(key));
-                log.info("old index {}", oldIndex);
-                log.info("new index {}", index);
                 if (oldIndex.isPresent() && !oldIndex.get().equals(index)) {
                     updateCaseFlagsData(oldIndex.get(), index, updatedCaseDataMap,
                                         representing, parties
 
                     );
                 } else if (oldIndex.isEmpty()) {
-                    log.info("generating new case flag for newly added party");
                     generateNewPartyFlags(index, updatedCaseDataMap, parties, representing);
                 }
             });
@@ -638,9 +631,7 @@ public class PartyLevelCaseFlagsService {
             );
             caseFlagsToBeUpdated.forEach(key -> {
                 String oldCaseDataKey = String.format(key, oldIndex + 1);
-                log.info("old case data key {}", oldCaseDataKey);
                 String caseDataKey = String.format(key, index + 1);
-                log.info("new case data key {}", caseDataKey);
                 Flags oldFlags = getCaseFlagsForParty(updatedCaseDataMap.get(oldCaseDataKey));
                 Flags newFlags = getCaseFlagsForParty(updatedCaseDataMap.get(caseDataKey));
                 PartyDetails applicant = applicants.get(index).getValue();
