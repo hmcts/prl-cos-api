@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -178,9 +177,6 @@ public class DocumentGenServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-
-    @Mock
-    ObjectMapper objectMapper;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
     protected String fl401RespC8TemplateWelsh;
