@@ -41,7 +41,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
-    public static final String CONFIRMATION_HEADER = "# Parhau i dalu\n Continue to payment";
+    public static final String CONFIRMATION_HEADER = "# Parhau i dalu\n# Continue to payment";
+    public static final String CONFIRMATION_HEADER_1 = "# Parhau i dalu<br/>Continue to payment";
+    public static final String CONFIRMATION_HEADER_2 = "# Parhau i dalu\n Continue to payment";
+    public static final String CONFIRMATION_HEADER_3 = "# Parhau i dalu<br/>\n# Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
         ### What happens next
@@ -55,11 +58,10 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         What happens next
 
 
-        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.
         The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
 
         """;
-    public static final String PAY_CONTENT = "\">Talu ffi’r gwneud cais/Pay the application fee.</a>";
+    public static final String PAY_CONTENT = "\">Pay the application fee.</a>";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
     private final SolicitorEmailService solicitorEmailService;
@@ -109,7 +111,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 }
                 return ok(SubmittedCallbackResponse
                               .builder()
-                              .confirmationHeader(CONFIRMATION_HEADER)
+                              .confirmationHeader(CONFIRMATION_HEADER + CONFIRMATION_HEADER_1 + CONFIRMATION_HEADER_2 + CONFIRMATION_HEADER_3)
                               .confirmationBody(HWF_NO_EMAIL_CONTENT
                                                     + "<a href=\"" + CASE_DETAILS_URL
                                                     + callbackRequest.getCaseDetails().getCaseId()
