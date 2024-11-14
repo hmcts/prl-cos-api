@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +32,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -91,6 +94,9 @@ public class CitizenCaseUpdateServiceTest {
 
     @Mock
     private CitizenAwpMapper citizenAwpMapper;
+
+    @Mock
+    private CourtFinderService courtLocatorService;
 
     private CaseData caseData;
     private Map<String, Object> caseDetails;
@@ -263,7 +269,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testSubmitApplication() throws IOException {
+    public void testSubmitApplication() throws IOException, NotFoundException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         partyDetails = PartyDetails.builder().build();
         caseData = caseData.toBuilder()
@@ -301,6 +307,57 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenReturn(Court.builder().courtName("Test court").build());
+        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+            authToken,
+            String.valueOf(caseId),
+            "citizenSaveC100DraftInternal",
+            caseData
+        ));
+    }
+
+    @Test
+    public void testSubmitApplicationNoCourtName() throws IOException, NotFoundException {
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        partyDetails = PartyDetails.builder().build();
+        caseData = caseData.toBuilder()
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
+                                      .applicationServedYesNo(YesOrNo.Yes)
+
+                                      .build()).build();
+        Map<String, Object> caseDetails1 = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails1,
+            caseData,
+            UserDetails.builder().build()
+        );
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(
+            any(),
+            any()
+        )).thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent1);
+        when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
+            .thenReturn(CaseDetails.builder().id(12345L).build());
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenReturn(null);
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),

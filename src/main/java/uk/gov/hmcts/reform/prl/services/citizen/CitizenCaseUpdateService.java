@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +27,11 @@ import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotes
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -47,7 +50,6 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_HWF_REF_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
@@ -73,6 +75,7 @@ public class CitizenCaseUpdateService {
     private final SystemUserService systemUserService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final CitizenAwpMapper citizenAwpMapper;
+    private final CourtFinderService courtLocatorService;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -143,7 +146,7 @@ public class CitizenCaseUpdateService {
                                                     String caseId,
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
-            throws JsonProcessingException {
+        throws JsonProcessingException, NotFoundException {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
@@ -159,11 +162,13 @@ public class CitizenCaseUpdateService {
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
                 .build();
+        //Find nearest court for the child post code
+        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(citizenUpdatedCaseData);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
-                .courtName(C100_DEFAULT_COURT_NAME)
-                .taskListVersion(TASK_LIST_VERSION_V3)
-                .build();
+            .courtName((nearestCourt != null) ? nearestCourt.getCourtName() : "No Court Fetched")
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .build();
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());

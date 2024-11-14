@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -169,7 +170,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test
-    public void testSubmitC100Application() throws JsonProcessingException {
+    public void testSubmitC100Application() throws JsonProcessingException, NotFoundException {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -184,7 +185,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
                                                                   any(),
@@ -195,7 +196,7 @@ public class CitizenCaseUpdateControllerTest {
 
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
                                                                   any(),
@@ -205,7 +206,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationJsonException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationJsonException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
         citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
