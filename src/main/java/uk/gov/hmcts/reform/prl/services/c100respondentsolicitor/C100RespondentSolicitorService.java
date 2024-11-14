@@ -723,10 +723,9 @@ public class C100RespondentSolicitorService {
 
     private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
                                                          Element<PartyDetails> respondent) {
-        List<ConfidentialityListEnum> confList = new ArrayList<>();
         if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
             && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
-            buildResponseForRespondent = buildKeepDetailsPrivateForRefuge(caseData, buildResponseForRespondent, respondent, confList);
+            buildResponseForRespondent = buildKeepDetailsPrivateForRefuge(caseData, buildResponseForRespondent, respondent);
         } else {
             buildResponseForRespondent = buildKeepDetailsPrivateForNonRefuge(caseData, buildResponseForRespondent, respondent);
         }
@@ -736,10 +735,10 @@ public class C100RespondentSolicitorService {
 
     private static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
                                                              Response buildResponseForRespondent,
-                                                             Element<PartyDetails> respondent,
-                                                             List<ConfidentialityListEnum> confList) {
+                                                             Element<PartyDetails> respondent) {
         setRespondentConfidentiality(caseData, respondent);
 
+        List<ConfidentialityListEnum> confList = new ArrayList<>();
         confList.add(ConfidentialityListEnum.address);
         confList.add(ConfidentialityListEnum.email);
         confList.add(ConfidentialityListEnum.phoneNumber);
