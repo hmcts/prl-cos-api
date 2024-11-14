@@ -89,6 +89,7 @@ public class FL401SubmitApplicationService {
 
         caseData = caseData.setDateSubmittedDate();
 
+        log.info("----------case data for doc generation for final do creation ----------- {}", objectMapper.writeValueAsString(caseData));
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
