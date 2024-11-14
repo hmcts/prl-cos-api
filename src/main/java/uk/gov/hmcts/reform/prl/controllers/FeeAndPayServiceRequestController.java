@@ -41,10 +41,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
-    public static final String CONFIRMATION_HEADER = "# Parhau i dalu\n# Continue to payment";
-    public static final String CONFIRMATION_HEADER_1 = "# Parhau i dalu<br/>Continue to payment";
-    public static final String CONFIRMATION_HEADER_2 = "# Parhau i dalu\n Continue to payment";
-    public static final String CONFIRMATION_HEADER_3 = "# Parhau i dalu<br/>\n# Continue to payment";
+    public static final String CONFIRMATION_HEADER = "# Parhau i dalu<br/>Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
         ### What happens next
@@ -111,7 +108,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 }
                 return ok(SubmittedCallbackResponse
                               .builder()
-                              .confirmationHeader(CONFIRMATION_HEADER + CONFIRMATION_HEADER_1 + CONFIRMATION_HEADER_2 + CONFIRMATION_HEADER_3)
+                              .confirmationHeader(CONFIRMATION_HEADER)
                               .confirmationBody(HWF_NO_EMAIL_CONTENT
                                                     + "<a href=\"" + CASE_DETAILS_URL
                                                     + callbackRequest.getCaseDetails().getCaseId()
