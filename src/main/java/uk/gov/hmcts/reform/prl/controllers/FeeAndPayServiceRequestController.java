@@ -54,7 +54,9 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         ### Beth fydd yn digwydd nesaf<br/>What happens next
 
 
-        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.<br/>The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
+        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. 
+        Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.<br/>
+        The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
 
         """;
     public static final String PAY_CONTENT = "\">Talu ffi’r gwneud cais./Pay the application fee.</a>";
