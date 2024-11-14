@@ -44,7 +44,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Cyflwynwyd y ddogfen<br/>Documents submitted";
-    public static final String CONFIRMATION_BODY = "### Beth fydd yn digwydd nesaf<br/>What happens next \n\n Bydd y llys yn adolygu'r dogfennau a gyflwynwyd.<br/>The court will review the submitted documents.";
+    public static final String CONFIRMATION_BODY = "### Beth fydd yn digwydd nesaf<br/>What happens next \n\n "
+        + "Bydd y llys yn adolygu'r dogfennau a gyflwynwyd.<br/>The court will review the submitted documents.";
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
