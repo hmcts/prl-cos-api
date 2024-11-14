@@ -51,14 +51,13 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
         The court will review your help with fees application and tell you what happens next.""";
     public static final String HWF_NO_EMAIL_CONTENT = """
-        ### Beth fydd yn digwydd nesaf
-        What happens next
+        ### Beth fydd yn digwydd nesaf<br/>What happens next
 
 
-        The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
+        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.<br/>The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
 
         """;
-    public static final String PAY_CONTENT = "\">Pay the application fee.</a>";
+    public static final String PAY_CONTENT = "\">Talu ffi’r gwneud cais./Pay the application fee.</a>";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
     private final SolicitorEmailService solicitorEmailService;
