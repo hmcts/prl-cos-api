@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -15,12 +16,14 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
@@ -32,6 +35,9 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusR
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -156,7 +162,6 @@ public class PaymentRequestServiceTest {
                 .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
                 .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
-
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
@@ -227,11 +232,10 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldThrowNullPointerException() throws Exception {
+    public void shouldThrowNullPointerException() {
         callbackRequest = CallbackRequest.builder().build();
-        assertThrows(NullPointerException.class, () -> {
-            PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "", feeResponse);
-        });
+        assertThrows(NullPointerException.class, () ->
+            paymentRequestService.createServiceRequest(callbackRequest, "", feeResponse));
     }
 
     @Test
@@ -262,7 +266,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentStatus() throws Exception {
+    public void shouldReturnPaymentStatus() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
@@ -893,5 +897,106 @@ public class PaymentRequestServiceTest {
 
     }
 
+    @Test
+    public void testCreatePaymentWithNullHwfReferenceNumber() {
+        when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
+        when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentResponse.builder().build());
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest, null,
+                                                                              null, feeResponse);
+        assertEquals("response", paymentResponse1.getServiceRequestReference());
+    }
+
+    @Test
+    public void testCreatePaymentWithNonNullHwfReferenceNumber() {
+        when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
+        createPaymentRequest.setHwfRefNumber("test");
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest, null,
+                                                                               null, feeResponse);
+        assertEquals("response", paymentResponse1.getServiceRequestReference());
+    }
+
+    @Test
+    public void testCreatePaymentWithNonNullPaymentServiceAndNullHwfReferenceNumber() {
+        when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentResponse.builder().build());
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest, "test",
+                                                                               null, feeResponse);
+        assertEquals("test", paymentResponse1.getServiceRequestReference());
+    }
+
+    @Test
+    public void testCreatePaymentWithNonNullPaymentServiceAndNonNullHwfReferenceNumber() {
+        when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
+        createPaymentRequest.setHwfRefNumber("test");
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest, "test",
+                                                                               null, feeResponse);
+        assertEquals("test", paymentResponse1.getServiceRequestReference());
+    }
+
+    @Test
+    public void testCreatePaymentWithNullCaseData() throws Exception {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        null, null, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
+        assertNull(paymentResponse1);
+    }
+
+    @Test
+    public void testCreatePaymentWithNullFeeResponse() throws Exception {
+        when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(null);
+
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
+        assertNull(paymentResponse1);
+    }
+
+    @Test
+    public void testCreatePaymentWithNonAwpFeeResponse() throws Exception {
+        when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(feeResponse);
+        when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentResponse.builder().build());
+        when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
+        createPaymentRequest = createPaymentRequest.toBuilder().feeType(FeeType.C2_WITH_NOTICE).build();
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
+        assertEquals("response", paymentResponse1.getServiceRequestReference());
+    }
+
+    @Test
+    public void testCreatePaymentWithAwpPayments() throws Exception {
+        List<Element<CitizenAwpPayment>> awpPayments = new ArrayList<>();
+        awpPayments.add(Element.<CitizenAwpPayment>builder().value(CitizenAwpPayment.builder()
+                                                                       .feeType(FeeType.C2_WITH_NOTICE.toString())
+                                                                       .awpType("test")
+                                                                       .partType("test")
+                                                                       .build()).build());
+        CaseData caseDataUpdated = caseData.toBuilder()
+            .citizenAwpPayments(awpPayments)
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        new HashMap<>(),
+                                                                                                        caseDataUpdated,
+                                                                                                        null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(feeResponse);
+        when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentResponse.builder().build());
+        when(paymentApi.createPaymentServiceRequest(Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .partyType("test")
+            .awpType("test")
+            .feeType(FeeType.C2_WITH_NOTICE).build();
+        PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
+        assertEquals("response", paymentResponse1.getServiceRequestReference());
+    }
 }
 

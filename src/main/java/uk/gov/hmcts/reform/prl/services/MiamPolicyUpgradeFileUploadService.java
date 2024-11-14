@@ -259,7 +259,7 @@ public class MiamPolicyUpgradeFileUploadService {
             );
             newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
         } catch (Exception ex) {
-            log.error("Failed to upload new document {}", ex.getMessage(), ex);
+            log.error("Failed to upload new document {}", ex.getMessage());
         }
         return newUploadedDocument;
     }

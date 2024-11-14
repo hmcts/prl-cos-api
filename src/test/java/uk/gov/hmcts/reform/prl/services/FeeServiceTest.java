@@ -27,6 +27,9 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -488,4 +491,23 @@ public class FeeServiceTest {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
+    @Test
+    public void testFetchFeeCodeWithNoFees() throws Exception {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London")).plusDays(15);
+        String currentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(zonedDateTime);
+        String hearingDate = "First Hearing -- " + currentDate;
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
+            .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
+            .hearingDate(hearingDate)
+            .applicationReason("delay-or-cancel-hearing-date")
+            .notice(YES)
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals("0.00",response.getAmount());
+    }
 }

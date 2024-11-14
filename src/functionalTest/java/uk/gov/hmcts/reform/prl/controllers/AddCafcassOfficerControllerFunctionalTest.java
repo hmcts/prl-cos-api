@@ -67,5 +67,6 @@ public class AddCafcassOfficerControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
         Assert.assertNotNull(response.getData().get("newChildDetails"));
+
     }
 }

@@ -84,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
@@ -288,6 +289,11 @@ public class DocumentGenService {
     @Value("${document.templates.common.prl_citizen_c1a_final_response_welsh_template}")
     protected String citizenC1aFinalResponseWelshTemplate;
 
+    @Value("${document.templates.common.doc_send_reply_message_template}")
+    protected String docSendReplyMessageTemplate;
+    @Value("${document.templates.common.doc_send_reply_message_welsh_template}")
+    protected String docSendReplyMessageWelshTemplate;
+
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final OrganisationService organisationService;
@@ -489,13 +495,28 @@ public class DocumentGenService {
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            if (isAohPresent(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, getDocument(authorisation, caseData, C1A_DRAFT_HINT, false));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
+            }
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            if (isAohPresent(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, getDocument(authorisation, caseData, C1A_DRAFT_HINT, true));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+            }
         }
 
         return updatedCaseData;
+    }
+
+    private static boolean isAohPresent(CaseData caseData) {
+        return caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo());
     }
 
     public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
@@ -964,6 +985,9 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
+            case DOCUMENT_SEND_REPLY_MESSAGE:
+                template = findDocSendReplyMessageTemplate(isWelsh);
+                break;
             case DOCUMENT_C7_DRAFT_HINT:
                 template = getC7CitizenDraftTemplate(isWelsh);
                 break;
@@ -1078,6 +1102,10 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocSendReplyMessageTemplate(boolean isWelsh) {
+        return !isWelsh ? docSendReplyMessageTemplate : docSendReplyMessageWelshTemplate;
     }
 
     private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
@@ -1244,7 +1272,7 @@ public class DocumentGenService {
                                                                              .build()).build();
 
         } catch (Exception e) {
-            log.error("Error while uploading document .", e);
+            log.error("Error while uploading document .{}", e.getMessage());
             throw e;
         }
     }
@@ -1259,7 +1287,7 @@ public class DocumentGenService {
             return DocumentResponse.builder().status("Success").build();
 
         } catch (Exception e) {
-            log.error("Error while deleting  document .", e);
+            log.error("Error while deleting  document . {}", e.getMessage());
             throw e;
         }
     }

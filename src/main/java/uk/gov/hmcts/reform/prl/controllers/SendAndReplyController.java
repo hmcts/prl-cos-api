@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,13 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final AllTabServiceImpl allTabService;
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
-    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
+
+    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = """
+        ### What happens next
+
+        The court will send this message in a notification to the external party or parties.
+        """;
+    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
     public static final String MESSAGES = "messages";
 
     @Autowired
@@ -143,8 +151,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
 
-                if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-                    closedMessages.addAll(caseData.getClosedMessages());
+                if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+                    closedMessages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
                 }
 
                 messages.removeAll(closedMessages);
@@ -153,7 +161,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
                     caseData.getMessageReply(),
-                    caseData.getOpenMessages()
+                    caseData.getSendOrReplyDto().getOpenMessages()
                 );
             }
 
@@ -163,11 +171,17 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         // sort lists of messages with most recent first
-        if (ofNullable(caseData.getOpenMessages()).isPresent()) {
-            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getOpenMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getOpenMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getClosedMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -184,9 +198,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        List<Element<Message>> messages = caseData.getOpenMessages();
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            messages.addAll(caseData.getClosedMessages());
+        List<Element<Message>> messages = caseData.getSendOrReplyDto().getOpenMessages();
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            messages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
@@ -247,7 +261,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
             String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
                 caseData, SEND
             );
@@ -264,6 +278,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
+            sendAndReplyService.sendNotificationToExternalParties(
+                caseData,
+                authorisation
+            );
+
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
@@ -271,7 +290,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData, caseDataMap));
 
                 // Update status of Additional applications if selected to Closed
                 String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
@@ -294,11 +313,12 @@ public class SendAndReplyController extends AbstractCallbackController {
                 sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation, caseDataMap));
             }
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
+
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
@@ -319,6 +339,13 @@ public class SendAndReplyController extends AbstractCallbackController {
             ).build());
         }
 
+        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
+            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                SEND_AND_CLOSE_EXTERNAL_MESSAGE
+            ).build());
+        }
+
         sendAndReplyService.closeAwPTask(caseData);
 
         return ok(SubmittedCallbackResponse.builder().build());
@@ -331,6 +358,13 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            if (!sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                    "No recipients selected to send your message. Select at least one party")).build();
+            }
+        }
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 

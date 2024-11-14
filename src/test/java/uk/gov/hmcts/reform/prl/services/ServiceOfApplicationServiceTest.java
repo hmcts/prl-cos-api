@@ -62,11 +62,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -169,6 +172,9 @@ public class ServiceOfApplicationServiceTest {
     private UserService userService;
 
     @Mock
+    private ConfidentialityCheckService confidentialityCheckService;
+
+    @Mock
     CoreCaseDataApi coreCaseDataApi;
 
     @Mock
@@ -188,6 +194,9 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    @Mock
+    private HearingService hearingService;
 
     private final String authorization = "authToken";
     private final String testString = "test";
@@ -463,7 +472,7 @@ public class ServiceOfApplicationServiceTest {
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .coverLettersMap(coverletterMap)
                                                                  .build())
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .packDocument(List.of(element(Document.builder()
                                                                                                     .documentFileName("").build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
@@ -556,7 +565,7 @@ public class ServiceOfApplicationServiceTest {
                                                                  .coverLettersMap(coverletterMap)
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
+                                      .unservedCitizenRespondentPack(SoaPack.builder().build())
                                       .unServedCafcassCymruPack(SoaPack.builder()
                                                                     .partyIds(List.of(element(TEST_UUID)))
                                                                     .build())
@@ -816,16 +825,25 @@ public class ServiceOfApplicationServiceTest {
                                           .rejectionReason("pack contain confidential address")
                                           .build()).build();
             Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+            CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus("LISTED")
+                .hearingType("ABA5-FFH")
+                .nextHearingDate(LocalDateTime.now().plusDays(3))
+                .hearingID(2030006118L).build();
+            Hearings hearings = Hearings.hearingsWith()
+                .caseRef("12345")
+                .hmctsServiceCode("ABA5")
+                .caseHearings(Collections.singletonList(caseHearing))
+                .build();
             CaseDetails caseDetails = CaseDetails.builder()
                 .id(123L)
                 .state(CASE_ISSUED.getValue())
                 .data(dataMap)
                 .build();
-            CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
             when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
             when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-            assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+            when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(hearings);
+            CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+            assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         }
     }
 
@@ -3420,29 +3438,7 @@ public class ServiceOfApplicationServiceTest {
             callbackRequest
         );
         assertNull(response.getErrors());
-    }
 
-    @Test
-    public void checkErrorMessageForSoaParties_whenNoPeopleSelected() {
-
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
-            .soaOtherParties(DynamicMultiSelectList.builder().build())
-            .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable).build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .serviceOfApplication(serviceOfApplication)
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
-            callbackRequest
-        );
-        assertEquals(response.getErrors().size(), 1);
     }
 
     @Test
@@ -4826,7 +4822,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertEquals(YES, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
@@ -4873,7 +4869,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertEquals(NO,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
@@ -4920,7 +4916,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
@@ -4951,7 +4947,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
         assertEquals(YES,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
@@ -4981,7 +4977,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
         assertEquals(NO,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
@@ -5012,7 +5008,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
         assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }

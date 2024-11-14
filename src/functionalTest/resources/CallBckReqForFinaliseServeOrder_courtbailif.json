@@ -304,7 +304,8 @@
         }
       ],
       "doYouWantToServeOrder": "Yes",
-      "whatDoWithOrder": "finalizeSaveToServeLater"
+      "whatDoWithOrder": "finalizeSaveToServeLater",
+      "personallyServeRespondentsOptions": "courtBailiff"
     }
   },
   "event_id": "litigationCapacity"

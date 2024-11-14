@@ -421,7 +421,7 @@ public class CaseDocumentController {
         try {
             documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
         } catch (DocumentGenerationException dge) {
-            log.error("Exception in generating a document", dge);
+            log.error("Exception in generating a document {}", dge.getMessage());
             return ResponseEntity.internalServerError().body("Error in generating a document");
         }
 
