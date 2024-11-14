@@ -903,10 +903,10 @@ public class PrlAppsConstants {
     public static final String DA_APPLICANT = "DAAPPLICANT";
     public static final String CA_RESPONDENT = "CARESPONDENT";
     public static final String DA_RESPONDENT = "DARESPONDENT";
-    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
-    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+    public static final String SOS_CONFIRMATION_HEADER = "# Cais wedi’i gyflwyno<br/>Application was served";
+    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### Beth fydd yn digwydd nesaf <br/>What happens next \n\n "
         + System.lineSeparator()
-        + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
+        + "Os yw Cafcass yn rhan o’r achos, byddant yn darparu llythyr diogelu i’r llys.<br/>If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
