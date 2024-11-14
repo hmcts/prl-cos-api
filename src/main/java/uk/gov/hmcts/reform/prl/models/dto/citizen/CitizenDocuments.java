@@ -47,4 +47,6 @@ public class CitizenDocuments {
     private boolean isFinal;
     private boolean isMultiple;
     private String documentLanguage;
+
+    private boolean isServedDocument;
 }
