@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
@@ -59,18 +58,17 @@ public class C100IssueCaseService {
             // Check if the selected court is Work Allocation enabled.
             List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
             log.info("WA Enabled Courts {}", courtListWorkAllocated);
-            String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
-            log.info("Selected Court ID {}", selectedCourtId);
+            String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
+            log.info("Selected Court ID {}", baseLocationId);
             if (courtListWorkAllocated.stream()
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
-                                   .equalsIgnoreCase(selectedCourtId.split(COLON_SEPERATOR)[0]))) {
+                                   .equalsIgnoreCase(baseLocationId))) {
                 log.info("Setting state to 'Offline'");
                 caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
             }
 
-            String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation

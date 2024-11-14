@@ -612,7 +612,7 @@ public class C100IssueCaseServiceTest {
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
             .courtList(dynamicList)
-            .courtId("123456")
+            .courtId("632")
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -628,6 +628,9 @@ public class C100IssueCaseServiceTest {
 
     @Test
     public void checkStateIsSubmittedWhenUserSelectsWorkAllocatedCourt() throws Exception {
+        DynamicList chosenCourtList = DynamicList.builder().value(DynamicListElement.builder().code("234946:")
+                                                                     .label("Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP")
+                                                                     .build()).build();
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -644,8 +647,8 @@ public class C100IssueCaseServiceTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123)
-            .courtId("234946:")
-            .courtList(dynamicList)
+            .courtId("115")
+            .courtList(chosenCourtList)
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -656,6 +659,6 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
-        Assertions.assertEquals(State.CASE_ISSUED, caseData.getState());
+        Assertions.assertEquals(State.CASE_ISSUED.getValue(), stringObjectMap.get("state"));
     }
 }
