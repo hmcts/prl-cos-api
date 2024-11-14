@@ -85,8 +85,6 @@ public class FL401SubmitApplicationService {
 
         caseDataUpdated.putAll(courtDetailsMap);
 
-        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-
         caseData = caseData.setDateSubmittedDate();
 
         log.info("----------case data for doc generation for final do creation ----------- {}", objectMapper.writeValueAsString(caseData));
