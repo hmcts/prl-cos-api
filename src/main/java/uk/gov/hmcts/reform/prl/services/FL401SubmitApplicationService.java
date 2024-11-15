@@ -71,7 +71,9 @@ public class FL401SubmitApplicationService {
             .isCourtEmailFound(YES)
             .build();
 
+
         if (courtVenue.isPresent()) {
+            log.info(" ===> courtVenue value: {}", String.valueOf(courtVenue.get()));
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
