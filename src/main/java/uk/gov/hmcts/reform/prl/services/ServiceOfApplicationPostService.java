@@ -83,6 +83,7 @@ public class ServiceOfApplicationPostService {
     public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         List<Document> coversheets = new ArrayList<>();
+        log.info("coverSheet James {}", coverSheetTemplate);
         if (null != address && null != address.getAddressLine1()) {
             if (documentLanguage.isGenEng()) {
                 GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,

@@ -929,6 +929,7 @@ public class ManageOrderEmailService {
             DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
+            log.info("coverLetetrs James is {}", coverLetterDocs);
             documents.addAll(coverLetterDocs);
         }
 
