@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -54,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 
@@ -94,10 +92,9 @@ public class CaseDataService {
 
     private final RefDataService refDataService;
 
-    private final OrganisationService organisationService;
+    private final CoreCaseDataApi coreCaseDataApi;
 
     private final ObjectMapper objMapper;
-
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
@@ -123,6 +120,7 @@ public class CaseDataService {
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                log.info("Query params : {}", searchString);
 
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
@@ -132,17 +130,18 @@ public class CaseDataService {
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
+                log.info("Search result response  {}", searchResult);
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
                     CafCassResponse.class
                 );
+                log.info("Cafcass response  {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
-                    updateSolicitorAddressForParties(filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
@@ -490,90 +489,6 @@ public class CaseDataService {
             .build();
     }
 
-
-    private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
-        Map<String, Address> orgIdToAddressMap = new HashMap<>();
-        List<String> orgIdListForAllCases = new ArrayList<>();
-        filteredCafcassData.getCases().stream().forEach(
-            caseDetail -> {
-                CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
-                orgIdListForAllCases.addAll(cafCassCaseData.getApplicants().stream()
-                                                .filter(party -> party.getValue().getSolicitorOrg() != null)
-                                                .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                                                .collect(Collectors.toList()));
-                orgIdListForAllCases.addAll(cafCassCaseData.getRespondents().stream()
-                                                .filter(party -> party.getValue().getSolicitorOrg() != null)
-                                                .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                                                .toList());
-            });
-        orgIdListForAllCases.stream().distinct()
-            .forEach(orgId ->
-                         orgIdToAddressMap.put(
-                             orgId,
-                             organisationService.getOrganisationDetails(
-                                     systemUserService.getSysUserToken(),
-                                     orgId
-                                 )
-                                 .getContactInformation().get(0).toAddress()
-                         ));
-
-
-        filteredCafcassData.getCases().stream().forEach(
-            caseDetail -> {
-                CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
-                cafCassCaseData = cafCassCaseData.toBuilder()
-                    .applicants(cafCassCaseData.getApplicants().stream()
-                                    .map(updatedParty -> {
-                                        if (updatedParty.getValue().getSolicitorOrg() == null) {
-                                            return updatedParty;
-                                        }
-                                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
-                                        return Element.<ApplicantDetails>builder().id(updatedParty.getId())
-                                            .value(updatedParty.getValue().toBuilder()
-                                                       .solicitorAddress(
-                                                           address != null
-                                                               ? uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
-                                                               .addressLine1(address.getAddressLine1())
-                                                               .addressLine2(address.getAddressLine2())
-                                                               .addressLine3(address.getAddressLine3())
-                                                               .county(address.getCounty())
-                                                               .country(address.getCountry())
-                                                               .postTown(address.getPostTown())
-                                                               .postCode(address.getPostCode())
-                                                               .build() : null
-                                                       )
-                                                       .build()).build();
-                                    })
-                                    .toList())
-                    .respondents(cafCassCaseData.getRespondents().stream()
-                                     .map(updatedParty -> {
-                                         if (updatedParty.getValue().getSolicitorOrg() == null) {
-                                             return updatedParty;
-                                         }
-                                         Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
-                                         return Element.<ApplicantDetails>builder().id(updatedParty.getId())
-                                             .value(updatedParty.getValue().toBuilder()
-                                                        .solicitorAddress(
-                                                            address != null
-                                                                ? uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
-                                                                .addressLine1(address.getAddressLine1())
-                                                                .addressLine2(address.getAddressLine2())
-                                                                .addressLine3(address.getAddressLine3())
-                                                                .county(address.getCounty())
-                                                                .country(address.getCountry())
-                                                                .postTown(address.getPostTown())
-                                                                .postCode(address.getPostCode())
-                                                                .build() : null
-                                                        )
-                                                        .build()).build();
-                                     })
-                                     .toList())
-                    .build();
-                caseDetail.setCaseData(cafCassCaseData);
-            });
-
-    }
-
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
 
         // set or condition for caseTypeofApplication (e.g. something like -
@@ -591,7 +506,8 @@ public class CaseDataService {
         Must must = Must.builder().stateFilter(stateFilter).build();
         Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(2).must(must).build();
         Query query = Query.builder().bool(bool).build();
-        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
+        return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize)
+            .dataToReturn(fetchFieldsRequiredForCafcass()).build();
     }
 
     private List<Should> populateStatesForQuery() {
@@ -645,9 +561,10 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-
+        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        log.info("Update hearing data for cafcass");
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
     }
@@ -693,14 +610,17 @@ public class CaseDataService {
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
-                    filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> caseHearing.getHearingDaySchedule().forEach(
-                            hearingDaySchedule -> {
-                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                hearingDaySchedule.setHearingVenueId(null);
+                    filteredHearing.getCaseHearings().forEach(
+                        caseHearing -> {
+                            if (CollectionUtils.isNotEmpty(caseHearing.getHearingDaySchedule())) {
+                                caseHearing.getHearingDaySchedule().forEach(
+                                    hearingDaySchedule -> {
+                                        hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                        hearingDaySchedule.setHearingVenueId(null);
+                                    }
+                                );
                             }
-                        )
-                    );
+                        });
                 }
             }
         }
@@ -728,5 +648,86 @@ public class CaseDataService {
                 }
             }
         }
+    }
+
+    private List<String> fetchFieldsRequiredForCafcass() {
+        return List.of(
+            "data.submitAndPayDownloadApplicationLink",
+            "data.c8Document",
+            "data.c1ADocument",
+            "data.familymanCaseNumber",
+            "data.dateSubmitted",
+            "data.issueDate",
+            "data.caseTypeOfApplication",
+            "data.draftConsentOrderFile",
+            "data.confidentialDetails",
+            "data.isInterpreterNeeded",
+            "data.interpreterNeeds",
+            "data.childrenKnownToLocalAuthority",
+            "data.otherDocuments",
+            "data.finalDocument",
+            "data.ordersApplyingFor",
+            "data.children",
+            "data.miamCertificationDocumentUpload1",
+            "data.miamStatus",
+            "data.miamExemptionsTable",
+            "data.claimingExemptionMiam",
+            "data.applicantAttendedMiam",
+            "data.familyMediatorMiam",
+            "data.otherProceedingsMiam",
+            "data.applicantConsentMiam",
+            "data.mediatorRegistrationNumber",
+            "data.familyMediatorServiceName",
+            "data.soleTraderName",
+            "data.mpuChildInvolvedInMiam",
+            "data.mpuApplicantAttendedMiam",
+            "data.mpuClaimingExemptionMiam",
+            "data.mpuExemptionReasons",
+            "data.miamDomesticAbuseEvidences",
+            "data.mpuDomesticAbuseEvidences",
+            "data.mpuIsDomesticAbuseEvidenceProvided",
+            "data.mpuDomesticAbuseEvidenceDocument",
+            "data.mpuNoDomesticAbuseEvidenceReason",
+            "data.mpuUrgencyReason",
+            "data.miamUrgencyReason",
+            "data.mpuPreviousMiamAttendanceReason",
+            "data.miamPreviousAttendanceReason",
+            "data.mpuDocFromDisputeResolutionProvider",
+            "data.mpuTypeOfPreviousMiamAttendanceEvidence",
+            "data.miamTypeOfPreviousAttendanceEvidence",
+            "data.mpuCertificateByMediator",
+            "data.mpuMediatorDetails",
+            "data.mpuOtherExemptionReasons",
+            "data.miamOtherExemptionReasons",
+            "data.mpuApplicantUnableToAttendMiamReason1",
+            "data.mpuApplicantUnableToAttendMiamReason2",
+            "data.miamCertificationDocumentUpload",
+            "data.mpuChildProtectionConcernReason",
+            "data.miamChildProtectionConcernReason",
+            "data.miamTable",
+            "data.summaryTabForOrderAppliedFor",
+            "data.partyIdAndPartyTypeMap",
+            "data.applicants",
+            "data.respondents",
+            "data.applicantsConfidentialDetails",
+            "data.applicantSolicitorEmailAddress",
+            "data.solicitorName",
+            "data.courtEpimsId",
+            "data.courtTypeId",
+            "data.courtName",
+            "data.otherPeopleInTheCaseTable",
+            "data.ordersNonMolestationDocument",
+            "data.hearingOutComeDocument",
+            "data.manageOrderCollection",
+            "data.hearingData",
+            "data.orderCollection",
+            "data.caseManagementLocation",
+            "data.otherPartyInTheCaseRevised",
+            "data.newChildDetails",
+            "data.childAndApplicantRelations",
+            "data.childAndRespondentRelations",
+            "data.childAndOtherPeopleRelations",
+            "data.cafcassUploadedDocs"
+        );
     }
 }
