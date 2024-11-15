@@ -71,9 +71,7 @@ public class FL401SubmitApplicationService {
             .isCourtEmailFound(YES)
             .build();
 
-
         if (courtVenue.isPresent()) {
-            log.info(" ===> courtVenue value: {}", String.valueOf(courtVenue.get()));
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
@@ -90,7 +88,6 @@ public class FL401SubmitApplicationService {
 
         caseData = caseData.setDateSubmittedDate();
 
-        log.info("----------case data for doc generation for final do creation ----------- {}", objectMapper.writeValueAsString(caseData));
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
