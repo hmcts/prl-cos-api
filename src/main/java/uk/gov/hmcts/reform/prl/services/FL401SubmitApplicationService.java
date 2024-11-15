@@ -77,6 +77,9 @@ public class FL401SubmitApplicationService {
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            caseData = caseData.toBuilder()
+                .courtSeal(courtSeal)
+                .build();
         }
 
         String courtEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(COLON_SEPERATOR).length > 1
