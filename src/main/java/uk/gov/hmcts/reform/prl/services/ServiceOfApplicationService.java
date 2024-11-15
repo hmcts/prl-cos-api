@@ -2320,6 +2320,7 @@ public class ServiceOfApplicationService {
                                                       ));
             if (coverLetter != null) {
                 docs.add(coverLetter);
+                log.info("coverLetter is {}", coverLetter.getDocumentFileName());
             }
             docs.addAll(packDocs);
             log.info("*** Sending docs to party Lip post");
