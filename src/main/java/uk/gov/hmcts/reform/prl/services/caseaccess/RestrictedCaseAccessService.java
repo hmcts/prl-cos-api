@@ -94,7 +94,9 @@ public class RestrictedCaseAccessService {
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
+        log.info("event id {}",caseEvent);
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
+            log.info("updating case fields ");
             caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
             caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
             caseDataUpdated.put(REASONS_TO_PRIVATE_TAB, null);
@@ -114,6 +116,7 @@ public class RestrictedCaseAccessService {
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
         }
         updateCaseName(caseDataUpdated, caseEvent);
+        log.info("updated staus {}",caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         return caseDataUpdated;
     }
 
@@ -143,6 +146,7 @@ public class RestrictedCaseAccessService {
     public ResponseEntity<SubmittedCallbackResponse> changeCaseAccessRequestSubmitted(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        log.info("security classification in submitted event {}",caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
