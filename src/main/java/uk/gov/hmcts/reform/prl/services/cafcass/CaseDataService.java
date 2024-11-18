@@ -120,22 +120,19 @@ public class CaseDataService {
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-                log.info("Query params : {}", searchString);
-
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
+                log.info("Invoking search cases");
                 SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
                     userToken,
                     searchString,
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
-                log.info("Search result response  {}", searchResult);
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
                     CafCassResponse.class
                 );
-                log.info("Cafcass response  {}", cafCassResponse);
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
                     log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                     cafCassFilter.filter(cafCassResponse);
@@ -573,7 +570,7 @@ public class CaseDataService {
         List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
-                hearings.getCaseHearings().stream().forEach(caseHearing -> {
+                hearings.getCaseHearings().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
                     }
