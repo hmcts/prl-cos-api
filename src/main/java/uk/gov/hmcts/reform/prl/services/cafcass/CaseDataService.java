@@ -121,15 +121,19 @@ public class CaseDataService {
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                log.info("searchString --> {}", searchString);
 
                 String userToken = systemUserService.getSysUserToken();
+                log.info("userToken --> {}", userToken);
                 final String s2sToken = authTokenGenerator.generate();
+                log.info("s2sToken --> {}", s2sToken);
                 SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
                     userToken,
                     searchString,
                     s2sToken,
                     cafCassSearchCaseTypeId
                 );
+                log.info("searchResult total ---> {}", searchResult.getTotal());
 
                 cafCassResponse = objectMapper.convertValue(
                     searchResult,
