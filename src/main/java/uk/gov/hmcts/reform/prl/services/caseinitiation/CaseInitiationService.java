@@ -9,13 +9,19 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
@@ -28,6 +34,8 @@ public class CaseInitiationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final LocationRefDataService locationRefDataService;
+    public static final String COURT_LIST = "submitCountyCourtSelection";
 
     public void handleCaseInitiation(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -45,5 +53,21 @@ public class CaseInitiationService {
         );
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
+    }
+
+    public Map<String, Object> prePopulateCourtDetails(String authorisation, Map<String, Object> caseDataUpdated) {
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get("caseTypeOfApplication")))) {
+            List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+                    .build());
+        } else {
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder()
+                    .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
+                            .sorted(Comparator.comparing(DynamicListElement::getLabel, Comparator.naturalOrder()))
+                            .toList())
+                    .build());
+        }
+        return caseDataUpdated;
     }
 }
