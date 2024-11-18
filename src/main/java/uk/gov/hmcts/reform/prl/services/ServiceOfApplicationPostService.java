@@ -126,7 +126,7 @@ public class ServiceOfApplicationPostService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
             uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage, caseData);
         } else {
-            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage);
+            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage, caseData);
         }
         if (null != uploadResponse) {
             List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
@@ -136,7 +136,7 @@ public class ServiceOfApplicationPostService {
         return Collections.emptyList();
     }
 
-    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage) {
+    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage, CaseData caseData) {
         List<MultipartFile> files = new ArrayList<>();
 
         attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
@@ -148,6 +148,10 @@ public class ServiceOfApplicationPostService {
                 APPLICATION_PDF_VALUE,
                 DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
             ));
+        }
+        // FPET-1147 Annex 1 file inclusion
+        if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
         }
         return caseDocumentClient.uploadDocuments(
             auth,
