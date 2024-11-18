@@ -151,6 +151,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
@@ -522,7 +523,7 @@ public class CallbackControllerTest {
                                .documentFileName("PRL-DRAFT-C100-20.docx")
                                .build())
             .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -601,7 +602,7 @@ public class CallbackControllerTest {
                                .documentFileName("PRL-DRAFT-C100-20.docx")
                                .build())
             .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -679,7 +680,7 @@ public class CallbackControllerTest {
                                .documentFileName("PRL-DRAFT-C100-20.docx")
                                .build())
             .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -1322,7 +1323,7 @@ public class CallbackControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtEmailAddress("test@gmail.com")
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
             .applicantsFL401(fl401Applicant)
             .build();
@@ -1360,7 +1361,7 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder()
             .id(1L)
             .courtEmailAddress("test@gmail.com")
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
             .build();
 
@@ -3479,6 +3480,26 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .populateChildInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("children"));
+    }
+
+    @Test
+    public void testAmendCourtAboutToStartTransferCourtForFL401Case() throws Exception {
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("caseTypeOfApplication", "FL401");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.TRANSFER_TO_ANOTHER_COURT.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getFilteredCourtLocations(Mockito.anyString()))
+            .thenReturn(List.of(DynamicListElement.EMPTY));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
     }
 
     @Test
