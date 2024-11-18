@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,8 @@ public class HearingManagementService {
         if (allowedHmcStatus.contains(hmcStatus)) {
             switch (caseState) {
                 case PREPARE_FOR_HEARING_CONDUCT_HEARING -> {
+                    fields.put("currentHearingId",hearingRequest.getHearingId());
+                    fields.put("currentHearingStatus",hmcStatus);
                     customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
                     submitUpdate(fields, customFields);
                 }
@@ -181,4 +184,23 @@ public class HearingManagementService {
         return hearingService.getNextHearingDate(userToken, caseReference);
     }
 
+    public void validateHearingState(Map<String, Object> caseDataUpdated, CaseData caseData) {
+        if (caseData.getHearingTaskData() != null
+                && "Listed".equals(caseData.getHearingTaskData().getCurrentHearingStatus())
+                && (caseData.getHearingTaskData().getExistedTaskHearingIds() == null || !caseData.getHearingTaskData()
+                .getExistedTaskHearingIds()
+                .contains(caseData.getHearingTaskData().getCurrentHearingId()))) {
+            List<String> ids = caseData.getHearingTaskData().getExistedTaskHearingIds();
+            if (ids == null) {
+                ids = new ArrayList<>();
+            }
+            ids.add(caseData.getHearingTaskData().getCurrentHearingId());
+            caseDataUpdated.put("hearingListed", true);
+            caseDataUpdated.put("existedTaskHearingIds", ids);
+            log.info("hearing listed for the case {} with hearing id {} ", caseData.getId(),
+                    caseData.getHearingTaskData().getCurrentHearingId());
+        } else {
+            log.info("hearing not listed for the case {}", caseData.getId());
+        }
+    }
 }
