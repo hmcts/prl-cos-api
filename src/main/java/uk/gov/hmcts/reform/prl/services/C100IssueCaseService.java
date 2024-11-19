@@ -62,7 +62,6 @@ public class C100IssueCaseService {
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
                                    .equalsIgnoreCase(baseLocationId))) {
-                log.info("Setting flag state to 'Offline' {}", CASE_NUMBER);
                 caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", true);
                 caseData = caseData.toBuilder().state(State.PROCEEDS_IN_HERITAGE_SYSTEM).build();
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
