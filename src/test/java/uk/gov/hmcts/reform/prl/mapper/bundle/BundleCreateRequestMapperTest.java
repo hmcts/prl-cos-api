@@ -43,6 +43,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_DOCUMENTS;
@@ -411,6 +412,11 @@ public class BundleCreateRequestMapperTest {
             .miamCertificateDocument(Document.builder().documentFileName("miamCertificate").build())
             .categoryName(MIAM_CERTIFICATE).categoryId("MIAMCertificate").build();
         courtStaffDoc.add(element(miamCertificate));
+
+        QuarantineLegalDoc fm5Statement = QuarantineLegalDoc.builder()
+            .fm5StatementsDocument(Document.builder().documentFileName("fm5Statements").build())
+            .categoryName(FM5_STATEMENTS).categoryId("fm5Statements").build();
+        courtStaffDoc.add(element(fm5Statement));
 
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
