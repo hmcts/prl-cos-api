@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
@@ -15,12 +14,12 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -33,6 +32,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 
 @Service
 @Slf4j
@@ -46,7 +47,6 @@ public class C100IssueCaseService {
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
-    private final CaseSummaryTabService caseSummaryTab;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -61,10 +61,9 @@ public class C100IssueCaseService {
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
                                    .equalsIgnoreCase(baseLocationId))) {
                 caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "Yes");
-                caseData = caseData.toBuilder().state(State.PROCEEDS_IN_HERITAGE_SYSTEM).build();
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-            } else {
-                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "No");
+                caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
+                    .state(PROCEEDS_IN_HERITAGE_SYSTEM.getLabel())
+                    .build());
             }
 
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
