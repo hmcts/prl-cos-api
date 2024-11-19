@@ -209,11 +209,8 @@ public class RestrictedCaseAccessService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
-        Map<String, Object> dataClassification
-            = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            .dataClassification(dataClassification)
             .securityClassification(String.valueOf(caseSecurityClassification))
             .build();
     }
