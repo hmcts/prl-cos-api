@@ -157,7 +157,6 @@ public class CaseDataService {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
-            log.info("Case data {}", caseData);
             populateReviewDocuments(otherDocsList, caseData);
             log.info("Other docs list 1 {}", otherDocsList);
             populateRespondentC1AResponseDoc(caseData.getRespondents(), otherDocsList);
@@ -736,7 +735,8 @@ public class CaseDataService {
             "data.childAndApplicantRelations",
             "data.childAndRespondentRelations",
             "data.childAndOtherPeopleRelations",
-            "data.cafcassUploadedDocs"
+            "data.cafcassUploadedDocs",
+            "data.courtStaffUploadDocListDocTab"
         );
     }
 }
