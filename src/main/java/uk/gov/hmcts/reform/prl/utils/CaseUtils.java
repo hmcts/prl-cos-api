@@ -192,9 +192,7 @@ public class CaseUtils {
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
-            log.info("Courtname {}", courtName);
             String regionName = courtVenue.get().getRegion();
-            log.info("regionName {}", regionName);
             String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
