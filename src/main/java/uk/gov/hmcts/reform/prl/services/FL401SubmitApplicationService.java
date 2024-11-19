@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
@@ -43,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
-import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 
 @Service
 @Slf4j
