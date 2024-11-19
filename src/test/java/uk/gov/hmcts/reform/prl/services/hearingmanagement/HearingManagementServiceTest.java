@@ -564,8 +564,9 @@ public class HearingManagementServiceTest {
 
     @Test
     public void testValidateHearingState() {
-        List<String> ids = new ArrayList<>();
-        ids.add("id1");
+        List<Element<String>> ids = new ArrayList<>();
+        Element<String> element = Element.<String>builder().value("id1").build();
+        ids.add(element);
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
                 .currentHearingStatus("LISTED").existedTaskHearingIds(ids).build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
