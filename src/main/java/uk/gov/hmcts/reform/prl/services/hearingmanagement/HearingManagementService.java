@@ -186,7 +186,7 @@ public class HearingManagementService {
 
     public void validateHearingState(Map<String, Object> caseDataUpdated, CaseData caseData) {
         if (caseData.getHearingTaskData() != null
-                && "Listed".equals(caseData.getHearingTaskData().getCurrentHearingStatus())
+                && "LISTED".equals(caseData.getHearingTaskData().getCurrentHearingStatus())
                 && (caseData.getHearingTaskData().getExistedTaskHearingIds() == null || !caseData.getHearingTaskData()
                 .getExistedTaskHearingIds()
                 .contains(caseData.getHearingTaskData().getCurrentHearingId()))) {
