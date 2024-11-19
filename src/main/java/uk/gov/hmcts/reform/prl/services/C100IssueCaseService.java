@@ -60,9 +60,11 @@ public class C100IssueCaseService {
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
                                    .equalsIgnoreCase(baseLocationId))) {
-                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", true);
+                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "Yes");
                 caseData = caseData.toBuilder().state(State.PROCEEDS_IN_HERITAGE_SYSTEM).build();
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+            } else {
+                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "No");
             }
 
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
