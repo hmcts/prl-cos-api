@@ -140,6 +140,12 @@ public class RestrictedCaseAccessServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(APPLICANT_CASE_NAME, "John Smith" + RESTRICTED_CASE);
         caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PRIVATE.getValue());
+
+        Map<String, Object> dataClassification = new HashMap<>();
+        dataClassification.put("draftConsentOrderFile", "PUBLIC");
+        dataClassification.put("effortsMadeWithRespondents", "PUBLIC");
+        when(caseDataService.getDataClassification(anyString())).thenReturn(dataClassification);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId(MARK_CASE_AS_RESTRICTED.getValue())
             .caseDetails(CaseDetails.builder()
