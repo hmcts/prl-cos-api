@@ -736,7 +736,28 @@ public class CaseDataService {
             "data.childAndRespondentRelations",
             "data.childAndOtherPeopleRelations",
             "data.cafcassUploadedDocs",
-            "data.courtStaffUploadDocListDocTab"
+            "data.courtStaffUploadDocListDocTab",
+            "data.legalProfUploadDocListDocTab",
+            "data.bulkScannedDocListDocTab",
+            "data.cafcassUploadDocListDocTab",
+            "data.citizenUploadedDocListDocTab",
+            "data.restrictedDocuments",
+            "data.confidentialDocuments",
+            "data.respondentAc8Documents",
+            "data.respondentBc8Documents",
+            "data.respondentCc8Documents",
+            "data.respondentDc8Documents",
+            "data.respondentEc8Documents",
+            "data.c8FormDocumentsUploaded",
+            "data.bundleInformation",
+            "data.otherDocumentsUploaded",
+            "data.uploadOrderDoc",
+            "data.specialArrangementsLetter",
+            "data.additionalDocuments",
+            "data.additionalDocumentsList",
+            "data.stmtOfServiceAddRecipient",
+            "data.stmtOfServiceForOrder",
+            "data.stmtOfServiceForApplication"
         );
     }
 }
