@@ -89,7 +89,10 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
-  
+
     @JsonUnwrapped
     private ServiceOfDocuments serviceOfDocuments;
+
+    @JsonUnwrapped
+    private boolean isNonWorkAllocationEnabledCourtSelected;
 }

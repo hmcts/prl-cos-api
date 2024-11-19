@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -56,16 +57,13 @@ public class C100IssueCaseService {
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             // Check if the selected court is Work Allocation enabled.
             List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
-            log.info("WA Enabled Courts {}", courtListWorkAllocated);
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-            log.info("Selected Court ID {}", baseLocationId);
-            log.info("CourtList {}",DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtListWorkAllocated.stream()
                 .noneMatch(workAllocationEnabledCourt ->
                                workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
                                    .equalsIgnoreCase(baseLocationId))) {
-                log.info("Setting state to 'Offline'");
-                caseDataUpdated.put(STATE, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+                log.info("Setting flag state to 'Offline' {}", CASE_NUMBER);
+                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", true);
                 caseData = caseData.toBuilder().state(State.PROCEEDS_IN_HERITAGE_SYSTEM).build();
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             }

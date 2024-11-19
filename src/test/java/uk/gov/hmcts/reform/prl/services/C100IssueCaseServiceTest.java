@@ -623,7 +623,7 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
-        Assertions.assertEquals(State.PROCEEDS_IN_HERITAGE_SYSTEM, stringObjectMap.get("state"));
+        Assertions.assertEquals(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"), true);
     }
 
     @Test
@@ -659,6 +659,6 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
-        Assertions.assertEquals(State.CASE_ISSUED.getValue(), stringObjectMap.get("state"));
+        Assertions.assertEquals(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"), false);
     }
 }
