@@ -23,8 +23,12 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChe
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -295,12 +299,18 @@ public class CafCassCaseData {
 
 
         this.miamExemptionsTable = MiamExemptions.builder()
-            .childProtectionEvidence(childProtectionEvidence[0])
-            .domesticViolenceEvidence(domesticViolenceEvidence[0])
-            .reasonsForMiamExemption(reasonsForMiamExemption[0])
-            .otherGroundsEvidence(otherGroundsEvidence[0])
-            .previousAttendenceEvidence(previousAttendenceEvidence[0])
-            .urgencyEvidence(urgencyEvidence[0])
+            .childProtectionEvidence(null != childProtectionEvidence[0] && !childProtectionEvidence[0].trim().isEmpty()
+                                         ? childProtectionEvidence[0] : null)
+            .domesticViolenceEvidence(null != domesticViolenceEvidence[0] && !domesticViolenceEvidence[0].trim().isEmpty()
+                                          ? domesticViolenceEvidence[0] : null)
+            .reasonsForMiamExemption(null != reasonsForMiamExemption[0] && !reasonsForMiamExemption[0].trim().isEmpty()
+                                         ? reasonsForMiamExemption[0] : null)
+            .otherGroundsEvidence(null != otherGroundsEvidence[0] && !otherGroundsEvidence[0].trim().isEmpty()
+                                      ? otherGroundsEvidence[0] : null)
+            .previousAttendenceEvidence(null != previousAttendenceEvidence[0] && !previousAttendenceEvidence[0].trim().isEmpty()
+                                            ? previousAttendenceEvidence[0] : null)
+            .urgencyEvidence(null != urgencyEvidence[0] && !urgencyEvidence[0].trim().isEmpty()
+                                 ? urgencyEvidence[0] : null)
             .build();
     }
 
@@ -345,7 +355,8 @@ public class CafCassCaseData {
                 && StringUtils.hasText(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl())) {
                 Document documentOther = mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                 URL url = new URL(documentOther.getDocumentUrl());
-                documentOther.setDocumentUrl(getDocumentId(url));
+                documentOther.setDocumentId(getDocumentId(url));
+                documentOther.setDocumentUrl(null);
                 mpuDomesticAbuseEvidenceDocument.getValue().setDomesticAbuseDocument(documentOther);
             }
         } catch (Exception e) {
@@ -723,5 +734,37 @@ public class CafCassCaseData {
     private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
 
     private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
+
+    private List<uk.gov.hmcts.reform.prl.models.documents.Document> c8FormDocumentsUploaded;
+
+    private BundlingInformation bundleInformation;
+
+    private List<uk.gov.hmcts.reform.prl.models.documents.Document> otherDocumentsUploaded;
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc;
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> restrictedDocuments;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> confidentialDocuments;
+
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentAc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentBc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentCc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentDc8Documents;
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentEc8Documents;
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document specialArrangementsLetter;
+    private uk.gov.hmcts.reform.prl.models.documents.Document additionalDocuments;
+    private List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> additionalDocumentsList;
+
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForOrder;
+    private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
 
 }
