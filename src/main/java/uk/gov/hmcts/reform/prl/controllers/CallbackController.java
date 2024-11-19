@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -410,7 +409,9 @@ public class CallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> courtList;
             if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+                courtList = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? locationRefDataService.getFilteredCourtLocations(authorisation) :
+                    locationRefDataService.getDaFilteredCourtLocations(authorisation);
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
@@ -873,7 +874,7 @@ public class CallbackController {
                 }
             }
         } catch (Exception e) {
-            log.error("Error while fetching User or Org details for the logged in user ", e);
+            log.error("Error while fetching User or Org details for the logged in user {}", e.getMessage());
         }
 
         return caseDataUpdated;
@@ -893,9 +894,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseDetails caseDetails
-                = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()

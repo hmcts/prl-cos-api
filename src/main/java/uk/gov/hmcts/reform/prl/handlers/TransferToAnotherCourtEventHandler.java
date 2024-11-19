@@ -52,7 +52,7 @@ public class TransferToAnotherCourtEventHandler {
     @EventListener(condition = "#event.typeOfEvent eq 'Transfer to another court'")
     public void transferCourtEmail(final TransferToAnotherCourtEvent event) {
         CaseData caseData = event.getCaseData();
-        if (caseData.getCourtEmailAddress() != null) {
+        if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtEmailAddress() != null) {
             sendTransferCourtEmail(caseData);
             sendTransferToAnotherCourtEmail(event.getAuthorisation(),caseData);
         }
@@ -64,7 +64,7 @@ public class TransferToAnotherCourtEventHandler {
                                                                   getEmailProps(caseData),
                                                                   caseData.getCourtEmailAddress(), getAllCaseDocuments(authorization,caseData));
         } catch (IOException e) {
-            log.error("Failed to send Email ", e);
+            log.error("Failed to send Email {}", e.getMessage());
         }
     }
 

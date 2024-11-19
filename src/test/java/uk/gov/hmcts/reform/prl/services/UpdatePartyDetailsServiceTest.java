@@ -25,7 +25,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -112,6 +114,7 @@ public class UpdatePartyDetailsServiceTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().build())
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
@@ -230,6 +233,7 @@ public class UpdatePartyDetailsServiceTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .response(Response.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -286,6 +290,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -340,6 +345,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         Address address = Address.builder()
@@ -436,7 +442,6 @@ public class UpdatePartyDetailsServiceTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .isAtAddressLessThan5Years(YesOrNo.Yes)
-
             .build();
 
         PartyDetails applicant1 = PartyDetails.builder()
@@ -466,6 +471,7 @@ public class UpdatePartyDetailsServiceTest {
             .isAtAddressLessThan5Years(YesOrNo.Yes)
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .response(Response.builder().build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
@@ -480,6 +486,7 @@ public class UpdatePartyDetailsServiceTest {
             .isDateOfBirthKnown(YesOrNo.No)
             .isPlaceOfBirthKnown(YesOrNo.No)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .response(Response.builder().build())
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
@@ -542,6 +549,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         PartyDetails respondent2 = PartyDetails.builder()
@@ -550,6 +558,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
@@ -634,6 +643,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         PartyDetails respondent2 = PartyDetails.builder()
@@ -645,6 +655,7 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(respondent1).build();
@@ -690,7 +701,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
@@ -721,7 +732,9 @@ public class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
             .isAddressConfidential(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
             .build();
 
         PartyDetails respondent2 = PartyDetails.builder()
@@ -733,6 +746,7 @@ public class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
         PartyDetails respondent3 = PartyDetails.builder()
             .firstName("respondent3")
@@ -743,6 +757,7 @@ public class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
         PartyDetails respondent4 = PartyDetails.builder()
             .firstName("respondent4")
@@ -753,6 +768,7 @@ public class UpdatePartyDetailsServiceTest {
             .email("resp1@test.com")
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
+            .response(Response.builder().build())
             .build();
         PartyDetails respondent5 = PartyDetails.builder()
             .firstName("respondent5")
@@ -763,16 +779,19 @@ public class UpdatePartyDetailsServiceTest {
             .phoneNumber("0123456789")
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .response(Response.builder().build())
             .build();
         PartyDetails respondent6 = PartyDetails.builder()
             .firstName("respondent6")
             .lastName("lastname666")
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.Yes)
             .email("resp1@test.com")
             .address(Address.builder().addressLine1("addressLin1").build())
             .phoneNumber("0123456789")
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .response(Response.builder().build())
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder()
@@ -884,7 +903,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
@@ -1229,6 +1248,7 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails respondentBefore = PartyDetails.builder()
                 .partyId(uuid)
                 .phoneNumber("01234")
+                .response(Response.builder().build())
                 .build();
         Element<PartyDetails> wrappedRespondentBefore = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
         List<Element<PartyDetails>> listOfRespondents = new ArrayList<>();
@@ -1400,7 +1420,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
         assertNotNull(updatedCaseData.get("respondents"));
     }
-    
+
     @Test
     public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
         Child child1 = Child.builder()

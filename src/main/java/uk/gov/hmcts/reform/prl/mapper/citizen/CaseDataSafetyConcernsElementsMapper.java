@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -51,6 +52,12 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static final String ONGOING = "Behaviour is ongoing";
 
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
+
+    public static final List<String> VALID_CHILD_ABUSES = List.of(ChildAbuseEnum.physicalAbuse.getId(),
+                                                            ChildAbuseEnum.psychologicalAbuse.getId(),
+                                                            ChildAbuseEnum.sexualAbuse.getId(),
+                                                            ChildAbuseEnum.emotionalAbuse.getId(),
+                                                            ChildAbuseEnum.financialAbuse.getId());
 
     private CaseDataSafetyConcernsElementsMapper() {
     }
@@ -144,11 +151,13 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                AllegationOfHarmRevised allegationOfHarmRevised) {
 
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())
-            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+            || null == c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild()) {
             return allegationOfHarmRevised;
         }
 
-        if (null != c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()) {
+        if (null != c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()
+            && isValidChildAbuseOptions(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())) {
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
                 .childAbuses(getChildAbuses(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()))
                 .build();
@@ -187,6 +196,10 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
 
         return allegationOfHarmRevised;
+    }
+
+    private static boolean isValidChildAbuseOptions(String[] childAbuses) {
+        return Arrays.stream(childAbuses).anyMatch(VALID_CHILD_ABUSES::contains);
     }
 
     private static List<ChildAbuseEnum> getChildAbuses(String[] citizenChildAbuses) {
@@ -440,7 +453,9 @@ public class CaseDataSafetyConcernsElementsMapper {
 
         List<ChildDetail> childDetails = c100RebuildChildDetailsElements.getChildDetails();
 
-        if (childDetails != null && abusedChildren.length != childDetails.size()) {
+        if (ObjectUtils.isNotEmpty(abusedChildren)
+            && ObjectUtils.isNotEmpty(childDetails)
+            && abusedChildren.length != childDetails.size()) {
             List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             childDetails.forEach(s -> {

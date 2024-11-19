@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -147,6 +150,10 @@ public class AllTabServiceImpl implements AllTabsService {
                                                  EventRequestData eventRequestData,
                                                  CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
+        //PRL-6318 - fix 0 id in caseData for court nav cases
+        if (ObjectUtils.isNotEmpty(combinedFieldsMap.get("id")) && 0 == (Long)combinedFieldsMap.get("id")) {
+            combinedFieldsMap.put("id", Long.parseLong(caseId));
+        }
 
         return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
     }
@@ -178,6 +185,11 @@ public class AllTabServiceImpl implements AllTabsService {
         documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
         documentMap.put("submitAndPayDownloadApplicationLink", caseData.getSubmitAndPayDownloadApplicationLink());
         documentMap.put("submitAndPayDownloadApplicationWelshLink", caseData.getSubmitAndPayDownloadApplicationWelshLink());
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) && State.SUBMITTED_PAID.equals(
+            caseData.getState())) {
+            documentMap.put("c1ADraftDocument", caseData.getC1ADraftDocument());
+            documentMap.put("c1AWelshDraftDocument", caseData.getC1AWelshDraftDocument());
+        }
 
         return documentMap;
     }

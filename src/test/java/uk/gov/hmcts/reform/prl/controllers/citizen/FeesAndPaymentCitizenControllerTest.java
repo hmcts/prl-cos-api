@@ -115,7 +115,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(paymentRequestService.createPayment(authToken,s2sToken,createPaymentRequest)).thenReturn(paymentResponse);
+        when(paymentRequestService.createPayment(authToken, createPaymentRequest)).thenReturn(paymentResponse);
 
         //When
         PaymentResponse actualPaymentResponse = feesAndPaymentCitizenController

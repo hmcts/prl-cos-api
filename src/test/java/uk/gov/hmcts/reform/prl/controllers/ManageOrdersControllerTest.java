@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -79,6 +80,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -1145,6 +1147,10 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isTheOrderAboutAllChildren", No);
         stringObjectMap.put("isTheOrderAboutChildren", Yes);
+        DraftOrder draftOrder = DraftOrder.builder().orderTypeId("abc").build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(element(draftOrder));
+        stringObjectMap.put("draftOrderCollection", draftOrderCollection);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
@@ -2237,6 +2243,84 @@ public class ManageOrdersControllerTest {
         assertExpectedException(() -> {
             manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+
+    @Test
+    public void testExceptionForPopulateHeaderFL401() throws Exception {
+
+        CaseData caseDataFL401 = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(List.of(element(PartyDetails.builder().firstName("app").build())))
+            .respondents(List.of(element(PartyDetails.builder().firstName("resp").build())))
+            .children(List.of(element(Child.builder().firstName("ch").build())))
+            .courtName("testcourt")
+            .caseTypeOfApplication("FL401")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataFL401.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataFL401);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+        assertNull(callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
+        assertNotNull(callbackResponse);
+    }
+
+    @Test
+    public void testExceptionForPopulateHeaderC100() throws Exception {
+
+        CaseData caseDataC100 = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(List.of(element(PartyDetails.builder().firstName("app").build())))
+            .respondents(List.of(element(PartyDetails.builder().firstName("resp").build())))
+            .children(List.of(element(Child.builder().firstName("ch").build())))
+            .courtName("testcourt")
+            .caseTypeOfApplication("C100")
+            .isCafcass(Yes)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataC100.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataC100);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+        assertEquals(Yes,callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
+        assertNotNull(callbackResponse);
     }
 
     @Test
