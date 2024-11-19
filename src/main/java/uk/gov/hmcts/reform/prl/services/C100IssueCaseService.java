@@ -53,19 +53,7 @@ public class C100IssueCaseService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            // Check if the selected court is Work Allocation enabled.
-            List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-            if (courtListWorkAllocated.stream()
-                .noneMatch(workAllocationEnabledCourt ->
-                               workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
-                                   .equalsIgnoreCase(baseLocationId))) {
-                caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "Yes");
-                caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
-                    .state(PROCEEDS_IN_HERITAGE_SYSTEM.getLabel())
-                    .build());
-            }
-
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
@@ -104,6 +92,18 @@ public class C100IssueCaseService {
         // Getting the tab fields and add it to the casedetails..
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
+        // Check if the selected court is Work Allocation enabled.
+        String chosenCourtId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
+        List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
+        if (courtListWorkAllocated.stream()
+            .noneMatch(workAllocationEnabledCourt ->
+                           workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
+                               .equalsIgnoreCase(chosenCourtId))) {
+            caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "Yes");
+            caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
+                .state(PROCEEDS_IN_HERITAGE_SYSTEM.getLabel())
+                .build());
+        }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
         return caseDataUpdated;
     }
