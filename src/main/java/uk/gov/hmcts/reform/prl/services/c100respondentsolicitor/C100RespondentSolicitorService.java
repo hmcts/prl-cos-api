@@ -160,12 +160,12 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
-    public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
+    public static final String RESPONSE_SUBMITTED_LABEL = "# Ymateb wedi'i gyflwyno<br/>Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
-        ### Your response is now submitted.
+        ### Mae eich ymateb wedi ei gyflwyno.<br/>Your response is now submitted.
 
 
-        You can contact your local court at\s""";
+        Gallwch gysylltu â’ch llys lleol yn\s<br/>You can contact your local court at\s""";
 
     private static final String OPEN_BRACKET = "(";
     private static final String CLOSE_BRACKET = ")";
