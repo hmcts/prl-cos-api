@@ -232,7 +232,7 @@ public class FeeService {
 
         if (isOrder) {
             return CHILD_ARRANGEMENTS_ORDER;
-        }else if (YES.equals(otherPartyConsent)) {
+        } else if (YES.equals(otherPartyConsent)) {
             return C2_WITHOUT_NOTICE;
         } else {
             if (NO.equals(notice)) {
