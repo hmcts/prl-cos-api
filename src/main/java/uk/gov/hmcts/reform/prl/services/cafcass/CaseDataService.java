@@ -301,29 +301,29 @@ public class CaseDataService {
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getLegalProfUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCafcassUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCitizenUploadedDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
             parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab());
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments());
         }
     }
 
