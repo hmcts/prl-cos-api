@@ -581,7 +581,7 @@ public class HearingManagementServiceTest {
                 .currentHearingStatus("Listed1").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
-        Assert.assertNull(caseDataUpdated.get("hearingListed"));
+        Assert.assertEquals("false",caseDataUpdated.get("hearingListed"));
 
     }
 
