@@ -296,29 +296,29 @@ public class CaseDataService {
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getLegalProfUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCafcassUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCitizenUploadedDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
             parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab());
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments());
         }
     }
 
@@ -724,7 +724,29 @@ public class CaseDataService {
             "data.childAndApplicantRelations",
             "data.childAndRespondentRelations",
             "data.childAndOtherPeopleRelations",
-            "data.cafcassUploadedDocs"
+            "data.cafcassUploadedDocs",
+            "data.courtStaffUploadDocListDocTab",
+            "data.legalProfUploadDocListDocTab",
+            "data.bulkScannedDocListDocTab",
+            "data.cafcassUploadDocListDocTab",
+            "data.citizenUploadedDocListDocTab",
+            "data.restrictedDocuments",
+            "data.confidentialDocuments",
+            "data.respondentAc8Documents",
+            "data.respondentBc8Documents",
+            "data.respondentCc8Documents",
+            "data.respondentDc8Documents",
+            "data.respondentEc8Documents",
+            "data.c8FormDocumentsUploaded",
+            "data.bundleInformation",
+            "data.otherDocumentsUploaded",
+            "data.uploadOrderDoc",
+            "data.specialArrangementsLetter",
+            "data.additionalDocuments",
+            "data.additionalDocumentsList",
+            "data.stmtOfServiceAddRecipient",
+            "data.stmtOfServiceForOrder",
+            "data.stmtOfServiceForApplication"
         );
     }
 }
