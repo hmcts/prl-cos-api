@@ -88,6 +88,7 @@ public class RestrictedCaseAccessServiceTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
+
     @Mock
     private IdamApi idamApi;
 
