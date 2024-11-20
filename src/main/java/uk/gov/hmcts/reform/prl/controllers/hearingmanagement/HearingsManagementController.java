@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +21,14 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -37,12 +39,22 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class HearingsManagementController {
-    private final ObjectMapper objectMapper;
+public class HearingsManagementController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
     private final AllTabServiceImpl allTabService;
+
+    @Autowired
+    public HearingsManagementController(ObjectMapper objectMapper,
+                                    EventService eventPublisher,
+                                        AuthorisationService authorisationService,
+                                        HearingManagementService hearingManagementService,
+                                        AllTabServiceImpl allTabService) {
+        super(objectMapper, eventPublisher);
+        this.hearingManagementService = hearingManagementService;
+        this.allTabService = allTabService;
+        this.authorisationService = authorisationService;
+    }
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
@@ -93,6 +105,24 @@ public class HearingsManagementController {
 
         caseDataUpdated.put("nextHearingDetails",
                             hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
+    @PostMapping(path = "/validate-hearing-state/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "validates hearing states")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateHearingState(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        hearingManagementService.validateHearingState(caseDataUpdated, caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
