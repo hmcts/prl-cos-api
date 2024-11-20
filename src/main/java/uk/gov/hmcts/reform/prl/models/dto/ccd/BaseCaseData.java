@@ -94,5 +94,6 @@ public class BaseCaseData {
     private ServiceOfDocuments serviceOfDocuments;
 
     @JsonUnwrapped
-    private String isNonWorkAllocationEnabledCourtSelected;
+    private HearingTaskData hearingTaskData;
+
 }

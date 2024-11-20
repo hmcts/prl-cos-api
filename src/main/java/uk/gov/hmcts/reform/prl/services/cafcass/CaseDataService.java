@@ -157,17 +157,11 @@ public class CaseDataService {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
-            log.info("Case data {}", caseData);
             populateReviewDocuments(otherDocsList, caseData);
-            log.info("Other docs list 1 {}", otherDocsList);
             populateRespondentC1AResponseDoc(caseData.getRespondents(), otherDocsList);
-            log.info("Other docs list 2 {}", otherDocsList);
             populateConfidentialDoc(caseData, otherDocsList);
-            log.info("Other docs list 3 {}", otherDocsList);
             populateBundleDoc(caseData, otherDocsList);
-            log.info("Other docs list 4 {}", otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
-            log.info("Other docs list 5 {}", otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
@@ -420,7 +414,6 @@ public class CaseDataService {
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
-        log.info("Quarentine legal docs {}", quarantineLegalDocs);
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -428,12 +421,10 @@ public class CaseDataService {
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     null
                 );
-                log.info("Attribute name {}", attributeName);
                 document = objMapper.convertValue(
                     objMapper.convertValue(quarantineLegalDocElement.getValue(), Map.class).get(attributeName),
                     uk.gov.hmcts.reform.prl.models.documents.Document.class
                 );
-                log.info("Document {}", document);
             }
             if (null != document) {
                 log.info("Found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
@@ -449,14 +440,11 @@ public class CaseDataService {
     private void parseCategoryAndCreateList(String category,
                                             uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
-        log.info("Exclude doc cat list {}", excludedDocumentCategoryList);
-        log.info("Exclude doc list {}", excludedDocumentList);
         if ((CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(category))
             && (CollectionUtils.isEmpty(excludedDocumentList) || !checkIfDocumentsNeedToExclude(
             excludedDocumentList,
             caseDocument.getDocumentFileName()
         ))) {
-            log.info("Adding to other doc list");
             addInOtherDocuments(category, caseDocument, otherDocsList);
 
         }
