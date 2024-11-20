@@ -36,7 +36,7 @@ public class TaskListRenderElementsTest {
         String actual = underTest.renderDisabledLink(Task.builder()
                                                          .event(Event.CASE_NAME)
                                                          .build());
-        assertThat(actual).isEqualToIgnoringCase("<a>Case name</a>");
+        assertThat(actual).isEqualToIgnoringCase("Case name");
     }
 
     @Test

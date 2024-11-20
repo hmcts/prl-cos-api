@@ -41,7 +41,7 @@ management:
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/"
+    import: "optional:configtree:/mnt/secrets/prl/"
   application:
     name: Prl cos api
   servlet:
@@ -50,6 +50,7 @@ spring:
       max-request-size: 1024MB
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
 
 azure:
   application-insights:
@@ -78,6 +79,30 @@ xui:
 
 citizen:
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
+  dashboard:
+    notifications:
+      C100:
+        SOA_APPLICANT: CAN4_SOA_PERSONAL_NON_PERSONAL_APPLICANT
+        SOA_PERSONAL_APPLICANT: CAN7_SOA_PERSONAL_APPLICANT,CAN9_SOA_PERSONAL_APPLICANT
+        SOA_RESPONDENT: CAN5_SOA_RESPONDENT
+        SOA_SOS_CA_CB_APPLICANT: CAN8_SOA_SOS_PERSONAL_APPLICANT
+        ORDER_APPLICANT_RESPONDENT: CRNF2_APPLICANT_RESPONDENT
+        ORDER_PERSONAL_APPLICANT: CRNF3_PERSONAL_SERV_APPLICANT
+        ORDER_SOS_CA_CB_APPLICANT: CAN11_ORDER_SOS_CA_CB
+        VIEW_RESPONDENT_RESP_APPLICANT: CAN6_VIEW_RESPONSE_APPLICANT
+        VIEW_RESPONDENT_C1A_APPL_APPLICANT: CAN6A_VIEW_C1A_RESPONSE_APPLICANT
+        VIEW_RESPONDENT_C1A_RESP_APPLICANT: CAN6B_VIEW_C1AR_RESPONSE_APPLICANT
+        FM5_REMINDER_APPLICANT_RESPONDENT: CAN10_FM5
+        SOD_APPLICANT_RESPONDENT: CRNF6_SOD_APPLICANT_RESPONDENT
+      FL401:
+        SOA_APPLICANT: DN1_SOA_PERSONAL_NON_PERSONAL_APPLICANT
+        SOA_PERSONAL_APPLICANT: DN2_SOA_PERSONAL_APPLICANT
+        SOA_RESPONDENT: DN3_SOA_RESPONDENT
+        SOA_SOS_CA_CB_APPLICANT: DN5_SOA_SOS_PERSONAL_APPLICANT
+        ORDER_APPLICANT_RESPONDENT: CRNF2_APPLICANT_RESPONDENT
+        ORDER_PERSONAL_APPLICANT: CRNF3_PERSONAL_SERV_APPLICANT
+        ORDER_SOS_CA_CB_APPLICANT: DN6_ORDER_SOS_CA_CB
+        SOD_APPLICANT_RESPONDENT: CRNF6_SOD_APPLICANT_RESPONDENT
 
 uk:
   gov:
@@ -139,10 +164,28 @@ uk:
             SEND_AND_REPLY_NOTIFICATION_OTHER: 949a9675-7232-4bab-920f-266b90d34a30
             TRANSFER_COURT_EMAIL_NOTIFICATION: 0f28438e-bdb4-4d04-866d-d0d8935b88cb
             LIST_ON_NOTICE_EMAIL_NOTIFICATION: 21ede4dc-cce4-4198-b63e-cd0f775299d5
+            SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT: ee1b4b2e-b709-4aaa-8aa2-d333a2685420
+            SOA_UNREPRESENTED_APPLICANT_COURTNAV: fefaa319-3184-48a1-8de5-66f63036a912
+            SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV: 607dcbd6-8c46-4ab9-92ef-8f41fc8be863
+            SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT: fefaa319-3184-48a1-8de5-66f63036a912
+            SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS: be25c994-b95b-431a-bd5f-08e27fc0e60e
+            CA_LIP_ORDERS: 0bf7cd2a-64ef-4b07-b886-d2658bc0a34e
+            DA_LIP_ORDERS: 1b729d01-473f-4d6a-8c79-65711d8b235a
+            SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A: ae88f74f-6b77-4faa-884c-73c1ac596a44
+            FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
+            RESPONDENT_RESPONDED_CAFCASS: 819eda05-d2f8-462b-bd17-e71b1626460e
+            RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS: 2bcc77f7-d363-4eac-923b-80881d02b8f9
+            RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS: 467af5e8-731a-4396-b2b9-f6711c5803bc
+            C7_NOTIFICATION_APPLICANT: 4da79604-d3c4-4b91-ae8c-0ae5ed613714
+            C1A_NOTIFICATION_APPLICANT: dcac407c-d167-4f2e-9295-09bde1ab4199
+            C1A_RESPONSE_NOTIFICATION_APPLICANT: cafad995-5f1e-47fe-9d23-b1f04df65a0b
+            SOD_CA_PERSONAL_SERVICE_APPLICANT_LIP: 628d8dd6-ea7a-419c-9312-22017484a7e0
+            SOD_DA_PERSONAL_SERVICE_APPLICANT_LIP: dda42bf3-980d-46e2-988a-ef58ec95f2fb
+            SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: d65785f3-90b3-41cf-bbc8-4e946dad9785
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
-            CA_APPLICANT_SERVICE_APPLICATION: e21dc419-8fc2-4f89-bf22-a8794632c1fc
+            CA_APPLICANT_SERVICE_APPLICATION: ecd29f4d-70c9-415f-9be8-7cae22156ba1
             CA_DA_CASE_WITHDRAWN: 2a00c797-5141-4298-ac60-663fa763d311
             CA_DA_MANAGE_ORDER_EMAIL: 948f7b9c-79de-49dd-bfe4-e2df164366dc
             CA_DA_FINAL_ORDER_EMAIL: fb1062c8-d966-495e-956e-dfffbd781bed
@@ -150,6 +193,24 @@ uk:
             CA_AWAITING_PAYMENT: 6ddd61dc-614a-433f-9b95-c72f52fdeb02
             CA_HELP_WITH_FEES: c188d173-b90f-48f1-a432-745f7ef93734
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
+            SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT: da651406-76b8-40d9-ab8d-df7764ff4f75
+            SOA_UNREPRESENTED_APPLICANT_COURTNAV: fefaa319-3184-48a1-8de5-66f63036a912
+            SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV: 607dcbd6-8c46-4ab9-92ef-8f41fc8be863
+            CA_LIP_ORDERS: 3bc97f41-6abc-4a59-b2f4-e684d3458c17
+            DA_LIP_ORDERS: ee37abe1-1ff8-4e31-8436-d8537930363a
+            SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT: ecd29f4d-70c9-415f-9be8-7cae22156ba1
+            SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A: a7f152c8-ef0c-4d94-879c-b8629ab610bb
+            FM5_REMINDER_APPLICANT_RESPONDENT: 2aeed2b8-c145-4c26-9931-b3cbcb280941
+            RESPONDENT_RESPONDED_CAFCASS: d133b6c6-330d-4cee-89bb-95b4fa63d5e3
+            RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS: 5aec6028-f463-4742-92c9-2fb961636ecf
+            RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS: f8aff628-b681-45dc-b427-599f4c1c5055
+            C7_NOTIFICATION_APPLICANT: 2475c145-4f08-4a04-85c0-bfda7cd4b1e1
+            C1A_NOTIFICATION_APPLICANT: fbfab6ba-0a4b-4a8d-8696-6b7000d1df3f
+            C1A_RESPONSE_NOTIFICATION_APPLICANT: 4d38f282-de3b-40bd-86bd-76fd556aa453
+            SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS: 061c4280-b68e-49bb-b2d0-abbc033c3cb2
+            SOD_CA_PERSONAL_SERVICE_APPLICANT_LIP: a3bdad49-a4d7-4a88-a564-3c29969c25ac
+            SOD_DA_PERSONAL_SERVICE_APPLICANT_LIP: 7cff41f7-615b-44b5-8018-1a25b4cda9b5
+            SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: 2f4d6928-7a21-45f8-bf3f-5d09e3d78565
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -172,22 +233,52 @@ send-grid:
       templates:
         english:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
-          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
-          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
-          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
-          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
-          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-f6f24e4d816c4813a36555e2a2ee0401}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-c56878eae5ba49258041ecbfeebe5906}
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-cb6b606789f741f59d40203eaa90f4ea}
+          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-4648305f896a4110aedaa01e6a6032ed}
+          SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-007239cbbc9a44bd919e8c383b2088e2}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-c1b5991660204a9c87b70a655519f6fe}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
+          SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-accf073f179e4e258959a2a624eb6e01}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
+          FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
+          FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
+          SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
+          C7_NOTIFICATION_APPLICANT: ${C7_NOTIFICATION_APPLICANT:d-2d87259a924045bdb35847f7298e651a}
+          C7_NOTIFICATION_APPLICANT_SOLICITOR: ${C7_NOTIFICATION_APPLICANT:d-4bf7b82473394927bffaf68f54a58774}
+          C1A_NOTIFICATION_APPLICANT: ${C1A_NOTIFICATION_APPLICANT:d-23c1f2a892c54afd852bc5f170195fb4}
+          C1A_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_NOTIFICATION_APPLICANT_SOLICITOR:d-ec36aa7e392841f68f3ba291c2765451}
+          C1A_RESPONSE_NOTIFICATION_APPLICANT: ${C1A_RESPONSE_NOTIFICATION_APPLICANT:d-821083909cdf4655a923e16bff735ae9}
+          C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR:d-b43e61866fbe44a8841fbbcf687073c1}
+          SOD_PERSONAL_SERVICE_APPLICANT_LIP: ${SOD_PERSONAL_SERVICE_APPLICANT_LIP:d-1cc07dce35024527af4ab937ceeaf1f8}
+          SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: ${SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP:d-05c9b7ba4e0d48438c9cfc11801820c4}
+          SOD_APPLICANT_RESPONDENT_SOLICITOR: ${SOD_APPLICANT_RESPONDENT_SOLICITOR:d-d546049909a74966a5f9d75428fbeb56}
+          SOD_ADDITIONAL_RECIPIENTS: ${SOD_ADDITIONAL_RECIPIENTS:d-ada46351d4e44796bb0badcc2a46eed4}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
-          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
-          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
-          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
-          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
-          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-f6f24e4d816c4813a36555e2a2ee0401}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-c56878eae5ba49258041ecbfeebe5906}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-c1b5991660204a9c87b70a655519f6fe}
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-cb6b606789f741f59d40203eaa90f4ea}
+          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-7908952eaa5f4ed18624464eb1f2fad6}
+          SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-007239cbbc9a44bd919e8c383b2088e2}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
+          SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-accf073f179e4e258959a2a624eb6e01}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
+          SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -276,11 +367,11 @@ fees-register:
       service: other
     C4_WHEREABOUTS_OF_A_MISSING_CHILD:
       channel: default
-      event: miscellaneous
+      event: issue
       jurisdiction1: family
       jurisdiction2: family court
-      keyword: WarrantSearchChild
-      service: private law
+      keyword: AppnPrivateOther
+      service: other
     FL407_ARREST_WARRANT:
       channel: default
       event: general application
@@ -303,6 +394,7 @@ idam:
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
+    scope: openid profile roles manage-user
     authorize:
       context-path: /oauth2/authorize
     token:
@@ -399,9 +491,11 @@ document:
     c100:
       c100_final_template: FL-PRL-APP-ENG-C100-Final.docx
       c100_final_template_v2: FL-PRL-APP-ENG-C100-Final-V2.docx
+      c100_final_template_v3: FL-PRL-APP-ENG-C100-Final-V3.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_template_v2: FL-PRL-APP-ENG-C100-DRAFT-V2.docx
+      c100_draft_template_v3: FL-PRL-APP-ENG-C100-DRAFT-V3.docx
       c100_draft_filename: Draft_C100_application.pdf
       c100_c8_template: FL-PRL-APP-ENG-C100-C8-Final.docx
       c100_c8_template_v2: FL-PRL-CON-ENG-C8-Final-V2.docx
@@ -427,9 +521,11 @@ document:
       c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_template_v2: FL-PRL-APP-WEL-C100-Final-V2.docx
+      c100_final_welsh_template_v3: FL-PRL-APP-WEL-C100-Final-V3.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_template_v2: FL-PRL-APP-WEL-C100-Draft-V2.docx
+      c100_draft_welsh_template_v3: FL-PRL-APP-WEL-C100-Draft-V3.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
       c100_c8_welsh_template: PRL-C8-WelshLang.docx
       c100_c8_welsh_template_v2: FL-PRL-CON-WEL-C8-Final-V2.docx
@@ -442,23 +538,23 @@ document:
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
-      fl401_draft_template: FL401-draft.docx
+      fl401_draft_template: FL-PRL-APP-ENG-FL401-draft.docx
       fl401_draft_filename: Draft_DA_application.pdf
       fl401_c8_template: FL-PRL-APP-ENG-FL401-C8-Final.docx
       fl401_c8_filename: C8_Document.pdf
       fl401_final_welsh_template: FL-PRL-APP-WEL-FL401-Final.docx
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
-      fl401_draft_welsh_template: FL401-draft-Welsh.docx
+      fl401_draft_welsh_template: FL-PRL-APP-WEL-FL401-draft.docx
       fl401_draft_welsh_filename: Draft_DA_Welsh_application.pdf
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
-      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_draft_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_draft_filename: Power_of_arrest_draft.pdf
       fl401_fl406_english_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_engllish_filename: Power_of_arrest.pdf
-      fl401_fl406_welsh_draft_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_welsh_draft_template: FL-PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
-      fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_welsh_template: FL-PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
@@ -483,11 +579,11 @@ document:
       prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
       prl_fl404_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
-      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
+      prl_fl404_draft_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
+      prl_fl404_welsh_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
       prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
-      prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
+      prl_fl404_welsh_draft_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
       prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
       prl_c49_draft_template: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
@@ -511,26 +607,28 @@ document:
       prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
       prl_fl404b_final_template: FL-PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_welsh_final_template: PRL-GOR-WEL-FL404B-Common-Final.docx
+      prl_fl404b_welsh_final_template: FL-PRL-GOR-WEL-FL404B-Common-Final.docx
       prl_fl404b_welsh_final_filename: welsh_amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
+      prl_fl404b_draft_template: FL-PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_welsh_draft_template: FL-PRL-GOR-WEL-FL404B-Common-Draft.docx
       prl_fl404b_welsh_draft_filename: welsh_amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
       prl_fl404b_blank_welsh_draft_filename: welsh_blank_order_fl404b_draft.pdf
       prl_fl404b_blank_welsh_final_filename: welsh_blank_order_fl404b_final.pdf
-      prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
+      prl_n117_draft_template: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
-      prl_c7_draft_filename: C7_Draft_Document.pdf
-      prl_c7_final_template_eng: FL-PRL-GOR-ENG-C7R-Final.docx
-      prl_c7_final_filename_eng: C7_Document.pdf
-      prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
-      prl_c7_final_filename_wel: C7_Document_Welsh.pdf
+      prl_lip_c7_draft_template: FL-PRL-GOR-ENG-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename: C7_Draft_Document.pdf
+      prl_lip_c7_draft_template_wel: FL-PRL-GOR-WEL-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
+      prl_lip_c7_final_template_eng: FL-PRL-GOR-ENG-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_eng: C7_Document.pdf
+      prl_lip_c7_final_template_wel: FL-PRL-GOR-WEL-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_wel: Final_C7_response_Welsh.pdf
       prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
       prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
@@ -555,11 +653,11 @@ document:
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl404a_final_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
-      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_draft_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      prl_fl404a_welsh_final_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_welsh_final_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
-      prl_fl404a_welsh_draft_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_welsh_draft_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
       prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
@@ -570,9 +668,9 @@ document:
       prl_fl402_welsh_draft_filename: Welsh_NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_welsh_final_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_welsh_final_filename: Welsh_NoticeOfProceedings(FL402).pdf
-      prl_n117_welsh_draft_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Draft.docx
+      prl_n117_welsh_draft_template: FL-PRL-GOR-WEL-N117-General-Undertaking-Form-Draft.docx
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
-      prl_n117_welsh_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
+      prl_n117_welsh_template: FL-PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
       prl_n117_welsh_filename: Welsh_N117CreateOrder.pdf
       prl_c43_welsh_template: FL-PRL-GOR-WEL-C43-Child-Arrangements-Final.docx
       prl_c43_welsh_filename: Welsh_ChildArrangements_Specific_Prohibited_Steps_C43.pdf
@@ -614,6 +712,12 @@ document:
       prl_sdo_welsh_draft_filename: Welsh_Standard_Directions_Order_draft.pdf
       prl_sdo_welsh_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Final.docx
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
+      doc_cover_sheet_serve_order_template: PRL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
+      doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
+      prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
+      prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
+      doc_send_reply_message_template: PRL-DOCUMENT-ENG-SEND-REPLY-MESSAGE.docx
+      doc_send_reply_message_welsh_template: PRL-WEL-DOCUMENT-SEND-REPLY-MESSAGE.docx
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
@@ -647,6 +751,7 @@ bundle:
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
+  caDefaultCourtEpimmsID: ${CA_DEFAULT_COURT_EPIMMS_ID:}
 
 fis_hearing:
   api:
@@ -659,11 +764,13 @@ postcodelookup:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: DECISION_OUTCOME,PREPARE_FOR_HEARING_CONDUCT_HEARING
+  caseState: DECISION_OUTCOME,PREPARE_FOR_HEARING_CONDUCT_HEARING,ALL_FINAL_ORDERS_ISSUED
   hearingStatus: LISTED, CANCELLED
+  excludedDocumentCategories: draftOrders,judgeNotesFromHearing,previousOrdersSubmittedWithApplication,ordersFromOtherProceedings,safeguardingLetter,16aRiskAssessment,guardianReport,otherDocs,emailsToCourtToRequestHearingsAdjourned,publicFundingCertificates,requestForFASFormsToBeChanged,witnessAvailability,lettersOfComplaint,internalCorrespondence,importantInfoAboutAddressAndContact,privacyNotice,MIAMCertificate
+  excludedDocuments: Draft_C100_application,C8Document,C1A_Document,C100FinalDocument
 ccd:
   elastic-search-api:
-    result-size: 100
+    result-size: 10000
     boost: 2.0
 
 refdata:

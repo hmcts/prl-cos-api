@@ -29,6 +29,7 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
 @Service
@@ -92,7 +93,9 @@ public class CaseSummaryTabService implements TabService {
                 orderAppliedForGenerator,
                 specialArrangementsGenerator,
                 urgencyGenerator,
-                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator : allegationOfHarmGenerator,
+                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                        || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
+                        : allegationOfHarmGenerator,
                 dateOfSubmissionGenerator
         );
     }

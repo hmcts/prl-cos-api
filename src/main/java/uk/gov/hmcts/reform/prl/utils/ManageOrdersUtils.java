@@ -19,12 +19,16 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,18 +40,21 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class ManageOrdersUtils {
@@ -322,16 +329,14 @@ public class ManageOrdersUtils {
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-                || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
                     errorList.add("This order is not available to be created");
                 }
-                if (!Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                        .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                    errorList.add(ORDER_NOT_AVAILABLE_C100);
+                if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
+                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
                 }
-
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                     .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
@@ -341,13 +346,22 @@ public class ManageOrdersUtils {
         return !errorList.isEmpty();
     }
 
+    private static boolean isNotDaOrderSupportedCase(CaseData caseData) {
+        return CollectionUtils.size(caseData.getApplicants()) > 1 || CollectionUtils.size(caseData.getRespondents()) > 1;
+    }
 
-    public static String getOrderNameAlongWithTime(String name) {
+    public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
+                VALID_ORDER_IDS_FOR_FL401)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
+    }
+
+    public static String getOrderNameAlongWithTime(String name, LocalDateTime now) {
         if (!isBlank(name)) {
             return String.format(
                 "%s - %s",
                 name,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                now.format(DateTimeFormatter.ofPattern(
                     PrlAppsConstants.D_MMM_YYYY_HH_MM,
                     Locale.ENGLISH
                                            )
@@ -392,6 +406,24 @@ public class ManageOrdersUtils {
             isOrderEdited = true;//default true for edit returned order
         }
         return isOrderEdited;
+    }
+
+    public static List<Element<ServedParties>> getServedParties(List<Element<PartyDetails>> parties) {
+        return nullSafeCollection(parties).stream()
+            .map(applicant -> element(ServedParties.builder()
+                                          .partyId(String.valueOf(applicant.getId()))
+                                          .partyName(applicant.getValue().getLabelForDynamicList())
+                                          .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+                                          .build()))
+            .toList();
+    }
+
+    public static Element<ServedParties> getServedParty(PartyDetails party) {
+        return element(ServedParties.builder()
+                           .partyId(String.valueOf(party.getPartyId()))
+                           .partyName(party.getLabelForDynamicList())
+                           .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
+                           .build());
     }
 }
 

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -23,7 +25,9 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -194,8 +198,15 @@ public class UploadAdditionalApplicationControllerTest {
 
     @Test
     public void testcreateUploadAdditionalApplicationBundle() throws Exception {
-
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .additionalApplicationFeesToPay("£232.00")
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(
+                UrgencyTimeFrameType.WITHIN_2_DAYS).build())
+            .build();
         CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
 

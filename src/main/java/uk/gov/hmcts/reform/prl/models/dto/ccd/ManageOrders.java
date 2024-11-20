@@ -183,6 +183,9 @@ public class ManageOrders implements MappableObject {
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
+
+    private final YesOrNo daOrderForCaCase;
+
     @Builder.Default
     @JsonProperty("serveOrderDynamicList")
     private DynamicMultiSelectList serveOrderDynamicList;
@@ -192,7 +195,7 @@ public class ManageOrders implements MappableObject {
     private final YesOrNo serveToRespondentOptions;
     @JsonProperty("servingOptionsForNonLegalRep")
     private final OrdersCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
-    private final OrdersServingRespondentsEnum servingRespondentsOptionsCA;
+    private final OrdersServingRespondentsEnum personallyServeRespondentsOptions;
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
@@ -203,8 +206,6 @@ public class ManageOrders implements MappableObject {
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
     @JsonProperty("serveOrgDetailsList")
     private final List<Element<ServeOrgDetails>> serveOrgDetailsList;
-
-    private final OrdersServingRespondentsEnum servingRespondentsOptionsDA;
     private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
 
     @JsonProperty("withdrawnOrRefusedOrder")
@@ -249,13 +250,6 @@ public class ManageOrders implements MappableObject {
     private final C21OrderOptionsEnum c21OrderOptions;
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
-
-    private final YesOrNo isOnlyC47aOrderSelectedToServe;
-    private final YesOrNo otherPeoplePresentInCaseFlag;
-    private final YesOrNo serveToRespondentOptionsOnlyC47a;
-    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
-    private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
-    private final DynamicMultiSelectList otherPartiesOnlyC47a;
 
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
@@ -310,4 +304,16 @@ public class ManageOrders implements MappableObject {
     private final List<Element<EmailInformation>> emailInformationCA;
     @JsonProperty("postalInformationCA")
     private final List<Element<PostalInformation>> postalInformationCA;
+
+    /*
+    * Unused fields
+    * */
+    private final YesOrNo isOnlyC47aOrderSelectedToServe;
+    private final YesOrNo otherPeoplePresentInCaseFlag;
+    private final YesOrNo serveToRespondentOptionsOnlyC47a;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
+    private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
+    private final DynamicMultiSelectList otherPartiesOnlyC47a;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
 }

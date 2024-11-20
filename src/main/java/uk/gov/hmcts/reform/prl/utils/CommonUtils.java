@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.text.DateFormat;
@@ -33,6 +35,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 @Slf4j
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
+
+    public static final String DATE_TIME_OF_SUBMISSION_FORMAT = "dd/MM/yyyy hh:mm:ss";
+
+    public static final String DATE_TIME_OF_SUBMISSION_FORMAT_HH_MM = "dd/MM/yyyy hh:mm";
     public static final String ERROR_STRING = "Error while formatting the date from casedetails to casedata.. ";
 
     private CommonUtils() {
@@ -48,6 +54,19 @@ public class CommonUtils {
             if (localDateTime != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_OF_SUBMISSION_FORMAT);
                 return localDateTime.format(formatter);
+            }
+        } catch (Exception e) {
+            log.error(ERROR_STRING, e);
+        }
+        return " ";
+    }
+
+    public static String formatLocalDateTime(String localDateTime, String pattern) {
+        try {
+            if (StringUtils.isNotEmpty(localDateTime)) {
+                LocalDateTime localDateTime1 = LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH);
+                return localDateTime1.format(dateTimeFormat);
             }
         } catch (Exception e) {
             log.error(ERROR_STRING, e);
@@ -124,9 +143,7 @@ public class CommonUtils {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null
-                && (caseData.getApplicantsFL401().getRepresentativeFirstName() != null
-                || caseData.getApplicantsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
@@ -137,9 +154,7 @@ public class CommonUtils {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null
-                && (caseData.getRespondentsFL401().getRepresentativeFirstName() != null
-                || caseData.getRespondentsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null) {
                 caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
@@ -148,7 +163,7 @@ public class CommonUtils {
         }
     }
 
-    private static UUID generateUuid() {
+    public static UUID generateUuid() {
         return UUID.randomUUID();
     }
 
@@ -226,5 +241,12 @@ public class CommonUtils {
 
     public static boolean isNotEmpty(@Nullable String string) {
         return !isEmpty(string);
+    }
+
+    public static Response getPartyResponse(PartyDetails partyDetails) {
+        if (null != partyDetails.getResponse()) {
+            return partyDetails.getResponse();
+        }
+        return Response.builder().build();
     }
 }

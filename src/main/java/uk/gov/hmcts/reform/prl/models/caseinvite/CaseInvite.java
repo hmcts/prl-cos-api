@@ -22,6 +22,7 @@ import java.util.UUID;
 public class CaseInvite {
 
     private UUID partyId;
+    //caseInviteEmail is not used correctly and it has to get updated whenever the access code is sent
     private String caseInviteEmail;
     private String accessCode;
     private String invitedUserId;

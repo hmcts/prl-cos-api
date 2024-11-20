@@ -108,21 +108,21 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        Boolean bool = respondentContactDetailsChecker.isStarted(respondent);
+        Boolean bool = respondentContactDetailsChecker.isStarted(respondent, true);
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryInformationTest() {
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
-        Boolean bool = respondentContactDetailsChecker.isFinished(respondent);
+        Boolean bool = respondentContactDetailsChecker.isFinished(respondent, true);
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
-        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent);
+        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent, true);
         assertFalse(bool);
     }
 }

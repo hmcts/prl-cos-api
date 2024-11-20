@@ -44,6 +44,8 @@ public class RelationshipsController {
 
     private final ObjectMapper objectMapper;
 
+    private static final String CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
+
     @PostMapping(path = "/pre-populate-applicant-to-child-relation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "pre populates applicant and child relations")
     @ApiResponses(value = {
@@ -70,7 +72,7 @@ public class RelationshipsController {
                     applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
                 })
         );
-        caseDataUpdated.put("buffChildAndApplicantRelations", applicantChildRelationsList);
+        caseDataUpdated.put(CHILD_AND_APPLICANT_RELATIONS, applicantChildRelationsList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -115,7 +117,7 @@ public class RelationshipsController {
                          applicantChildRelations).build());
                  })
         );
-        caseDataUpdated.put("buffChildAndApplicantRelations", applicantChildRelationsList);
+        caseDataUpdated.put(CHILD_AND_APPLICANT_RELATIONS, applicantChildRelationsList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -143,7 +145,7 @@ public class RelationshipsController {
             }
         });
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("buffChildAndApplicantRelations", null);
+        caseDataUpdated.put(CHILD_AND_APPLICANT_RELATIONS, null);
         caseDataUpdated.put("childAndApplicantRelations", updatedChildAndApplicantRelations);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
