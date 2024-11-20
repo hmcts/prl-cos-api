@@ -230,13 +230,15 @@ public class FeeService {
 
     private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice, boolean isOrder) {
 
-        if (YES.equals(otherPartyConsent)) {
+        if (isOrder) {
+            return CHILD_ARRANGEMENTS_ORDER;
+        }else if (YES.equals(otherPartyConsent)) {
             return C2_WITHOUT_NOTICE;
         } else {
             if (NO.equals(notice)) {
                 return C2_WITHOUT_NOTICE;
             } else if (YES.equals(notice)) {
-                return isOrder ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
+                return C2_WITH_NOTICE;
             } else {
                 return null;
             }
