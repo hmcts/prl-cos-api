@@ -55,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
 
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
