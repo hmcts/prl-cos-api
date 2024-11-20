@@ -202,6 +202,7 @@ public class HearingManagementService {
             log.info("hearing listed for the case {} with hearing id {} ", caseData.getId(),
                     caseData.getHearingTaskData().getCurrentHearingId());
         } else {
+            caseDataUpdated.put("hearingListed", "false");
             log.info("hearing not listed for the case {}", caseData.getId());
         }
     }
