@@ -733,6 +733,106 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testServeOrdersToOtherOrganisationWithLegalRep() {
+        PostalInformation address = PostalInformation.builder()
+            .postalAddress(Address.builder()
+                .addressLine1("Made Up Street").build())
+            .postalName("Test")
+            .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+            .id(uuid)
+            .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(englishOrderDoc)
+            .orderDocumentWelsh(welshOrderDoc)
+            .typeOfOrder("Final")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
+            .build();
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication("C100")
+            .applicants(parties)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .manageOrders(ManageOrders.builder()
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisationWithCourtBailiff() {
+        PostalInformation address = PostalInformation.builder()
+            .postalAddress(Address.builder()
+                .addressLine1("Made Up Street").build())
+            .postalName("Test")
+            .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+            .id(uuid)
+            .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(englishOrderDoc)
+            .orderDocumentWelsh(welshOrderDoc)
+            .typeOfOrder("Final")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
+            .build();
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication("C100")
+            .applicants(parties)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .manageOrders(ManageOrders.builder()
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.courtBailiff)
+                .build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
     public void testServeOrdersToOtherOrganisationThrowsException() throws Exception {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
