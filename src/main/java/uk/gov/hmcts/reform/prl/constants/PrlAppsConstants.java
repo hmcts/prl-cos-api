@@ -1089,4 +1089,6 @@ public class PrlAppsConstants {
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
     public static final String RESPONDENT = "respondent";
 
+    public static final String CASE_STATUS = "caseStatus";
+
 }

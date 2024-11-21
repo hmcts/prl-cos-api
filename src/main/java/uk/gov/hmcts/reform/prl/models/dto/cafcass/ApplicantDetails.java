@@ -52,7 +52,6 @@ public class ApplicantDetails {
     private YesOrNo isPlaceOfBirthKnown;
     private List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren;
     private Organisation solicitorOrg;
-    private Address solicitorAddress;
     private String dxNumber;
     private String solicitorReference;
     private String representativeFirstName;
