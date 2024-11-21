@@ -18,12 +18,13 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -193,8 +194,8 @@ public class ManageOrders implements MappableObject {
 
     private final YesOrNo serveToRespondentOptions;
     @JsonProperty("servingOptionsForNonLegalRep")
-    private final SoaCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
-    private final SoaSolicitorServingRespondentsEnum personallyServeRespondentsOptions;
+    private final OrdersCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
+    private final OrdersServingRespondentsEnum personallyServeRespondentsOptions;
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;

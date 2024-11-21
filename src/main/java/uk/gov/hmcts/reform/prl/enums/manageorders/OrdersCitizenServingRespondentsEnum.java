@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.serveorder;
+package uk.gov.hmcts.reform.prl.enums.manageorders;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,17 +9,21 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ServingRespondentsEnum {
-    @JsonProperty("applicantLegalRepresentative")
-    applicantLegalRepresentative("applicantLegalRepresentative", "Applicant's legal representative"),
+public enum OrdersCitizenServingRespondentsEnum {
+
     @JsonProperty("courtBailiff")
     courtBailiff("courtBailiff", "Court bailiff (you must arrange for them to serve the order)"),
+    @JsonProperty("unrepresentedApplicant")
+    unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
     courtAdmin("courtAdmin", "Court admin (you must serve the order)");
 
-
     private final String id;
     private final String displayedValue;
+
+    public String getId() {
+        return id;
+    }
 
     @JsonValue
     public String getDisplayedValue() {
@@ -27,7 +31,7 @@ public enum ServingRespondentsEnum {
     }
 
     @JsonCreator
-    public static ServingRespondentsEnum getValue(String key) {
-        return ServingRespondentsEnum.valueOf(key);
+    public static OrdersCitizenServingRespondentsEnum getValue(String key) {
+        return OrdersCitizenServingRespondentsEnum.valueOf(key);
     }
 }

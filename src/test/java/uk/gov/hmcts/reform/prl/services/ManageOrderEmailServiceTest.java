@@ -21,11 +21,11 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -718,8 +718,108 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .serveToRespondentOptions(YesOrNo.Yes)
-                              .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                              .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.courtAdmin)
                               .build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisationWithLegalRep() {
+        PostalInformation address = PostalInformation.builder()
+            .postalAddress(Address.builder()
+                .addressLine1("Made Up Street").build())
+            .postalName("Test")
+            .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+            .id(uuid)
+            .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(englishOrderDoc)
+            .orderDocumentWelsh(welshOrderDoc)
+            .typeOfOrder("Final")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
+            .build();
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication("C100")
+            .applicants(parties)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .manageOrders(ManageOrders.builder()
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisationWithCourtBailiff() {
+        PostalInformation address = PostalInformation.builder()
+            .postalAddress(Address.builder()
+                .addressLine1("Made Up Street").build())
+            .postalName("Test")
+            .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+            .id(uuid)
+            .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(englishOrderDoc)
+            .orderDocumentWelsh(welshOrderDoc)
+            .typeOfOrder("Final")
+            .serveOrderDetails(ServeOrderDetails.builder()
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
+            .build();
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication("C100")
+            .applicants(parties)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .manageOrders(ManageOrders.builder()
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.courtBailiff)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
@@ -918,7 +1018,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .serveToRespondentOptions(YesOrNo.Yes)
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.applicantLegalRepresentative)
                 .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
@@ -1354,7 +1454,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.post)
@@ -1408,7 +1508,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.post)
@@ -1461,7 +1561,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                 .serveToRespondentOptions(YesOrNo.No)
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(null)
@@ -1512,7 +1612,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                 .serveToRespondentOptions(YesOrNo.No)
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(null)
@@ -1566,7 +1666,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.email)
@@ -1616,7 +1716,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
-                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.email)
@@ -2072,7 +2172,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2166,7 +2266,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListEmailOptionEmpty)
             .serveOrderDynamicList(dynamicMultiSelectListEmailOptionEmpty)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2261,7 +2361,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2355,7 +2455,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListCourtBaliff)
             .serveOrderDynamicList(dynamicMultiSelectListCourtBaliff)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2450,7 +2550,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2544,7 +2644,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListCourtAdmin)
             .serveOrderDynamicList(dynamicMultiSelectListCourtAdmin)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2613,7 +2713,7 @@ public class ManageOrderEmailServiceTest {
             .otherParties(dynamicMultiSelectList)
             .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
             .cafcassCymruEmail("test@cafcasscymru.com")
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum.applicantLegalRepresentative)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -2690,7 +2790,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2785,7 +2885,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListC100Welsh)
             .serveOrderDynamicList(dynamicMultiSelectListC100Welsh)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2881,7 +2981,7 @@ public class ManageOrderEmailServiceTest {
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveToRespondentOptions(YesOrNo.Yes)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2980,7 +3080,7 @@ public class ManageOrderEmailServiceTest {
             .recipientsOptions(dynamicMultiSelectListCaWelsh)
             .serveOrderDynamicList(dynamicMultiSelectListCaWelsh)
             .serveToRespondentOptions(YesOrNo.Yes)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(OrdersServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -3251,7 +3351,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .serveToRespondentOptions(YesOrNo.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3288,7 +3388,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .serveToRespondentOptions(YesOrNo.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3324,7 +3424,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .serveToRespondentOptions(YesOrNo.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3356,7 +3456,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantPostFl401)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3392,7 +3492,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantNoAddressFl401)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3426,7 +3526,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantEmailFl401)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3462,7 +3562,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantFl401Exception)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3499,7 +3599,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantDa)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
-                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
             .build();
@@ -3569,7 +3669,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                               .build())
             .orderCollection(orderList)
             .welshLanguageRequirement(YesOrNo.Yes)
@@ -3629,7 +3729,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                               .build())
             .orderCollection(orderList)
             .welshLanguageRequirement(YesOrNo.Yes)
@@ -3699,7 +3799,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                               .build())
             .orderCollection(orderList)
             .welshLanguageRequirement(YesOrNo.Yes)
@@ -3769,7 +3869,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                               .build())
             .orderCollection(orderList)
             .welshLanguageRequirement(YesOrNo.Yes)
@@ -3829,7 +3929,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .servingOptionsForNonLegalRep(OrdersCitizenServingRespondentsEnum.unrepresentedApplicant)
                               .build())
             .orderCollection(orderList)
             .welshLanguageRequirement(YesOrNo.Yes)

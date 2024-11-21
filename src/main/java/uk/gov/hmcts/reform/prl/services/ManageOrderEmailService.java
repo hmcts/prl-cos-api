@@ -14,11 +14,11 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -442,7 +442,7 @@ public class ManageOrderEmailService {
                                                         Map<String, Object> dynamicDataForEmail,
                                                         String respondentOption,
                                                         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
+        if (!OrdersCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
             .equals(respondentOption)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
@@ -538,7 +538,7 @@ public class ManageOrderEmailService {
                                                          List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
         log.info("*** DA Personal service serving option selected {}", servingOptions);
         //represented applicant options - applicantLegalRepresentative, courtAdmin and courtBailiff
-        if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId().equals(servingOptions)) {
+        if (!OrdersCitizenServingRespondentsEnum.unrepresentedApplicant.getId().equals(servingOptions)) {
             log.info("===== DA Serving represented applicant ====");
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendPersonalServiceNotifications(
@@ -577,14 +577,14 @@ public class ManageOrderEmailService {
                                                   List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
         log.info("CA personal service email notifications: sendPersonalServiceNotifications: {}",respondentOption);
         PartyDetails party = partyElement.getValue();
-        if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.getId().equals(respondentOption)
+        if (OrdersServingRespondentsEnum.applicantLegalRepresentative.getId().equals(respondentOption)
             && isNotEmpty(party.getSolicitorEmail())) {
             log.info("*** applicantLegalRepresentative: Sending email to applicant LR ");
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getSolicitorEmail(),
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
-        } else if ((SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
-            || SoaSolicitorServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
+        } else if ((OrdersServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
+            || OrdersServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
             //PRL-5365, PRL-5556 - send email/post notifications to all C100 applicants
             if (CaseUtils.isCitizenCase(caseData)
                 && C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
