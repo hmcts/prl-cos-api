@@ -37,9 +37,11 @@ public class EditReturnedOrderController {
     private final AuthorisationService authorisationService;
     private final AllTabServiceImpl allTabService;
 
-    private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
+    private static final String CONFIRMATION_HEADER = "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n The judge will review the edits you have made to this order.
+        ### Beth fydd yn digwydd nesaf<br/>What happens next \n
+        Bydd y Barnwr yn adolygu’r newidiadau rydych wedi’u gwneud i’r gorchymyn hwn<br/>
+        The judge will review the edits you have made to this order.
         """;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
