@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
@@ -86,6 +84,9 @@ public class FL401SubmitApplicationService {
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            caseData = caseData.toBuilder()
+                .courtSeal(courtSeal)
+                .build();
         }
 
         String courtEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(COLON_SEPERATOR).length > 1
@@ -93,19 +94,6 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
 
         caseDataUpdated.putAll(courtDetailsMap);
-
-        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.isPresent()) {
-            if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                caseData = caseData.toBuilder()
-                    .respondentBehaviourData(null)
-                    .build();
-            } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                caseData = caseData.toBuilder()
-                    .home(null)
-                    .build();
-            }
-        }
 
         caseData = caseData.setDateSubmittedDate();
 
