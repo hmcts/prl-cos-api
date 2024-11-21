@@ -96,4 +96,6 @@ public class BaseCaseData {
     @JsonUnwrapped
     private HearingTaskData hearingTaskData;
 
+    private String isNonWorkAllocationEnabledCourtSelected;
+
 }
