@@ -108,7 +108,9 @@ public class BaseCaseData {
     private ValidReopenClosedCasesStatusEnum changeStatusOptions;
     private String reopenStateTo;
 
-  
     @JsonUnwrapped
     private ServiceOfDocuments serviceOfDocuments;
+
+    @JsonUnwrapped
+    private String isNonWorkAllocationEnabledCourtSelected;
 }
