@@ -199,7 +199,8 @@ public class UpdateHearingActualsService {
         StateFilter stateFilter = StateFilter.builder().should(List.of(
             Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
             Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build(),
+            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 

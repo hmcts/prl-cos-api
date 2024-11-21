@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 
 @Slf4j
@@ -68,8 +68,10 @@ public class HearingManagementService {
         Map<String, Object> fields = new HashMap<>();
 
         if (hearingRequest.getNextHearingDateRequest() != null
-            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
-            fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
+            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null
+            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails().getHearingDateTime() != null) {
+            fields.put(NEXT_HEARING_DATE, hearingRequest.getNextHearingDateRequest().getNextHearingDetails()
+                .getHearingDateTime().toLocalDate());
         }
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
