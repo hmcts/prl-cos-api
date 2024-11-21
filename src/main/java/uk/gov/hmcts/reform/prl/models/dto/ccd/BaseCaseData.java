@@ -96,4 +96,7 @@ public class BaseCaseData {
 
     @JsonProperty("nextHearingDate")
     private LocalDate nextHearingDate;
+
+    @JsonUnwrapped
+    private String isNonWorkAllocationEnabledCourtSelected;
 }
