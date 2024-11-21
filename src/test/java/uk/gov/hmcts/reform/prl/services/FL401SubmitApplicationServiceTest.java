@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -124,9 +123,6 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     private EventService eventPublisher;
-
-    @Mock
-    private CaseSummaryTabService caseSummaryTab;
 
     public static final String authToken = "Bearer TestAuthToken";
 
