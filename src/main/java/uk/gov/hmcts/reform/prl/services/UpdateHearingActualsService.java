@@ -148,7 +148,7 @@ public class UpdateHearingActualsService {
             hearingsForAllCaseIds.forEach(hearings -> {
                 log.info("hearings {}", hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
-                    .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
+                    .stream()
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
                         .stream()
                         .anyMatch(hearingDaySchedule -> null != hearingDaySchedule.getHearingStartDateTime()
