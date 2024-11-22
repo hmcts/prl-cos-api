@@ -200,19 +200,19 @@ public class UpdateHearingActualsService {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
-                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build()
+                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
+                Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
         );
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder().should(List.of(
             Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
             Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build(),
-            Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
