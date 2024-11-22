@@ -81,7 +81,7 @@ public class UpdateHearingActualsService {
             authTokenGenerator.generate(),
             listOfCaseidsForHearings
         );
-        log.info("Hearing list {}", hearingsList);
+        log.info("List of case ids for hearing {}", listOfCaseidsForHearings);
         return filterCaseIdAndHearingsForTodaysDate(hearingsList);
     }
 
@@ -142,8 +142,11 @@ public class UpdateHearingActualsService {
 
     private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
         Map<String, String> caseIdHearingIdMapping = new HashMap<>();
+        log.info("Hearing for all case ids {}", hearingsForAllCaseIds);
         if (isNotEmpty(hearingsForAllCaseIds)) {
+            log.info("Hearings are not empty");
             hearingsForAllCaseIds.forEach(hearings -> {
+                log.info("hearings {}", hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
                     .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
@@ -153,6 +156,7 @@ public class UpdateHearingActualsService {
                         ))
                     .map(CaseHearing::getHearingID).toList();
                 if (isNotEmpty(filteredHearingIds)) {
+                    log.info("Hearing exists {}", filteredHearingIds);
                     caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
                 }
             });
