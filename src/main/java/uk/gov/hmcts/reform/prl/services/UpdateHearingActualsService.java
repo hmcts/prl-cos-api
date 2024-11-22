@@ -96,7 +96,7 @@ public class UpdateHearingActualsService {
                     log.info("Hearing id is not mapped in orders");
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService
-                        .getStartUpdateForSpecificEvent(caseId, String.valueOf(Event.ENABLE_UPDATE_HEARING_ACTUAL_TASK));
+                        .getStartUpdateForSpecificEvent(caseId, Event.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getId());
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     allTabService.submitAllTabsUpdate(
                         startAllTabsUpdateDataContent.authorisation(),
