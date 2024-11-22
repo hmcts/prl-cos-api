@@ -9,7 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -126,8 +129,6 @@ public class CaseSummaryTabServiceTest {
         fields.put("field6", "value6");
         fields.put("field7", "value7");
         fields.put("otherProceedingEmptyTable", null);
-        fields.put("otherProceedingsForSummaryTab", new ArrayList<>());
-
 
         assertEquals(fields, actual);
     }
@@ -155,7 +156,6 @@ public class CaseSummaryTabServiceTest {
         expected.put("field6", "value6");
         expected.put("field7", "value7");
         expected.put("otherProceedingEmptyTable", null);
-        expected.put("otherProceedingsForSummaryTab", new ArrayList<>());
 
         Map<String, Object> actual = caseSummaryTabService.updateTab(CASE_DATA);
 
@@ -169,7 +169,8 @@ public class CaseSummaryTabServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("field0", "value0");
         map.put("field1", null);
-
+        when(otherProceedingsGenerator.getOtherProceedingsDetails(Mockito.any()))
+            .thenReturn(List.of(Element.<OtherProceedings>builder().value(OtherProceedings.builder().build()).build()));
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(map);
 
@@ -185,7 +186,8 @@ public class CaseSummaryTabServiceTest {
         expected.put("field6", "value6");
         expected.put("field7", "value7");
         expected.put("otherProceedingEmptyTable", null);
-        expected.put("otherProceedingsForSummaryTab", new ArrayList<>());
+        expected.put("otherProceedingsForSummaryTab", List.of(Element.<OtherProceedings>builder()
+                                                                  .value(OtherProceedings.builder().build()).build()));
 
         assertThat(actual).isEqualTo(expected);
 
