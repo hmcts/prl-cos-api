@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
@@ -96,7 +96,7 @@ public class UpdateHearingActualsService {
                     log.info("Hearing id is not mapped in orders");
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService
-                        .getStartUpdateForSpecificEvent(caseId, Event.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getId());
+                        .getStartUpdateForSpecificEvent(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue());
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     allTabService.submitAllTabsUpdate(
                         startAllTabsUpdateDataContent.authorisation(),

@@ -71,8 +71,7 @@ public enum Event {
     AMEND_MIAM_POLICY_UPGRADE("amendMiamPolicyUpgrade", "Amend MIAM"),
     SOLICITOR_CREATE("solicitorCreate", "Solicitor application"),
     SERVICE_OF_DOCUMENTS("serviceOfDocuments", "Service of documents"),
-    CONFIDENTIAL_CHECK_DOCUMENTS("serviceOfDocumentsConfCheck", "Confidential check - Documents"),
-    ENABLE_UPDATE_HEARING_ACTUAL_TASK("enableUpdateHearingActualTask", "Create WA - Update hearing actual task");
+    CONFIDENTIAL_CHECK_DOCUMENTS("serviceOfDocumentsConfCheck", "Confidential check - Documents");
 
     private final String id;
     private final String name;
