@@ -64,7 +64,7 @@ public class UpdateHearingActualsServiceTest {
     private CaseDetails caseDetails;
     private CaseData caseData;
     @InjectMocks
-    private  updateHearingActualsService;
+    private UpdateHearingActualsService updateHearingActualsService;
 
     @Before
     public void setUp() {

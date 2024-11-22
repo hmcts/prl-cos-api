@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
-@ServiceUpdateHearingActualsService
+@Service
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UpdateHearingActualsService {
