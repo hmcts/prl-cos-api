@@ -81,15 +81,19 @@ public class UpdateHearingActualsService {
             authTokenGenerator.generate(),
             listOfCaseidsForHearings
         );
+        log.info("Hearing list {}", hearingsList);
         return filterCaseIdAndHearingsForTodaysDate(hearingsList);
     }
 
     private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
                                                  Map<String, String> caseIds) {
+        log.info("Case Id's {}", caseIds);
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).forEach(caseDetails -> {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                log.info("Hearing id {}", hearingId);
                 if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                    log.info("Hearing id is not mapped in orders");
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
                     Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -107,7 +111,9 @@ public class UpdateHearingActualsService {
     }
 
     private boolean checkIfHearingIdIsMappedInOrders(CaseData caseData, String hearingId) {
+        log.info("Checking hearing id is mapped in orders");
         if (!checkIfHearingIdIsMappedinDraftOrder(caseData, hearingId)) {
+            log.info("Hearing id not mapped in draft order");
             return !checkIfHearingIdIsMappedinSavedServedOrder(caseData, hearingId);
         }
         return true;
@@ -172,9 +178,11 @@ public class UpdateHearingActualsService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+            log.info("Search string {}", searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
+            log.info("Search result {}", searchResult);
 
             response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
         } catch (JsonProcessingException e) {
