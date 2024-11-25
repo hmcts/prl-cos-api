@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 
 @Slf4j
 @RestController
+@RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private  final CaseDataService caseDataService;
@@ -48,7 +50,7 @@ public class CafCassController extends AbstractCallbackController {
 
     }
 
-    @GetMapping(path = "/cases/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",

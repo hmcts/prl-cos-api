@@ -31,14 +31,14 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFC
 
 @Slf4j
 @RestController
-@RequestMapping("/cases/documents/{documentId}/binary")
+@RequestMapping("/cases")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassDocumentManagementController {
     private final CafcassCdamService cafcassCdamService;
     private final AuthorisationService authorisationService;
     private final SystemUserService systemUserService;
 
-    @GetMapping(path = "")
+    @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Downloaded Successfully"),

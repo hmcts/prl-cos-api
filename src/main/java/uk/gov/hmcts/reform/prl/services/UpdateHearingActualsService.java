@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -148,7 +149,7 @@ public class UpdateHearingActualsService {
             hearingsForAllCaseIds.forEach(hearings -> {
                 log.info("hearings {}", hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
-                    .stream()
+                    .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus()))
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
                         .stream()
                         .anyMatch(hearingDaySchedule -> null != hearingDaySchedule.getHearingStartDateTime()
