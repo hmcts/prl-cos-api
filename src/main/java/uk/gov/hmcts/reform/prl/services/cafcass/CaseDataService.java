@@ -665,7 +665,6 @@ public class CaseDataService {
             "data.finalDocument",
             "data.ordersApplyingFor",
             "data.children",
-            "data.miamCertificationDocumentUpload1",
             "data.miamStatus",
             "data.miamExemptionsTable",
             "data.claimingExemptionMiam",
