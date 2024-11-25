@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -109,7 +108,6 @@ public class UpdateHearingActualsServiceTest {
         when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
     }
 
-    @Ignore
     @Test
     public void testUpdateHearingActualTaskCreatedSuccessfully() {
 
@@ -162,11 +160,10 @@ public class UpdateHearingActualsServiceTest {
             caseData,
             null
         );
-        when(allTabService.getStartAllTabsUpdate(Mockito.anyString())).thenReturn(startAllTabsUpdateDataContent1);
+        when(allTabService.getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent1);
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(1)).getStartAllTabsUpdate(
-            Mockito.any()
-        );
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
