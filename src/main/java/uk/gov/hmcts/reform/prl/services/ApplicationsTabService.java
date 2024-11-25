@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +60,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCaf
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ApplicantFamily;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndApplicantRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndOtherPeopleRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401SolicitorDetails;
@@ -81,9 +76,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamPolicyUpgrade;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamPolicyUpgradeExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCaseRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.RelationshipToRespondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
@@ -153,10 +146,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             caseData = upTabForMiam(caseData, applicationTab);
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
-            List<Element<OtherProceedingsDetails>> otherProceedingsDetailsTable = getOtherProceedingsDetailsTable(caseData);
-            if (CollectionUtils.isNotEmpty(otherProceedingsDetailsTable)) {
-                applicationTab.put("otherProceedingsDetailsTable", otherProceedingsDetailsTable);
-            }
+            applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
@@ -164,36 +154,14 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateChildAndCafcassOfficerDetails(caseData));
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
                 || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-                List<Element<ChildDetailsRevised>> childDetailsRevisedTable = applicationsTabServiceHelper.getChildRevisedDetails(caseData);
-                if (CollectionUtils.isNotEmpty(childDetailsRevisedTable)) {
-                    applicationTab.put("childDetailsRevisedTable", childDetailsRevisedTable);
-                }
+                applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
                 applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));
-                List<Element<OtherPersonInTheCaseRevised>> otherPeopleInTheCaseRevisedTable = applicationsTabServiceHelper
-                    .getOtherPeopleInTheCaseRevisedTable(caseData);
-                if (CollectionUtils.isNotEmpty(otherPeopleInTheCaseRevisedTable)) {
-                    applicationTab.put("otherPeopleInTheCaseRevisedTable", otherPeopleInTheCaseRevisedTable);
-                }
-                List<Element<OtherChildrenNotInTheCase>> otherChildNotInTheCaseTable = applicationsTabServiceHelper
-                    .getOtherChildNotInTheCaseTable(caseData);
-                if (CollectionUtils.isNotEmpty(otherChildNotInTheCaseTable)) {
-                    applicationTab.put("otherChildNotInTheCaseTable", otherChildNotInTheCaseTable);
-                }
-                List<Element<ChildAndApplicantRelation>> childAndApplicantsRelationTable = applicationsTabServiceHelper
-                    .getChildAndApplicantsRelationTable(caseData);
-                if (CollectionUtils.isNotEmpty(childAndApplicantsRelationTable)) {
-                    applicationTab.put("childAndApplicantsRelationTable", childAndApplicantsRelationTable);
-                }
-                List<Element<ChildAndRespondentRelation>> childAndRespondentRelationsTable = applicationsTabServiceHelper
-                    .getChildAndRespondentRelationsTable(caseData);
-                if (CollectionUtils.isNotEmpty(childAndRespondentRelationsTable)) {
-                    applicationTab.put("childAndRespondentRelationsTable", childAndRespondentRelationsTable);
-                }
-                List<Element<ChildAndOtherPeopleRelation>> childAndOtherPeopleRelationsTable = applicationsTabServiceHelper
-                    .getChildAndOtherPeopleRelationsTable(caseData);
-                if (CollectionUtils.isNotEmpty(childAndOtherPeopleRelationsTable)) {
-                    applicationTab.put("childAndOtherPeopleRelationsTable", childAndOtherPeopleRelationsTable);
-                }
+                applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
+                applicationTab.put("otherChildNotInTheCaseTable", applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(caseData));
+                applicationTab.put("childAndApplicantsRelationTable", applicationsTabServiceHelper.getChildAndApplicantsRelationTable(caseData));
+                applicationTab.put("childAndRespondentRelationsTable", applicationsTabServiceHelper.getChildAndRespondentRelationsTable(caseData));
+                applicationTab.put("childAndOtherPeopleRelationsTable",
+                                   applicationsTabServiceHelper.getChildAndOtherPeopleRelationsTable(caseData));
                 applicationTab.put("allegationsOfHarmRevisedOverviewTable", getAllegationsOfHarmRevisedOverviewTable(caseData));
                 applicationTab.put("allegationsOfHarmRevisedDATable", getAllegationsOfHarmRevisedDaTable(caseData));
                 applicationTab.put("allegationsOfHarmRevisedCATable", getAllegationsOfHarmRevisedCaTable(caseData));
