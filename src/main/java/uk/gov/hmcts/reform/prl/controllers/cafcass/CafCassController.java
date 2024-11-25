@@ -35,7 +35,6 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 
 @Slf4j
 @RestController
-@RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private  final CaseDataService caseDataService;
@@ -50,7 +49,7 @@ public class CafCassController extends AbstractCallbackController {
 
     }
 
-    @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/cases/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
