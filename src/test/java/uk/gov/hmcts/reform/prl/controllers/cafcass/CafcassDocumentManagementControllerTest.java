@@ -156,7 +156,7 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
         when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
-        when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
+        when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
@@ -174,7 +174,7 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
         when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
 
-        when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
+        when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,

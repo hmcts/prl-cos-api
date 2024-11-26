@@ -246,8 +246,6 @@ public class HearingManagementServiceTest {
         );
         verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
                                                               Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
-
-        assertTrue(true);
     }
 
     @Test
@@ -528,7 +526,7 @@ public class HearingManagementServiceTest {
                                .build())
             .nextHearingDateRequest(nextHearingDateRequest)
             .build();
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),

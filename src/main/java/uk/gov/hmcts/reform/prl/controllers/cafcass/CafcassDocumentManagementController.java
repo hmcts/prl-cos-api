@@ -54,7 +54,7 @@ public class CafcassDocumentManagementController {
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing  request after authorization");
-                return (ResponseEntity<T>) cafcassCdamService.getDocument(systemUserService.getSysUserToken(), serviceAuthorisation, documentId);
+                return (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
