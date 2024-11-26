@@ -150,13 +150,19 @@ public class UpdateHearingActualsService {
             hearingsForAllCaseIds.forEach(hearings -> {
                 log.info("hearings {}", hearings.getCaseHearings());
                 List<Long> filteredHearingIds = nullSafeCollection(hearings.getCaseHearings())
-                    .stream().filter(caseHearing -> LISTED.equals(caseHearing.getHmcStatus())
-                        || AWAITING_HEARING_DETAILS.equals(caseHearing.getHmcStatus()))
+                    .stream().filter(caseHearing -> {
+                        log.info("Hearing status for {} is {}", caseHearing.getHearingID(), caseHearing.getHmcStatus());
+                        log.info("Hearing day schedule is {}", caseHearing.getHearingDaySchedule());
+                        return LISTED.equals(caseHearing.getHmcStatus())
+                            || AWAITING_HEARING_DETAILS.equals(caseHearing.getHmcStatus())
+                    })
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
                         .stream()
-                        .anyMatch(hearingDaySchedule -> null != hearingDaySchedule.getHearingStartDateTime()
-                                && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
-                        ))
+                        .anyMatch(hearingDaySchedule -> {
+                            log.info("Hearing day scgedule date {}", hearingDaySchedule.getHearingStartDateTime());
+                            return null != hearingDaySchedule.getHearingStartDateTime()
+                                          && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
+                        }))
                     .map(CaseHearing::getHearingID).toList();
                 if (isNotEmpty(filteredHearingIds)) {
                     log.info("Hearing exists {}", filteredHearingIds);
