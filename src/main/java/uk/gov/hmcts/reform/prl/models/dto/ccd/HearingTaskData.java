@@ -5,9 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.models.Element;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -17,5 +14,4 @@ public class HearingTaskData {
 
     private String currentHearingId;
     private String currentHearingStatus;
-    private List<Element<String>> existedTaskHearingIds;
 }

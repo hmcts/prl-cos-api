@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
@@ -22,7 +21,6 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,18 +185,8 @@ public class HearingManagementService {
 
     public void validateHearingState(Map<String, Object> caseDataUpdated, CaseData caseData) {
         if (caseData.getHearingTaskData() != null
-                && "LISTED".equals(caseData.getHearingTaskData().getCurrentHearingStatus())
-                && (caseData.getHearingTaskData().getExistedTaskHearingIds() == null || caseData.getHearingTaskData()
-                .getExistedTaskHearingIds().stream().noneMatch(eachE -> eachE.getValue()
-                        .equals(caseData.getHearingTaskData().getCurrentHearingId())))) {
-            List<Element<String>> ids = caseData.getHearingTaskData().getExistedTaskHearingIds();
-            Element<String> element = Element.<String>builder().value(caseData.getHearingTaskData().getCurrentHearingId()).build();
-            if (ids == null) {
-                ids = new ArrayList<>();
-            }
-            ids.add(element);
+                && "LISTED".equals(caseData.getHearingTaskData().getCurrentHearingStatus())) {
             caseDataUpdated.put("hearingListed", "true");
-            caseDataUpdated.put("existedTaskHearingIds", ids);
             log.info("hearing listed for the case {} with hearing id {} ", caseData.getId(),
                     caseData.getHearingTaskData().getCurrentHearingId());
         } else {

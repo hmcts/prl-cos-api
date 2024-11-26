@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -564,11 +563,8 @@ public class HearingManagementServiceTest {
 
     @Test
     public void testValidateHearingState() {
-        List<Element<String>> ids = new ArrayList<>();
-        Element<String> element = Element.<String>builder().value("id1").build();
-        ids.add(element);
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
-                .currentHearingStatus("LISTED").existedTaskHearingIds(ids).build()).build();
+                .currentHearingStatus("LISTED").build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
         Assert.assertTrue(caseDataUpdated.containsKey("hearingListed"));
