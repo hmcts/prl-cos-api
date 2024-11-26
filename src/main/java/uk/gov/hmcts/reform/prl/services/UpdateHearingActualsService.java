@@ -161,7 +161,7 @@ public class UpdateHearingActualsService {
                         .anyMatch(hearingDaySchedule -> {
                             log.info("Hearing day scgedule date {}", hearingDaySchedule.getHearingStartDateTime());
                             return null != hearingDaySchedule.getHearingStartDateTime()
-                                          && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now())
+                                          && hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(LocalDate.now());
                         }))
                     .map(CaseHearing::getHearingID).toList();
                 if (isNotEmpty(filteredHearingIds)) {
