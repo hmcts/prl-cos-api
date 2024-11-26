@@ -63,14 +63,6 @@ withPipeline(type, product, component) {
   enableSlackNotifications(channel)
   disableLegacyDeployment()
 
-  afterAlways('integrationTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
-  }
-
-  afterAlways('integrationTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
-  }
-
   afterSuccess('sonarscan') {
 
     publishHTML target: [
@@ -78,6 +70,15 @@ withPipeline(type, product, component) {
       alwaysLinkToLastBuild: true,
       keepAll              : true,
       reportDir            : "build/reports/tests/test",
+      reportFiles          : "index.html",
+      reportName           : "Unit Tests Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/integration",
       reportFiles          : "index.html",
       reportName           : "Integration Test Report"
     ]
@@ -90,6 +91,14 @@ withPipeline(type, product, component) {
   afterAlways('test') {
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  }
+
+  afterAlways('integrationTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+  }
+
+  afterAlways('integrationTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
   }
 
   before('functionalTest:aat') {
