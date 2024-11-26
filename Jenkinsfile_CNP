@@ -110,6 +110,15 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
+  before('integrationTest:preview') {
+    env.test_environment = 'preview'
+  }
+
+  afterAlways('integrationTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  }
+
   onMaster() {
     env.ENV = 'aat'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
