@@ -194,7 +194,15 @@ public class UpdateHearingActualsService {
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
                 .size("100")
+            .dataToReturn(fetchFieldsRequiredForHearingActualTask())
                 .build();
     }
 
+    private List<String> fetchFieldsRequiredForHearingActualTask() {
+        return List.of(
+            "data.nextHearingDate",
+            "data.draftOrderCollection",
+            "data.orderCollection"
+        );
+    }
 }
