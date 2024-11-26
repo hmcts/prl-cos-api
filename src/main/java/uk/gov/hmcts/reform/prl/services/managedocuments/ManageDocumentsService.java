@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -293,10 +294,27 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            notificationService.sendNotifications(caseData,
-                                                  quarantineLegalDoc,
-                                                  userRole);
+            //notificationService.sendNotifications(caseData,
+            //                                      quarantineLegalDoc,
+            //                                      userRole);
+            sendNotificationsAsync(caseData,
+                                   quarantineLegalDoc,
+                                   userRole);
         }
+    }
+
+    @Async
+    private void sendNotificationsAsync(CaseData caseData,
+                                        QuarantineLegalDoc quarantineLegalDoc,
+                                        String userRole) {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        notificationService.sendNotifications(caseData,
+                                              quarantineLegalDoc,
+                                              userRole);
     }
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
