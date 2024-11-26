@@ -23,3 +23,4 @@ src/main/resources/application.yaml
 .DS_Store
 /.aat-env
 /bin/ccd-config-PRL-local.xlsx
+/target/site/
