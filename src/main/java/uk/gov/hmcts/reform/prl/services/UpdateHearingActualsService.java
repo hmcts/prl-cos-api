@@ -154,7 +154,7 @@ public class UpdateHearingActualsService {
                         log.info("Hearing status for {} is {}", caseHearing.getHearingID(), caseHearing.getHmcStatus());
                         log.info("Hearing day schedule is {}", caseHearing.getHearingDaySchedule());
                         return LISTED.equals(caseHearing.getHmcStatus())
-                            || AWAITING_HEARING_DETAILS.equals(caseHearing.getHmcStatus())
+                            || AWAITING_HEARING_DETAILS.equals(caseHearing.getHmcStatus());
                     })
                     .filter(caseHearing -> nullSafeCollection(caseHearing.getHearingDaySchedule())
                         .stream()
