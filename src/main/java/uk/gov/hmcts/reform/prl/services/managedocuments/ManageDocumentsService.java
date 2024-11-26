@@ -200,6 +200,7 @@ public class ManageDocumentsService {
             updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
+        log.info("Time before about to submit ends: {}", LocalDateTime.now());
         return caseDataUpdated;
     }
 
@@ -297,9 +298,11 @@ public class ManageDocumentsService {
             //notificationService.sendNotifications(caseData,
             //                                      quarantineLegalDoc,
             //                                      userRole);
+            log.info("Time before async call: {}", LocalDateTime.now());
             sendNotificationsAsync(caseData,
                                    quarantineLegalDoc,
                                    userRole);
+            log.info("Time after async call: {}", LocalDateTime.now());
         }
     }
 
@@ -307,14 +310,17 @@ public class ManageDocumentsService {
     private void sendNotificationsAsync(CaseData caseData,
                                         QuarantineLegalDoc quarantineLegalDoc,
                                         String userRole) {
+        log.info("Time before waiting: {}", LocalDateTime.now());
         try {
-            Thread.sleep(3000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        log.info("Time after waiting: {}", LocalDateTime.now());
         notificationService.sendNotifications(caseData,
                                               quarantineLegalDoc,
                                               userRole);
+        log.info("Time after notification sent: {}", LocalDateTime.now());
     }
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
