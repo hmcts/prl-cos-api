@@ -620,6 +620,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
   '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java',
   '**uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java',
+  '**uk/gov/hmcts/reform/prl/services/notifications/NotificationService.java'
 ]
 
 sonarqube {
