@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +107,24 @@ public class NotificationService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
+    @Async
+    public void sendNotificationsAsync(CaseData caseData,
+                                       QuarantineLegalDoc quarantineLegalDoc,
+                                       String userRole) {
+        log.info("Time before waiting: {}", LocalDateTime.now());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("Time after waiting: {}", LocalDateTime.now());
+        sendNotifications(
+            caseData,
+            quarantineLegalDoc,
+            userRole
+        );
+        log.info("Time after notification sent: {}", LocalDateTime.now());
+    }
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,

@@ -11,7 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -299,29 +298,13 @@ public class ManageDocumentsService {
             //                                      quarantineLegalDoc,
             //                                      userRole);
             log.info("Time before async call: {}", LocalDateTime.now());
-            sendNotificationsAsync(caseData,
+            notificationService.sendNotificationsAsync(caseData,
                                    quarantineLegalDoc,
                                    userRole);
             log.info("Time after async call: {}", LocalDateTime.now());
         }
     }
 
-    @Async
-    private void sendNotificationsAsync(CaseData caseData,
-                                        QuarantineLegalDoc quarantineLegalDoc,
-                                        String userRole) {
-        log.info("Time before waiting: {}", LocalDateTime.now());
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("Time after waiting: {}", LocalDateTime.now());
-        notificationService.sendNotifications(caseData,
-                                              quarantineLegalDoc,
-                                              userRole);
-        log.info("Time after notification sent: {}", LocalDateTime.now());
-    }
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
