@@ -116,18 +116,15 @@ public class NotificationService {
     public void sendNotificationsAsync(CaseData caseData,
                                        QuarantineLegalDoc quarantineLegalDoc,
                                        String userRole) {
-        log.info("Time before waiting: {}", LocalDateTime.now());
         scheduler.schedule(() -> sendNotifications(caseData,
                                                    quarantineLegalDoc,
                                                    userRole), 5, TimeUnit.SECONDS);
-        log.info("Time after waiting: {}", LocalDateTime.now());
     }
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
                                   String userRole) {
         log.info("*** Send notifications, uploader role {}", userRole);
-        log.info("Time when notification sent: {}", LocalDateTime.now());
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);
             String cafcassCymruEmail = getCafcassCymruEmail(caseData);
@@ -188,7 +185,6 @@ public class NotificationService {
                                           cafcassCymruEmail);
             }
         }
-        log.info("Time after notification sent: {}", LocalDateTime.now());
     }
 
     private void sendNotificationToCafCass(CaseData caseData,
