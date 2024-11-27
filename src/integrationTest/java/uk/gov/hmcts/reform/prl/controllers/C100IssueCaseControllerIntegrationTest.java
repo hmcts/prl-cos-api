@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -35,12 +36,15 @@ public class C100IssueCaseControllerIntegrationTest {
     @Autowired
     IdamTokenGenerator idamTokenGenerator;
 
+    @Autowired
+    SystemUserService systemUserService;
+
     @Test
     public void testIssueAndSendToLocalCourtEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader(AUTHORIZATION, systemUserService.getSysUserToken());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -53,7 +57,7 @@ public class C100IssueCaseControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpointNotify);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader(AUTHORIZATION, systemUserService.getSysUserToken());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
