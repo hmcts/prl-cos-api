@@ -235,7 +235,7 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsAsync() throws IOException, InterruptedException {
+    public void testSendNotificationsAsync() {
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .categoryId("respondentApplication")
             .document(Document.builder().build())
