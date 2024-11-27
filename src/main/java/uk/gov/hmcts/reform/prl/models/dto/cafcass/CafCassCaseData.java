@@ -440,7 +440,6 @@ public class CafCassCaseData {
             miamCertificationDocumentUpload.setDocumentId(getDocumentId(url));
             miamCertificationDocumentUpload.setDocumentUrl(null);
         }
-        this.miamCertificationDocumentUpload = miamCertificationDocumentUpload;
         this.miamCertificationDocumentUpload1 = miamCertificationDocumentUpload;
     }
 
