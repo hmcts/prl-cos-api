@@ -57,7 +57,7 @@ public class HearingsManagementController extends AbstractCallbackController {
     }
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
+    @Operation(description = "fis service call to update the state of case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
