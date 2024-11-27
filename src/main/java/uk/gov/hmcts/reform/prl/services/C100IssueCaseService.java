@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
-import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
 
 @Service
 @Slf4j

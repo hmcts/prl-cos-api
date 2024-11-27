@@ -629,8 +629,8 @@ public class C100IssueCaseServiceTest {
     @Test
     public void checkStateIsSubmittedWhenUserSelectsWorkAllocatedCourt() throws Exception {
         DynamicList chosenCourtList = DynamicList.builder().value(DynamicListElement.builder().code("234946:")
-                                                                     .label("Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP")
-                                                                     .build()).build();
+                                                                      .label("Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP")
+                                                                      .build()).build();
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
