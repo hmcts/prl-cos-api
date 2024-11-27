@@ -1000,8 +1000,6 @@ public class ServiceOfApplicationService {
             .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        log.info("** appplicant fl401 {}", applicantFl401);
-        log.info("** respondent fl401 {}", respondentFl401);
         sendNotificationsDaNonPersonalApplicant(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, applicantFl401);
         sendNotificationsDaNonPersonalRespondent(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, respondentFl401);
     }
@@ -1023,13 +1021,10 @@ public class ServiceOfApplicationService {
                 servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
             } else {
                 log.info("respondent is unrepresented");
-                log.info(" Case Invites {}", CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
-                                                                     caseData.getCaseInvites()));
                 coverLetter = getRe1OrRe4BasedOnWithOrWithoutNotice(caseData, authorization, respondentFl401.get(0),
                                                                     CaseUtils.getCaseInvite(respondentFl401.get(0).getId(),
                                                                                             caseData.getCaseInvites()));
                 sendEmail = false;
-                log.info(" ** cover letter {}", coverLetter);
                 docs.addAll(coverLetter);
             }
             List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
@@ -2975,7 +2970,6 @@ public class ServiceOfApplicationService {
 
     public List<Document> generateAccessCodeLetter(String authorisation, CaseData caseData, Element<PartyDetails> party,
                                                    CaseInvite caseInvite, String template) {
-        log.info("CAse Invite {}", caseInvite);
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         return fetchCoverLetter(authorisation, template, dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
@@ -2984,7 +2978,6 @@ public class ServiceOfApplicationService {
     public List<Document> fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap, boolean english,
                                      boolean welsh) {
         List<Document> coverLetters = new ArrayList<>();
-        log.info("Data map {}", dataMap);
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             if (english) {
@@ -2997,7 +2990,6 @@ public class ServiceOfApplicationService {
                     coverLetters.add(getCoverLetterDocument(authorisation,  Templates.getWelshTemplate(template), dataMap));
                 }
             }
-            log.info("cover letters {}", coverLetters);
             return coverLetters;
         } catch (Exception e) {
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
