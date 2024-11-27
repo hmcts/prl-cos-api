@@ -423,6 +423,18 @@ aca:
 
 test-url: ${TEST_URL:http://localhost:4044}
 
+
+security:
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
+
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
