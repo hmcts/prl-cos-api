@@ -16,10 +16,10 @@ import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
-import uk.gov.hmcts.reform.prl.util.SystemAuthUserService;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, AddCaseNoteControllerIntegrationTest.class})
@@ -40,17 +40,14 @@ public class AddCaseNoteControllerIntegrationTest {
     @Autowired
     ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @Autowired
-    SystemAuthUserService systemAuthUserService;
-
 
     @Test
     public void testSubmitCaseEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + submitCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, systemAuthUserService.getSysUserToken());
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -62,7 +59,8 @@ public class AddCaseNoteControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + populateCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

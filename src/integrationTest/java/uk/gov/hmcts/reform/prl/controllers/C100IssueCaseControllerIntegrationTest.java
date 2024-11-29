@@ -14,11 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, C100IssueCaseControllerIntegrationTest.class})
@@ -33,19 +34,22 @@ public class C100IssueCaseControllerIntegrationTest {
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
+    public static final String VALID_REQUEST_BODY_ISSUE_AND_SEND_TO_LOCAL_COURT_NOTIFICATION
+        = "requests/issue-and-send-email-request.json";
+
     @Autowired
     IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
-    SystemUserService systemUserService;
+    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @Test
     public void testIssueAndSendToLocalCourtEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, systemUserService.getSysUserToken());
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -54,11 +58,11 @@ public class C100IssueCaseControllerIntegrationTest {
 
     @Test
     public void testIssueAndSendToLocalCourtEndpointNotification() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_ISSUE_AND_SEND_TO_LOCAL_COURT_NOTIFICATION);
         HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpointNotify);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, systemUserService.getSysUserToken());
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

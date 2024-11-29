@@ -1090,4 +1090,6 @@ public class PrlAppsConstants {
 
     public static final String CASE_STATUS = "caseStatus";
 
+    public static final String BEARER = "Bearer ";
+
 }

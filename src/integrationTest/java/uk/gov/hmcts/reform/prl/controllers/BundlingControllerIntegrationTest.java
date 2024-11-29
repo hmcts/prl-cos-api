@@ -7,6 +7,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -14,14 +15,24 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {BundlingControllerIntegrationTest.class, Application.class})
 public class BundlingControllerIntegrationTest extends IntegrationTest {
-    @Value("${bundle.api.url}")
+    @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
+
+    @Autowired
+    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    IdamTokenGenerator idamTokenGenerator;
 
     private final String bundleControllerEndpoint = "/bundle/createBundle";
 
@@ -32,8 +43,8 @@ public class BundlingControllerIntegrationTest extends IntegrationTest {
 
         HttpPost httpPost = new HttpPost(serviceUrl + bundleControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
