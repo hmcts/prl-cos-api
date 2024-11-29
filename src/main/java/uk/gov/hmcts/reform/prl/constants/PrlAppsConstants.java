@@ -1089,6 +1089,14 @@ public class PrlAppsConstants {
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
 
+    public static final String FINAL_CASE_CLOSED_DATE = "finalCaseClosedDate";
+    public static final String CASE_CLOSED = "caseClosed";
+    public static final String CHILD_DETAILS_REVISED_TABLE = "childDetailsRevisedTable";
+    public static final String DOES_APPLICANT_HAVE_CHILDREN = "doesApplicantHaveChildren";
+    public static final String APPLICANT_FAMILY_TABLE = "applicantFamilyTable";
+    public static final String FL401_CHILD_DETAILS_TABLE = "fl401ChildDetailsTable";
+    public static final String APPLICANT_CHILD = "applicantChild";
+
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
     public static final String RESPONDENT = "respondent";
 
