@@ -40,7 +40,7 @@ public class ServiceAuthenticationGenerator {
 
         assertThat(response.getStatusCode()).isEqualTo(200);
 
-        return response.getBody().asString();
+        return BEARER + response.getBody().asString();
     }
 
     public String generateTokenForCcd() {
