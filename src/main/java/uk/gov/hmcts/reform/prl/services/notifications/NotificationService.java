@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -38,11 +39,15 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
@@ -106,10 +111,24 @@ public class NotificationService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @Async
+    public void sendNotificationsAsync(CaseData caseData,
+                                       QuarantineLegalDoc quarantineLegalDoc,
+                                       String userRole) {
+        log.info("Async method thread id: {}", Thread.currentThread().getId());
+        log.info("Time before scheduling send notification: {}", LocalDateTime.now());
+        scheduler.schedule(() -> sendNotifications(caseData,
+                                                   quarantineLegalDoc,
+                                                   userRole), 500, TimeUnit.MILLISECONDS);
+    }
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
                                   String userRole) {
+        log.info("Notification thread thread id: {}", Thread.currentThread().getId());
+        log.info("Time when notification sent: {}", LocalDateTime.now());
         log.info("*** Send notifications, uploader role {}", userRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);
