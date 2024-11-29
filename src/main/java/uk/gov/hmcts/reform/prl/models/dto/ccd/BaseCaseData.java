@@ -95,4 +95,7 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private String isNonWorkAllocationEnabledCourtSelected;
+
+    @JsonProperty("respondentSolicitorName")
+    private String respondentSolicitorName;
 }
