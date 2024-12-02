@@ -139,9 +139,11 @@ public class FeeService {
             String awpApplicationType = feeRequest.getApplicationType();
             String caseType = feeRequest.getCaseType();
             String partyType = feeRequest.getPartyType();
+            log.info("D_caseType - " + caseType);
+            log.info("D_partyType - " + partyType);
 
-            boolean isDAapplicant = PrlAppsConstants.FL401_CASE_TYPE.equals(caseType) && PrlAppsConstants.SERVED_PARTY_APPLICANT.equals(partyType);
-
+            boolean isDAapplicant = PrlAppsConstants.FL401_CASE_TYPE.equals(caseType) && PrlAppsConstants.SERVED_PARTY_APPLICANT.equals(partyType)? true : false;
+            log.info("isDAapplicant - " + isDAapplicant);
             if (AwpApplicationTypeEnum.C2.toString().equals(awpApplicationType)) {
 
                 // feeCode logic at the time of citizen guidance page
