@@ -56,9 +56,13 @@ def secrets = [
    ]
 ]
 
+
+
 withPipeline(type, product, component) {
   pipelineConf = config;
   loadVaultSecrets(secrets)
+  echo 'secrets are getting loaded'
+  echo secrets
   enableAksStagingDeployment()
   enableSlackNotifications(channel)
   disableLegacyDeployment()
