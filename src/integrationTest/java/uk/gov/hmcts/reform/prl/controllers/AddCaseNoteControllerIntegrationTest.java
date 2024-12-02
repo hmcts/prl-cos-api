@@ -63,7 +63,7 @@ public class AddCaseNoteControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + populateCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
-        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generate());
+        httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

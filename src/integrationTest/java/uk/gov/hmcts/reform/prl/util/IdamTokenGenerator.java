@@ -32,6 +32,9 @@ public class IdamTokenGenerator {
     @Value("${idam.api.url}")
     private String idamUserBaseUrl;
 
+    @Value("${idam.client.id}")
+    private String idamClientId;
+
     private IdamClient idamClient;
 
     private final OAuth2Configuration auth;
@@ -57,7 +60,7 @@ public class IdamTokenGenerator {
     public String getSysUserToken() {
         JsonPath jp = RestAssured.given().relaxedHTTPSValidation().post(idamUserBaseUrl + "/o/token?"
                                                                             + "client_secret=" + auth.getClientSecret()
-                                                                            + "&client_id==prl-cos-api"
+                                                                            + "&client_id=" + idamClientId
                                                                             + "&redirect_uri=" + auth.getRedirectUri()
                                                                             + "&username=" + userConfig.getUserName()
                                                                             + "&password=" + userConfig.getPassword()
