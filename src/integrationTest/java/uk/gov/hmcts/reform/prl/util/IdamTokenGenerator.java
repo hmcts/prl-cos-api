@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.util;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 @TestPropertySource("classpath:application.yaml")
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@Slf4j
 public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.username}")
@@ -67,6 +69,7 @@ public class IdamTokenGenerator {
                                                                             + "&grant_type=password&scope=openid profile roles manage-user")
             .body().jsonPath();
         String token = jp.get("access_token");
+        log.info("System user token: {}", token);
         return "Bearer " + token;
     }
 }
