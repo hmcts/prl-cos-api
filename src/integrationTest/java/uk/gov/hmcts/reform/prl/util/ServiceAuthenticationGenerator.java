@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.util;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.TestPropertySource;
@@ -15,6 +16,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BEARER;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class ServiceAuthenticationGenerator {
 
     @Value("${idam.s2s-auth.microservice}")
@@ -28,6 +30,7 @@ public class ServiceAuthenticationGenerator {
     }
 
     public String generate(final String s2sName) {
+        log.info("s2sUrl ======>  {}", s2sUrl);
         final Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -38,12 +41,16 @@ public class ServiceAuthenticationGenerator {
             .post("/testing-support/lease")
             .andReturn();
 
+        log.info("Response status code: =====> {}", response.getStatusCode());
         assertThat(response.getStatusCode()).isEqualTo(200);
+
+        log.info("Response body: =====> {}", response.getBody().asString());
 
         return BEARER + response.getBody().asString();
     }
 
     public String generateTokenForCcd() {
+        log.info("s2sUrl ======>  {}", s2sUrl);
         final Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -53,8 +60,10 @@ public class ServiceAuthenticationGenerator {
             .when()
             .post("/testing-support/lease")
             .andReturn();
+        log.info("Response status code: =====> {}", response.getStatusCode());
 
         assertThat(response.getStatusCode()).isEqualTo(200);
+        log.info("Response body: =====> {}", response.getBody().asString());
 
         return BEARER + response.getBody().asString();
     }
