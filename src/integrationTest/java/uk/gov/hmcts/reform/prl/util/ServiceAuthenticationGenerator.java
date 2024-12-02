@@ -30,7 +30,8 @@ public class ServiceAuthenticationGenerator {
     }
 
     public String generate(final String s2sName) {
-        log.info("s2sUrl ======>  {}", s2sUrl);
+        log.info("s2sUrl generate ======>  {}", s2sUrl);
+        log.info("s2sName ======>  {}", s2sName);
         final Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -50,7 +51,7 @@ public class ServiceAuthenticationGenerator {
     }
 
     public String generateTokenForCcd() {
-        log.info("s2sUrl ======>  {}", s2sUrl);
+        log.info("s2sUrl generateTokenForCcd ======>  {}", s2sUrl);
         final Response response = RestAssured
             .given()
             .relaxedHTTPSValidation()
