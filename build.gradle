@@ -538,8 +538,6 @@ task functional(type: Test, description: 'Runs functional tests.', group: 'Verif
   setClasspath(sourceSets.functionalTest.runtimeClasspath)
 }
 
-functional.dependsOn('integration')
-
 task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functional tests.', group: 'Verification') {
   doFirst(){
     printf("::::::::::  Running  nightlyFunctional ::::::::::")
@@ -592,7 +590,7 @@ jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
+project.tasks['sonarqube'].dependsOn integration, jacocoTestReport
 
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
