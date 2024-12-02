@@ -4,7 +4,7 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 env: ${test_environment:local}
-TEST_URL: https://localhost:4044
+TEST_URL: https://prl-cos-aat.service.core-compute-aat.internal
 
 case:
   orchestration:
@@ -224,7 +224,7 @@ payments:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data,prl_cos_api}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -423,11 +423,34 @@ aca:
 
 test-url: ${TEST_URL:http://localhost:4044}
 
+
+security:
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
+
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1906.preview.platform.hmcts.net/}
-
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
+  user:
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxx}
+  system-update:
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 auth:
   idam:
