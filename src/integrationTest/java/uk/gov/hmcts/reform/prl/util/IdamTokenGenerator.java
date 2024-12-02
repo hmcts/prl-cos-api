@@ -59,8 +59,8 @@ public class IdamTokenGenerator {
                                                                             + "client_secret=" + auth.getClientSecret()
                                                                             + "&client_id=prl-cos-api"
                                                                             + "&redirect_uri=" + auth.getRedirectUri()
-                                                                            + "&username=" + userConfig.getUserName()
-                                                                            + "&password=" + userConfig.getPassword()
+                                                                            + "&username=" + "prl_aat_am_swansea_hca@justice.gov.uk"
+                                                                            + "&password=" + "Nagoya0102"
                                                                             + "&grant_type=password&scope=openid profile roles manage-user")
             .body().jsonPath();
         String token = jp.get("access_token");
