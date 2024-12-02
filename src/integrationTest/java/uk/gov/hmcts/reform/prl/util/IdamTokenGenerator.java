@@ -67,6 +67,6 @@ public class IdamTokenGenerator {
                                                                             + "&grant_type=password&scope=openid profile roles manage-user")
             .body().jsonPath();
         String token = jp.get("access_token");
-        return token;
+        return "Bearer " + token;
     }
 }
