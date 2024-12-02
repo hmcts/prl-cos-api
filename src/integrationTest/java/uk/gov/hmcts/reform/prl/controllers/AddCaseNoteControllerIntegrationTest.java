@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -23,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORI
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, AddCaseNoteControllerIntegrationTest.class})
+@Slf4j
 public class AddCaseNoteControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -44,6 +46,7 @@ public class AddCaseNoteControllerIntegrationTest {
     @Test
     public void testSubmitCaseEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        log.info("Request url: {}", serviceUrl + submitCaseEndpoint);
         HttpPost httpPost = new HttpPost(serviceUrl + submitCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());

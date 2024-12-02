@@ -57,7 +57,7 @@ public class IdamTokenGenerator {
     public String getSysUserToken() {
         JsonPath jp = RestAssured.given().relaxedHTTPSValidation().post(idamUserBaseUrl + "/o/token?"
                                                                             + "client_secret=" + auth.getClientSecret()
-                                                                            + "&client_id==prl-cos-api"
+                                                                            + "&client_id=prl-cos-api"
                                                                             + "&redirect_uri=" + auth.getRedirectUri()
                                                                             + "&username=" + userConfig.getUserName()
                                                                             + "&password=" + userConfig.getPassword()
