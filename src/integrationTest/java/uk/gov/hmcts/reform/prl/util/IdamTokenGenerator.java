@@ -60,6 +60,12 @@ public class IdamTokenGenerator {
     }
 
     public String getSysUserToken() {
+        log.info("idamUserBaseUrl: {}", idamUserBaseUrl);
+        log.info("idamClientId: {}", idamClientId);
+        log.info("auth.getClientSecret(): {}", auth.getClientSecret());
+        log.info("auth.getRedirectUri(): {}", auth.getRedirectUri());
+        log.info("userConfig.getUserName(): {}", userConfig.getUserName());
+        log.info("userConfig.getPassword(): {}", userConfig.getPassword());
         JsonPath jp = RestAssured.given().relaxedHTTPSValidation().post(idamUserBaseUrl + "/o/token?"
                                                                             + "client_secret=" + auth.getClientSecret()
                                                                             + "&client_id=" + idamClientId
