@@ -189,9 +189,9 @@ public class FeeService {
     }
 
     private FeeType getFeeTypeByApplicationReason(FeeRequest feeRequest, boolean isDAapplicant) {
-      if (isDAapplicant) {
-          return NO_FEE;
-      }
+        if (isDAapplicant) {
+            return NO_FEE;
+        }
         return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
     }
 
@@ -224,7 +224,7 @@ public class FeeService {
     }
 
     private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice, boolean isOrder, boolean isDAapplicant) {
-        return isDAapplicant? NO_FEE:fromOtherPartyConsentAndNotice(partyConsent, notice, isOrder);
+        return isDAapplicant ? NO_FEE : fromOtherPartyConsentAndNotice(partyConsent, notice, isOrder);
     }
 
     private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
