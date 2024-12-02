@@ -25,7 +25,7 @@ static Map<String, Object> secret(String secretName, String envVariable) {
 }
 
 def secrets = [
-   'prl-${env}':[
+   'prl-aat':[
       secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
       secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
       secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
