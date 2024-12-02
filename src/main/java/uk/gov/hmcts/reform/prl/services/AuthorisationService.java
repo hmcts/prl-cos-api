@@ -32,6 +32,8 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("Calling service is: " + callingService);
+            log.info("Authorised services are: " + s2sAuthorisedServices);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
                 return true;
@@ -46,6 +48,7 @@ public class AuthorisationService {
         try {
             userInfo = idamClient.getUserInfo(authorisation);
             if (null != userInfo) {
+                log.info("User token is valid------------");
                 return true;
             }
         } catch (Exception ex) {
