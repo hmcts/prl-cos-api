@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -261,6 +262,102 @@ public class FeeServiceTest {
     }
 
     @Test
+    public void testFetchFeeCodeForC2DAApplicant() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder()
+            .caseId(TEST_CASE_ID)
+            .caseType(PrlAppsConstants.FL401_CASE_TYPE)
+            .partyType(PrlAppsConstants.APPLICANT)
+            .applicationType(AwpApplicationTypeEnum.C2.toString())
+            .applicationReason(AwpApplicationReasonEnum.PERMISSION_FOR_APPLICATION.getId())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals("0.00",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeForC2DAApplicantWithNotice() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder()
+            .caseId(TEST_CASE_ID)
+            .applicationType(AwpApplicationTypeEnum.C2.toString())
+            .applicationReason(AwpApplicationReasonEnum.PERMISSION_FOR_APPLICATION.getId())
+            .caseType(PrlAppsConstants.FL401_CASE_TYPE)
+            .partyType(PrlAppsConstants.APPLICANT)
+            .notice(YES)
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals("0.00",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeForC2DARespondant() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder()
+            .caseId(TEST_CASE_ID)
+            .applicationType(AwpApplicationTypeEnum.C2.toString())
+            .applicationReason(AwpApplicationReasonEnum.PERMISSION_FOR_APPLICATION.getId())
+            .caseType(PrlAppsConstants.FL401_CASE_TYPE)
+            .partyType(PrlAppsConstants.RESPONDENT)
+            .notice(YES)
+            .build();
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(58.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.C2_WITH_NOTICE)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
+        assertEquals("58.0",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeFornonC2DAApplicant() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder()
+            .caseId(TEST_CASE_ID)
+            .applicationType(AwpApplicationTypeEnum.N161.toString())
+            .caseType(PrlAppsConstants.FL401_CASE_TYPE)
+            .partyType(PrlAppsConstants.APPLICANT)
+            .notice(YES)
+            .build();
+        when(feesConfig.getFeeParametersByFeeType(FeeType.N161_APPELLANT_NOTICE_DA)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(184.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.N161_APPELLANT_NOTICE_DA)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.N161_APPELLANT_NOTICE_DA.toString(),response.getFeeType());
+        assertEquals("184.0",response.getAmount());
+    }
+
+    @Test
     public void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
             AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER.getId()).build();
@@ -463,7 +560,6 @@ public class FeeServiceTest {
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
             .hearingDate("First Hearing -- 27/10/2023").build();
 
-        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITHOUT_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0324").feeType(FeeType.C2_WITHOUT_NOTICE.toString())
             .amount(BigDecimal.valueOf(167.00))
