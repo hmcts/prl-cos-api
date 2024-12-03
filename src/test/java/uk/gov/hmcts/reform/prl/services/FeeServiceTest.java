@@ -262,7 +262,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DAApplicant() throws Exception {
+    public void testFetchFeeCodeForC2DomesticAbuseApplicant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .caseType(PrlAppsConstants.FL401_CASE_TYPE)
@@ -282,7 +282,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DAApplicantWithNotice() throws Exception {
+    public void testFetchFeeCodeForC2DomesticAbuseApplicantWithNotice() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString())
@@ -303,7 +303,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeForC2DARespondant() throws Exception {
+    public void testFetchFeeCodeForC2DomesticAbuseRespondant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.C2.toString())
@@ -331,7 +331,7 @@ public class FeeServiceTest {
     }
 
     @Test
-    public void testFetchFeeCodeFornonC2DAApplicant() throws Exception {
+    public void testFetchFeeCodeForNonC2DomesticAbuseApplicant() throws Exception {
         FeeRequest feeRequest = FeeRequest.builder()
             .caseId(TEST_CASE_ID)
             .applicationType(AwpApplicationTypeEnum.N161.toString())
