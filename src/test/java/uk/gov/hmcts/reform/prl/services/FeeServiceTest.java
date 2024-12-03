@@ -559,7 +559,7 @@ public class FeeServiceTest {
             .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
             .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
             .hearingDate("First Hearing -- 27/10/2023").build();
-
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITHOUT_NOTICE)).thenReturn(feeParameters);
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0324").feeType(FeeType.C2_WITHOUT_NOTICE.toString())
             .amount(BigDecimal.valueOf(167.00))
