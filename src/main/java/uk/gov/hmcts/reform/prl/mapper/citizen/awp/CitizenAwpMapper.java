@@ -94,10 +94,6 @@ public class CitizenAwpMapper {
         if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
             return "C2";
         }
-
-        if (null != additionalApplicationsBundle.getOtherApplicationsBundle()) {
-            return additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType().getDisplayedValue();
-        }
         
         return null;
     }

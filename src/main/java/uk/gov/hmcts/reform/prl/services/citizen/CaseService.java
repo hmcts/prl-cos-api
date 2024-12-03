@@ -1827,7 +1827,7 @@ public class CaseService {
             .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
             .orderTypeId(ObjectUtils.isNotEmpty(notifMap.get(ORDER_TYPE_ID)) ? (String) notifMap.get(ORDER_TYPE_ID) : null)
             .orderMadeDate(ObjectUtils.isNotEmpty(notifMap.get(ORDER_MADE_DATE)) ? LocalDate.parse(
-                notifMap.get(ORDER_MADE_DATE).toString(), DATE_FORMATTER_YYYY_MM_DD).format(DATE_FORMATTER_D_MMM_YYYY) : null)
+                notifMap.get(ORDER_MADE_DATE).toString(), DATE_FORMATTER_YYYY_MM_DD).format(DATE_FORMATTER_YYYY_MM_DD) : null)
             .build();
     }
 }
