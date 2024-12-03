@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
@@ -238,7 +239,8 @@ public class FeeServiceTest {
 
     @Test
     public void testFetchFeeCode() throws Exception {
-        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).build();
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.PERMISSION_FOR_APPLICATION.getId()).build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
 
@@ -256,6 +258,98 @@ public class FeeServiceTest {
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
         assertEquals("167.0",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeC2ProhibitedOrder() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.PROHIBITED_STEPS_ORDER.getId()).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeC2ChildArrangemenetOrder() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId()).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeC2ChildArrangemenetOrderwithConsent() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME.getId()).notice(YES).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeCodeC2SpecificIssueOrder() throws Exception {
+        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID).applicationType(AwpApplicationTypeEnum.C2.toString()).applicationReason(
+            AwpApplicationReasonEnum.SPECIFIC_ISSUE_ORDER.getId()).build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse1);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+
+        assertNotNull(response);
+        assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
+        assertEquals("255.0",response.getAmount());
     }
 
     @Test
