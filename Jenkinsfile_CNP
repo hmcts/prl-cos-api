@@ -80,15 +80,6 @@ withPipeline(type, product, component) {
       reportFiles          : "index.html",
       reportName           : "Unit Tests Report"
     ]
-
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/tests/integration",
-      reportFiles          : "index.html",
-      reportName           : "Integration Test Report"
-    ]
   }
 
   afterAlways('checkout') {
@@ -110,6 +101,15 @@ withPipeline(type, product, component) {
 
   before('functionalTest:aat') {
     env.test_environment = 'aat'
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/integration",
+      reportFiles          : "index.html",
+      reportName           : "Integration Test Report"
+    ]
   }
   afterAlways('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
