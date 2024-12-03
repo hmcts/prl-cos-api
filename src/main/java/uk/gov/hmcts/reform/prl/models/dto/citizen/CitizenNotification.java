@@ -21,4 +21,5 @@ public class CitizenNotification {
     private boolean isPersonalService;
     private String partyNames;
     private String orderTypeId;
+    private String orderMadeDate;
 }
