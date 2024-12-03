@@ -138,10 +138,10 @@ public class FeeService {
         if (feeRequest != null) {
             String awpApplicationType = feeRequest.getApplicationType();
 
-            log.info("D_caseType - " + feeRequest.getCaseType());
-            log.info("D_partyType - " + feeRequest.getPartyType());
+            log.info("D_caseType - " + feeRequest.getCaseType()+"D_partyType - " + feeRequest.getPartyType());
 
-            boolean isDAapplicant = PrlAppsConstants.FL401_CASE_TYPE.equals(feeRequest.getCaseType()) && PrlAppsConstants.SERVED_PARTY_APPLICANT.equals(feeRequest.getPartyType());
+            boolean isDAapplicant = PrlAppsConstants.FL401_CASE_TYPE.equals(feeRequest.getCaseType())
+                && PrlAppsConstants.SERVED_PARTY_APPLICANT.equals(feeRequest.getPartyType());
             log.info("isDAapplicant - " + isDAapplicant);
             if (AwpApplicationTypeEnum.C2.toString().equals(awpApplicationType)) {
 
