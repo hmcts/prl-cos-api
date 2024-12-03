@@ -45,6 +45,7 @@ public class AddCaseNoteControllerIntegrationTest {
 
     @Test
     public void testSubmitCaseEndpoint() throws Exception {
+        serviceUrl = "https://prl-cos-aat.service.core-compute-aat.internal";
         log.info("Request url: {}", serviceUrl + submitCaseEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + submitCaseEndpoint);
@@ -59,9 +60,10 @@ public class AddCaseNoteControllerIntegrationTest {
 
     @Test
     public void testPopulateCaseEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        serviceUrl = "https://prl-cos-aat.service.core-compute-aat.internal";
         HttpPost httpPost = new HttpPost(serviceUrl + populateCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());
         httpPost.addHeader(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd());
         StringEntity body = new StringEntity(requestBody);
