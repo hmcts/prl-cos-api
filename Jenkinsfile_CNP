@@ -24,6 +24,10 @@ static Map<String, Object> secret(String secretName, String envVariable) {
  ]
 }
 
+def vaultOverrides = [
+  'preview': 'aat'
+]
+
 def secrets = [
    'prl-${env}':[
       secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
@@ -60,6 +64,7 @@ def secrets = [
 
 withPipeline(type, product, component) {
   pipelineConf = config;
+  overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   enableSlackNotifications(channel)
