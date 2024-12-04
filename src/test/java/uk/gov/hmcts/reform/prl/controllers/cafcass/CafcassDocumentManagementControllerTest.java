@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.io.File;
@@ -63,9 +62,6 @@ public class CafcassDocumentManagementControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    private SystemUserService systemUserService;
-
-    @Mock
     private UserInfo userInfo;
 
     private static final int TEST_DOWNLOAD_FILE_CONTENT_LENGTH = 10000;
@@ -90,7 +86,6 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
-        when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
 
         Mockito.when(cafcassCdamService.getDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -115,7 +110,6 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
-        when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
 
         Mockito.when(cafcassCdamService.getDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -155,8 +149,7 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
-        when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
-        when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
+        when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
@@ -172,9 +165,8 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authorisationService.getUserInfo()).thenReturn(userInfo);
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
-        when(systemUserService.getSysUserToken()).thenReturn(CAFCASS_TEST_AUTHORISATION_TOKEN);
 
-        when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
+        when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
