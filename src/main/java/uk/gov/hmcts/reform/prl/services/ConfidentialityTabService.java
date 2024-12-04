@@ -173,14 +173,21 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
-        if (childrenAndOtherPeopleRelations.isPresent()) {
+        if (!childrenAndOtherPeopleRelations.isEmpty()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
-                getConfidentialRelationForOtherPeople(childrenAndOtherPeopleRelations.get());
+                childrenAndOtherPeopleRelations.get()
+                    .stream()
+                    .map(Element::getValue)
+                    .toList()
+                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
+                        && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
+                    .toList();
             Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
             List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
             if (children.isPresent()) {
                 List<String> childIds = childrenAndOtherPeopleRelationList.stream()
                     .map(ChildrenAndOtherPeopleRelation::getChildId)
+                    .distinct()
                     .toList();
                 children.get().stream()
                     .filter(child -> childIds.contains(String.valueOf(child.getId())))
@@ -233,7 +240,6 @@ public class ConfidentialityTabService {
                                                 ? "" : partyDetails.get().getPhoneNumber())
                                .relationshipToChildDetails(childrenAndOtherPeopleRelation
                                                                .getChildAndOtherPeopleRelation().getDisplayedValue())
-                               .isPersonIdentityConfidential(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
                                .address(partyDetails.get().getAddress()).build()).build();
 
                 tempOtherPersonConfidentialDetails.add(otherElement);
