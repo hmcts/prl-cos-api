@@ -1448,15 +1448,15 @@ public class CaseService {
                         ));
                     }
 
-                    log.info("test james");
-
                     //supporting documents
                     if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
-                        log.info("inside uploading c2 document test");
+                        applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                            awp,
+                            awp.getC2DocumentBundle().getSupportingEvidenceBundle()
+                        ));
+                        log.info("applicationsWithinProceedings {}", applicationsWithinProceedings);
                     }
-
-                    //NEED SUPPORTING DOCUMENTS ?
                 });
         }
         return applicationsWithinProceedings;
@@ -1474,6 +1474,7 @@ public class CaseService {
                     .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
                     .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                    .document(document.getDocument())
                     .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
                         DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                     .build()
