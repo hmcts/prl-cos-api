@@ -334,6 +334,7 @@ public class CallbackController {
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
                     caseData)).state(
                     State.SUBMITTED_NOT_PAID)
+                .otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(caseData))
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
 

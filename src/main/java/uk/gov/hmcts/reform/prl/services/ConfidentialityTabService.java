@@ -173,15 +173,9 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
-        if (!childrenAndOtherPeopleRelations.isEmpty()) {
+        if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
-                childrenAndOtherPeopleRelations.get()
-                    .stream()
-                    .map(Element::getValue)
-                    .toList()
-                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
-                        && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
-                    .toList();
+                getConfidentialRelationForOtherPeople(childrenAndOtherPeopleRelations.get());
             Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
             List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
             if (children.isPresent()) {
@@ -208,6 +202,17 @@ public class ConfidentialityTabService {
             }
         }
         return childrenConfidentialDetails;
+    }
+
+    private List<ChildrenAndOtherPeopleRelation> getConfidentialRelationForOtherPeople(
+        List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations) {
+        return childrenAndOtherPeopleRelations
+            .stream()
+            .map(Element::getValue)
+            .toList()
+            .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
+                && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
+            .toList();
     }
 
     public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
@@ -297,5 +302,27 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
+    public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(CaseData caseData) {
+        return ofNullable(caseData.getOtherPartyInTheCaseRevised())
+            .map(otherPeople -> {
+                List<String> otherPersonIds = ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                    .map(this::getConfidentialRelationForOtherPeople)
+                    .orElseGet(ArrayList::new)
+                    .stream()
+                    .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
+                    .toList();
+                otherPeople.forEach(partyDetails -> {
+                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
+                        partyDetails.getValue().toBuilder()
+                            .isAddressConfidential(YesOrNo.Yes)
+                            .isPhoneNumberConfidential(YesOrNo.Yes)
+                            .isEmailAddressConfidential(YesOrNo.Yes)
+                            .build();
+                    }
+                });
+                return otherPeople;
+            })
+            .orElseGet(() -> null);
+    }
 }
 
