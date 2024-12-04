@@ -161,7 +161,7 @@ public class CafcassUploadDocService {
                 .build();
         } else {
             Map<String, CafcassReportAndGuardianEnum> documentTypeToCategoryMap = new HashMap<>();
-            documentTypeToCategoryMap.put("16_4_Report", CafcassReportAndGuardianEnum.riskAssessment);
+            documentTypeToCategoryMap.put("16_4_Report", CafcassReportAndGuardianEnum.guardianReport);
             documentTypeToCategoryMap.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
             documentTypeToCategoryMap.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
             documentTypeToCategoryMap.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
