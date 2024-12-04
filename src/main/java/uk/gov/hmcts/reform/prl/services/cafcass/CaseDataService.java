@@ -456,7 +456,6 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                log.info("Document is not null for category {}", category);
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
@@ -665,7 +664,6 @@ public class CaseDataService {
             "data.finalDocument",
             "data.ordersApplyingFor",
             "data.children",
-            "data.miamCertificationDocumentUpload1",
             "data.miamStatus",
             "data.miamExemptionsTable",
             "data.claimingExemptionMiam",
