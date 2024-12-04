@@ -49,6 +49,8 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -63,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100Respo
 public class UpdatePartyDetailsServiceTest {
 
     public static final String BEARER_TOKEN = "Bearer token";
+    public static final String RESPONDENT_AC_8_DOCUMENTS = "respondentAc8Documents";
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
 
@@ -1553,5 +1556,38 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
         assertEquals(1, updatedChildDetails.size());
+    }
+
+    @Test
+    public void testPopulateC8Documents() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .respondentC8Document(RespondentC8Document.builder().build())
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("isConfidentialDataPresent", true);
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
+        updatePartyDetailsService.populateC8Documents("test", dataMap, caseData, dataMap, true,
+                                                      0, Element.<PartyDetails>builder()
+                                                          .id(UUID.fromString(PrlAppsConstants.TEST_UUID))
+                                                          .value(PartyDetails.builder().build()).build());
+        assertTrue(dataMap.containsKey(RESPONDENT_AC_8_DOCUMENTS));
+    }
+
+    @Test
+    public void testPopulateC8DocumentsWithoutDetailsChanged() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .respondentC8Document(RespondentC8Document.builder().build())
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("isConfidentialDataPresent", true);
+        updatePartyDetailsService.populateC8Documents("test", dataMap, caseData, dataMap, false,
+                                                      0, Element.<PartyDetails>builder()
+                                                          .id(UUID.fromString(PrlAppsConstants.TEST_UUID))
+                                                          .value(PartyDetails.builder().build()).build());
+        assertTrue(dataMap.containsKey(RESPONDENT_AC_8_DOCUMENTS));
+        assertNull(dataMap.get(RESPONDENT_AC_8_DOCUMENTS));
     }
 }
