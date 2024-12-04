@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORI
 @SpringBootTest(classes = {Application.class, C100IssueCaseControllerIntegrationTest.class})
 public class C100IssueCaseControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
+    @Value("${prl.api.baseurl}")
     protected String serviceUrl;
 
     private final String issueAndSendToLocalCourtEndpoint = "/issue-and-send-to-local-court";

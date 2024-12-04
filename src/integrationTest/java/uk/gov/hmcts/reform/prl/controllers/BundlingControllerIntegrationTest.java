@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORI
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {BundlingControllerIntegrationTest.class, Application.class})
 public class BundlingControllerIntegrationTest extends IntegrationTest {
-    @Value("${case.orchestration.service.base.uri}")
+    @Value("${prl.api.baseurl}")
     protected String serviceUrl;
 
     @Autowired
@@ -40,7 +40,6 @@ public class BundlingControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
-
         HttpPost httpPost = new HttpPost(serviceUrl + bundleControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.getSysUserToken());

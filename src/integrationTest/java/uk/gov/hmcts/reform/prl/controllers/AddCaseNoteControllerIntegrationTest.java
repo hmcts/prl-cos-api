@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORI
 @Slf4j
 public class AddCaseNoteControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
+    @Value("${prl.api.baseurl}")
     protected String serviceUrl;
 
     private final String submitCaseEndpoint = "/submit-case-note";
@@ -45,7 +45,6 @@ public class AddCaseNoteControllerIntegrationTest {
 
     @Test
     public void testSubmitCaseEndpoint() throws Exception {
-        serviceUrl = "http://prl-cos-aat.service.core-compute-aat.internal";
         log.info("Request url: {}", serviceUrl + submitCaseEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + submitCaseEndpoint);
@@ -60,7 +59,6 @@ public class AddCaseNoteControllerIntegrationTest {
 
     @Test
     public void testPopulateCaseEndpoint() throws Exception {
-        serviceUrl = "http://prl-cos-aat.service.core-compute-aat.internal";
         HttpPost httpPost = new HttpPost(serviceUrl + populateCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
