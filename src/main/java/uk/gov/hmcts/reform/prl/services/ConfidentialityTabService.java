@@ -173,23 +173,27 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
-        Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
-        List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
-        if (children.isPresent()) {
-            childDetailsReviseds = children.get()
-                .stream()
-                .map(Element::getValue)
-                .toList();
-        }
-        if (!childrenAndOtherPeopleRelations.isEmpty()) {
+        if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
                     .toList()
-                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
+                    .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
+            Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
+            List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
+            if (children.isPresent()) {
+                List<String> childIds = childrenAndOtherPeopleRelationList.stream()
+                    .map(ChildrenAndOtherPeopleRelation::getChildId)
+                    .distinct()
+                    .toList();
+                children.get().stream()
+                    .filter(child -> childIds.contains(String.valueOf(child.getId())))
+                    .map(Element::getValue)
+                    .forEach(childDetailsReviseds::add);
+            }
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
                     getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
@@ -207,6 +211,17 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
+    private List<ChildrenAndOtherPeopleRelation> getConfidentialRelationForOtherPeople(
+        List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations) {
+        return childrenAndOtherPeopleRelations
+            .stream()
+            .map(Element::getValue)
+            .toList()
+            .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
+                && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
+            .toList();
+    }
+
     public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
         List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
         List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
@@ -219,8 +234,9 @@ public class ConfidentialityTabService {
                     .value(OtherPersonConfidentialityDetails.builder()
                                .firstName(partyDetails.get().getFirstName())
                                .lastName(partyDetails.get().getLastName())
-                               .email(YesOrNo.Yes.equals(partyDetails.get().getIsEmailAddressConfidential()) ? "" : partyDetails.get().getEmail())
-                               .phoneNumber(YesOrNo.Yes.equals(partyDetails.get().getIsPhoneNumberConfidential())
+                               .email(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
+                                          ? "" : partyDetails.get().getEmail())
+                               .phoneNumber(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
                                                 ? "" : partyDetails.get().getPhoneNumber())
                                .relationshipToChildDetails(childrenAndOtherPeopleRelation
                                                                .getChildAndOtherPeopleRelation().getDisplayedValue())
@@ -292,5 +308,27 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
+    public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(CaseData caseData) {
+        return ofNullable(caseData.getOtherPartyInTheCaseRevised())
+            .map(otherPeople -> {
+                List<String> otherPersonIds = ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                    .map(this::getConfidentialRelationForOtherPeople)
+                    .orElseGet(ArrayList::new)
+                    .stream()
+                    .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
+                    .toList();
+                otherPeople.forEach(partyDetails -> {
+                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
+                        partyDetails.getValue().toBuilder()
+                            .isAddressConfidential(YesOrNo.Yes)
+                            .isPhoneNumberConfidential(YesOrNo.Yes)
+                            .isEmailAddressConfidential(YesOrNo.Yes)
+                            .build();
+                    }
+                });
+                return otherPeople;
+            })
+            .orElseGet(() -> null);
+    }
 }
 

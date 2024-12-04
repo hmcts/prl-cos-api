@@ -103,7 +103,6 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(applicant.getIsCurrentAddressKnown());
         if (!isCurrentAddressKnown.isEmpty() && Yes.equals(isCurrentAddressKnown.get())) {
             fields.add(ofNullable(applicant.getAddress()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
 
         Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
@@ -116,12 +115,10 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
-            fields.add(ofNullable(applicant.getIsEmailAddressConfidential()));
         }
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(applicant.getCanYouProvidePhoneNumber());
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getPhoneNumber()));
-            fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
