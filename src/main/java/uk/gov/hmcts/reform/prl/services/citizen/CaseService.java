@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -1447,10 +1448,36 @@ public class CaseService {
                         ));
                     }
 
+                    log.info("test james");
+
+                    //supporting documents
+                    if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
+                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                        log.info("inside uploading c2 document test");
+                    }
+
                     //NEED SUPPORTING DOCUMENTS ?
                 });
         }
         return applicationsWithinProceedings;
+    }
+
+    private List<CitizenDocuments> getSupportingEvidenceDocuments(AdditionalApplicationsBundle awp,
+                                                                  List<Element<SupportingEvidenceBundle>> documents) {
+        return documents.stream()
+            .map(Element::getValue)
+            .map(document ->
+                CitizenDocuments.builder()
+                    .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                    .partyType(awp.getPartyType().getDisplayedValue())
+                    .partyName(awp.getAuthor())
+                    .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
+                    .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                    .build()
+            ).toList();
     }
 
     private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
