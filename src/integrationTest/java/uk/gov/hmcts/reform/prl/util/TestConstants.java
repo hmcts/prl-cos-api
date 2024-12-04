@@ -16,4 +16,6 @@ public class TestConstants {
     public static final String AUTHORISATION_HEADER = "Authorization";
     public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
     public static final String CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT = "/cases/documents/{documentId}/binary";
+
+    public static final String COURTNAV_UPLOAD_DOCUMENT_ENDPOINT = "/cases/searchCases";
 }
