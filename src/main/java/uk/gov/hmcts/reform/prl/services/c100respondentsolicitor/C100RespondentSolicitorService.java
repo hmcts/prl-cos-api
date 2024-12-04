@@ -844,6 +844,10 @@ public class C100RespondentSolicitorService {
                         && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
                     boolean isC1aApplicable = caseData.getC1ADocument() != null;
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue(), isC1aApplicable);
+                    caseDataUpdated.put(
+                        "respondentSolicitorName",
+                        respondingParty.getValue().getRepresentativeFirstName() + " " + respondingParty.getValue().getRepresentativeLastName()
+                    );
                 }
             }
         }
@@ -856,6 +860,7 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.remove("respondentSolicitorName");
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final String[] surname = {null};

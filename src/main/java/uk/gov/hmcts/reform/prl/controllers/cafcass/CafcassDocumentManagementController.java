@@ -53,7 +53,7 @@ public class CafcassDocumentManagementController {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
-                log.info("processing  request after authorization");
+                log.info("processing cafcass request after authorization");
                 return (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
 
             } else {
