@@ -27,6 +27,8 @@ prl:
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+  api:
+    baseurl: http://prl-cos-aat.service.core-compute-aat.internal
 
 management:
   endpoint:
