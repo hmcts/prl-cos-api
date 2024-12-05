@@ -324,20 +324,26 @@ public class ConfidentialityTabService {
                     .orElseGet(ArrayList::new)
                     .stream()
                     .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
+                    .distinct()
                     .toList();
                 log.info("Other person ids are : {} ", otherPersonIds);
-                otherPeople.forEach(partyDetails -> {
+
+                for (int i = 0; i < otherPeople.size(); i++) {
+                    Element<PartyDetails> partyDetails = otherPeople.get(i);
                     if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
-                        partyDetails.getValue().toBuilder()
-                            .isAddressConfidential(YesOrNo.Yes)
-                            .isPhoneNumberConfidential(YesOrNo.Yes)
-                            .isEmailAddressConfidential(YesOrNo.Yes)
-                            .build();
+                        otherPeople.set(i, Element.<PartyDetails>builder()
+                            .value(partyDetails.getValue().toBuilder()
+                                       .isAddressConfidential(YesOrNo.Yes)
+                                       .isPhoneNumberConfidential(YesOrNo.Yes)
+                                       .isEmailAddressConfidential(YesOrNo.Yes)
+                                       .build())
+                            .id(partyDetails.getId())
+                            .build());
                     }
-                });
+                }
                 //log the updated other people in json format
                 try {
-                    log.info("Other people after update : {} ",  objectMapper.writeValueAsString(otherPeople));
+                    log.info("Other people after update : {} ", objectMapper.writeValueAsString(otherPeople));
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
