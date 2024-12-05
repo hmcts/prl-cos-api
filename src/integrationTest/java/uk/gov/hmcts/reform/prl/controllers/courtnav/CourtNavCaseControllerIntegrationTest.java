@@ -98,20 +98,6 @@ public class CourtNavCaseControllerIntegrationTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
-    @Test
-    public void testCreateCaseEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + caseEndpoint);
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
-    }
-
     @Test
     public void testCreateCaseEndpoint1() throws Exception {
 
