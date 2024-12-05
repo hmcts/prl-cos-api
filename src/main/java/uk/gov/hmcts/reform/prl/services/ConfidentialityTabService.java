@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
+
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
@@ -183,7 +187,7 @@ public class ConfidentialityTabService {
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
             Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
-            List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
+            List<Element<ChildDetailsRevised>> childDetailsReviseds = new ArrayList<>();
             if (children.isPresent()) {
                 List<String> childIds = childrenAndOtherPeopleRelationList.stream()
                     .map(ChildrenAndOtherPeopleRelation::getChildId)
@@ -191,19 +195,26 @@ public class ConfidentialityTabService {
                     .toList();
                 children.get().stream()
                     .filter(child -> childIds.contains(String.valueOf(child.getId())))
-                    .map(Element::getValue)
                     .forEach(childDetailsReviseds::add);
             }
-            for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
-                List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
-                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
-                if (!tempOtherPersonConfidentialDetails.isEmpty()) {
+            for (Element<ChildDetailsRevised> childDetailsRevisedElement : childDetailsReviseds) {
+                //get the matched full name related result from childDetailsRevisedElement full name relation object
+                //fix any exceptions for below method
+                Optional<ChildrenAndOtherPeopleRelation> optionalChildrenAndOtherPeopleRelation = childrenAndOtherPeopleRelationList
+                    .stream()
+                    .filter(other -> other.getChildId().equals(String.valueOf(childDetailsRevisedElement.getId())))
+                    .findFirst();
+                if (optionalChildrenAndOtherPeopleRelation.isPresent()) {
+                    ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = optionalChildrenAndOtherPeopleRelation.get();
+                    Element<OtherPersonConfidentialityDetails> tempOtherPersonConfidentialDetails =
+                        getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelation,objectPartyDetailsMap);
+                    ChildDetailsRevised childDetailsRevised = childDetailsRevisedElement.getValue();
                     Element<ChildConfidentialityDetails> childElement = Element
                         .<ChildConfidentialityDetails>builder()
                         .value(ChildConfidentialityDetails.builder()
                                    .firstName(childDetailsRevised.getFirstName())
                                    .lastName(childDetailsRevised.getLastName())
-                                   .otherPerson(tempOtherPersonConfidentialDetails).build()).build();
+                                   .otherPerson(List.of(tempOtherPersonConfidentialDetails)).build()).build();
                     childrenConfidentialDetails.add(childElement);
                 }
             }
@@ -222,30 +233,27 @@ public class ConfidentialityTabService {
             .toList();
     }
 
-    public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
-        List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
-        List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
-        for (ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation : childrenAndOtherPeopleRelationList) {
-            Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
-                childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
-            if (partyDetails.isPresent()) {
-                Element<OtherPersonConfidentialityDetails> otherElement = Element
-                    .<OtherPersonConfidentialityDetails>builder()
-                    .value(OtherPersonConfidentialityDetails.builder()
-                               .firstName(partyDetails.get().getFirstName())
-                               .lastName(partyDetails.get().getLastName())
-                               .email(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
-                                          ? "" : partyDetails.get().getEmail())
-                               .phoneNumber(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
-                                                ? "" : partyDetails.get().getPhoneNumber())
-                               .relationshipToChildDetails(childrenAndOtherPeopleRelation
-                                                               .getChildAndOtherPeopleRelation().getDisplayedValue())
-                               .address(partyDetails.get().getAddress()).build()).build();
+    public Element<OtherPersonConfidentialityDetails> getOtherPersonConfidentialDetails(
+        ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation, Map<Object, PartyDetails> objectPartyDetailsMap) {
+        Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
+            childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
+        if (partyDetails.isPresent()) {
+            Element<OtherPersonConfidentialityDetails> otherElement = Element
+                .<OtherPersonConfidentialityDetails>builder()
+                .value(OtherPersonConfidentialityDetails.builder()
+                           .firstName(partyDetails.get().getFirstName())
+                           .lastName(partyDetails.get().getLastName())
+                           .email(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
+                                      ? "" : partyDetails.get().getEmail())
+                           .phoneNumber(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
+                                            ? "" : partyDetails.get().getPhoneNumber())
+                           .relationshipToChildDetails(childrenAndOtherPeopleRelation
+                                                           .getChildAndOtherPeopleRelation().getDisplayedValue())
+                           .address(partyDetails.get().getAddress()).build()).build();
 
-                tempOtherPersonConfidentialDetails.add(otherElement);
-            }
+            return otherElement;
         }
-        return tempOtherPersonConfidentialDetails;
+        return null;
     }
 
     public List<Element<ApplicantConfidentialityDetails>> getConfidentialApplicantDetails(List<PartyDetails> currentApplicants) {
@@ -317,6 +325,7 @@ public class ConfidentialityTabService {
                     .stream()
                     .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
                     .toList();
+                log.info("Other person ids are : {} ", otherPersonIds);
                 otherPeople.forEach(partyDetails -> {
                     if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
                         partyDetails.getValue().toBuilder()
@@ -326,6 +335,12 @@ public class ConfidentialityTabService {
                             .build();
                     }
                 });
+                //log the updated other people in json format
+                try {
+                    log.info("Other people after update : {} ",  objectMapper.writeValueAsString(otherPeople));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
                 return otherPeople;
             })
             .orElseGet(() -> null);
