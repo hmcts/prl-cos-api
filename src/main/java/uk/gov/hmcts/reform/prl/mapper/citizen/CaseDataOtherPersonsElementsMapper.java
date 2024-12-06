@@ -126,6 +126,7 @@ public class CaseDataOtherPersonsElementsMapper {
                                                 .childAndOtherPeopleRelation(RelationshipsEnum.getEnumForDisplayedValue(
                                                     childRelationship.getRelationshipType()))
                                                 .childAndOtherPeopleRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                                .isChildLivesWithPersonConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
                                                 .build()).build();
                              }
                              return null;
