@@ -1448,7 +1448,7 @@ public class CaseService {
                         ));
                     }
 
-                    log.info("test james log");
+                    log.info("test james log awp {}", awp);
                     //supporting documents
                     if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
