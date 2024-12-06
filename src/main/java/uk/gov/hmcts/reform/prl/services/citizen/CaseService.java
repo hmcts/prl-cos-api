@@ -1431,43 +1431,41 @@ public class CaseService {
                 .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
-                    if (null != awp.getC2DocumentBundle()
-                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getC2DocumentBundle().getFinalDocument(),
-                            partyIdAndType.get(PARTY_ID)
-                        ));
+                    if (null != awp.getC2DocumentBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
 
                     //Other bundle docs
-                    if (null != awp.getOtherApplicationsBundle()
-                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getOtherApplicationsBundle().getFinalDocument(),
-                            partyIdAndType.get(PARTY_ID)
-                        ));
-                    }
-
-                    //supporting documents uploaded with c2
-                    if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
-                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
-                        applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
-                            awp,
-                            awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
-                            partyIdAndType.get(PARTY_ID)
-                        ));
-                    }
-
-                    //supporting documents uploaded with other applications
-                    if (null != awp.getOtherApplicationsBundle() && null != awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
-                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
-                        applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
-                            awp,
-                            awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
-                            partyIdAndType.get(PARTY_ID)
-                        ));
+                    if (null != awp.getOtherApplicationsBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
                 });
         }
