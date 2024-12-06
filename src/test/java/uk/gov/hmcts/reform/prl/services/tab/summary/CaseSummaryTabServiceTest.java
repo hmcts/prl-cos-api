@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherP
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
@@ -70,6 +71,9 @@ public class CaseSummaryTabServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
+    @Mock
+    CaseClosedDateGenerator caseClosedDateGenerator;
+
     private static final CaseData CASE_DATA = mock(CaseData.class);
     private static final CaseSummary CASE_SUMMARY0 = mock(CaseSummary.class);
     private static final CaseSummary CASE_SUMMARY1 = mock(CaseSummary.class);
@@ -80,6 +84,9 @@ public class CaseSummaryTabServiceTest {
     private static final CaseSummary CASE_SUMMARY6 = mock(CaseSummary.class);
     private static final CaseSummary CASE_SUMMARY7 = mock(CaseSummary.class);
     private static final CaseSummary CASE_SUMMARY8 = mock(CaseSummary.class);
+
+    private static final CaseSummary CASE_SUMMARY9 = mock(CaseSummary.class);
+
     private static final String[] EMPTY_ARRAY = {};
 
     @Before
@@ -93,6 +100,7 @@ public class CaseSummaryTabServiceTest {
         when(allegationOfHarmGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY6);
         when(dateOfSubmissionGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY7);
         when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY8);
+        when(caseClosedDateGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(otherProceedingsGenerator.getOtherProceedingsDetails(CASE_DATA)).thenReturn(new ArrayList<>());
 
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),
@@ -111,6 +119,8 @@ public class CaseSummaryTabServiceTest {
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field6", "value6"));
         when(objectMapper.convertValue(eq(CASE_SUMMARY7),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field7", "value7"));
+        when(objectMapper.convertValue(eq(CASE_SUMMARY9),
+                                      Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field9", "value9"));
 
     }
 
@@ -128,6 +138,7 @@ public class CaseSummaryTabServiceTest {
         fields.put("field5", "value5");
         fields.put("field6", "value6");
         fields.put("field7", "value7");
+        fields.put("field9", "value9");
         fields.put("otherProceedingEmptyTable", null);
 
         assertEquals(fields, actual);
@@ -155,6 +166,7 @@ public class CaseSummaryTabServiceTest {
         expected.put("field5", "value5");
         expected.put("field6", "value6");
         expected.put("field7", "value7");
+        expected.put("field9", "value9");
         expected.put("otherProceedingEmptyTable", null);
 
         Map<String, Object> actual = caseSummaryTabService.updateTab(CASE_DATA);
@@ -185,6 +197,7 @@ public class CaseSummaryTabServiceTest {
         expected.put("field5", "value5");
         expected.put("field6", "value6");
         expected.put("field7", "value7");
+        expected.put("field9", "value9");
         expected.put("otherProceedingEmptyTable", null);
         expected.put("otherProceedingsForSummaryTab", List.of(Element.<OtherProceedings>builder()
                                                                   .value(OtherProceedings.builder().build()).build()));

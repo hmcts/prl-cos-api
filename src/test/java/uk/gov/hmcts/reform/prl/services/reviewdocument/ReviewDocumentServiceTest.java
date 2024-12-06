@@ -86,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -516,10 +517,10 @@ public class ReviewDocumentServiceTest {
             .value(UploadedDocuments.builder()
                        .citizenDocument(Document.builder()
                                             .build())
-                       .uploadedBy("Legal professional")
+                       .uploadedBy("Citizen")
                        .partyName("test")
                        .documentType("test").build()).build();
-        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploaderRole("Legal professional").build();
+        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploadedBy("Citizen").build();
         Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
             .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(quarantineLegalDoc1).build();
@@ -1693,5 +1694,70 @@ public class ReviewDocumentServiceTest {
         );
         Assert.assertEquals(RESPONDENT_C1A_APPLICATION, citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
 
+    }
+
+    @Test
+    public void testGetDocumentDetailsWhenUploadedByCourtNavAndUploaderRoleNull() {
+        element = Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(UploadedDocuments.builder()
+                       .citizenDocument(Document.builder()
+                                            .build())
+                       .uploadedBy(COURTNAV)
+                       .partyName("test")
+                       .documentType("test").build()).build();
+        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder()
+            .uploadedBy(COURTNAV).build();
+        Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(quarantineLegalDoc1).build();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .courtNavQuarantineDocumentList(List.of(element))
+                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
+                    .build()
+            )
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDocsDynamicList(DynamicList.builder().value(
+                                     DynamicListElement.builder()
+                                         .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                 ).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
+    }
+
+    @Test
+    public void testGetDocumentDetailsWhenUploadedByCafcassCymruAndUploderRolenull() {
+
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .cafcassQuarantineDocument(document)
+            .restrictedDetails("test details")
+            .documentParty(CAFCASS_CYMRU.getDisplayedValue())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                                                quarantineLegalDoc)))
+                    .build()
+            )
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDocsDynamicList(DynamicList.builder().value(
+                                     DynamicListElement.builder()
+                                         .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                 ).build()).build()).build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+
+        Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
+        Assert.assertNotNull(caseDataMap.get("reviewDoc"));
+        Document reviewDoc = (Document) caseDataMap.get("reviewDoc");
+        Assert.assertEquals("test.pdf", reviewDoc.getDocumentFileName());
     }
 }
