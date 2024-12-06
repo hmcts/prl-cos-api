@@ -827,7 +827,7 @@ public class CitizenPartyDetailsMapper {
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
             log.info("case data before updating other person confidentiality: {}", caseDataBuilder);
-            caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(caseDataBuilder.build()));
+            //caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(caseDataBuilder.build()));
             log.info("case data after updating other person confidentiality: {}", caseDataBuilder);
         }
 
