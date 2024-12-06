@@ -1448,13 +1448,16 @@ public class CaseService {
                         ));
                     }
 
+                    log.info("test james log");
                     //supporting documents
                     if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                        log.info("inside supporting evidence documents");
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
                             awp,
                             awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         ));
+                        log.info("applicationsWithinProceedings {}", applicationsWithinProceedings);
                     }
                 });
         }
