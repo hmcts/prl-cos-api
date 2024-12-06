@@ -329,6 +329,7 @@ public class ConfidentialityTabService {
                 log.info("Other person ids are : {} ", otherPersonIds);
                 for (int i = 0; i < otherPeople.size(); i++) {
                     Element<PartyDetails> partyDetails = otherPeople.get(i);
+                    log.info("Other people party details before changing confidentiality: {}", partyDetails);
                     if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
                         otherPeople.set(i, Element.<PartyDetails>builder()
                             .value(partyDetails.getValue().toBuilder()
@@ -348,6 +349,7 @@ public class ConfidentialityTabService {
                             .id(partyDetails.getId())
                             .build());
                     }
+                    log.info("Other people party details after changing confidentiality: {}", partyDetails);
                 }
                 try {
                     log.info("Other people after update : {} ", objectMapper.writeValueAsString(otherPeople));
