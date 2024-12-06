@@ -773,11 +773,6 @@ ccd:
     result-size: 10000
     boost: 2.0
 
-refdata:
-  api:
-    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
-  category-id: HearingType
-
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
