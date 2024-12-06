@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -27,7 +28,11 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     @Override
     public CaseSummary generate(CaseData caseData) {
         List<Element<OtherProceedings>> otherProceedingsDetails = getOtherProceedingsDetails(caseData);
-
+        if (CollectionUtils.isEmpty(otherProceedingsDetails)) {
+            return CaseSummary.builder().otherProceedingEmptyTable(OtherProceedingEmptyTable.builder()
+                                               .otherProceedingEmptyField(hasOtherProceedings(caseData) ? "" : " ")
+                                               .build()).build();
+        }
         return CaseSummary.builder().otherProceedingsForSummaryTab(otherProceedingsDetails)
             .otherProceedingEmptyTable(OtherProceedingEmptyTable.builder()
                                            .otherProceedingEmptyField(hasOtherProceedings(caseData) ? "" : " ")
