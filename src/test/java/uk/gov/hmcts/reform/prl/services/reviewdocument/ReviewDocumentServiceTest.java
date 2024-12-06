@@ -69,7 +69,6 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
@@ -1663,8 +1662,6 @@ public class ReviewDocumentServiceTest {
                                                                             .isGenWelsh(true)
                                                                             .isGenEng(true)
                                                                             .build());
-        when(serviceOfApplicationService.getCoverLetters(
-            anyString(), any(CaseData.class), anyString(), anyMap())).thenReturn(coverLetterDocs);
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()

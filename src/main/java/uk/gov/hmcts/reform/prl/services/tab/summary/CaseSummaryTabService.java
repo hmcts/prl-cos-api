@@ -3,10 +3,13 @@ package uk.gov.hmcts.reform.prl.services.tab.summary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
@@ -73,8 +76,10 @@ public class CaseSummaryTabService implements TabService {
 
         // For Collection Fields, We should do manually since it should have element structure..
         CaseSummary caseSummary = otherProceedingsGenerator.generate(caseData);
-
-        summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
+        List<Element<OtherProceedings>> otherProceedingsForSummaryTab = otherProceedingsGenerator.getOtherProceedingsDetails(caseData);
+        if (CollectionUtils.isNotEmpty(otherProceedingsForSummaryTab)) {
+            summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsForSummaryTab);
+        }
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
         return summaryTabFields;
     }
