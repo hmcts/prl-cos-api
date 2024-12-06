@@ -1452,10 +1452,18 @@ public class CaseService {
                     //supporting documents
                     if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
-                        log.info("inside supporting evidence documents");
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
                             awp,
                             awp.getC2DocumentBundle().getSupportingEvidenceBundle()
+                        ));
+                    }
+
+                    if (null != awp.getOtherApplicationsBundle() && null != awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
+                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
+                        log.info("inside supporting evidence documents");
+                        applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                            awp,
+                            awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
                         ));
                         log.info("applicationsWithinProceedings {}", applicationsWithinProceedings);
                     }
