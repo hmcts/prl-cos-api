@@ -1448,8 +1448,7 @@ public class CaseService {
                         ));
                     }
 
-                    log.info("test james log awp {}", awp);
-                    //supporting documents
+                    //supporting documents uploaded with c2
                     if (null != awp.getC2DocumentBundle() && null != awp.getC2DocumentBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
@@ -1458,14 +1457,13 @@ public class CaseService {
                         ));
                     }
 
+                    //supporting documents uploaded with other applications
                     if (null != awp.getOtherApplicationsBundle() && null != awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
                         && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
-                        log.info("inside supporting evidence documents");
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
                             awp,
                             awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
                         ));
-                        log.info("applicationsWithinProceedings {}", applicationsWithinProceedings);
                     }
                 });
         }
