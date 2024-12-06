@@ -1435,7 +1435,8 @@ public class CaseService {
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
                         applicationsWithinProceedings.addAll(getAwpDocuments(
                             awp,
-                            awp.getC2DocumentBundle().getFinalDocument()
+                            awp.getC2DocumentBundle().getFinalDocument(),
+                            partyIdAndType.get(PARTY_ID)
                         ));
                     }
 
@@ -1444,7 +1445,8 @@ public class CaseService {
                         && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
                         applicationsWithinProceedings.addAll(getAwpDocuments(
                             awp,
-                            awp.getOtherApplicationsBundle().getFinalDocument()
+                            awp.getOtherApplicationsBundle().getFinalDocument(),
+                            partyIdAndType.get(PARTY_ID)
                         ));
                     }
 
@@ -1453,7 +1455,8 @@ public class CaseService {
                         && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
                             awp,
-                            awp.getC2DocumentBundle().getSupportingEvidenceBundle()
+                            awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
+                            partyIdAndType.get(PARTY_ID)
                         ));
                     }
 
@@ -1462,7 +1465,8 @@ public class CaseService {
                         && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
                         applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
                             awp,
-                            awp.getOtherApplicationsBundle().getSupportingEvidenceBundle()
+                            awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
+                            partyIdAndType.get(PARTY_ID)
                         ));
                     }
                 });
@@ -1471,12 +1475,13 @@ public class CaseService {
     }
 
     private List<CitizenDocuments> getSupportingEvidenceDocuments(AdditionalApplicationsBundle awp,
-                                                                  List<Element<SupportingEvidenceBundle>> documents) {
+                                                                  List<Element<SupportingEvidenceBundle>> documents,
+                                                                  String partyId) {
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
                 CitizenDocuments.builder()
-                    .partyId(TEST_UUID)
+                    .partyId(partyId)
                     .partyType(awp.getPartyType().getDisplayedValue())
                     .partyName(awp.getAuthor())
                     .uploadedBy(awp.getAuthor())
@@ -1501,12 +1506,13 @@ public class CaseService {
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
-                                                   List<Element<Document>> documents) {
+                                                   List<Element<Document>> documents,
+                                                   String partyId) {
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
                      CitizenDocuments.builder()
-                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                         .partyId(partyId)
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
