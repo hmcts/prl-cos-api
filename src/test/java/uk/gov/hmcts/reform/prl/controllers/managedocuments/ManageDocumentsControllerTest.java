@@ -167,7 +167,7 @@ public class ManageDocumentsControllerTest {
 
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
-        Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
+        Assert.assertEquals("# Cyflwynwyd y ddogfen<br/>Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
 
     }
