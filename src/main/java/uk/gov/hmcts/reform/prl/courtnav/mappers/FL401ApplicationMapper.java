@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -213,8 +212,8 @@ public class FL401ApplicationMapper {
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
-                               .isWelshNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
-                               .isIntermediaryNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
+                               .isWelshNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab.
+                               .isIntermediaryNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab.
                                .interpreterNeeds(getInterpreterNeeds(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
