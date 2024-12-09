@@ -558,17 +558,33 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-        listOfHearingDetails.forEach(a -> log.info("first filter case id {}", a.getCaseRef()));
+        extracted(listOfHearingDetails);
         log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
 
         listOfHearingDetails.forEach(a -> log.info("second filter {}", a.getCaseRef()));
+        extracted(listOfHearingDetails);
+
         log.info("Update hearing data for cafcass");
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
 
         log.info("filteredCafcassResponse {}", filteredCafcassResponse);
         return filteredCafcassResponse;
+    }
+
+    private static void extracted(List<Hearings> listOfHearingDetails) {
+        listOfHearingDetails.forEach(
+            h -> {
+                log.info("case id {}", h.getCaseRef());
+                log.info("hearings for {}", h.getCaseHearings());
+                h.getCaseHearings().forEach(b -> log.info(
+                    "hearing id's {} for case {}",
+                    b.getHearingID(),
+                    h.getCaseRef()
+                ));
+            }
+        );
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
