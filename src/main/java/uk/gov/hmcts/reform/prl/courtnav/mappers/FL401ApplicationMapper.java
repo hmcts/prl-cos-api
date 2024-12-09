@@ -213,8 +213,8 @@ public class FL401ApplicationMapper {
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
-                               .isWelshNeeded(YesOrNo.No)
-                               .isIntermediaryNeeded(YesOrNo.No)
+                               .isWelshNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
+                               .isIntermediaryNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
                                .interpreterNeeds(getInterpreterNeeds(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
@@ -447,10 +447,9 @@ public class FL401ApplicationMapper {
 
     private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
 
-        List<PartyEnum> emptyPartyList = new ArrayList<>();
         InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .name("")
-            .party(emptyPartyList)
+            .name(null) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
+            .party(null) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
             .language(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
             .otherAssistance(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect())
             .build();
