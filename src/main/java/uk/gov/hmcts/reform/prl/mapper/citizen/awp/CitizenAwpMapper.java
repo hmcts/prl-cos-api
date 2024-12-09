@@ -89,11 +89,11 @@ public class CitizenAwpMapper {
             .build();
     }
 
-    public static String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle, boolean isNotHWF) {
+    public static String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle, boolean isNotHwf) {
         //PRL-4023 - postfix to awp task name
         if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
             return "C2";
-        }else if(isNotHWF && null != additionalApplicationsBundle.getOtherApplicationsBundle()){
+        } else if (isNotHwf && null != additionalApplicationsBundle.getOtherApplicationsBundle()) {
             return additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType().getDisplayedValue();
         }
         return null;
