@@ -130,6 +130,7 @@ public class CaseDataOtherPersonsElementsMapper {
                                                 .childAndOtherPeopleRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
                                                 .isChildLivesWithPersonConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
                                                 .otherPeopleId(otherPeopleDetails.getId())
+                                                .childId(childDetail.getId())
                                                 .build()).build();
                              }
                              return null;
