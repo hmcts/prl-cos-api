@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
@@ -137,13 +138,16 @@ public class FeeService {
         if (feeRequest != null) {
             String awpApplicationType = feeRequest.getApplicationType();
 
+            boolean isDAapplicant = PrlAppsConstants.FL401_CASE_TYPE.equals(feeRequest.getCaseType())
+                && PrlAppsConstants.APPLICANT.equals(feeRequest.getPartyType());
+
             if (AwpApplicationTypeEnum.C2.toString().equals(awpApplicationType)) {
 
                 // feeCode logic at the time of citizen guidance page
                 if (isBlank(feeRequest.getHearingDate())
                     && isBlank(feeRequest.getOtherPartyConsent())
                     && isBlank(feeRequest.getNotice())) {
-                    return getFeeTypeByApplicationReason(feeRequest);
+                    return getFeeTypeByApplicationReason(feeRequest,isDAapplicant);
                 }
 
                 // For C2 - Adjourn Hearing
@@ -162,7 +166,8 @@ public class FeeService {
                 return getFeeTypeByPartyConsentAndNotice(
                     feeRequest.getOtherPartyConsent(),
                     feeRequest.getNotice(),
-                    isc2WithOrder(feeRequest.getApplicationReason())
+                    isc2WithOrder(feeRequest.getApplicationReason()),
+                    isDAapplicant
                 );
 
             } else {
@@ -182,7 +187,10 @@ public class FeeService {
         return feeType;
     }
 
-    private FeeType getFeeTypeByApplicationReason(FeeRequest feeRequest) {
+    private FeeType getFeeTypeByApplicationReason(FeeRequest feeRequest, boolean isDAapplicant) {
+        if (isDAapplicant) {
+            return NO_FEE;
+        }
         return isc2WithOrder(feeRequest.getApplicationReason()) ? CHILD_ARRANGEMENTS_ORDER : C2_WITH_NOTICE;
     }
 
@@ -214,8 +222,8 @@ public class FeeService {
         return feeType.orElse(null);
     }
 
-    private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice, boolean isOrder) {
-        return fromOtherPartyConsentAndNotice(partyConsent, notice, isOrder);
+    private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice, boolean isOrder, boolean isDAapplicant) {
+        return isDAapplicant ? NO_FEE : fromOtherPartyConsentAndNotice(partyConsent, notice, isOrder);
     }
 
     private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
