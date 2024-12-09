@@ -136,7 +136,7 @@ public class HelpWithFeesService {
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
                 caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No.getDisplayedValue());
                 //WA fields
-                caseDataUpdated.put(AWP_WA_TASK_NAME, getAwpTaskName(additionalApplicationsBundle,false));
+                caseDataUpdated.put(AWP_WA_TASK_NAME, getAwpTaskName(additionalApplicationsBundle, true));
             }
         }
         if (ObjectUtils.isNotEmpty(caseData.getProcessUrgentHelpWithFees())
