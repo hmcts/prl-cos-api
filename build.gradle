@@ -590,7 +590,7 @@ jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
+project.tasks['sonarqube'].dependsOn integration, jacocoTestReport
 
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
