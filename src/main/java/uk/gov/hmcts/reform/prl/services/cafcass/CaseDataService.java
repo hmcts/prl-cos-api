@@ -553,15 +553,21 @@ public class CaseDataService {
                 }
             }
         }
+        log.info("caseIdWithRegionIdMap {}", caseIdWithRegionIdMap);
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
             authorisation,
             caseIdWithRegionIdMap
         );
+        listOfHearingDetails.forEach(a -> log.info("first filter {}", a.getCaseRef()));
         log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
+
+        listOfHearingDetails.forEach(a -> log.info("second filter {}", a.getCaseRef()));
         log.info("Update hearing data for cafcass");
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
+        log.info("filteredCafcassResponse {}", filteredCafcassResponse);
         return filteredCafcassResponse;
     }
 
