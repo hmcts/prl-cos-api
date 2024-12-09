@@ -330,24 +330,32 @@ public class ConfidentialityTabService {
                 for (int i = 0; i < otherPeople.size(); i++) {
                     Element<PartyDetails> partyDetails = otherPeople.get(i);
                     log.info("Other people party details before changing confidentiality: {}", partyDetails);
-                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
-                        otherPeople.set(i, Element.<PartyDetails>builder()
-                            .value(partyDetails.getValue().toBuilder()
-                                       .isAddressConfidential(YesOrNo.Yes)
-                                       .isPhoneNumberConfidential(YesOrNo.Yes)
-                                       .isEmailAddressConfidential(YesOrNo.Yes)
-                                       .build())
-                            .id(partyDetails.getId())
-                            .build());
-                    } else {
-                        otherPeople.set(i, Element.<PartyDetails>builder()
-                            .value(partyDetails.getValue().toBuilder()
-                                       .isAddressConfidential(YesOrNo.No)
-                                       .isPhoneNumberConfidential(YesOrNo.No)
-                                       .isEmailAddressConfidential(YesOrNo.No)
-                                       .build())
-                            .id(partyDetails.getId())
-                            .build());
+                    try {
+                        if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
+                            otherPeople.set(i, Element.<PartyDetails>builder()
+                                .value(partyDetails.getValue().toBuilder()
+                                           .isAddressConfidential(YesOrNo.Yes)
+                                           .isPhoneNumberConfidential(YesOrNo.Yes)
+                                           .isEmailAddressConfidential(YesOrNo.Yes)
+                                           .build())
+                                .id(partyDetails.getId())
+                                .build());
+                        } else {
+                            otherPeople.set(i, Element.<PartyDetails>builder()
+                                .value(partyDetails.getValue().toBuilder()
+                                           .isAddressConfidential(YesOrNo.No)
+                                           .isPhoneNumberConfidential(YesOrNo.No)
+                                           .isEmailAddressConfidential(YesOrNo.No)
+                                           .build())
+                                .id(partyDetails.getId())
+                                .build());
+                        }
+                    } catch (Exception e) {
+                        log.info("Other people collection: {}", otherPeople);
+                        log.info("Party details get value: {}", partyDetails.getValue());
+                        log.info("Party details get id: {}", partyDetails.getId());
+                        log.info("Party details to builder: {}", partyDetails.getValue().toBuilder());
+                        log.info("Error while updating other people confidentiality details : {}", e.getMessage());
                     }
                     log.info("Other people party details after changing confidentiality: {}", partyDetails);
                 }
