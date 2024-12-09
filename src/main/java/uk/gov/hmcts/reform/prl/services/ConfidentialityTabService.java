@@ -163,10 +163,8 @@ public class ConfidentialityTabService {
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
-            ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
         Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
+        log.info("other persons {}",otherPersons);
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
         if (otherPersons.isPresent()) {
             List<PartyDetails> partyDetailsList =
@@ -177,6 +175,11 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
+        log.info("otherperson map {}",objectPartyDetailsMap);
+        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
+            ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
+        log.info("children and other people relation {}",childrenAndOtherPeopleRelations);
         if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
@@ -186,6 +189,7 @@ public class ConfidentialityTabService {
                     .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
+            log.info("children and other people relation list after filter {}",childrenAndOtherPeopleRelationList);
             Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
             List<Element<ChildDetailsRevised>> childDetailsReviseds = new ArrayList<>();
             if (children.isPresent()) {
@@ -197,6 +201,7 @@ public class ConfidentialityTabService {
                     .filter(child -> childIds.contains(String.valueOf(child.getId())))
                     .forEach(childDetailsReviseds::add);
             }
+            log.info("child details revised {}",childDetailsReviseds);
             for (Element<ChildDetailsRevised> childDetailsRevisedElement : childDetailsReviseds) {
                 //get the matched full name related result from childDetailsRevisedElement full name relation object
                 //fix any exceptions for below method
@@ -204,6 +209,7 @@ public class ConfidentialityTabService {
                     .stream()
                     .filter(other -> other.getChildId().equals(String.valueOf(childDetailsRevisedElement.getId())))
                     .findFirst();
+                log.info("optionalChildrenAndOtherPeopleRelation {}",optionalChildrenAndOtherPeopleRelation);
                 if (optionalChildrenAndOtherPeopleRelation.isPresent()) {
                     ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = optionalChildrenAndOtherPeopleRelation.get();
                     Element<OtherPersonConfidentialityDetails> tempOtherPersonConfidentialDetails =
@@ -215,10 +221,12 @@ public class ConfidentialityTabService {
                                    .firstName(childDetailsRevised.getFirstName())
                                    .lastName(childDetailsRevised.getLastName())
                                    .otherPerson(List.of(tempOtherPersonConfidentialDetails)).build()).build();
+                    log.info("child element {}",childElement);
                     childrenConfidentialDetails.add(childElement);
                 }
             }
         }
+        log.info("children confidential details {}",childrenConfidentialDetails);
         return childrenConfidentialDetails;
     }
 
