@@ -316,10 +316,11 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
-    public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(CaseData caseData) {
-        return ofNullable(caseData.getOtherPartyInTheCaseRevised())
+    public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations,
+                                                                         List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
+        return ofNullable(otherPartyInTheCaseRevised)
             .map(otherPeople -> {
-                List<String> otherPersonIds = ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                List<String> otherPersonIds = ofNullable(childrenAndOtherPeopleRelations)
                     .map(this::getConfidentialRelationForOtherPeople)
                     .orElseGet(ArrayList::new)
                     .stream()

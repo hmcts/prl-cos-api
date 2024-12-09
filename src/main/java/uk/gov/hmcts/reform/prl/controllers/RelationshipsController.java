@@ -378,9 +378,20 @@ public class RelationshipsController {
                 "before updating confidentiality {}",
                 objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
             );
+            log.info(
+                "before updating confidentiality relationship{}",
+                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
+            );
+            log.info(
+                "before updating confidentiality {}",
+                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
+            );
             caseDataUpdated.put(
                 "otherPartyInTheCaseRevised",
-                confidentialityTabService.updateOtherPeopleConfidentiality(caseData)
+                confidentialityTabService.updateOtherPeopleConfidentiality(
+                    updatedChildAndOtherPeopleRelations,
+                    caseData.getOtherPartyInTheCaseRevised()
+                )
             );
             log.info(
                 "after updating confidentiality {}",

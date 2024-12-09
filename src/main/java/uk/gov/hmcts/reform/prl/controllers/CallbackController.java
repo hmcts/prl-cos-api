@@ -333,7 +333,6 @@ public class CallbackController {
                                 .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
                     caseData))
-                .otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(caseData))
                 .state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
