@@ -327,12 +327,13 @@ public class ConfidentialityTabService {
                     .distinct()
                     .toList();
                 log.info("Other person ids are : {} ", otherPersonIds);
+                List<Element<PartyDetails>> otherPeopleList = new ArrayList<>();
                 for (int i = 0; i < otherPeople.size(); i++) {
                     Element<PartyDetails> partyDetails = otherPeople.get(i);
                     log.info("Other people party details before changing confidentiality: {}", partyDetails);
                     try {
                         if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
-                            otherPeople.set(i, Element.<PartyDetails>builder()
+                            otherPeopleList.add(Element.<PartyDetails>builder()
                                 .value(partyDetails.getValue().toBuilder()
                                            .isAddressConfidential(YesOrNo.Yes)
                                            .isPhoneNumberConfidential(YesOrNo.Yes)
@@ -341,7 +342,7 @@ public class ConfidentialityTabService {
                                 .id(partyDetails.getId())
                                 .build());
                         } else {
-                            otherPeople.set(i, Element.<PartyDetails>builder()
+                            otherPeopleList.add(Element.<PartyDetails>builder()
                                 .value(partyDetails.getValue().toBuilder()
                                            .isAddressConfidential(YesOrNo.No)
                                            .isPhoneNumberConfidential(YesOrNo.No)
@@ -376,7 +377,7 @@ public class ConfidentialityTabService {
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-                return otherPeople;
+                return otherPeopleList;
             })
             .orElseGet(() -> null);
     }
