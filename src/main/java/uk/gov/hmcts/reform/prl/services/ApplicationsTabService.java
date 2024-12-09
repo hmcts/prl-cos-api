@@ -1265,6 +1265,7 @@ public class ApplicationsTabService implements TabService {
             return Collections.emptyMap();
         }
         PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
+        log.info("current respondent data {}", currentRespondent);
         FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
