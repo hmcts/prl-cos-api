@@ -355,6 +355,17 @@ public class ConfidentialityTabService {
                         log.info("Party details get value: {}", partyDetails.getValue());
                         log.info("Party details get id: {}", partyDetails.getId());
                         log.info("Party details to builder: {}", partyDetails.getValue().toBuilder());
+                        log.info("Party details build with confidentiality: {}", partyDetails.getValue().toBuilder()
+                            .isAddressConfidential(YesOrNo.Yes)
+                            .isPhoneNumberConfidential(YesOrNo.Yes)
+                            .isEmailAddressConfidential(YesOrNo.Yes)
+                            .build());
+                        log.info("Party details element builder with confidentiality: {}", Element.<PartyDetails>builder()
+                            .value(partyDetails.getValue().toBuilder()
+                                       .isAddressConfidential(YesOrNo.Yes)
+                                       .isPhoneNumberConfidential(YesOrNo.Yes)
+                                       .isEmailAddressConfidential(YesOrNo.Yes)
+                                       .build()));
                         log.info("Error while updating other people confidentiality details : {}", e.getMessage());
                         throw new RuntimeException(e);
                     }
