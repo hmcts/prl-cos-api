@@ -83,16 +83,18 @@ public class CitizenAwpMapper {
                 citizenAwpRequest
             ))
             .additionalApplicationsBundle(additionalApplicationsBundles)
-            .awpWaTaskName(getAwpTaskName(additionalApplicationsBundle))
+            .awpWaTaskName(getAwpTaskName(additionalApplicationsBundle,true))
             //PRL-4024 - awp hwf ref no.
             .awpHwfRefNo(citizenAwpRequest.getHwfReferenceNumber())
             .build();
     }
 
-    public static String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle) {
+    public static String getAwpTaskName(AdditionalApplicationsBundle additionalApplicationsBundle, boolean isNotHWF) {
         //PRL-4023 - postfix to awp task name
         if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
             return "C2";
+        }else if(isNotHWF && null != additionalApplicationsBundle.getOtherApplicationsBundle()){
+            return additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType().getDisplayedValue();
         }
         return null;
     }
