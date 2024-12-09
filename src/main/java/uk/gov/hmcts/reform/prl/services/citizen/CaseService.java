@@ -1086,7 +1086,10 @@ public class CaseService {
         CitizenDocuments order = findPersonalServiceLipOrderPendingSos(citizenOrders);
         if (SERVED_PARTY_APPLICANT.equals(partyType) && null != order) {
             notifMap.put(IS_PERSONAL, true);
+            notifMap.put(IS_NEW, order.isNew());
+            notifMap.put(IS_FINAL, order.isFinal());
             notifMap.put(ORDER_TYPE_ID, order.getOrderTypeId());
+            notifMap.put(ORDER_MADE_DATE, order.getMadeDate());
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }
     }
