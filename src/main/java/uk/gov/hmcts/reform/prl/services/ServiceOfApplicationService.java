@@ -210,6 +210,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_BODY = "confirmationBody";
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
+    public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -4163,12 +4164,18 @@ public class ServiceOfApplicationService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         log.info("inside soaValidation");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         List<String> errorList = new ArrayList<>();
-
+        if (YesNoNotApplicable.NotApplicable.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            && isOtherPartySelectedToServe(caseData)
+            && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && isCafcasOptedToBeServed(caseData)
+            && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
+            errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -4206,8 +4213,17 @@ public class ServiceOfApplicationService {
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
+            .data(callbackRequest.getCaseDetails().getData())
             .build();
+    }
+
+    private boolean isCafcasOptedToBeServed(CaseData caseData) {
+        return null == caseData.getManageOrders() || !YesOrNo.Yes.equals(caseData.getManageOrders().getCafcassServedOptions());
+    }
+
+    private boolean isOtherPartySelectedToServe(CaseData caseData) {
+        return ObjectUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties())
+            || CollectionUtils.isEmpty(caseData.getServiceOfApplication().getSoaOtherParties().getValue());
     }
 
     /**
