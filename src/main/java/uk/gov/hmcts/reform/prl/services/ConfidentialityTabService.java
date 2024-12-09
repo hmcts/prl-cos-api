@@ -319,18 +319,18 @@ public class ConfidentialityTabService {
     public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(CaseData caseData) {
         return ofNullable(caseData.getOtherPartyInTheCaseRevised())
             .map(otherPeople -> {
-                List<String> otherPersonNames = ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                List<String> otherPersonIds = ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
                     .map(this::getConfidentialRelationForOtherPeople)
                     .orElseGet(ArrayList::new)
                     .stream()
-                    .map(ChildrenAndOtherPeopleRelation::getOtherPeopleFullName)
+                    .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
                     .distinct()
                     .toList();
-                log.info("Other person ids are : {} ", otherPersonNames);
+                log.info("Other person ids are : {} ", otherPersonIds);
                 for (int i = 0; i < otherPeople.size(); i++) {
                     Element<PartyDetails> partyDetails = otherPeople.get(i);
                     log.info("Other people party details before changing confidentiality: {}", partyDetails);
-                    if (otherPersonNames.contains((partyDetails.getValue().getFirstName()) + " " + partyDetails.getValue().getLastName())) {
+                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
                         otherPeople.set(i, Element.<PartyDetails>builder()
                             .value(partyDetails.getValue().toBuilder()
                                        .isAddressConfidential(YesOrNo.Yes)
