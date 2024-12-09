@@ -558,7 +558,7 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-        listOfHearingDetails.forEach(a -> log.info("first filter {}", a.getCaseRef()));
+        listOfHearingDetails.forEach(a -> log.info("first filter case id {}", a.getCaseRef()));
         log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
@@ -603,10 +603,17 @@ public class CaseDataService {
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
+                log.info("case id {}", cafCassCaseDetail.getId());
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
+
                 if (filteredHearing != null) {
+                    filteredHearing.getCaseHearings().forEach(a -> log.info(
+                        "hearing id' {} for case number {}",
+                        a.getHearingID(),
+                        cafCassCaseDetail.getId()
+                    ));
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
