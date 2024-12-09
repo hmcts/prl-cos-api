@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.testingsupport;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -155,7 +154,6 @@ public class TestingSupportControllerTest {
     }
 
     @Test
-    @Ignore
     public void testAboutToSubmitCaseCreationCourtNav() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         testingSupportController.aboutToSubmitCaseCreationCourtNav(authToken, s2sToken, callbackRequest);
