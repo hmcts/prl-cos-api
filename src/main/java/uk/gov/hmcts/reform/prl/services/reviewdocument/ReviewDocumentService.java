@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -231,8 +232,10 @@ public class ReviewDocumentService {
 
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
-            quarantineLegalDocElement = resetUploaderRoleForCourtNavUploadedDocs(quarantineLegalDocElement);
-
+            //TEMP FIX TO RESOLVE UPLOADER_ROLE NULL FROM XUI ISSUE
+            if (quarantineLegalDocElement.isPresent() && null == quarantineLegalDocElement.get().getValue().getUploaderRole()) {
+                quarantineLegalDocElement = resetUploaderRole(quarantineLegalDocElement);
+            }
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
                 legalDocElement,
@@ -243,13 +246,27 @@ public class ReviewDocumentService {
         }
     }
 
-    private static Optional<Element<QuarantineLegalDoc>> resetUploaderRoleForCourtNavUploadedDocs(Optional<Element<QuarantineLegalDoc>>
-                                                                                                      quarantineLegalDocElement) {
+    private Optional<Element<QuarantineLegalDoc>> resetUploaderRole(Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement) {
+
         if (quarantineLegalDocElement.isPresent() && COURTNAV.equals(quarantineLegalDocElement.get().getValue().getUploadedBy())) {
-            quarantineLegalDocElement = Optional.of(element(
+            return setUploaderRole(quarantineLegalDocElement, COURTNAV);
+        } else if (quarantineLegalDocElement.isPresent()
+            && (uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS.getDisplayedValue().equals(
+            quarantineLegalDocElement.get().getValue().getDocumentParty())
+            || CAFCASS_CYMRU.getDisplayedValue().equals(quarantineLegalDocElement.get().getValue().getDocumentParty()))) {
+            return setUploaderRole(quarantineLegalDocElement, CAFCASS);
+        }
+        return quarantineLegalDocElement;
+    }
+
+    private static Optional<Element<QuarantineLegalDoc>> setUploaderRole(Optional<Element<QuarantineLegalDoc>>
+                                                                             quarantineLegalDocElement,
+                                                                         String uploaderRole) {
+        if (quarantineLegalDocElement.isPresent()) {
+            return Optional.of(element(
                 quarantineLegalDocElement.get().getId(),
                 quarantineLegalDocElement.get().getValue().toBuilder().uploaderRole(
-                    COURTNAV).build()
+                    uploaderRole).build()
             ));
         }
         return quarantineLegalDocElement;
