@@ -332,7 +332,9 @@ public class CallbackController {
                                     Element::getValue)
                                 .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                    caseData)).state(
+                    caseData))
+                .otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(caseData))
+                .state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
