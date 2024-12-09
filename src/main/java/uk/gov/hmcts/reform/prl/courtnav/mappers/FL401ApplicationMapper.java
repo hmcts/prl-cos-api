@@ -522,7 +522,7 @@ public class FL401ApplicationMapper {
                 .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnMortgageOther())
                 .mortgageLenderName(courtNavCaseData.getFl401().getTheHome().getMortgageLenderName())
                 .mortgageNumber(courtNavCaseData.getFl401().getTheHome().getMortgageNumber())
-                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getLandlordAddress()))
+                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getMortgageLenderAddress()))
                 .build();
         }
         return mortgage;
