@@ -356,6 +356,7 @@ public class ConfidentialityTabService {
                         log.info("Party details get id: {}", partyDetails.getId());
                         log.info("Party details to builder: {}", partyDetails.getValue().toBuilder());
                         log.info("Error while updating other people confidentiality details : {}", e.getMessage());
+                        throw new RuntimeException(e);
                     }
                     log.info("Other people party details after changing confidentiality: {}", partyDetails);
                 }
