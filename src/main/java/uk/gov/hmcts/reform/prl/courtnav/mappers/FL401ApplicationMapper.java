@@ -447,8 +447,6 @@ public class FL401ApplicationMapper {
     private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
 
         InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .name(null) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
-            .party(null) //Prl-6617: Attending the hearing doesn't appear in application tab due to fields not being populated.
             .language(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
             .otherAssistance(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect())
             .build();
