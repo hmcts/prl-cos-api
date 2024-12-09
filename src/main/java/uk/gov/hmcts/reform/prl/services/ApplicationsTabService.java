@@ -1305,7 +1305,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getRespondentRelationDateInfoObject() != null) {
             RespondentRelationDateInfo resRelInfo = caseData.getRespondentRelationDateInfoObject();
             if (resRelInfo.getRelationStartAndEndComplexType() != null) {
-                rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
+                rs.relationshipDateComplexStartDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
                 rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
             }
             rs.applicantRelationshipDate(resRelInfo.getApplicantRelationshipDate());
