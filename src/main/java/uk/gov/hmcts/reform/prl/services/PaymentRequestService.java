@@ -373,6 +373,9 @@ public class PaymentRequestService {
     }
 
     private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
-        return FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType());
+        return FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())
+            || FeeType.PARENTAL_ORDER.equals(createPaymentRequest.getFeeType())
+            || FeeType.DECLARATION_OF_PARENTAGE.equals(createPaymentRequest.getFeeType())
+            || FeeType.SPECIAL_GUARDIANSHIP_ORDER.equals(createPaymentRequest.getFeeType());
     }
 }
