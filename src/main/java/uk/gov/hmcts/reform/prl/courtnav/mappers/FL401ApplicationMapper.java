@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -91,6 +93,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -697,6 +700,12 @@ public class FL401ApplicationMapper {
 
     private PartyDetails mapApplicant(ApplicantsDetails applicant) {
 
+        ContactPreferences contactPreferences = null;
+        if (isNotEmpty(applicant.getApplicantPreferredContact())) {
+            contactPreferences = applicant.getApplicantPreferredContact()
+                .contains(PreferredContactEnum.email) ? ContactPreferences.email : ContactPreferences.post;
+        }
+
         return PartyDetails.builder()
             .firstName(applicant.getApplicantFirstName())
             .lastName(applicant.getApplicantLastName())
@@ -722,6 +731,7 @@ public class FL401ApplicationMapper {
             .representativeLastName(applicant.getLegalRepresentativeLastName())
             .solicitorTelephone(applicant.getLegalRepresentativePhone())
             .solicitorReference(applicant.getLegalRepresentativeReference())
+            .contactPreferences(contactPreferences)
             .solicitorOrg(Organisation.builder()
                               .organisationName(applicant.getLegalRepresentativeFirm())
                               .build())
