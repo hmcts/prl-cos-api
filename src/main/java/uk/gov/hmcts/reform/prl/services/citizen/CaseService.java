@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -1430,27 +1431,65 @@ public class CaseService {
                 .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
-                    if (null != awp.getC2DocumentBundle()
-                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getC2DocumentBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getC2DocumentBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
 
                     //Other bundle docs
-                    if (null != awp.getOtherApplicationsBundle()
-                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getOtherApplicationsBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getOtherApplicationsBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
-
-                    //NEED SUPPORTING DOCUMENTS ?
                 });
         }
         return applicationsWithinProceedings;
+    }
+
+    private List<CitizenDocuments> getSupportingEvidenceDocuments(AdditionalApplicationsBundle awp,
+                                                                  List<Element<SupportingEvidenceBundle>> documents,
+                                                                  String partyId) {
+        return documents.stream()
+            .map(Element::getValue)
+            .map(document ->
+                CitizenDocuments.builder()
+                    .partyId(partyId)
+                    .partyType(awp.getPartyType().getDisplayedValue())
+                    .partyName(awp.getAuthor())
+                    .uploadedBy(awp.getAuthor())
+                    .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                    .document(document.getDocument())
+                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                    .build()
+            ).toList();
     }
 
     private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
@@ -1465,12 +1504,13 @@ public class CaseService {
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
-                                                   List<Element<Document>> documents) {
+                                                   List<Element<Document>> documents,
+                                                   String partyId) {
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
                      CitizenDocuments.builder()
-                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                         .partyId(partyId)
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
