@@ -162,6 +162,7 @@ public class CaseService {
     public static final String IS_PERSONAL = "isPersonal";
     public static final String PARTY_NAMES = "partyNames";
     public static final String ORDER_TYPE_ID = "orderTypeId";
+    public static final String ORDER_MADE_DATE = "orderMadeDate";
     public static final String OCCUPATION_ORDER = "occupation";
     public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
     private final CoreCaseDataApi coreCaseDataApi;
@@ -1056,6 +1057,7 @@ public class CaseService {
         notifMap.put(IS_FINAL, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal));
         notifMap.put(IS_MULTIPLE, multipleOrdersServed.size() > 1);
         notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
+        notifMap.put(ORDER_MADE_DATE, citizenOrders.get(0).getMadeDate());
 
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
@@ -1085,7 +1087,10 @@ public class CaseService {
         CitizenDocuments order = findPersonalServiceLipOrderPendingSos(citizenOrders);
         if (SERVED_PARTY_APPLICANT.equals(partyType) && null != order) {
             notifMap.put(IS_PERSONAL, true);
+            notifMap.put(IS_NEW, order.isNew());
+            notifMap.put(IS_FINAL, order.isFinal());
             notifMap.put(ORDER_TYPE_ID, order.getOrderTypeId());
+            notifMap.put(ORDER_MADE_DATE, order.getMadeDate());
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }
     }
@@ -1864,6 +1869,8 @@ public class CaseService {
             .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) && (Boolean) notifMap.get(IS_PERSONAL))
             .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
             .orderTypeId(ObjectUtils.isNotEmpty(notifMap.get(ORDER_TYPE_ID)) ? (String) notifMap.get(ORDER_TYPE_ID) : null)
+            .orderMadeDate(ObjectUtils.isNotEmpty(notifMap.get(ORDER_MADE_DATE)) ? LocalDate.parse(
+                notifMap.get(ORDER_MADE_DATE).toString(), DATE_FORMATTER_YYYY_MM_DD).format(DATE_FORMATTER_YYYY_MM_DD) : null)
             .build();
     }
 }
