@@ -332,8 +332,7 @@ public class CallbackController {
                                     Element::getValue)
                                 .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                    caseData))
-                .state(
+                    caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
@@ -378,7 +377,6 @@ public class CallbackController {
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
-            log.info("case data before submission: {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

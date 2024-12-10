@@ -185,7 +185,6 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        log.info("Data before ccd call: {}", objectMapper.writeValueAsString(caseDataToSubmit));
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -194,7 +193,6 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
-        log.info("Data after ccd call: {}", objectMapper.writeValueAsString(caseDetails.getData()));
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
     }
