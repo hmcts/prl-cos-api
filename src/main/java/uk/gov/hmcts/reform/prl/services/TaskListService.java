@@ -37,8 +37,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_FINAL_ORDERS_ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DECISION_OUTCOME_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREPARE_FOR_HEARING_CONDUCT_HEARING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -306,7 +309,10 @@ public class TaskListService {
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
-            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
+            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+            || ALL_FINAL_ORDERS_ISSUED_STATE.equalsIgnoreCase(state)
+            || PREPARE_FOR_HEARING_CONDUCT_HEARING_STATE.equals(state)
+            || DECISION_OUTCOME_STATE.equals(state)) {
             try {
                 if (Event.AMEND_MIAM_POLICY_UPGRADE.getId().equals(callbackRequest.getEventId())) {
                     caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
