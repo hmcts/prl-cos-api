@@ -42,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -629,6 +630,167 @@ public class ConfidentialityTabServiceTest {
         Assertions.assertEquals(0, result.size());
     }
 
+    @Test
+    public void testUpdateOtherPeopleConfidentiality_withConfidentialRelations() {
+        // Mock data
+        ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
+            .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .childAndOtherPeopleRelation(RelationshipsEnum.other)
+            .otherPeopleFullName("ABC 1 XYZ 2")
+            .childId("00000000-0000-0000-0000-000000000000").build();
+
+        partyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000")).value(
+            partyDetails1).build();
+        List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
+
+        List<Element<ChildrenAndOtherPeopleRelation>> relations = List.of(Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).build());
+
+        // Call the method
+        List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
+
+        // Assertions
+        Assertions.assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsAddressConfidential());
+        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
+        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsEmailAddressConfidential());
+    }
+
+    @Test
+    public void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations() {
+        // Mock data
+        ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
+            .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
+            .isChildLivesWithPersonConfidential(YesOrNo.No)
+            .childAndOtherPeopleRelation(RelationshipsEnum.other)
+            .otherPeopleFullName("ABC 1 XYZ 2")
+            .childId("00000000-0000-0000-0000-000000000000").build();
+
+        partyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000")).value(
+            partyDetails1).build();
+        List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
+
+        List<Element<ChildrenAndOtherPeopleRelation>> relations = List.of(Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).build());
+
+        // Call the method
+        List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
+
+        // Assertions
+        Assertions.assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+    }
+
+    @Test
+    public void testUpdateOtherPeopleConfidentiality_withEmptyRelations() {
+        // Mock data
+        partyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
+            partyDetails1).build();
+        List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
+
+        List<Element<ChildrenAndOtherPeopleRelation>> relations = List.of();
+
+        // Call the method
+        List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
+
+        // Assertions
+        Assertions.assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+    }
+
+    @Test
+    public void testUpdateOtherPeopleConfidentiality_withNullRelations() {
+        // Mock data
+        partyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
+            partyDetails1).build();
+        List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
+
+        // Call the method
+        List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(null, otherPartyList);
+
+        // Assertions
+        Assertions.assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.get(0).getValue();
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+    }
+
+    @Test
+    public void testUpdateOtherPeopleConfidentiality_withNullOtherPartyList() {
+        // Mock data
+        ChildrenAndOtherPeopleRelation relation = mock(ChildrenAndOtherPeopleRelation.class);
+
+        List<Element<ChildrenAndOtherPeopleRelation>> relations = List.of(Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).build());
+
+        // Call the method
+        List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, null);
+
+        // Assertions
+        Assertions.assertNull(result);
+    }
 
 
 }

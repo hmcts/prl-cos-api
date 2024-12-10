@@ -372,34 +372,13 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS, null);
         caseDataUpdated.put("childAndOtherPeopleRelations", updatedChildAndOtherPeopleRelations);
-        // log (caseData.getOtherPartyInTheCaseRevised()) in json format
-        try {
-            log.info(
-                "before updating confidentiality {}",
-                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
-            );
-            log.info(
-                "before updating confidentiality relationship{}",
-                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
-            );
-            log.info(
-                "before updating confidentiality {}",
-                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
-            );
-            caseDataUpdated.put(
-                "otherPartyInTheCaseRevised",
-                confidentialityTabService.updateOtherPeopleConfidentiality(
-                    updatedChildAndOtherPeopleRelations,
-                    caseData.getOtherPartyInTheCaseRevised()
-                )
-            );
-            log.info(
-                "after updating confidentiality {}",
-                objectMapper.writeValueAsString(caseData.getOtherPartyInTheCaseRevised())
-            );
-        } catch (Exception e) {
-            log.error("Error while logging otherPartyInTheCaseRevised", e);
-        }
+        caseDataUpdated.put(
+            "otherPartyInTheCaseRevised",
+            confidentialityTabService.updateOtherPeopleConfidentiality(
+                updatedChildAndOtherPeopleRelations,
+                caseData.getOtherPartyInTheCaseRevised()
+            )
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

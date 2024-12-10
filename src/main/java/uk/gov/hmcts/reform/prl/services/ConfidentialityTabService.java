@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -164,7 +163,6 @@ public class ConfidentialityTabService {
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
-        log.info("other persons {}",otherPersons);
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
         if (otherPersons.isPresent()) {
             List<PartyDetails> partyDetailsList =
@@ -175,11 +173,9 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
-        log.info("otherperson map {}",objectPartyDetailsMap);
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
             ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
-        log.info("children and other people relation {}",childrenAndOtherPeopleRelations);
         if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
@@ -189,7 +185,6 @@ public class ConfidentialityTabService {
                     .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
-            log.info("children and other people relation list after filter {}",childrenAndOtherPeopleRelationList);
             Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
             List<Element<ChildDetailsRevised>> childDetailsReviseds = new ArrayList<>();
             if (children.isPresent()) {
@@ -201,7 +196,6 @@ public class ConfidentialityTabService {
                     .filter(child -> childIds.contains(String.valueOf(child.getId())))
                     .forEach(childDetailsReviseds::add);
             }
-            log.info("child details revised {}",childDetailsReviseds);
             for (Element<ChildDetailsRevised> childDetailsRevisedElement : childDetailsReviseds) {
                 //get the matched full name related result from childDetailsRevisedElement full name relation object
                 //fix any exceptions for below method
@@ -209,7 +203,6 @@ public class ConfidentialityTabService {
                     .stream()
                     .filter(other -> other.getChildId().equals(String.valueOf(childDetailsRevisedElement.getId())))
                     .findFirst();
-                log.info("optionalChildrenAndOtherPeopleRelation {}",optionalChildrenAndOtherPeopleRelation);
                 if (optionalChildrenAndOtherPeopleRelation.isPresent()) {
                     ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = optionalChildrenAndOtherPeopleRelation.get();
                     Element<OtherPersonConfidentialityDetails> tempOtherPersonConfidentialDetails =
@@ -221,12 +214,10 @@ public class ConfidentialityTabService {
                                    .firstName(childDetailsRevised.getFirstName())
                                    .lastName(childDetailsRevised.getLastName())
                                    .otherPerson(List.of(tempOtherPersonConfidentialDetails)).build()).build();
-                    log.info("child element {}",childElement);
                     childrenConfidentialDetails.add(childElement);
                 }
             }
         }
-        log.info("children confidential details {}",childrenConfidentialDetails);
         return childrenConfidentialDetails;
     }
 
@@ -325,7 +316,7 @@ public class ConfidentialityTabService {
     }
 
     public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations,
-                                                                         List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
+                                                                        List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
         return ofNullable(otherPartyInTheCaseRevised)
             .map(otherPeople -> {
                 List<String> otherPersonIds = ofNullable(childrenAndOtherPeopleRelations)
@@ -335,56 +326,28 @@ public class ConfidentialityTabService {
                     .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
                     .distinct()
                     .toList();
-                log.info("Other person ids are : {} ", otherPersonIds);
                 List<Element<PartyDetails>> otherPeopleList = new ArrayList<>();
                 for (int i = 0; i < otherPeople.size(); i++) {
                     Element<PartyDetails> partyDetails = otherPeople.get(i);
-                    log.info("Other people party details before changing confidentiality: {}", partyDetails);
-                    try {
-                        if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
-                            otherPeopleList.add(Element.<PartyDetails>builder()
-                                .value(partyDetails.getValue().toBuilder()
-                                           .isAddressConfidential(YesOrNo.Yes)
-                                           .isPhoneNumberConfidential(YesOrNo.Yes)
-                                           .isEmailAddressConfidential(YesOrNo.Yes)
-                                           .build())
-                                .id(partyDetails.getId())
-                                .build());
-                        } else {
-                            otherPeopleList.add(Element.<PartyDetails>builder()
-                                .value(partyDetails.getValue().toBuilder()
-                                           .isAddressConfidential(YesOrNo.No)
-                                           .isPhoneNumberConfidential(YesOrNo.No)
-                                           .isEmailAddressConfidential(YesOrNo.No)
-                                           .build())
-                                .id(partyDetails.getId())
-                                .build());
-                        }
-                    } catch (Exception e) {
-                        log.info("Other people collection: {}", otherPeople);
-                        log.info("Party details get value: {}", partyDetails.getValue());
-                        log.info("Party details get id: {}", partyDetails.getId());
-                        log.info("Party details to builder: {}", partyDetails.getValue().toBuilder());
-                        log.info("Party details build with confidentiality: {}", partyDetails.getValue().toBuilder()
-                            .isAddressConfidential(YesOrNo.Yes)
-                            .isPhoneNumberConfidential(YesOrNo.Yes)
-                            .isEmailAddressConfidential(YesOrNo.Yes)
-                            .build());
-                        log.info("Party details element builder with confidentiality: {}", Element.<PartyDetails>builder()
-                            .value(partyDetails.getValue().toBuilder()
-                                       .isAddressConfidential(YesOrNo.Yes)
-                                       .isPhoneNumberConfidential(YesOrNo.Yes)
-                                       .isEmailAddressConfidential(YesOrNo.Yes)
-                                       .build()));
-                        log.info("Error while updating other people confidentiality details : {}", e.getMessage());
-                        throw new RuntimeException(e);
+                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
+                        otherPeopleList.add(Element.<PartyDetails>builder()
+                                                .value(partyDetails.getValue().toBuilder()
+                                                           .isAddressConfidential(YesOrNo.Yes)
+                                                           .isPhoneNumberConfidential(YesOrNo.Yes)
+                                                           .isEmailAddressConfidential(YesOrNo.Yes)
+                                                           .build())
+                                                .id(partyDetails.getId())
+                                                .build());
+                    } else {
+                        otherPeopleList.add(Element.<PartyDetails>builder()
+                                                .value(partyDetails.getValue().toBuilder()
+                                                           .isAddressConfidential(YesOrNo.No)
+                                                           .isPhoneNumberConfidential(YesOrNo.No)
+                                                           .isEmailAddressConfidential(YesOrNo.No)
+                                                           .build())
+                                                .id(partyDetails.getId())
+                                                .build());
                     }
-                    log.info("Other people party details after changing confidentiality: {}", partyDetails);
-                }
-                try {
-                    log.info("Other people after update : {} ", objectMapper.writeValueAsString(otherPeople));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
                 }
                 return otherPeopleList;
             })
