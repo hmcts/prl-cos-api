@@ -619,3 +619,7 @@ amRoleAssignment:
 sendandreply:
   service-code: ABA5
   category-id: JudgeType
+
+closing_case:
+  unallocated_roleCategory: ADMIN,CTSC,LEGAL_OPERATIONS,JUDICIAL,OTHER_GOV_DEPT
+  unallocated_roleName: allocated-admin-caseworker,allocated-ctsc-caseworker,allocated-legal-adviser,gatekeeping-judge,hearing-judge,allocated-judge

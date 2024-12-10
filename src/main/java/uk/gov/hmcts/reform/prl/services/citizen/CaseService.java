@@ -847,7 +847,7 @@ public class CaseService {
         citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
 
         //Applications within proceedings
-        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
+        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData, partyIdAndType));
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
@@ -1525,12 +1525,14 @@ public class CaseService {
             .build();
     }
 
-    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData) {
+    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData,
+                                                                               Map<String, String> partyIdAndType) {
         List<CitizenDocuments> applicationsWithinProceedings = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             caseData.getAdditionalApplicationsBundle().stream()
                 .map(Element::getValue)
+                .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
                     if (null != awp.getC2DocumentBundle()
@@ -1554,6 +1556,17 @@ public class CaseService {
                 });
         }
         return applicationsWithinProceedings;
+    }
+
+    private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
+                                               String partyId) {
+        if (null != addlAppBundle
+            && CollectionUtils.isNotEmpty(addlAppBundle.getSelectedParties())) {
+            return addlAppBundle.getSelectedParties().stream()
+                .map(Element::getValue)
+                .anyMatch(servedParty -> partyId.equals(servedParty.getPartyId()));
+        }
+        return false;
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
