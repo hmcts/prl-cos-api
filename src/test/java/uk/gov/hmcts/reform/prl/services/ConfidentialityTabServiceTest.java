@@ -42,7 +42,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -654,7 +653,8 @@ public class ConfidentialityTabServiceTest {
             .isEmailAddressConfidential(YesOrNo.Yes)
             .build();
 
-        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000")).value(
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString(
+            "00000000-0000-0000-0000-000000000000")).value(
             partyDetails1).build();
         List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
 
@@ -695,7 +695,8 @@ public class ConfidentialityTabServiceTest {
             .isEmailAddressConfidential(YesOrNo.Yes)
             .build();
 
-        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000")).value(
+        Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString(
+            "00000000-0000-0000-0000-000000000000")).value(
             partyDetails1).build();
         List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
 
