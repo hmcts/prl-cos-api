@@ -3,14 +3,12 @@ package uk.gov.hmcts.reform.prl.enums;
 public enum ServeOrderFieldsEnum {
 
     serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
-    isCafcass("isCafcass"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     serveOrderDynamicList("serveOrderDynamicList"),
     serveToRespondentOptions("serveToRespondentOptions"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     recipientsOptions("recipientsOptions"),
     otherParties("otherParties"),
-    cafcassServedOptions("cafcassServedOptions"),
     cafcassCymruServedOptions("cafcassCymruServedOptions"),
     cafcassCymruEmail("cafcassCymruEmail"),
     cafcassEmailId("cafcassEmailId"),
@@ -33,7 +31,10 @@ public enum ServeOrderFieldsEnum {
     postalInformationCaOnlyC47a("postalInformationCaOnlyC47a"),
     emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
     isOrderCompleteToServe("isOrderCompleteToServe"),
-    doesOrderClosesCase("doesOrderClosesCase");
+    doesOrderClosesCase("doesOrderClosesCase"),
+    requestSafeGuardingLetterUpdate("requestSafeGuardingLetterUpdate"),
+    safeGuardingLetterUploadDueDate("safeGuardingLetterUploadDueDate"),
+    draftOrderCollectionId("draftOrderCollectionId");
 
     private final String value;
 

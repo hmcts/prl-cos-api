@@ -1,118 +1,115 @@
 {
-  "appl_allApplicants":[
+  "appl_allApplicants": [
     {
-      "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
-      "applicantFirstName":"applicantFN1",
-      "applicantLastName":"applicantLN1",
-      "detailsKnown":"Yes",
-      "startAlternative":"",
-      "start":"Yes",
-      "contactDetailsPrivate":[
+      "id": "188b7c9e-4780-44c8-9252-36b1402726d5",
+      "applicantFirstName": "applicantFN1",
+      "applicantLastName": "applicantLN1",
+      "detailsKnown": "Yes",
+      "startAlternative": "",
+      "start": "Yes",
+      "contactDetailsPrivate": [
         "address",
         "telephone",
         "email"
       ],
-      "contactDetailsPrivateAlternative":[
-
+      "contactDetailsPrivateAlternative": [
       ],
-      "relationshipDetails":{
-        "relationshipToChildren":[
+      "relationshipDetails": {
+        "relationshipToChildren": [
           {
-            "childId":"b3b7208a-443e-432c-9824-0d7ca768f7b9",
-            "relationshipType":"Father",
-            "otherRelationshipTypeDetails":""
+            "childId": "b3b7208a-443e-432c-9824-0d7ca768f7b9",
+            "relationshipType": "Father",
+            "otherRelationshipTypeDetails": ""
           },
           {
-            "childId":"d2513831-e99f-4f38-af32-be46b9802a19",
-            "relationshipType":"Father",
-            "otherRelationshipTypeDetails":""
+            "childId": "d2513831-e99f-4f38-af32-be46b9802a19",
+            "relationshipType": "Father",
+            "otherRelationshipTypeDetails": ""
           }
         ]
       },
-      "personalDetails":{
-        "haveYouChangeName":"Yes",
-        "applPreviousName":"applicantFN11 applicantLN11",
-        "dateOfBirth":{
-          "year":"1990",
-          "month":"10",
-          "day":"10"
+      "personalDetails": {
+        "haveYouChangeName": "Yes",
+        "applPreviousName": "applicantFN11 applicantLN11",
+        "dateOfBirth": {
+          "year": "1990",
+          "month": "10",
+          "day": "10"
         },
-        "gender":"Male",
-        "otherGenderDetails":"",
-        "applicantPlaceOfBirth":"London"
+        "gender": "Male",
+        "otherGenderDetails": "",
+        "applicantPlaceOfBirth": "London"
       },
-      "applicantContactDetail":{
-        "canProvideEmail":"Yes",
-        "emailAddress":"app1@gmail.com",
-        "canProvideTelephoneNumber":"Yes",
-        "telephoneNumber":"07438408341",
-        "canNotProvideTelephoneNumberReason":"",
-        "canLeaveVoiceMail":"Yes",
-        "applicantContactPreferences":"digital"
+      "applicantContactDetail": {
+        "canProvideEmail": "Yes",
+        "emailAddress": "app1@gmail.com",
+        "canProvideTelephoneNumber": "Yes",
+        "telephoneNumber": "07438408341",
+        "canNotProvideTelephoneNumberReason": "",
+        "canLeaveVoiceMail": "Yes",
+        "applicantContactPreferences": "email"
       },
-      "applicantAddressPostcode":"CV3 2ND",
-      "applicantAddress1":"app1 adrs line 1",
-      "applicantAddress2":"app1 adrs line 2",
-      "applicantAddressTown":"app 1 adrs line 1",
-      "applicantAddressCounty":"app1County",
-      "applicantAddressHistory":"No",
-      "applicantProvideDetailsOfPreviousAddresses":"app1 adrs line 11\r\napp1 adrs line 22\r\napp1 11 Town"
+      "applicantAddressPostcode": "CV3 2ND",
+      "applicantAddress1": "app1 adrs line 1",
+      "applicantAddress2": "app1 adrs line 2",
+      "applicantAddressTown": "app 1 adrs line 1",
+      "applicantAddressCounty": "app1County",
+      "applicantAddressHistory": "No",
+      "applicantProvideDetailsOfPreviousAddresses": "app1 adrs line 11\r\napp1 adrs line 22\r\napp1 11 Town"
     },
     {
-      "id":"4204ca6a-dd6f-49e2-9c34-41fe153f0aaf",
-      "applicantFirstName":"applicantFN2",
-      "applicantLastName":"applicantLN2",
-      "detailsKnown":"I dont know",
-      "startAlternative":"No",
-      "start":"",
-      "contactDetailsPrivate":[
-
+      "id": "4204ca6a-dd6f-49e2-9c34-41fe153f0aaf",
+      "applicantFirstName": "applicantFN2",
+      "applicantLastName": "applicantLN2",
+      "detailsKnown": "I dont know",
+      "startAlternative": "No",
+      "start": "",
+      "contactDetailsPrivate": [
       ],
-      "contactDetailsPrivateAlternative":[
-
+      "contactDetailsPrivateAlternative": [
       ],
-      "relationshipDetails":{
-        "relationshipToChildren":[
+      "relationshipDetails": {
+        "relationshipToChildren": [
           {
-            "childId":"b3b7208a-443e-432c-9824-0d7ca768f7b9",
-            "relationshipType":"Father",
-            "otherRelationshipTypeDetails":""
+            "childId": "b3b7208a-443e-432c-9824-0d7ca768f7b9",
+            "relationshipType": "Father",
+            "otherRelationshipTypeDetails": ""
           },
           {
-            "childId":"d2513831-e99f-4f38-af32-be46b9802a19",
-            "relationshipType":"Father",
-            "otherRelationshipTypeDetails":""
+            "childId": "d2513831-e99f-4f38-af32-be46b9802a19",
+            "relationshipType": "Father",
+            "otherRelationshipTypeDetails": ""
           }
         ]
       },
-      "personalDetails":{
-        "haveYouChangeName":"No",
-        "applPreviousName":"",
-        "dateOfBirth":{
-          "year":"1995",
-          "month":"10",
-          "day":"10"
+      "personalDetails": {
+        "haveYouChangeName": "No",
+        "applPreviousName": "",
+        "dateOfBirth": {
+          "year": "1995",
+          "month": "10",
+          "day": "10"
         },
-        "gender":"Female",
-        "otherGenderDetails":"",
-        "applicantPlaceOfBirth":"Coventry"
+        "gender": "Female",
+        "otherGenderDetails": "",
+        "applicantPlaceOfBirth": "Coventry"
       },
-      "applicantContactDetail":{
-        "canProvideEmail":"No",
-        "emailAddress":"",
-        "canProvideTelephoneNumber":"No",
-        "telephoneNumber":"",
-        "canNotProvideTelephoneNumberReason":"app2 can't provide telephone",
-        "canLeaveVoiceMail":"No",
-        "applicantContactPreferences":"post"
+      "applicantContactDetail": {
+        "canProvideEmail": "No",
+        "emailAddress": "",
+        "canProvideTelephoneNumber": "No",
+        "telephoneNumber": "",
+        "canNotProvideTelephoneNumberReason": "app2 can't provide telephone",
+        "canLeaveVoiceMail": "No",
+        "applicantContactPreferences": "post"
       },
-      "applicantAddressPostcode":"CV34BA",
-      "applicantAddress1":"app2 adrs line 1",
-      "applicantAddress2":"app2 adrs line 2",
-      "applicantAddressTown":"app2Town",
-      "applicantAddressCounty":"app2County",
-      "applicantAddressHistory":"Yes",
-      "applicantProvideDetailsOfPreviousAddresses":""
+      "applicantAddressPostcode": "CV34BA",
+      "applicantAddress1": "app2 adrs line 1",
+      "applicantAddress2": "app2 adrs line 2",
+      "applicantAddressTown": "app2Town",
+      "applicantAddressCounty": "app2County",
+      "applicantAddressHistory": "Yes",
+      "applicantProvideDetailsOfPreviousAddresses": ""
     }
   ]
 }

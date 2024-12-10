@@ -3,15 +3,19 @@ package uk.gov.hmcts.reform.prl.services.tab.summary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmRevisedGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
@@ -29,6 +33,7 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
 @Service
@@ -48,6 +53,8 @@ public class CaseSummaryTabService implements TabService {
     private final DateOfSubmissionGenerator dateOfSubmissionGenerator;
     private final ObjectMapper objectMapper;
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
+
+    private final CaseClosedDateGenerator caseClosedDateGenerator;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -69,8 +76,10 @@ public class CaseSummaryTabService implements TabService {
 
         // For Collection Fields, We should do manually since it should have element structure..
         CaseSummary caseSummary = otherProceedingsGenerator.generate(caseData);
-
-        summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
+        List<Element<OtherProceedings>> otherProceedingsForSummaryTab = otherProceedingsGenerator.getOtherProceedingsDetails(caseData);
+        if (CollectionUtils.isNotEmpty(otherProceedingsForSummaryTab)) {
+            summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsForSummaryTab);
+        }
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
         return summaryTabFields;
     }
@@ -81,7 +90,7 @@ public class CaseSummaryTabService implements TabService {
 
             return List.of(allocatedJudgeDetailsGenerator,
                     caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
-                    specialArrangementsGenerator, dateOfSubmissionGenerator);
+                    specialArrangementsGenerator, dateOfSubmissionGenerator, caseClosedDateGenerator);
 
         }
 
@@ -92,8 +101,11 @@ public class CaseSummaryTabService implements TabService {
                 orderAppliedForGenerator,
                 specialArrangementsGenerator,
                 urgencyGenerator,
-                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator : allegationOfHarmGenerator,
-                dateOfSubmissionGenerator
+                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                        || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
+                        : allegationOfHarmGenerator,
+                dateOfSubmissionGenerator,
+                caseClosedDateGenerator
         );
     }
 

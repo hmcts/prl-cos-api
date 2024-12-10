@@ -362,7 +362,11 @@ public class ConfidentialityTabServiceTest {
             partyDetailsFirstRec,
             partyDetailsSecondRec
         );
-        CaseData caseData = CaseData.builder().applicants(listOfPartyDetails).children(listOfChild).caseTypeOfApplication(C100_CASE_TYPE).build();
+        CaseData caseData = CaseData.builder()
+            .applicants(listOfPartyDetails)
+            .children(listOfChild)
+            .respondents(listOfPartyDetails)
+            .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
@@ -442,6 +446,7 @@ public class ConfidentialityTabServiceTest {
                                          .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
                                          .build())
             .applicantsFL401(partyDetails1)
+            .respondentsFL401(partyDetails1)
             .home(home)
             .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);

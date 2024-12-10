@@ -16,7 +16,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -25,37 +24,23 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.json.JsonObject;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_END;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_START;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.FINAL_ORDER_TITLE;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @Service
@@ -66,11 +51,6 @@ public class SendgridService {
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
     public static final String NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY = "Notification to party sent successfully";
-    @Value("${send-grid.api-key}")
-    private String apiKey;
-
-    @Value("${xui.url}")
-    private String manageCaseUrl;
 
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
@@ -83,7 +63,6 @@ public class SendgridService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
-    private final ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
         String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
@@ -109,7 +88,7 @@ public class SendgridService {
         }
     }
 
-    public void sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
+    public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
@@ -118,25 +97,34 @@ public class SendgridService {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
         Mail mail = new Mail();
+        long attachDocsStartTime = System.currentTimeMillis();
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
+        log.info("*** Time taken to attach docs to mail - {}s",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
+        long startTime = System.currentTimeMillis();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
-            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                 log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
+                return true;
             }
+            return false;
         } catch (IOException ex) {
-            log.info("error is {}", ex.getMessage());
+            log.info("Sendgrid exception is {}", ex.getMessage());
             throw new IOException(ex.getMessage());
+        } finally {
+            log.info("*** Response time taken by sendgrid - {}s",
+                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         }
     }
 
@@ -156,74 +144,6 @@ public class SendgridService {
 
     private Email getEmail(String toEmailAddress) {
         return new Email(toEmailAddress);
-    }
-
-    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                                             String toEmailAddress, List<Document> listOfAttachments, String servedParty)
-        throws IOException {
-
-        Content content;
-        String subject = emailProps.get("subject");
-        if (emailProps.containsKey("orderURLLinkNeeded")) {
-            subject = emailProps.get("orderSubject");
-            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
-            String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
-            String body = emailProps.containsKey("finalOrder")
-                ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
-
-            String emailStart = String.format(
-                EMAIL_START,
-                emailProps.get(CASE_NAME),
-                emailProps.get("caseNumber"),
-                emailProps.get("solicitorName")
-            );
-
-            String emailEnd = String.format(
-                EMAIL_END,
-                emailProps.get("orderUrLLink")
-            );
-
-            content = new Content("text/html", String.format("%s%s%s%s", title, emailStart, body, emailEnd));
-        } else {
-            content = new Content("text/plain", String.format(
-                    (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
-                            .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
-                    emailProps.get(CASE_NAME),
-                    emailProps.get(CASE_NUMBER),
-                    emailProps.get("solicitorName")
-            ));
-        }
-        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-        if (!listOfAttachments.isEmpty()) {
-            attachFiles(authorization, mail, emailProps, listOfAttachments);
-        }
-
-        if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
-            log.info("******Sendgrid service is enabled****");
-            Request request = new Request();
-            try {
-                request.setMethod(Method.POST);
-                request.setEndpoint(MAIL_SEND);
-                request.setBody(mail.build());
-                Response response = sendGrid.api(request);
-                log.info("Sendgrid status code {}", response.getStatusCode());
-                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                    log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
-                }
-
-            } catch (IOException ex) {
-                log.error("Notification to parties failed");
-                throw new IOException(ex.getMessage());
-            }
-        }
-        return EmailNotificationDetails.builder()
-            .emailAddress(toEmailAddress)
-            .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(ElementUtils::element).toList())
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(Document::getDocumentFileName).toList()))
-            .timeStamp(currentDate).build();
     }
 
     public void sendTransferCourtEmailWithAttachments(String authorization, Map<String, String> emailProps,
@@ -250,7 +170,7 @@ public class SendgridService {
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
                 Response response = sendGrid.api(request);
-                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
             } catch (IOException ex) {
@@ -265,8 +185,7 @@ public class SendgridService {
         String s2sToken = authTokenGenerator.generate();
         documents.parallelStream().forEach(document -> {
             Attachments attachments = new Attachments();
-            String documentAsString = "";
-            documentAsString = Base64.getEncoder().encodeToString(documentGenService
+            String documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                       .getDocumentBytes(
                                                                           document.getDocumentUrl(),
                                                                           authorization,

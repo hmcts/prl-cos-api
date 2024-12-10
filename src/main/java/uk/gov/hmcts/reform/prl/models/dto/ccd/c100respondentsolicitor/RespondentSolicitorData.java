@@ -71,6 +71,7 @@ public class RespondentSolicitorData {
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
+    private final Document finalC7WelshResponseDoc;
     private final Document draftC8ResponseDoc;
     private final Document finalC8ResponseDoc;
 
@@ -78,7 +79,12 @@ public class RespondentSolicitorData {
 
     private final Document draftC1ADoc;
 
+    private final Document draftC1ADocWelsh;
+
     private final Document finalC1AResponseDoc;
+
+    private final Document finalC1AResponseDocWelsh;
+
     /**
      * Respondent solicitor's Current or Past proceedings.
      */

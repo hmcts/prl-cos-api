@@ -1,1 +1,121 @@
-{"caseTypeId":"PRLAPPS","jurisdictionId":"PRIVATELAW","case_details":{"case_data":{"bundleConfiguration":"prl-bundle-config.yaml","id":"1670244398096397","data":{"applicantCaseName":"BundleDemoTest2","caseNumber":"1670244398096397","orders":[],"allOtherDocuments":[{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/10452084-a54b-4862-82bc-67a5dfd1ccf2","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/10452084-a54b-4862-82bc-67a5dfd1ccf2/binary","document_filename":"SampleDoc2WithSample.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc2WithSample.pdf","documentGroup":"applicantStatementDocsUploadedByCourtAdmin"}},{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/356e5424-cbe6-4622-852f-6b95af299866","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/356e5424-cbe6-4622-852f-6b95af299866/binary","document_filename":"SampleDoc1.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc1.pdf","documentGroup":"cafcassReportsUploadedByCourtAdmin"}},{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/0bb79ffd-8798-48bf-a7c9-53ee0fe1e0e7","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/0bb79ffd-8798-48bf-a7c9-53ee0fe1e0e7/binary","document_filename":"SampleDoc2.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc2.pdf","documentGroup":"expertReportsUploadedByCourtAdmin"}},{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/15ca4a0e-a2de-4695-a4b4-bbffbea47aa5","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/15ca4a0e-a2de-4695-a4b4-bbffbea47aa5/binary","document_filename":"SampleDoc1.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc1.pdf","documentGroup":"notRequiredGroup"}}],"applications":[{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/8ab34183-a942-40f4-9fed-eb304a838937","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/8ab34183-a942-40f4-9fed-eb304a838937/binary","document_filename":"C100FinalDocument.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"C100FinalDocument.pdf","documentGroup":"applicantApplication"}},{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/6fb20836-3022-4d5b-896e-7eb619b792bd","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/6fb20836-3022-4d5b-896e-7eb619b792bd/binary","document_filename":"SampleDoc1.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc1.pdf","documentGroup":"applicantMiamCertificate"}},{"id":null,"value":{"documentLink":{"document_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/349cc681-f3b0-4580-bef5-f71048a72cc1","document_binary_url":"http://dm-store-demo.service.core-compute-demo.internal/documents/349cc681-f3b0-4580-bef5-f71048a72cc1/binary","document_filename":"SampleDoc2.pdf","document_hash":null,"document_creation_date":null},"documentFileName":"SampleDoc2.pdf","documentGroup":"applicantPreviousOrdersSubmittedWithApplication"}}]}},"id":"ApplicantFname ApplicantLname"},"event_id":"createBundle"}
+{
+  "caseTypeId": "PRLAPPS",
+  "jurisdictionId": "PRIVATELAW",
+  "case_details": {
+    "case_data": {
+      "bundleConfiguration": "prl-bundle-config.yaml",
+      "id": "1670244398096397",
+      "data": {
+        "applicantCaseName": "BundleDemoTest2",
+        "caseNumber": "1670244398096397",
+        "orders": [
+
+        ],
+        "allOtherDocuments": [
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/10452084-a54b-4862-82bc-67a5dfd1ccf2",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/10452084-a54b-4862-82bc-67a5dfd1ccf2/binary",
+                "document_filename": "SampleDoc2WithSample.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc2WithSample.pdf",
+              "documentGroup": "applicantStatementDocsUploadedByCourtAdmin"
+            }
+          },
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/356e5424-cbe6-4622-852f-6b95af299866",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/356e5424-cbe6-4622-852f-6b95af299866/binary",
+                "document_filename": "SampleDoc1.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc1.pdf",
+              "documentGroup": "cafcassReportsUploadedByCourtAdmin"
+            }
+          },
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0bb79ffd-8798-48bf-a7c9-53ee0fe1e0e7",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0bb79ffd-8798-48bf-a7c9-53ee0fe1e0e7/binary",
+                "document_filename": "SampleDoc2.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc2.pdf",
+              "documentGroup": "expertReportsUploadedByCourtAdmin"
+            }
+          },
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/15ca4a0e-a2de-4695-a4b4-bbffbea47aa5",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/15ca4a0e-a2de-4695-a4b4-bbffbea47aa5/binary",
+                "document_filename": "SampleDoc1.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc1.pdf",
+              "documentGroup": "notRequiredGroup"
+            }
+          }
+        ],
+        "applications": [
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/8ab34183-a942-40f4-9fed-eb304a838937",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/8ab34183-a942-40f4-9fed-eb304a838937/binary",
+                "document_filename": "C100FinalDocument.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "C100FinalDocument.pdf",
+              "documentGroup": "applicantApplication"
+            }
+          },
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/6fb20836-3022-4d5b-896e-7eb619b792bd",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/6fb20836-3022-4d5b-896e-7eb619b792bd/binary",
+                "document_filename": "SampleDoc1.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc1.pdf",
+              "documentGroup": "applicantMiamCertificate"
+            }
+          },
+          {
+            "id": null,
+            "value": {
+              "documentLink": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/349cc681-f3b0-4580-bef5-f71048a72cc1",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/349cc681-f3b0-4580-bef5-f71048a72cc1/binary",
+                "document_filename": "SampleDoc2.pdf",
+                "document_hash": null,
+                "document_creation_date": null
+              },
+              "documentFileName": "SampleDoc2.pdf",
+              "documentGroup": "applicantPreviousOrdersSubmittedWithApplication"
+            }
+          }
+        ]
+      }
+    },
+    "bundle_name": "ApplicantFname ApplicantLname"
+  },
+  "event_id": "createBundle"
+}

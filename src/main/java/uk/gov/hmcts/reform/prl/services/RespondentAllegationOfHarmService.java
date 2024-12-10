@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PHYSICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Slf4j
 @Service
@@ -56,39 +58,50 @@ public class RespondentAllegationOfHarmService {
                     ofNullable(respondentAllegationsOfHarm.get().getRespChildFinancialAbuse());
 
 
+            if (CollectionUtils.isNotEmpty(respondentAllegationsOfHarm.get().getRespChildAbuses())) {
+                for (ChildAbuseEnum eachBehavior : respondentAllegationsOfHarm.get().getRespChildAbuses()) {
 
-            for (ChildAbuseEnum eachBehavior : respondentAllegationsOfHarm.get().getRespChildAbuses()) {
+                    switch (eachBehavior.name()) {
+                        case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
+                                                                               checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                     childAbuseBehaviourList, eachBehavior,
+                                                                                                     abuse)
 
-                switch (eachBehavior.name()) {
-                    case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
+                                                                                         checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                               childAbuseBehaviourList, eachBehavior,
+                                                                                                               abuse)
 
-                    );
-                        break;
-                    case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
+                                                                           checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                 childAbuseBehaviourList, eachBehavior, abuse)
 
-                    );
-                        break;
-                    case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior,
+                                                                                                       abuse)
 
-                    );
-                        break;
-                    case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
+                        );
+                            break;
+                        case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
+                                                                                 checkAndAddChildAbuse(respondentAllegationsOfHarm.get(),
+                                                                                                       childAbuseBehaviourList, eachBehavior,
+                                                                                                       abuse)
 
-                    );
-                        break;
-                    case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
-                            checkAndAddChildAbuse(respondentAllegationsOfHarm.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                        break;
-                    default : {
-                        //
+                        );
+                            break;
+                        default : {
+                            //
+                        }
                     }
                 }
+
             }
             respondentAllegationsOfHarmData.toBuilder().respChildAbuseBehavioursDocmosis(childAbuseBehaviourList);
 
@@ -288,7 +301,8 @@ public class RespondentAllegationOfHarmService {
 
     private static List<DynamicMultiselectListElement> getChildrenDynamicList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             caseData.getNewChildDetails().forEach(eachChild ->
                     listItems.add(DynamicMultiselectListElement.builder()
                             .code(eachChild.getId().toString())

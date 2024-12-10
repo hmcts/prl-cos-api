@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class FL401CaseInviteService implements CaseInviteService {
 
     public CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
         //no party id required as fl401 cases have only a single respondent
-        return new CaseInvite().generateAccessCode(partyDetails.getEmail(), null, isApplicant);
+        return new CaseInvite().generateAccessCode(partyDetails.getEmail(), partyDetails.getPartyId(), isApplicant);
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
@@ -37,25 +38,20 @@ public class FL401CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendCaseInvite(CaseData caseData) {
+    public CaseData sendCaseInviteEmail(CaseData caseData) {
         PartyDetails respondent = caseData.getRespondentsFL401();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
 
         if (!respondentHasLegalRepresentation(respondent) && Yes.equals(respondent.getCanYouProvideEmailAddress())) {
-            CaseInvite caseInvite = generateCaseInvite(respondent, YesOrNo.No);
-            caseInvites.add(element(caseInvite));
-            if (Yes.equals(respondent.getCanYouProvideEmailAddress())) {
-                sendCaseInvite(caseInvite, respondent, caseData);
-            }
+            sendCaseInvite(CaseUtils.getCaseInvite(respondent.getPartyId(), caseData.getCaseInvites()), respondent, caseData);
         }
 
-        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
-            PartyDetails applicant = caseData.getApplicantsFL401();
-            CaseInvite caseInvite = generateCaseInvite(applicant, YesOrNo.Yes);
-            caseInvites.add(element(caseInvite));
-            if (Yes.equals(applicant.getCanYouProvideEmailAddress())) {
-                sendCaseInvite(caseInvite, applicant, caseData);
-            }
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")
+            && Yes.equals(caseData.getApplicantsFL401().getCanYouProvideEmailAddress())) {
+            sendCaseInvite(CaseUtils.getCaseInvite(
+                caseData.getApplicantsFL401().getPartyId(),
+                caseData.getCaseInvites()
+            ), caseData.getApplicantsFL401(), caseData);
         }
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }

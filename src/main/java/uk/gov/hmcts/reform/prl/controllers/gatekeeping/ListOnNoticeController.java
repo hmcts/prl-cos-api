@@ -163,14 +163,9 @@ public class ListOnNoticeController {
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
-                CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
-                );
-                listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
                 listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
                 allTabService.submitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),

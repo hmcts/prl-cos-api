@@ -64,7 +64,7 @@ public class EditReturnedOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authorisation, callbackRequest);
+            return editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authorisation, callbackRequest, null);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -85,7 +85,7 @@ public class EditReturnedOrderController {
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
+                startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),

@@ -149,7 +149,8 @@ public class CaseEventHandlerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMap,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -215,7 +216,8 @@ public class CaseEventHandlerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMap,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -314,7 +316,8 @@ public class CaseEventHandlerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMap,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
@@ -523,7 +526,8 @@ public class CaseEventHandlerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMap,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);

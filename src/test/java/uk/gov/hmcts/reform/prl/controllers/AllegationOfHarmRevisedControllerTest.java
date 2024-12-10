@@ -11,10 +11,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +35,13 @@ public class AllegationOfHarmRevisedControllerTest {
     @InjectMocks
     private AllegationOfHarmRevisedController allegationOfHarmRevisedController;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     private CaseDetails caseDetails;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testPrepopulateChildData() {
@@ -67,4 +75,35 @@ public class AllegationOfHarmRevisedControllerTest {
 
     }
 
+    @Test
+    public void testMidEvent() {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .state("CASE_ISSUED")
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .build();
+
+        String authorisation = "authorisation";
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        CaseData caseData1 = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .state(State.valueOf(caseDetails.getState()))
+            .build();
+        allegationOfHarmRevisedController.handleMidEvent(authToken, s2sToken, callbackRequest);
+        verify(allegationOfHarmRevisedService, times(1))
+            .resetFields(caseData1, stringObjectMap);
+    }
 }

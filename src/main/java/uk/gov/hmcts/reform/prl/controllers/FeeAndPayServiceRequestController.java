@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 
 import java.util.List;
 
@@ -61,17 +63,20 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final SolicitorEmailService solicitorEmailService;
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final AuthorisationService authorisationService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Autowired
     protected FeeAndPayServiceRequestController(ObjectMapper objectMapper,
                                                 EventService eventPublisher,
                                                 SolicitorEmailService solicitorEmailService,
                                                 FeeAndPayServiceRequestService feeAndPayServiceRequestService,
-                                                AuthorisationService authorisationService) {
+                                                AuthorisationService authorisationService,
+                                                PartyLevelCaseFlagsService partyLevelCaseFlagsService) {
         super(objectMapper, eventPublisher);
         this.solicitorEmailService = solicitorEmailService;
         this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
         this.authorisationService = authorisationService;
+        this.partyLevelCaseFlagsService = partyLevelCaseFlagsService;
     }
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -97,6 +102,9 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                               .build());
             } else {
                 eventPublisher.publishEvent(prepareAwaitingPaymentEvent(callbackRequest));
+                if (CaseCreatedBy.COURT_ADMIN.equals(callbackRequest.getCaseDetails().getCaseData().getCaseCreatedBy())) {
+                    partyLevelCaseFlagsService.generateAndStoreCaseFlags(callbackRequest.getCaseDetails().getCaseId());
+                }
                 return ok(SubmittedCallbackResponse
                               .builder()
                               .confirmationHeader(CONFIRMATION_HEADER)

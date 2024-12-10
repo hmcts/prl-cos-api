@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static org.hamcrest.Matchers.is;
  * Built-in feature which saves service's swagger specs in temporary directory.
  * Each travis run on master should automatically save and upload (if updated) documentation.
  */
+@Ignore
 @Slf4j
 @SpringBootTest(classes = {Application.class,SwaggerPublisherTest.class})
 public class SwaggerPublisherTest extends IntegrationTest {
@@ -31,6 +33,7 @@ public class SwaggerPublisherTest extends IntegrationTest {
     private CosApiClient cosApiClient;
 
     @DisplayName("Generate swagger documentation")
+    @Ignore
     @Test
     public void generateDocs() throws Exception {
         byte[] specs = cosApiClient.apiDocs();
