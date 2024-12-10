@@ -588,9 +588,9 @@ public class CaseDataService {
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
+                List<CaseHearing> filteredCaseHearings = new ArrayList<>();
                 hearings.getCaseHearings().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
