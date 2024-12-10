@@ -103,6 +103,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,13 +127,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
@@ -5580,6 +5586,100 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertNull(updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+
+    }
+
+    @Test
     public void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
@@ -5814,7 +5914,6 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
-
     }
 
 }
