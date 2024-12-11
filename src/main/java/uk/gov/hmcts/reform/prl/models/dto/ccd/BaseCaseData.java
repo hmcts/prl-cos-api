@@ -112,6 +112,8 @@ public class BaseCaseData {
     private ServiceOfDocuments serviceOfDocuments;
 
     @JsonUnwrapped
+    private HearingTaskData hearingTaskData;
+
     private String isNonWorkAllocationEnabledCourtSelected;
 
     @JsonProperty("respondentSolicitorName")
