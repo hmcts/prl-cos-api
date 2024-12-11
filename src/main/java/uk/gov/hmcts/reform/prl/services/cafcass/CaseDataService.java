@@ -553,38 +553,16 @@ public class CaseDataService {
                 }
             }
         }
-        log.info("caseIdWithRegionIdMap {}", caseIdWithRegionIdMap);
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
             authorisation,
             caseIdWithRegionIdMap
         );
-        extracted(listOfHearingDetails);
-        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
 
-        listOfHearingDetails.forEach(a -> log.info("second filter {}", a.getCaseRef()));
-        extracted(listOfHearingDetails);
-
-        log.info("Update hearing data for cafcass");
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
 
-        log.info("filteredCafcassResponse {}", filteredCafcassResponse);
         return filteredCafcassResponse;
-    }
-
-    private static void extracted(List<Hearings> listOfHearingDetails) {
-        listOfHearingDetails.forEach(
-            h -> {
-                log.info("case id {}", h.getCaseRef());
-                log.info("hearings for {}", h.getCaseHearings());
-                h.getCaseHearings().forEach(b -> log.info(
-                    "hearing id's {} for case {}",
-                    b.getHearingID(),
-                    h.getCaseRef()
-                ));
-            }
-        );
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
@@ -619,17 +597,11 @@ public class CaseDataService {
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
-                log.info("case id {}", cafCassCaseDetail.getId());
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
 
                 if (filteredHearing != null) {
-                    filteredHearing.getCaseHearings().forEach(a -> log.info(
-                        "hearing id' {} for case number {}",
-                        a.getHearingID(),
-                        cafCassCaseDetail.getId()
-                    ));
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
