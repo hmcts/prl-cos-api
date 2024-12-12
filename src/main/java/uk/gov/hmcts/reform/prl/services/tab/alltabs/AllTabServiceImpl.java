@@ -150,6 +150,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                                  EventRequestData eventRequestData,
                                                  CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
+        log.info("mapAndSubmitAllTabsUpdate::combinedFieldsMap.get(\"id\") {}", combinedFieldsMap.get("id"));
         //PRL-6318 - fix 0 id in caseData for court nav cases
         if (ObjectUtils.isNotEmpty(combinedFieldsMap.get("id")) && 0 == (Long)combinedFieldsMap.get("id")) {
             combinedFieldsMap.put("id", Long.parseLong(caseId));

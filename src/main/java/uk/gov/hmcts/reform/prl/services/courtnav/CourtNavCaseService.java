@@ -268,6 +268,7 @@ public class CourtNavCaseService {
                                                                                   PartyRole.Representing.DAAPPLICANT));
         data.put("caseFlags", Flags.builder().build());
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+        log.info("refreshTabs::caseData.getId() {}", caseData.getId());
 
         allTabService.mapAndSubmitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
