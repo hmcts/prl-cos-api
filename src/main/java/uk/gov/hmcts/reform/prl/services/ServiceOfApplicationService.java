@@ -2297,6 +2297,7 @@ public class ServiceOfApplicationService {
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
             if (coverLetter != null) {
+                log.info("cover letter is {}", coverLetter);
                 docs.addAll(coverLetter);
             }
             docs.addAll(packDocs);
