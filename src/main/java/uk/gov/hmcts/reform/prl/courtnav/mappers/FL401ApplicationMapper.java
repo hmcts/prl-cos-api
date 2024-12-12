@@ -215,8 +215,6 @@ public class FL401ApplicationMapper {
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
-                               .isWelshNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab.
-                               .isIntermediaryNeeded(YesOrNo.No) //Prl-6617: Attending the hearing doesn't appear in application tab.
                                .interpreterNeeds(getInterpreterNeeds(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
