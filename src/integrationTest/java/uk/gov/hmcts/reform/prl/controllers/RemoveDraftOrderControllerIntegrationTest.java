@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +14,9 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.RemoveDraftOrderService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -32,16 +32,15 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class ServiceOfApplicationControllerIntegrationTest {
+public class RemoveDraftOrderControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-
     @MockBean
-    ServiceOfApplicationService serviceOfApplicationService;
+    RemoveDraftOrderService removeDraftOrderService;
 
     @MockBean
     AuthorisationService authorisationService;
@@ -52,12 +51,16 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToStart() throws Exception {
-        String url = "/service-of-application/about-to-start";
+    public void testPopulateRemoveDraftOrderDropdown() throws Exception {
+        String url = "/populate-remove-draft-order-dropdown";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any())).thenReturn(new HashMap<>());
+        when(removeDraftOrderService.getDraftOrderDynamicList(
+            any(),
+            anyString(),
+            anyString()
+        )).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -71,12 +74,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
-        String url = "/service-of-application/about-to-submit";
+    public void testHandleRemoveDraftOrderAboutToSubmitted() throws Exception {
+        String url = "/remove-draft-order/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.handleAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
+        when(removeDraftOrderService.removeSelectedDraftOrder(any())).thenReturn(new ArrayList<>());
 
         mockMvc.perform(
                 post(url)
@@ -88,41 +91,4 @@ public class ServiceOfApplicationControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
-    @Test
-    public void testHandleSubmitted() throws Exception {
-        String url = "/service-of-application/submitted";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void testSoaValidation() throws Exception {
-        String url = "/service-of-application/soa-validation";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
 }

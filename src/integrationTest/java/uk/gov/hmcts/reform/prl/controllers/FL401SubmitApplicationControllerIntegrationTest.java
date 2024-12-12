@@ -1,104 +1,124 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@Ignore
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class FL401SubmitApplicationControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String baseUrl;
-
-    private final String fl401ValidationUrl = "/fl401-submit-application-validation";
-
-    private final String validBody = "requests/FL401-case-data.json";
+    private MockMvc mockMvc;
 
     @Autowired
-    IdamTokenGenerator idamTokenGenerator;
+    private WebApplicationContext webApplicationContext;
 
-    @Test
-    public void whenFL401ValidationRequestShouldReturn200() throws Exception {
+    @MockBean
+    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-submit-application-validation");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse =  HttpClientBuilder.create().build().execute(httpPost);
+    @MockBean
+    LocationRefDataService locationRefDataService;
 
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+    @MockBean
+    FL401SubmitApplicationService fl401SubmitApplicationService;
+
+    @MockBean
+    AuthorisationService authorisationService;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    public void whenFL401SubmitApplicationRequestShouldReturn200() throws Exception {
+    public void testFl401SubmitApplicationValidation() throws Exception {
+        String url = "/fl401-submit-application-validation";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        String token = idamTokenGenerator.generateIdamTokenForSolicitor();
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(locationRefDataService.getDaCourtLocations(anyString())).thenReturn(new ArrayList<>());
 
-        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-submit-application");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", token);
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse =  HttpClientBuilder.create().build().execute(httpPost);
-
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenFL401SubmitApplicationNotificationRequest() throws Exception {
+    public void testFl401GenerateDocumentSubmitApplication() throws Exception {
+        String url = "/fl401-generate-document-submit-application";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-submit-application-notification");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "Bearer Testtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse =  HttpClientBuilder.create().build().execute(httpPost);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(new HashMap<>());
 
-        assertEquals(
-            HttpStatus.SC_NOT_FOUND,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenFl401InvalidRequestFormat_Return400() throws IOException {
+    public void testFl401SubmitApplicationSendNotification() throws Exception {
+        String url = "/fl401-submit-application-send-notification";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-application");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_NOT_FOUND);
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(fl401SubmitApplicationService.fl401SendApplicationNotification(
+            anyString(),
+            any()
+        )).thenReturn(CaseData.builder().build());
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
-
 }

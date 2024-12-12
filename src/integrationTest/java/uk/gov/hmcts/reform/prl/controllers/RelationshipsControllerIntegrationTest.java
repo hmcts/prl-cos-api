@@ -5,43 +5,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class DraftOrderControllerIntegrationTest {
+public class RelationshipsControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
-    @MockBean
-    DraftAnOrderService draftAnOrderService;
-
-    @MockBean
-    AuthorisationService authorisationService;
 
     @Before
     public void setUp() {
@@ -49,15 +37,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testResetFieldsEndpoint() throws Exception {
-        String url = "/reset-fields";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPrePopulateApplicantToChildRelation() throws Exception {
+        String url = "/pre-populate-applicant-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -67,15 +53,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testSelectedOrderEndpoint() throws Exception {
-        String url = "/selected-order";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPrePopulateAmendApplicantToChildRelation() throws Exception {
+        String url = "/pre-populate-amend-applicant-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -85,15 +69,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testPopulateDraftOrderFieldsEndpoint() throws Exception {
-        String url = "/populate-draft-order-fields";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPopulateApplicantToChildRelation() throws Exception {
+        String url = "/populate-applicant-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -103,15 +85,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testPopulateStandardDirectionOrderFieldsEndpoint() throws Exception {
-        String url = "/populate-standard-direction-order-fields";
-        String jsonRequest = ResourceLoader.loadJson("requests/draft-order-sdo-with-options-request.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPrePopulateRespondentToChildRelation() throws Exception {
+        String url = "/pre-populate-respondent-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -121,15 +101,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testPopulateDirectionOnIssueEndpoint() throws Exception {
-        String url = "/populate-direction-on-issue";
-        String jsonRequest = ResourceLoader.loadJson("requests/draft-order-sdo-with-options-request.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPrePopulateAmendRespondentToChildRelation() throws Exception {
+        String url = "/pre-populate-amend-respondent-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -139,15 +117,13 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testGenerateDocEndpoint() throws Exception {
-        String url = "/generate-doc";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPopulateRespondentToChildRelation() throws Exception {
+        String url = "/populate-respondent-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -157,15 +133,46 @@ public class DraftOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitEndpoint() throws Exception {
-        String url = "/about-to-submit";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+    public void testPrePopulateOtherPeopleToChildRelation() throws Exception {
+        String url = "/pre-populate-other-people-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testPrePopulateAmendOtherPeopleToChildRelation() throws Exception {
+        String url = "/pre-populate-amend-other-people-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+
+    @Test
+    public void testPopulateOtherPeopleToChildRelation() throws Exception {
+        String url = "/populate-other-people-to-child-relation";
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)

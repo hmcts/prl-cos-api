@@ -1,68 +1,70 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.entity.StringEntity;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-//import org.junit.Ignore;
-import org.junit.Ignore;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.IntegrationTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
-import java.io.IOException;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import static org.junit.Assert.assertEquals;
-
-@Ignore
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ServiceRequestUpdateCallbackControllerIntegrationTest.class, Application.class})
-public class ServiceRequestUpdateCallbackControllerIntegrationTest extends IntegrationTest {
+@ContextConfiguration
+public class ServiceRequestUpdateCallbackControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
+    private MockMvc mockMvc;
 
-    protected String serviceUrl;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    private final String serviceRequestContextPath = "/service-req-update";
+    @MockBean
+    RequestUpdateCallbackService requestUpdateCallbackService;
 
-    private final String path = "requests/C100-case-data.json";
+    @MockBean
+    AuthorisationService authorisationService;
 
-    @Test
-    public void whenInvalidRequestFormat_Return400() throws IOException {
+    @MockBean
+    LaunchDarklyClient launchDarklyClient;
 
-        HttpPost httpPost = new HttpPost(serviceUrl + serviceRequestContextPath);
-
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_METHOD_NOT_ALLOWED);
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    public void whenServiceRequestUpdateRequest() throws Exception {
+    public void testServiceRequestUpdate() throws Exception {
+        String url = "/service-request-update";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        HttpPut httpPut = new HttpPut(serviceUrl + serviceRequestContextPath);
-        String requestBody = ResourceLoader.loadJson(path);
-        httpPut.addHeader("Authorization", "Bearer TestAuth");
-        httpPut.addHeader("Authorization", "ServiceAuthorization");
-        httpPut.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPut.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPut);
-        assertEquals(
-            HttpStatus.SC_NOT_FOUND,
-            httpResponse.getStatusLine().getStatusCode());
+        when(launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
+
+        mockMvc.perform(
+                put(url)
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 }

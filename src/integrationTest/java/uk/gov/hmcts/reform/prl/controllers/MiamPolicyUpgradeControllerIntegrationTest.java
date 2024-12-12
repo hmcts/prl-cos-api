@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
+
+import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,12 +25,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class ResetAccessCodeControllerIntegrationTest {
+public class MiamPolicyUpgradeControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
@@ -38,28 +39,27 @@ public class ResetAccessCodeControllerIntegrationTest {
     private WebApplicationContext webApplicationContext;
 
     @MockBean
-    CaseInviteManager caseInviteManager;
+    AuthorisationService authorisationService;
 
     @MockBean
-    AuthorisationService authorisationService;
+    MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-
     @Test
-    public void testResetAccessCode() throws Exception {
-        String url = "/regenerate-access-code";
+    public void testSubmitMiamPolicyUpgrade() throws Exception {
+        String url = "/submit-miam-policy-upgrade";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(caseInviteManager.reGeneratePinAndSendNotificationEmail(any())).thenReturn(CaseData.builder().build());
+        when(miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
-                    .header("Authorization", "testAuthToken")
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
@@ -67,5 +67,4 @@ public class ResetAccessCodeControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }

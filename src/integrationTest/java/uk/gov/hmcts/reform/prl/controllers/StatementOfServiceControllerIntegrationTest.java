@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 
 import java.util.HashMap;
 
@@ -32,19 +31,18 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class ServiceOfApplicationControllerIntegrationTest {
+public class StatementOfServiceControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-
-    @MockBean
-    ServiceOfApplicationService serviceOfApplicationService;
-
     @MockBean
     AuthorisationService authorisationService;
+
+    @MockBean
+    StmtOfServImplService stmtOfServImplService;
 
     @Before
     public void setUp() {
@@ -52,12 +50,13 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToStart() throws Exception {
-        String url = "/service-of-application/about-to-start";
+    public void testSosAboutToStart() throws Exception {
+        String url = "/Statement-of-service-about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any())).thenReturn(new HashMap<>());
+        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
+        when(stmtOfServImplService.retrieveRespondentsList(any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -71,12 +70,13 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
-        String url = "/service-of-application/about-to-submit";
+    public void testSosAboutToSubmit() throws Exception {
+        String url = "/Statement-of-service-about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.handleAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
+        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
+        when(stmtOfServImplService.handleSosAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -90,11 +90,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleSubmitted() throws Exception {
-        String url = "/service-of-application/submitted";
+    public void testSosSubmitConfirmation() throws Exception {
+        String url = "/Statement-of-service-confirmation";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         mockMvc.perform(
                 post(url)
@@ -108,11 +109,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testSoaValidation() throws Exception {
-        String url = "/service-of-application/soa-validation";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+    public void testCitizenSoaSubmit() throws Exception {
+        String url = "/12345/67890/save-statement-of-service-by-citizen";
+        String jsonRequest = ResourceLoader.loadJson("requests/service-of-application.json");
 
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         mockMvc.perform(
                 post(url)
@@ -124,5 +126,4 @@ public class ServiceOfApplicationControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }

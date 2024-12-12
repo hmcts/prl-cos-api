@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,6 +50,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
                                              C100RespondentSolicitorService respondentSolicitorService,
                                              AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
+        objectMapper.registerModule(new ParameterNamesModule());
         this.respondentSolicitorService = respondentSolicitorService;
         this.authorisationService = authorisationService;
     }
