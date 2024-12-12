@@ -557,18 +557,18 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
-        log.info("Update hearing data for cafcass");
+
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
         return filteredCafcassResponse;
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
+                List<CaseHearing> filteredCaseHearings = new ArrayList<>();
                 hearings.getCaseHearings().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
@@ -600,6 +600,7 @@ public class CaseDataService {
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
+
                 if (filteredHearing != null) {
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
