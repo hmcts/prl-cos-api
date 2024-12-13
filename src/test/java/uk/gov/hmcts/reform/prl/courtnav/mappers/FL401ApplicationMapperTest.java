@@ -687,7 +687,7 @@ public class FL401ApplicationMapperTest {
                        .respondentBehaviour(respondentBehaviour)
                        .theHome(home1)
                        .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
+                       .goingToCourt(goingToCourt.toBuilder().interpreterDialect(null).build())
                        .build())
             .metaData(courtNavMetaData)
             .build();
