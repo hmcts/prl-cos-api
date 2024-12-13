@@ -561,7 +561,7 @@ pitest {
     'uk.gov.hmcts.reform.prl.Application.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
   ]
-  threads = 10
+  threads = 20
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
   mutationThreshold = 80
