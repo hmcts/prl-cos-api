@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -448,8 +449,11 @@ public class FL401ApplicationMapper {
     private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
 
         InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .language(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
-            .otherAssistance(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect())
+            .party(List.of(PartyEnum.applicant))
+            .language(null != courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
+                ? courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage() + " - "
+                    + courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
+                : courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
             .build();
 
         return List.of(
