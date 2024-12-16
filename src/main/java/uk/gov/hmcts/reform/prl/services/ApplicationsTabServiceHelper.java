@@ -186,6 +186,22 @@ public class ApplicationsTabServiceHelper {
 
     public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
         for (PartyDetails applicantDetails : currentApplicants) {
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential()) && applicantDetails.getPhoneNumber() != null) {
+                applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential()) && applicantDetails.getEmail() != null) {
+                applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential()) && applicantDetails.getAddress() != null
+                && applicantDetails.getAddress().getAddressLine1() != null) {
+                applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            }
+        }
+        return currentApplicants;
+    }
+
+    public List<PartyDetails> maskOtherPeopleConfidentialDetails(List<PartyDetails> currentApplicants) {
+        for (PartyDetails applicantDetails : currentApplicants) {
             if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
                 applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
             }
