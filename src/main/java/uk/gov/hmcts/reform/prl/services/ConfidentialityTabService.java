@@ -242,10 +242,8 @@ public class ConfidentialityTabService {
                 .value(OtherPersonConfidentialityDetails.builder()
                            .firstName(partyDetails.get().getFirstName())
                            .lastName(partyDetails.get().getLastName())
-                           .email(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
-                                      ? "" : partyDetails.get().getEmail())
-                           .phoneNumber(YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.getIsChildLivesWithPersonConfidential())
-                                            ? "" : partyDetails.get().getPhoneNumber())
+                           .email(partyDetails.get().getEmail())
+                           .phoneNumber(partyDetails.get().getPhoneNumber())
                            .relationshipToChildDetails(childrenAndOtherPeopleRelation
                                                            .getChildAndOtherPeopleRelation().getDisplayedValue())
                            .address(partyDetails.get().getAddress()).build()).build();
