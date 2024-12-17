@@ -31,4 +31,7 @@ public class ChildDetail {
 
     @JsonProperty("liveWith")
     private List<ChildLiveWith> childLiveWith;
+
+    @JsonProperty("mainlyLiveWith")
+    private ChildLiveWith mainlyLiveWith;
 }

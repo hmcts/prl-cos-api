@@ -69,7 +69,9 @@ public enum Event {
     SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
     TS_CA_URGENT_CASE("testingSupportCAUrgentCases", "TS-Urgent case"),
     AMEND_MIAM_POLICY_UPGRADE("amendMiamPolicyUpgrade", "Amend MIAM"),
-    SOLICITOR_CREATE("solicitorCreate", "Solicitor application");
+    SOLICITOR_CREATE("solicitorCreate", "Solicitor application"),
+    SERVICE_OF_DOCUMENTS("serviceOfDocuments", "Service of documents"),
+    CONFIDENTIAL_CHECK_DOCUMENTS("serviceOfDocumentsConfCheck", "Confidential check - Documents");
 
     private final String id;
     private final String name;
@@ -100,10 +102,10 @@ public enum Event {
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
-                CHILD_DETAILS_REVISED,
                 APPLICANT_DETAILS,
                 RESPONDENT_DETAILS,
                 OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                CHILD_DETAILS_REVISED,
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 CHILDREN_AND_APPLICANTS,
                 CHILDREN_AND_RESPONDENTS,

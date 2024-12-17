@@ -13,17 +13,22 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -45,7 +50,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
@@ -53,13 +57,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -78,6 +84,7 @@ public class UpdatePartyDetailsService {
     private final DocumentGenService documentGenService;
     private final ConfidentialityTabService confidentialityTabService;
     private final DocumentLanguageService documentLanguageService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -113,7 +120,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}", e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -133,10 +140,21 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e);
+                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
+        if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
+            Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+            partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
+        }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        return updatedCaseData;
+    }
+
+    public Map<String, Object> amendOtherPeopleInTheCase(CallbackRequest callbackRequest) {
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         return updatedCaseData;
     }
 
@@ -240,6 +258,9 @@ public class UpdatePartyDetailsService {
             .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
             .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
             .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
+            .response(getPartyResponse(partyDetails).toBuilder()
+                          .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                          .build())
             .build();
 
         return partyDetails;
@@ -309,18 +330,48 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
+            PartyDetails updatedPartyDetails = respondent.getValue().toBuilder().response(getPartyResponse(respondent.getValue()).toBuilder()
+                                                                                              .keepDetailsPrivate(
+                                                                                                  updateRespondentKeepYourDetailsPrivateInformation(
+                                                                                                      respondent.getValue()))
+                                                                                              .build()).build();
+            respondent = element(respondent.getId(), updatedPartyDetails);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
-                respondent
+                respondent,
+                SOLICITOR
             );
             populateC8Documents(authorisation,
-                        updatedCaseData,
-                        caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
-                        respondentIndex,respondent
+                                updatedCaseData,
+                                caseData,
+                                dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
+                                respondentIndex, respondent
             );
             respondentIndex++;
         }
+    }
+
+    private KeepDetailsPrivate updateRespondentKeepYourDetailsPrivateInformation(PartyDetails respondent) {
+        KeepDetailsPrivate keepDetailsPrivate;
+        if (null != respondent.getResponse() && null != respondent.getResponse().getKeepDetailsPrivate()) {
+            keepDetailsPrivate = respondent.getResponse().getKeepDetailsPrivate();
+        } else {
+            keepDetailsPrivate = KeepDetailsPrivate.builder().build();
+        }
+        List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
+        if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.address);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.phoneNumber);
+        }
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+            confidentialityList.add(ConfidentialityListEnum.email);
+        }
+        return keepDetailsPrivate.toBuilder()
+            .confidentiality(CollectionUtils.isEmpty(confidentialityList) ? YesOrNo.No : YesOrNo.Yes)
+            .confidentialityList(confidentialityList)
+            .build();
     }
 
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
@@ -512,15 +563,28 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 children = new ArrayList<>();
-                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)).build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
-                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
+                List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
+                List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
+                listOfChildren.forEach(child -> listOfChildrenRevised.add(element(
+                    child.getValue().toBuilder()
+                        .whoDoesTheChildLiveWith(
+                            populateWhoDoesTheChildLiveWith(caseData)
+                                .toBuilder()
+                                .value(null != child.getValue().getWhoDoesTheChildLiveWith()
+                                    ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
+                                .build())
+                        .build())));
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildrenRevised);
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
@@ -535,5 +599,86 @@ public class UpdatePartyDetailsService {
         }
         return caseDataUpdated;
 
+    }
+
+    private DynamicList populateWhoDoesTheChildLiveWith(CaseData caseData) {
+        List<DynamicListElement> whoDoesTheChildLiveWith = new ArrayList<>();
+        List<Element<PartyDetails>> listOfParties = new ArrayList<>();
+        if (null != caseData.getApplicants()) {
+            listOfParties.addAll(caseData.getApplicants());
+        }
+        if (null != caseData.getRespondents()) {
+            listOfParties.addAll(caseData.getRespondents());
+        }
+        if (null != caseData.getOtherPartyInTheCaseRevised()) {
+            listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
+        }
+        if (!listOfParties.isEmpty()) {
+            for (Element<PartyDetails> parties : listOfParties) {
+
+                String address = populateAddressInDynamicList(parties);
+                String name = populateNameInDynamicList(parties, address);
+
+                if (null != name && null != address) {
+                    whoDoesTheChildLiveWith.add(DynamicListElement
+                        .builder()
+                        .code(parties.getId())
+                        .label(name + address)
+                        .build());
+                } else if (null != name) {
+                    whoDoesTheChildLiveWith.add(DynamicListElement
+                        .builder()
+                        .code(parties.getId())
+                        .label(name)
+                        .build());
+                }
+            }
+        }
+
+        return DynamicList
+            .builder()
+            .listItems(whoDoesTheChildLiveWith)
+            .build();
+    }
+
+    private  String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
+        String name = null;
+        if (!StringUtils.isBlank(parties.getValue().getFirstName())
+            && !StringUtils.isBlank(parties.getValue().getLastName())) {
+            name = !StringUtils.isBlank(address)
+                ? parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
+                : parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
+        }
+        return name;
+    }
+
+    private String populateAddressInDynamicList(Element<PartyDetails> parties) {
+        String address = null;
+        if (null != parties.getValue().getAddress()
+            && !StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())) {
+
+            //Address line 2 is an optional field
+            String addressLine2 = "";
+
+            //Postcode is an optional field
+            String postcode = !StringUtils.isBlank(parties.getValue().getAddress().getPostCode())
+                ? parties.getValue().getAddress().getPostCode() : "";
+
+            //Adding comma to address line 2 if the postcode is there
+            if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
+                addressLine2 = !StringUtils.isBlank(postcode)
+                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
+                    : parties.getValue().getAddress().getAddressLine2();
+            }
+
+            //Comma is required if postcode or address line 2 is not blank
+            String addressLine1 = !StringUtils.isBlank(postcode) || !StringUtils.isBlank(addressLine2)
+                ? parties.getValue().getAddress().getAddressLine1().concat(", ")
+                : parties.getValue().getAddress().getAddressLine1();
+
+            address = addressLine1 + addressLine2 + postcode;
+        }
+
+        return address;
     }
 }

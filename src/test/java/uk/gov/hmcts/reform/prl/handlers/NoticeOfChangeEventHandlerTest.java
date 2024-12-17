@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -79,6 +81,7 @@ public class NoticeOfChangeEventHandlerTest {
     private PartyDetails applicant2;
     private PartyDetails respondent1;
     private PartyDetails respondent2;
+    private PartyDetails respondent3;
     private PartyDetails otherPerson;
     private CaseData caseData;
 
@@ -100,6 +103,7 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("rf1").lastName("rl1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("rfl11@test.com")
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
             .contactPreferences(ContactPreferences.email)
             .build();
         respondent2 = PartyDetails.builder()
@@ -109,6 +113,14 @@ public class NoticeOfChangeEventHandlerTest {
             .email("rfl11@test.com")
             .representativeFirstName("rsf2").representativeLastName("rsl2")
             .solicitorEmail("rsl22@test.com")
+            .build();
+        respondent3 = PartyDetails.builder()
+            .firstName("rf1").lastName("rl1")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("rfl11@test.com")
+            .address(Address.builder().addressLine1("test").build())
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .contactPreferences(ContactPreferences.post)
             .build();
         otherPerson = PartyDetails.builder()
             .firstName("of").lastName("ol")
@@ -130,9 +142,13 @@ public class NoticeOfChangeEventHandlerTest {
             .representing(CAAPPLICANT)
             .accessCode("ABCD1234")
             .build();
-
+        List<Document> documents = new ArrayList<>();
+        documents.add(Document.builder().build());
         when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
         when(systemUserService.getSysUserToken()).thenReturn("test auth");
+        when(serviceOfApplicationService.generateAccessCodeLetter(Mockito.anyString(), Mockito.any(), Mockito.any(),
+                                                                  Mockito.any(), Mockito.anyString()))
+            .thenReturn(documents);
     }
 
     @Test
@@ -150,7 +166,7 @@ public class NoticeOfChangeEventHandlerTest {
     public void shouldNotifyWhenLegalRepresentativeRemoved() {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(6)).send(Mockito.anyString(),
+        verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -163,7 +179,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(6)).send(Mockito.anyString(),
+        verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -183,7 +199,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(3)).send(Mockito.anyString(),
+        verify(emailService,times(2)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -194,18 +210,44 @@ public class NoticeOfChangeEventHandlerTest {
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())
+            .caseInvites(List.of(element(CaseInvite
+                .builder().partyId(UUID.fromString("00000000-0000-0000-0000-000000000000")).accessCode("test").build())))
             .applicantsFL401(applicant1)
             .respondentsFL401(respondent1)
             .build();
         noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
             .caseData(caseData)
             .representing(DARESPONDENT).build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
+
+    }
+
+    @Test
+    public void shouldNotifyWhenDaRespondentRemovedPreferencePost() {
+        caseData = caseData.toBuilder()
+            .applicants(Collections.emptyList())
+            .respondents(Collections.emptyList())
+            .caseInvites(List.of(element(CaseInvite
+                .builder().partyId(UUID.fromString("00000000-0000-0000-0000-000000000000")).accessCode("test").build())))
+            .applicantsFL401(applicant1)
+            .respondentsFL401(respondent3)
+            .build();
+        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
+            .caseData(caseData)
+            .representing(DARESPONDENT).build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
+
+        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
+
+        verify(emailService,times(2)).send(Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(), Mockito.any());
 
     }
 
@@ -269,13 +311,13 @@ public class NoticeOfChangeEventHandlerTest {
                 CaseInvite.class),
             anyString()
         )).thenReturn(
-            Document.builder().build());
+            List.of(Document.builder().build()));
         when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString())).thenReturn(UUID.randomUUID());
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         Assert.assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
-        verify(emailService,times(5)).send(Mockito.anyString(),
+        verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
     }

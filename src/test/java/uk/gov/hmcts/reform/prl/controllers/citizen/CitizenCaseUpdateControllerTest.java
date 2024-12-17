@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -167,7 +170,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test
-    public void testSubmitC100Application() throws JsonProcessingException {
+    public void testSubmitC100Application() throws JsonProcessingException, NotFoundException {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -182,7 +185,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
                                                                   any(),
@@ -193,7 +196,7 @@ public class CitizenCaseUpdateControllerTest {
 
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationAuthoirizationException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),
                                                                   any(),
@@ -203,7 +206,7 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSubmitC100ApplicationJsonException() throws JsonProcessingException {
+    public void testSubmitC100ApplicationJsonException() throws JsonProcessingException, NotFoundException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
         citizenCaseUpdateController.submitC100Application(any(), any(), authToken, s2sToken, any());
@@ -279,7 +282,39 @@ public class CitizenCaseUpdateControllerTest {
         citizenCaseUpdateController.withdrawCase(any(), any(), authToken, s2sToken);
     }
 
+    @Test
+    public void testCitizenAwpApplication() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
+                                                                any(),
+                                                                any())).thenReturn(caseDetails);
 
+        ResponseEntity<Object> response = citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(
+            CitizenAwpRequest.class));
+        Assert.assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+
+    @Test
+    public void testCitizenAwpApplicationThrowError() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
+                                                                any(),
+                                                                any())).thenReturn(null);
+
+        ResponseEntity<Object> response = citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(
+            CitizenAwpRequest.class));
+        Assert.assertTrue(response.getStatusCode().is5xxServerError());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCitizenAwpApplicationThrowsAuthException() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        when(citizenCaseUpdateService.saveCitizenAwpApplication(any(),
+                                                                any(),
+                                                                any())).thenReturn(caseDetails);
+
+        citizenCaseUpdateController.saveCitizenAwpApplication(authToken, s2sToken, any(), any(CitizenAwpRequest.class));
+    }
 
 }
 

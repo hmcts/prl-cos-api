@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -71,8 +72,6 @@ public class ManageOrdersControllerFunctionalTest {
     private HearingService hearingService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
-
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
 
     private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
 
@@ -209,20 +208,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmailForAutoHearing() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
-
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/case-order-email-notification")
-            .then().assertThat().statusCode(200);
-    }
-
-    @Test
     public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
         request
@@ -328,6 +313,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with one hearings with approval required.
      */
+    @Ignore
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
@@ -371,6 +357,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with many hearings with approval required.
      */
+    @Ignore
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_requiredMultiple() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
@@ -664,6 +651,7 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required_sdo() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);

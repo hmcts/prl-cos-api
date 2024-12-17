@@ -18,5 +18,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 public class HearingDetails {
 
     private DynamicList hearingTypes;
+    private DynamicList confirmedHearingDates;
 
 }
