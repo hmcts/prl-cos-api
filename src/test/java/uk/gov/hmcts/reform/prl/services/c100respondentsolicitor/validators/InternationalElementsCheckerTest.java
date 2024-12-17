@@ -69,20 +69,20 @@ public class InternationalElementsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        Boolean bool = internationalElementsChecker.isStarted(respondent);
+        Boolean bool = internationalElementsChecker.isStarted(respondent, true);
         assertTrue(bool);
     }
 
     @Test
     public void isNotStartedTest() {
         PartyDetails blankRespondent = PartyDetails.builder().build();
-        Boolean bool = internationalElementsChecker.isStarted(blankRespondent);
+        Boolean bool = internationalElementsChecker.isStarted(blankRespondent, true);
         assertFalse(bool);
     }
 
     @Test
     public void mandatoryCompletedTest() {
-        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertTrue(bool);
     }
 
@@ -90,7 +90,7 @@ public class InternationalElementsCheckerTest {
     public void isNotFinishedEmptyResponseTest() {
         PartyDetails blankRespondent = PartyDetails.builder().response(Response
                                                                            .builder().build()).build();
-        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent, true);
         assertFalse(bool);
     }
 
@@ -105,7 +105,7 @@ public class InternationalElementsCheckerTest {
                                                             .build())
                           .build())
             .build();
-        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent, true);
         assertFalse(bool);
     }
 
@@ -122,14 +122,14 @@ public class InternationalElementsCheckerTest {
                                                             .build())
                           .build())
             .build();
-        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent, true);
         assertFalse(bool);
     }
 
     @Test
     public void mandatoryCompletedWithoutRespdntTest() {
         respondent = null;
-        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertFalse(bool);
     }
 
@@ -148,7 +148,7 @@ public class InternationalElementsCheckerTest {
                                                             .build())
                           .build())
             .build();
-        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertFalse(bool);
     }
 
@@ -167,7 +167,7 @@ public class InternationalElementsCheckerTest {
                                                             .build())
                           .build())
             .build();
-        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        Boolean bool = internationalElementsChecker.isFinished(respondent, true);
         assertTrue(bool);
     }
 

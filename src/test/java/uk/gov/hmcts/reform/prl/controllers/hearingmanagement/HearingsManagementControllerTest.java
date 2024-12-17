@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,8 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -27,6 +33,7 @@ import java.util.Map;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -49,6 +56,9 @@ public class HearingsManagementControllerTest {
 
     @Mock
     private HearingManagementService hearingManagementService;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     private HearingRequest hearingRequest;
     @MockBean
@@ -156,5 +166,54 @@ public class HearingsManagementControllerTest {
         hearingsManagementController.updateNextHearingDetailsCallback("auth",callbackRequest);
         assertTrue(true);
 
+    }
+
+    @Test
+    public void testUpdateAllTabsAfterHmcCaseState() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "authToken",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
+
+        hearingsManagementController.updateAllTabsAfterHmcCaseState("authToken", callbackRequest);
+        assertTrue(true);
+
+    }
+
+    @Test
+    public void testValidateHearingState() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(caseDetails)
+                .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = hearingsManagementController.validateHearingState("authToken", callbackRequest);
+        Assert.assertNotNull(response.getData());
     }
 }

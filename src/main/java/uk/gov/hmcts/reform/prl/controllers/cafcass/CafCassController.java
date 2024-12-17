@@ -23,8 +23,11 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 
+import java.time.LocalDateTime;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.status;
@@ -65,6 +68,12 @@ public class CafCassController extends AbstractCallbackController {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
+                LocalDateTime startDateTime = LocalDateTime.parse(startDate);
+                LocalDateTime endDateTime = LocalDateTime.parse(endDate);
+                if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
+                    return status(BAD_REQUEST).body(new ApiError(
+                        "Difference between end date and start date should not be more than 15 minutes"));
+                }
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
                     startDate,

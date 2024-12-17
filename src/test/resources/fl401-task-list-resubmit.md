@@ -90,7 +90,7 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a>Statement of Truth and submit</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHcannot-start-yet.png' title='Cannot start yet'/>
+Statement of Truth and submit<img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHcannot-start-yet.png' title='Cannot start yet'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

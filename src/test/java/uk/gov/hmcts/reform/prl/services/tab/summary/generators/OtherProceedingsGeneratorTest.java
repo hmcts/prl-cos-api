@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherP
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -145,5 +146,22 @@ public class OtherProceedingsGeneratorTest {
                                                                              .build())
                                               .build());
 
+    }
+
+    @Test
+    public void testWithoutProceedings() {
+        CaseData caseData = CaseData.builder()
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
+            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
+                                             .fl401OtherProceedings(new ArrayList<>()).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+
+        CaseSummary caseSummary = generator.generate(caseData);
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .otherProceedingEmptyTable(OtherProceedingEmptyTable.builder()
+                                                                             .otherProceedingEmptyField("")
+                                                                             .build())
+                                              .build());
     }
 }

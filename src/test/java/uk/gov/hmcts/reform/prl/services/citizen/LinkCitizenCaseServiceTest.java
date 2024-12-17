@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -72,7 +75,7 @@ public class LinkCitizenCaseServiceTest {
     public static final String s2sToken = "s2s AuthToken";
     public static final String caseId = "case id";
     public static final String accessCode = "access code";
-    private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private final UUID testUuid = UUID.fromString(TEST_UUID);
     CaseDetails caseDetails;
     CaseData caseData;
     CaseData caseDataAlreadyLinked;
@@ -94,6 +97,7 @@ public class LinkCitizenCaseServiceTest {
 
         caseDetails = CaseDetails.builder().build();
         caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
             .applicants(applicantList)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(testUuid)
@@ -263,6 +267,7 @@ public class LinkCitizenCaseServiceTest {
         CaseDetails caseDetails1 = CaseDetails.builder().build();
         CaseData caseData1 = CaseData.builder()
             .respondents(Arrays.asList(element(applicant)))
+            .caseTypeOfApplication("C100")
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
                                                                          .partyId(testUuid)
                                                                          .accessCode(accessCode).build()).build()))
@@ -282,5 +287,16 @@ public class LinkCitizenCaseServiceTest {
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testInValidAccessCode() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class))
+            .thenReturn(caseData.toBuilder().caseTypeOfApplication(FL401_CASE_TYPE).build());
+        when(launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)).thenReturn(false);
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 }

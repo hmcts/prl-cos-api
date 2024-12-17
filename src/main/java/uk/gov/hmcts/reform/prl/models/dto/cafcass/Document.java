@@ -22,13 +22,18 @@ public class Document {
     @JsonProperty("document_hash")
     String documentHash;
 
+    @JsonProperty("document_id")
+    String documentId;
+
     @JsonCreator
     public Document(@JsonProperty("document_url") String documentUrl,
                     @JsonProperty("document_filename") String documentFileName,
-                    @JsonProperty("document_hash") String documentHash) {
+                    @JsonProperty("document_hash") String documentHash,
+                    @JsonProperty("document_id") String documentId) {
         this.documentUrl = documentUrl;
         this.documentFileName = documentFileName;
         this.documentHash = documentHash;
+        this.documentId = documentId;
     }
 
     public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
@@ -38,5 +43,10 @@ public class Document {
             .build();
     }
 
-
+    public static Document buildFromPrlDocument(uk.gov.hmcts.reform.prl.models.documents.Document cafcassDocument) {
+        return Document.builder()
+            .documentUrl(cafcassDocument.getDocumentUrl())
+            .documentFileName(cafcassDocument.getDocumentFileName())
+            .build();
+    }
 }

@@ -103,6 +103,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             // Refreshing the page in the same event. Hence no external event call needed.
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseData = returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(caseData, caseDataUpdated);
             caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
             String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);
