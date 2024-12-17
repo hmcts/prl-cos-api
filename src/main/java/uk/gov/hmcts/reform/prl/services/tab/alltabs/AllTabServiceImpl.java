@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -150,8 +149,8 @@ public class AllTabServiceImpl implements AllTabsService {
                                                  EventRequestData eventRequestData,
                                                  CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
-        //PRL-6318 - fix 0 id in caseData for court nav cases
-        if (ObjectUtils.isNotEmpty(combinedFieldsMap.get("id")) && 0 == (Long)combinedFieldsMap.get("id")) {
+        //PRL-6779 - fix 0 id in caseData for court nav cases
+        if (null == combinedFieldsMap.get("id") || 0 == (Long)combinedFieldsMap.get("id")) {
             combinedFieldsMap.put("id", Long.parseLong(caseId));
         }
 
