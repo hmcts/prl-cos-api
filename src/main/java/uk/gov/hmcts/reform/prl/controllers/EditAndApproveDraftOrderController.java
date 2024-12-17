@@ -206,6 +206,7 @@ public class EditAndApproveDraftOrderController {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
+            manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()

@@ -304,6 +304,7 @@ public class ManageOrdersController {
                 && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
                 List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
                     DRAFT_ORDER_COLLECTION);
+
                 newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
                     ? draftOrderCollection.get(0).getId() : null;
             }

@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -49,6 +50,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -80,6 +82,9 @@ public class UpdatePartyDetailsServiceTest {
 
     @Mock
     DocumentGenService documentGenService;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -158,9 +163,8 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -186,9 +190,8 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -244,9 +247,8 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -304,9 +306,8 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -388,9 +389,8 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -510,9 +510,8 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -615,12 +614,12 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(CaseDetails.builder().id(123L).data(stringObjectMap).build())
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -707,9 +706,8 @@ public class UpdatePartyDetailsServiceTest {
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
                                          Mockito.anyBoolean(),Mockito.anyMap()))
             .thenReturn(Document.builder().build());
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
@@ -909,13 +907,12 @@ public class UpdatePartyDetailsServiceTest {
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
                                          Mockito.anyBoolean(),Mockito.anyMap()))
             .thenReturn(Document.builder().build());
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
-            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .caseDetailsBefore(CaseDetails.builder()
                                    .id(123L)
                                    .data(stringObjectMap1)
                                    .build())
@@ -1239,6 +1236,30 @@ public class UpdatePartyDetailsServiceTest {
         when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> updatedCaseData = updatePartyDetailsService
                 .updateApplicantRespondentAndChildData(callbackRequest, "test");
+        assertNotNull(updatedCaseData);
+    }
+
+
+    @Test
+    public void testAmendOtherPeopleInTheCase() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> objectMap = new HashMap<>();
+        objectMap.put("caseTypeOfApplication", "C100");
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
+                                                                                    .data(objectMap)
+                                                                                    .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .data(objectMap)
+                                   .build())
+            .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
+        doNothing().when(partyLevelCaseFlagsService).amendCaseFlags(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString());
+        Map<String, Object> updatedCaseData = updatePartyDetailsService
+            .amendOtherPeopleInTheCase(callbackRequest);
         assertNotNull(updatedCaseData);
     }
 
