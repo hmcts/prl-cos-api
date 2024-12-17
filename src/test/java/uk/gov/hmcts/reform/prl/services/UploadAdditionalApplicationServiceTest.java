@@ -56,6 +56,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -146,7 +147,7 @@ class UploadAdditionalApplicationServiceTest {
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
-        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class)))
+        when(paymentRequestService.getPaymentServiceResponse(anyString(), any(CaseData.class), any(FeeResponse.class), anyBoolean()))
             .thenReturn(PaymentServiceResponse.builder()
                           .build());
         CaseData caseData = CaseData.builder()
