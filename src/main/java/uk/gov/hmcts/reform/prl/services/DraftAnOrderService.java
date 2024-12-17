@@ -1112,6 +1112,13 @@ public class DraftAnOrderService {
                     log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                // Check for Automated Hearing Management
+                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
+                    UserRoles.JUDGE.toString()) || loggedInUserType.equalsIgnoreCase(UserRoles.CASEMANAGER.toString()))
+                    && isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
+                    draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();
+                }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(selectedOrderId, draftOrder)
