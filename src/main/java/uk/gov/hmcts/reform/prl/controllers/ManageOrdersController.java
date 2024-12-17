@@ -82,7 +82,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
-    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE = "This feature is not currently available. Please refer to HMCTS guidance.";
+    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE =
+        "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
