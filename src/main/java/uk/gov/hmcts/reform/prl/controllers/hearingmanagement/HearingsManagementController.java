@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -103,8 +105,13 @@ public class HearingsManagementController extends AbstractCallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("nextHearingDetails",
-                            hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
+        NextHearingDetails nextHearingDetails = hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        if (null != nextHearingDetails) {
+            caseDataUpdated.put("nextHearingDetails", nextHearingDetails);
+            if (nonNull(nextHearingDetails.getHearingDateTime())) {
+                caseDataUpdated.put("nextHearingDate", nextHearingDetails.getHearingDateTime().toLocalDate());
+            }
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
