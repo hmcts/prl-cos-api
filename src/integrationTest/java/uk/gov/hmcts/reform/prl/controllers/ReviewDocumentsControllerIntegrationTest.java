@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,26 +12,22 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class ServiceOfApplicationControllerIntegrationTest {
+public class ReviewDocumentsControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
@@ -41,10 +36,7 @@ public class ServiceOfApplicationControllerIntegrationTest {
 
 
     @MockBean
-    ServiceOfApplicationService serviceOfApplicationService;
-
-    @MockBean
-    AuthorisationService authorisationService;
+    ReviewDocumentService reviewDocumentService;
 
     @Before
     public void setUp() {
@@ -53,16 +45,29 @@ public class ServiceOfApplicationControllerIntegrationTest {
 
     @Test
     public void testHandleAboutToStart() throws Exception {
-        String url = "/service-of-application/about-to-start";
+        String url = "/review-documents/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any())).thenReturn(new HashMap<>());
+        when(reviewDocumentService.fetchDocumentDynamicListElements(any(), any())).thenReturn(new ArrayList<>());
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testHandleMidEvent() throws Exception {
+        String url = "/review-documents/mid-event";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
@@ -72,16 +77,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-        String url = "/service-of-application/about-to-submit";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.handleAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
+        String url = "/review-documents/about-to-submit";
+        String jsonRequest = ResourceLoader.loadJson("requests/review-doc-body.json");
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .header("Authorization", "testAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
@@ -91,38 +92,16 @@ public class ServiceOfApplicationControllerIntegrationTest {
 
     @Test
     public void testHandleSubmitted() throws Exception {
-        String url = "/service-of-application/submitted";
+        String url = "/review-documents/submitted";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .header("Authorization", "testAuthToken")
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
     }
-
-    @Test
-    public void testSoaValidation() throws Exception {
-        String url = "/service-of-application/soa-validation";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
 }
