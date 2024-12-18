@@ -63,8 +63,6 @@ public class HearingData {
 
     private DynamicList applicantHearingChannel;
 
-    private String hearingId;
-
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
