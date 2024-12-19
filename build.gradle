@@ -561,7 +561,7 @@ pitest {
     'uk.gov.hmcts.reform.prl.Application.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
   ]
-  threads = 10
+  threads = 20
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
   mutationThreshold = 80
@@ -590,7 +590,7 @@ jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
+project.tasks['sonarqube'].dependsOn integration, jacocoTestReport
 
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
@@ -618,7 +618,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
-  '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java'
+  '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java',
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java'
 ]
 
 sonarqube {
