@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @Builder(toBuilder = true)
@@ -27,5 +28,6 @@ public class OtherPersonDetail {
     private RelationshipDetails relationshipDetails;
     @JsonProperty("address")
     private OtherPersonAddress otherPersonAddress;
-
+    @JsonProperty("isOtherPersonAddressConfidential")
+    private YesOrNo isOtherPersonAddressConfidential;
 }

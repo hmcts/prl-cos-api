@@ -47,7 +47,8 @@
         "emailAddress":"",
         "telephoneNumber":"",
         "donKnowTelephoneNumber":"No"
-      }
+      },
+      "isOtherPersonAddressConfidential": "No"
     }
   ]
 }
