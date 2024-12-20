@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 
 @Data
@@ -35,4 +36,6 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
 }

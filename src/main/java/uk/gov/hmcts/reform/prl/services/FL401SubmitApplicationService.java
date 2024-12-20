@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
@@ -37,6 +38,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
@@ -53,6 +56,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -110,6 +114,11 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         caseDataUpdated.put("caseFlags", Flags.builder().build());
         caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        cleanUpC8RefugeFields(caseData, caseDataUpdated);
+        confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+            caseDataUpdated,
+            caseData
+        );
 
         // Work Allocation court list
         List<DynamicListElement> workAllocationEnabledCourtList;
@@ -164,5 +173,22 @@ public class FL401SubmitApplicationService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .userDetails(userDetails)
             .build();
+    }
+
+    public void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+        log.info("Start cleaning up on submit");
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getApplicantsFL401()),
+            updatedCaseData,
+            FL401_APPLICANTS,
+            true
+        );
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
+            ofNullable(caseData.getRespondentsFL401()),
+            updatedCaseData,
+            FL401_RESPONDENTS,
+            true
+        );
+        log.info("close cleaning up on submit");
     }
 }

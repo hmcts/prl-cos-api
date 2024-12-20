@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherP
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
 @Data
 public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
+    private final RefugeCase refugeCase;
     private final CaseStatus caseStatus;
     private final CaseClosedDate caseClosedDate;
     private final ConfidentialDetails confidentialDetails;

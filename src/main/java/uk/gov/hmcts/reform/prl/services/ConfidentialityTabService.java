@@ -174,25 +174,25 @@ public class ConfidentialityTabService {
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
         Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
-        List<ChildDetailsRevised> childDetailsReviseds = new ArrayList<>();
+        List<ChildDetailsRevised> childDetailsRevisedList = new ArrayList<>();
         if (children.isPresent()) {
-            childDetailsReviseds = children.get()
+            childDetailsRevisedList = children.get()
                 .stream()
                 .map(Element::getValue)
                 .toList();
         }
-        if (!childrenAndOtherPeopleRelations.isEmpty()) {
+        if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
                     .toList()
-                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
+                    .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
-            for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
+            for (ChildDetailsRevised childDetailsRevised : childDetailsRevisedList) {
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
-                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
+                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList, objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
                     Element<ChildConfidentialityDetails> childElement = Element
                         .<ChildConfidentialityDetails>builder()
@@ -238,14 +238,25 @@ public class ConfidentialityTabService {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential()) && isNotEmpty(applicant.getAddress())) {
-                addressSet = true;
+            if (isNotEmpty(applicant.getAddress())) {
+                addressSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsAddressConfidential()
+                );
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential()) && isNotEmpty(applicant.getEmail())) {
-                emailSet = true;
+
+            if (isNotEmpty(applicant.getEmail())) {
+                emailSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsEmailAddressConfidential()
+                );
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential()) && isNotEmpty(applicant.getPhoneNumber())) {
-                phoneSet = true;
+
+            if (isNotEmpty(applicant.getPhoneNumber())) {
+                phoneSet = findIsConfidentialField(
+                    applicant.getLiveInRefuge(),
+                    applicant.getIsPhoneNumberConfidential()
+                );
             }
             if (addressSet || emailSet || phoneSet) {
                 tempConfidentialApplicants
@@ -254,6 +265,14 @@ public class ConfidentialityTabService {
         }
 
         return tempConfidentialApplicants;
+    }
+
+    private boolean findIsConfidentialField(YesOrNo liveInRefuge, YesOrNo isFieldConfidential) {
+        if ((YesOrNo.Yes).equals(liveInRefuge)) {
+            return true;
+        } else {
+            return (YesOrNo.Yes).equals(isFieldConfidential);
+        }
     }
 
     private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,

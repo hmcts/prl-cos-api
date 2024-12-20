@@ -38,6 +38,15 @@
         "County":"thames",
         "PostCode":"tw22tr8",
         "Country":"uk"
+      },
+      "liveInRefuge": "Yes",
+      "refugeConfidentialityC8Form": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary",
+        "document_filename": "Sample_doc_2.pdf",
+        "document_hash": null,
+        "category_id": null,
+        "document_creation_date": "2024-05-14T13:13:44.000+00:00"
       }
     }
   ]
