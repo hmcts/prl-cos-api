@@ -740,7 +740,7 @@ public class StmtOfServImplServiceTest {
 
         when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
                                                                               Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
+            .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
                 .partiesServed(List.of(TEST_UUID, "234", "1234"))
@@ -780,7 +780,7 @@ public class StmtOfServImplServiceTest {
 
         when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
                                                                               Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
+            .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
             .partiesServed(List.of(TEST_UUID, "234", "1234"))
@@ -820,7 +820,7 @@ public class StmtOfServImplServiceTest {
 
         when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
                                                                               Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
+            .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
             .partiesServed(List.of("123", "234", "1234"))
@@ -860,7 +860,7 @@ public class StmtOfServImplServiceTest {
 
         when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
                                                                               Mockito.any(),Mockito.anyString()))
-            .thenReturn(Document.builder().build());
+            .thenReturn(List.of(Document.builder().build()));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
             .partiesServed(List.of("123", "234", "1234"))

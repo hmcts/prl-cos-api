@@ -22,13 +22,18 @@ public class Document {
     @JsonProperty("document_hash")
     String documentHash;
 
+    @JsonProperty("document_id")
+    String documentId;
+
     @JsonCreator
     public Document(@JsonProperty("document_url") String documentUrl,
                     @JsonProperty("document_filename") String documentFileName,
-                    @JsonProperty("document_hash") String documentHash) {
+                    @JsonProperty("document_hash") String documentHash,
+                    @JsonProperty("document_id") String documentId) {
         this.documentUrl = documentUrl;
         this.documentFileName = documentFileName;
         this.documentHash = documentHash;
+        this.documentId = documentId;
     }
 
     public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
