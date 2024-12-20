@@ -68,7 +68,7 @@ public class PaymentRequestService {
             CaseData.class
         );
 
-        return getPaymentServiceResponse(authorisation, caseData, feeResponse);
+        return getPaymentServiceResponse(authorisation, caseData, feeResponse, true);
     }
 
     public PaymentResponse createServicePayment(String serviceRequestReference,
@@ -172,7 +172,7 @@ public class PaymentRequestService {
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
                 //create service request
-                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
+                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse, false);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
                     .build();
@@ -180,7 +180,7 @@ public class PaymentRequestService {
                 // if CR and PR doesn't exist
                 log.info("Creating new service request and payment request for card payment 1st time for the case id: {}", caseId);
                 //create service request
-                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
+                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse, false);
                 paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                        authorization, createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
                 //set service request ref
@@ -254,14 +254,17 @@ public class PaymentRequestService {
             CaseData.class
         );
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-        return getPaymentServiceResponse(authorisation, caseData, feeResponse);
+        return getPaymentServiceResponse(authorisation, caseData, feeResponse, true);
     }
 
-    public PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, FeeResponse feeResponse) {
+    public PaymentServiceResponse getPaymentServiceResponse(String authorisation,
+                                                            CaseData caseData,
+                                                            FeeResponse feeResponse,
+                                                            boolean isCallbackRequired) {
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
-                                             .callBackUrl(callBackUrl)
+                                             .callBackUrl(isCallbackRequired ? callBackUrl : null)
                                              .casePaymentRequest(CasePaymentRequestDto.builder()
                                                                      .action(PAYMENT_ACTION)
                                                                      .responsibleParty(caseData.getApplicantCaseName()).build())
