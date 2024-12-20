@@ -78,6 +78,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.Respondent
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -136,6 +137,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     RespondentAllegationOfHarmService respondentAllegationOfHarmService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     PartyDetails respondent;
 
