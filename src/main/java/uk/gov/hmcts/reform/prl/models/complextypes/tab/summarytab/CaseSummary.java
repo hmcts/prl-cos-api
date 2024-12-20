@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Allega
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseClosedDate;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ConfidentialDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
@@ -26,6 +27,7 @@ public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
     private final RefugeCase refugeCase;
     private final CaseStatus caseStatus;
+    private final CaseClosedDate caseClosedDate;
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
     private final AllegationOfHarm allegationOfHarm;

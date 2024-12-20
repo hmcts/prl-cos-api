@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -93,6 +94,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentLanguageService documentLanguageService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -176,9 +178,20 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
-            cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-            findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
+        if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
+            Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+            partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
+        }
+        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
+        return updatedCaseData;
+    }
+
+    public Map<String, Object> amendOtherPeopleInTheCase(CallbackRequest callbackRequest) {
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         return updatedCaseData;
     }
 
