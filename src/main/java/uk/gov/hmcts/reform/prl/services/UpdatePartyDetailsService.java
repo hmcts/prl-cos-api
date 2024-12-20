@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -85,6 +86,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialityTabService confidentialityTabService;
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final UserService userService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -409,6 +411,8 @@ public class UpdatePartyDetailsService {
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
         log.info("inside populateC8Documents for partyIndex " + partyIndex);
+        UserDetails userInfo = userService.getUserDetails(authorisation);
+        userInfo.getRoles().forEach(role -> log.info("Role: " + role));
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
