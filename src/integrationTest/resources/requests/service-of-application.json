@@ -1,0 +1,13 @@
+{
+  "partiesServedDate": "2023-10-01",
+  "partiesServed": [
+    "Party1",
+    "Party2"
+  ],
+  "citizenSosDocs": {
+    "documentUrl": "http://example.com/doc.pdf",
+    "documentBinaryUrl": "http://example.com/doc.pdf/binary",
+    "documentFilename": "doc.pdf"
+  },
+  "isOrder": "Yes"
+}

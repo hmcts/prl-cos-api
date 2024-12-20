@@ -1,84 +1,109 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.ResourceLoader;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
-import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static org.junit.Assert.assertEquals;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Ignore
-@RunWith(SpringIntegrationSerenityRunner.class)
-@SpringBootTest(classes = {Application.class, CaseDocumentControllerIntegrationTest.class})
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
+@Slf4j
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@ContextConfiguration
 public class CaseDocumentControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
-
-    private final String generateCitizenDocumentEndpoint = "/generate-citizen-statement-document";
-
-    private final String uploadCitizenStatementEndpoint = "/upload-citizen-statement-document";
-
-    private final String deleteCitizenStatementEndpoint = "/delete-citizen-statement-documente";
-
-    private final String validBody = "controller/delete-citizen-document.json";
+    private MockMvc mockMvc;
 
     @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @MockBean
+    DocumentGenService documentGenService;
+
+    @MockBean
+    UploadDocumentService uploadService;
+
+    @MockBean
+    AuthorisationService authorisationService;
+
+    @MockBean
+    CoreCaseDataApi coreCaseDataApi;
+    @MockBean
+    IdamClient idamClient;
+
+    @MockBean
     CaseService caseService;
 
-    @Autowired
-    IdamTokenGenerator idamTokenGenerator;
+    @MockBean
+    EmailService emailService;
 
-    @Autowired
-    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+    @MockBean
+    CitizenDocumentService citizenDocumentService;
 
-    @Test
-    public void testGenerateCitizenDocumentEndpoint() throws Exception {
-        HttpPost httpPost = new HttpPost(serviceUrl + generateCitizenDocumentEndpoint);
-        httpPost.addHeader("Content-Type", MediaType.MULTIPART_FORM_DATA_VALUE);
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    public void testUploadCitizenStatementEndpoint() throws Exception {
-        HttpPost httpPost = new HttpPost(serviceUrl + uploadCitizenStatementEndpoint);
-        httpPost.addHeader("Content-Type", MediaType.MULTIPART_FORM_DATA_VALUE);
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    public void testDeleteCitizenStatementDocument() throws Exception {
+
+
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        Map<String, Object> map = new HashMap<>();
+        map.put("caseId", "123");
+        map.put("citizenUploadedDocumentList", List.of(element(UploadedDocuments.builder().build())));
+
+
+        when(coreCaseDataApi.getCase(anyString(), anyString(), anyString())).thenReturn(CaseDetails.builder()
+                                                                                            .id(123L)
+                                                                                            .data(map)
+                                                                                            .build());
+
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        String url = "/delete-citizen-statement-document";
+        String jsonRequest = "{\"values\": {\"caseId\": \"123\", \"documentId\": \"456\"}}";
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
-
-    @Test
-    public void testDeleteCitizenStatementEndpointt() throws Exception {
-        String requestBody = ResourceLoader.loadJson(validBody);
-
-        HttpPost httpPost = new HttpPost(serviceUrl + deleteCitizenStatementEndpoint);
-        httpPost.addHeader("Content-Type", MediaType.MULTIPART_FORM_DATA_VALUE);
-        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
-    }
-
 }
