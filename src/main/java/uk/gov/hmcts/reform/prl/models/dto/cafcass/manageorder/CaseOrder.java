@@ -110,7 +110,11 @@ public class CaseOrder {
     }
 
     public void setHearingId(String hearingId) {
-        this.hearingId = hearingId;
+        if (null != hearingId && !hearingId.trim().isEmpty()) {
+            this.hearingId = hearingId;
+        } else {
+            this.hearingId = null;
+        }
     }
 
     private List<String> courtReportType;
