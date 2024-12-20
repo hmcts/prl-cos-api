@@ -20,6 +20,7 @@ public class HomeDetails {
 
     private final YesOrNo isPropertyAdapted;
     private final YesOrNo howIsThePropertyAdapted;
+    private final String howIsThePropertyAdaptedText;
     private final YesOrNo isThereMortgageOnProperty;
     private final String mortgageNamedAfter;
     private final String mortgageNumber;
