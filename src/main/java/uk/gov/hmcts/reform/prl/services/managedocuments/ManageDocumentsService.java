@@ -213,6 +213,15 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
+            if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+                || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
+                quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                    quarantineLegalDoc,
+                    caseData.getIsPathfinderCase()
+                );
+            }
+
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
@@ -231,6 +240,14 @@ public class ManageDocumentsService {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
+    }
+
+    private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc, YesOrNo isPathfinderCase) {
+        return quarantineLegalDoc.toBuilder()
+            .isConfidential(YesOrNo.Yes)
+            .categoryName(YesOrNo.Yes.equals(isPathfinderCase) ? "Pathfinder" : quarantineLegalDoc.getCategoryName())
+            .categoryId(YesOrNo.Yes.equals(isPathfinderCase) ? "pathfinder" : quarantineLegalDoc.getCategoryId())
+            .build();
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
@@ -309,6 +326,7 @@ public class ManageDocumentsService {
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
+            .documentType(quarantineLegalDoc.getDocumentType())
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentType(COURTNAV.equals(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getDocumentType() : null)
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())

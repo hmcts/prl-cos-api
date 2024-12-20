@@ -25,20 +25,35 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -48,7 +63,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNull;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -84,11 +102,15 @@ public class CaseDataServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Mock
+    private ObjectMapper objMapper;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
+
 
     @Test
     public void getCaseData() throws IOException {
@@ -390,17 +412,72 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testBuildFromCfvDocument() throws MalformedURLException {
-        String documentUrl = "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7";
-        uk.gov.hmcts.reform.ccd.client.model.Document cfvDocument = new uk.gov.hmcts.reform.ccd.client.model.Document(
-            documentUrl,
-            "test",
-            "test",
-            "test",
-            null
+    public void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        Document document = Document.builder().documentUrl("test").documentFileName("test").build();
+        when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
+        when(objMapper.convertValue(anyMap(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class))).thenReturn(
+            document);
+        Bundle caseBundles = Bundle.builder()
+            .value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().documentUrl("http://test.link")
+                                                                .documentFilename("test").build()).build())
+            .build();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("section7Report")
+            .section7ReportDocument(document).build();
+        ResponseDocuments responseDocuments = ResponseDocuments.builder()
+            .citizenDocument(document)
+            .respondentC8Document(document)
+            .respondentC8DocumentWelsh(document)
+            .build();
+        StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
+            .stmtOfServiceDocument(document)
+            .build();
+        ApplicantDetails applicantDetails = ApplicantDetails.builder()
+            .response(Response.builder().responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                                         .responseToAllegationsOfHarmDocument(document)
+                                                                         .build()).build())
+            .build();
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .respondents(List.of(Element.<ApplicantDetails>builder().id(UUID.randomUUID()).value(applicantDetails).build()))
+            .c8FormDocumentsUploaded(List.of(document))
+            .bundleInformation(BundlingInformation.builder().caseBundles(List.of(caseBundles)).build())
+            .otherDocumentsUploaded(List.of(document))
+            .uploadOrderDoc(document)
+            .courtStaffUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+            .legalProfUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+            .cafcassUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+            .courtStaffUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
+            .citizenUploadedDocListDocTab(List.of(element(quarantineLegalDoc)))
+            .restrictedDocuments(List.of(element(quarantineLegalDoc)))
+            .confidentialDocuments(List.of(element(quarantineLegalDoc)))
+            .respondentAc8Documents(List.of(element(responseDocuments)))
+            .respondentBc8Documents(List.of(element(responseDocuments)))
+            .respondentCc8Documents(List.of(element(responseDocuments)))
+            .respondentDc8Documents(List.of(element(responseDocuments)))
+            .respondentEc8Documents(List.of(element(responseDocuments)))
+            .specialArrangementsLetter(document)
+            .additionalDocuments(document)
+            .additionalDocumentsList(List.of(element(document)))
+            .stmtOfServiceAddRecipient(List.of(element(stmtOfServiceAddRecipient)))
+            .stmtOfServiceForOrder(List.of(element(stmtOfServiceAddRecipient)))
+            .stmtOfServiceForApplication(List.of(element(stmtOfServiceAddRecipient)))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder()
+            .caseData(cafCassCaseData)
+            .build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
         );
-        Document document = caseDataService.buildFromCfvDocument(cfvDocument);
-        assertEquals("test", document.getDocumentFileName());
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(caseDataService, cafCassResponse);
+
+        assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
+        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
+        assertNull(cafCassResponse.getCases().get(0).getCaseData().getCafcassUploadDocListDocTab());
+
     }
+
 
 }
