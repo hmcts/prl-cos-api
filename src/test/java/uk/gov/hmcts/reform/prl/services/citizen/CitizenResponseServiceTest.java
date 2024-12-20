@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -74,6 +75,8 @@ public class CitizenResponseServiceTest {
     DocumentLanguageService documentLanguageService;
     @Mock
     CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    @Mock
+    ManageOrderService manageOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String caseId = "123";
