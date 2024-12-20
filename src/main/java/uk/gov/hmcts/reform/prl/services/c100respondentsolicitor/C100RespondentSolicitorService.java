@@ -1108,8 +1108,8 @@ public class C100RespondentSolicitorService {
         Document c8FinalDocumentWel = null;
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
 
-            String loggedInUser = manageOrderService.getLoggedInUserType(authorisation);
-            log.info("logged in user type: {}", loggedInUser);
+            //prl-6790 - getting user-role and adding to datamap
+            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenWelsh()) {

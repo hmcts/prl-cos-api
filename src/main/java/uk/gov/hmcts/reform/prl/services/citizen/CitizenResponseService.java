@@ -397,8 +397,8 @@ public class CitizenResponseService {
                                                    UserDetails userDetails) throws Exception {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             int partyIndex = caseData.getRespondents().indexOf(partyDetailsElement);
-            String loggedInUser = manageOrderService.getLoggedInUserType(authorisation);
-            log.info("loggedInUser: {}", loggedInUser);
+            //prl-6790 - getting user-role and adding to datamap
+            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
             Document c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
