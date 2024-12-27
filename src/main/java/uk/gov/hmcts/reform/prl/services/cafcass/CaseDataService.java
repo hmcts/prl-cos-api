@@ -296,29 +296,29 @@ public class CaseDataService {
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getLegalProfUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCafcassUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCitizenUploadedDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
             parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab());
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments());
         }
     }
 
@@ -456,7 +456,6 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                log.info("Document is not null for category {}", category);
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
@@ -558,18 +557,18 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
-        log.info("Update hearing data for cafcass");
+
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
         return filteredCafcassResponse;
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
+                List<CaseHearing> filteredCaseHearings = new ArrayList<>();
                 hearings.getCaseHearings().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
@@ -601,6 +600,7 @@ public class CaseDataService {
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
+
                 if (filteredHearing != null) {
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
@@ -665,7 +665,6 @@ public class CaseDataService {
             "data.finalDocument",
             "data.ordersApplyingFor",
             "data.children",
-            "data.miamCertificationDocumentUpload1",
             "data.miamStatus",
             "data.miamExemptionsTable",
             "data.claimingExemptionMiam",

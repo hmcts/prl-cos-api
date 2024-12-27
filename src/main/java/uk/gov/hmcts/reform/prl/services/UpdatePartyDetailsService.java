@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -83,6 +84,7 @@ public class UpdatePartyDetailsService {
     private final DocumentGenService documentGenService;
     private final ConfidentialityTabService confidentialityTabService;
     private final DocumentLanguageService documentLanguageService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -141,7 +143,18 @@ public class UpdatePartyDetailsService {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
+        if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
+            Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+            partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
+        }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        return updatedCaseData;
+    }
+
+    public Map<String, Object> amendOtherPeopleInTheCase(CallbackRequest callbackRequest) {
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         return updatedCaseData;
     }
 
