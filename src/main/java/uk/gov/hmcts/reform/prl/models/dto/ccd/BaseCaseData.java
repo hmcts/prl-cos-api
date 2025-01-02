@@ -13,8 +13,11 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
+import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDateTime;
 
@@ -70,6 +73,9 @@ public class BaseCaseData {
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
 
+    @JsonProperty("isPathfinderCase")
+    private YesOrNo isPathfinderCase;
+
     @JsonUnwrapped
     private DocumentsNotifications documentsNotifications;
 
@@ -86,6 +92,30 @@ public class BaseCaseData {
     @JsonProperty("isApplicantRepresented")
     private String isApplicantRepresented;
 
+
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
+
+    @JsonUnwrapped
+    private ClosingCaseOptions closingCaseOptions;
+
+    //PRL-6191 - Added for Record final decision
+    private String finalCaseClosedDate;
+
+    private YesOrNo caseClosed;
+
+    //PRL-6262 - Reopening closed cases
+    private ValidReopenClosedCasesStatusEnum changeStatusOptions;
+    private String reopenStateTo;
+
+    @JsonUnwrapped
+    private ServiceOfDocuments serviceOfDocuments;
+
+    @JsonUnwrapped
+    private HearingTaskData hearingTaskData;
+
+    private String isNonWorkAllocationEnabledCourtSelected;
+
+    @JsonProperty("respondentSolicitorName")
+    private String respondentSolicitorName;
 }

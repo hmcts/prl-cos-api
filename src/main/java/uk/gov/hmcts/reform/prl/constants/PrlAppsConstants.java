@@ -590,6 +590,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
+    public static final String APPLICANT = "applicant";
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
     public static final String CAFCASS_REPORTS = "Cafcass reports";
@@ -906,8 +907,6 @@ public class PrlAppsConstants {
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
-        + "The court will contact the people in the case with details of the first court hearing. "
-        + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
@@ -1065,10 +1064,15 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
     public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
     public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
+    public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
+
+    public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";
 
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
@@ -1085,4 +1089,18 @@ public class PrlAppsConstants {
     public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
+
+    public static final String FINAL_CASE_CLOSED_DATE = "finalCaseClosedDate";
+    public static final String CASE_CLOSED = "caseClosed";
+    public static final String CHILD_DETAILS_REVISED_TABLE = "childDetailsRevisedTable";
+    public static final String DOES_APPLICANT_HAVE_CHILDREN = "doesApplicantHaveChildren";
+    public static final String APPLICANT_FAMILY_TABLE = "applicantFamilyTable";
+    public static final String FL401_CHILD_DETAILS_TABLE = "fl401ChildDetailsTable";
+    public static final String APPLICANT_CHILD = "applicantChild";
+
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+    public static final String RESPONDENT = "respondent";
+
+    public static final String CASE_STATUS = "caseStatus";
+
 }

@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -46,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -69,6 +72,8 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,6 +112,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
@@ -156,6 +162,7 @@ public class CaseService {
     public static final String IS_PERSONAL = "isPersonal";
     public static final String PARTY_NAMES = "partyNames";
     public static final String ORDER_TYPE_ID = "orderTypeId";
+    public static final String ORDER_MADE_DATE = "orderMadeDate";
     public static final String OCCUPATION_ORDER = "occupation";
     public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
     private final CoreCaseDataApi coreCaseDataApi;
@@ -459,7 +466,7 @@ public class CaseService {
 
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
         //Retrieve citizen documents with other docs segregated
-        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments);
+        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments, partyIdAndType);
         //Retrieve citizen orders for the party
         List<CitizenDocuments> citizenOrders = getCitizenOrders(userDetails, caseData, partyIdAndType, citizenDocuments);
         //Add additional documents served along with order
@@ -690,7 +697,8 @@ public class CaseService {
 
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
                                                        CaseData caseData,
-                                                       List<CitizenDocuments> otherDocuments) {
+                                                       List<CitizenDocuments> otherDocuments,
+                                                       Map<String, String> partyIdAndType) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
@@ -736,10 +744,13 @@ public class CaseService {
         citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
 
         //Applications within proceedings
-        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
+        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData, partyIdAndType));
 
         //C9/FL415 - Statement of service documents
         otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
+
+        //PRL-6319 - service of documents
+        otherDocuments.addAll(getAllServiceOfDocuments(caseData, partyIdAndType));
 
         return citizenDocuments;
     }
@@ -1030,6 +1041,9 @@ public class CaseService {
         //Respondent response notification to applicant
         addRespondentResponseNotification(caseData, citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
+        //PRL-6319 - Service of documents
+        addServiceOfDocumentsNotification(caseData, citizenDocumentsManagement, citizenNotifications);
+
         return citizenNotifications;
     }
 
@@ -1043,6 +1057,7 @@ public class CaseService {
         notifMap.put(IS_FINAL, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal));
         notifMap.put(IS_MULTIPLE, multipleOrdersServed.size() > 1);
         notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
+        notifMap.put(ORDER_MADE_DATE, citizenOrders.get(0).getMadeDate());
 
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
@@ -1072,7 +1087,10 @@ public class CaseService {
         CitizenDocuments order = findPersonalServiceLipOrderPendingSos(citizenOrders);
         if (SERVED_PARTY_APPLICANT.equals(partyType) && null != order) {
             notifMap.put(IS_PERSONAL, true);
+            notifMap.put(IS_NEW, order.isNew());
+            notifMap.put(IS_FINAL, order.isFinal());
             notifMap.put(ORDER_TYPE_ID, order.getOrderTypeId());
+            notifMap.put(ORDER_MADE_DATE, order.getMadeDate());
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }
     }
@@ -1223,6 +1241,31 @@ public class CaseService {
         }
     }
 
+    private void addServiceOfDocumentsNotification(CaseData caseData,
+                                                   CitizenDocumentsManagement citizenDocumentsManagement,
+                                                   List<CitizenNotification> citizenNotifications) {
+        CitizenDocuments servedDocument = getLatestServedDocument(citizenDocumentsManagement.getCitizenOtherDocuments());
+        if (null != servedDocument
+            && !isAnyOrderServedPostDate(citizenDocumentsManagement.getCitizenOrders(),
+                                         servedDocument.getUploadedDate())) {
+            Map<String, Object> notifMap = new HashMap<>();
+            notifMap.put(IS_PERSONAL, servedDocument.isPersonalService());
+            citizenNotifications.addAll(getNotifications(
+                caseData,
+                NotificationNames.SOD_APPLICANT_RESPONDENT,
+                notifMap
+            ));
+        }
+    }
+
+    private CitizenDocuments getLatestServedDocument(List<CitizenDocuments> otherDocuments) {
+
+        return nullSafeCollection(otherDocuments).stream()
+            .filter(CitizenDocuments::isServedDocument)
+            .findFirst()
+            .orElse(null);
+    }
+
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
                                          UserDetails userDetails) {
         return CollectionUtils.isNotEmpty(citizenDocuments)
@@ -1280,9 +1323,8 @@ public class CaseService {
             .categoryId(categoryId)
             .document(isWelsh ? null : document)
             .documentWelsh(isWelsh ? document : null)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(submittedDate,
-                                                           DATE_FORMATTER_YYYY_MM_DD),
-                                           LocalTime.of(0, 0)))
+            .uploadedDate(null == submittedDate ? ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime()
+                : LocalDateTime.of(LocalDate.parse(submittedDate, DATE_FORMATTER_YYYY_MM_DD), LocalTime.of(0, 0)))
             .documentLanguage(isWelsh ? WELSH : ENGLISH)
             .uploadedBy(SYSTEM)
             .build();
@@ -1377,50 +1419,103 @@ public class CaseService {
             .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
-            .uploadedDate(LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(),
-                                                           DATE_FORMATTER_YYYY_MM_DD),
-                                           LocalTime.of(0, 0)))
+            .uploadedDate(null == caseData.getDateSubmitted()
+                              ? ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime()
+                              : LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(), DATE_FORMATTER_YYYY_MM_DD),
+                                                 LocalTime.of(0, 0)))
             .build();
     }
 
-    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData) {
+    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData,
+                                                                               Map<String, String> partyIdAndType) {
         List<CitizenDocuments> applicationsWithinProceedings = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             caseData.getAdditionalApplicationsBundle().stream()
                 .map(Element::getValue)
+                .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
-                    if (null != awp.getC2DocumentBundle()
-                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getC2DocumentBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getC2DocumentBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
 
                     //Other bundle docs
-                    if (null != awp.getOtherApplicationsBundle()
-                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getOtherApplicationsBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getOtherApplicationsBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
-
-                    //NEED SUPPORTING DOCUMENTS ?
                 });
         }
         return applicationsWithinProceedings;
     }
 
+    private List<CitizenDocuments> getSupportingEvidenceDocuments(AdditionalApplicationsBundle awp,
+                                                                  List<Element<SupportingEvidenceBundle>> documents,
+                                                                  String partyId) {
+        return documents.stream()
+            .map(Element::getValue)
+            .map(document ->
+                CitizenDocuments.builder()
+                    .partyId(partyId)
+                    .partyType(awp.getPartyType().getDisplayedValue())
+                    .partyName(awp.getAuthor())
+                    .uploadedBy(awp.getAuthor())
+                    .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                    .document(document.getDocument())
+                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                    .build()
+            ).toList();
+    }
+
+    private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
+                                               String partyId) {
+        if (null != addlAppBundle
+            && CollectionUtils.isNotEmpty(addlAppBundle.getSelectedParties())) {
+            return addlAppBundle.getSelectedParties().stream()
+                .map(Element::getValue)
+                .anyMatch(servedParty -> partyId.equals(servedParty.getPartyId()));
+        }
+        return false;
+    }
+
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
-                                                   List<Element<Document>> documents) {
+                                                   List<Element<Document>> documents,
+                                                   String partyId) {
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
                      CitizenDocuments.builder()
-                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                         .partyId(partyId)
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
@@ -1433,7 +1528,7 @@ public class CaseService {
             ).toList();
     }
 
-    private Collection<? extends CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
+    private List<CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
         List<CitizenDocuments> statementOfServiceDocuments = new ArrayList<>();
         if (null != caseData.getStatementOfService()) {
             //SOS for SOA
@@ -1463,6 +1558,131 @@ public class CaseService {
                          .uploadedDate(sos.getSubmittedDateTime())
                          .uploadedBy(sos.getUploadedBy().getDisplayedValue())
                          .build()
+            ).toList();
+    }
+
+    private List<CitizenDocuments> getAllServiceOfDocuments(CaseData caseData,
+                                                            Map<String, String> partyIdAndType) {
+        if (null != caseData.getServiceOfDocuments()
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList())) {
+            return fetchDocumentsForParty(caseData.getServiceOfDocuments().getServedDocumentsDetailsList(), partyIdAndType);
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> fetchDocumentsForParty(List<Element<ServedApplicationDetails>> servedDocumentsDetailsList,
+                                                          Map<String, String> partyIdAndType) {
+        List<CitizenDocuments> otherDocuments = new ArrayList<>();
+        //sort in descending order
+        servedDocumentsDetailsList
+            .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+        servedDocumentsDetailsList.stream()
+            .map(Element::getValue)
+            .forEach(servedDetails -> {
+                if (null != servedDetails) {
+                    if (SOA_BY_EMAIL_AND_POST.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+
+                        otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                    } else if (SOA_BY_EMAIL.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromEmailNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                    } else if (SOA_BY_POST.equals(servedDetails.getModeOfService())) {
+                        otherDocuments.addAll(retrieveDocumentsFromPostNotifications(
+                            servedDetails,
+                            partyIdAndType
+                        ));
+                    }
+                }
+            });
+
+        return otherDocuments;
+    }
+
+    private List<CitizenDocuments> retrieveDocumentsFromEmailNotifications(ServedApplicationDetails servedDetails,
+                                                                           Map<String, String> partyIdAndType) {
+        if (CollectionUtils.isNotEmpty(servedDetails.getEmailNotificationDetails())) {
+            //sort in descending order
+            servedDetails.getEmailNotificationDetails()
+                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            return servedDetails.getEmailNotificationDetails().stream()
+                .map(Element::getValue)
+                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .map(emailNotification ->
+                    getSodDocuments(
+                        emailNotification.getDocs(),
+                        partyIdAndType.get(PARTY_ID),
+                        emailNotification.getServedParty(),
+                        servedDetails.getServedBy(),
+                        servedDetails.getWhoIsResponsible(),
+                        emailNotification.getTimeStamp()
+                    )
+                ).flatMap(Collection::stream)
+                .toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> retrieveDocumentsFromPostNotifications(ServedApplicationDetails servedDetails,
+                                                                          Map<String, String> partyIdAndType) {
+        if (CollectionUtils.isNotEmpty(servedDetails.getBulkPrintDetails())) {
+            //sort in descending order
+            servedDetails.getBulkPrintDetails()
+                .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
+
+            return servedDetails.getBulkPrintDetails().stream()
+                .map(Element::getValue)
+                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .map(postNotification ->
+                         getSodDocuments(
+                             postNotification.getPrintDocs(),
+                             partyIdAndType.get(PARTY_ID),
+                             postNotification.getServedParty(),
+                             servedDetails.getServedBy(),
+                             servedDetails.getWhoIsResponsible(),
+                             postNotification.getTimeStamp()
+                         )
+                ).flatMap(Collection::stream)
+                .toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<CitizenDocuments> getSodDocuments(List<Element<Document>> documents,
+                                                   String partyId,
+                                                   String servedParty,
+                                                   String servedBy,
+                                                   String responsibleToServe,
+                                                   String timeStamp) {
+        return nullSafeCollection(documents).stream()
+            .map(Element::getValue)
+            /*.filter(document -> null != document
+                && null != document.getDocumentFileName()
+                && !document.getDocumentFileName().startsWith("coversheet"))*/
+            .map(document -> CitizenDocuments.builder()
+                .categoryId(ANY_OTHER_DOC)
+                .partyId(partyId)
+                .partyType(servedParty)
+                .document(document)
+                .uploadedBy(servedBy)
+                .whoIsResponsible(responsibleToServe)
+                .isPersonalService(SodCitizenServingRespondentsEnum.unrepresentedApplicant
+                                       .getDisplayedValue().equals(responsibleToServe)
+                                       || SodSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                    .getDisplayedValue().equals(responsibleToServe))
+                .uploadedDate(LocalDateTime.parse(timeStamp, DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS))
+                .isServedDocument(true)
+                .build()
             ).toList();
     }
 
@@ -1595,7 +1815,6 @@ public class CaseService {
             .map(CitizenDocuments::getPartyName)
             .distinct()
             .toList();
-        log.info("respondent names {}", respondentNames);
         return String.join(", ", respondentNames);
     }
 
@@ -1635,7 +1854,6 @@ public class CaseService {
     private Set<String> getNotificationIds(String caseTypeOfApplication,
                                            NotificationNames notificationName) {
         String notification = notificationsConfig.getNotifications().get(caseTypeOfApplication).get(notificationName);
-        log.info("Retrieved notification ids {} for notification name {} & {} case type", notification, notificationName, caseTypeOfApplication);
         if (null != notification) {
             return getStringsSplitByDelimiter(notification, COMMA);
         }
@@ -1651,6 +1869,8 @@ public class CaseService {
             .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) && (Boolean) notifMap.get(IS_PERSONAL))
             .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
             .orderTypeId(ObjectUtils.isNotEmpty(notifMap.get(ORDER_TYPE_ID)) ? (String) notifMap.get(ORDER_TYPE_ID) : null)
+            .orderMadeDate(ObjectUtils.isNotEmpty(notifMap.get(ORDER_MADE_DATE)) ? LocalDate.parse(
+                notifMap.get(ORDER_MADE_DATE).toString(), DATE_FORMATTER_YYYY_MM_DD).format(DATE_FORMATTER_YYYY_MM_DD) : null)
             .build();
     }
 }

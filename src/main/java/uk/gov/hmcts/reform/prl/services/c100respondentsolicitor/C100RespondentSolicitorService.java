@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESP_CHILD_ABUSES_DOCMOSIS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -843,6 +844,10 @@ public class C100RespondentSolicitorService {
                         && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
                     boolean isC1aApplicable = caseData.getC1ADocument() != null;
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue(), isC1aApplicable);
+                    caseDataUpdated.put(
+                        "respondentSolicitorName",
+                        respondingParty.getValue().getRepresentativeFirstName() + " " + respondingParty.getValue().getRepresentativeLastName()
+                    );
                 }
             }
         }
@@ -855,6 +860,7 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.remove("respondentSolicitorName");
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final String[] surname = {null};
@@ -1210,7 +1216,7 @@ public class C100RespondentSolicitorService {
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
             if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
-                dataMap.put("respondent", getRespondentPartyDetails(solicitorRepresentedRespondent));
+                dataMap.put(RESPONDENT, getRespondentPartyDetails(solicitorRepresentedRespondent));
             }
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
@@ -1903,7 +1909,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails() != null) {
             CitizenDetails citizenDetails = solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails();
             PartyDetails.PartyDetailsBuilder partyDetailsBuilder = solicitorRepresentedRespondent.getValue().toBuilder();
-            if (citizenDetails.getAddress() != null) {
+            if (citizenDetails.getAddress() != null && citizenDetails.getAddress().getPostCode() != null) {
                 partyDetailsBuilder.address(citizenDetails.getAddress());
                 partyDetailsBuilder.isCurrentAddressKnown(Yes);
                 boolean isEmail = Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())
