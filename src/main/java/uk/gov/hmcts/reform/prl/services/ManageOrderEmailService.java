@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.prl.constants.OrderEmailConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -36,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.OrderEmailNotification;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -48,7 +45,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,7 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.isAccessEnabled;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -81,10 +77,10 @@ public class ManageOrderEmailService {
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
-    public static final String MULTIPLE_ORDERS = "multipleOrders";
     public static final String ORDERS = "#Orders";
     public static final String NAME = "name";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
+    public static final String MULTIPLE_ORDERS = "multipleOrders";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -263,7 +259,6 @@ public class ManageOrderEmailService {
             .map(PartyDetails::getEmail)
             .toList();
     }
-
 
     public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
 
@@ -590,7 +585,8 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP,
+                EmailTemplateNames.CA_LIP_ORDERS
             ));
             //Added as part of PRL-5509
             caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
@@ -599,7 +595,7 @@ public class ManageOrderEmailService {
 
     private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-            && isPartyProvidedWithEmail(party.getValue()) && hasDashboardAccess(party)) {
+            && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.isAccessEnabled(party)) {
             emailService.send(
                 party.getValue().getEmail(),
                 EmailTemplateNames.CA_LIP_ORDERS,
@@ -615,18 +611,19 @@ public class ManageOrderEmailService {
                                           Map<String, Object> dynamicDataForEmail,
                                           List<Document> orderDocuments,
                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
-                                          SendgridEmailTemplateNames sengGridTemplate) {
+                                          SendgridEmailTemplateNames sengGridTemplate,
+                                          EmailTemplateNames emailTemplate) {
         log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue())) {
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            if (hasDashboardAccess(party)) {
+            if (isAccessEnabled(party)) {
                 //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
-                    EmailTemplateNames.CA_LIP_ORDERS,
+                    emailTemplate,
                     buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                     dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
@@ -684,7 +681,8 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP
+                SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP,
+                EmailTemplateNames.CA_LIP_ORDERS
             );
         }
     }
@@ -717,7 +715,8 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
-                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                    EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                 ));
             } else if (isNotEmpty(party.getSolicitorEmail())) {
                 log.info("*** courtAdmin/courtBailiff: Sending email to applicant LR");
@@ -733,7 +732,8 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
-                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                    EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                 );
             }
         }
@@ -848,7 +848,6 @@ public class ManageOrderEmailService {
                         log.info("Final order is selected to serve {}",order.getId());
                         finalOrdersExists.set(true);
                     }
-
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1041,7 +1040,8 @@ public class ManageOrderEmailService {
                         dynamicDataForEmail,
                         orderDocuments,
                         bulkPrintOrderDetails,
-                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                        EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                     );
                 }
             }
