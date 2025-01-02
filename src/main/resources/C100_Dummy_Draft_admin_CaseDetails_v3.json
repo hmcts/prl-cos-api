@@ -29,6 +29,7 @@
           },
           "email": "applicant1@example.net",
           "gender": "male",
+          "liveInRefuge": "No",
           "address": {
             "County": null,
             "Country": "United Kingdom",
@@ -522,6 +523,7 @@
           },
           "email": "applicant2@example.com",
           "gender": "male",
+          "liveInRefuge": "No",
           "address": {
             "County": null,
             "Country": "United Kingdom",

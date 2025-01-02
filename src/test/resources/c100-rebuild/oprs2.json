@@ -38,7 +38,9 @@
         "County":"sdy",
         "PostCode":"tw23tr9",
         "Country":"uk"
-      }
+      },
+      "addressUnknown":"Yes",
+      "liveInRefuge": "No"
     }
   ]
 }
