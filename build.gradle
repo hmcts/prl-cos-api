@@ -284,6 +284,7 @@ dependencyCheck {
   }
 }
 ext['snakeyaml.version'] = '2.2'
+ext['quartz.version'] = '2.4.0'
 
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
@@ -560,7 +561,7 @@ pitest {
     'uk.gov.hmcts.reform.prl.Application.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
   ]
-  threads = 10
+  threads = 20
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
   mutationThreshold = 80
@@ -589,7 +590,7 @@ jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
+project.tasks['sonarqube'].dependsOn integration, jacocoTestReport
 
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
