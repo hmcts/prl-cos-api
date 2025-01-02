@@ -758,8 +758,7 @@ public class UpdatePartyDetailsService {
     }
 
     public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest) {
-        amendOtherPeopleInTheCase(callbackRequest);
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> updatedCaseData =  amendOtherPeopleInTheCase(callbackRequest);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
