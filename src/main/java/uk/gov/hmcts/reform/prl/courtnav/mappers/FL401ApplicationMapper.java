@@ -13,12 +13,14 @@ import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -72,9 +74,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -90,6 +94,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -102,6 +107,7 @@ public class FL401ApplicationMapper {
     private final CourtFinderService courtFinderService;
     private final LaunchDarklyClient launchDarklyClient;
     private final LocationRefDataService locationRefDataService;
+    private final CourtSealFinderService courtSealFinderService;
 
     private Court court = null;
 
@@ -269,6 +275,7 @@ public class FL401ApplicationMapper {
                                             .baseLocationName(courtVenue.get().getCourtName()).build())
                 .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
                 .courtId(epimsId)
+                .courtSeal(courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId()))
                 .build();
         } else {
             // 4. populate court details from fact-finder Api.
@@ -442,8 +449,11 @@ public class FL401ApplicationMapper {
     private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
 
         InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .language(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
-            .otherAssistance(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect())
+            .party(List.of(PartyEnum.applicant))
+            .language(null != courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
+                ? courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage() + " - "
+                    + courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
+                : courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
             .build();
 
         return List.of(
@@ -519,7 +529,7 @@ public class FL401ApplicationMapper {
                 .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnMortgageOther())
                 .mortgageLenderName(courtNavCaseData.getFl401().getTheHome().getMortgageLenderName())
                 .mortgageNumber(courtNavCaseData.getFl401().getTheHome().getMortgageNumber())
-                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getLandlordAddress()))
+                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getMortgageLenderAddress()))
                 .build();
         }
         return mortgage;
@@ -692,6 +702,12 @@ public class FL401ApplicationMapper {
 
     private PartyDetails mapApplicant(ApplicantsDetails applicant) {
 
+        ContactPreferences contactPreferences = null;
+        if (isNotEmpty(applicant.getApplicantPreferredContact())) {
+            contactPreferences = applicant.getApplicantPreferredContact()
+                .contains(PreferredContactEnum.email) ? ContactPreferences.email : ContactPreferences.post;
+        }
+
         return PartyDetails.builder()
             .firstName(applicant.getApplicantFirstName())
             .lastName(applicant.getApplicantLastName())
@@ -717,6 +733,7 @@ public class FL401ApplicationMapper {
             .representativeLastName(applicant.getLegalRepresentativeLastName())
             .solicitorTelephone(applicant.getLegalRepresentativePhone())
             .solicitorReference(applicant.getLegalRepresentativeReference())
+            .contactPreferences(contactPreferences)
             .solicitorOrg(Organisation.builder()
                               .organisationName(applicant.getLegalRepresentativeFirm())
                               .build())

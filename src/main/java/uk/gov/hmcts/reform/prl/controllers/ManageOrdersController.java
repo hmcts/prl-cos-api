@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -48,12 +51,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -285,7 +290,23 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
+            UUID newDraftOrderCollectionId = null;
+            //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+                && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
+                List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
+                    DRAFT_ORDER_COLLECTION);
+
+                newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                    ? draftOrderCollection.get(0).getId() : null;
+            }
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
+                                                                         caseData,
+                                                                         callbackRequest.getEventId(),
+                                                                         newDraftOrderCollectionId));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);

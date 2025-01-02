@@ -46,10 +46,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
@@ -98,6 +100,9 @@ public class FL401ApplicationMapperTest {
     private LaunchDarklyClient launchDarklyClient;
     @Mock
     private LocationRefDataService locationRefDataService;
+
+    @Mock
+    private CourtSealFinderService courtSealFinderService;
 
     @Before
     public void setUp() {
@@ -163,6 +168,7 @@ public class FL401ApplicationMapperTest {
             .applicantEmailAddress("test@courtNav.com")
             .applicantPhoneNumber("12345678907")
             .applicantHasLegalRepresentative(false)
+            .applicantPreferredContact(List.of(PreferredContactEnum.email))
             .applicantAddress(CourtnavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
@@ -681,7 +687,7 @@ public class FL401ApplicationMapperTest {
                        .respondentBehaviour(respondentBehaviour)
                        .theHome(home1)
                        .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
+                       .goingToCourt(goingToCourt.toBuilder().interpreterDialect(null).build())
                        .build())
             .metaData(courtNavMetaData)
             .build();

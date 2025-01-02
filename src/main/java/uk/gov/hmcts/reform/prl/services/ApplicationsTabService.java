@@ -1266,6 +1266,15 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
         FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
+
+        //Fix for PRL-6615 due to the respondent lived with applicant not being set in the respondent object
+        if (null != a) {
+            a = a.toBuilder()
+                .isRespondentLiveWithApplicant(null
+                    != currentRespondent.getRespondentLivedWithApplicant()
+                    ? currentRespondent.getRespondentLivedWithApplicant() : null)
+                .build();
+        }
         return toMap(a);
     }
 
@@ -1305,7 +1314,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getRespondentRelationDateInfoObject() != null) {
             RespondentRelationDateInfo resRelInfo = caseData.getRespondentRelationDateInfoObject();
             if (resRelInfo.getRelationStartAndEndComplexType() != null) {
-                rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
+                rs.relationshipDateComplexStartDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
                 rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
             }
             rs.applicantRelationshipDate(resRelInfo.getApplicantRelationshipDate());
@@ -1342,7 +1351,7 @@ public class ApplicationsTabService implements TabService {
             .address(home.getAddress())
             .doAnyChildrenLiveAtAddress(home.getDoAnyChildrenLiveAtAddress())
             .everLivedAtTheAddress(home.getEverLivedAtTheAddress() != null ? home.getEverLivedAtTheAddress().getDisplayedValue() : "")
-            .howIsThePropertyAdapted(home.getIsPropertyAdapted())
+            .howIsThePropertyAdaptedText(home.getHowIsThePropertyAdapted())
             .furtherInformation(home.getFurtherInformation())
             .doesApplicantHaveHomeRights(home.getDoesApplicantHaveHomeRights())
             .intendToLiveAtTheAddress(home.getIntendToLiveAtTheAddress() != null ? home.getIntendToLiveAtTheAddress().getDisplayedValue() : "")

@@ -31,7 +31,10 @@ public enum ServeOrderFieldsEnum {
     postalInformationCaOnlyC47a("postalInformationCaOnlyC47a"),
     emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
     isOrderCompleteToServe("isOrderCompleteToServe"),
-    doesOrderClosesCase("doesOrderClosesCase");
+    doesOrderClosesCase("doesOrderClosesCase"),
+    requestSafeGuardingLetterUpdate("requestSafeGuardingLetterUpdate"),
+    safeGuardingLetterUploadDueDate("safeGuardingLetterUploadDueDate"),
+    draftOrderCollectionId("draftOrderCollectionId");
 
     private final String value;
 

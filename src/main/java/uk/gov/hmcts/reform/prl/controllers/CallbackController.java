@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -410,7 +409,9 @@ public class CallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> courtList;
             if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+                courtList = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? locationRefDataService.getFilteredCourtLocations(authorisation) :
+                    locationRefDataService.getDaFilteredCourtLocations(authorisation);
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
@@ -646,6 +647,28 @@ public class CallbackController {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/amend-other-people-in-case/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Update Applicants, Children and Respondents details for future processing")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse amendOtherPeopleInTheCase(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(updatePartyDetailsService.amendOtherPeopleInTheCase(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -893,9 +916,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseDetails caseDetails
-                = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()

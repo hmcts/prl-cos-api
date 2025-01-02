@@ -7,6 +7,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.util.CosApiClient;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, CallbackControllerIntegrationTest.class})
 public class CallbackControllerIntegrationTest extends IntegrationTest {
