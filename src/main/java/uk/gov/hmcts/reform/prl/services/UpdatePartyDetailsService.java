@@ -770,6 +770,7 @@ public class UpdatePartyDetailsService {
             );
 
             findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
+            amendOtherPeopleInTheCase(callbackRequest);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
