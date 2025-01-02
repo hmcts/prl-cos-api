@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -110,6 +111,9 @@ public class BaseCaseData {
 
     @JsonUnwrapped
     private ServiceOfDocuments serviceOfDocuments;
+
+    @JsonProperty("nextHearingDate")
+    private LocalDate nextHearingDate;
 
     @JsonUnwrapped
     private HearingTaskData hearingTaskData;
