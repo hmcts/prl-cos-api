@@ -163,8 +163,8 @@ public class SendgridServiceTest {
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
             when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
-                                                      TEST_AUTH,
-                                                      s2sToken)).thenReturn(biteData);
+                                                     TEST_AUTH,
+                                                     s2sToken)).thenReturn(biteData);
         }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "test auth");
@@ -281,7 +281,7 @@ public class SendgridServiceTest {
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-                applicant.getSolicitorEmail())
+            applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
@@ -386,7 +386,7 @@ public class SendgridServiceTest {
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-                applicant.getSolicitorEmail())
+            applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
@@ -482,7 +482,7 @@ public class SendgridServiceTest {
             IOException.class,
             () -> sendgridService
                 .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
-                                          documentList));
+                                                       documentList));
 
 
     }

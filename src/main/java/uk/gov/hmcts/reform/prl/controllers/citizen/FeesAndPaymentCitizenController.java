@@ -157,7 +157,6 @@ public class FeesAndPaymentCitizenController {
                 .build();
         }
         return feeResponseForCitizen;
-
     }
 
 }

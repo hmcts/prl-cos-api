@@ -116,7 +116,8 @@ public class CaseApplicationResponseService {
             CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
-                currentRespondent.get()
+                currentRespondent.get(),
+                CITIZEN
             );
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {

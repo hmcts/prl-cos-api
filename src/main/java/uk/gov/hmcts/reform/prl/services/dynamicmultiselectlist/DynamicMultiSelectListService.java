@@ -230,7 +230,8 @@ public class DynamicMultiSelectListService {
     public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
         List<Element<Child>> childList = new ArrayList<>();
         if (null != caseData.getManageOrders()
-            && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+            && (YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()
+        ) || YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren()))
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
             caseData.getManageOrders().getChildOption().getValue().forEach(value -> {

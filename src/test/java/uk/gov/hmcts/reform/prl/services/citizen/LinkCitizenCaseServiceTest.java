@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -72,7 +73,7 @@ public class LinkCitizenCaseServiceTest {
     public static final String s2sToken = "s2s AuthToken";
     public static final String caseId = "case id";
     public static final String accessCode = "access code";
-    private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private final UUID testUuid = UUID.fromString(TEST_UUID);
     CaseDetails caseDetails;
     CaseData caseData;
     CaseData caseDataAlreadyLinked;
@@ -94,6 +95,7 @@ public class LinkCitizenCaseServiceTest {
 
         caseDetails = CaseDetails.builder().build();
         caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
             .applicants(applicantList)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(testUuid)
@@ -263,6 +265,7 @@ public class LinkCitizenCaseServiceTest {
         CaseDetails caseDetails1 = CaseDetails.builder().build();
         CaseData caseData1 = CaseData.builder()
             .respondents(Arrays.asList(element(applicant)))
+            .caseTypeOfApplication("C100")
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
                                                                          .partyId(testUuid)
                                                                          .accessCode(accessCode).build()).build()))

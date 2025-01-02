@@ -30,25 +30,26 @@ public class CaseInviteManager {
     private final C100CaseInviteService c100CaseInviteService;
     private final FL401CaseInviteService fl401CaseInviteService;
 
-    public CaseData generatePinAndSendNotificationEmail(CaseData caseData) {
+    public CaseData sendAccessCodeNotificationEmail(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
-            log.info("Generating and sending PIN to respondents");
+            log.info("sending PIN to respondents");
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
+                caseData = c100CaseInviteService.sendCaseInviteEmail(caseData);
             } else {
-                caseData = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
+                caseData = fl401CaseInviteService.sendCaseInviteEmail(caseData);
             }
         }
         return caseData;
     }
 
     public CaseData reGeneratePinAndSendNotificationEmail(CaseData caseData) {
-
+        //TO DO: Regenerate access code when this piece of work is picked
+        // i.e regenerate access code event is picked for rework
         caseData = caseData.toBuilder().caseInvites(new ArrayList<>()).build();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
+            caseData = c100CaseInviteService.sendCaseInviteEmail(caseData);
         } else {
-            caseData = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
+            caseData = fl401CaseInviteService.sendCaseInviteEmail(caseData);
         }
         return caseData;
     }

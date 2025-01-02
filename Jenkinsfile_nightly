@@ -38,6 +38,7 @@ def secrets = [
           secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
           secret('filtered-court-ids', 'COURT_IDS_TO_FILTER'),
           secret('da-filtered-court-ids', 'DA_COURT_IDS_TO_FILTER'),
+          secret('ca-default-court-epimms-id', 'CA_DEFAULT_COURT_EPIMMS_ID'),
           secret('welsh-court-mapping', 'WELSH_COURT_MAPPING'),
           secret('judge-testuser-one', 'JUDGE_USER_NAME'),
           secret('judge-testpassword', 'JUDGE_PASSWORD'),

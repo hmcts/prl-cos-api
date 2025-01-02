@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
@@ -38,6 +39,9 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
 @Slf4j
 @RestController
@@ -52,6 +56,7 @@ public class CaseController {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private final LaunchDarklyClient launchDarklyClient;
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
@@ -162,6 +167,12 @@ public class CaseController {
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                && launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
+                caseData = caseData.toBuilder()
+                    .taskListVersion(TASK_LIST_VERSION_V3)
+                    .build();
+            }
             CaseDetails caseDetails = caseService.createCase(caseData, authorisation);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(

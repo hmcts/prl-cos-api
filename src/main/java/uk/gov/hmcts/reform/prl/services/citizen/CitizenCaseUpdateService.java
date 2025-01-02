@@ -26,7 +26,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Arrays;
@@ -41,9 +45,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_CO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
@@ -56,6 +62,10 @@ public class CitizenCaseUpdateService {
     private final ObjectMapper objectMapper;
     private final AddCaseNoteService addCaseNoteService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+    private final SystemUserService systemUserService;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -145,12 +155,22 @@ public class CitizenCaseUpdateService {
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
                 .courtName(C100_DEFAULT_COURT_NAME)
-                .taskListVersion(TASK_LIST_VERSION_V2)
+                .taskListVersion(TASK_LIST_VERSION_V3)
                 .build();
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
+        caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
+
+        caseDataToSubmit = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
+            caseDataToSubmit,
+            systemUserService.getSysUserToken()
+        );
+        allTabService.getNewMiamPolicyUpgradeDocumentMap(caseDataToSubmit, caseDataMapToBeUpdated);
+        caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CARESPONDENT));
+        caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseDataToSubmit, CAAPPLICANT));
+
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);

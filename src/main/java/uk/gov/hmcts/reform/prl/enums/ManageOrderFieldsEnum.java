@@ -31,6 +31,7 @@ public enum ManageOrderFieldsEnum {
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
     childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
     childOption("childOption"),
+    daOrderForCaCase("daOrderForCaCase"),
     makeChangesToUploadedOrder("makeChangesToUploadedOrder"),
     editedUploadOrderDoc("editedUploadOrderDoc"),
     previewUploadedOrder("previewUploadedOrder"),

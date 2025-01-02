@@ -45,6 +45,7 @@ public class Child {
     private List<LiveWithEnum> childLiveWith;
     private List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
     private String parentalResponsibilityDetails;
+    private WhoDoesTheChildLiveWith whoDoesTheChildLiveWith;
 
     public boolean hasConfidentialInfo() {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);

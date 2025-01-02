@@ -36,7 +36,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -121,7 +120,7 @@ public class ManageDocumentsControllerTest {
         parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
             .stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .collect(Collectors.toList());
+            .toList();
 
         dynamicListElementList = new ArrayList<>();
         CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);

@@ -85,16 +85,16 @@ public class AllocatedJudgeService {
         TierOfJudiciaryEnum tierOfJudiciaryEnum = null;
         switch (tierOfJudiciary) {
             case DISTRICT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.DISTRICT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.districtJudge;
                 break;
             case MAGISTRATES:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.MAGISTRATES;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.magistrates;
                 break;
             case CIRCUIT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.CIRCUIT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.circuitJudge;
                 break;
             case HIGHCOURT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.HIGHCOURT_JUDGE;
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.highCourtJudge;
                 break;
             default:
                 break;

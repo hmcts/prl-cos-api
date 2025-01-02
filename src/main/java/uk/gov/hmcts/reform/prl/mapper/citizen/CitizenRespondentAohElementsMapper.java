@@ -83,7 +83,6 @@ public class CitizenRespondentAohElementsMapper {
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
         List<Element<ChildDetailsRevised>> newChildDetails) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
-
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             respondentAllegationsOfHarmData = respondentAllegationsOfHarmData.toBuilder()
                 .respAohYesOrNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
@@ -96,7 +95,6 @@ public class CitizenRespondentAohElementsMapper {
                                                           newChildDetails, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohAbduction(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
         }
-        log.info("allegation of harm data {}", respondentAllegationsOfHarmData);
         return respondentAllegationsOfHarmData;
     }
 
@@ -437,7 +435,8 @@ public class CitizenRespondentAohElementsMapper {
     private String buildBehavioursStartDateAndLength(AbuseDto abuseDto) {
 
         if (ObjectUtils.isNotEmpty(abuseDto.getBehaviourStartDate()) && ObjectUtils.isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
-            return abuseDto.getBehaviourStartDate() + HYPHEN_SEPARATOR + isBehaviourOngoing(abuseDto);
+            //Fix for PRL-6141
+            return abuseDto.getBehaviourStartDate();
         } else if (ObjectUtils.isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
             return isBehaviourOngoing(abuseDto);
         }
@@ -464,7 +463,6 @@ public class CitizenRespondentAohElementsMapper {
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             newChildDetails.forEach(s -> {
                 boolean contains = Arrays.asList(abusedChildren).contains(String.valueOf(s.getId()));
-                log.info("abused children {}, {}, contains {}", abusedChildren, s.getId(), contains);
                 if (contains) {
                     valueElements.add(DynamicMultiselectListElement.builder()
                                           .code(s.getId().toString()).label(s.getValue().getFirstName()

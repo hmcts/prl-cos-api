@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -207,7 +208,8 @@ public class CitizenPartyDetailsMapperTest {
 
             .c100RebuildData(c100RebuildData)
             .build();
-        doNothing().when(c100RespondentSolicitorService).checkIfConfidentialDataPresent(any(), any());
+        doNothing().when(c100RespondentSolicitorService).populateConfidentialAndMiscDataMap(any(), any(),
+                                                                                            anyString());
         when(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(any(),any())).thenReturn(true);
         Map<String, Object> updatedCaseData = new HashMap<>();
         Element<PartyDetails> respondent = null;
@@ -396,6 +398,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .applicantPcqId("123")
             .build();
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -409,6 +412,32 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testGetC100RebuildCaseDataMap() throws IOException {
         Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(caseData);
+        assertNotNull(caseDataResult);
+    }
+
+    @Test
+    public void testBuildUpdatedCaseDataForMiam() throws IOException {
+        c100RebuildData = C100RebuildData.builder()
+            .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
+            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
+            .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
+            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam1.json"))
+            .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
+            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
+            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .build();
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
     }
 

@@ -59,12 +59,12 @@ public class RespondentEventsChecker {
         eventStatus.put(RESPOND_ALLEGATION_OF_HARM, responseToAllegationsOfHarmChecker);
     }
 
-    public boolean isStarted(RespondentSolicitorEvents event, PartyDetails respondingParty) {
-        return eventStatus.get(event).isStarted(respondingParty);
+    public boolean isStarted(RespondentSolicitorEvents event, PartyDetails respondingParty, boolean isC1aApplicable) {
+        return eventStatus.get(event).isStarted(respondingParty, isC1aApplicable);
     }
 
-    public boolean isFinished(RespondentSolicitorEvents event, PartyDetails respondingParty) {
-        return eventStatus.get(event).isFinished(respondingParty);
+    public boolean isFinished(RespondentSolicitorEvents event, PartyDetails respondingParty, boolean isC1aApplicable) {
+        return eventStatus.get(event).isFinished(respondingParty, isC1aApplicable);
     }
 
     public Map<RespondentSolicitorEvents, RespondentEventChecker> getEventStatus() {

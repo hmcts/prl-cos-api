@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -54,6 +56,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
@@ -69,8 +72,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -91,10 +98,6 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
-
-    private static final String BY_EMAIL = "By email";
-    private static final String BY_EMAIL_AND_POST = "By email and post";
-    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -182,7 +185,7 @@ public class CaseUtils {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
@@ -428,7 +431,9 @@ public class CaseUtils {
             || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
             && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedLaPack() != null
-            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
+            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedCafcassCymruPack() != null
+            && caseData.getServiceOfApplication().getUnServedCafcassCymruPack().getServedPartyEmail() != null))) {
             arePacksPresent = true;
         }
         return arePacksPresent;
@@ -489,6 +494,18 @@ public class CaseUtils {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","));
+    }
+
+    public static CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
+                .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
+                ).findFirst();
+            if (caseInvite.isPresent()) {
+                return caseInvite.map(Element::getValue).orElse(null);
+            }
+        }
+        return null;
     }
 
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
@@ -676,13 +693,13 @@ public class CaseUtils {
                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
         if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
-            temp = BY_EMAIL;
+            temp = SOA_BY_EMAIL;
         }
         if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
             if (null != temp) {
-                temp = BY_EMAIL_AND_POST;
+                temp = SOA_BY_EMAIL_AND_POST;
             } else {
-                temp = BY_POST;
+                temp = SOA_BY_POST;
             }
         }
         return temp;
@@ -802,5 +819,94 @@ public class CaseUtils {
 
         roles = new ArrayList<>(Collections.singleton(idamRole));
         return roles;
+    }
+
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+        return null != party.getValue()
+            && null != party.getValue().getUser()
+            && null != party.getValue().getUser().getIdamId();
+    }
+
+    public static String getApplicantNameForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
+                             applicant1.getLastName()
+        );
+
+    }
+
+    public static String getApplicantReferenceForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return applicant1.getSolicitorReference();
+    }
+
+    public static String getRespondentForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        return String.format(
+            PrlAppsConstants.FORMAT, respondent1.getFirstName(),
+            respondent1.getLastName()
+        );
+    }
+
+    public static LocalDate getRespondentDobForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
+            return respondent1.getDateOfBirth();
+        }
+        return null;
+    }
+
+    public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
+        Optional<Element<PartyDetails>> party = Optional.empty();
+        if (CollectionUtils.isNotEmpty(parties)) {
+            party = parties.stream()
+                .filter(element -> code.equalsIgnoreCase(String.valueOf(element.getId()))).findFirst();
+        }
+        return party;
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForC100(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                                List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
+                                                                                                 List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
+            element.getCode())).collect(Collectors.toList());
+    }
+
+    public static String formatAddress(Address address) {
+        if (ObjectUtils.isNotEmpty(address)) {
+            List<String> addressLines = new ArrayList<>();
+            getAddressLines(address, addressLines);
+            return String.join("\n", addressLines);
+        } else {
+            return EMPTY_STRING;
+        }
+    }
+
+    private static void getAddressLines(Address address, List<String> addressLines) {
+        if (address.getAddressLine1() != null && StringUtils.isNotEmpty(address.getAddressLine1().trim())) {
+            addressLines.add(address.getAddressLine1());
+        }
+        if (address.getAddressLine2() != null && StringUtils.isNotEmpty(address.getAddressLine2().trim())) {
+            addressLines.add(address.getAddressLine2());
+        }
+        if (address.getAddressLine3() != null && StringUtils.isNotEmpty(address.getAddressLine3().trim())) {
+            addressLines.add(address.getAddressLine3());
+        }
+        if (address.getPostTown() != null && StringUtils.isNotEmpty(address.getPostTown().trim())) {
+            addressLines.add(address.getPostTown());
+        }
+        if (address.getPostCode() != null && StringUtils.isNotEmpty(address.getPostCode().trim())) {
+            addressLines.add(address.getPostCode());
+        }
     }
 }

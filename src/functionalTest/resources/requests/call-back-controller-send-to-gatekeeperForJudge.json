@@ -5,6 +5,7 @@
       "caseTypeOfApplication": "C100",
       "isSpecificJudgeOrLegalAdviserNeeded": "Yes",
       "isJudgeOrLegalAdviser": "judge",
+      "isJudgeOrLegalAdviserGatekeeping": "judge",
       "judgeNameAndEmail": {
         "idamId" :null,
         "personalCode": "49933940"

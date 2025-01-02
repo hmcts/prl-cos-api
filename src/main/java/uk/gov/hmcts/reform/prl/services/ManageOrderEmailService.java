@@ -103,6 +103,163 @@ public class ManageOrderEmailService {
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
 
+    public void sendEmail(CaseDetails caseDetails) {
+        List<String> emailList = new ArrayList<>();
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        emailList.addAll(getEmailAddress(caseData.getApplicants()));
+        emailList.addAll(getEmailAddress(caseData.getRespondents()));
+        emailList.forEach(email -> emailService.send(
+            email,
+            EmailTemplateNames.SOLICITOR,
+            buildEmail(caseDetails),
+            LanguagePreference.english
+        ));
+
+    }
+
+    public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        if (State.ALL_FINAL_ORDERS_ISSUED.equals(caseData.getState())) {
+            sendNotificationToRespondentSolicitor(caseDetails);
+            sendNotificationToRespondent(caseDetails);
+        }
+    }
+
+    private void sendNotificationToRespondent(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                if (!StringUtils.isEmpty(respondent.getValue().getEmail())) {
+                    emailService.send(
+                        respondent.getValue().getEmail(),
+                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                        buildRespondentEmail(caseDetails, respondent.getValue()),
+                        LanguagePreference.english
+                    );
+                }
+            }
+            //send notification for applicants
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                    emailService.send(
+                        applicant.getValue().getEmail(),
+                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                        buildRespondentEmail(caseDetails, applicant.getValue()),
+                        LanguagePreference.english
+                    );
+                }
+            }
+        } else {
+            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+                emailService.send(
+                    caseData.getRespondentsFL401().getEmail(),
+                    EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                    buildRespondentEmail(caseDetails, caseData.getRespondentsFL401()),
+                    LanguagePreference.english
+                );
+            }
+        }
+
+    }
+
+
+    private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
+                String solicitorEmail = resSols.keySet().toArray()[0].toString();
+                if (!StringUtils.isEmpty(solicitorEmail)) {
+                    emailService.send(
+                        solicitorEmail,
+                        EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
+                        buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                                      resSols.get(solicitorEmail).get(1)
+                        ),
+                        LanguagePreference.english
+                    );
+                }
+            }
+        }
+    }
+
+    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(String.format("%s %s", partyDetails.getFirstName(), partyDetails.getLastName()))
+            .dashboardLink(citizenDashboardUrl)
+            .build();
+    }
+
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName,
+                                                            String respondentName) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        return RespondentSolicitorEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .solicitorName(solicitorName)
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .respondentName(respondentName)
+            .issueDate(caseData.getIssueDate())
+            .build();
+    }
+
+    private EmailTemplateVars buildEmail(CaseDetails caseDetails) {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        String applicantNames = getApplicants(caseData).stream()
+            .map(element -> element.getFirstName() + " " + element.getLastName())
+            .collect(Collectors.joining(", "));
+
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(caseData.getCourtName())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .courtEmail(courtEmail).build();
+    }
+
+
+    private List<PartyDetails> getApplicants(CaseData caseData) {
+        return caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .toList();
+    }
+
+    private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        return caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
+            .map(i -> {
+                Map<String, List<String>> temp = new HashMap<>();
+                temp.put(i.getSolicitorEmail(), List.of(
+                    i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                    i.getFirstName() + " " + i.getLastName()
+                ));
+                return temp;
+            })
+            .toList();
+    }
+
+    private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
+        return partyDetails
+            .stream()
+            .map(Element::getValue)
+            .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+            .map(PartyDetails::getEmail)
+            .toList();
+    }
+
     public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);

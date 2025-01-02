@@ -119,10 +119,11 @@ public class TaskListService {
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
+        boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
                 .map(event -> RespondentTask.builder()
                         .event(event)
-                        .state(getRespondentTaskState(event, respondingParty))
+                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
                         .build())
                 .toList();
     }
@@ -140,11 +141,11 @@ public class TaskListService {
         return eventsChecker.getDefaultState(event, caseData);
     }
 
-    private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty) {
-        if (respondentEventsChecker.isFinished(event, respondingParty)) {
+    private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty, boolean isC1aApplicable) {
+        if (respondentEventsChecker.isFinished(event, respondingParty, isC1aApplicable)) {
             return TaskState.FINISHED;
         }
-        if (respondentEventsChecker.isStarted(event, respondingParty)) {
+        if (respondentEventsChecker.isStarted(event, respondingParty, isC1aApplicable)) {
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;
@@ -162,10 +163,10 @@ public class TaskListService {
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
-                CHILD_DETAILS_REVISED,
                 APPLICANT_DETAILS,
                 RESPONDENT_DETAILS,
                 OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                CHILD_DETAILS_REVISED,
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 CHILDREN_AND_APPLICANTS,
                 CHILDREN_AND_RESPONDENTS,

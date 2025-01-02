@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
@@ -55,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -115,21 +118,12 @@ public class CitizenPartyDetailsMapper {
             ));
         }
 
-        try {
-            log.info("citizenUpdatePartyDataContent is after::" + objectMapper.writeValueAsString(citizenUpdatePartyDataContent));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
         if (citizenUpdatePartyDataContent.isPresent()) {
-            log.info("citizenUpdatePartyDataContent is present");
             if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
-                log.info("event satisfied");
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
         } else {
-            log.error("{} event has failed for the case {}", caseEvent.getValue(), dbCaseData.getId());
             throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
         }
         return citizenUpdatePartyDataContent.get();
@@ -137,18 +131,13 @@ public class CitizenPartyDetailsMapper {
 
     private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
         CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
-        log.info("case type is::" + caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("c100 case type it is");
-            log.info("party type is::" + partyType);
             if (PartyEnum.respondent.equals(partyType)) {
-                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CARESPONDENT
                 ));
             } else {
-                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CAAPPLICANT
@@ -156,25 +145,16 @@ public class CitizenPartyDetailsMapper {
             }
         } else {
             if (PartyEnum.respondent.equals(partyType)) {
-                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DARESPONDENT
                 ));
             } else {
-                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DAAPPLICANT
                 ));
             }
-        }
-
-        try {
-            log.info("citizenUpdatePartyDataContent is after::"
-                         + objectMapper.writeValueAsString(citizenUpdatePartyDataContent.updatedCaseDataMap()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
         }
     }
 
@@ -255,7 +235,9 @@ public class CitizenPartyDetailsMapper {
             dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         }
-        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Document);
+        c100RespondentSolicitorService.populateConfidentialAndMiscDataMap(updatedPartyElement, dataMapForC8Document,
+                                                                          CITIZEN
+        );
 
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
@@ -378,6 +360,12 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case CITIZEN_PCQ_UPDATE -> {
+                return updatePcqIdForParty(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
                 // For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseForProceedings(
@@ -386,24 +374,38 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case REVIEW_AND_SUBMIT -> {
-                try {
-                    log.info("******* citizenProvidedPartyDetails json ===>" + objectMapper.writeValueAsString(citizenProvidedPartyDetails));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
-
-                try {
-                    log.info("******* existingPartyDetails json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
                 return updateCitizenC7Response(existingPartyDetails, citizenProvidedPartyDetails);
+            }
+            case CITIZEN_RESPONSE_TO_AOH -> {
+                return updateCitizenResponseToAohDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
             }
             default -> {
                 //return existing party details - no event
                 return existingPartyDetails;
             }
         }
+    }
+
+    private PartyDetails updateCitizenResponseToAohDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .responseToAllegationsOfHarm(citizenProvidedPartyDetails.getResponse()
+                                                           .getResponseToAllegationsOfHarm().toBuilder()
+                                                           .responseToAllegationsOfHarmYesOrNoResponse(
+                                                               citizenProvidedPartyDetails.getResponse()
+                                                                   .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                           .respondentResponseToAllegationOfHarm(YesOrNo.Yes.equals(
+                                                               citizenProvidedPartyDetails.getResponse()
+                                                                   .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                                                                     ? citizenProvidedPartyDetails.getResponse()
+                                                               .getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm() : null)
+                                                           .build())
+                          .build())
+            .build();
     }
 
     private PartyDetails updateCitizenContactPreferenceDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
@@ -426,6 +428,15 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .isRemoveLegalRepresentativeRequested(citizenProvidedPartyDetails.getIsRemoveLegalRepresentativeRequested())
+            .build();
+    }
+
+    private PartyDetails updatePcqIdForParty(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        User user = ObjectUtils.isNotEmpty(existingPartyDetails.getUser())
+            ? existingPartyDetails.getUser().toBuilder().pcqId(citizenProvidedPartyDetails.getUser().getPcqId()).build()
+            : User.builder().pcqId(citizenProvidedPartyDetails.getUser().getPcqId()).build();
+        return existingPartyDetails.toBuilder()
+            .user(user)
             .build();
     }
 
@@ -756,13 +767,15 @@ public class CitizenPartyDetailsMapper {
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
             c100RebuildChildDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+
             updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements);
+            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements,
+                                               c100RebuildData.getApplicantPcqId());
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
@@ -849,11 +862,6 @@ public class CitizenPartyDetailsMapper {
                             .build())
                     .currentRespondent(null)
                     .build();
-        }
-        try {
-            log.info("******* existingPartyDetails after updated json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
-        } catch (JsonProcessingException e) {
-            log.info("error");
         }
 
         return existingPartyDetails;

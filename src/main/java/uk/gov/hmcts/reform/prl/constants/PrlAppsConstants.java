@@ -79,6 +79,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
     public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
     public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_EXTERNAL = "External";
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
@@ -128,9 +129,12 @@ public class PrlAppsConstants {
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
     public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
+
+    public static final String DOCUMENT_C1A_DRAFT_HINT = "DOCUMENT_C1A_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
+    public static final String DOCUMENT_SEND_REPLY_MESSAGE = "SEND_REPLY_MESSAGE";
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
@@ -657,6 +661,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
@@ -770,6 +775,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
     public static final String COMMA = ",";
@@ -935,6 +941,9 @@ public class PrlAppsConstants {
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
 
+    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
+        + "upload an order, as this case has multiple applicants or respondents.";
+
     public static final String ORDER_COLLECTION = "orderCollection";
 
     public static final String WA_PERFORMING_USER = "performingUser";
@@ -1002,13 +1011,27 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
-    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
+    public static final String SOA_CAFCASS_CYMRU_SERVED_OPTIONS = "soaCafcassCymruServedOptions";
 
-    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
+    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
+    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
+    public static final String C100_DEFAULT_REGION_ID = "2";
+
+    public static final String C1A_FINAL_RESPONSE_DOCUMENT = "C1A_FINAL_RESPONSE_DOCUMENT";
+    public static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+
+    public static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
 
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
+
+    //SOA - mode of service
+    public static final String SOA_BY_EMAIL = "By email";
+    public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
+    public static final String SOA_BY_POST = "By post";
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";

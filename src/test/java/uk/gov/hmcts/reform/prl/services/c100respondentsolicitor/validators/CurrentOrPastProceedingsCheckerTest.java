@@ -75,7 +75,7 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -83,14 +83,14 @@ public class CurrentOrPastProceedingsCheckerTest {
     @Test
     public void isStartedNotTest() {
         respondent = null;
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent, true);
 
         assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
         Assert.assertTrue(anyNonEmpty);
     }
 
@@ -101,7 +101,7 @@ public class CurrentOrPastProceedingsCheckerTest {
                           .builder()
                           .build())
             .build();
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
         Assert.assertFalse(anyNonEmpty);
     }
 
@@ -113,7 +113,7 @@ public class CurrentOrPastProceedingsCheckerTest {
                           .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
                           .build())
             .build();
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
         Assert.assertTrue(anyNonEmpty);
     }
 
@@ -125,7 +125,7 @@ public class CurrentOrPastProceedingsCheckerTest {
                           .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
                           .build())
             .build();
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent, true);
         Assert.assertTrue(anyNonEmpty);
     }
 
