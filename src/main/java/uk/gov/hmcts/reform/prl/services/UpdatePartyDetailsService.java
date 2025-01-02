@@ -677,7 +677,6 @@ public class UpdatePartyDetailsService {
     }
 
     private DynamicList populateWhoDoesTheChildLiveWith(CaseData caseData) {
-        List<DynamicListElement> whoDoesTheChildLiveWith = new ArrayList<>();
         List<Element<PartyDetails>> listOfParties = new ArrayList<>();
         if (null != caseData.getApplicants()) {
             listOfParties.addAll(caseData.getApplicants());
@@ -688,6 +687,7 @@ public class UpdatePartyDetailsService {
         if (null != caseData.getOtherPartyInTheCaseRevised()) {
             listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
         }
+        List<DynamicListElement> whoDoesTheChildLiveWith = new ArrayList<>();
         if (!listOfParties.isEmpty()) {
             for (Element<PartyDetails> parties : listOfParties) {
 
@@ -758,6 +758,7 @@ public class UpdatePartyDetailsService {
     }
 
     public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest) {
+        amendOtherPeopleInTheCase(callbackRequest);
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
@@ -770,7 +771,6 @@ public class UpdatePartyDetailsService {
             );
 
             findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
-            amendOtherPeopleInTheCase(callbackRequest);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
