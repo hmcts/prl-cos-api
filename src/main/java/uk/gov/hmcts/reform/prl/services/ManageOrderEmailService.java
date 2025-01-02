@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,9 +64,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.isAccessEnabled;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getOtherPerson;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -321,9 +321,8 @@ public class ManageOrderEmailService {
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
-                log.info("*** CA Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
                 String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsCA().getId();
+                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions().getId();
                 handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                        servingRespondentsOptions,
                                                        bulkPrintOrderDetails
@@ -352,6 +351,7 @@ public class ManageOrderEmailService {
                 });
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
+            log.info("Send notifications for FL401 parties");
             handleFL401ServeOrderNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                bulkPrintOrderDetails, otherOrganisationEmailList, otherOrganisationPostList);
         }
@@ -377,17 +377,32 @@ public class ManageOrderEmailService {
                                                     List<EmailInformation> otherOrganisationEmailList,
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
-        log.info("*** DA Personal service represented serving option selected {}",manageOrders.getServingRespondentsOptionsDA());
-        log.info("*** DA Personal service unrepresented serving option selected {}", manageOrders.getServingOptionsForNonLegalRep());
-        String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
+        if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            log.info("Non personal service FL401");
+            handleFL401NonPersonalServiceNotifications(authorisation,
+                                                        caseData,
+                                                        manageOrders,
+                                                        bulkPrintOrderDetails,
+                                                        orderDocuments,
+                                                        dynamicDataForEmail);
 
-        handleFL401PersonalServiceNotifications(authorisation,
-                                                caseData,
-                                                orderDocuments,
-                                                dynamicDataForEmail,
-                                                servingOptions,
-                                                bulkPrintOrderDetails);
+
+        } else {
+            log.info("*** DA Personal service ");
+            log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
+            String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
+                ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions()
+                .getId();
+
+            handleFL401PersonalServiceNotifications(
+                authorisation,
+                caseData,
+                orderDocuments,
+                dynamicDataForEmail,
+                servingOptions,
+                bulkPrintOrderDetails
+            );
+        }
 
         if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
             .contains(ServeOtherPartiesOptions.other)) {
@@ -400,6 +415,27 @@ public class ManageOrderEmailService {
             });
         }
     }
+
+    private void handleFL401NonPersonalServiceNotifications(String authorisation, CaseData caseData,
+                                                            ManageOrders manageOrders,
+                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                                            List<Document> orderDocuments,
+                                                            Map<String, Object> dynamicDataForEmail) {
+
+        List<Element<PartyDetails>> partyList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
+                                                                      caseData.getApplicantsFL401()),
+                                                              element(caseData.getRespondentsFL401().getPartyId(),
+                                                                      caseData.getRespondentsFL401()));
+        DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+        sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
+                                             partyList,
+                                             caseData,
+                                             authorisation,
+                                             dynamicDataForEmail,
+                                             bulkPrintOrderDetails,
+                                             orderDocuments);
+    }
+
 
     private void handleC100PersonalServiceNotifications(String authorisation, CaseData caseData,
                                                         List<Document> orderDocuments,
@@ -433,16 +469,18 @@ public class ManageOrderEmailService {
                 EmailTemplateNames.CA_LIP_ORDERS
             ));
             //Added as part of PRL-5509
-            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
+            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail,
+                                                                                             EmailTemplateNames.CA_LIP_ORDERS));
         }
     }
 
-    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
+    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail,
+                                                       EmailTemplateNames template) {
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.isAccessEnabled(party)) {
             emailService.send(
                 party.getValue().getEmail(),
-                EmailTemplateNames.CA_LIP_ORDERS,
+                template,
                 buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                 dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
             );
@@ -525,7 +563,7 @@ public class ManageOrderEmailService {
                 orderDocuments,
                 bulkPrintOrderDetails,
                 SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP,
-                EmailTemplateNames.CA_LIP_ORDERS
+                EmailTemplateNames.DA_LIP_ORDERS
             );
         }
     }
@@ -548,7 +586,7 @@ public class ManageOrderEmailService {
         } else if ((SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
             //PRL-5365, PRL-5556 - send email/post notifications to all C100 applicants
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)
+            if (CaseUtils.isCitizenCase(caseData)
                 && C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 log.info("*** courtAdmin/courtBailiff: Send email/post notifications to all C100 applicants");
                 dynamicDataForEmail.put(AUTHORISATION, authorisation);
@@ -600,7 +638,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("There is a failure in sending send grid email with exception {}",
-                      e.getMessage(), e);
+                      e.getMessage());
         }
     }
 
@@ -620,7 +658,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      cafcassCymruEmailId, e.getMessage(), e);
+                      cafcassCymruEmailId, e.getMessage());
         }
 
     }
@@ -755,7 +793,7 @@ public class ManageOrderEmailService {
                                                   organisationPostalInfo.getPostalName())));
                 } catch (Exception e) {
                     log.error("Error in sending order docs to other person {}", organisationPostalInfo.hashCode());
-                    log.error("Exception occurred in sending order docs to other person", e);
+                    log.error("Exception occurred in sending order docs to other person {}", e.getMessage());
                 }
             } else {
                 log.info("Couldn't send serve order details to other person, address is null/empty for {}",
@@ -786,7 +824,7 @@ public class ManageOrderEmailService {
                     )));
             } catch (Exception e) {
                 log.error("Error in sending orders to party address {}", partyElement.getId());
-                log.error("Exception occurred in sending orders to party address", e);
+                log.error("Exception occurred in sending orders to party address {}", e.getMessage());
             }
         } else {
             log.info(
@@ -837,22 +875,6 @@ public class ManageOrderEmailService {
         return cafcassCymruEmail;
     }
 
-    private PartyDetails getOtherPerson(String id, CaseData caseData) {
-        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
-            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
-            ? caseData.getOtherPartyInTheCaseRevised()
-            : caseData.getOthersToNotify();
-        if (null != otherPartiesToNotify) {
-            Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
-                .filter(element -> element.getId().toString().equalsIgnoreCase(id))
-                .findFirst();
-            if (otherPerson.isPresent()) {
-                return otherPerson.get().getValue();
-            }
-        }
-        return null;
-    }
-
     private void sendEmailToSolicitorOrNotifyParties(List<DynamicMultiselectListElement> value,
                                                      List<Element<PartyDetails>> partyDetails,
                                                      CaseData caseData,
@@ -866,6 +888,7 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("Sending email to sollicitor");
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(
                         authorisation,

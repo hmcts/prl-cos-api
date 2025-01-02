@@ -97,8 +97,6 @@ public class ManageOrderEmailServiceTest {
     @InjectMocks
     private ManageOrderEmailService manageOrderEmailService;
 
-    private Map<String, String> expectedEmailVarsAsMap;
-
     @Mock
     private CourtFinderApi courtFinderApi;
 
@@ -213,8 +211,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .build();
 
-        List<Court> courtList = new ArrayList<>();
-        courtList.add(court);
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -549,12 +545,6 @@ public class ManageOrderEmailServiceTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                .label("John (Child 1)")
-                .code("00000000-0000-0000-0000-000000000000")
-                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -573,6 +563,103 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void sendEmailDaWhenOrderIsServed() {
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+        uuid = UUID.fromString(TEST_UUID);
+        PartyDetails applicantDA = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().id(uuid).value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(uuid).value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String cafcassEmail = "testing@cafcass.com";
+
+        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
+        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassEmailAddress(listOfCafcassEmail)
+            .cafcassCymruServedOptions(YesOrNo.Yes)
+            .cafcassServedOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .build();
+
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("FL401")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicantsFL401(applicantDA)
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.randomUUID())
+                                  .build())
             .children(listOfChildren)
             .courtName("testcourt")
             .manageOrders(manageOrders)
@@ -631,7 +718,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .serveToRespondentOptions(YesOrNo.Yes)
-                              .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                              .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
@@ -831,7 +918,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .serveToRespondentOptions(YesOrNo.Yes)
-                .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                 .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
@@ -1252,6 +1339,7 @@ public class ManageOrderEmailServiceTest {
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
+            .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1266,7 +1354,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.post)
@@ -1305,6 +1393,7 @@ public class ManageOrderEmailServiceTest {
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
+            .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1319,7 +1408,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.post)
@@ -1359,6 +1448,7 @@ public class ManageOrderEmailServiceTest {
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
+            .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1371,7 +1461,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                 .serveToRespondentOptions(YesOrNo.No)
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(null)
@@ -1410,6 +1500,7 @@ public class ManageOrderEmailServiceTest {
             .build();
         applicant = applicant.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .partyId(UUID.fromString(TEST_UUID))
             .representativeLastName("")
             .representativeFirstName("")
             .solicitorEmail("test@gmail.com")
@@ -1421,7 +1512,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                 .serveToRespondentOptions(YesOrNo.No)
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(null)
@@ -1460,6 +1551,7 @@ public class ManageOrderEmailServiceTest {
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
+            .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1474,7 +1566,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.email)
@@ -1509,6 +1601,7 @@ public class ManageOrderEmailServiceTest {
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
+            .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1523,7 +1616,7 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
-                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.email)
@@ -1934,6 +2027,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void sendEmailWhenOrderIsServedEmailOptionIsEmpty() throws IOException {
         applicant = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
@@ -1978,7 +2072,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -1993,14 +2087,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2072,7 +2166,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListEmailOptionEmpty)
             .serveOrderDynamicList(dynamicMultiSelectListEmailOptionEmpty)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2087,14 +2181,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2122,6 +2216,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void sendServeOrderEmailWhenCourtBailiffOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
@@ -2166,7 +2261,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2181,14 +2276,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2260,7 +2355,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListCourtBaliff)
             .serveOrderDynamicList(dynamicMultiSelectListCourtBaliff)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2275,14 +2370,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2310,6 +2405,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void sendServeOrderEmailWhenCourtAdminOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
@@ -2354,7 +2450,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2369,14 +2465,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2448,7 +2544,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListCourtAdmin)
             .serveOrderDynamicList(dynamicMultiSelectListCourtAdmin)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2463,14 +2559,14 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder()
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .solicitorEmail("t")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .email("test@ree.com").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder()
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
                 .lastName("test")
                 .firstName("test1")
                 .email("test@sdsc.com").build())
@@ -2517,7 +2613,7 @@ public class ManageOrderEmailServiceTest {
             .otherParties(dynamicMultiSelectList)
             .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
             .cafcassCymruEmail("test@cafcasscymru.com")
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -2594,7 +2690,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2689,7 +2785,7 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectListC100Welsh)
             .serveOrderDynamicList(dynamicMultiSelectListC100Welsh)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2785,7 +2881,7 @@ public class ManageOrderEmailServiceTest {
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2884,7 +2980,7 @@ public class ManageOrderEmailServiceTest {
             .recipientsOptions(dynamicMultiSelectListCaWelsh)
             .serveOrderDynamicList(dynamicMultiSelectListCaWelsh)
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
