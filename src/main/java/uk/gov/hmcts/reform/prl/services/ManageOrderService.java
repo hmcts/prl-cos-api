@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -3530,9 +3531,8 @@ public class ManageOrderService {
                                 authorisation,
                                 AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
+                            log.info("Automated Hearing Response: {}", getPrettyJson(automatedHearingResponse));
                             hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
-                            log.info("Automated Hearing Response: {}", automatedHearingResponse);
-
                         }
                     });
             }
@@ -3541,5 +3541,16 @@ public class ManageOrderService {
         }
         log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
         return hearingsList;
+    }
+
+    private String getPrettyJson(Object object) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 }

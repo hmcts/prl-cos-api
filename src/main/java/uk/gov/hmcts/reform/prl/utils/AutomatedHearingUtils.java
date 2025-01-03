@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -20,14 +21,13 @@ public class AutomatedHearingUtils {
     public static void automatedHearingManagementRequest(String authorisation, CaseData caseData, Map<String, Object> caseDataMap,
                                                    ManageOrderService manageOrderService) {
         log.info("Automated Hearing Management: automatedHearingManagementRequest: Start");
+        log.info("Automated Hearing Management: amendOrderSelectCheckOptions: {}, doYouWantToServeOrder: {}, whatDoWithOrder: {}",
+                 caseDataMap.get("amendOrderSelectCheckOptions"), caseDataMap.get("doYouWantToServeOrder"), caseDataMap.get("whatDoWithOrder"));
         boolean saveAsDraft = No.getDisplayedValue().equalsIgnoreCase(String.valueOf(caseDataMap.get("doYouWantToServeOrder")));
         if (caseData.getManageOrders() != null) {
-            if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()
+            if (CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())
                 && (!AmendOrderCheckEnum.noCheck.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataMap.get("amendOrderSelectCheckOptions"))) || saveAsDraft)) {
-                log.info("Automated Hearing Management: amendOrderSelectCheckOptions: {}, saveAsDraft: {}",
-                         caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
-                );
                 caseData.getDraftOrderCollection().forEach(draftOrder -> {
                     if (Yes.equals(draftOrder.getValue().getIsAutoHearingReqPending())) {
                         draftOrder.getValue().setManageOrderHearingDetails(manageOrderService
@@ -36,10 +36,7 @@ public class AutomatedHearingUtils {
                     draftOrder.getValue().setIsAutoHearingReqPending(No);
                 });
                 caseDataMap.put("draftOrderCollection", caseData.getDraftOrderCollection());
-            } else if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-                log.info("Automated Hearing Management: amendOrderSelectCheckOptions: {}, saveAsDraft: {}",
-                         caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
-                );
+            } else if (CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
                 caseData.getOrderCollection().forEach(order -> {
                     if (Yes.equals(order.getValue().getIsAutoHearingReqPending())) {
                         order.getValue().setManageOrderHearingDetails(manageOrderService
