@@ -123,17 +123,34 @@ public class ManageOrdersUtils {
                     }
                     //numeric estimated timings validation
                     validateHearingEstimatedTimings(errorList, hearingData);
+                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                        && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed
+                        .equals(hearingData.getHearingDateConfirmOptionEnum()))) {
+                        validateHearingData(errorList, hearingData);
+                    }
+
                 });
         }
     }
 
     private static boolean isDateReservedWithListAssist(HearingData hearingData) {
         return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-            && HearingDateConfirmOptionEnum.dateReservedWithListAssit
-            .equals(hearingData.getHearingDateConfirmOptionEnum());
+            && (HearingDateConfirmOptionEnum.dateReservedWithListAssit
+            .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+            .equals(hearingData.getHearingDateConfirmOptionEnum())
+            || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum()));
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
+        if (StringUtils.isBlank(hearingData.getHearingEstimatedDays()) && StringUtils
+            .isBlank(hearingData.getHearingEstimatedHours()) && StringUtils
+            .isBlank(hearingData.getHearingEstimatedMinutes())) {
+            errorList.add("You must enter a value for either Hearing estimated days or hours or minutes");
+        }
+
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
             errorList.add("Please enter numeric value for Hearing estimated days");
@@ -148,6 +165,83 @@ public class ManageOrdersUtils {
         }
         //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
+
+    private static void validateHearingData(List<String> errorList,HearingData hearingData) {
+
+        if (ObjectUtils.isEmpty(hearingData.getHearingAuthority())) {
+            errorList.add("You must select this hearing will be before");
+        }
+
+        if (YesOrNo.No.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())
+            && ((StringUtils.isNotEmpty(hearingData.getApplicantName1())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName2())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName3())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName4())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName5())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor1())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor2())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor3())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor4())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor5())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName1())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName2())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName3())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName4())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName5())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor1())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor2())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor3())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor4())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor5())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel5().getValue()))))) {
+            errorList.add("You must select this hearing channel");
+        }
+
+
+    }
+
+
+
+
 
     public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {
         List<String> errorList = new ArrayList<>();
