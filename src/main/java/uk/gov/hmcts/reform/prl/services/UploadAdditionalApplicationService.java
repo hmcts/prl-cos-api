@@ -224,7 +224,8 @@ public class UploadAdditionalApplicationService {
                 .build();
             paymentServiceResponse = Optional.of(paymentRequestService.getPaymentServiceResponse(authorisation,
                                                                                                  paymentCaseData,
-                                                                                                 feeResponse));
+                                                                                                 feeResponse,
+                                                                                                 true));
         }
         return paymentServiceResponse;
     }
