@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 
@@ -328,5 +331,23 @@ public class RoleAssignmentServiceTest {
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         Map<String, String> rolesResponse = roleAssignmentService.fetchIdamAmRoles(auth, emailId);
         Assert.assertFalse(rolesResponse.isEmpty());
+    }
+
+    @Test
+    public void testremoveRoleAssignment() {
+        roleAssignmentService.removeRoleAssignment("test");
+        verify(roleAssignmentApi, times(1)).removeRoleAssignments(null, null,
+                                                                  null, "test");
+        verifyNoMoreInteractions(roleAssignmentApi);
+    }
+
+    @Test
+    public void testRoleAssignmentForActorId() {
+        when(roleAssignmentApi.getRoleAssignments(null, null, null, "actorId"))
+            .thenReturn(RoleAssignmentServiceResponse.builder().roleAssignmentResponse(List.of(new RoleAssignmentResponse()))
+                            .build());
+        roleAssignmentService.getRoleAssignmentForActorId("actorId");
+        verify(roleAssignmentApi, times(1)).getRoleAssignments(null, null,
+                                                               null, "actorId");
     }
 }
