@@ -1828,6 +1828,31 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
     public void testAddUploadOrder() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
