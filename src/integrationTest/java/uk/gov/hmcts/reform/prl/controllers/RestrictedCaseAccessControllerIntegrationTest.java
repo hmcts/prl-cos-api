@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService;
 
 import java.util.HashMap;
 
@@ -32,19 +31,18 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class ServiceOfApplicationControllerIntegrationTest {
+public class RestrictedCaseAccessControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-
-    @MockBean
-    ServiceOfApplicationService serviceOfApplicationService;
-
     @MockBean
     AuthorisationService authorisationService;
+
+    @MockBean
+    RestrictedCaseAccessService restrictedCaseAccessService;
 
     @Before
     public void setUp() {
@@ -52,12 +50,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToStart() throws Exception {
-        String url = "/service-of-application/about-to-start";
+    public void testRestrictedCaseAccessAboutToStart() throws Exception {
+        String url = "/restricted-case-access/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any())).thenReturn(new HashMap<>());
+        when(restrictedCaseAccessService.retrieveAssignedUserRoles(any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -71,12 +69,12 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
-        String url = "/service-of-application/about-to-submit";
+    public void testRestrictedCaseAccessAboutToSubmit() throws Exception {
+        String url = "/restricted-case-access/about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.handleAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
+        when(restrictedCaseAccessService.initiateUpdateCaseAccess(any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -90,8 +88,8 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testHandleSubmitted() throws Exception {
-        String url = "/service-of-application/submitted";
+    public void testRestrictedCaseAccessSubmitted() throws Exception {
+        String url = "/restricted-case-access/submitted";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
@@ -108,8 +106,8 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testSoaValidation() throws Exception {
-        String url = "/service-of-application/soa-validation";
+    public void testChangeCaseAccess() throws Exception {
+        String url = "/restricted-case-access/change-case-access";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
@@ -124,5 +122,4 @@ public class ServiceOfApplicationControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }
