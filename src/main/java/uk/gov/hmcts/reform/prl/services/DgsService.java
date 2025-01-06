@@ -96,6 +96,7 @@ public class DgsService {
                 welshDataMap.put(k, updatedWelshObj);
             }
         });
+        log.info("The dataMap is {}", welshDataMap);
         return generateDocument(authorisation, caseId, templateName,
                                 welshDataMap
         );
