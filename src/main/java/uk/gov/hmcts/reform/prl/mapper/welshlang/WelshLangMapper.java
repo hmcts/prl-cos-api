@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
@@ -908,6 +909,20 @@ public class WelshLangMapper {
         welshMap.put("Behaviour is not ongoing", "Nid yw’r ymddygiad yn parhau");
 
         welshMap.put("Behaviour is ongoing", "Mae’r ymddygiad yn parhau");
+
+        /**
+         * Welsh translations for special arrangements enum
+         */
+        welshMap.put(SpecialArrangementEnum.separateWaitingRoom.getDisplayedValue(), "Ystafell aros ar wahân");
+        welshMap.put(SpecialArrangementEnum.separateExitEntrance.getDisplayedValue(), "Drysau ar wahân i fynd i mewn ac allan o'r llys");
+        welshMap.put(SpecialArrangementEnum.screenWithOtherPeople.getDisplayedValue(),
+                     "Sgriniau i atal chi a’r bobl eraill yn yr achos rhag gweld eich gilydd");
+        welshMap.put(SpecialArrangementEnum.noSafetyRequirements.getDisplayedValue(),
+                     "Nac oes, nid oes arnaf angen unrhyw ofynion o ran diogelwch ar hyn o bryd");
+        welshMap.put(SpecialArrangementEnum.separateToilets.getDisplayedValue(), "Toiledau ar wahân");
+        welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
+        welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
+        welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
 
         return welshMap;
     }
