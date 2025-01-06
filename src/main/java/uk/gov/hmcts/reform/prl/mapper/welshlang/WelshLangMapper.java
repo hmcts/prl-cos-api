@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+@Slf4j
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
@@ -102,7 +104,9 @@ public class WelshLangMapper {
             if (validateMappingKey(key, obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(key + "_" + obj);
             } else if (validateObject(obj, isCA)) {
+                log.info("Object before translation : {}", obj);
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(obj);
+                log.info("Object after translation : {}", obj);
             }
         }
         return obj;
@@ -923,7 +927,7 @@ public class WelshLangMapper {
         welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
         welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
         welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
-
+        log.info("Welsh map {}", welshMap);
         return welshMap;
     }
 
