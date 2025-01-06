@@ -1352,7 +1352,9 @@ public class C100RespondentSolicitorService {
         boolean isConfidentialDataPresent = false;
         if (null != solicitorRepresentedRespondent
                 && null != solicitorRepresentedRespondent.getValue()) {
-            if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
+            //PRL-6625 - Skip ref data call for citizen cases
+            if (isNotEmpty(solicitorRepresentedRespondent.getValue().getSolicitorOrg())
+                && isNotEmpty(solicitorRepresentedRespondent.getValue().getSolicitorOrg().getOrganisationID())) {
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
             if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
