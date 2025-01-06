@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -19,10 +19,14 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
@@ -173,20 +177,18 @@ public class CaseDocumentControllerIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testUploadCitizenStatementDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        Map<String, Object> map = new HashMap<>();
-        map.put("caseId", "123");
-        map.put("citizenUploadedDocumentList", List.of(element(UploadedDocuments.builder().build())));
-        map.put("state", "SUBMITTED_PAID");
-        map.put("createdDate", "2023-03-29T00:27:28.863787");
-        map.put("lastModifiedDate", "2023-03-29T00:27:28.863787");
+        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
-        when(coreCaseDataApi.getCase(anyString(), anyString(), anyString())).thenReturn(CaseDetails.builder()
-                                                                                            .data(map)
-                                                                                            .build());
+        when(documentGenService.uploadDocument(anyString(), any())).thenReturn(DocumentResponse.builder()
+                                                                                   .document(Document.builder()
+                                                                                                 .documentFileName(
+                                                                                                     "test.pdf")
+                                                                                                 .build())
+                                                                                   .build());
 
         when(uploadService.uploadCitizenDocument(anyString(), any())).thenReturn(UploadedDocuments.builder()
                                                                                      .citizenDocument(Document.builder()
@@ -195,6 +197,35 @@ public class CaseDocumentControllerIntegrationTest {
                                                                                                           .build())
                                                                                      .build());
 
+        when(idamClient.getUserInfo(anyString())).thenReturn(UserInfo.builder()
+                                                                 .sub("123")
+                                                                 .uid("123")
+                                                                 .build());
+        when(coreCaseDataApi.startEventForCitizen(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(StartEventResponse.builder()
+                            .token("123")
+                            .build());
+        Map<String, Object> map = new HashMap<>();
+        map.put("caseId",123L);
+        map.put("citizenUploadedDocumentList", List.of(element(UploadedDocuments.builder().build())));
+        map.put("state", "SUBMITTED_PAID");
+        map.put("createdDate", "2023-03-29T00:27:28.863787");
+        map.put("lastModifiedDate", "2023-03-29T00:27:28.863787");
+        map.put("respondentsFL401", PartyDetails.builder()
+                .user(User.builder()
+                          .idamId("123")
+                          .build())
+            .build());
+        map.put("applicantsFL401", PartyDetails.builder()
+            .user(User.builder()
+                      .idamId("123")
+                      .build())
+            .build());
+
+        when(coreCaseDataApi.getCase(anyString(), anyString(), anyString())).thenReturn(CaseDetails.builder()
+                                                                                            .id(123L)
+                                                                                            .data(map)
+                                                                                            .build());
         String url = "/upload-citizen-statement-document";
         MockMultipartFile file = new MockMultipartFile(
             "file",
@@ -202,7 +233,7 @@ public class CaseDocumentControllerIntegrationTest {
             "application/pdf",
             "test content".getBytes()
         );
-        //create json request for UploadedDocumentRequest
+
         String jsonRequest = "{"
             + "\"caseId\": \"123\","
             + "\"documentType\": \"statement\","
@@ -215,10 +246,16 @@ public class CaseDocumentControllerIntegrationTest {
         mockMvc.perform(
                 multipart(url)
                     .file(file)
-                    .header(AUTHORISATION_HEADER, "testAuthToken")
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .header(HttpHeaders.AUTHORIZATION, "testAuthToken")
+                    .header("ServiceAuthorization", "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
-                    .content(jsonRequest))
+                    //.contentType(APPLICATION_JSON)
+                    .param("caseId", "123")
+                    .param("documentType", "statement")
+                    .param("partyName", "John Doe")
+                    .param("partyId", "7663081e-778d-4317-b278-7642b740d317")
+                    .param("isApplicant", "true")
+                    .param("documentRequestedByCourt", "Yes"))
             .andExpect(status().isOk())
             .andReturn();
     }
