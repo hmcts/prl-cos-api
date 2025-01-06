@@ -1538,6 +1538,7 @@ public class C100RespondentSolicitorService {
             attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt);
 
             dataMap.put("attendingTheCourt", attendToCourt);
+            dataMap.put("attendingTheCourtWelsh", attendToCourt);
         }
     }
 
