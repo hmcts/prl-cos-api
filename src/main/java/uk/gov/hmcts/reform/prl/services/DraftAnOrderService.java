@@ -1007,6 +1007,7 @@ public class DraftAnOrderService {
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
                                             List<Element<HearingData>> manageOrderHearingDetail) {
+        boolean isAutomatedHearingPresent = false;
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -1026,6 +1027,14 @@ public class DraftAnOrderService {
                     .id(hearingDataElement.getId())
                     .build();
                 updatedManageOrderHearingDetail.add(hearingDataElement);
+                //For Automated Hearing Check for Judge and Manager
+                if (!isAutomatedHearingPresent
+                    && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(
+                    hearingDataElement.getValue().getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(
+                        hearingDataElement.getValue().getHearingDateConfirmOptionEnum()))) {
+                    isAutomatedHearingPresent = true;
+                }
             }
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
@@ -1033,6 +1042,9 @@ public class DraftAnOrderService {
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
+        //Check for Automated Hearing Management
+        log.info("isAutomatedHearingPresent: {}", isAutomatedHearingPresent);
+        caseDataMap.put("isAutomatedHearingPresent", isAutomatedHearingPresent ? Yes : No);
     }
 
     private static HearingData resetHearingConfirmedDatesAndLinkedCases(

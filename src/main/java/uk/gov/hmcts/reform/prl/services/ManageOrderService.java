@@ -3149,12 +3149,6 @@ public class ManageOrderService {
             caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
         }
-
-        //For Automated Hearing Check for Judge
-        String loggedInUserType = getLoggedInUserType(authorisation);
-        log.info("isAutomatedHearingPresent: loggedInUserType: {}", loggedInUserType);
-        caseDataUpdated.put("isAutomatedHearingPresent", UserRoles.JUDGE.name().equals(loggedInUserType) ? Yes : No);
-        log.info("isAutomatedHearingPresent: caseDataUpdated: {}", caseDataUpdated.get("isAutomatedHearingPresent"));
     }
 
     public HearingData getHearingData(String authorization,
