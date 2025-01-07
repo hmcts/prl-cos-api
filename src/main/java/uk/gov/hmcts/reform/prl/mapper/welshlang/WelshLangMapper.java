@@ -34,7 +34,13 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.citizen.*;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
@@ -987,8 +993,10 @@ public class WelshLangMapper {
         welshMap.put(ReasonableAdjustmentsEnum.docsformat.getDisplayedValue(), "Rwyf angen dogfennau mewn fformat arall");
         welshMap.put(ReasonableAdjustmentsEnum.commhelp.getDisplayedValue(), "Rwyf angen cymorth gyda chyfathrebu a deall pethau");
         welshMap.put(ReasonableAdjustmentsEnum.hearingsupport.getDisplayedValue(), "Rwyf angen dod â rhywun efo fi i fy nghefnogi mewn gwrandawiad");
-        welshMap.put(ReasonableAdjustmentsEnum.hearingcomfort.getDisplayedValue(), "Rwyf angen rhywbeth i wneud i mi deimlo’n gyfforddus yn ystod gwrandawiad");
-        welshMap.put(ReasonableAdjustmentsEnum.travellinghelp.getDisplayedValue(), "Rwyf angen cymorth i deithio i, neu symud o gwmpas adeiladau’r llys");
+        welshMap.put(ReasonableAdjustmentsEnum.hearingcomfort.getDisplayedValue(),
+            "Rwyf angen rhywbeth i wneud i mi deimlo’n gyfforddus yn ystod gwrandawiad");
+        welshMap.put(ReasonableAdjustmentsEnum.travellinghelp.getDisplayedValue(),
+            "Rwyf angen cymorth i deithio i, neu symud o gwmpas adeiladau’r llys");
         welshMap.put(ReasonableAdjustmentsEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
     }
 
