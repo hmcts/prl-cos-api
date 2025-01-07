@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
@@ -918,6 +919,7 @@ public class WelshLangMapper {
          * Welsh translations for special arrangements enum
          */
         getSpecialArrangementsWelsh(welshMap);
+        getReasonbleAdjustmentsWelsh(welshMap);
         log.info("Welsh map {}", welshMap);
         return welshMap;
     }
@@ -933,6 +935,10 @@ public class WelshLangMapper {
         welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
         welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
         welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
+    }
+
+    public static void getReasonbleAdjustmentsWelsh(Map<String, String> welshMap) {
+        welshMap.put("No, I do not need any support at this time", "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
     }
 
     /**
