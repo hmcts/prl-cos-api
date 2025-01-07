@@ -1539,8 +1539,8 @@ public class C100RespondentSolicitorService {
             attendToCourtWelsh = buildSafetyArrangementsList(response, attendToCourtWelsh, false);
             attendToCourt = buildSafetyArrangementsList(response, attendToCourt, true);
 
-            attendToCourtWelsh = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
-            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
+            buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
+            buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
 
             dataMap.put("attendingTheCourt", attendToCourt);
             dataMap.put("attendingTheCourtWelsh", attendToCourtWelsh);
@@ -1651,8 +1651,11 @@ public class C100RespondentSolicitorService {
             documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed, isEnglish, welshMapping);
             if (!documentInformation.isEmpty()) {
                 dataMap.put("documentsInAlternativeFormatNeeded", YES);
-                dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
-
+                if (isEnglish) {
+                    dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
+                } else {
+                    dataMap.put("documentsInAlternativeFormatDetailsWelsh", documentInformation);
+                }
                 adjustmentRequired.append(isEnglish ? docsformat.getDisplayedValue() : welshMapping.get(docsformat.getDisplayedValue()))
                     .append(COLON).append(documentInformation);
             }
@@ -1662,7 +1665,11 @@ public class C100RespondentSolicitorService {
                                                               isEnglish, welshMapping);
             if (!communicationHelpDetails.isEmpty()) {
                 dataMap.put("helpInCommunicationNeeded", YES);
-                dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
+                if (isEnglish) {
+                    dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
+                } else {
+                    dataMap.put("helpInCommunicationDetailsWelsh", communicationHelpDetails);
+                }
                 adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? commhelp.getDisplayedValue()
                                                                       : welshMapping.get(commhelp.getDisplayedValue()))
                     .append(COLON).append(communicationHelpDetails);
@@ -1674,7 +1681,11 @@ public class C100RespondentSolicitorService {
                     supportYouNeed, isEnglish, welshMapping);
             if (!helpTravellingMovingBuildingSupportDetails.isEmpty()) {
                 dataMap.put("helpNeededTravellingToNeeded", YES);
-                dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
+                if (isEnglish) {
+                    dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
+                } else {
+                    dataMap.put("helpNeededTravellingToDetailsWelsh", helpTravellingMovingBuildingSupportDetails);
+                }
                 adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? travellinghelp.getDisplayedValue()
                                                                       : welshMapping.get(travellinghelp.getDisplayedValue()))
                     .append(COLON).append(helpTravellingMovingBuildingSupportDetails);
@@ -1693,7 +1704,11 @@ public class C100RespondentSolicitorService {
             extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed, isEnglish, welshMapping);
             if (!extraSupportDetails.isEmpty()) {
                 dataMap.put("extraSupportNeeded", YES);
-                dataMap.put("extraSupportDetails", extraSupportDetails);
+                if (isEnglish) {
+                    dataMap.put("extraSupportDetails", extraSupportDetails);
+                } else {
+                    dataMap.put("extraSupportDetailsWelsh", extraSupportDetails);
+                }
                 adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingsupport.getDisplayedValue()
                         : welshMapping.get(hearingsupport.getDisplayedValue())).append(COLON)
                         .append(extraSupportDetails);
@@ -1706,7 +1721,11 @@ public class C100RespondentSolicitorService {
             );
             if (!feelComfortableSupportDetails.isEmpty()) {
                 dataMap.put("feelComfortableNeeed", YES);
-                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                if (isEnglish) {
+                    dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                } else {
+                    dataMap.put("feelComfortableDetailsWelsh", feelComfortableSupportDetails);
+                }
                 adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingcomfort.getDisplayedValue()
                         : welshMapping.get(hearingcomfort.getDisplayedValue())).append(COLON)
                         .append(feelComfortableSupportDetails);
