@@ -34,9 +34,10 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
@@ -963,6 +964,19 @@ public class WelshLangMapper {
         welshMap.put(TravellingToCourtEnum.building.getDisplayedValue(), "Cymorth i fynd o amgylch yr adeilad");
         welshMap.put(TravellingToCourtEnum.other.getDisplayedValue(), "Arall");
         welshMap.put(TravellingToCourtEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(CourtComfortEnum.appropriatelighting.getDisplayedValue(), "Goleuadau priodol");
+        welshMap.put(CourtComfortEnum.breaks.getDisplayedValue(), "Seibiannau rheolaidd");
+        welshMap.put(CourtComfortEnum.space.getDisplayedValue(), "Lle i allu codi a symud o gwmpas");
+        welshMap.put(CourtComfortEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(CourtComfortEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(CourtHearingEnum.supportworker.getDisplayedValue(), "Gweithiwr cymorth neu ofalwr");
+        welshMap.put(CourtHearingEnum.familymember.getDisplayedValue(), "ffrind neu aelod o'r teulu");
+        welshMap.put(CourtHearingEnum.assistance.getDisplayedValue(), "Ci cymorth / ci tywys");
+        welshMap.put(CourtHearingEnum.animal.getDisplayedValue(), "Anifail therapi");
+        welshMap.put(CourtHearingEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(CourtHearingEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
 
         welshMap.put(HelpCommunicationEnum.hearingloop.getDisplayedValue(), "Dolen sain (system gwella clyw)");
         welshMap.put(HelpCommunicationEnum.infraredreceiver.getDisplayedValue(), "Derbynnydd isgoch (system gwella clyw)");
