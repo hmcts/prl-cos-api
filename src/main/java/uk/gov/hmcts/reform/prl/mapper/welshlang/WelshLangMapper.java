@@ -924,7 +924,6 @@ public class WelshLangMapper {
          */
         getSpecialArrangementsWelsh(welshMap);
         getReasonbleAdjustmentsWelsh(welshMap);
-        log.info("Welsh map {}", welshMap);
         return welshMap;
     }
 

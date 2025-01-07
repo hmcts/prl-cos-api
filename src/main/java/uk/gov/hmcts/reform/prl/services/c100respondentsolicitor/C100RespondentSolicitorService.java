@@ -1822,6 +1822,7 @@ public class C100RespondentSolicitorService {
 
     private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed,
                                                    boolean isEnglish, Map<String, String> welshMapping) {
+        log.info("Docs support {}", documentInformation);
         return documentInformation.stream()
                 .map(element -> buildDocumentInformationElement(element,
                         supportYouNeed.getDocsDetails(),
@@ -1843,7 +1844,7 @@ public class C100RespondentSolicitorService {
             String otherDocDetails = isEnglish ? docsprint.getDisplayedValue() : welshMapping.get(other.getDisplayedValue());
             return otherDocDetails + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
