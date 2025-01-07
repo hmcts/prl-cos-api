@@ -82,6 +82,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
+    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE =
+        "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
@@ -299,6 +301,7 @@ public class ManageOrdersController {
                 && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
                 List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
                     DRAFT_ORDER_COLLECTION);
+
                 newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
                     ? draftOrderCollection.get(0).getId() : null;
             }
@@ -461,6 +464,10 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
+            }
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);

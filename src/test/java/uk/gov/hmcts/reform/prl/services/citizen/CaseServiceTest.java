@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
@@ -47,6 +48,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -869,6 +873,18 @@ public class CaseServiceTest {
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .orderCollection(List.of(element(orderDetails)))
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
+                .builder()
+                .uploadedDateTime("04-Sep-2024 01:38:33 PM")
+                .partyType(PartyEnum.applicant)
+                .selectedParties(List.of(element(ServedParties.builder().partyId(testUuid.toString()).build())))
+                .c2DocumentBundle(C2DocumentBundle
+                    .builder()
+                    .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle
+                        .builder()
+                        .build())))
+                    .build())
+                .build())))
             .state(State.DECISION_OUTCOME)
             .build();
 

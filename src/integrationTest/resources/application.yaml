@@ -773,11 +773,6 @@ ccd:
     result-size: 10000
     boost: 2.0
 
-refdata:
-  api:
-    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
-  category-id: HearingType
-
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
@@ -790,3 +785,11 @@ hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
   hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
 
+refdata:
+  api:
+    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+  category-id: HearingType
+
+closing_case:
+  unallocated_roleCategory: ADMIN,CTSC,LEGAL_OPERATIONS,JUDICIAL,OTHER_GOV_DEPT
+  unallocated_roleName: allocated-admin-caseworker,allocated-ctsc-caseworker,allocated-legal-adviser,gatekeeping-judge,hearing-judge,allocated-judge

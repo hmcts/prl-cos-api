@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -192,5 +194,26 @@ public class HearingsManagementControllerTest {
         hearingsManagementController.updateAllTabsAfterHmcCaseState("authToken", callbackRequest);
         assertTrue(true);
 
+    }
+
+    @Test
+    public void testValidateHearingState() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(caseDetails)
+                .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = hearingsManagementController.validateHearingState("authToken", callbackRequest);
+        Assert.assertNotNull(response.getData());
     }
 }
