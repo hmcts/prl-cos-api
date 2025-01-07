@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -55,7 +53,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
     @MockBean
     AuthorisationService authorisationService;
 
-    @Mock
+    @Autowired
     ObjectMapper objectMapper;
 
     @MockBean
@@ -64,7 +62,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
-
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test
@@ -111,8 +109,6 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.registerModule(new ParameterNamesModule());
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Mockito.when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(any())).thenReturn(Map.of("childName", "123"));
@@ -190,7 +186,6 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
     public void testSubmittedC7Response() throws Exception {
         String url = "/respondent-solicitor/submitted";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Mockito.doNothing().when(eventPublisher).publishEvent(any());
 

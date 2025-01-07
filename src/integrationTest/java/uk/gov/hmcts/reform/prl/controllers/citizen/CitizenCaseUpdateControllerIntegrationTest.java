@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -43,7 +43,7 @@ public class CitizenCaseUpdateControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Mock
+    @Autowired
     ObjectMapper objectMapper;
 
     @MockBean
@@ -61,6 +61,7 @@ public class CitizenCaseUpdateControllerIntegrationTest {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test

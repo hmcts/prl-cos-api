@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +40,13 @@ public class ReviewDocumentsControllerIntegrationTest {
     @MockBean
     ReviewDocumentService reviewDocumentService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test

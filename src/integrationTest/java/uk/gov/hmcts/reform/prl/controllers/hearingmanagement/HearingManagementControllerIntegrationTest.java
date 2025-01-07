@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,7 +42,7 @@ public class HearingManagementControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Mock
+    @Autowired
     ObjectMapper objectMapper;
 
     @MockBean
@@ -57,6 +57,7 @@ public class HearingManagementControllerIntegrationTest {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test
