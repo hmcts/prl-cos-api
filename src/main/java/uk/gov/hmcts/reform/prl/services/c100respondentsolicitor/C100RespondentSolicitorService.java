@@ -1601,16 +1601,15 @@ public class C100RespondentSolicitorService {
     private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList,
                                                       String otherSubField, boolean isEnglish) {
         String specialArrangement = safetyArrangementsEnumList.stream()
-            .map(element ->
-                 {
-                     if (isEnglish) {
-                         return SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue();
-                     } else {
-                         Map<String, String> welshMap = new HashMap<>();
-                         WelshLangMapper.getSpecialArrangementsWelsh(welshMap);
-                         return welshMap.get(SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue());
-                     }
-                 })
+            .map(element -> {
+                if (isEnglish) {
+                    return SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue();
+                } else {
+                    Map<String, String> welshMap = new HashMap<>();
+                    WelshLangMapper.getSpecialArrangementsWelsh(welshMap);
+                    return welshMap.get(SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue());
+                }
+            })
             .collect(Collectors.joining(COMMA_SEPARATOR));
         if (StringUtils.isNotEmpty(otherSubField)) {
             return specialArrangement + OPEN_BRACKET + otherSubField + CLOSE_BRACKET;

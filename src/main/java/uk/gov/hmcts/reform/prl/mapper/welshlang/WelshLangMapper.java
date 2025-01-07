@@ -34,8 +34,11 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
@@ -919,6 +922,9 @@ public class WelshLangMapper {
          * Welsh translations for special arrangements enum
          */
         getSpecialArrangementsWelsh(welshMap);
+        getTravellingToCourtWelsh(welshMap);
+        getHelpCommunicationWelsh(welshMap);
+        getDocumentSupportWelsh(welshMap);
         getReasonbleAdjustmentsWelsh(welshMap);
         log.info("Welsh map {}", welshMap);
         return welshMap;
@@ -935,6 +941,44 @@ public class WelshLangMapper {
         welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
         welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
         welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
+    }
+
+    public static void getHelpCommunicationWelsh(Map<String, String> welshMap) {
+        welshMap.put(HelpCommunicationEnum.hearingloop.getDisplayedValue(), "Dolen sain (system gwella clyw)");
+        welshMap.put(HelpCommunicationEnum.infraredreceiver.getDisplayedValue(), "Derbynnydd isgoch (system gwella clyw)");
+        welshMap.put(HelpCommunicationEnum.needspeakinghelp.getDisplayedValue(), "Angen bod yn agos at bwy bynnag sy'n siarad");
+        welshMap.put(HelpCommunicationEnum.signlanguage.getDisplayedValue(), "Dehonglydd iaith arwyddion");
+        welshMap.put(HelpCommunicationEnum.speechreporter.getDisplayedValue(), "Cofnodwr iaith lafar i destun (palanteipydd)");
+        welshMap.put(HelpCommunicationEnum.extratime.getDisplayedValue(), "Amser ychwanegol i feddwl ac egluro fy hun");
+        welshMap.put(HelpCommunicationEnum.courtvisit.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
+        welshMap.put(HelpCommunicationEnum.courthearing.getDisplayedValue(), "Esboniad o osodiad y llys a phwy fydd yn yr ystafell wrandawiadau");
+        welshMap.put(HelpCommunicationEnum.intermediary.getDisplayedValue(), "Cyfryngwr");
+        welshMap.put(HelpCommunicationEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(HelpCommunicationEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+    }
+
+    public static void getTravellingToCourtWelsh(Map<String, String> welshMap) {
+        welshMap.put(TravellingToCourtEnum.parkingspace.getDisplayedValue(), "Lle parcio yn agos i'r lleoliad");
+        welshMap.put(TravellingToCourtEnum.stepfree.getDisplayedValue(), "Dim gris / mynediad ar gyfer cadair olwyn");
+        welshMap.put(TravellingToCourtEnum.wheelchair.getDisplayedValue(), "Dim gris / mynediad ar gyfer cadair olwyn");
+        welshMap.put(TravellingToCourtEnum.toilet.getDisplayedValue(), "Toiledau hygyrch");
+        welshMap.put(TravellingToCourtEnum.lift.getDisplayedValue(), "Help i ddefnyddio lifft");
+        welshMap.put(TravellingToCourtEnum.differentchair.getDisplayedValue(), "Math gwahanol o gadair");
+        welshMap.put(TravellingToCourtEnum.building.getDisplayedValue(), "Cymorth i fynd o amgylch yr adeilad");
+        welshMap.put(TravellingToCourtEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(TravellingToCourtEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+    }
+
+    public static void getDocumentSupportWelsh(Map<String, String> welshMap) {
+        welshMap.put(DocsSupportEnum.docsprint.getDisplayedValue(), "Dogfennau mewn lliw penodol");
+        welshMap.put(DocsSupportEnum.docsreadformat.getDisplayedValue(), "Dogfennau mewn fformat hawdd i’w darllen");
+        welshMap.put(DocsSupportEnum.brailledocs.getDisplayedValue(), "Dogfennau Braille");
+        welshMap.put(DocsSupportEnum.largeprintdocs.getDisplayedValue(), "Dogfennau mewn print bras");
+        welshMap.put(DocsSupportEnum.docsaudio.getDisplayedValue(), "Help i ddefnyddio lifft");
+        welshMap.put(DocsSupportEnum.docsReadOut.getDisplayedValue(), "Cyfieithiad sain o ddogfennau");
+        welshMap.put(DocsSupportEnum.emailInfo.getDisplayedValue(), "Gwybodaeth yn cael ei hanfon ataf drwy e-bost");
+        welshMap.put(DocsSupportEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(DocsSupportEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
     }
 
     public static void getReasonbleAdjustmentsWelsh(Map<String, String> welshMap) {
