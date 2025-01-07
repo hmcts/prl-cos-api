@@ -1533,13 +1533,32 @@ public class C100RespondentSolicitorService {
                         .build();
             }
 
+            AttendToCourt attendToCourtWelsh = attendToCourt.toBuilder().build();
+
+            attendToCourtWelsh = buildSafetyArrangementsListWelsh(response, attendToCourtWelsh);
             attendToCourt = buildSafetyArrangementsList(response, attendToCourt);
 
+            attendToCourtWelsh = buildReasonableAdjustmentNeedsWelsh(response, dataMap, attendToCourtWelsh);
             attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt);
 
             dataMap.put("attendingTheCourt", attendToCourt);
-            dataMap.put("attendingTheCourtWelsh", attendToCourt);
+            dataMap.put("attendingTheCourtWelsh", attendToCourtWelsh);
         }
+    }
+
+    private static AttendToCourt buildSafetyArrangementsListWelsh(Response response, AttendToCourt attendToCourt) {
+        List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
+        if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
+            attendToCourt = attendToCourt.toBuilder()
+                .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
+                .respondentSpecialArrangementDetails(
+                    buildSpecialArrangementList(
+                        safetyArrangementsEnumList,
+                        response.getSupportYouNeed().getSafetyArrangementsDetails()
+                    ))
+                .build();
+        }
+        return attendToCourt;
     }
 
     private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt) {
@@ -1553,6 +1572,20 @@ public class C100RespondentSolicitorService {
                                     response.getSupportYouNeed().getSafetyArrangementsDetails()
                             ))
                     .build();
+        }
+        return attendToCourt;
+    }
+
+    private static AttendToCourt buildReasonableAdjustmentNeedsWelsh(Response response, Map<String, Object> dataMap, AttendToCourt attendToCourt) {
+        List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
+        if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
+            attendToCourt = attendToCourt.toBuilder()
+                .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
+                .disabilityNeeds(
+                    buildDisabilityNeeds(
+                        response.getSupportYouNeed(), dataMap
+                    ))
+                .build();
         }
         return attendToCourt;
     }
