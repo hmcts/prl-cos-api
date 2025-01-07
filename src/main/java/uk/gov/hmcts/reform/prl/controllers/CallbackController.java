@@ -349,10 +349,8 @@ public class CallbackController {
             caseDataUpdated.putAll(map);
 
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                // updating Summary tab to update case status
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-                caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+                //PRL-6627 - Removed duplicate calls to generate documents
+                caseDataUpdated.putAll(documentGenService.generateC100DraftDocuments(authorisation, caseData));
                 //Update version V2 here to get latest data refreshed in tabs
                 if (launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
                     caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
