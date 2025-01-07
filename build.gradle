@@ -43,14 +43,14 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '5.10.3',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.34',
+  lombok                       : '1.18.36',
   pact                         : '4.1.11',
   pitest                       : '1.16.3',
   puppyCrawl                   : '8.45.1',
   reformsJavaLogging           : '6.1.7',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.2.6',
-  serenityCucumber             : '4.2.6',
+  serenityCucumber             : '4.2.11',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.15',
@@ -318,7 +318,7 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
-  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.10'
+  implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.11'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
@@ -490,7 +490,7 @@ dependencies {
 
 
   integrationTestImplementation(sourceSets.test.output)
-  testImplementation 'com.github.hmcts:fortify-client:1.4.5:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.6:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
