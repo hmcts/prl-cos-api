@@ -1652,7 +1652,9 @@ public class C100RespondentSolicitorService {
             if (!documentInformation.isEmpty()) {
                 dataMap.put("documentsInAlternativeFormatNeeded", YES);
                 dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
-                adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
+
+                adjustmentRequired.append(isEnglish ? docsformat.getDisplayedValue() : welshMapping.get(docsformat.getDisplayedValue()))
+                    .append(COLON).append(documentInformation);
             }
         }
         if (reasonableAdjustmentsEnums.contains(commhelp)) {
@@ -1661,8 +1663,9 @@ public class C100RespondentSolicitorService {
             if (!communicationHelpDetails.isEmpty()) {
                 dataMap.put("helpInCommunicationNeeded", YES);
                 dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
-                        .append(communicationHelpDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? commhelp.getDisplayedValue()
+                                                                      : welshMapping.get(commhelp.getDisplayedValue()))
+                    .append(COLON).append(communicationHelpDetails);
             }
         }
         buildHearingNeeds(supportYouNeed, dataMap, reasonableAdjustmentsEnums, adjustmentRequired, isEnglish, welshMapping);
@@ -1672,8 +1675,9 @@ public class C100RespondentSolicitorService {
             if (!helpTravellingMovingBuildingSupportDetails.isEmpty()) {
                 dataMap.put("helpNeededTravellingToNeeded", YES);
                 dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
-                        .append(helpTravellingMovingBuildingSupportDetails);
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? travellinghelp.getDisplayedValue()
+                                                                      : welshMapping.get(travellinghelp.getDisplayedValue()))
+                    .append(COLON).append(helpTravellingMovingBuildingSupportDetails);
             }
         }
         return String.valueOf(adjustmentRequired);
@@ -1690,7 +1694,8 @@ public class C100RespondentSolicitorService {
             if (!extraSupportDetails.isEmpty()) {
                 dataMap.put("extraSupportNeeded", YES);
                 dataMap.put("extraSupportDetails", extraSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingsupport.getDisplayedValue()
+                        : welshMapping.get(hearingsupport.getDisplayedValue())).append(COLON)
                         .append(extraSupportDetails);
             }
         }
@@ -1702,7 +1707,8 @@ public class C100RespondentSolicitorService {
             if (!feelComfortableSupportDetails.isEmpty()) {
                 dataMap.put("feelComfortableNeeed", YES);
                 dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingcomfort.getDisplayedValue()
+                        : welshMapping.get(hearingcomfort.getDisplayedValue())).append(COLON)
                         .append(feelComfortableSupportDetails);
             }
         }
