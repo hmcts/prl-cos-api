@@ -1539,8 +1539,8 @@ public class C100RespondentSolicitorService {
             attendToCourtWelsh = buildSafetyArrangementsList(response, attendToCourtWelsh, false);
             attendToCourt = buildSafetyArrangementsList(response, attendToCourt, true);
 
-            buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
-            buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
+            attendToCourtWelsh = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
+            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
 
             dataMap.put("attendingTheCourt", attendToCourt);
             dataMap.put("attendingTheCourtWelsh", attendToCourtWelsh);
