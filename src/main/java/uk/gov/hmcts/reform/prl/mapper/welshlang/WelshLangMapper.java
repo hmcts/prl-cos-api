@@ -917,6 +917,12 @@ public class WelshLangMapper {
         /**
          * Welsh translations for special arrangements enum
          */
+        getSpecialArrangementsWelsh(welshMap);
+        log.info("Welsh map {}", welshMap);
+        return welshMap;
+    }
+
+    public static void getSpecialArrangementsWelsh(Map<String, String> welshMap) {
         welshMap.put(SpecialArrangementEnum.separateWaitingRoom.getDisplayedValue(), "Ystafell aros ar wahân");
         welshMap.put(SpecialArrangementEnum.separateExitEntrance.getDisplayedValue(), "Drysau ar wahân i fynd i mewn ac allan o'r llys");
         welshMap.put(SpecialArrangementEnum.screenWithOtherPeople.getDisplayedValue(),
@@ -927,8 +933,6 @@ public class WelshLangMapper {
         welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
         welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
         welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
-        log.info("Welsh map {}", welshMap);
-        return welshMap;
     }
 
     /**

@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
@@ -1535,33 +1536,18 @@ public class C100RespondentSolicitorService {
 
             AttendToCourt attendToCourtWelsh = attendToCourt.toBuilder().build();
 
-            attendToCourtWelsh = buildSafetyArrangementsListWelsh(response, attendToCourtWelsh);
-            attendToCourt = buildSafetyArrangementsList(response, attendToCourt);
+            attendToCourtWelsh = buildSafetyArrangementsList(response, attendToCourtWelsh, false);
+            attendToCourt = buildSafetyArrangementsList(response, attendToCourt, true);
 
-            attendToCourtWelsh = buildReasonableAdjustmentNeedsWelsh(response, dataMap, attendToCourtWelsh);
-            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt);
+            attendToCourtWelsh = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
+            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
 
             dataMap.put("attendingTheCourt", attendToCourt);
             dataMap.put("attendingTheCourtWelsh", attendToCourtWelsh);
         }
     }
 
-    private static AttendToCourt buildSafetyArrangementsListWelsh(Response response, AttendToCourt attendToCourt) {
-        List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
-        if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
-            attendToCourt = attendToCourt.toBuilder()
-                .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
-                .respondentSpecialArrangementDetails(
-                    buildSpecialArrangementList(
-                        safetyArrangementsEnumList,
-                        response.getSupportYouNeed().getSafetyArrangementsDetails()
-                    ))
-                .build();
-        }
-        return attendToCourt;
-    }
-
-    private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt) {
+    private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt, boolean isEnglish) {
         List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
         if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
             attendToCourt = attendToCourt.toBuilder()
@@ -1569,35 +1555,23 @@ public class C100RespondentSolicitorService {
                     .respondentSpecialArrangementDetails(
                             buildSpecialArrangementList(
                                     safetyArrangementsEnumList,
-                                    response.getSupportYouNeed().getSafetyArrangementsDetails()
+                                    response.getSupportYouNeed().getSafetyArrangementsDetails(),
+                                    isEnglish
                             ))
                     .build();
         }
         return attendToCourt;
     }
 
-    private static AttendToCourt buildReasonableAdjustmentNeedsWelsh(Response response, Map<String, Object> dataMap, AttendToCourt attendToCourt) {
-        List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
-        if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
-            attendToCourt = attendToCourt.toBuilder()
-                .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
-                .disabilityNeeds(
-                    buildDisabilityNeeds(
-                        response.getSupportYouNeed(), dataMap
-                    ))
-                .build();
-        }
-        return attendToCourt;
-    }
-
-    private static AttendToCourt buildReasonableAdjustmentNeeds(Response response, Map<String, Object> dataMap, AttendToCourt attendToCourt) {
+    private static AttendToCourt buildReasonableAdjustmentNeeds(Response response, Map<String, Object> dataMap,
+                                                                AttendToCourt attendToCourt, boolean isEnglish) {
         List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
         if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
             attendToCourt = attendToCourt.toBuilder()
                     .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
                     .disabilityNeeds(
                             buildDisabilityNeeds(
-                                    response.getSupportYouNeed(), dataMap
+                                    response.getSupportYouNeed(), dataMap, isEnglish
                             ))
                     .build();
         }
@@ -1624,9 +1598,20 @@ public class C100RespondentSolicitorService {
         return respondentWelshNeedsListEnums;
     }
 
-    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList, String otherSubField) {
-        String specialArrangement = safetyArrangementsEnumList.stream().map(element -> SafetyArrangementsEnum.valueOf(element.getId())
-                .getDisplayedValue()).collect(Collectors.joining(COMMA_SEPARATOR));
+    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList,
+                                                      String otherSubField, boolean isEnglish) {
+        String specialArrangement = safetyArrangementsEnumList.stream()
+            .map(element ->
+                 {
+                     if (isEnglish) {
+                         return SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue();
+                     } else {
+                         Map<String, String> welshMap = new HashMap<>();
+                         WelshLangMapper.getSpecialArrangementsWelsh(welshMap);
+                         return welshMap.get(SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue());
+                     }
+                 })
+            .collect(Collectors.joining(COMMA_SEPARATOR));
         if (StringUtils.isNotEmpty(otherSubField)) {
             return specialArrangement + OPEN_BRACKET + otherSubField + CLOSE_BRACKET;
         }
@@ -1651,7 +1636,8 @@ public class C100RespondentSolicitorService {
         return reasonableAdjustmentsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
     }
 
-    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap) {
+    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed,
+                                               Map<String, Object> dataMap, boolean isEnglish) {
         List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums = supportYouNeed.getReasonableAdjustments();
         StringBuilder adjustmentRequired = new StringBuilder();
         String documentInformation;
