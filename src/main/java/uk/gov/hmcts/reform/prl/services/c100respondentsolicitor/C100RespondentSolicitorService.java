@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
@@ -51,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -61,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
@@ -69,14 +72,17 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,6 +166,9 @@ public class C100RespondentSolicitorService {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
+    private final CaseSummaryTabService caseSummaryTab;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -169,6 +178,7 @@ public class C100RespondentSolicitorService {
 
     private static final String OPEN_BRACKET = "(";
     private static final String CLOSE_BRACKET = ")";
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -230,6 +240,9 @@ public class C100RespondentSolicitorService {
                                     .firstName(ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
                                     .lastName(ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
                                     .placeOfBirth(ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
+                                    .liveInRefuge(ofNullable(citizenDetails.getLiveInRefuge()).orElse(partyDetails.getLiveInRefuge()))
+                                    .refugeConfidentialityC8Form(ofNullable(citizenDetails.getRefugeConfidentialityC8Form())
+                                                                     .orElse(partyDetails.getRefugeConfidentialityC8Form()))
                                     .previousName(ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
                                     .build()
                     );
@@ -336,16 +349,17 @@ public class C100RespondentSolicitorService {
         }
         String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         Element<PartyDetails> finalSolicitorRepresentedRespondent = solicitorRepresentedRespondent;
+        List<Element<PartyDetails>> finalRespondents = respondents;
         RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
                 .ifPresent(event -> buildResponseForRespondent(
                         caseData,
-                        respondents,
+                        finalRespondents,
                         finalSolicitorRepresentedRespondent,
                         event
                 ));
 
         if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
-                || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
+            || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
@@ -404,7 +418,7 @@ public class C100RespondentSolicitorService {
                 );
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
-                buildResponseForRespondent = buildCitizenDetailsResponse(caseData, buildResponseForRespondent);
+                buildResponseForRespondent = buildCitizenDetailsResponse(caseData, buildResponseForRespondent, party);
                 break;
             case ATTENDING_THE_COURT:
                 AttendToCourt attendToCourt = optimiseAttendingCourt(caseData.getRespondentSolicitorData()
@@ -670,31 +684,110 @@ public class C100RespondentSolicitorService {
                 .build();
     }
 
-    private Response buildCitizenDetailsResponse(CaseData caseData, Response buildResponseForRespondent) {
+    private Response buildCitizenDetailsResponse(CaseData caseData,
+                                                 Response buildResponseForRespondent,
+                                                 Element<PartyDetails> respondent) {
         CitizenDetails citizenDetails = caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails();
         buildResponseForRespondent = buildResponseForRespondent
-                .toBuilder().citizenDetails(
-                        buildResponseForRespondent.getCitizenDetails()
-                                .toBuilder()
-                                .firstName(citizenDetails.getFirstName())
-                                .lastName(citizenDetails.getLastName())
-                                .dateOfBirth(citizenDetails.getDateOfBirth())
-                                .previousName(citizenDetails.getPreviousName())
-                                .placeOfBirth(citizenDetails.getPlaceOfBirth())
-                                .address(citizenDetails.getAddress())
-                                .addressHistory(citizenDetails.getAddressHistory())
-                                .contact(citizenDetails.getContact())
-                                .build())
+            .toBuilder().citizenDetails(
+                buildResponseForRespondent.getCitizenDetails()
+                    .toBuilder()
+                    .firstName(citizenDetails.getFirstName())
+                    .lastName(citizenDetails.getLastName())
+                    .dateOfBirth(citizenDetails.getDateOfBirth())
+                    .previousName(citizenDetails.getPreviousName())
+                    .placeOfBirth(citizenDetails.getPlaceOfBirth())
+                    .liveInRefuge(citizenDetails.getLiveInRefuge())
+                    .refugeConfidentialityC8Form(YesOrNo.Yes.equals(citizenDetails.getLiveInRefuge())
+                                                     ? citizenDetails.getRefugeConfidentialityC8Form() : null)
+                    .address(citizenDetails.getAddress())
+                    .addressHistory(citizenDetails.getAddressHistory())
+                    .contact(citizenDetails.getContact())
+                    .build())
+            .build();
+
+        if (YesOrNo.Yes.equals(citizenDetails.getLiveInRefuge())) {
+            buildResponseForRespondent = buildResponseForRespondent
+                .toBuilder().keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
+                                                    .confidentiality(Yes)
+                                                    .confidentialityList(Arrays.asList(
+                                                        ConfidentialityListEnum.email,
+                                                        ConfidentialityListEnum.address,
+                                                        ConfidentialityListEnum.phoneNumber
+                                                    )).build())
                 .build();
+
+            setRespondentConfidentiality(caseData, respondent);
+        }
         return buildResponseForRespondent;
     }
 
     private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
                                                          Element<PartyDetails> respondent) {
-        List<ConfidentialityListEnum> confList = null;
-        if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                && YesOrNo.Yes.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
-            confList = caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentialityList();
+        if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
+            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+            buildResponseForRespondent = buildKeepDetailsPrivateForRefuge(caseData, buildResponseForRespondent, respondent);
+        } else {
+            buildResponseForRespondent = buildKeepDetailsPrivateForNonRefuge(caseData, buildResponseForRespondent, respondent);
+        }
+
+        return buildResponseForRespondent;
+    }
+
+    private static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
+                                                             Response buildResponseForRespondent,
+                                                             Element<PartyDetails> respondent) {
+        setRespondentConfidentiality(caseData, respondent);
+
+        List<ConfidentialityListEnum> confList = new ArrayList<>();
+        confList.add(ConfidentialityListEnum.address);
+        confList.add(ConfidentialityListEnum.email);
+        confList.add(ConfidentialityListEnum.phoneNumber);
+
+        buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                .otherPeopleKnowYourContactDetails(
+                    caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
+                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+                        .getOtherPeopleKnowYourContactDetails() : null)
+                .confidentiality(Yes)
+                .confidentialityList(confList)
+                .build()).build();
+
+        return  buildResponseForRespondent;
+    }
+
+    private static Response buildKeepDetailsPrivateForNonRefuge(CaseData caseData,
+                                                                Response buildResponseForRespondent,
+                                                                Element<PartyDetails> respondent) {
+        setRespondentConfidentiality(caseData, respondent);
+
+        List<ConfidentialityListEnum> confList = caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentialityList();
+        buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                    .otherPeopleKnowYourContactDetails(
+                                        caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
+                                            ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+                                            .getOtherPeopleKnowYourContactDetails() : null)
+                                    .confidentiality(caseData
+                                                         .getRespondentSolicitorData()
+                                                         .getKeepContactDetailsPrivate()
+                                                         .getConfidentiality())
+                                    .confidentialityList(confList)
+                                    .build()).build();
+        return buildResponseForRespondent;
+    }
+
+    private static void setRespondentConfidentiality(CaseData caseData,
+                                                                      Element<PartyDetails> respondent) {
+        if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
+            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+            respondent.getValue().setIsAddressConfidential(Yes);
+            respondent.getValue().setIsEmailAddressConfidential(Yes);
+            respondent.getValue().setIsPhoneNumberConfidential(Yes);
+        } else if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+            && YesOrNo.Yes.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
+            List<ConfidentialityListEnum> confList = caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentialityList();
             if (confList.contains(ConfidentialityListEnum.address)) {
                 respondent.getValue().setIsAddressConfidential(Yes);
             } else {
@@ -711,25 +804,11 @@ public class C100RespondentSolicitorService {
                 respondent.getValue().setIsPhoneNumberConfidential(No);
             }
         } else if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                && YesOrNo.No.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
+            && YesOrNo.No.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
             respondent.getValue().setIsAddressConfidential(No);
             respondent.getValue().setIsEmailAddressConfidential(No);
             respondent.getValue().setIsPhoneNumberConfidential(No);
         }
-
-        buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                        .otherPeopleKnowYourContactDetails(
-                                caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate() != null
-                                        ? caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
-                                        .getOtherPeopleKnowYourContactDetails() : null)
-                        .confidentiality(caseData
-                                .getRespondentSolicitorData()
-                                .getKeepContactDetailsPrivate()
-                                .getConfidentiality())
-                        .confidentialityList(confList)
-                        .build()).build();
-        return buildResponseForRespondent;
     }
 
     private AttendToCourt optimiseAttendingCourt(AttendToCourt attendToCourt) {
@@ -910,11 +989,21 @@ public class C100RespondentSolicitorService {
                             .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
                             .build())
                     .build();
-            String party = representedRespondent.getValue().getLabelForDynamicList();
 
+            amended = updatedRefugeData(amended);
+            caseData = updateRefugeDocumentList(caseData, amended);
+
+            String party = representedRespondent.getValue().getLabelForDynamicList();
             caseData.getRespondents().set(
                     caseData.getRespondents().indexOf(representedRespondent),
                     element(representedRespondent.getId(), amended)
+            );
+            confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(
+                updatedCaseData,
+                representedRespondent.getValue(),
+                caseData.getRefugeDocuments(),
+                caseData.getHistoricalRefugeDocuments(),
+                caseData.getRespondents().indexOf(representedRespondent) + 1
             );
             String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
                     ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
@@ -938,8 +1027,59 @@ public class C100RespondentSolicitorService {
                     dataMap
             );
         }
+
+        updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
         moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
+
         return updatedCaseData;
+    }
+
+    private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
+
+        if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())
+            && respondent.getRefugeConfidentialityC8Form() != null) {
+            log.info("Respondent lives in refuge");
+            List<Element<RefugeConfidentialDocuments>> refugeDocuments = caseData.getRefugeDocuments();
+
+            RefugeConfidentialDocuments refugeConfidentialDocuments
+                = RefugeConfidentialDocuments
+                .builder()
+                .partyType("Respondent")
+                .partyName(respondent.getLabelForDynamicList())
+                .documentDetails(DocumentDetails.builder()
+                    .documentName(respondent.getRefugeConfidentialityC8Form().getDocumentFileName())
+                    .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(
+                        dateTimeFormatter)).build())
+                .document(respondent.getRefugeConfidentialityC8Form()).build();
+
+            if (refugeDocuments == null) {
+                refugeDocuments = new ArrayList<>();
+            }
+            refugeDocuments.add(ElementUtils.element(refugeConfidentialDocuments));
+            caseData = caseData.toBuilder()
+                .refugeDocuments(refugeDocuments)
+                .build();
+        }
+
+        log.info("Refuge documents are {}", caseData.getRefugeDocuments());
+
+        return caseData;
+    }
+
+
+    private PartyDetails updatedRefugeData(PartyDetails respondent) {
+        if (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+            respondent = respondent.toBuilder()
+                .liveInRefuge(Yes)
+                .refugeConfidentialityC8Form(respondent
+                                                 .getResponse()
+                                                 .getCitizenDetails()
+                                                 .getRefugeConfidentialityC8Form())
+                .build();
+        }
+        return respondent;
     }
 
     private List<Element<RespondentProceedingDetails>> getAmendedProceedings(Element<PartyDetails> representedRespondent) {
@@ -1260,9 +1400,18 @@ public class C100RespondentSolicitorService {
                                               Map<String, Object> dataMap,
                                               Response response,
                                               String requestOriginatedFrom) {
-        dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         populateAohDataMap(response, dataMap);
         populateRespondToAohDataMap(response, dataMap);
+        if (null != response.getConsent()) {
+            dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
+            dataMap.put(
+                "consentToTheApplication",
+                getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
+            );
+            dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
+            dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
+            dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
+        }
         //citizen current or previous proceeding data
         if (null != response.getCurrentOrPreviousProceedings()) {
             dataMap.put(
@@ -1277,16 +1426,12 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("signedBy", solicitorRepresentedRespondent.getValue().getLabelForDynamicList());
         dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-        dataMap.put(
-                "consentToTheApplication",
-                getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication())
-        );
-        dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
-        dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
-        dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
-        dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+
+        if (null != response.getMiam()) {
+            dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
+            dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
+            dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+        }
 
         if (response.getCitizenInternationalElements() != null) {
             dataMap.put(
@@ -1329,7 +1474,9 @@ public class C100RespondentSolicitorService {
                 null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
                         ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
-        dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        if (null != response.getSupportYouNeed()) {
+            dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        }
 
         if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
             populateCitizenAttendingTheHearingDataMap(response, dataMap);

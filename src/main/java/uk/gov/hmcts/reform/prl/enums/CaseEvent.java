@@ -68,7 +68,10 @@ public enum CaseEvent {
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
     CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate"),
     ENABLE_UPDATE_HEARING_ACTUAL_TASK("enableUpdateHearingActualTask"),
-    ENABLE_REQUEST_SOLICITOR_ORDER_TASK("enableRequestSolicitorOrderTask");
+    ENABLE_REQUEST_SOLICITOR_ORDER_TASK("enableRequestSolicitorOrderTask"),
+    AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
+    AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
+    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised");
 
     private final String value;
 
