@@ -382,10 +382,10 @@ dependencies {
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.12'){
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16'){
     force = true
   }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.12'){
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16'){
     force = true
   }
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
