@@ -33,6 +33,7 @@
             "solicitorRepresented": null
           },
           "email": "applicant1@example.net",
+          "liveInRefuge": "No",
           "gender": "male",
           "address": {
             "County": "",
@@ -476,6 +477,7 @@
             "solicitorRepresented": null
           },
           "email": "applicant2@example.net",
+          "liveInRefuge": "No",
           "gender": "male",
           "address": {
             "County": "",
@@ -920,6 +922,7 @@
           },
           "email": "applicant3@example.net",
           "gender": "female",
+          "liveInRefuge": "No",
           "address": {
             "County": "",
             "Country": "United Kingdom",
