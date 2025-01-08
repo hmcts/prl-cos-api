@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -119,7 +120,7 @@ public class UpdatePartyDetailsService {
                                                   callbackRequest,
                                                   authorisation,
                                                   caseData,
-                                                  List.of(ElementUtils.element(fl401respondent)));
+                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -342,6 +343,8 @@ public class UpdatePartyDetailsService {
                 respondent,
                 SOLICITOR
             );
+            //PRL-6790 - Add updated respondent details to dataMap for C8 document generation
+            dataMap.put(RESPONDENT, respondent.getValue());
             populateC8Documents(authorisation,
                                 updatedCaseData,
                                 caseData,
