@@ -119,7 +119,8 @@ public class CitizenPartyDetailsMapper {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsDa(
                 dbCaseData,
                 citizenUpdatedCaseData,
-                caseEvent
+                caseEvent,
+                authorisation
             ));
         }
 
@@ -265,7 +266,8 @@ public class CitizenPartyDetailsMapper {
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                            CaseEvent caseEvent) {
+                                                                 CaseEvent caseEvent,
+                                                                 String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -288,6 +290,12 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                //PRL-6790 - create C8 for DA respondent
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    reGenerateRespondentC8Documents(caseDataMapToBeUpdated,
+                                                    element(partyDetails.getPartyId(), partyDetails),
+                                                    caseData, 0, authorisation);
+                }
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
