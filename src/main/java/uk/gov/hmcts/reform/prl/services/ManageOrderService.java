@@ -3557,11 +3557,14 @@ public class ManageOrderService {
 
     public void populateCheckForAutomatedRequest(CaseData caseData,
                                                  Map<String, Object> caseDataUpdated) {
-        if (isNotEmpty(caseData.getManageOrders())
-            && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-            && isNotEmpty(caseData.getServeOrderData())
-            && (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            || WhatToDoWithOrderEnum.finalizeSaveToServeLater.equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
+        log.info("Inside populateCheckForAutomatedRequest, AmendOrderSelectCheckOptions: {} \n tDoYouWantToServeOrder: {} \n WhatToDoWithOrder: {}",
+            caseData.getManageOrders().getAmendOrderSelectCheckOptions(),
+                 caseData.getServeOrderData().getDoYouWantToServeOrder(),
+                 caseData.getServeOrderData().getWhatDoWithOrder());
+        if ((isNotEmpty(caseData.getManageOrders())
+            && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
+            && (isNotEmpty(caseData.getServeOrderData()) && (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            || WhatToDoWithOrderEnum.finalizeSaveToServeLater.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
             log.info("Need to check for Automated Hearing Request");
             caseDataUpdated.put("checkForAutomatedHearing", Yes);
         } else {
