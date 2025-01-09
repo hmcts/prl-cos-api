@@ -298,6 +298,7 @@ public class ManageOrdersController {
             log.info("james{}", caseData.getManageOrders());
             log.info("amendorderslectoption james{}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
                 && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
