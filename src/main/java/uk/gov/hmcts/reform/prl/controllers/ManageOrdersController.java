@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -295,6 +296,7 @@ public class ManageOrdersController {
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            log.info("amendorderslectoption james{}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
