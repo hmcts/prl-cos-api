@@ -89,6 +89,8 @@ public class CaseDataApplicantElementsMapper {
                 .previousName(applicantDto.getPersonalDetails().getPreviousFullName())
                 .gender(Gender.getDisplayedValueFromEnumString(applicantDto.getPersonalDetails().getGender()))
                 .otherGender(applicantDto.getPersonalDetails().getOtherGenderDetails())
+                .liveInRefuge(applicantDto.getLiveInRefuge())
+                .refugeConfidentialityC8Form(applicantDto.getRefugeConfidentialityC8Form())
                 .dateOfBirth(buildDateOfBirth(applicantDto.getPersonalDetails().getDateOfBirth()))
                 .placeOfBirth(applicantDto.getPersonalDetails().getApplicantPlaceOfBirth())
                 .phoneNumber(isNotEmpty(applicantDto.getApplicantContactDetail().getTelephoneNumber())
@@ -102,9 +104,12 @@ public class CaseDataApplicantElementsMapper {
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
-                .isAddressConfidential(buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
-                .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-                .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+                .isAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
+                .isEmailAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
+                .isPhoneNumberConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
                 .build();

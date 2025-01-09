@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -57,6 +58,22 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
+    public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalseForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.isFinished(caseData));
+    }
+
+    @Test
     public void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
 
         caseData = caseData.toBuilder()
@@ -95,12 +112,28 @@ public class ApplicantsCheckerTest {
     @Test
     public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
-        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesOrNo.Yes).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForFL401() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
             .applicants(applicantList)
             .build();
 
@@ -122,7 +155,7 @@ public class ApplicantsCheckerTest {
         caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
-            .applicants(null)
+            .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
             .build();
 
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
