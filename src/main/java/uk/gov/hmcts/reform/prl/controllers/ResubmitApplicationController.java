@@ -30,9 +30,11 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -77,6 +79,7 @@ public class ResubmitApplicationController {
     private final OrganisationService organisationService;
     private final AllTabServiceImpl allTabService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final AuthorisationService authorisationService;
     private final EventService eventPublisher;
 
@@ -85,6 +88,7 @@ public class ResubmitApplicationController {
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     private final SystemUserService systemUserService;
+    private final FL401SubmitApplicationService fl401SubmitApplicationService;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
@@ -125,6 +129,7 @@ public class ResubmitApplicationController {
                 ResubmitApplicationController::getPreviousState).findFirst();
 
             updateCaseDataBasedOnState(authorisation, callbackRequest, caseData, caseDataUpdated, previousStates);
+            confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -283,6 +288,8 @@ public class ResubmitApplicationController {
             caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+            fl401SubmitApplicationService.cleanUpC8RefugeFields(caseData, caseDataUpdated);
+            confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();

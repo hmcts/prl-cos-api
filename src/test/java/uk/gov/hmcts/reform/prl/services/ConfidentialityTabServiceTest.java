@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
@@ -58,6 +59,8 @@ public class ConfidentialityTabServiceTest {
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
 
+    PartyDetails refugePartyDetails1;
+    PartyDetails refugePartyDetails2;
 
     @Before
     public void setUp() {
@@ -66,6 +69,42 @@ public class ConfidentialityTabServiceTest {
             .addressLine1("AddressLine1")
             .postTown("Xyz town")
             .postCode("AB1 2YZ")
+            .build();
+
+        refugePartyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails2 = PartyDetails.builder()
+            .firstName("ABC 2")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("12345678900")
+            .liveInRefuge(YesOrNo.Yes)
+            .email("abc2@xyz.com")
             .build();
     }
 
@@ -365,6 +404,10 @@ public class ConfidentialityTabServiceTest {
         CaseData caseData = CaseData.builder()
             .applicants(listOfPartyDetails)
             .children(listOfChild)
+            .refugeDocuments(List.of(Element.<RefugeConfidentialDocuments>builder()
+                .value(RefugeConfidentialDocuments.builder().build()).build()))
+            .historicalRefugeDocuments(List.of(Element.<RefugeConfidentialDocuments>builder()
+                .value(RefugeConfidentialDocuments.builder().build()).build()))
             .respondents(listOfPartyDetails)
             .caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
@@ -505,5 +548,59 @@ public class ConfidentialityTabServiceTest {
 
     }
 
+    @Test
+    public void testRefugeApplicantConfidentialDetails() {
 
+        refugePartyDetails1 = refugePartyDetails1.toBuilder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        refugePartyDetails2 = refugePartyDetails2.toBuilder()
+            .firstName("ABC 2")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .phoneNumber("12345678900")
+            .email("abc2@xyz.com")
+            .build();
+
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build(),
+                Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 2")
+                               .lastName("XYZ 2")
+                               .email("abc2@xyz.com")
+                               .phoneNumber("12345678900")
+                               .address(address)
+                               .build()).build());
+
+        assertEquals(
+            expectedOutput,
+            confidentialityTabService.getConfidentialApplicantDetails(List.of(refugePartyDetails1, refugePartyDetails2))
+        );
+
+    }
 }
