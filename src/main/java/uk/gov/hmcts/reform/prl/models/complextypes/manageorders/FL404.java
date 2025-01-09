@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Builder(toBuilder = true)
 @Data
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FL404 {
 
