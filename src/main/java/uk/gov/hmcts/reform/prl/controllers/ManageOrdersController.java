@@ -295,8 +295,6 @@ public class ManageOrdersController {
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-            log.info("james{}", caseData.getManageOrders());
-            log.info("amendorderslectoption james{}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
