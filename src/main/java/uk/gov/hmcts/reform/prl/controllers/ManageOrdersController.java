@@ -227,7 +227,15 @@ public class ManageOrdersController {
             }
 
             // Check for Automated Hearing Management
-            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, caseDataUpdated, manageOrderService);
+            if (Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService,
+                    callbackRequest.getEventId()
+                );
+            }
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
@@ -316,6 +324,9 @@ public class ManageOrdersController {
                                                                          newDraftOrderCollectionId));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
+            //Populate need to check automated hearing request
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated);
+
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

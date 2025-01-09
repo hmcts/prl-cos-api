@@ -3515,18 +3515,25 @@ public class ManageOrderService {
                 hearingsList.stream()
                     .map(Element::getValue)
                     .forEach(hearingData -> {
+                        log.info("Automated Hearing Request: HearingDateConfirmOptionEnum: {}",
+                            hearingData.getHearingDateConfirmOptionEnum()
+                        );
                         if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
                             || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                            log.info(
-                                "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
-                                hearingData.getHearingDateConfirmOptionEnum()
-                            );
+                            log.info("Eligible for AHR, trigger automated hearing request");
                             AutomatedHearingResponse automatedHearingResponse = hearingService.createAutomatedHearing(
                                 authorisation,
                                 AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
                             log.info("Automated Hearing Response: {}", getPrettyJson(automatedHearingResponse));
-                            hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                            if (null != automatedHearingResponse) {
+                                hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                            } else {
+                                log.error("Automated Hearing Request is failed, hearing response is null");
+                                //NEED TO HANDLE THIS FAILED SCENARIO FOR RETRY
+                            }
+                        } else {
+                            log.info("Not eligible for AHR, skip automated hearing request");
                         }
                     });
             }
@@ -3546,5 +3553,19 @@ public class ManageOrderService {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    public void populateCheckForAutomatedRequest(CaseData caseData,
+                                                 Map<String, Object> caseDataUpdated) {
+        if (isNotEmpty(caseData.getManageOrders())
+            && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            && isNotEmpty(caseData.getServeOrderData())
+            && (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            || WhatToDoWithOrderEnum.finalizeSaveToServeLater.equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
+            log.info("Need to check for Automated Hearing Request");
+            caseDataUpdated.put("checkForAutomatedHearing", Yes);
+        } else {
+            caseDataUpdated.put("checkForAutomatedHearing", No);
+        }
     }
 }

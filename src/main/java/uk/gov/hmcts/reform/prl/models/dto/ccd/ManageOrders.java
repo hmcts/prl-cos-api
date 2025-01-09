@@ -304,6 +304,9 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("postalInformationCA")
     private final List<Element<PostalInformation>> postalInformationCA;
 
+    @JsonProperty("checkForAutomatedHearing")
+    private YesOrNo checkForAutomatedHearing;
+
     /*
     * Unused fields
     * */

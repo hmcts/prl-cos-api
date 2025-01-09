@@ -515,7 +515,8 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 caseData,
                 caseDataUpdated,
-                manageOrderService);
+                manageOrderService,
+                callbackRequest.getEventId());
 
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
