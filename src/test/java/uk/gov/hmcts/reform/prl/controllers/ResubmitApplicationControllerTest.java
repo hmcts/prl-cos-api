@@ -33,9 +33,11 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -112,6 +114,12 @@ public class ResubmitApplicationControllerTest {
 
     @Mock
     private ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
+    @Mock
+    private FL401SubmitApplicationService fl401SubmitApplicationService;
 
     @Mock
     private EventService eventPublisher;
@@ -227,10 +235,12 @@ public class ResubmitApplicationControllerTest {
 
         caseDetails = CaseDetails.builder()
             .id(12345L)
+            .state("AWAITING_RESUBMISSION_TO_HMCTS")
             .data(Map.of("caseTypeOfApplication", "C100"))
             .build();
 
         callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(caseDetails)
             .caseDetails(caseDetails)
             .build();
 
