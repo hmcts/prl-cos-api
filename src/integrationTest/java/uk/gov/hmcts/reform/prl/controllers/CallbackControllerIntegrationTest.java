@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -169,6 +170,7 @@ public class CallbackControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         objectMapper.registerModule(new ParameterNamesModule());
+        objectMapper.registerModule(new Jdk8Module());
     }
 
     @Test
