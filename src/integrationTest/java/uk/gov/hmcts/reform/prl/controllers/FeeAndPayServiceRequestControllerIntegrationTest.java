@@ -1,60 +1,97 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.restassured.response.Response;
-import net.serenitybdd.rest.SerenityRest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.IntegrationTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
+import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 
-import java.io.IOException;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
-@Ignore
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {FeeAndPayServiceRequestControllerIntegrationTest.class, Application.class})
-public class FeeAndPayServiceRequestControllerIntegrationTest extends IntegrationTest {
+@ContextConfiguration
+public class FeeAndPayServiceRequestControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
+    private MockMvc mockMvc;
 
-    @Value("${payments.api.url}")
-    protected String paymentUrl;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    private final String feeAndPayServiceRequestControllerEndPoint = "/create-payment-service-request";
+    @MockBean
+    SolicitorEmailService solicitorEmailService;
 
-    private final String path = "CallBackRequest.json";
+    @MockBean
+    FeeAndPayServiceRequestService feeAndPayServiceRequestService;
 
-    @Test
-    public void whenInvalidRequestFormat_Return400() throws IOException {
+    @MockBean
+    AuthorisationService authorisationService;
 
-        HttpPost httpPost = new HttpPost(serviceUrl + feeAndPayServiceRequestControllerEndPoint);
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+    @MockBean
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    public void return200ForHealthcheckForPaymentApi() throws Exception {
+    public void testPaymentConfirmation() throws Exception {
+        String url = "/payment-confirmation";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Response response = SerenityRest.given()
-            .when()
-            .get(paymentUrl + "/health")
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
             .andReturn();
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
+    }
 
+    @Test
+    public void testValidateHelpWithFees() throws Exception {
+        String url = "/validate-help-with-fees";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any())).thenReturn(List.of());
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 }

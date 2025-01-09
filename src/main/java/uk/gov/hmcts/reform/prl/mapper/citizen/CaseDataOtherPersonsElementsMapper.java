@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -67,15 +68,40 @@ public class CaseDataOtherPersonsElementsMapper {
                 .firstName(otherPersonDetail.getFirstName())
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
+                .liveInRefuge(livingInRefuge(otherPersonDetail))
+                .refugeConfidentialityC8Form(otherPersonDetail.getRefugeConfidentialityC8Form())
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
                 .otherGender(PrlAppsConstants.OTHER.equalsIgnoreCase(personalDetails.getGender()) ? personalDetails.getOtherGenderDetails() : null)
                 .dateOfBirth(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
                         ? buildDateOfBirth(personalDetails.getApproxDateOfBirth())
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
                 .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
+                .isCurrentAddressKnown(null != otherPersonDetail.getAddressUnknown()
+                    ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : Yes)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
+                .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
+                    ? livingInRefuge(otherPersonDetail) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
+    }
+
+    private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
+        if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
+            return No;
+        } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
+            && YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+            return Yes;
+        } else {
+            return No;
+        }
+    }
+
+    private static YesOrNo reverseYesOrNoForIsCurrentAddressKnown(YesOrNo isCurrentAddressUnknown) {
+        if (YesOrNo.Yes.equals(isCurrentAddressUnknown)) {
+            return No;
+        } else {
+            return Yes;
+        }
     }
 
     private static Address buildAddress(OtherPersonAddress address) {
