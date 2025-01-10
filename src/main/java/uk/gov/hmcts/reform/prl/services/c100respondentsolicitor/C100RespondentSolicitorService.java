@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -162,6 +163,7 @@ public class C100RespondentSolicitorService {
     private final DocumentGenService documentGenService;
     private final ResponseSubmitChecker responseSubmitChecker;
     private final ApplicationsTabService applicationsTabService;
+    private final ManageOrderService manageOrderService;
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final OrganisationService organisationService;
@@ -1248,6 +1250,9 @@ public class C100RespondentSolicitorService {
         Document c8FinalDocument = null;
         Document c8FinalDocumentWel = null;
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
+
+            //prl-6790 - getting user-role and adding to datamap
+            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenWelsh()) {
