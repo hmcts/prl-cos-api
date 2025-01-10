@@ -110,9 +110,7 @@ public class WelshLangMapper {
             if (validateMappingKey(key, obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(key + "_" + obj);
             } else if (validateObject(obj, isCA)) {
-                log.info("Object before translation : {}", obj);
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(obj);
-                log.info("Object after translation : {}", obj);
             }
         }
         return obj;

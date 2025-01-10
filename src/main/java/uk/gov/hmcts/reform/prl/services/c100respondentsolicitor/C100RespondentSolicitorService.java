@@ -1999,7 +1999,6 @@ public class C100RespondentSolicitorService {
 
     private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed,
                                                    boolean isEnglish, Map<String, String> welshMapping) {
-        log.info("Docs support {}", documentInformation);
         return documentInformation.stream()
                 .map(element -> buildDocumentInformationElement(element,
                         supportYouNeed.getDocsDetails(),
