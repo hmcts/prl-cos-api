@@ -1,105 +1,115 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.IntegrationTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-@Ignore
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {AllocateJudgeControllerIntegrationTest.class, Application.class})
-public class AllocateJudgeControllerIntegrationTest extends IntegrationTest {
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
+@ContextConfiguration
+public class AllocateJudgeControllerIntegrationTest {
 
+    private MockMvc mockMvc;
 
-    private final String legalAdvisorEndpoint = "/allocateJudge/pre-populate-legalAdvisor-details";
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    private final String allocateJudgeEndpoint = "/allocateJudge/allocatedJudgeDetails";
+    @MockBean
+    CaseSummaryTabService caseSummaryTabService;
 
+    @MockBean
+    RefDataUserService refDataUserService;
 
-    private static final String VALID_REQUEST_BODY = "requests/C100-case-data.json";
+    @MockBean
+    AllocatedJudgeService allocatedJudgeService;
 
-    private static final String VALID_REQUEST_BODY_JUDGE = "requests/AllocateJudgeDetailsRequest1.json";
+    @MockBean
+    AuthorisationService authorisationService;
 
-    private static final String VALID_REQUEST_BODY_LEGALADVISOR = "requests/LegalAdvisorApiRequest.json";
+    @MockBean
+    RoleAssignmentService roleAssignmentService;
 
-    private static final String VALID_REQUEST_BODY_TIER_OF_JUDICIARY = "requests/AllocateJudgeDetailsRequest2.json";
+    @Autowired
+    ObjectMapper objectMapper;
 
-    @Test
-    public void testPrePoulateLegalAdvisorDetails_Return200() throws Exception {
-
-        HttpPost httpPost = new HttpPost(serviceUrl + legalAdvisorEndpoint);
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test
-    public void testAllocateJudgeWhenJudgeDetailsProvided_Return200() throws Exception {
+    public void testPrePopulateLegalAdvisorDetails() throws Exception {
+        String url = "/allocateJudge/pre-populate-legalAdvisor-details";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_JUDGE);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Mockito.when(refDataUserService.getLegalAdvisorList()).thenReturn(new ArrayList<>());
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .header("ServiceAuthorization", "testServiceAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void testAllocateJudgeWhenLegalAdvisorDetailsProvided_Return200() throws Exception {
+    public void testAllocateJudge() throws Exception {
+        String url = "/allocateJudge/allocatedJudgeDetails";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_LEGALADVISOR);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
-    }
+        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Mockito.when(allocatedJudgeService.getAllocatedJudgeDetails(
+            any(),
+            any(),
+            any()
+        )).thenReturn(AllocatedJudge.builder()
+                          .isSpecificJudgeOrLegalAdviserNeeded(
+                              YesOrNo.Yes)
+                          .build());
+        Mockito.when(caseSummaryTabService.updateTab(any())).thenReturn(new HashMap<>());
 
-    @Test
-    public void testAllocateJudgeWhenTierOfJudiciaryProvided_Return200() throws Exception {
-
-        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_LEGALADVISOR);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .header("ServiceAuthorization", "testServiceAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 }
