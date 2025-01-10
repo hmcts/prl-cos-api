@@ -65,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZON
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -95,6 +96,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final ManageOrderService manageOrderService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -140,7 +142,7 @@ public class UpdatePartyDetailsService {
                                                   callbackRequest,
                                                   authorisation,
                                                   caseData,
-                                                  List.of(ElementUtils.element(fl401respondent)));
+                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}", e.getMessage());
             }
@@ -416,6 +418,8 @@ public class UpdatePartyDetailsService {
                 respondent,
                 SOLICITOR
             );
+            //PRL-6790 - Add updated respondent details to dataMap for C8 document generation
+            dataMap.put(RESPONDENT, respondent.getValue());
             populateC8Documents(authorisation,
                                 updatedCaseData,
                                 caseData,
@@ -483,6 +487,9 @@ public class UpdatePartyDetailsService {
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
+        //prl-6790 - getting user-role and adding to datamap
+        dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+
         log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
