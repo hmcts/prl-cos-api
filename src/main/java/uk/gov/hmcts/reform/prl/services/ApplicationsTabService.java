@@ -546,6 +546,9 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> declarationMap = new HashMap<>();
         String solicitor = caseData.getSolicitorName();
         String statementOfTruthPlaceHolder = null;
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. ";
 
         if (nonNull(solicitor)) {
             statementOfTruthPlaceHolder = solicitor;
@@ -554,11 +557,13 @@ public class ApplicationsTabService implements TabService {
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 
-        String declarationText = "I understand that proceedings for contempt of court may be brought"
-            + " against anyone who makes, or causes to be made, a false statement in a document verified"
-            + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. " + statementOfTruthPlaceHolder
-            + " is authorised by the applicant to sign this statement.";
+        if (null != caseData.getIsCourtNavCase() && YesOrNo.Yes.equals(caseData.getIsCourtNavCase())) {
+            declarationText = declarationText + "I believe that the facts stated in this application are true.";
+        } else {
+            declarationText = declarationText + "The applicant believes that the facts stated in this form and any "
+                + "continuation sheets are true. " + statementOfTruthPlaceHolder
+                + " is authorised by the applicant to sign this statement.";
+        }
 
         declarationMap.put("declarationText", declarationText);
         declarationMap.put("agreedBy", statementOfTruthPlaceHolder);
