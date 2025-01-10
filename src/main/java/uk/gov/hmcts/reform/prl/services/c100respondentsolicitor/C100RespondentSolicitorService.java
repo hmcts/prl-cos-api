@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
@@ -155,6 +156,8 @@ public class C100RespondentSolicitorService {
     private static final String COLON = ";";
     public static final String RESPONDENT_APPLICATION_CATEGORY = "Respondent Application";
     public static final String RESPONDENT_C1A_APPLICATION_CATEGORY = "Respondent C1A Application";
+    public static final String ATTENDING_THE_COURT = "attendingTheCourt";
+    public static final String ATTENDING_THE_COURT_WELSH = "attendingTheCourtWelsh";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -1499,7 +1502,8 @@ public class C100RespondentSolicitorService {
                 );
             }
         } else {
-            dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            dataMap.put(ATTENDING_THE_COURT, response.getAttendToCourt());
+            dataMap.put(ATTENDING_THE_COURT_WELSH, response.getAttendToCourt());
             List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
             dataMap.put("respondentsExistingProceedings", proceedingsList);
             dataMap.put(
@@ -1687,15 +1691,20 @@ public class C100RespondentSolicitorService {
                         .build();
             }
 
-            attendToCourt = buildSafetyArrangementsList(response, attendToCourt);
+            AttendToCourt attendToCourtWelsh = attendToCourt.toBuilder().build();
 
-            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt);
+            attendToCourtWelsh = buildSafetyArrangementsList(response, attendToCourtWelsh, false);
+            attendToCourt = buildSafetyArrangementsList(response, attendToCourt, true);
 
-            dataMap.put("attendingTheCourt", attendToCourt);
+            attendToCourtWelsh = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourtWelsh, false);
+            attendToCourt = buildReasonableAdjustmentNeeds(response, dataMap, attendToCourt, true);
+
+            dataMap.put(ATTENDING_THE_COURT, attendToCourt);
+            dataMap.put(ATTENDING_THE_COURT_WELSH, attendToCourtWelsh);
         }
     }
 
-    private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt) {
+    private static AttendToCourt buildSafetyArrangementsList(Response response, AttendToCourt attendToCourt, boolean isEnglish) {
         List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
         if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
             attendToCourt = attendToCourt.toBuilder()
@@ -1703,21 +1712,23 @@ public class C100RespondentSolicitorService {
                     .respondentSpecialArrangementDetails(
                             buildSpecialArrangementList(
                                     safetyArrangementsEnumList,
-                                    response.getSupportYouNeed().getSafetyArrangementsDetails()
+                                    response.getSupportYouNeed().getSafetyArrangementsDetails(),
+                                    isEnglish
                             ))
                     .build();
         }
         return attendToCourt;
     }
 
-    private static AttendToCourt buildReasonableAdjustmentNeeds(Response response, Map<String, Object> dataMap, AttendToCourt attendToCourt) {
+    private static AttendToCourt buildReasonableAdjustmentNeeds(Response response, Map<String, Object> dataMap,
+                                                                AttendToCourt attendToCourt, boolean isEnglish) {
         List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnumList = response.getSupportYouNeed().getReasonableAdjustments();
         if (reasonableAdjustmentsEnumList != null && !reasonableAdjustmentsEnumList.isEmpty()) {
             attendToCourt = attendToCourt.toBuilder()
                     .haveAnyDisability(buildHaveAnyDisability(reasonableAdjustmentsEnumList))
                     .disabilityNeeds(
                             buildDisabilityNeeds(
-                                    response.getSupportYouNeed(), dataMap
+                                    response.getSupportYouNeed(), dataMap, isEnglish
                             ))
                     .build();
         }
@@ -1744,9 +1755,19 @@ public class C100RespondentSolicitorService {
         return respondentWelshNeedsListEnums;
     }
 
-    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList, String otherSubField) {
-        String specialArrangement = safetyArrangementsEnumList.stream().map(element -> SafetyArrangementsEnum.valueOf(element.getId())
-                .getDisplayedValue()).collect(Collectors.joining(COMMA_SEPARATOR));
+    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList,
+                                                      String otherSubField, boolean isEnglish) {
+        String specialArrangement = safetyArrangementsEnumList.stream()
+            .map(element -> {
+                if (isEnglish) {
+                    return SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue();
+                } else {
+                    Map<String, String> welshMap = new HashMap<>();
+                    WelshLangMapper.getSpecialArrangementsWelsh(welshMap);
+                    return welshMap.get(SafetyArrangementsEnum.valueOf(element.getId()).getDisplayedValue());
+                }
+            })
+            .collect(Collectors.joining(COMMA_SEPARATOR));
         if (StringUtils.isNotEmpty(otherSubField)) {
             return specialArrangement + OPEN_BRACKET + otherSubField + CLOSE_BRACKET;
         }
@@ -1771,41 +1792,60 @@ public class C100RespondentSolicitorService {
         return reasonableAdjustmentsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
     }
 
-    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed, Map<String, Object> dataMap) {
+    private static String buildDisabilityNeeds(ReasonableAdjustmentsSupport supportYouNeed,
+                                               Map<String, Object> dataMap, boolean isEnglish) {
         List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums = supportYouNeed.getReasonableAdjustments();
         StringBuilder adjustmentRequired = new StringBuilder();
         String documentInformation;
         String communicationHelpDetails;
         String helpTravellingMovingBuildingSupportDetails;
+        Map<String, String> welshMapping = new HashMap<>();
+        WelshLangMapper.getReasonbleAdjustmentsWelsh(welshMapping);
         if (reasonableAdjustmentsEnums.contains(nosupport)) {
-            return nosupport.getDisplayedValue();
+            return isEnglish ? nosupport.getDisplayedValue() : welshMapping.get(nosupport.getDisplayedValue());
         }
         if (reasonableAdjustmentsEnums.contains(docsformat)) {
-            documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed);
+            documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed, isEnglish, welshMapping);
             if (!documentInformation.isEmpty()) {
                 dataMap.put("documentsInAlternativeFormatNeeded", YES);
-                dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
-                adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
+                if (isEnglish) {
+                    dataMap.put("documentsInAlternativeFormatDetails", documentInformation);
+                } else {
+                    dataMap.put("documentsInAlternativeFormatDetailsWelsh", documentInformation);
+                }
+                adjustmentRequired.append(isEnglish ? docsformat.getDisplayedValue() : welshMapping.get(docsformat.getDisplayedValue()))
+                    .append(COLON).append(documentInformation);
             }
         }
         if (reasonableAdjustmentsEnums.contains(commhelp)) {
-            communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed);
+            communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed,
+                                                              isEnglish, welshMapping);
             if (!communicationHelpDetails.isEmpty()) {
                 dataMap.put("helpInCommunicationNeeded", YES);
-                dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
-                        .append(communicationHelpDetails);
+                if (isEnglish) {
+                    dataMap.put("helpInCommunicationDetails", communicationHelpDetails);
+                } else {
+                    dataMap.put("helpInCommunicationDetailsWelsh", communicationHelpDetails);
+                }
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? commhelp.getDisplayedValue()
+                                                                      : welshMapping.get(commhelp.getDisplayedValue()))
+                    .append(COLON).append(communicationHelpDetails);
             }
         }
-        buildHearingNeeds(supportYouNeed, dataMap, reasonableAdjustmentsEnums, adjustmentRequired);
+        buildHearingNeeds(supportYouNeed, dataMap, reasonableAdjustmentsEnums, adjustmentRequired, isEnglish, welshMapping);
         if (reasonableAdjustmentsEnums.contains(travellinghelp)) {
             helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(supportYouNeed.getTravellingToCourt(),
-                    supportYouNeed);
+                    supportYouNeed, isEnglish, welshMapping);
             if (!helpTravellingMovingBuildingSupportDetails.isEmpty()) {
                 dataMap.put("helpNeededTravellingToNeeded", YES);
-                dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
-                        .append(helpTravellingMovingBuildingSupportDetails);
+                if (isEnglish) {
+                    dataMap.put("helpNeededTravellingToDetails", helpTravellingMovingBuildingSupportDetails);
+                } else {
+                    dataMap.put("helpNeededTravellingToDetailsWelsh", helpTravellingMovingBuildingSupportDetails);
+                }
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? travellinghelp.getDisplayedValue()
+                                                                      : welshMapping.get(travellinghelp.getDisplayedValue()))
+                    .append(COLON).append(helpTravellingMovingBuildingSupportDetails);
             }
         }
         return String.valueOf(adjustmentRequired);
@@ -1814,139 +1854,178 @@ public class C100RespondentSolicitorService {
     private static void buildHearingNeeds(ReasonableAdjustmentsSupport supportYouNeed,
                                           Map<String, Object> dataMap,
                                           List<ReasonableAdjustmentsEnum> reasonableAdjustmentsEnums,
-                                          StringBuilder adjustmentRequired) {
+                                          StringBuilder adjustmentRequired, boolean isEnglish, Map<String, String> welshMapping) {
         String feelComfortableSupportDetails;
         String extraSupportDetails;
         if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
-            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
+            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed, isEnglish, welshMapping);
             if (!extraSupportDetails.isEmpty()) {
                 dataMap.put("extraSupportNeeded", YES);
-                dataMap.put("extraSupportDetails", extraSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
+                if (isEnglish) {
+                    dataMap.put("extraSupportDetails", extraSupportDetails);
+                } else {
+                    dataMap.put("extraSupportDetailsWelsh", extraSupportDetails);
+                }
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingsupport.getDisplayedValue()
+                        : welshMapping.get(hearingsupport.getDisplayedValue())).append(COLON)
                         .append(extraSupportDetails);
             }
         }
         if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
             feelComfortableSupportDetails = buildFeelComfortableSupport(
                     supportYouNeed.getCourtComfort(),
-                    supportYouNeed
+                    supportYouNeed, isEnglish, welshMapping
             );
             if (!feelComfortableSupportDetails.isEmpty()) {
                 dataMap.put("feelComfortableNeeed", YES);
-                dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
-                adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
+                if (isEnglish) {
+                    dataMap.put("feelComfortableDetails", feelComfortableSupportDetails);
+                } else {
+                    dataMap.put("feelComfortableDetailsWelsh", feelComfortableSupportDetails);
+                }
+                adjustmentRequired.append(COMMA_SEPARATOR).append(isEnglish ? hearingcomfort.getDisplayedValue()
+                        : welshMapping.get(hearingcomfort.getDisplayedValue())).append(COLON)
                         .append(feelComfortableSupportDetails);
             }
         }
     }
 
     private static String buildHelpTravellingMovingBuildingSupport(List<TravellingToCourtEnum> travellingToCourtEnums,
-                                                                   ReasonableAdjustmentsSupport support) {
+                                                                   ReasonableAdjustmentsSupport support, boolean isEnglish,
+                                                                   Map<String, String> welshMapping) {
         return travellingToCourtEnums.stream()
                 .map(element -> buildTravellingCourtElement(element,
                         support.getParkingDetails(),
                         support.getDifferentChairDetails(),
-                        support.getTravellingOtherDetails()))
+                        support.getTravellingOtherDetails(), isEnglish, welshMapping))
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     private static String buildTravellingCourtElement(TravellingToCourtEnum element, String parkingSpaceSubField,
-                                                      String differentTypeChairSubField, String travellingCourtOtherSubField) {
+                                                      String differentTypeChairSubField, String travellingCourtOtherSubField,
+                                                      boolean isEnglish, Map<String, String> welshMapping) {
         if (TravellingToCourtEnum.parkingspace.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return TravellingToCourtEnum.parkingspace.getDisplayedValue() + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
+            String parkingSpace = isEnglish ? TravellingToCourtEnum.parkingspace.getDisplayedValue()
+                : welshMapping.get(TravellingToCourtEnum.parkingspace.getDisplayedValue());
+            return parkingSpace + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
         } else if (TravellingToCourtEnum.differentchair.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return TravellingToCourtEnum.differentchair.getDisplayedValue() + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
+            String differentChair = isEnglish ? TravellingToCourtEnum.differentchair.getDisplayedValue()
+                : welshMapping.get(TravellingToCourtEnum.differentchair.getDisplayedValue());
+            return differentChair + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
         } else if (TravellingToCourtEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return TravellingToCourtEnum.other.getDisplayedValue() + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
+            String other = isEnglish ? TravellingToCourtEnum.other.getDisplayedValue()
+                : welshMapping.get(TravellingToCourtEnum.other.getDisplayedValue());
+            return other + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
-    private static String buildFeelComfortableSupport(List<CourtComfortEnum> courtComfortEnums, ReasonableAdjustmentsSupport support) {
+    private static String buildFeelComfortableSupport(List<CourtComfortEnum> courtComfortEnums, ReasonableAdjustmentsSupport support,
+                                                      boolean isEnglish, Map<String, String> welshMapping) {
         return courtComfortEnums.stream()
                 .map(element -> buildFeelComfortableElement(element,
                         support.getLightingDetails(),
-                        support.getOtherProvideDetails()))
+                        support.getOtherProvideDetails(), isEnglish, welshMapping))
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     private static String buildFeelComfortableElement(CourtComfortEnum element, String appropriateLightingSubField,
-                                                      String feelComfortableOtherSubField) {
+                                                      String feelComfortableOtherSubField, boolean isEnglish, Map<String, String> welshMapping) {
         if (CourtComfortEnum.appropriatelighting.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtComfortEnum.appropriatelighting.getDisplayedValue() + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
+            String appropriateLight = isEnglish ? CourtComfortEnum.appropriatelighting.getDisplayedValue()
+                : welshMapping.get(CourtComfortEnum.appropriatelighting.getDisplayedValue());
+            return appropriateLight + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
         } else if (CourtComfortEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtComfortEnum.other.getDisplayedValue() + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
+            String other = isEnglish ? CourtComfortEnum.other.getDisplayedValue() : welshMapping.get(CourtComfortEnum.other.getDisplayedValue());
+            return other + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
-    private static String buildExtraSupport(List<CourtHearingEnum> courtHearingEnums, ReasonableAdjustmentsSupport support) {
+    private static String buildExtraSupport(List<CourtHearingEnum> courtHearingEnums, ReasonableAdjustmentsSupport support,
+                                            boolean isEnglish, Map<String, String> welshMapping) {
         return courtHearingEnums.stream()
                 .map(element -> buildSupportCourtElement(element,
                         support.getSupportWorkerDetails(),
                         support.getFamilyProviderDetails(),
                         support.getTherapyDetails(),
-                        support.getCommunicationSupportOther()))
+                        support.getCommunicationSupportOther(), isEnglish, welshMapping))
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     private static String buildSupportCourtElement(CourtHearingEnum element, String supportWorkerCarerSubField,
                                                    String friendFamilyMemberSubField, String therapyAnimalSubField,
-                                                   String supportCourtOtherSubField) {
+                                                   String supportCourtOtherSubField, boolean isEnglish, Map<String, String> welshMapping) {
         if (CourtHearingEnum.supportworker.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtHearingEnum.supportworker.getDisplayedValue() + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
+            String supportWorker = isEnglish ? CourtHearingEnum.supportworker.getDisplayedValue()
+                : welshMapping.get(CourtHearingEnum.supportworker.getDisplayedValue());
+            return supportWorker + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
         } else if (CourtHearingEnum.familymember.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtHearingEnum.familymember.getDisplayedValue() + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
+            String familyMember = isEnglish ? CourtHearingEnum.familymember.getDisplayedValue()
+                : welshMapping.get(CourtHearingEnum.familymember.getDisplayedValue());
+            return familyMember + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
         } else if (CourtHearingEnum.animal.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtHearingEnum.animal.getDisplayedValue() + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
+            String animal = isEnglish ? CourtHearingEnum.animal.getDisplayedValue()
+                : welshMapping.get(CourtHearingEnum.animal.getDisplayedValue());
+            return animal + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
         } else if (CourtHearingEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return CourtHearingEnum.other.getDisplayedValue() + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
+            String other = isEnglish ? CourtHearingEnum.other.getDisplayedValue() : welshMapping.get(CourtHearingEnum.other.getDisplayedValue());
+            return other + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
     private static String buildCommunicationHelp(List<HelpCommunicationEnum> communicationHelp, ReasonableAdjustmentsSupport
-            support) {
+        support, boolean isEnglish, Map<String, String> welshMapping) {
         return communicationHelp.stream()
                 .map(element -> buildCommunicationHelpElement(element,
                         support.getSignLanguageDetails(),
-                        support.getDescribeOtherNeed()))
+                        support.getDescribeOtherNeed(), isEnglish, welshMapping))
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     private static String buildCommunicationHelpElement(HelpCommunicationEnum element, String signLanguageInterpreterDetails,
-                                                        String communicationHelpOtherDetails) {
+                                                        String communicationHelpOtherDetails, boolean isEnglish,
+                                                        Map<String, String> welshMapping) {
         if (signlanguage.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return signlanguage.getDisplayedValue() + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
+            String signLanguage = isEnglish ? signlanguage.getDisplayedValue() : welshMapping.get(signlanguage.getDisplayedValue());
+            return signLanguage + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
         } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return HelpCommunicationEnum.other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
+            String otherDetails = isEnglish ? HelpCommunicationEnum.other.getDisplayedValue()
+                : welshMapping.get(HelpCommunicationEnum.other.getDisplayedValue());
+            return otherDetails + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
-    private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed) {
+    private static String buildDocumentInformation(List<DocsSupportEnum> documentInformation, ReasonableAdjustmentsSupport supportYouNeed,
+                                                   boolean isEnglish, Map<String, String> welshMapping) {
         return documentInformation.stream()
                 .map(element -> buildDocumentInformationElement(element,
                         supportYouNeed.getDocsDetails(),
                         supportYouNeed.getLargePrintDetails(),
-                        supportYouNeed.getOtherDetails()))
+                        supportYouNeed.getOtherDetails(), isEnglish, welshMapping))
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     private static String buildDocumentInformationElement(DocsSupportEnum element, String specifiedColorDocumentsDetails,
-                                                          String largePrintDocumentsDetails, String otherDetails) {
+                                                          String largePrintDocumentsDetails, String otherDetails,
+                                                          boolean isEnglish, Map<String, String> welshMapping) {
         if (docsprint.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return docsprint.getDisplayedValue() + OPEN_BRACKET + specifiedColorDocumentsDetails + CLOSE_BRACKET;
+            String docPrintDetails = isEnglish ? docsprint.getDisplayedValue() : welshMapping.get(docsprint.getDisplayedValue());
+            return docPrintDetails + OPEN_BRACKET + specifiedColorDocumentsDetails + CLOSE_BRACKET;
         } else if (largeprintdocs.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return largeprintdocs.getDisplayedValue() + OPEN_BRACKET + largePrintDocumentsDetails + CLOSE_BRACKET;
+            String largePrintDocDetails = isEnglish ? docsprint.getDisplayedValue() : welshMapping.get(largeprintdocs.getDisplayedValue());
+            return largePrintDocDetails + OPEN_BRACKET + largePrintDocumentsDetails + CLOSE_BRACKET;
         } else if (other.name().equalsIgnoreCase(element.getDisplayedValue())) {
-            return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
+            String otherDocDetails = isEnglish ? docsprint.getDisplayedValue() : welshMapping.get(other.getDisplayedValue());
+            return otherDocDetails + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
         } else {
-            return element.getDisplayedValue();
+            return isEnglish ? element.getDisplayedValue() : welshMapping.get(element.getDisplayedValue());
         }
     }
 
