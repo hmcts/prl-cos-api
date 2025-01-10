@@ -148,6 +148,10 @@ public class HearingManagementService {
         customFields.put(EVENT_ID, CaseEvent.UPDATE_NEXT_HEARING_DATE_IN_CCD);
         Map<String, Object> data = new HashMap<>();
         data.put("nextHearingDetails", nextHearingDateRequest.getNextHearingDetails());
+        if (nextHearingDateRequest.getNextHearingDetails() != null
+            && nextHearingDateRequest.getNextHearingDetails().getHearingDateTime() != null) {
+            data.put(NEXT_HEARING_DATE, nextHearingDateRequest.getNextHearingDetails().getHearingDateTime().toLocalDate());
+        }
         submitUpdate(data, customFields);
     }
 
