@@ -3209,6 +3209,7 @@ public class ManageOrderService {
     public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
             caseDataUpdated.put(field.getValue(), null);
+            log.info("Cleaning up field {}", field.getValue());
         }
     }
 
