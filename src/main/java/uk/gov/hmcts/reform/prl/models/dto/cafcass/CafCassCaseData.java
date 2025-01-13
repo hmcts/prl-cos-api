@@ -274,28 +274,32 @@ public class CafCassCaseData {
     public void setMpuExemptionReasons(List<MiamExemptionsChecklistEnum> mpuExemptionReasons) {
         final String[] childProtectionEvidence = {""};
         final String[] domesticViolenceEvidence = {""};
-        final String[] reasonsForMiamExemption = {""};
+        final List<String> reasonsForMiamExemption = new ArrayList();
         final String[] otherGroundsEvidence = {""};
         final String[] previousAttendenceEvidence = {""};
         final String[] urgencyEvidence = {""};
 
-        mpuExemptionReasons.stream()
+        mpuExemptionReasons
             .forEach(
                 reasonEnum -> {
                     if (reasonEnum.equals(mpuDomesticAbuse)) {
                         domesticViolenceEvidence[0] = mpuDomesticAbuse.getDisplayedValue();
+                        reasonsForMiamExemption.add(mpuDomesticAbuse.getDisplayedValue());
                     } else if (reasonEnum.equals(mpuChildProtectionConcern)) {
                         childProtectionEvidence[0] = mpuChildProtectionConcern.getDisplayedValue();
+                        reasonsForMiamExemption.add(mpuChildProtectionConcern.getDisplayedValue());
                     } else if (reasonEnum.equals(mpuUrgency)) {
                         urgencyEvidence[0] = mpuUrgency.getDisplayedValue();
+                        reasonsForMiamExemption.add(mpuUrgency.getDisplayedValue());
                     } else if (reasonEnum.equals(mpuPreviousMiamAttendance)) {
                         previousAttendenceEvidence[0] = mpuPreviousMiamAttendance.getDisplayedValue();
+                        reasonsForMiamExemption.add(mpuPreviousMiamAttendance.getDisplayedValue());
                     } else if (reasonEnum.equals(mpuOther)) {
                         otherGroundsEvidence[0] = mpuOther.getDisplayedValue();
+                        reasonsForMiamExemption.add(mpuOther.getDisplayedValue());
                     }
-                }
-
-            );
+            }
+        );
 
 
         this.miamExemptionsTable = MiamExemptions.builder()
@@ -303,8 +307,7 @@ public class CafCassCaseData {
                                          ? childProtectionEvidence[0] : null)
             .domesticViolenceEvidence(null != domesticViolenceEvidence[0] && !domesticViolenceEvidence[0].trim().isEmpty()
                                           ? domesticViolenceEvidence[0] : null)
-            .reasonsForMiamExemption(null != reasonsForMiamExemption[0] && !reasonsForMiamExemption[0].trim().isEmpty()
-                                         ? reasonsForMiamExemption[0] : null)
+            .reasonsForMiamExemption(String.join(",", reasonsForMiamExemption))
             .otherGroundsEvidence(null != otherGroundsEvidence[0] && !otherGroundsEvidence[0].trim().isEmpty()
                                       ? otherGroundsEvidence[0] : null)
             .previousAttendenceEvidence(null != previousAttendenceEvidence[0] && !previousAttendenceEvidence[0].trim().isEmpty()
