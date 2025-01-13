@@ -356,7 +356,13 @@ public class RelationshipsController {
         List<Element<ChildrenAndOtherPeopleRelation>> buffChildAndOtherPeopleRelations = caseData.getRelations()
                                                                                             .getBuffChildAndOtherPeopleRelations();
         List<Element<ChildrenAndOtherPeopleRelation>> updatedChildAndOtherPeopleRelations = new ArrayList<>();
-        buffChildAndOtherPeopleRelations.stream().forEach(relationElement -> {
+        List<String> uniqueOtherPersonIds = buffChildAndOtherPeopleRelations.stream()
+            .filter(relationElement -> relationElement.getValue().getChildLivesWith().equals(YesOrNo.Yes)
+                && relationElement.getValue().getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
+            .map(relationElement -> relationElement.getValue().getOtherPeopleId())
+            .distinct()
+            .toList();
+        buffChildAndOtherPeopleRelations.forEach(relationElement -> {
             ChildrenAndOtherPeopleRelation relation = relationElement.getValue();
             updatedChildAndOtherPeopleRelations.add(Element.<ChildrenAndOtherPeopleRelation>builder()
                 .value(relation.toBuilder()
@@ -365,6 +371,7 @@ public class RelationshipsController {
                                    ? relation.getChildAndOtherPeopleRelationOtherDetails() : null)
                            .isChildLivesWithPersonConfidential(
                                relation.getChildLivesWith().equals(YesOrNo.Yes) ? relation.getIsChildLivesWithPersonConfidential() : null)
+                           .isOtherPeopleIdConfidential(uniqueOtherPersonIds.contains(relation.getOtherPeopleId()) ? YesOrNo.Yes : YesOrNo.No)
                            .build())
                 .id(relationElement.getId())
                 .build());

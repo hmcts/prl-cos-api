@@ -352,6 +352,7 @@ public class ConfidentialityTabService {
                                                            .isAddressConfidential(YesOrNo.Yes)
                                                            .isPhoneNumberConfidential(YesOrNo.Yes)
                                                            .isEmailAddressConfidential(YesOrNo.Yes)
+                                                           .isPartyIdentityConfidential(YesOrNo.Yes)
                                                            .build())
                                                 .id(partyDetails.getId())
                                                 .build());
@@ -361,6 +362,7 @@ public class ConfidentialityTabService {
                                                            .isAddressConfidential(YesOrNo.No)
                                                            .isPhoneNumberConfidential(YesOrNo.No)
                                                            .isEmailAddressConfidential(YesOrNo.No)
+                                                           .isPartyIdentityConfidential(YesOrNo.No)
                                                            .build())
                                                 .id(partyDetails.getId())
                                                 .build());

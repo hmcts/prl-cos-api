@@ -1165,6 +1165,7 @@ public class RelationshipsControllerTest {
             .childLivesWith(YesOrNo.No)
             .childAndOtherPeopleRelationOtherDetails(null)
             .isChildLivesWithPersonConfidential(null)
+            .isOtherPeopleIdConfidential(YesOrNo.No)
             .build();
         List<Element<ChildrenAndOtherPeopleRelation>> expectedRelationList = Collections.singletonList(
             Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
@@ -1206,6 +1207,7 @@ public class RelationshipsControllerTest {
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
             .childAndOtherPeopleRelationOtherDetails("test")
             .childLivesWith(YesOrNo.Yes)
+            .isOtherPeopleIdConfidential(YesOrNo.Yes)
             .isChildLivesWithPersonConfidential(YesOrNo.Yes)
             .build();
 
