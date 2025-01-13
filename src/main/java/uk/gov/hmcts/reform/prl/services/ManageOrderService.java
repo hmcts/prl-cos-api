@@ -1504,16 +1504,16 @@ public class ManageOrderService {
         if (!YesNoNotApplicable.NotApplicable.equals(serveToRespondentOptions)) {
             servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
             servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-            servedOrderDetails.put(SERVED_PARTIES, servedParties);
-            servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
-            servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
-            servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
             if (null != serveRecipientName
                 && null != servingRespondentsOptions) {
                 servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative.getDisplayedValue() + ")");
             }
         }
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
+        servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
+        servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
