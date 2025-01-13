@@ -289,4 +289,31 @@ public class FeeService {
 
         }
     }
+
+    public FeeResponseForCitizen fetchFee(String applicationType) {
+        try {
+            log.info("### Fetching fees for application type: {}", applicationType);
+            FeeType feeType = applicationToFeeMapForCitizen.get(applicationType);
+            if (null == feeType) {
+                return FeeResponseForCitizen.builder()
+                    .errorRetrievingResponse("Invalid application type to fetch fee details").build();
+            }
+            //Fetch fee details
+            FeeResponse feeResponse = fetchFeeDetails(feeType);
+            if (null == feeResponse) {
+                return FeeResponseForCitizen.builder()
+                    .errorRetrievingResponse("Error while fetching fee details").build();
+            }
+
+            return FeeResponseForCitizen.builder()
+                .amount(feeResponse.getAmount().toString())
+                .feeType(feeType.toString())
+                .build();
+        } catch (Exception e) {
+            log.error("Exception while fetching fee for application: {}", applicationType, e);
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(e.getMessage())
+                .build();
+        }
+    }
 }

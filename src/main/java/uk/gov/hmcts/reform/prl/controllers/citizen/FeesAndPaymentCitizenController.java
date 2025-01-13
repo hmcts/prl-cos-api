@@ -160,4 +160,24 @@ public class FeesAndPaymentCitizenController {
         return feeResponseForCitizen;
     }
 
+    @GetMapping(path = "/getFee/{applicationType}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "API to fetch the application fees by application type")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public FeeResponseForCitizen fetchFee(
+        //@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @PathVariable String applicationType
+    ) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
+            return feeService.fetchFee(applicationType);
+        } else {
+            throw (new RuntimeException(LOGGERMESSAGE));
+        }
+    }
+
 }
