@@ -227,7 +227,6 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-            log.info("casedata after cleanup - {}", caseDataUpdated);
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
