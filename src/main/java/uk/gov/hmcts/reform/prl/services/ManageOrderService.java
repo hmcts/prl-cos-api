@@ -1505,7 +1505,6 @@ public class ManageOrderService {
             servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
             servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
             servedOrderDetails.put(SERVED_PARTIES, servedParties);
-            servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
             servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrder(caseData.getManageOrders()));
             servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
             servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
@@ -1515,6 +1514,7 @@ public class ManageOrderService {
                     .applicantLegalRepresentative.getDisplayedValue() + ")");
             }
         }
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
             servedOrderDetails,
