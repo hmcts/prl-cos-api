@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 
 @Slf4j
@@ -169,11 +170,16 @@ public class FeesAndPaymentCitizenController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public FeeResponseForCitizen fetchFee(
-        //@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable String applicationType
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
+            log.info("### Fetch fees for application type: {}", applicationType);
+            if (null == applicationType || applicationType.isEmpty()) {
+                return FeeResponseForCitizen.builder()
+                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
+                    .build();
+            }
             return feeService.fetchFee(applicationType);
         } else {
             throw (new RuntimeException(LOGGERMESSAGE));

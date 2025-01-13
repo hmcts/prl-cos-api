@@ -39,6 +39,8 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME;
@@ -292,17 +294,18 @@ public class FeeService {
 
     public FeeResponseForCitizen fetchFee(String applicationType) {
         try {
-            log.info("### Fetching fees for application type: {}", applicationType);
             FeeType feeType = applicationToFeeMapForCitizen.get(applicationType);
             if (null == feeType) {
                 return FeeResponseForCitizen.builder()
-                    .errorRetrievingResponse("Invalid application type to fetch fee details").build();
+                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE.concat(applicationType))
+                    .build();
             }
             //Fetch fee details
             FeeResponse feeResponse = fetchFeeDetails(feeType);
-            if (null == feeResponse) {
+            if (null == feeResponse || null == feeResponse.getAmount()) {
                 return FeeResponseForCitizen.builder()
-                    .errorRetrievingResponse("Error while fetching fee details").build();
+                    .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
+                    .build();
             }
 
             return FeeResponseForCitizen.builder()
@@ -312,7 +315,7 @@ public class FeeService {
         } catch (Exception e) {
             log.error("Exception while fetching fee for application: {}", applicationType, e);
             return FeeResponseForCitizen.builder()
-                .errorRetrievingResponse(e.getMessage())
+                .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
                 .build();
         }
     }
