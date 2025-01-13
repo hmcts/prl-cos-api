@@ -298,8 +298,8 @@ public class CafCassCaseData {
                         otherGroundsEvidence[0] = mpuOther.getDisplayedValue();
                         reasonsForMiamExemption.add(mpuOther.getDisplayedValue());
                     }
-                }
-            );
+            }
+        );
 
 
         this.miamExemptionsTable = MiamExemptions.builder()
