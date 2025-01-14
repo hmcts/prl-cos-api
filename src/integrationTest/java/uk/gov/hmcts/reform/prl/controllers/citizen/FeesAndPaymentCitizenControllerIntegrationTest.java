@@ -144,4 +144,24 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+    @Test
+    public void testFetchFee() throws Exception {
+        String url = "/fees-and-payment-apis/getFee/C100_SUBMISSION_FEE";
+
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
+        when(feeService.fetchFee(anyString()))
+            .thenReturn(FeeResponseForCitizen.builder()
+                            .amount("100")
+                            .feeType("C100_SUBMISSION_FEE")
+                            .build());
+
+        mockMvc.perform(
+                get(url)
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 }

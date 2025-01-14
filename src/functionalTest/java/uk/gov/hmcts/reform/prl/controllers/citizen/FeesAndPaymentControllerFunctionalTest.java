@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,5 +53,25 @@ public class FeesAndPaymentControllerFunctionalTest {
 
         Assert.assertNotNull(response1.getAmount());
 
+    }
+
+    @Test
+    public void testFetchFee() {
+        FeeResponseForCitizen response = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+            .header("Content-Type", APPLICATION_JSON_VALUE)
+            .header("Accepts", APPLICATION_JSON_VALUE)
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate("prl_citizen_frontend"))
+            .body("")
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .get("/fees-and-payment-apis/getFee/C100_SUBMISSION_FEE")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(FeeResponseForCitizen.class);
+
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.getAmount());
+        Assertions.assertEquals("255.0", response.getAmount());
     }
 }
