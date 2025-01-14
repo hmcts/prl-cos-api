@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -213,16 +212,8 @@ public class RestrictedCaseAccessService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
-        Map<String, Object> dataClassification
-            = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        try {
-            log.info("data classification is {}",objectMapper.writeValueAsString(dataClassification));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            .dataClassification(dataClassification)
             .securityClassification(String.valueOf(caseSecurityClassification))
             .build();
     }
