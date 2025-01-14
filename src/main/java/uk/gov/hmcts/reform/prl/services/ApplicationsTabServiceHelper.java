@@ -191,15 +191,17 @@ public class ApplicationsTabServiceHelper {
     private ChildAndOtherPeopleRelation maskChildAndOtherPeopleConfidentialDetails(ChildAndOtherPeopleRelation childAndOtherPeopleRelation,
                                                                                    ChildrenAndOtherPeopleRelation otherPeople) {
         if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential()) && childAndOtherPeopleRelation.getOtherPeopleFullName() != null) {
-            childAndOtherPeopleRelation.toBuilder().otherPeopleFullName(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+            childAndOtherPeopleRelation = childAndOtherPeopleRelation.toBuilder().otherPeopleFullName(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())
             && childAndOtherPeopleRelation.getChildAndOtherPeopleRelation() != null) {
-            childAndOtherPeopleRelation.toBuilder().childAndOtherPeopleRelation(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+            childAndOtherPeopleRelation = childAndOtherPeopleRelation.toBuilder()
+                .childAndOtherPeopleRelation(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())
             && childAndOtherPeopleRelation.getChildAndOtherPeopleRelationOtherDetails() != null) {
-            childAndOtherPeopleRelation.toBuilder().childAndOtherPeopleRelationOtherDetails(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+            childAndOtherPeopleRelation = childAndOtherPeopleRelation.toBuilder()
+                .childAndOtherPeopleRelationOtherDetails(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         return childAndOtherPeopleRelation;
     }
