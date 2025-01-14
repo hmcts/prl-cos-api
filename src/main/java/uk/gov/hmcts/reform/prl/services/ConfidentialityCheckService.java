@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Service
 @Slf4j
@@ -34,30 +37,35 @@ public class ConfidentialityCheckService {
                                 caseData.getRespondentC8(), 0));
                         caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
                         caseDataMap.put(RESP_AC_8_WEL_DOCUMENT, responseDocumentA.getRespondentC8DocumentWelsh());
+                        findAndShowC8RefugeDocs(caseDataMap, eachRes.getValue(), "respAC8RefugeDocument");
                     }
                     case 1 -> {
                         ResponseDocuments responseDocumentB = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 1));
                         caseDataMap.put("respBC8EngDocument", responseDocumentB.getRespondentC8Document());
                         caseDataMap.put("respBC8WelDocument", responseDocumentB.getRespondentC8DocumentWelsh());
+                        findAndShowC8RefugeDocs(caseDataMap, eachRes.getValue(), "respBC8RefugeDocument");
                     }
                     case 2 -> {
                         ResponseDocuments responseDocumentC = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 2));
                         caseDataMap.put("respCC8EngDocument", responseDocumentC.getRespondentC8Document());
                         caseDataMap.put("respCC8WelDocument", responseDocumentC.getRespondentC8DocumentWelsh());
+                        findAndShowC8RefugeDocs(caseDataMap, eachRes.getValue(), "respCC8RefugeDocument");
                     }
                     case 3 -> {
                         ResponseDocuments responseDocumentD = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 3));
                         caseDataMap.put("respDC8EngDocument", responseDocumentD.getRespondentC8Document());
                         caseDataMap.put("respDC8WelDocument", responseDocumentD.getRespondentC8DocumentWelsh());
+                        findAndShowC8RefugeDocs(caseDataMap, eachRes.getValue(), "respDC8RefugeDocument");
                     }
                     case 4 -> {
                         ResponseDocuments responseDocumentE = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                                 caseData.getRespondentC8(), 4));
                         caseDataMap.put("respEC8EngDocument", responseDocumentE.getRespondentC8Document());
                         caseDataMap.put("respEC8WelDocument", responseDocumentE.getRespondentC8DocumentWelsh());
+                        findAndShowC8RefugeDocs(caseDataMap, eachRes.getValue(), "respEC8RefugeDocument");
                     }
 
                     default -> log.info("no respondent found here");
@@ -65,6 +73,7 @@ public class ConfidentialityCheckService {
                 }
             });
         } else {
+            findAndShowC8RefugeDocs(caseDataMap, caseData.getRespondentsFL401(), "respAC8RefugeDocument");
             ResponseDocuments responseDocumentA = getRespondentDoc(findLatestC8Document(caseData.getRespondentC8Document(),
                     caseData.getRespondentC8(), 0));
             caseDataMap.put(RESP_AC_8_ENG_DOCUMENT, responseDocumentA.getRespondentC8Document());
@@ -72,6 +81,47 @@ public class ConfidentialityCheckService {
 
         }
 
+    }
+
+    public void processApplicantC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getApplicants().forEach(eachApp -> {
+                switch (caseData.getApplicants().indexOf(eachApp)) {
+                    case 0 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appAC8RefugeDocument");
+                    case 1 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appBC8RefugeDocument");
+                    case 2 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appCC8RefugeDocument");
+                    case 3 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appDC8RefugeDocument");
+                    case 4 -> findAndShowC8RefugeDocs(caseDataMap, eachApp.getValue(), "appEC8RefugeDocument");
+                    default -> log.info("Applicant is out of index here");
+                }
+            });
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            findAndShowC8RefugeDocs(caseDataMap, caseData.getApplicantsFL401(), "appAC8RefugeDocument");
+        }
+    }
+
+    private static void findAndShowC8RefugeDocs(Map<String, Object> caseDataMap, PartyDetails eachApp, String ccdCaseFieldId) {
+        if (YesOrNo.Yes.equals(eachApp.getLiveInRefuge())
+                && null != eachApp.getRefugeConfidentialityC8Form()) {
+            caseDataMap.put(ccdCaseFieldId, eachApp.getRefugeConfidentialityC8Form());
+        } else {
+            caseDataMap.put(ccdCaseFieldId, null);
+        }
+    }
+
+    public void processOtherC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getOtherPartyInTheCaseRevised().forEach(eachOther -> {
+                switch (caseData.getOtherPartyInTheCaseRevised().indexOf(eachOther)) {
+                    case 0 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherAC8RefugeDocument");
+                    case 1 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherBC8RefugeDocument");
+                    case 2 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherCC8RefugeDocument");
+                    case 3 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherDC8RefugeDocument");
+                    case 4 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherEC8RefugeDocument");
+                    default -> log.info("Other party is out of index here");
+                }
+            });
+        }
     }
 
     private ResponseDocuments getRespondentDoc(ResponseDocuments latestC8Document) {

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -51,7 +52,6 @@ public class ApplicantDetails {
     private YesOrNo isPlaceOfBirthKnown;
     private List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren;
     private Organisation solicitorOrg;
-    private Address solicitorAddress;
     private String dxNumber;
     private String solicitorReference;
     private String representativeFirstName;
@@ -68,4 +68,6 @@ public class ApplicantDetails {
     private String solicitorTelephone;
     private String caseTypeOfApplication;
     private YesOrNo respondentLivedWithApplicant;
+    private Response response;
+
 }

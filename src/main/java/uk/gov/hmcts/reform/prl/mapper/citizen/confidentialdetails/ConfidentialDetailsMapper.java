@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
@@ -54,6 +56,7 @@ public class ConfidentialDetailsMapper {
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
         }
+
         if (updateTabs) {
             allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData.getId()));
         }
@@ -66,22 +69,44 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
+            if (checkIfLivesInRefuge(respondent)) {
                 addressSet = true;
-            }
-            if ((YesOrNo.Yes).equals(respondent.getIsEmailAddressConfidential())) {
                 emailSet = true;
-            }
-            if ((YesOrNo.Yes).equals(respondent.getIsPhoneNumberConfidential())) {
                 phoneSet = true;
+            } else {
+                if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
+                    addressSet = true;
+                }
+                if ((YesOrNo.Yes).equals(respondent.getIsEmailAddressConfidential())) {
+                    emailSet = true;
+                }
+                if ((YesOrNo.Yes).equals(respondent.getIsPhoneNumberConfidential())) {
+                    phoneSet = true;
+                }
             }
 
-            if (addressSet || emailSet || phoneSet) {
-                tempConfidentialApplicants
-                    .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
-            }
+            tempConfidentialApplicants = setTempConfidentialApplicants(tempConfidentialApplicants, addressSet, emailSet, phoneSet, respondent);
         }
         return tempConfidentialApplicants;
+    }
+
+    private List<Element<ApplicantConfidentialityDetails>> setTempConfidentialApplicants(
+        List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants, boolean addressSet,
+        boolean emailSet, boolean phoneSet, PartyDetails respondent) {
+        if (addressSet || emailSet || phoneSet) {
+            tempConfidentialApplicants
+                .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
+
+        }
+        return tempConfidentialApplicants;
+    }
+
+    private boolean checkIfLivesInRefuge(PartyDetails respondent) {
+        return ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown())
+            && YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
+            || (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()
+            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
