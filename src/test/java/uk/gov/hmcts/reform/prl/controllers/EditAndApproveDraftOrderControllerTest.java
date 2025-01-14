@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
@@ -1019,7 +1020,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .ordersHearingDetails(List.of(element(HearingData.builder()
@@ -1119,7 +1120,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .ordersHearingDetails(List.of(element(HearingData.builder()
