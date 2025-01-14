@@ -293,30 +293,36 @@ public class FeeService {
     }
 
     public FeeResponseForCitizen fetchFee(String applicationType) {
-        try {
-            FeeType feeType = applicationToFeeMapForCitizen.get(applicationType);
-            if (null == feeType) {
+        FeeType feeType = applicationToFeeMapForCitizen.get(applicationType);
+        if (null == feeType) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE.concat(applicationType))
+                .build();
+        } else if (NO_FEE.equals(feeType)) {
+            return FeeResponseForCitizen.builder()
+                .amount(ZERO_AMOUNT)
+                .feeType(feeType.toString())
+                .build();
+        } else {
+            try {
+                //Fetch fee details
+                FeeResponse feeResponse = fetchFeeDetails(feeType);
+                if (null == feeResponse || null == feeResponse.getAmount()) {
+                    return FeeResponseForCitizen.builder()
+                        .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
+                        .build();
+                }
+
                 return FeeResponseForCitizen.builder()
-                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE.concat(applicationType))
+                    .amount(feeResponse.getAmount().toString())
+                    .feeType(feeType.toString())
                     .build();
-            }
-            //Fetch fee details
-            FeeResponse feeResponse = fetchFeeDetails(feeType);
-            if (null == feeResponse || null == feeResponse.getAmount()) {
+            } catch (Exception e) {
+                log.error("Exception while fetching fee for application: {}", applicationType, e);
                 return FeeResponseForCitizen.builder()
                     .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
                     .build();
             }
-
-            return FeeResponseForCitizen.builder()
-                .amount(feeResponse.getAmount().toString())
-                .feeType(feeType.toString())
-                .build();
-        } catch (Exception e) {
-            log.error("Exception while fetching fee for application: {}", applicationType, e);
-            return FeeResponseForCitizen.builder()
-                .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
-                .build();
         }
     }
 }

@@ -709,7 +709,7 @@ public class FeeServiceTest {
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0336")
             .feeType(FeeType.C100_SUBMISSION_FEE.toString())
-            .amount(BigDecimal.valueOf(255.0))
+            .amount(BigDecimal.valueOf(255.00))
             .build();
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse1);
@@ -718,7 +718,16 @@ public class FeeServiceTest {
 
         assertNotNull(response);
         assertEquals(FeeType.C100_SUBMISSION_FEE.toString(),response.getFeeType());
-        assertEquals("255.0",response.getAmount());
+        assertEquals("255.0", response.getAmount());
+    }
+
+    @Test
+    public void testFetchZeroFee() {
+        FeeResponseForCitizen response = feeService.fetchFee("C100_EX740_APPLICANT");
+
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals(ZERO_AMOUNT, response.getAmount());
     }
 
     @Test
