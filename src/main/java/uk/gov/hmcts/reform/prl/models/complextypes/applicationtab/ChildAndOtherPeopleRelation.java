@@ -6,7 +6,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class ChildAndOtherPeopleRelation {
 
     private final String otherPeopleFullName;

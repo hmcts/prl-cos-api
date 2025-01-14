@@ -58,7 +58,9 @@ public class ApplicationsTabServiceHelper {
                            .gender(otherPerson.getGender() != null
                                        ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
                            .build()).build();
-            otherPersonsInTheCase.add(wrappedPerson);
+            if (currentOtherPerson.getIsPartyIdentityConfidential() != YesOrNo.Yes) {
+                otherPersonsInTheCase.add(wrappedPerson);
+            }
         }
         return otherPersonsInTheCase;
     }
@@ -178,11 +180,28 @@ public class ApplicationsTabServiceHelper {
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
+            a = maskChildAndOtherPeopleConfidentialDetails(a, otherPeople);
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
             otherPeopleRelations.add(app);
         }
         log.info("-->getChildAndOtherPeopleRelationsTable()--->End");
         return otherPeopleRelations;
+    }
+
+    private ChildAndOtherPeopleRelation maskChildAndOtherPeopleConfidentialDetails(ChildAndOtherPeopleRelation childAndOtherPeopleRelation,
+                                                                                   ChildrenAndOtherPeopleRelation otherPeople) {
+        if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential()) && childAndOtherPeopleRelation.getOtherPeopleFullName() != null) {
+            childAndOtherPeopleRelation.toBuilder().otherPeopleFullName(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+        }
+        if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())
+            && childAndOtherPeopleRelation.getChildAndOtherPeopleRelation() != null) {
+            childAndOtherPeopleRelation.toBuilder().childAndOtherPeopleRelation(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+        }
+        if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())
+            && childAndOtherPeopleRelation.getChildAndOtherPeopleRelationOtherDetails() != null) {
+            childAndOtherPeopleRelation.toBuilder().childAndOtherPeopleRelationOtherDetails(THIS_INFORMATION_IS_CONFIDENTIAL).build();
+        }
+        return childAndOtherPeopleRelation;
     }
 
 
