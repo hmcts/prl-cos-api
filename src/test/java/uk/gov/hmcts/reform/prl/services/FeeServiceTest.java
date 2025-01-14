@@ -759,13 +759,11 @@ public class FeeServiceTest {
         assertEquals(FETCH_FEE_ERROR.concat(FeeType.C100_SUBMISSION_FEE.toString()), response.getErrorRetrievingResponse());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testFetchFeeThrowsException() throws Exception {
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new RuntimeException());
-        FeeResponseForCitizen response = feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
 
-        assertNotNull(response);
-        assertEquals(FETCH_FEE_ERROR.concat(FeeType.C100_SUBMISSION_FEE.toString()), response.getErrorRetrievingResponse());
+        feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
     }
 }

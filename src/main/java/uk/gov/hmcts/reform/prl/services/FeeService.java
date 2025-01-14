@@ -319,9 +319,7 @@ public class FeeService {
                     .build();
             } catch (Exception e) {
                 log.error("Exception while fetching fee for application: {}", applicationType, e);
-                return FeeResponseForCitizen.builder()
-                    .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
-                    .build();
+                throw (new RuntimeException(e.getMessage()));
             }
         }
     }
