@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndRespon
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -841,6 +842,37 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
+    public void testDeclarationTableForCourtNavCaseNo() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. The applicant believes "
+            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + " is authorised by the applicant to sign this statement.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().isCourtNavCase(No).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testDeclarationTableForCourtNavCaseYes() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. "
+            + "I believe that the facts stated in this application are true.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().isCourtNavCase(Yes).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
     public void testHearingUrgencyTableMapper() {
         HearingUrgency hearingUrgency = HearingUrgency.builder()
             .isCaseUrgent(YesOrNo.Yes)
@@ -1378,6 +1410,8 @@ public class ApplicationsTabServiceTest {
                                               "isAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL
         );
+        FL401Respondent fl401Respondent = FL401Respondent.builder().build();
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(FL401Respondent.class))).thenReturn(fl401Respondent);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);

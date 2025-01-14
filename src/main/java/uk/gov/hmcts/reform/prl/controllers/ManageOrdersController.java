@@ -82,6 +82,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
+    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE =
+        "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
@@ -292,8 +294,10 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
+            //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
                 && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
@@ -462,6 +466,10 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
+            }
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);

@@ -14,12 +14,15 @@ import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.restrictedcaseaccessmanagement.CaseAccessStatusAndReason;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -93,6 +96,12 @@ public class BaseCaseData {
     private String isApplicantRepresented;
 
 
+    @JsonProperty("refugeDocuments")
+    private List<Element<RefugeConfidentialDocuments>> refugeDocuments;
+
+    @JsonProperty("historicalRefugeDocuments")
+    private List<Element<RefugeConfidentialDocuments>> historicalRefugeDocuments;
+
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
 
@@ -112,6 +121,8 @@ public class BaseCaseData {
     private ServiceOfDocuments serviceOfDocuments;
 
     @JsonUnwrapped
+    private HearingTaskData hearingTaskData;
+
     private String isNonWorkAllocationEnabledCourtSelected;
 
     @JsonProperty("respondentSolicitorName")
