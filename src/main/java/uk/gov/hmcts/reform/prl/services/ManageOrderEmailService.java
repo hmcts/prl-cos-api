@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.constants.OrderEmailConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -309,7 +310,7 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
                 handleNonPersonalServiceNotifications(
                     authorisation,
@@ -319,7 +320,7 @@ public class ManageOrderEmailService {
                     orderDocuments,
                     dynamicDataForEmail
                 );
-            } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
+            } else if (YesNoNotApplicable.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
                 String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                     ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions().getId();
@@ -377,7 +378,7 @@ public class ManageOrderEmailService {
                                                     List<EmailInformation> otherOrganisationEmailList,
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
-        if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+        if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
             log.info("Non personal service FL401");
             handleFL401NonPersonalServiceNotifications(authorisation,
                                                         caseData,
@@ -387,7 +388,7 @@ public class ManageOrderEmailService {
                                                         dynamicDataForEmail);
 
 
-        } else {
+        } else if (YesNoNotApplicable.Yes.equals(manageOrders.getServeToRespondentOptions())) {
             log.info("*** DA Personal service ");
             log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())

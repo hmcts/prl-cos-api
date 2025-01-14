@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -744,7 +745,7 @@ public class CaseServiceTest {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
-                                   .serveOnRespondent(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
             .otherDetails(OtherOrderDetails.builder().orderCreatedDate("12 Jan 2021").orderMadeDate("12 Jan 2021").build())
@@ -802,7 +803,7 @@ public class CaseServiceTest {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
-                                   .serveOnRespondent(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
             .build();
@@ -833,7 +834,7 @@ public class CaseServiceTest {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
-                                   .serveOnRespondent(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.courtAdmin.getId())
                                    .build())
             .sosStatus(SOS_COMPLETED)
@@ -863,7 +864,7 @@ public class CaseServiceTest {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
-                                   .serveOnRespondent(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
                                    .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.courtAdmin.getId())
                                    .build())
             .sosStatus(SOS_COMPLETED)
