@@ -13,6 +13,7 @@ public class ChildAndOtherPeopleRelation {
     private final String childFullName;
     private final String childAndOtherPeopleRelation;
     private final String childAndOtherPeopleRelationOtherDetails;
+    private final String childAndOtherPeopleRelationInfo;
     private final YesOrNo childLivesWith;
     private final YesOrNo isChildLivesWithPersonConfidential;
 }

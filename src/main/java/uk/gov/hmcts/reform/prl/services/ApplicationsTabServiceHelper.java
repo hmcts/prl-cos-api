@@ -199,7 +199,7 @@ public class ApplicationsTabServiceHelper {
                 builder.otherPeopleFullName(THIS_INFORMATION_IS_CONFIDENTIAL);
             }
             if (StringUtils.isNotBlank(childAndOtherPeopleRelation.getChildAndOtherPeopleRelation())) {
-                builder.childAndOtherPeopleRelation(THIS_INFORMATION_IS_CONFIDENTIAL);
+                builder.childAndOtherPeopleRelationInfo(THIS_INFORMATION_IS_CONFIDENTIAL);
             }
             if (StringUtils.isNotBlank(childAndOtherPeopleRelation.getChildAndOtherPeopleRelationOtherDetails())) {
                 builder.childAndOtherPeopleRelationOtherDetails(THIS_INFORMATION_IS_CONFIDENTIAL);
