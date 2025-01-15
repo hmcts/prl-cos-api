@@ -514,6 +514,25 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    public Map<String, Object> generateC100DraftDocuments(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+        }
+
+        return updatedCaseData;
+    }
+
     private static boolean isAohPresent(CaseData caseData) {
         return caseData.getAllegationOfHarmRevised() != null
                 && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo());
@@ -529,7 +548,7 @@ public class DocumentGenService {
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
 
-        updatedCaseData.putAll(generateDraftDocuments(authorisation, caseData));
+        updatedCaseData.putAll(generateC100DraftDocuments(authorisation, caseData));
         generateDraftEngC1aAndC8DocumentsForResubmission(
             authorisation,
             caseData,

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -161,6 +163,7 @@ public class CaseService {
     public static final String IS_PERSONAL = "isPersonal";
     public static final String PARTY_NAMES = "partyNames";
     public static final String ORDER_TYPE_ID = "orderTypeId";
+    public static final String ORDER_MADE_DATE = "orderMadeDate";
     public static final String OCCUPATION_ORDER = "occupation";
     public static final String POWER_OF_ARREST_ORDER = "powerOfArrest";
     private final CoreCaseDataApi coreCaseDataApi;
@@ -879,7 +882,7 @@ public class CaseService {
 
     private boolean isPersonalService(OrderDetails order) {
         return null != order.getServeOrderDetails()
-            && YesOrNo.Yes.equals(order.getServeOrderDetails().getServeOnRespondent())
+            && YesNoNotApplicable.Yes.equals(order.getServeOrderDetails().getServeOnRespondent())
             && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
             .equals(order.getServeOrderDetails().getWhoIsResponsibleToServe());
     }
@@ -1055,6 +1058,7 @@ public class CaseService {
         notifMap.put(IS_FINAL, multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal));
         notifMap.put(IS_MULTIPLE, multipleOrdersServed.size() > 1);
         notifMap.put(ORDER_TYPE_ID, citizenOrders.get(0).getOrderTypeId());
+        notifMap.put(ORDER_MADE_DATE, citizenOrders.get(0).getMadeDate());
 
         if (citizenOrders.get(0).isPersonalService()) {
             //personal service by unrepresented applicant lip
@@ -1084,7 +1088,10 @@ public class CaseService {
         CitizenDocuments order = findPersonalServiceLipOrderPendingSos(citizenOrders);
         if (SERVED_PARTY_APPLICANT.equals(partyType) && null != order) {
             notifMap.put(IS_PERSONAL, true);
+            notifMap.put(IS_NEW, order.isNew());
+            notifMap.put(IS_FINAL, order.isFinal());
             notifMap.put(ORDER_TYPE_ID, order.getOrderTypeId());
+            notifMap.put(ORDER_MADE_DATE, order.getMadeDate());
             citizenNotifications.addAll(getNotifications(caseData, NotificationNames.ORDER_PERSONAL_APPLICANT, notifMap));
         }
     }
@@ -1430,27 +1437,65 @@ public class CaseService {
                 .filter(addlAppBundle -> filterApplicationsForParty(addlAppBundle, partyIdAndType.get(PARTY_ID)))
                 .forEach(awp -> {
                     //C2 bundle docs
-                    if (null != awp.getC2DocumentBundle()
-                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getC2DocumentBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getC2DocumentBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getC2DocumentBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
 
                     //Other bundle docs
-                    if (null != awp.getOtherApplicationsBundle()
-                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
-                        applicationsWithinProceedings.addAll(getAwpDocuments(
-                            awp,
-                            awp.getOtherApplicationsBundle().getFinalDocument()
-                        ));
+                    if (null != awp.getOtherApplicationsBundle()) {
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
+                            applicationsWithinProceedings.addAll(getAwpDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getFinalDocument(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
+                        //supporting documents
+                        if (CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getSupportingEvidenceBundle())) {
+                            applicationsWithinProceedings.addAll(getSupportingEvidenceDocuments(
+                                awp,
+                                awp.getOtherApplicationsBundle().getSupportingEvidenceBundle(),
+                                partyIdAndType.get(PARTY_ID)
+                            ));
+                        }
                     }
-
-                    //NEED SUPPORTING DOCUMENTS ?
                 });
         }
         return applicationsWithinProceedings;
+    }
+
+    private List<CitizenDocuments> getSupportingEvidenceDocuments(AdditionalApplicationsBundle awp,
+                                                                  List<Element<SupportingEvidenceBundle>> documents,
+                                                                  String partyId) {
+        return documents.stream()
+            .map(Element::getValue)
+            .map(document ->
+                CitizenDocuments.builder()
+                    .partyId(partyId)
+                    .partyType(awp.getPartyType().getDisplayedValue())
+                    .partyName(awp.getAuthor())
+                    .uploadedBy(awp.getAuthor())
+                    .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                        ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                    .document(document.getDocument())
+                    .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(),
+                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
+                    .build()
+            ).toList();
     }
 
     private boolean filterApplicationsForParty(AdditionalApplicationsBundle addlAppBundle,
@@ -1465,12 +1510,13 @@ public class CaseService {
     }
 
     private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
-                                                   List<Element<Document>> documents) {
+                                                   List<Element<Document>> documents,
+                                                   String partyId) {
         return documents.stream()
             .map(Element::getValue)
             .map(document ->
                      CitizenDocuments.builder()
-                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                         .partyId(partyId)
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .partyName(awp.getAuthor())
                          .uploadedBy(awp.getAuthor()) //PRL-6202 populate uploaded party name
@@ -1824,6 +1870,8 @@ public class CaseService {
             .isPersonalService(ObjectUtils.isNotEmpty(notifMap.get(IS_PERSONAL)) && (Boolean) notifMap.get(IS_PERSONAL))
             .partyNames(ObjectUtils.isNotEmpty(notifMap.get(PARTY_NAMES)) ? (String) notifMap.get(PARTY_NAMES) : null)
             .orderTypeId(ObjectUtils.isNotEmpty(notifMap.get(ORDER_TYPE_ID)) ? (String) notifMap.get(ORDER_TYPE_ID) : null)
+            .orderMadeDate(ObjectUtils.isNotEmpty(notifMap.get(ORDER_MADE_DATE)) ? LocalDate.parse(
+                notifMap.get(ORDER_MADE_DATE).toString(), DATE_FORMATTER_YYYY_MM_DD).format(DATE_FORMATTER_YYYY_MM_DD) : null)
             .build();
     }
 }
