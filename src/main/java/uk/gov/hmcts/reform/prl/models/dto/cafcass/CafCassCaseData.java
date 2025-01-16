@@ -609,6 +609,7 @@ public class CafCassCaseData {
                                                                       .gender(partyDetails.getGender().getDisplayedValue())
                                                                       .otherGender(partyDetails.getOtherGender())
                                                                       .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
+                                                                      .placeOfBirth(partyDetails.getPlaceOfBirth())
                                                                       .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
                                                                       .address(
                                                                           partyDetails.getAddress() != null
