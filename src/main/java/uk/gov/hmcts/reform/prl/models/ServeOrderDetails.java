@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
@@ -22,7 +23,7 @@ import java.util.List;
 public class ServeOrderDetails {
 
     private final List<Element<Document>> additionalDocuments;
-    private final YesOrNo serveOnRespondent;
+    private final YesNoNotApplicable serveOnRespondent;
     private final SoaSolicitorServingRespondentsEnum servingRespondent;
     private final String recipientsOptions;
     private final String otherParties;
