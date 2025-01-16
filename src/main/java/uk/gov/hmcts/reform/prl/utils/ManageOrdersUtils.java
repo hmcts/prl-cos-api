@@ -116,13 +116,15 @@ public class ManageOrdersUtils {
                 .map(Element::getValue)
                 .forEach(hearingData -> {
                     //validate for manage orders, draft & edit returned order
-                    if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
-                        && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                        || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        errorList.add("You must select a hearing type");
+                    if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            errorList.add("You must select a hearing type");
+                        }
+                        //numeric estimated timings validation
+                        validateHearingEstimatedTimings(errorList, hearingData);
                     }
-                    //numeric estimated timings validation
-                    validateHearingEstimatedTimings(errorList, hearingData);
+
                     if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
                         && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
@@ -130,7 +132,6 @@ public class ManageOrdersUtils {
                         .equals(hearingData.getHearingDateConfirmOptionEnum()))) {
                         validateHearingData(errorList, hearingData);
                     }
-
                 });
         }
     }
@@ -139,9 +140,10 @@ public class ManageOrdersUtils {
         return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
             && (HearingDateConfirmOptionEnum.dateReservedWithListAssit
             .equals(hearingData.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+            || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
             .equals(hearingData.getHearingDateConfirmOptionEnum())
-            || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum()));
+            || HearingDateConfirmOptionEnum.dateToBeFixed
+            .equals(hearingData.getHearingDateConfirmOptionEnum()));
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
@@ -163,7 +165,6 @@ public class ManageOrdersUtils {
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
             errorList.add("Please enter numeric value for Hearing estimated minutes");
         }
-        //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
 
     private static void validateHearingData(List<String> errorList,HearingData hearingData) {
@@ -236,12 +237,16 @@ public class ManageOrdersUtils {
             errorList.add("You must select this hearing channel");
         }
 
-
+        //validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute
+        if (ObjectUtils.isNotEmpty(hearingData.getHearingMustTakePlaceAtHour())
+            && !StringUtils.isNumeric(hearingData.getHearingMustTakePlaceAtHour())) {
+            errorList.add("Please enter numeric value for Hearing must take place at hour");
+        }
+        if (ObjectUtils.isNotEmpty(hearingData.getHearingMustTakePlaceAtMinute())
+            && !StringUtils.isNumeric(hearingData.getHearingMustTakePlaceAtMinute())) {
+            errorList.add("Please enter numeric value for Hearing must take place at minute");
+        }
     }
-
-
-
-
 
     public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {
         List<String> errorList = new ArrayList<>();
