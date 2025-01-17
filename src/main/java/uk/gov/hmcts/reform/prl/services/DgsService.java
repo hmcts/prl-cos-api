@@ -135,7 +135,7 @@ public class DgsService {
         if (templateName.contains("FL-PRL-APP-WEL-C100-Final-V3") || templateName.contains("FL-PRL-CON-WEL-C8-Final-V2")) {
             log.info(
                 "Generating document caseData: -->  {} with template --> {}",
-                CcdObjectMapper.getObjectMapper().writeValueAsString(caseDetails.getCaseData()), templateName
+                CcdObjectMapper.getObjectMapper().writeValueAsString(tempCaseDetails), templateName
             );
         }
         try {
