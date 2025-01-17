@@ -70,7 +70,7 @@ public class DgsService {
         );
         GeneratedDocumentInfo generatedDocumentInfo = null;
         if (templateName.contains("C100-Draft-") || templateName.contains("C100-Final-") || templateName.contains(
-            "FL-PRL-CON-ENG-C8-Final-V2") || templateName.contains("FL-PRL-CON-ENG-C8-Draft-V2")) {
+            "FL-PRL-CON-WEL-C8-Final-V2") || templateName.contains("FL-PRL-CON-ENG-C8-Draft-V2")) {
             log.info(
                 "Generating document caseData: -->  {} with template --> {}",
                 CcdObjectMapper.getObjectMapper().writeValueAsString(caseDetails.getCaseData()), templateName
