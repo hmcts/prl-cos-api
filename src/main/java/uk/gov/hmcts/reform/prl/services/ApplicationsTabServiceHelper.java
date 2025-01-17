@@ -180,10 +180,8 @@ public class ApplicationsTabServiceHelper {
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation childAndOtherPeopleRelation = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
-            log.info("childAndOtherPeopleRelation---> " + childAndOtherPeopleRelation);
             childAndOtherPeopleRelation = maskChildAndOtherPeopleConfidentialDetails(childAndOtherPeopleRelation, otherPeople);
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(childAndOtherPeopleRelation).build();
-            log.info("childAndOtherPeopleRelation after builder---> " + app);
             otherPeopleRelations.add(app);
         }
         log.info("-->getChildAndOtherPeopleRelationsTable()--->End");

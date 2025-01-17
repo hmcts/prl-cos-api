@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -132,12 +131,6 @@ public class DgsService {
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        if (templateName.contains("FL-PRL-APP-WEL-C100-Final-V3") || templateName.contains("FL-PRL-CON-WEL-C8-Final-V2")) {
-            log.info(
-                "Generating document caseData: -->  {} with template --> {}",
-                CcdObjectMapper.getObjectMapper().writeValueAsString(tempCaseDetails), templateName
-            );
-        }
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
