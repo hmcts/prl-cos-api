@@ -139,6 +139,12 @@ public class DgsService {
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        if (templateName.contains("FL-PRL-CON-WEL-C8-Final-V2")) {
+            log.info(
+                "Generating document caseData: -->  {} with template --> {}",
+                CcdObjectMapper.getObjectMapper().writeValueAsString(caseDetails.getCaseData()), templateName
+            );
+        }
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -207,10 +213,11 @@ public class DgsService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation,
-                                              GenerateDocumentRequest.builder()
-                                                  .template(prlCitizenUploadTemplate)
-                                                  .values(tempCaseDetails).build()
+                dgsApiClient.generateDocument(
+                    authorisation,
+                    GenerateDocumentRequest.builder()
+                        .template(prlCitizenUploadTemplate)
+                        .values(tempCaseDetails).build()
                 );
 
         } catch (Exception ex) {
