@@ -2297,7 +2297,8 @@ public class ManageOrderService {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         YesOrNo isAutoHearingReqPending = No;
-        if (isHearingPageNeeded(CreateSelectOrderOptionsEnum.valueOf(flagSelectedOrderId), orderDetails.getC21OrderOptions())) {
+        if (isHearingPageNeeded(CreateSelectOrderOptionsEnum.valueOf(flagSelectedOrderId),
+                                caseData.getManageOrders().getC21OrderOptions())) {
             isAutoHearingReqPending = Yes;
         }
         return element(orderDetails.toBuilder()
