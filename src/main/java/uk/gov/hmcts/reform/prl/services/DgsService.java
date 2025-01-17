@@ -69,13 +69,6 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        if (templateName.contains("C100-Draft-") || templateName.contains("C100-Final-") || templateName.contains(
-            "FL-PRL-CON-WEL-C8-Final-V2") || templateName.contains("FL-PRL-CON-ENG-C8-Draft-V2")) {
-            log.info(
-                "Generating document caseData: -->  {} with template --> {}",
-                CcdObjectMapper.getObjectMapper().writeValueAsString(caseDetails.getCaseData()), templateName
-            );
-        }
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -139,7 +132,7 @@ public class DgsService {
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        if (templateName.contains("FL-PRL-CON-WEL-C8-Final-V2")) {
+        if (templateName.contains("FL-PRL-APP-WEL-C100-Final-V3") || templateName.contains("FL-PRL-CON-WEL-C8-Final-V2")) {
             log.info(
                 "Generating document caseData: -->  {} with template --> {}",
                 CcdObjectMapper.getObjectMapper().writeValueAsString(caseDetails.getCaseData()), templateName
