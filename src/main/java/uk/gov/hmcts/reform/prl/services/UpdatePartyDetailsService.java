@@ -200,22 +200,27 @@ public class UpdatePartyDetailsService {
 
     private static void setCitizenConfidentialDetailsInResponse(Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
                                                       Map<String, Object> updatedCaseData) {
+        log.info("inside setCitizenConfidentialDetailsInResponse");
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
+            log.info("inside setCitizenConfidentialDetailsInResponse - partyDetailsWrappedList is present");
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             for (PartyDetails partyDetails : partyDetailsList) {
 
                 YesOrNo confidentiality = YesOrNo.No;
                 List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
+                log.info("inside setCitizenConfidentialDetailsInResponse - partyDetails is present");
+                log.info("partyDetails.getIsAddressConfidential() : " + partyDetails.getIsAddressConfidential());
                 if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
                     || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
                     || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
                     confidentiality = YesOrNo.Yes;
-
+                    log.info("confidentiality : " + confidentiality);
                     setConfidentialityListEnums(partyDetails, confidentialityListEnums);
                 }
 
                 if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
+                    log.info("partyDetails.getResponse().getKeepDetailsPrivate() is present");
                     partyDetails
                         .toBuilder()
                         .response(partyDetails
@@ -233,7 +238,8 @@ public class UpdatePartyDetailsService {
                 }
             }
 
-            updatedCaseData.put("applicants", partyDetailsList);
+            log.info("partyDetailsList : " + partyDetailsList);
+            updatedCaseData.put(APPLICANTS, partyDetailsList);
         }
     }
 
