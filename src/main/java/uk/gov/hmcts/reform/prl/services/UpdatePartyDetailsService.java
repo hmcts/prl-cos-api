@@ -153,7 +153,7 @@ public class UpdatePartyDetailsService {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
-            setCitizenConfidentialDetailsInResponse(ofNullable(caseData.getApplicants()), updatedCaseData);
+            caseData = setCitizenConfidentialDetailsInResponse(caseData);
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
@@ -188,6 +188,7 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
+        log.info("Updated case data applicants : " + updatedCaseData.get(APPLICANTS));
         return updatedCaseData;
     }
 
@@ -198,11 +199,13 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-    private static void setCitizenConfidentialDetailsInResponse(Optional<List<Element<PartyDetails>>> applicantDetailsWrappedList,
-                                                      Map<String, Object> updatedCaseData) {
-        if (applicantDetailsWrappedList.isPresent() && !applicantDetailsWrappedList.get().isEmpty()) {
-            List<PartyDetails> updatedPartyDetailsList = new ArrayList<>();
-            List<PartyDetails> partyDetailsList = applicantDetailsWrappedList.get().stream().map(Element::getValue).toList();
+    private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData) {
+        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
+        List<Element<PartyDetails>> updatedPartyDetailsList = null;
+
+        if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList)) {
+            updatedPartyDetailsList = new ArrayList<>();
+            List<PartyDetails> partyDetailsList = applicantDetailsWrappedList.stream().map(Element::getValue).toList();
             for (PartyDetails partyDetails : partyDetailsList) {
 
                 YesOrNo confidentiality = YesOrNo.No;
@@ -233,12 +236,10 @@ public class UpdatePartyDetailsService {
                         .build();
                 }
 
-                updatedPartyDetailsList.add(partyDetails);
+                updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
             }
-
-            log.info("partyDetailsList : " + updatedPartyDetailsList);
-            updatedCaseData.put(APPLICANTS, updatedPartyDetailsList);
         }
+        return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
     }
 
     private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails,
