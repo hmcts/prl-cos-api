@@ -201,7 +201,7 @@ public class UpdatePartyDetailsService {
     private static void setCitizenConfidentialDetailsInResponse(Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
                                                       Map<String, Object> updatedCaseData) {
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
-            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
+            List<PartyDetails> partyDetailsList = new ArrayList<>(partyDetailsWrappedList.get().stream().map(Element::getValue).toList());
             for (PartyDetails partyDetails : partyDetailsList) {
 
                 YesOrNo confidentiality = YesOrNo.No;
@@ -212,28 +212,28 @@ public class UpdatePartyDetailsService {
                     || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
                     confidentiality = YesOrNo.Yes;
                     setConfidentialityListEnums(partyDetails, confidentialityListEnums);
-                    log.info("confidentialityListEnums : " + confidentialityListEnums);
-                    log.info("confidentiality : " + confidentiality);
                 }
 
                 if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
-                    partyDetails
+                    partyDetails = partyDetails
                         .toBuilder()
                         .response(partyDetails
                             .getResponse()
                             .toBuilder()
-                            .keepDetailsPrivate(KeepDetailsPrivate
-                                    .builder()
+                            .keepDetailsPrivate(
+                                partyDetails
+                                .getResponse()
+                                .getKeepDetailsPrivate()
+                                .toBuilder()
                                 .confidentiality(confidentiality)
                                 .confidentialityList(confidentialityListEnums)
-                                .otherPeopleKnowYourContactDetails(partyDetails
-                                    .getResponse()
-                                    .getKeepDetailsPrivate()
-                                    .getOtherPeopleKnowYourContactDetails())
                                 .build())
-                            .build());
+                            .build())
+                        .build();
+
+                    int index = partyDetailsList.indexOf(partyDetails);
+                    partyDetailsList.set(index, partyDetails);
                 }
-                log.info("partyDetails : " + partyDetails);
             }
 
             log.info("partyDetailsList : " + partyDetailsList);
