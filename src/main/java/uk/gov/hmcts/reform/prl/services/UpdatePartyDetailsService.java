@@ -153,6 +153,7 @@ public class UpdatePartyDetailsService {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
+            setCitizenConfidentialDetailsInResponse(ofNullable(caseData.getApplicants()), updatedCaseData);
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
@@ -195,6 +196,60 @@ public class UpdatePartyDetailsService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         return updatedCaseData;
+    }
+
+    private static void setCitizenConfidentialDetailsInResponse(Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+                                                      Map<String, Object> updatedCaseData) {
+        if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
+            List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
+            for (PartyDetails partyDetails : partyDetailsList) {
+
+                YesOrNo confidentiality = YesOrNo.No;
+                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+                if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                    || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                    || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
+                    confidentiality = YesOrNo.Yes;
+
+                    setConfidentialityListEnums(partyDetails, confidentialityListEnums);
+                }
+
+                if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
+                    partyDetails
+                        .toBuilder()
+                        .response(partyDetails
+                            .getResponse()
+                            .toBuilder()
+                            .keepDetailsPrivate(partyDetails
+                                .getResponse()
+                                .getKeepDetailsPrivate()
+                                .toBuilder()
+                                .confidentiality(confidentiality)
+                                .confidentialityList(confidentialityListEnums)
+                                .build())
+                            .build())
+                        .build();
+                }
+            }
+
+            updatedCaseData.put("applicants", partyDetailsList);
+        }
+    }
+
+    private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails,
+                                                                             List<ConfidentialityListEnum> confidentialityListEnums) {
+        if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
+            confidentialityListEnums.add(ConfidentialityListEnum.address);
+        }
+        if (YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())) {
+            confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+        }
+        if (YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
+            confidentialityListEnums.add(ConfidentialityListEnum.email);
+        }
+
+        return  confidentialityListEnums;
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
