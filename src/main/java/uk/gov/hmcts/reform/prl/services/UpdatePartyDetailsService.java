@@ -153,7 +153,6 @@ public class UpdatePartyDetailsService {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
-            caseData = setCitizenConfidentialDetailsInResponse(caseData);
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
@@ -169,6 +168,7 @@ public class UpdatePartyDetailsService {
                 RESPONDENTS,
                 false
             );
+            caseData = setCitizenConfidentialDetailsInResponse(caseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
