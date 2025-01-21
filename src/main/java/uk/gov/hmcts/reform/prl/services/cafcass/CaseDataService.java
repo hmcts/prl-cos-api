@@ -467,7 +467,7 @@ public class CaseDataService {
                 otherDocsList.add(otherDocumentsElement);
                 log.info("OtherDocsList after document is added is {}", otherDocsList);
             }
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
         }
     }
