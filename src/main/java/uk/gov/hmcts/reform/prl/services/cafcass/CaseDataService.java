@@ -472,6 +472,7 @@ public class CaseDataService {
                 List<Element<OtherDocuments>> elementList = new ArrayList<>();
                 elementList.add(otherDocumentsElement);
                 log.info("elementlist test {}", elementList);
+                log.info("james test unique value {}", otherDocumentsElement);
             }
         } catch (Exception e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
