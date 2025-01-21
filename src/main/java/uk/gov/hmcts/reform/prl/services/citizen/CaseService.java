@@ -323,17 +323,15 @@ public class CaseService {
 
         List<Element<Document>> uploadDssDocs = new ArrayList<Element<Document>>();
         List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<Element<Document>>();
-        dssCaseData.getApplicantApplicationFormDocuments().forEach(edgeCaseDocumentElement -> {
-            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getDocumentLink();
-            uploadDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
-                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
+        dssCaseData.getApplicantApplicationFormDocuments().forEach(edgeCaseDocument -> {
+            uploadDssDocs.add(element(Document.builder().documentUrl(edgeCaseDocument.getDocumentURL()).documentBinaryUrl(
+                edgeCaseDocument.getDocumentBinaryURL()).documentFileName(edgeCaseDocument.getDocumentFilename()).build()));
             log.info("uploadDssDocs ========== {}", uploadDssDocs);
         });
 
-        dssCaseData.getApplicantAdditionalDocuments().forEach(edgeCaseDocumentElement -> {
-            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getDocumentLink();
-            uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
-                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
+        dssCaseData.getApplicantAdditionalDocuments().forEach(edgeCaseDocument -> {
+            uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(edgeCaseDocument.getDocumentURL()).documentBinaryUrl(
+                edgeCaseDocument.getDocumentBinaryURL()).documentFileName(edgeCaseDocument.getDocumentFilename()).build()));
             log.info("uploadAdditionalDssDocs ========== {}", uploadAdditionalDssDocs);
         });
 

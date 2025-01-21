@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.ccd.client.model.Document;
 
 import java.util.List;
 
@@ -33,6 +34,6 @@ public class DssCaseData {
     private String applicantStatementOfTruth;
     private String selectedCourt;
 
-    private List<EdgeCaseDocument> applicantApplicationFormDocuments;
-    private List<EdgeCaseDocument> applicantAdditionalDocuments;
+    private List<Document> applicantApplicationFormDocuments;
+    private List<Document> applicantAdditionalDocuments;
 }
