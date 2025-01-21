@@ -163,6 +163,9 @@ public class CaseDataService {
             populateBundleDoc(caseData, otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
 
+            log.info("Other Documents List Size --> {}", otherDocsList.size());
+            log.info("Other Documents List is --> {}", otherDocsList);
+
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
                 caseData.getRespondents().parallelStream().forEach(applicantDetailsElement -> {
@@ -199,6 +202,9 @@ public class CaseDataService {
                 .stmtOfServiceForApplication(null)
                 .respondents(respondents)
                 .build();
+
+            log.info("Case Data after processing documents --> {}", cafCassCaseData);
+
             cafCassCaseDetail.setCaseData(cafCassCaseData);
         });
 
