@@ -459,13 +459,19 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
+                log.info("OtherDocsList length is {}", otherDocsList.size());
+                log.info("document being added {}", caseDocument.getDocumentFileName());
                 Element<OtherDocuments> otherDocumentsElement = Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
                     DocTypeOtherDocumentsEnum.getValue(category)).build()).build();
                 log.info("OtherDocsElement is {}", otherDocumentsElement);
                 otherDocsList.add(otherDocumentsElement);
-                log.info("OtherDocsList after document is added is {}", otherDocsList);
+                log.info("OtherDocsList after document {} is added is {}", caseDocument.getDocumentFileName(), otherDocsList);
+                log.info("OtherDocsList length after is {}", otherDocsList.size());
+                List<Element<OtherDocuments>> elementList = new ArrayList<>();
+                elementList.add(otherDocumentsElement);
+                log.info("elementlist test {}", elementList);
             }
         } catch (Exception e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
