@@ -510,50 +510,54 @@ public class CaseService {
     private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData,
                                                          Map<String, String> partyIdAndType) {
         final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
+        if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
+            //sort in descending order
+            List<Element<ServedApplicationDetails>> servedApplicationDetailsList = new ArrayList<>(caseData.getFinalServedApplicationDetailsList());
+            servedApplicationDetailsList.sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
-        nullSafeCollection(caseData.getFinalServedApplicationDetailsList()).stream()
-            .map(Element::getValue)
-            .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
-            .forEach(servedApplicationDetails -> {
-                if (CollectionUtils.isEmpty(citizenDocuments[0])
-                    && servedApplicationDetails.getModeOfService() != null) {
-                    switch (servedApplicationDetails.getModeOfService()) {
-                        case SOA_BY_EMAIL_AND_POST -> {
-                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
-                                servedApplicationDetails,
-                                caseData.getServiceOfApplication(),
-                                partyIdAndType
-                            );
-                            addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, emailSoaPack);
+            servedApplicationDetailsList.stream()
+                .map(Element::getValue)
+                .forEach(servedApplicationDetails -> {
+                    if (CollectionUtils.isEmpty(citizenDocuments[0])
+                        && servedApplicationDetails.getModeOfService() != null) {
+                        switch (servedApplicationDetails.getModeOfService()) {
+                            case SOA_BY_EMAIL_AND_POST -> {
+                                CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
+                                    servedApplicationDetails,
+                                    caseData.getServiceOfApplication(),
+                                    partyIdAndType
+                                );
+                                addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, emailSoaPack);
 
-                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
-                                servedApplicationDetails,
-                                caseData.getServiceOfApplication(),
-                                partyIdAndType
-                            );
-                            addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, postSoaPack);
-                        }
-                        case SOA_BY_EMAIL -> {
-                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
-                                servedApplicationDetails,
-                                caseData.getServiceOfApplication(),
-                                partyIdAndType
-                            );
-                            addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, emailSoaPack);
-                        }
-                        case SOA_BY_POST -> {
-                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
-                                servedApplicationDetails,
-                                caseData.getServiceOfApplication(),
-                                partyIdAndType
-                            );
-                            addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, postSoaPack);
-                        }
+                                CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                    servedApplicationDetails,
+                                    caseData.getServiceOfApplication(),
+                                    partyIdAndType
+                                );
+                                addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, postSoaPack);
+                            }
+                            case SOA_BY_EMAIL -> {
+                                CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
+                                    servedApplicationDetails,
+                                    caseData.getServiceOfApplication(),
+                                    partyIdAndType
+                                );
+                                addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, emailSoaPack);
+                            }
+                            case SOA_BY_POST -> {
+                                CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                    servedApplicationDetails,
+                                    caseData.getServiceOfApplication(),
+                                    partyIdAndType
+                                );
+                                addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, postSoaPack);
+                            }
 
-                        default -> citizenDocuments[0] = null;
+                            default -> citizenDocuments[0] = null;
+                        }
                     }
-                }
-            });
+                });
+        }
         return citizenDocuments[0];
     }
 
@@ -575,37 +579,41 @@ public class CaseService {
         ServiceOfApplication serviceOfApplication,
         Map<String, String> partyIdAndType) {
         final CitizenDocuments[] citizenDocuments = {null};
+        if (CollectionUtils.isNotEmpty(servedApplicationDetails.getEmailNotificationDetails())) {
+            //sort in descending order
+            List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>(servedApplicationDetails.getEmailNotificationDetails());
+            emailNotifications.sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
-        nullSafeCollection(servedApplicationDetails.getEmailNotificationDetails()).stream()
-            .map(Element::getValue)
-            .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
-            .filter(emailNotificationDetails -> getStringsSplitByDelimiter(emailNotificationDetails.getPartyIds(), COMMA)
-                .contains(partyIdAndType.get(PARTY_ID)))
-            .findFirst()
-            .ifPresent(
-                emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
-                    .partyId(partyIdAndType.get(PARTY_ID))
-                    .servedParty(emailNotificationDetails.getServedParty())
-                    .uploadedDate(LocalDateTime.parse(
-                        emailNotificationDetails.getTimeStamp(),
-                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
-                    ))
-                    .applicantSoaPack(
-                        SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
-                            : null
-                    )
-                    .respondentSoaPack(
-                        SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
-                            : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
-                    )
-                    .wasCafcassServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
-                                                                    SERVED_PARTY_CAFCASS))
-                    .wasCafcassCymruServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
-                                                                         SERVED_PARTY_CAFCASS_CYMRU))
-                    .build()
-        );
+            emailNotifications.stream()
+                .map(Element::getValue)
+                .filter(emailNotificationDetails -> getStringsSplitByDelimiter(emailNotificationDetails.getPartyIds(), COMMA)
+                    .contains(partyIdAndType.get(PARTY_ID)))
+                .findFirst()
+                .ifPresent(
+                    emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                        .partyId(partyIdAndType.get(PARTY_ID))
+                        .servedParty(emailNotificationDetails.getServedParty())
+                        .uploadedDate(LocalDateTime.parse(
+                            emailNotificationDetails.getTimeStamp(),
+                            DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
+                        ))
+                        .applicantSoaPack(
+                            SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
+                                ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
+                                : null
+                        )
+                        .respondentSoaPack(
+                            SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
+                                ? emailNotificationDetails.getDocs().stream().map(Element::getValue).toList()
+                                : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
+                        )
+                        .wasCafcassServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
+                                                                        SERVED_PARTY_CAFCASS))
+                        .wasCafcassCymruServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
+                                                                             SERVED_PARTY_CAFCASS_CYMRU))
+                        .build()
+                );
+        }
         return citizenDocuments[0];
     }
 
@@ -626,35 +634,37 @@ public class CaseService {
         ServedApplicationDetails servedApplicationDetails,
         ServiceOfApplication serviceOfApplication,
         Map<String, String> partyIdAndType) {
-
         final CitizenDocuments[] citizenDocuments = {null};
+        if (CollectionUtils.isNotEmpty(servedApplicationDetails.getBulkPrintDetails())) {
+            List<Element<BulkPrintDetails>> postNotifications = new ArrayList<>(servedApplicationDetails.getBulkPrintDetails());
+            postNotifications.sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
-        nullSafeCollection(servedApplicationDetails.getBulkPrintDetails()).stream()
-            .map(Element::getValue)
-            .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
-            .filter(bulkPrintDetails -> getStringsSplitByDelimiter(bulkPrintDetails.getPartyIds(), COMMA)
-                .contains(partyIdAndType.get(PARTY_ID)))
-            .findFirst()
-            .ifPresent(
-                bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
-                    .partyId(partyIdAndType.get(PARTY_ID))
-                    .servedParty(bulkPrintDetails.getServedParty())
-                    .uploadedDate(LocalDateTime.parse(
-                        bulkPrintDetails.getTimeStamp(),
-                        DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
-                    ))
-                    .applicantSoaPack(
-                        SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
-                            : null
-                    )
-                    .respondentSoaPack(
-                        SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
-                            : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
-                    )
-                    .build()
-        );
+            postNotifications.stream()
+                .map(Element::getValue)
+                .filter(bulkPrintDetails -> getStringsSplitByDelimiter(bulkPrintDetails.getPartyIds(), COMMA)
+                    .contains(partyIdAndType.get(PARTY_ID)))
+                .findFirst()
+                .ifPresent(
+                    bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                        .partyId(partyIdAndType.get(PARTY_ID))
+                        .servedParty(bulkPrintDetails.getServedParty())
+                        .uploadedDate(LocalDateTime.parse(
+                            bulkPrintDetails.getTimeStamp(),
+                            DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS
+                        ))
+                        .applicantSoaPack(
+                            SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))
+                                ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
+                                : null
+                        )
+                        .respondentSoaPack(
+                            SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
+                                ? bulkPrintDetails.getPrintDocs().stream().map(Element::getValue).toList()
+                                : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
+                        )
+                        .build()
+                );
+        }
         return citizenDocuments[0];
     }
 
