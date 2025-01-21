@@ -420,6 +420,7 @@ public class CaseDataService {
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
+        log.info("Amount of documents found is {}", quarantineLegalDocs.size());
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -434,6 +435,7 @@ public class CaseDataService {
             }
             if (null != document) {
                 log.info("Found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
+                log.info("Document is {}", document.getDocumentFileName());
                 parseCategoryAndCreateList(
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     document,
@@ -451,6 +453,7 @@ public class CaseDataService {
             excludedDocumentList,
             caseDocument.getDocumentFileName()
         ))) {
+            log.info("document is being added to other documents {}", caseDocument.getDocumentFileName());
             addInOtherDocuments(category, caseDocument, otherDocsList);
 
         }
@@ -466,6 +469,7 @@ public class CaseDataService {
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
                     DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
+                log.info("OtherDocsList after document is added is {}", otherDocsList);
             }
         } catch (MalformedURLException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
