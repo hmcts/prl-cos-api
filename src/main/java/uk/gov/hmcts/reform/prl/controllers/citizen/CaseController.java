@@ -227,8 +227,7 @@ public class CaseController {
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody DssCaseData dssCaseData
-    ) throws JsonProcessingException {
+        @RequestBody DssCaseData dssCaseData) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseForDss(

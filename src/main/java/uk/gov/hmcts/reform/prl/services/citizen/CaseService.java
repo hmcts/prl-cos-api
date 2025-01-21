@@ -316,28 +316,25 @@ public class CaseService {
         return edgeCaseCourtList;
     }
 
-    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
+    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) {
 
-        System.out.println("dssCaseDate recieved " + dssCaseData);
+        log.info("dssCaseData received {}", dssCaseData);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         List<Element<Document>> uploadDssDocs = new ArrayList<Element<Document>>();
         List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<Element<Document>>();
-        dssCaseData.getApplicantApplicationFormDocuments().stream().forEach(edgeCaseDocumentElement -> {
-            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
-            System.out.println("document---------------" + document);
+        dssCaseData.getApplicantApplicationFormDocuments().forEach(edgeCaseDocumentElement -> {
+            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getDocumentLink();
             uploadDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
                 document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
-            System.out.println("**************");
-            System.out.println("uploadDssDocs ==========" + uploadDssDocs);
-
+            log.info("uploadDssDocs ========== {}", uploadDssDocs);
         });
 
-        dssCaseData.getApplicantAdditionalDocuments().stream().forEach(edgeCaseDocumentElement -> {
-            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
-
+        dssCaseData.getApplicantAdditionalDocuments().forEach(edgeCaseDocumentElement -> {
+            uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getDocumentLink();
             uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
                 document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
+            log.info("uploadAdditionalDssDocs ========== {}", uploadAdditionalDssDocs);
         });
 
         PartyDetails partyDetails = PartyDetails.builder().firstName(dssCaseData.getApplicantFirstName()).email(
@@ -358,7 +355,7 @@ public class CaseService {
                 .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
-        log.info("updatedCaseData --" + updatedCaseData);
+        log.info("updatedCaseData -- {}", updatedCaseData);
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
