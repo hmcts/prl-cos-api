@@ -163,9 +163,6 @@ public class CaseDataService {
             populateBundleDoc(caseData, otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
 
-            log.info("Other Documents List Size --> {}", otherDocsList.size());
-            log.info("Other Documents List is --> {}", otherDocsList);
-
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
                 caseData.getRespondents().parallelStream().forEach(applicantDetailsElement -> {
@@ -202,9 +199,6 @@ public class CaseDataService {
                 .stmtOfServiceForApplication(null)
                 .respondents(respondents)
                 .build();
-
-            log.info("Case Data after processing documents --> {}", cafCassCaseData);
-
             cafCassCaseDetail.setCaseData(cafCassCaseData);
         });
 
@@ -435,7 +429,6 @@ public class CaseDataService {
             }
             if (null != document) {
                 log.info("Found document for category {}", quarantineLegalDocElement.getValue().getCategoryId());
-                log.info("Document is {}", document.getDocumentFileName());
                 parseCategoryAndCreateList(
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     document,
@@ -454,6 +447,7 @@ public class CaseDataService {
             caseDocument.getDocumentFileName()
         ))) {
             log.info("document is being added to other documents {}", caseDocument.getDocumentFileName());
+            log.info("whole document object {}", caseDocument);
             addInOtherDocuments(category, caseDocument, otherDocsList);
 
         }
@@ -465,10 +459,12 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                otherDocsList.add(Element.<OtherDocuments>builder().id(
+                Element<OtherDocuments> otherDocumentsElement = Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
-                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
+                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build();
+                log.info("OtherDocsElement is {}", otherDocumentsElement);
+                otherDocsList.add(otherDocumentsElement);
                 log.info("OtherDocsList after document is added is {}", otherDocsList);
             }
         } catch (MalformedURLException e) {
@@ -489,10 +485,12 @@ public class CaseDataService {
 
     public Document buildFromCaseDocument(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument) throws MalformedURLException {
         URL url = new URL(caseDocument.getDocumentUrl());
-        return Document.builder()
+        Document document = Document.builder()
             .documentId(CafCassCaseData.getDocumentId(url))
             .documentFileName(caseDocument.getDocumentFileName())
             .build();
+        log.info("Document is {}", document);
+        return document;
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
