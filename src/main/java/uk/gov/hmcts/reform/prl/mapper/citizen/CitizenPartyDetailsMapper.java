@@ -937,12 +937,10 @@ public class CitizenPartyDetailsMapper {
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
-            log.info("case data before updating other person confidentiality: {}", caseDataBuilder);
             caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(
                 caseDataBuilder.build().getRelations().getChildAndOtherPeopleRelations(),
                 caseDataBuilder.build().getOtherPartyInTheCaseRevised()
             ));
-            log.info("case data after updating other person confidentiality: {}", caseDataBuilder);
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
