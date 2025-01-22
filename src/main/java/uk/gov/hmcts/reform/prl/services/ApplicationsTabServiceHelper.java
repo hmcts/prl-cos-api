@@ -178,17 +178,9 @@ public class ApplicationsTabServiceHelper {
             .map(Element::getValue)
             .toList();
 
-        //Get all the distinct other person with confidential details
-        List<String> uniqueOtherPersonIds = caseData.getRelations().getChildAndOtherPeopleRelations().stream()
-            .filter(relationElement -> relationElement.getValue().getChildLivesWith().equals(YesOrNo.Yes)
-                && relationElement.getValue().getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
-            .map(relationElement -> relationElement.getValue().getOtherPeopleId())
-            .distinct()
-            .toList();
-
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation childAndOtherPeopleRelation = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
-            childAndOtherPeopleRelation = maskChildAndOtherPeopleConfidentialDetails(childAndOtherPeopleRelation, otherPeople, uniqueOtherPersonIds);
+            childAndOtherPeopleRelation = maskChildAndOtherPeopleConfidentialDetails(childAndOtherPeopleRelation, otherPeople);
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(childAndOtherPeopleRelation).build();
             log.info("childAndOtherPeopleRelation after builder---> " + app);
             otherPeopleRelations.add(app);
@@ -198,12 +190,7 @@ public class ApplicationsTabServiceHelper {
     }
 
     private ChildAndOtherPeopleRelation maskChildAndOtherPeopleConfidentialDetails(ChildAndOtherPeopleRelation childAndOtherPeopleRelation,
-                                                                                   ChildrenAndOtherPeopleRelation otherPeople,
-                                                                                   List<String> uniqueOtherPersonIds) {
-
-        if (uniqueOtherPersonIds.contains(otherPeople.getOtherPeopleId())) {
-            otherPeople = otherPeople.toBuilder().isOtherPeopleIdConfidential(YesOrNo.Yes).build();
-        }
+                                                                                   ChildrenAndOtherPeopleRelation otherPeople) {
 
         if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())) {
             ChildAndOtherPeopleRelation.ChildAndOtherPeopleRelationBuilder builder = childAndOtherPeopleRelation.toBuilder();
