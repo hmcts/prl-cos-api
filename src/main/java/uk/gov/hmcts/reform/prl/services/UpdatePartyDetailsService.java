@@ -226,13 +226,6 @@ public class UpdatePartyDetailsService {
                         confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
                         partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
                     }
-                } else if (YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
-                    || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
-                    || YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
-
-                    confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
-                    partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
-
                 }
                 updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
             }
