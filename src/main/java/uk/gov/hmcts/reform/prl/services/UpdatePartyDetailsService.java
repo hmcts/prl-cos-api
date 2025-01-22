@@ -211,9 +211,12 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> partyDetailsBeforeList = applicantDetailsBeforeList.stream().map(Element::getValue).toList();
             updatedPartyDetailsList = new ArrayList<>();
             for (PartyDetails partyDetails : partyDetailsList) {
-                for (PartyDetails partyDetailsBefore : partyDetailsBeforeList) {
-                    if (checkIfUsersMatch(partyDetails, partyDetailsBefore)
-                        && checkIfAddressHasChanged(partyDetails, partyDetailsBefore)
+                int index = partyDetailsList.indexOf(partyDetails);
+                log.info("index : " + index);
+                if (indexExists(partyDetailsBeforeList, index)) {
+                    log.info("inside indexExists");
+                    PartyDetails partyDetailsBefore = partyDetailsBeforeList.get(index);
+                    if (checkIfAddressHasChanged(partyDetails, partyDetailsBefore)
                         || checkIfPhoneHasChanged(partyDetails, partyDetailsBefore)
                         || checkIfEmailHasChanged(partyDetails, partyDetailsBefore)) {
 
@@ -230,12 +233,8 @@ public class UpdatePartyDetailsService {
         return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
     }
 
-    private static boolean checkIfUsersMatch(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        boolean bool = isNotEmpty(partyDetails.getPartyId())
-            && isNotEmpty(partyDetailsBefore.getPartyId())
-            && partyDetails.getPartyId().equals(partyDetailsBefore.getPartyId());
-        log.info("checkIfUsersMatch : " + bool);
-        return bool;
+    private boolean indexExists(final List<?> list, final int index) {
+        return list != null && index >= 0 && index < list.size();
     }
 
     private static boolean checkIfAddressHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
