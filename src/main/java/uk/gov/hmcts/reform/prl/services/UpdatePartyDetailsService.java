@@ -107,8 +107,9 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        CaseData caseDataBefore = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class);
+        CaseData caseDataBefore = objectMapper.convertValue(caseDataMap, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
@@ -202,7 +203,7 @@ public class UpdatePartyDetailsService {
     }
 
     private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData, CaseData caseDataBefore) {
-        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();;
+        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
         List<Element<PartyDetails>> applicantDetailsBeforeList = caseDataBefore.getApplicants();
         log.info("caseDataBefore" + caseDataBefore);
         log.info("applicantDetailsBeforeList : " + applicantDetailsBeforeList);
