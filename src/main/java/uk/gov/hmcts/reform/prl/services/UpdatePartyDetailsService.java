@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -107,6 +108,7 @@ public class UpdatePartyDetailsService {
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        CaseData caseDataBefore = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
@@ -168,7 +170,7 @@ public class UpdatePartyDetailsService {
                 RESPONDENTS,
                 false
             );
-            caseData = setCitizenConfidentialDetailsInResponse(caseData);
+            caseData = setCitizenConfidentialDetailsInResponse(caseData, caseDataBefore);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -199,47 +201,105 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-    private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData) {
+    private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData, CaseData caseDataBefore) {
         List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
+        List<Element<PartyDetails>> applicantDetailsBeforeList = caseDataBefore.getApplicants();
         List<Element<PartyDetails>> updatedPartyDetailsList = null;
 
-        if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList)) {
-            updatedPartyDetailsList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList) && CollectionUtils.isNotEmpty(applicantDetailsBeforeList)) {
             List<PartyDetails> partyDetailsList = applicantDetailsWrappedList.stream().map(Element::getValue).toList();
+            List<PartyDetails> partyDetailsBeforeList = applicantDetailsBeforeList.stream().map(Element::getValue).toList();
+            updatedPartyDetailsList = new ArrayList<>();
             for (PartyDetails partyDetails : partyDetailsList) {
+                for (PartyDetails partyDetailsBefore : partyDetailsBeforeList) {
+                    if (checkIfUsersMatch(partyDetails, partyDetailsBefore)
+                        && checkIfAddressHasChanged(partyDetails, partyDetailsBefore)
+                        || checkIfPhoneHasChanged(partyDetails, partyDetailsBefore)
+                        || checkIfEmailHasChanged(partyDetails, partyDetailsBefore)) {
 
-                YesOrNo confidentiality = YesOrNo.No;
-                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+                        YesOrNo confidentiality = YesOrNo.Yes;
+                        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
-                if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
-                    || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
-                    || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
-                    confidentiality = YesOrNo.Yes;
-                    confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
+                        confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
+                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, confidentiality, confidentialityListEnums);
+                    }
                 }
-
-                if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
-                    partyDetails = partyDetails
-                        .toBuilder()
-                        .response(partyDetails
-                            .getResponse()
-                            .toBuilder()
-                            .keepDetailsPrivate(
-                                partyDetails
-                                .getResponse()
-                                .getKeepDetailsPrivate()
-                                .toBuilder()
-                                .confidentiality(confidentiality)
-                                .confidentialityList(confidentialityListEnums)
-                                .build())
-                            .build())
-                        .build();
-                }
-
                 updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
             }
         }
         return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
+    }
+
+    private static boolean checkIfUsersMatch(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+        return isNotEmpty(partyDetails.getPartyId())
+            && isNotEmpty(partyDetailsBefore.getPartyId())
+            && partyDetails.getPartyId().equals(partyDetailsBefore.getPartyId());
+    }
+
+    private static boolean checkIfAddressHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+        return isNotEmpty(partyDetails.getIsAddressConfidential())
+            && isNotEmpty(partyDetailsBefore.getIsAddressConfidential())
+            && !partyDetailsBefore.getIsAddressConfidential()
+            .getDisplayedValue().equals(partyDetails.getIsAddressConfidential().getDisplayedValue());
+    }
+
+    private static boolean checkIfEmailHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+        return isNotEmpty(partyDetails.getIsEmailAddressConfidential())
+            && isNotEmpty(partyDetailsBefore.getIsEmailAddressConfidential())
+            && !partyDetailsBefore.getIsEmailAddressConfidential()
+            .getDisplayedValue().equals(partyDetails.getIsEmailAddressConfidential().getDisplayedValue());
+    }
+
+    private static boolean checkIfPhoneHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+        return isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
+            && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
+            && !partyDetailsBefore.getIsPhoneNumberConfidential()
+            .getDisplayedValue().equals(partyDetails.getIsPhoneNumberConfidential().getDisplayedValue());
+    }
+
+    private static PartyDetails setUpdatedKeepDetailsPrivate(PartyDetails partyDetails,
+                                                             YesOrNo confidentiality,
+                                                             List<ConfidentialityListEnum> confidentialityListEnums) {
+        if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
+            return partyDetails
+                .toBuilder()
+                .response(partyDetails
+                    .getResponse()
+                    .toBuilder()
+                    .keepDetailsPrivate(
+                        partyDetails
+                            .getResponse()
+                            .getKeepDetailsPrivate()
+                            .toBuilder()
+                            .confidentiality(confidentiality)
+                            .confidentialityList(confidentialityListEnums)
+                            .build())
+                    .build())
+                .build();
+        } else if (null != partyDetails.getResponse()) {
+            return partyDetails
+                .toBuilder()
+                .response(partyDetails
+                    .getResponse()
+                    .toBuilder()
+                    .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                        .confidentiality(confidentiality)
+                        .confidentialityList(confidentialityListEnums)
+                        .build())
+                    .build())
+                .build();
+        } else {
+            return partyDetails
+                .toBuilder()
+                .response(Response.builder()
+                    .keepDetailsPrivate(KeepDetailsPrivate
+                        .builder()
+                        .confidentiality(confidentiality)
+                        .confidentialityList(confidentialityListEnums)
+                        .build())
+                    .build())
+                .build();
+        }
     }
 
     private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails,
