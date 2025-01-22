@@ -202,10 +202,9 @@ public class UpdatePartyDetailsService {
     }
 
     private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData, CaseData caseDataBefore) {
-        log.info("inside setCitizenConfidentialDetailsInResponse");
-        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
-        log.info("applicantDetailsWrappedList : " + applicantDetailsWrappedList);
+        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();;
         List<Element<PartyDetails>> applicantDetailsBeforeList = caseDataBefore.getApplicants();
+        log.info("caseDataBefore" + caseDataBefore);
         log.info("applicantDetailsBeforeList : " + applicantDetailsBeforeList);
         List<Element<PartyDetails>> updatedPartyDetailsList = null;
 
