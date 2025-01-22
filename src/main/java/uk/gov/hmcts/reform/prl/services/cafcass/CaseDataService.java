@@ -414,7 +414,6 @@ public class CaseDataService {
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
                                           List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
-        log.info("Amount of documents found is {}", quarantineLegalDocs.size());
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -446,8 +445,6 @@ public class CaseDataService {
             excludedDocumentList,
             caseDocument.getDocumentFileName()
         ))) {
-            log.info("document is being added to other documents {}", caseDocument.getDocumentFileName());
-            log.info("whole document object {}", caseDocument);
             addInOtherDocuments(category, caseDocument, otherDocsList);
 
         }
@@ -459,22 +456,12 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                log.info("OtherDocsList length is {}", otherDocsList.size());
-                log.info("document being added {}", caseDocument.getDocumentFileName());
-                Element<OtherDocuments> otherDocumentsElement = Element.<OtherDocuments>builder().id(
+                otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
-                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build();
-                log.info("OtherDocsElement is {}", otherDocumentsElement);
-                otherDocsList.add(otherDocumentsElement);
-                log.info("OtherDocsList after document {} is added is {}", caseDocument.getDocumentFileName(), otherDocsList);
-                log.info("OtherDocsList length after is {}", otherDocsList.size());
-                List<Element<OtherDocuments>> elementList = new ArrayList<>();
-                elementList.add(otherDocumentsElement);
-                log.info("elementlist test {}", elementList);
-                log.info("james test unique value {}", otherDocumentsElement);
+                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
             }
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
         }
     }
@@ -492,12 +479,10 @@ public class CaseDataService {
 
     public Document buildFromCaseDocument(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument) throws MalformedURLException {
         URL url = new URL(caseDocument.getDocumentUrl());
-        Document document = Document.builder()
+        return Document.builder()
             .documentId(CafCassCaseData.getDocumentId(url))
             .documentFileName(caseDocument.getDocumentFileName())
             .build();
-        log.info("Document is {}", document);
-        return document;
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
