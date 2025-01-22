@@ -202,17 +202,21 @@ public class UpdatePartyDetailsService {
     }
 
     private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData, CaseData caseDataBefore) {
+        log.info("inside setCitizenConfidentialDetailsInResponse");
         List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
+        log.info("applicantDetailsWrappedList : " + applicantDetailsWrappedList);
         List<Element<PartyDetails>> applicantDetailsBeforeList = caseDataBefore.getApplicants();
+        log.info("applicantDetailsBeforeList : " + applicantDetailsBeforeList);
         List<Element<PartyDetails>> updatedPartyDetailsList = null;
 
         if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList) && CollectionUtils.isNotEmpty(applicantDetailsBeforeList)) {
+            log.info("inside applicantDetailsWrappedList and applicantDetailsBeforeList not empty");
             List<PartyDetails> partyDetailsList = applicantDetailsWrappedList.stream().map(Element::getValue).toList();
             List<PartyDetails> partyDetailsBeforeList = applicantDetailsBeforeList.stream().map(Element::getValue).toList();
             updatedPartyDetailsList = new ArrayList<>();
             for (PartyDetails partyDetails : partyDetailsList) {
                 int index = partyDetailsList.indexOf(partyDetails);
-                log.info("index : " + index);
+                log.info("index inside partydetails is : " + index);
 
                 if (indexExists(partyDetailsBeforeList, index)) {
                     log.info("inside indexExists");
