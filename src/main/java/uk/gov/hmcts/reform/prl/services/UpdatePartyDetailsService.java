@@ -231,30 +231,38 @@ public class UpdatePartyDetailsService {
     }
 
     private static boolean checkIfUsersMatch(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getPartyId())
+        boolean bool = isNotEmpty(partyDetails.getPartyId())
             && isNotEmpty(partyDetailsBefore.getPartyId())
             && partyDetails.getPartyId().equals(partyDetailsBefore.getPartyId());
+        log.info("checkIfUsersMatch : " + bool);
+        return bool;
     }
 
     private static boolean checkIfAddressHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsAddressConfidential())
+        boolean bool = isNotEmpty(partyDetails.getIsAddressConfidential())
             && isNotEmpty(partyDetailsBefore.getIsAddressConfidential())
             && !partyDetailsBefore.getIsAddressConfidential()
             .getDisplayedValue().equals(partyDetails.getIsAddressConfidential().getDisplayedValue());
+        log.info("checkIfAddressHasChanged : " + bool);
+        return bool;
     }
 
     private static boolean checkIfEmailHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsEmailAddressConfidential())
+        boolean bool = isNotEmpty(partyDetails.getIsEmailAddressConfidential())
             && isNotEmpty(partyDetailsBefore.getIsEmailAddressConfidential())
             && !partyDetailsBefore.getIsEmailAddressConfidential()
             .getDisplayedValue().equals(partyDetails.getIsEmailAddressConfidential().getDisplayedValue());
+        log.info("checkIfEmailHasChanged : " + bool);
+        return bool;
     }
 
     private static boolean checkIfPhoneHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
-        return isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
+        boolean bool = isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
             && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
             && !partyDetailsBefore.getIsPhoneNumberConfidential()
             .getDisplayedValue().equals(partyDetails.getIsPhoneNumberConfidential().getDisplayedValue());
+        log.info("checkIfPhoneHasChanged : " + bool);
+        return bool;
     }
 
     private static PartyDetails setUpdatedKeepDetailsPrivate(PartyDetails partyDetails,
