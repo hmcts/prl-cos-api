@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +43,10 @@ public class ApplicationsTabServiceHelper {
         List<Element<OtherPersonInTheCaseRevised>> otherPersonsInTheCase = new ArrayList<>();
 
         if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
-            return getEmptyOtherPeople(otherPersonsInTheCase);
+            OtherPersonInTheCaseRevised op = OtherPersonInTheCaseRevised.builder().build();
+            Element<OtherPersonInTheCaseRevised> other = Element.<OtherPersonInTheCaseRevised>builder().value(op).build();
+            otherPersonsInTheCase.add(other);
+            return otherPersonsInTheCase;
         }
         List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream().map(Element::getValue).toList();
         otherPeople = maskConfidentialDetails(otherPeople);
@@ -60,16 +62,10 @@ public class ApplicationsTabServiceHelper {
                 otherPersonsInTheCase.add(wrappedPerson);
             }
         }
-        return CollectionUtils.size(otherPersonsInTheCase) > 0 ? otherPersonsInTheCase : getEmptyOtherPeople(
-            otherPersonsInTheCase);
-    }
-
-    private static List<Element<OtherPersonInTheCaseRevised>> getEmptyOtherPeople(List<Element<OtherPersonInTheCaseRevised>> otherPersonsInTheCase) {
-        OtherPersonInTheCaseRevised op = OtherPersonInTheCaseRevised.builder().build();
-        Element<OtherPersonInTheCaseRevised> other = Element.<OtherPersonInTheCaseRevised>builder().value(op).build();
-        otherPersonsInTheCase.add(other);
         return otherPersonsInTheCase;
     }
+
+
 
 
     public List<Element<ChildDetailsRevised>> getChildRevisedDetails(CaseData caseData) {
@@ -184,8 +180,10 @@ public class ApplicationsTabServiceHelper {
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation childAndOtherPeopleRelation = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
+            log.info("childAndOtherPeopleRelation---> " + childAndOtherPeopleRelation);
             childAndOtherPeopleRelation = maskChildAndOtherPeopleConfidentialDetails(childAndOtherPeopleRelation, otherPeople);
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(childAndOtherPeopleRelation).build();
+            log.info("childAndOtherPeopleRelation after builder---> " + app);
             otherPeopleRelations.add(app);
         }
         log.info("-->getChildAndOtherPeopleRelationsTable()--->End");
