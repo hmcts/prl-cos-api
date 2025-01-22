@@ -213,7 +213,6 @@ public class UpdatePartyDetailsService {
             for (PartyDetails partyDetails : partyDetailsList) {
                 int index = partyDetailsList.indexOf(partyDetails);
                 log.info("index : " + index);
-                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
                 if (indexExists(partyDetailsBeforeList, index)) {
                     log.info("inside indexExists");
@@ -223,9 +222,11 @@ public class UpdatePartyDetailsService {
                         || checkIfPhoneHasChanged(partyDetails, partyDetailsBefore)
                         || checkIfEmailHasChanged(partyDetails, partyDetailsBefore)) {
 
-                        confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
+                        List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
                         partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
                     }
+                } else {
+                    partyDetails = setKeepDetailsPrivateForNewParty(partyDetails);
                 }
                 updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
             }
@@ -233,7 +234,22 @@ public class UpdatePartyDetailsService {
         return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
     }
 
-    private boolean indexExists(final List<?> list, final int index) {
+    private static PartyDetails setKeepDetailsPrivateForNewParty(PartyDetails partyDetails) {
+        log.info("Partydetails is {}", partyDetails);
+        if (null != partyDetails.getIsPhoneNumberConfidential()
+            && YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+            || null != partyDetails.getIsEmailAddressConfidential()
+            && YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
+            || null != partyDetails.getIsAddressConfidential()
+            && YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
+            List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
+            return setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
+        }
+
+        return partyDetails;
+    }
+
+    private static boolean indexExists(final List<?> list, final int index) {
         return list != null && index >= 0 && index < list.size();
     }
 
@@ -309,8 +325,8 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails,
-                                                                             List<ConfidentialityListEnum> confidentialityListEnums) {
+    private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails) {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
         if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
             confidentialityListEnums.add(ConfidentialityListEnum.address);
         }
