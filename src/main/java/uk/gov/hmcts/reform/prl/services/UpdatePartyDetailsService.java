@@ -213,19 +213,26 @@ public class UpdatePartyDetailsService {
             for (PartyDetails partyDetails : partyDetailsList) {
                 int index = partyDetailsList.indexOf(partyDetails);
                 log.info("index : " + index);
+                List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
                 if (indexExists(partyDetailsBeforeList, index)) {
                     log.info("inside indexExists");
                     PartyDetails partyDetailsBefore = partyDetailsBeforeList.get(index);
+
                     if (checkIfAddressHasChanged(partyDetails, partyDetailsBefore)
                         || checkIfPhoneHasChanged(partyDetails, partyDetailsBefore)
                         || checkIfEmailHasChanged(partyDetails, partyDetailsBefore)) {
 
-                        YesOrNo confidentiality = YesOrNo.Yes;
-                        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
-
                         confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
-                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, confidentiality, confidentialityListEnums);
+                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
                     }
+                } else if (YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                    || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
+                    || YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
+
+                    confidentialityListEnums = setConfidentialityListEnums(partyDetails, confidentialityListEnums);
+                    partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
+
                 }
                 updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
             }
