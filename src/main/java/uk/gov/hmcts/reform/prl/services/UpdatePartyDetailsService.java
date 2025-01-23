@@ -553,11 +553,12 @@ public class UpdatePartyDetailsService {
             keepDetailsPrivate = KeepDetailsPrivate.builder().build();
         }
         List<ConfidentialityListEnum> confidentialityList = new ArrayList<>();
-        if (YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())
-            || null != respondent.getAddress() && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
+        if ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown()) && YesOrNo.Yes.equals(respondent.getIsAddressConfidential()))
+            || (null != respondent.getAddress() && YesOrNo.Yes.equals(respondent.getIsAddressConfidential()))) {
             confidentialityList.add(ConfidentialityListEnum.address);
         }
-        if (YesOrNo.Yes.equals(respondent.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())) {
+        if (YesOrNo.Yes.equals(respondent.getCanYouProvidePhoneNumber()) && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())
+            || (null != respondent.getPhoneNumber() && YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential()))) {
             confidentialityList.add(ConfidentialityListEnum.phoneNumber);
         }
         if (YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()) && YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
