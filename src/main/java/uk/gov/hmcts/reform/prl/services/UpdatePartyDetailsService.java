@@ -140,6 +140,14 @@ public class UpdatePartyDetailsService {
                 FL401_RESPONDENTS,
                 false
             );
+            if (CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equals(callbackRequest.getEventId())
+                || CaseEvent.APPLICANT_DETAILS.getValue().equals(callbackRequest.getEventId())) {
+                caseData = caseData
+                    .toBuilder()
+                    .applicantsFL401(setCitizenConfidentialDetailsFL401(caseData.getApplicantsFL401(),
+                        caseDataBefore.getApplicantsFL401()))
+                    .build();
+            }
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -171,7 +179,14 @@ public class UpdatePartyDetailsService {
                 RESPONDENTS,
                 false
             );
-            caseData = setCitizenConfidentialDetailsInResponse(caseData, caseDataBefore);
+            if (CaseEvent.AMEND_APPLICANTS_DETAILS.getValue().equals(callbackRequest.getEventId())
+                || CaseEvent.APPLICANT_DETAILS.getValue().equals(callbackRequest.getEventId())) {
+                caseData = caseData
+                    .toBuilder()
+                    .applicants(setCitizenConfidentialDetailsInResponseC100(caseData.getApplicants(),
+                        caseDataBefore.getApplicants()))
+                    .build();
+            }
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
                     ElementUtils.unwrapElements(elements).get(0)));
@@ -201,9 +216,8 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-    private CaseData setCitizenConfidentialDetailsInResponse(CaseData caseData, CaseData caseDataBefore) {
-        List<Element<PartyDetails>> applicantDetailsWrappedList = caseData.getApplicants();
-        List<Element<PartyDetails>> applicantDetailsBeforeList = caseDataBefore.getApplicants();
+    private List<Element<PartyDetails>> setCitizenConfidentialDetailsInResponseC100(List<Element<PartyDetails>> applicantDetailsWrappedList,
+                                                                 List<Element<PartyDetails>> applicantDetailsBeforeList) {
         List<Element<PartyDetails>> updatedPartyDetailsList = null;
 
         if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList) && CollectionUtils.isNotEmpty(applicantDetailsBeforeList)) {
@@ -214,27 +228,54 @@ public class UpdatePartyDetailsService {
 
                 if (indexExists(applicantDetailsBeforeList, index)) {
                     PartyDetails partyDetailsBefore = applicantDetailsBeforeList.get(index).getValue();
-
-                    if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
-                        || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
-                        || checkIfEmailConfidentialityHasChanged(partyDetails, partyDetailsBefore)) {
-
-                        List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
-                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, confidentialityListEnums);
-                    }
+                    partyDetails = checkConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
                 } else {
-                    partyDetails = setKeepDetailsPrivateForNewParty(partyDetails);
+                    partyDetails = partyDetails
+                        .toBuilder()
+                        .response(Response
+                            .builder()
+                            .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                            .build())
+                        .build();
                 }
                 updatedPartyDetailsList.add(element(partyDetailsElement.getId(), partyDetails));
             }
         }
-        return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
+        return updatedPartyDetailsList;
     }
 
-    private static PartyDetails setKeepDetailsPrivateForNewParty(PartyDetails partyDetails) {
-        List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
-        if (CollectionUtils.isNotEmpty(confidentialityListEnums)) {
-            return setUpdatedKeepDetailsPrivate(partyDetails, confidentialityListEnums);
+    private PartyDetails setCitizenConfidentialDetailsFL401(PartyDetails partyDetails,
+                                                                   PartyDetails partyDetailsBefore) {
+        if (null != partyDetailsBefore && null != partyDetails) {
+            partyDetails = checkConfidentialDetailsForExistingUser(partyDetails, partyDetailsBefore);
+        }
+        return partyDetails;
+    }
+
+    private PartyDetails checkConfidentialDetailsForExistingUser(PartyDetails partyDetails,
+                                                                        PartyDetails partyDetailsBefore) {
+        if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+            || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+            || checkIfEmailConfidentialityHasChanged(partyDetails, partyDetailsBefore)) {
+
+            if (null != partyDetails.getResponse()) {
+                return partyDetails
+                    .toBuilder()
+                    .response(partyDetails
+                        .getResponse()
+                        .toBuilder()
+                        .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                        .build())
+                    .build();
+            } else {
+                return partyDetails
+                    .toBuilder()
+                    .response(Response
+                        .builder()
+                        .keepDetailsPrivate(updateRespondentKeepYourDetailsPrivateInformation(partyDetails))
+                        .build())
+                    .build();
+            }
         }
 
         return partyDetails;
@@ -263,65 +304,6 @@ public class UpdatePartyDetailsService {
             && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
             && !partyDetailsBefore.getIsPhoneNumberConfidential()
             .equals(partyDetails.getIsPhoneNumberConfidential());
-    }
-
-    private static PartyDetails setUpdatedKeepDetailsPrivate(PartyDetails partyDetails,
-                                                             List<ConfidentialityListEnum> confidentialityListEnums) {
-        if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
-            return partyDetails
-                .toBuilder()
-                .response(partyDetails
-                    .getResponse()
-                    .toBuilder()
-                    .keepDetailsPrivate(
-                        partyDetails
-                            .getResponse()
-                            .getKeepDetailsPrivate()
-                            .toBuilder()
-                            .confidentiality(YesOrNo.Yes)
-                            .confidentialityList(confidentialityListEnums)
-                            .build())
-                    .build())
-                .build();
-        } else if (null != partyDetails.getResponse()) {
-            return partyDetails
-                .toBuilder()
-                .response(partyDetails
-                    .getResponse()
-                    .toBuilder()
-                    .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                        .confidentiality(YesOrNo.Yes)
-                        .confidentialityList(confidentialityListEnums)
-                        .build())
-                    .build())
-                .build();
-        } else {
-            return partyDetails
-                .toBuilder()
-                .response(Response.builder()
-                    .keepDetailsPrivate(KeepDetailsPrivate
-                        .builder()
-                        .confidentiality(YesOrNo.Yes)
-                        .confidentialityList(confidentialityListEnums)
-                        .build())
-                    .build())
-                .build();
-        }
-    }
-
-    private static List<ConfidentialityListEnum> setConfidentialityListEnums(PartyDetails partyDetails) {
-        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
-        if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
-            confidentialityListEnums.add(ConfidentialityListEnum.address);
-        }
-        if (YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())) {
-            confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
-        }
-        if (YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
-            confidentialityListEnums.add(ConfidentialityListEnum.email);
-        }
-
-        return  confidentialityListEnums;
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
