@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -207,40 +208,34 @@ public class UpdatePartyDetailsService {
         List<Element<PartyDetails>> updatedPartyDetailsList = null;
 
         if (CollectionUtils.isNotEmpty(applicantDetailsWrappedList) && CollectionUtils.isNotEmpty(applicantDetailsBeforeList)) {
-            List<PartyDetails> partyDetailsList = applicantDetailsWrappedList.stream().map(Element::getValue).toList();
-            List<PartyDetails> partyDetailsBeforeList = applicantDetailsBeforeList.stream().map(Element::getValue).toList();
             updatedPartyDetailsList = new ArrayList<>();
-            for (PartyDetails partyDetails : partyDetailsList) {
-                int index = partyDetailsList.indexOf(partyDetails);
+            for (Element<PartyDetails> partyDetailsElement : applicantDetailsWrappedList) {
+                PartyDetails partyDetails = partyDetailsElement.getValue();
+                int index = applicantDetailsWrappedList.indexOf(partyDetailsElement);
 
-                if (indexExists(partyDetailsBeforeList, index)) {
-                    PartyDetails partyDetailsBefore = partyDetailsBeforeList.get(index);
+                if (indexExists(applicantDetailsBeforeList, index)) {
+                    PartyDetails partyDetailsBefore = applicantDetailsBeforeList.get(index).getValue();
 
-                    if (checkIfAddressHasChanged(partyDetails, partyDetailsBefore)
-                        || checkIfPhoneHasChanged(partyDetails, partyDetailsBefore)
-                        || checkIfEmailHasChanged(partyDetails, partyDetailsBefore)) {
+                    if (checkIfAddressConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+                        || checkIfPhoneConfidentialityHasChanged(partyDetails, partyDetailsBefore)
+                        || checkIfEmailConfidentialityHasChanged(partyDetails, partyDetailsBefore)) {
 
                         List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
-                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
+                        partyDetails = setUpdatedKeepDetailsPrivate(partyDetails, confidentialityListEnums);
                     }
                 } else {
                     partyDetails = setKeepDetailsPrivateForNewParty(partyDetails);
                 }
-                updatedPartyDetailsList.add(Element.<PartyDetails>builder().value(partyDetails).build());
+                updatedPartyDetailsList.add(element(partyDetailsElement.getId(), partyDetails));
             }
         }
         return caseData.toBuilder().applicants(updatedPartyDetailsList).build();
     }
 
     private static PartyDetails setKeepDetailsPrivateForNewParty(PartyDetails partyDetails) {
-        if (null != partyDetails.getIsPhoneNumberConfidential()
-            && YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
-            || null != partyDetails.getIsEmailAddressConfidential()
-            && YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())
-            || null != partyDetails.getIsAddressConfidential()
-            && YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())) {
-            List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
-            return setUpdatedKeepDetailsPrivate(partyDetails, YesOrNo.Yes, confidentialityListEnums);
+        List<ConfidentialityListEnum> confidentialityListEnums = setConfidentialityListEnums(partyDetails);
+        if (CollectionUtils.isNotEmpty(confidentialityListEnums)) {
+            return setUpdatedKeepDetailsPrivate(partyDetails, confidentialityListEnums);
         }
 
         return partyDetails;
@@ -250,29 +245,28 @@ public class UpdatePartyDetailsService {
         return list != null && index >= 0 && index < list.size();
     }
 
-    private static boolean checkIfAddressHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+    private static boolean checkIfAddressConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
         return isNotEmpty(partyDetails.getIsAddressConfidential())
             && isNotEmpty(partyDetailsBefore.getIsAddressConfidential())
             && !partyDetailsBefore.getIsAddressConfidential()
-            .getDisplayedValue().equals(partyDetails.getIsAddressConfidential().getDisplayedValue());
+            .equals(partyDetails.getIsAddressConfidential());
     }
 
-    private static boolean checkIfEmailHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+    private static boolean checkIfEmailConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
         return isNotEmpty(partyDetails.getIsEmailAddressConfidential())
             && isNotEmpty(partyDetailsBefore.getIsEmailAddressConfidential())
             && !partyDetailsBefore.getIsEmailAddressConfidential()
-            .getDisplayedValue().equals(partyDetails.getIsEmailAddressConfidential().getDisplayedValue());
+            .equals(partyDetails.getIsEmailAddressConfidential());
     }
 
-    private static boolean checkIfPhoneHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
+    private static boolean checkIfPhoneConfidentialityHasChanged(PartyDetails partyDetails, PartyDetails partyDetailsBefore) {
         return isNotEmpty(partyDetails.getIsPhoneNumberConfidential())
             && isNotEmpty(partyDetailsBefore.getIsPhoneNumberConfidential())
             && !partyDetailsBefore.getIsPhoneNumberConfidential()
-            .getDisplayedValue().equals(partyDetails.getIsPhoneNumberConfidential().getDisplayedValue());
+            .equals(partyDetails.getIsPhoneNumberConfidential());
     }
 
     private static PartyDetails setUpdatedKeepDetailsPrivate(PartyDetails partyDetails,
-                                                             YesOrNo confidentiality,
                                                              List<ConfidentialityListEnum> confidentialityListEnums) {
         if (null != partyDetails.getResponse() && null != partyDetails.getResponse().getKeepDetailsPrivate()) {
             return partyDetails
@@ -285,7 +279,7 @@ public class UpdatePartyDetailsService {
                             .getResponse()
                             .getKeepDetailsPrivate()
                             .toBuilder()
-                            .confidentiality(confidentiality)
+                            .confidentiality(YesOrNo.Yes)
                             .confidentialityList(confidentialityListEnums)
                             .build())
                     .build())
@@ -297,7 +291,7 @@ public class UpdatePartyDetailsService {
                     .getResponse()
                     .toBuilder()
                     .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                        .confidentiality(confidentiality)
+                        .confidentiality(YesOrNo.Yes)
                         .confidentialityList(confidentialityListEnums)
                         .build())
                     .build())
@@ -308,7 +302,7 @@ public class UpdatePartyDetailsService {
                 .response(Response.builder()
                     .keepDetailsPrivate(KeepDetailsPrivate
                         .builder()
-                        .confidentiality(confidentiality)
+                        .confidentiality(YesOrNo.Yes)
                         .confidentialityList(confidentialityListEnums)
                         .build())
                     .build())
