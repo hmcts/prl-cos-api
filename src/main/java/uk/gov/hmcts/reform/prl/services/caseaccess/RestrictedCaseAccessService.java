@@ -72,11 +72,9 @@ public class RestrictedCaseAccessService {
     public static final String RESTRICTED_CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
     public static final String A_HREF = "<a href=\"";
     public static final String RESTRICTED_CONFIRMATION_BODY = "</br> You can return to " + A_HREF + MY_WORK_URL + "\">My Work</a>" + ".";
-    public static final String PUBLIC_CONFIRMATION_HEADER = "# Case marked as public";
+    public static final String PUBLIC_CONFIRMATION_HEADER = "# Case marked as public\n\n";
     public static final String PUBLIC_CONFIRMATION_SUBTEXT = """
-        \n
-         ## This case will now appear in search results
-        and any previous access restrictions will be removed""";
+        ## This case will now appear in search results and any previous access restrictions will be removed""";
     public static final String PRIVATE_CONFIRMATION_HEADER = "# Case marked as private";
 
     private final RoleAssignmentApi roleAssignmentApi;
@@ -96,7 +94,6 @@ public class RestrictedCaseAccessService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-            log.info("updating case fields ");
             caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
             caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
             caseDataUpdated.put(REASONS_TO_PRIVATE_TAB, null);
