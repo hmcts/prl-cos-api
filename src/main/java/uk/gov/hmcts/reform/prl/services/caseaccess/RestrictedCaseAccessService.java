@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -88,8 +87,6 @@ public class RestrictedCaseAccessService {
 
     private final IdamApi idamApi;
 
-    private final ObjectMapper objectMapper;
-
     public static final List<String> ROLE_CATEGORIES = List.of("JUDICIAL",
                                                      "LEGAL_OPERATIONS",
                                                      "CTSC",
@@ -98,7 +95,6 @@ public class RestrictedCaseAccessService {
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
-        log.info("event id {}",caseEvent);
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
             log.info("updating case fields ");
             caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
@@ -120,7 +116,6 @@ public class RestrictedCaseAccessService {
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
         }
         updateCaseName(caseDataUpdated, caseEvent);
-        log.info("updated staus {}",caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         return caseDataUpdated;
     }
 
@@ -150,7 +145,6 @@ public class RestrictedCaseAccessService {
     public ResponseEntity<SubmittedCallbackResponse> changeCaseAccessRequestSubmitted(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("security classification in submitted event {}",caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
