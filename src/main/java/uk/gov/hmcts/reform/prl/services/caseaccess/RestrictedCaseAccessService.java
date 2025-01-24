@@ -75,7 +75,8 @@ public class RestrictedCaseAccessService {
     public static final String RESTRICTED_CONFIRMATION_BODY = "</br> You can return to " + A_HREF + MY_WORK_URL + "\">My Work</a>" + ".";
     public static final String PUBLIC_CONFIRMATION_HEADER = "# Case marked as public";
     public static final String PUBLIC_CONFIRMATION_SUBTEXT = """
-        ## This case will now appear in search results
+        \n
+         ## This case will now appear in search results
         and any previous access restrictions will be removed""";
     public static final String PRIVATE_CONFIRMATION_HEADER = "# Case marked as private";
 
