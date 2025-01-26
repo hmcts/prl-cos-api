@@ -120,16 +120,15 @@ public class ManageOrdersUtils {
                 .forEach(hearingData -> {
                     //validate for manage orders, draft, edit returned order & judge creating order
                     if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
-                        validateHearingTypeAndEstimatedTimings(errorList, hearingData);
+                        validateHearingTypeAndEstimatedTimings(errorList, hearingData, loggedInUserType);
                     }
 
                     //validate for admin creating order with hearings for AHR
-                    if (!UserRoles.JUDGE.name().equals(loggedInUserType)
-                        && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed
-                        .equals(hearingData.getHearingDateConfirmOptionEnum()))) {
-                        validateHearingTypeAndEstimatedTimings(errorList, hearingData);
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        validateHearingTypeAndEstimatedTimings(errorList, hearingData, loggedInUserType);
                         validateHearingData(errorList, hearingData);
                     }
                 });
@@ -137,13 +136,17 @@ public class ManageOrdersUtils {
     }
 
     private static void validateHearingTypeAndEstimatedTimings(List<String> errorList,
-                                                               HearingData hearingData) {
+                                                               HearingData hearingData,
+                                                               String loggedInUserType) {
         if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
             || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
             errorList.add("You must select a hearing type");
         }
-        //numeric estimated timings validation
-        validateHearingEstimatedTimings(errorList, hearingData);
+        //For Judge user these fields are not shown
+        if (!UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            //numeric estimated timings validation
+            validateHearingEstimatedTimings(errorList, hearingData);
+        }
     }
 
     private static boolean isDateReservedWithListAssist(HearingData hearingData) {
