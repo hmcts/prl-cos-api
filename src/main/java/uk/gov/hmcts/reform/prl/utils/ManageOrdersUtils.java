@@ -120,7 +120,12 @@ public class ManageOrdersUtils {
                 .forEach(hearingData -> {
                     //validate for manage orders, draft, edit returned order & judge creating order
                     if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
-                        validateHearingTypeAndEstimatedTimings(errorList, hearingData, loggedInUserType);
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            errorList.add("You must select a hearing type");
+                        }
+                        //numeric estimated timings validation
+                        validateHearingEstimatedTimings(errorList, hearingData);
                     }
 
                     //validate for admin creating order with hearings for AHR
@@ -128,24 +133,18 @@ public class ManageOrdersUtils {
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed
                         .equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        validateHearingTypeAndEstimatedTimings(errorList, hearingData, loggedInUserType);
-                        validateHearingData(errorList, hearingData);
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            errorList.add("You must select a hearing type");
+                        }
+                        //For Judge user these fields are not shown
+                        if (!UserRoles.JUDGE.name().equals(loggedInUserType)) {
+                            //numeric estimated timings validation
+                            validateHearingEstimatedTimings(errorList, hearingData);
+                            validateHearingData(errorList, hearingData);
+                        }
                     }
                 });
-        }
-    }
-
-    private static void validateHearingTypeAndEstimatedTimings(List<String> errorList,
-                                                               HearingData hearingData,
-                                                               String loggedInUserType) {
-        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
-            errorList.add("You must select a hearing type");
-        }
-        //For Judge user these fields are not shown
-        if (!UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            //numeric estimated timings validation
-            validateHearingEstimatedTimings(errorList, hearingData);
         }
     }
 
