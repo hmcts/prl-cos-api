@@ -2407,7 +2407,8 @@ public class DraftAnOrderService {
             errorList.addAll(getHearingScreenValidations(
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 caseData.getCreateSelectOrderOptions(),
-                true
+                true,
+                null
             ));
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
@@ -2418,7 +2419,7 @@ public class DraftAnOrderService {
         return errorList;
     }
 
-    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder) {
+    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder, String loggedInUserType) {
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
@@ -2430,7 +2431,8 @@ public class DraftAnOrderService {
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 draftOrder.getOrderType(),
                 (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails()))
+                    && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())),
+                loggedInUserType
             ));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder()));
@@ -2484,7 +2486,8 @@ public class DraftAnOrderService {
             draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList, clientContext, callbackRequest.getEventId());
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                errorList = validateEditedOrderDetails(caseData, draftOrder);
+                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                errorList = validateEditedOrderDetails(caseData, draftOrder, loggedInUserType);
                 if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
                 }

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -75,14 +76,15 @@ public class ManageOrdersUtils {
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
-                                                           boolean isSolicitorOrdersHearings) {
+                                                           boolean isSolicitorOrdersHearings,
+                                                           String loggedInUserType) {
         log.info("### Create select order options {}", selectedOrderType);
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
         singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings);
+        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings, loggedInUserType);
 
         return errorList;
     }
@@ -110,39 +112,43 @@ public class ManageOrdersUtils {
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
                                                                   List<String> errorList,
-                                                                  boolean isSolicitorOrdersHearings) {
+                                                                  boolean isSolicitorOrdersHearings,
+                                                                  String loggedInUserType) {
         if (isNotEmpty(ordersHearingDetails)) {
             ordersHearingDetails.stream()
                 .map(Element::getValue)
                 .forEach(hearingData -> {
-                    //validate for manage orders, draft & edit returned order
+                    //validate for manage orders, draft, edit returned order & judge creating order
                     if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
-                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
-                            errorList.add("You must select a hearing type");
-                        }
-                        //numeric estimated timings validation
-                        validateHearingEstimatedTimings(errorList, hearingData);
+                        validateHearingTypeAndEstimatedTimings(errorList, hearingData);
                     }
 
-                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                    //validate for admin creating order with hearings for AHR
+                    if (!UserRoles.JUDGE.name().equals(loggedInUserType)
                         && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed
                         .equals(hearingData.getHearingDateConfirmOptionEnum()))) {
+                        validateHearingTypeAndEstimatedTimings(errorList, hearingData);
                         validateHearingData(errorList, hearingData);
                     }
                 });
         }
     }
 
+    private static void validateHearingTypeAndEstimatedTimings(List<String> errorList,
+                                                               HearingData hearingData) {
+        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+            errorList.add("You must select a hearing type");
+        }
+        //numeric estimated timings validation
+        validateHearingEstimatedTimings(errorList, hearingData);
+    }
+
     private static boolean isDateReservedWithListAssist(HearingData hearingData) {
         return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
             && (HearingDateConfirmOptionEnum.dateReservedWithListAssit
-            .equals(hearingData.getHearingDateConfirmOptionEnum())
-            || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
-            .equals(hearingData.getHearingDateConfirmOptionEnum())
-            || HearingDateConfirmOptionEnum.dateToBeFixed
             .equals(hearingData.getHearingDateConfirmOptionEnum()));
     }
 

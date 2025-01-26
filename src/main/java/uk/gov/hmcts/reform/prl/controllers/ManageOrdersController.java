@@ -545,16 +545,21 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            List<String> errorList;
+            List<String> errorList = new ArrayList<>();
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
                 errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
-            } else {
+            } else if (ManageOrdersUtils.isHearingPageNeeded(caseData.getCreateSelectOrderOptions(),
+                                                             caseData.getManageOrders().getC21OrderOptions())) {
                 //PRL-4260 - hearing screen validations
-                errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                        caseData.getCreateSelectOrderOptions(),
-                                                        false);
+                errorList = getHearingScreenValidations(
+                    caseData.getManageOrders().getOrdersHearingDetails(),
+                    caseData.getCreateSelectOrderOptions(),
+                    false,
+                    loggedInUserType
+                );
             }
 
             if (isNotEmpty(errorList)) {
