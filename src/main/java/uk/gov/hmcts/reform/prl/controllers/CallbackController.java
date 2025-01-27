@@ -651,7 +651,6 @@ public class CallbackController {
                                                                          @Parameter(hidden = true) String authorisation,
                                                                          @RequestBody uk.gov.hmcts.reform
                                                                              .ccd.client.model.CallbackRequest callbackRequest) {
-        log.info("callbackRequest: {}", callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
