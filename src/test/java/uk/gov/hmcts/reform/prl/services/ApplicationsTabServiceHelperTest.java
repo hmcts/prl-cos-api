@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCaseRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -162,7 +163,18 @@ public class ApplicationsTabServiceHelperTest {
             .childLivesWith(YesOrNo.Yes)
             .childAndOtherPeopleRelationOtherDetails("Test")
             .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .isOtherPeopleIdConfidential(YesOrNo.Yes)
             .build();
+
+        ChildAndOtherPeopleRelation childAndOtherPeopleRelation = ChildAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation("other")
+            .childAndOtherPeopleRelationOtherDetails("Test")
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+
+        when(objectMapper.convertValue(child, ChildAndOtherPeopleRelation.class)).thenReturn(childAndOtherPeopleRelation);
 
         Element<ChildrenAndOtherPeopleRelation> wrappedChildren =
             Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
@@ -183,11 +195,22 @@ public class ApplicationsTabServiceHelperTest {
             .childLivesWith(YesOrNo.Yes)
             .childAndOtherPeopleRelationOtherDetails("Test")
             .isChildLivesWithPersonConfidential(YesOrNo.No)
+            .isOtherPeopleIdConfidential(YesOrNo.No)
+            .build();
+
+        ChildAndOtherPeopleRelation childAndOtherPeopleRelation = ChildAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation("other")
+            .childAndOtherPeopleRelationOtherDetails("Test")
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
             .build();
 
         Element<ChildrenAndOtherPeopleRelation> wrappedChildren =
             Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        when(objectMapper.convertValue(child, ChildAndOtherPeopleRelation.class)).thenReturn(childAndOtherPeopleRelation);
 
         CaseData caseData = CaseData.builder()
                 .relations(Relations.builder()
