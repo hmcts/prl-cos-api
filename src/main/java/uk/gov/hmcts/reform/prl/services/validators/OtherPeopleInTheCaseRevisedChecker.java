@@ -106,12 +106,10 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
-            fields.add(ofNullable(applicant.getIsEmailAddressConfidential()));
         }
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(applicant.getCanYouProvidePhoneNumber());
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getPhoneNumber()));
-            fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));

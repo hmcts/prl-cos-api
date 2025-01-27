@@ -96,7 +96,8 @@ public class CaseDataChildDetailsElementsMapper {
                                childDetail.getParentialResponsibility()))
             .whoDoesTheChildLiveWith(whoDoesTheChildLiveWithDynamicList)
             .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
-            .build()).build();
+            .build())
+            .id(UUID.fromString(childDetail.getId())).build();
     }
 
     private static LocalDate getDateOfBirth(ChildDetail childDetail) {
