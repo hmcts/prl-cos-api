@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +38,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
-
-    private final ObjectMapper objectMapper;
 
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
@@ -162,6 +159,9 @@ public class ConfidentialityTabService {
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
+        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
+            ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
         Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
         if (otherPersons.isPresent()) {
@@ -173,9 +173,14 @@ public class ConfidentialityTabService {
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
-            ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
+        Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
+        List<ChildDetailsRevised> childDetailsRevisedList = new ArrayList<>();
+        if (children.isPresent()) {
+            childDetailsRevisedList = children.get()
+                .stream()
+                .map(Element::getValue)
+                .toList();
+        }
         if (childrenAndOtherPeopleRelations.isPresent()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
@@ -185,35 +190,16 @@ public class ConfidentialityTabService {
                     .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
-            Optional<List<Element<ChildDetailsRevised>>> children = ofNullable(caseData.getNewChildDetails());
-            List<Element<ChildDetailsRevised>> childDetailsRevisedList = new ArrayList<>();
-            if (children.isPresent()) {
-                List<String> childIds = childrenAndOtherPeopleRelationList.stream()
-                    .map(ChildrenAndOtherPeopleRelation::getChildId)
-                    .distinct()
-                    .toList();
-                children.get().stream()
-                    .filter(child -> childIds.contains(String.valueOf(child.getId())))
-                    .forEach(childDetailsRevisedList::add);
-            }
-            for (Element<ChildDetailsRevised> childDetailsRevisedElement : childDetailsRevisedList) {
-                //get the matched full name related result from childDetailsRevisedElement full name relation object
-                //fix any exceptions for below method
-                Optional<ChildrenAndOtherPeopleRelation> optionalChildrenAndOtherPeopleRelation = childrenAndOtherPeopleRelationList
-                    .stream()
-                    .filter(other -> other.getChildId().equals(String.valueOf(childDetailsRevisedElement.getId())))
-                    .findFirst();
-                if (optionalChildrenAndOtherPeopleRelation.isPresent()) {
-                    ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = optionalChildrenAndOtherPeopleRelation.get();
-                    Element<OtherPersonConfidentialityDetails> tempOtherPersonConfidentialDetails =
-                        getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelation, objectPartyDetailsMap);
-                    ChildDetailsRevised childDetailsRevised = childDetailsRevisedElement.getValue();
+            for (ChildDetailsRevised childDetailsRevised : childDetailsRevisedList) {
+                List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
+                    getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList, objectPartyDetailsMap);
+                if (!tempOtherPersonConfidentialDetails.isEmpty()) {
                     Element<ChildConfidentialityDetails> childElement = Element
                         .<ChildConfidentialityDetails>builder()
                         .value(ChildConfidentialityDetails.builder()
                                    .firstName(childDetailsRevised.getFirstName())
                                    .lastName(childDetailsRevised.getLastName())
-                                   .otherPerson(List.of(tempOtherPersonConfidentialDetails)).build()).build();
+                                   .otherPerson(tempOtherPersonConfidentialDetails).build()).build();
                     childrenConfidentialDetails.add(childElement);
                 }
             }
@@ -221,41 +207,29 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
-    private List<ChildrenAndOtherPeopleRelation> getConfidentialRelationForOtherPeople(
-        List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations) {
-        return childrenAndOtherPeopleRelations
-            .stream()
-            .map(Element::getValue)
-            .toList()
-            .stream().filter(other -> ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
-                && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
-            .toList();
-    }
+    public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
+        List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
+        List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
+        for (ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation : childrenAndOtherPeopleRelationList) {
+            Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
+                childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
+            if (partyDetails.isPresent()) {
+                Element<OtherPersonConfidentialityDetails> otherElement = Element
+                    .<OtherPersonConfidentialityDetails>builder()
+                    .value(OtherPersonConfidentialityDetails.builder()
+                               .firstName(partyDetails.get().getFirstName())
+                               .lastName(partyDetails.get().getLastName())
+                               .email(YesOrNo.Yes.equals(partyDetails.get().getIsEmailAddressConfidential()) ? "" : partyDetails.get().getEmail())
+                               .phoneNumber(YesOrNo.Yes.equals(partyDetails.get().getIsPhoneNumberConfidential())
+                                                ? "" : partyDetails.get().getPhoneNumber())
+                               .relationshipToChildDetails(childrenAndOtherPeopleRelation
+                                                               .getChildAndOtherPeopleRelation().getDisplayedValue())
+                               .address(partyDetails.get().getAddress()).build()).build();
 
-    public Element<OtherPersonConfidentialityDetails> getOtherPersonConfidentialDetails(
-        ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation, Map<Object, PartyDetails> objectPartyDetailsMap) {
-        Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
-            childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
-        if (partyDetails.isPresent()) {
-            Element<OtherPersonConfidentialityDetails> otherElement = Element
-                .<OtherPersonConfidentialityDetails>builder()
-                .value(OtherPersonConfidentialityDetails.builder()
-                           .firstName(partyDetails.get().getFirstName())
-                           .lastName(partyDetails.get().getLastName())
-                           .previousName(partyDetails.get().getPreviousName())
-                           .relationshipToChildDetails(childrenAndOtherPeopleRelation
-                                                           .getChildAndOtherPeopleRelation().getDisplayedValue())
-                           .gender(partyDetails.get().getGender())
-                           .dateOfBirth(partyDetails.get().getDateOfBirth())
-                           .address(partyDetails.get().getAddress())
-                           .addressLivedLessThan5YearsDetails(partyDetails.get().getAddressLivedLessThan5YearsDetails())
-                           .email(partyDetails.get().getEmail())
-                           .phoneNumber(partyDetails.get().getPhoneNumber())
-                           .build()).build();
-
-            return otherElement;
+                tempOtherPersonConfidentialDetails.add(otherElement);
+            }
         }
-        return null;
+        return tempOtherPersonConfidentialDetails;
     }
 
     public List<Element<ApplicantConfidentialityDetails>> getConfidentialApplicantDetails(List<PartyDetails> currentApplicants) {
@@ -337,45 +311,5 @@ public class ConfidentialityTabService {
         return childrenConfidentialDetails;
     }
 
-    public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations,
-                                                                        List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
-        return ofNullable(otherPartyInTheCaseRevised)
-            .map(otherPeople -> {
-                List<String> otherPersonIds = ofNullable(childrenAndOtherPeopleRelations)
-                    .map(this::getConfidentialRelationForOtherPeople)
-                    .orElseGet(ArrayList::new)
-                    .stream()
-                    .map(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
-                    .distinct()
-                    .toList();
-                List<Element<PartyDetails>> otherPeopleList = new ArrayList<>();
-                for (int i = 0; i < otherPeople.size(); i++) {
-                    Element<PartyDetails> partyDetails = otherPeople.get(i);
-                    if (otherPersonIds.contains(String.valueOf(partyDetails.getId()))) {
-                        otherPeopleList.add(Element.<PartyDetails>builder()
-                                                .value(partyDetails.getValue().toBuilder()
-                                                           .isAddressConfidential(YesOrNo.Yes)
-                                                           .isPhoneNumberConfidential(YesOrNo.Yes)
-                                                           .isEmailAddressConfidential(YesOrNo.Yes)
-                                                           .isPartyIdentityConfidential(YesOrNo.Yes)
-                                                           .build())
-                                                .id(partyDetails.getId())
-                                                .build());
-                    } else {
-                        otherPeopleList.add(Element.<PartyDetails>builder()
-                                                .value(partyDetails.getValue().toBuilder()
-                                                           .isAddressConfidential(YesOrNo.No)
-                                                           .isPhoneNumberConfidential(YesOrNo.No)
-                                                           .isEmailAddressConfidential(YesOrNo.No)
-                                                           .isPartyIdentityConfidential(YesOrNo.No)
-                                                           .build())
-                                                .id(partyDetails.getId())
-                                                .build());
-                    }
-                }
-                return otherPeopleList;
-            })
-            .orElseGet(() -> null);
-    }
 }
 

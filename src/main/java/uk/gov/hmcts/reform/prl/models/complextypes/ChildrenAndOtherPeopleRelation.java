@@ -18,5 +18,4 @@ public class ChildrenAndOtherPeopleRelation {
     private final YesOrNo isChildLivesWithPersonConfidential;
     private final String otherPeopleId;
     private final String childId;
-    private final YesOrNo isOtherPeopleIdConfidential;
 }
