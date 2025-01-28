@@ -95,6 +95,8 @@ public class CaseOrder {
         this.hearingDetails = caseHearing;
     }
 
+    private ServeOrderDetails serveOrderDetails;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String selectedHearingType;
 
@@ -135,6 +137,14 @@ public class CaseOrder {
         String path = url.getPath();
         String documentId = path.split("/")[path.split("/").length - 1];
         return documentId;
+    }
+
+    public void setServeOrderDetails(ServeOrderDetails serveOrderDetails) {
+        this.serveOrderDetails = serveOrderDetails;
+        if (this.serveOrderDetails != null) {
+            setOriginalFilingDate(serveOrderDetails.getWhenReportsMustBeFiled());
+            setCourtReportType(serveOrderDetails.getCafcassCymruDocuments());
+        }
     }
 
     @JsonProperty("originalFilingDate")
