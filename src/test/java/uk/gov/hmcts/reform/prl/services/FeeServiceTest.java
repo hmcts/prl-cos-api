@@ -732,10 +732,10 @@ public class FeeServiceTest {
 
     @Test
     public void testFetchFeeInvalidFeeType() {
-        FeeResponseForCitizen response = feeService.fetchFee(anyString());
+        FeeResponseForCitizen response = feeService.fetchFee("INVALID_FEE_TYPE");
 
         assertNotNull(response);
-        assertEquals(FETCH_FEE_INVALID_APPLICATION_TYPE, response.getErrorRetrievingResponse());
+        assertEquals(FETCH_FEE_INVALID_APPLICATION_TYPE.concat("INVALID_FEE_TYPE"), response.getErrorRetrievingResponse());
     }
 
     @Test
