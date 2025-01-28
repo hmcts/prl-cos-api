@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -141,7 +140,6 @@ public class CaseDataService {
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
-                    filteredCafcassData = removeUnnecessaryFieldsFromResponse(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -153,50 +151,6 @@ public class CaseDataService {
             throw e;
         }
         return cafCassResponse;
-    }
-
-    private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
-        log.info("Removing unnecessary fields from response");
-        filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
-            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
-            final CafCassCaseData cafCassCaseData = caseData.toBuilder()
-                .applicants(removeResponse(caseData.getApplicants()))
-                .respondents(removeResponse(caseData.getRespondents()))
-                .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
-                .build();
-
-            cafCassCaseDetail.setCaseData(cafCassCaseData);
-        });
-
-        log.info("Removed unnecessary fields from response");
-        return  filteredCafcassData;
-    }
-
-    private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
-        log.info("Removing serve order details from response");
-        if (!CollectionUtils.isEmpty(orderCollection)) {
-            orderCollection.forEach(order -> {
-                log.info("order is not null");
-                log.info("order value is {}", order.getValue());
-                if (null != order.getValue() && null != order.getValue().getServeOrderDetails()) {
-                    order.getValue().setServeOrderDetails(null);
-                }
-            });
-        }
-
-        return orderCollection;
-    }
-
-    private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
-        partyDetails.forEach(partyDetail -> {
-            log.info("party is not null");
-            if (null != partyDetail.getValue() && null != partyDetail.getValue().getResponse()) {
-                log.info("response is {}", partyDetail.getValue().getResponse());
-                partyDetail.getValue().setResponse(null);
-            }
-        });
-
-        return partyDetails;
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
