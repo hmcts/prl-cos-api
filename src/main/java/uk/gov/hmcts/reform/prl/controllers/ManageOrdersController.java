@@ -227,11 +227,11 @@ public class ManageOrdersController {
             }
 
             // Check for Automated Hearing Management
-            log.info("Check for automated hearing request ? - {}", caseData.getManageOrders().getCheckForAutomatedHearing());
             if (Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
                 AutomatedHearingUtils.automatedHearingManagementRequest(
                     authorisation,
                     caseData,
+                    caseDataUpdated,
                     manageOrderService
                 );
             }

@@ -485,6 +485,7 @@ public class EditAndApproveDraftOrderController {
                 AutomatedHearingUtils.automatedHearingManagementRequest(
                     authorisation,
                     caseData,
+                    caseDataUpdated,
                     manageOrderService
                 );
             }
@@ -546,6 +547,7 @@ public class EditAndApproveDraftOrderController {
                 AutomatedHearingUtils.automatedHearingManagementRequest(
                     authorisation,
                     caseData,
+                    caseDataUpdated,
                     manageOrderService
                 );
             }
