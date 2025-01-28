@@ -136,7 +136,7 @@ public class DraftOrder {
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
     @JsonProperty("manageOrderHearingDetails")
-    private final List<Element<HearingData>> manageOrderHearingDetails;
+    private List<Element<HearingData>> manageOrderHearingDetails;
     private final YesOrNo isTheOrderAboutChildren;
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
@@ -148,6 +148,8 @@ public class DraftOrder {
 
     private final SdoDetails sdoDetails;
     private final YesOrNo isOrderCreatedBySolicitor;
+
+    private YesOrNo isAutoHearingReqPending;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
