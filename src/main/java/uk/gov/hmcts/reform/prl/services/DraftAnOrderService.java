@@ -663,6 +663,9 @@ public class DraftAnOrderService {
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             //PRL-6046 - persist FL404 data
             .fl404CustomFields(draftOrder.getFl404CustomFields())
+            //Admin editing and finalising the order
+            .isAutoHearingReqPending(manageOrderService.isEligibleForAutomatedHearing(
+                draftOrder.getManageOrderHearingDetails()) ? Yes : No)
             .build();
     }
 
@@ -1124,11 +1127,12 @@ public class DraftAnOrderService {
                     log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                // Check for Automated Hearing Management
-                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
-                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
-                    UserRoles.JUDGE.toString()) || loggedInUserType.equalsIgnoreCase(UserRoles.CASEMANAGER.toString()))
-                    && isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
+                //AHR - Judge/Manager approves an order or Admin edits an order & saves as draft
+                if (!UserRoles.SOLICITOR.name().equals(loggedInUserType)
+                    && (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+                        || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId))
+                    && manageOrderService.isEligibleForAutomatedHearing(
+                        caseData.getManageOrders().getOrdersHearingDetails())) {
                     draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();
                 }
                 draftOrderCollection.set(

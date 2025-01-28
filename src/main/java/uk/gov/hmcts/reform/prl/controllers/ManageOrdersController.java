@@ -232,9 +232,7 @@ public class ManageOrdersController {
                 AutomatedHearingUtils.automatedHearingManagementRequest(
                     authorisation,
                     caseData,
-                    caseDataUpdated,
-                    manageOrderService,
-                    callbackRequest.getEventId()
+                    manageOrderService
                 );
             }
 
@@ -328,7 +326,7 @@ public class ManageOrdersController {
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
             //Populate need to check automated hearing request
-            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated);
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 

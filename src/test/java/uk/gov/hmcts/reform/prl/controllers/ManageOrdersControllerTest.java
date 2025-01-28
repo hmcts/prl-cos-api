@@ -3719,7 +3719,6 @@ public class ManageOrdersControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-                              .checkForAutomatedHearing(Yes)
                               .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .id(UUID.randomUUID()).value(OrderDetails
