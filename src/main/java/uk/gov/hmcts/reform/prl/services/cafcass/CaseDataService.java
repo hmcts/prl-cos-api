@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -140,6 +141,7 @@ public class CaseDataService {
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
+                    filteredCafcassData = removeUnnecessaryFieldsFromResponse(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -151,6 +153,43 @@ public class CaseDataService {
             throw e;
         }
         return cafCassResponse;
+    }
+
+    private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            final CafCassCaseData cafCassCaseData = caseData.toBuilder()
+                .applicants(removeResponse(caseData.getApplicants()))
+                .respondents(removeResponse(caseData.getRespondents()))
+                .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
+                .build();
+
+            cafCassCaseDetail.setCaseData(cafCassCaseData);
+        });
+
+        return  filteredCafcassData;
+    }
+
+    private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
+        if (!CollectionUtils.isEmpty(orderCollection)) {
+            orderCollection.forEach(order -> {
+                if (null != order.getValue() && null != order.getValue().getServeOrderDetails()) {
+                    order.getValue().setServeOrderDetails(null);
+                }
+            });
+        }
+
+        return orderCollection;
+    }
+
+    private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
+        partyDetails.forEach(partyDetail -> {
+            if (null != partyDetail.getValue() && null != partyDetail.getValue().getResponse()) {
+                partyDetail.getValue().setResponse(null);
+            }
+        });
+
+        return partyDetails;
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
