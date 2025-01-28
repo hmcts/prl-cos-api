@@ -156,7 +156,6 @@ public class CaseDataService {
     }
 
     private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
-        log.info("Removing unnecessary fields from response");
         filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             final CafCassCaseData cafCassCaseData = caseData.toBuilder()
@@ -168,16 +167,12 @@ public class CaseDataService {
             cafCassCaseDetail.setCaseData(cafCassCaseData);
         });
 
-        log.info("Removed unnecessary fields from response");
         return  filteredCafcassData;
     }
 
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
-        log.info("Removing serve order details from response");
         if (!CollectionUtils.isEmpty(orderCollection)) {
             orderCollection.forEach(order -> {
-                log.info("order is not null");
-                log.info("order value is {}", order.getValue());
                 if (null != order.getValue() && null != order.getValue().getServeOrderDetails()) {
                     order.getValue().setServeOrderDetails(null);
                 }
@@ -189,9 +184,7 @@ public class CaseDataService {
 
     private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
         partyDetails.forEach(partyDetail -> {
-            log.info("party is not null");
             if (null != partyDetail.getValue() && null != partyDetail.getValue().getResponse()) {
-                log.info("response is {}", partyDetail.getValue().getResponse());
                 partyDetail.getValue().setResponse(null);
             }
         });

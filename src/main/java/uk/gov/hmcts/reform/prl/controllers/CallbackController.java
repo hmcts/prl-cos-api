@@ -294,12 +294,9 @@ public class CallbackController {
             Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
                 .getEmailAddress(closestChildArrangementsCourt);
             if (courtEmailAddress.isPresent()) {
-                log.info("Found court email for case id {}", caseData.getId());
                 caseDataUpdated.put("localCourtAdmin", List.of(
                     Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
                         .build()));
-            } else {
-                log.info("Court email not found for case id {}", caseData.getId());
             }
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
