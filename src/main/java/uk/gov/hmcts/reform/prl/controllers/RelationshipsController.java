@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -44,8 +43,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class RelationshipsController {
 
     private final ObjectMapper objectMapper;
-
-    private final ConfidentialityTabService confidentialityTabService;
 
     private static final String CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
 
@@ -356,13 +353,7 @@ public class RelationshipsController {
         List<Element<ChildrenAndOtherPeopleRelation>> buffChildAndOtherPeopleRelations = caseData.getRelations()
                                                                                             .getBuffChildAndOtherPeopleRelations();
         List<Element<ChildrenAndOtherPeopleRelation>> updatedChildAndOtherPeopleRelations = new ArrayList<>();
-        List<String> uniqueOtherPersonIds = buffChildAndOtherPeopleRelations.stream()
-            .filter(relationElement -> relationElement.getValue().getChildLivesWith().equals(YesOrNo.Yes)
-                && relationElement.getValue().getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
-            .map(relationElement -> relationElement.getValue().getOtherPeopleId())
-            .distinct()
-            .toList();
-        buffChildAndOtherPeopleRelations.forEach(relationElement -> {
+        buffChildAndOtherPeopleRelations.stream().forEach(relationElement -> {
             ChildrenAndOtherPeopleRelation relation = relationElement.getValue();
             updatedChildAndOtherPeopleRelations.add(Element.<ChildrenAndOtherPeopleRelation>builder()
                 .value(relation.toBuilder()
@@ -371,7 +362,6 @@ public class RelationshipsController {
                                    ? relation.getChildAndOtherPeopleRelationOtherDetails() : null)
                            .isChildLivesWithPersonConfidential(
                                relation.getChildLivesWith().equals(YesOrNo.Yes) ? relation.getIsChildLivesWithPersonConfidential() : null)
-                           .isOtherPeopleIdConfidential(uniqueOtherPersonIds.contains(relation.getOtherPeopleId()) ? YesOrNo.Yes : YesOrNo.No)
                            .build())
                 .id(relationElement.getId())
                 .build());
@@ -379,15 +369,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS, null);
         caseDataUpdated.put("childAndOtherPeopleRelations", updatedChildAndOtherPeopleRelations);
-        caseDataUpdated.put(
-            "otherPartyInTheCaseRevised",
-            confidentialityTabService.updateOtherPeopleConfidentiality(
-                updatedChildAndOtherPeopleRelations,
-                caseData.getOtherPartyInTheCaseRevised()
-            )
-        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }
 
