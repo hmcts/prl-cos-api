@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -68,6 +69,9 @@ public class ApplicantDetails {
     private String solicitorTelephone;
     private String caseTypeOfApplication;
     private YesOrNo respondentLivedWithApplicant;
+
+    //This field is required to get the respondent c1a however, it should not be included in the response
+    @JsonIgnore
     private Response response;
 
 }
