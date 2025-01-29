@@ -124,7 +124,6 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
                 fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
             }
             fields.add(ofNullable(applicant.getAddress()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
 
         Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
