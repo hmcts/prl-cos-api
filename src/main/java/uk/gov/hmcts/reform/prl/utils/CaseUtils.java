@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
@@ -1087,4 +1088,12 @@ public class CaseUtils {
         }
         return null;
     }
+
+    public static String getLanguage(ClientContext clientContext) {
+        if (null != clientContext && null != clientContext.getUserLanguage()) {
+            return clientContext.getUserLanguage().getLanguage();
+        }
+        return null;
+    }
+
 }
