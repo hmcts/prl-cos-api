@@ -173,7 +173,7 @@ public class CaseDataService {
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
         if (!CollectionUtils.isEmpty(orderCollection)) {
             orderCollection.forEach(order -> {
-                if (null != order.getValue() && null != order.getValue().getServeOrderDetails()) {
+                if (null != order.getValue()) {
                     order.getValue().setServeOrderDetails(null);
                 }
             });
@@ -184,7 +184,7 @@ public class CaseDataService {
 
     private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
         partyDetails.forEach(partyDetail -> {
-            if (null != partyDetail.getValue() && null != partyDetail.getValue().getResponse()) {
+            if (null != partyDetail.getValue()) {
                 partyDetail.getValue().setResponse(null);
             }
         });
