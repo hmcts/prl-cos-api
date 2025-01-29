@@ -76,4 +76,17 @@ public class RestrictedCaseAccessControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenRequestBody_whenChangeCaseAccess_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/restricted-case-access/change-case-access")
+            .then()
+            .assertThat().statusCode(200);
+    }
 }
