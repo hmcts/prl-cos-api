@@ -171,7 +171,7 @@ public class CaseDataService {
     }
 
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
-        if (null != orderCollection && !orderCollection.isEmpty()) {
+        if (!CollectionUtils.isEmpty(orderCollection)) {
             orderCollection.forEach(order -> {
                 if (null != order.getValue() && null != order.getValue().getServeOrderDetails()) {
                     order.getValue().setServeOrderDetails(null);
