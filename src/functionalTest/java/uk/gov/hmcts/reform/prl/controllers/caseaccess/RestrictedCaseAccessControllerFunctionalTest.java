@@ -87,6 +87,6 @@ public class RestrictedCaseAccessControllerFunctionalTest {
             .contentType("application/json")
             .post("/restricted-case-access/change-case-access")
             .then()
-            .assertThat().statusCode(500);
+            .assertThat().statusCode(200);
     }
 }
