@@ -178,7 +178,6 @@ public class CaseDataService {
                 }
             });
         }
-
         return orderCollection;
     }
 
@@ -188,7 +187,6 @@ public class CaseDataService {
                 partyDetail.getValue().setResponse(null);
             }
         });
-
         return partyDetails;
     }
 
