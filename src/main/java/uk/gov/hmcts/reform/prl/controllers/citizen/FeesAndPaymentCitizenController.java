@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 
 @Slf4j
@@ -95,7 +96,7 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
 
-        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
+        return paymentRequestService.createPayment(authorization, createPaymentRequest);
 
     }
 
@@ -146,6 +147,7 @@ public class FeesAndPaymentCitizenController {
     ) {
         FeeResponseForCitizen feeResponseForCitizen = null;
         try {
+            log.info("#### FeeRequest {}", feeRequest);
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
             } else {
@@ -157,6 +159,23 @@ public class FeesAndPaymentCitizenController {
                 .build();
         }
         return feeResponseForCitizen;
+    }
+
+    @GetMapping(path = "/getFee/{applicationType}", produces = APPLICATION_JSON)
+    @Operation(description = "API to fetch the application fees by application type")
+    public FeeResponseForCitizen fetchFee(@RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+                                          @PathVariable String applicationType) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
+            log.info("### Fetch fees for application type: {}", applicationType);
+            if (null == applicationType || applicationType.isEmpty()) {
+                return FeeResponseForCitizen.builder()
+                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
+                    .build();
+            }
+            return feeService.fetchFee(applicationType);
+        } else {
+            throw (new RuntimeException(LOGGERMESSAGE));
+        }
     }
 
 }

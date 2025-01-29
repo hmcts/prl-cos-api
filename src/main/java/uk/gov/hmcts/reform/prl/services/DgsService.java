@@ -199,10 +199,11 @@ public class DgsService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation,
-                                              GenerateDocumentRequest.builder()
-                                                  .template(prlCitizenUploadTemplate)
-                                                  .values(tempCaseDetails).build()
+                dgsApiClient.generateDocument(
+                    authorisation,
+                    GenerateDocumentRequest.builder()
+                        .template(prlCitizenUploadTemplate)
+                        .values(tempCaseDetails).build()
                 );
 
         } catch (Exception ex) {

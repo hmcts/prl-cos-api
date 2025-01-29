@@ -28,7 +28,7 @@ public enum FeeType {
     public static final Map<String, FeeType> applicationToFeeMapForCitizen = Map.ofEntries(
         Map.entry("C100_FP25_APPLICANT", FP25_WITNESS_SUMMONS),
         Map.entry("C100_FP25_RESPONDENT", FP25_WITNESS_SUMMONS),
-        Map.entry("FL401_FP25_APPLICANT", FP25_WITNESS_SUMMONS),
+        Map.entry("FL401_FP25_APPLICANT", NO_FEE),//Changed as part of PRL-6181
         Map.entry("FL401_FP25_RESPONDENT", FP25_WITNESS_SUMMONS),
 
         Map.entry("C100_N161_APPLICANT", N161_APPELLANT_NOTICE_CA),
@@ -59,9 +59,12 @@ public enum FeeType {
 
 
         Map.entry("C100_C79_APPLICANT", CHILD_ARRANGEMENTS_ORDER),
+        Map.entry("C100_C79_RESPONDENT", CHILD_ARRANGEMENTS_ORDER),
 
         Map.entry("C100_FC600_APPLICANT", FC600_COMMITTAL_APPLICATION),
-        Map.entry("FL401_FC600_APPLICANT", FC600_COMMITTAL_APPLICATION),
+        Map.entry("C100_FC600_RESPONDENT", FC600_COMMITTAL_APPLICATION),
+        Map.entry("FL401_FC600_APPLICANT", NO_FEE),
+        Map.entry("FL401_FC600_RESPONDENT", FC600_COMMITTAL_APPLICATION),
 
         Map.entry("C100_C1_APPLICANT", CHILD_ARRANGEMENTS_ORDER),
         Map.entry("C100_C1_RESPONDENT", CHILD_ARRANGEMENTS_ORDER),
@@ -70,5 +73,8 @@ public enum FeeType {
         Map.entry("C100_C3_RESPONDENT", C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD),
 
         Map.entry("C100_C4_APPLICANT", C4_WHEREABOUTS_OF_A_MISSING_CHILD),
-        Map.entry("C100_C4_RESPONDENT", C4_WHEREABOUTS_OF_A_MISSING_CHILD));
+        Map.entry("C100_C4_RESPONDENT", C4_WHEREABOUTS_OF_A_MISSING_CHILD),
+
+        //PRL-6806 - C100 application fees
+        Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE));
 }

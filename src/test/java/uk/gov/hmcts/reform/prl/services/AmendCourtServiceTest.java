@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -62,6 +64,9 @@ public class AmendCourtServiceTest {
     @Mock
     private EventService eventService;
 
+    @Mock
+    private CaseSummaryTabService caseSummaryTab;
+
     private CaseData caseData;
     private CallbackRequest callbackRequest;
     private Map<String, Object> caseDataMap;
@@ -99,6 +104,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
+    @Ignore("Removed this test case since no emails are now triggered "
+        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
     public void testC100EmailNotificationWithEmail() throws Exception {
         caseData = caseData.toBuilder()
             .cantFindCourtCheck(List.of())
@@ -140,6 +147,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
+    @Ignore("Removed this test case since no emails are now triggered "
+        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
     public void testFL401CourtAdminEmailEmail() throws Exception {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)

@@ -77,7 +77,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -87,6 +89,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -130,12 +133,18 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     ReviewDocumentService reviewDocumentService;
 
+    @Mock
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
     CaseData caseData;
 
     CaseData caseData2;
 
     @Mock
     RespondentAllegationOfHarmService respondentAllegationOfHarmService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     PartyDetails respondent;
 
@@ -147,6 +156,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    CaseSummaryTabService caseSummaryTab;
 
 
     @Mock
@@ -558,12 +570,17 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
@@ -1214,6 +1231,10 @@ public class C100RespondentSolicitorServiceTest {
                             .id(123L)
                             .data(stringObjectMap)
                             .build())
+                    .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
                     .build();
 
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
@@ -1563,12 +1584,17 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
                         .id(123L)
+                        .state("test")
                         .data(stringObjectMap)
                         .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                    .id(123L)
+                    .state("test")
+                    .data(stringObjectMap)
+                    .build())
                 .eventId("SolicitorA")
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
@@ -2192,6 +2218,8 @@ public class C100RespondentSolicitorServiceTest {
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName("test")
                                 .lastName("test")
+                                .address(Address.builder().postCode("MK8 1DY").build())
+                                .contact(Contact.builder().phoneNumber("123").build())
                                 .build())
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
@@ -2223,6 +2251,8 @@ public class C100RespondentSolicitorServiceTest {
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                         .build())
                 .canYouProvideEmailAddress(Yes)
+                .canYouProvidePhoneNumber(Yes)
+                .isCurrentAddressKnown(Yes)
                 .isEmailAddressConfidential(Yes)
                 .isPhoneNumberConfidential(Yes)
                 .isAddressConfidential(Yes)
@@ -2301,6 +2331,10 @@ public class C100RespondentSolicitorServiceTest {
                                  .id(123L)
                                  .data(stringObjectMap)
                                  .build())
+                .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                    .id(123L)
+                    .data(stringObjectMap)
+                    .build())
                 .build();
             callbackRequest.setEventId(event);
 
@@ -2378,6 +2412,8 @@ public class C100RespondentSolicitorServiceTest {
                                               .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
+            .canYouProvidePhoneNumber(Yes)
+            .isCurrentAddressKnown(Yes)
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
             .isAddressConfidential(Yes)

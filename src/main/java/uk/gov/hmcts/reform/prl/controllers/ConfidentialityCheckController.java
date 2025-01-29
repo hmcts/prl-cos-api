@@ -64,7 +64,9 @@ public class ConfidentialityCheckController {
 
             if (CaseUtils.unServedPacksPresent(caseData)) {
                 Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+                confidentialityCheckService.processApplicantC8Documents(caseDataMap,caseData);
                 confidentialityCheckService.processRespondentsC8Documents(caseDataMap,caseData);
+                confidentialityCheckService.processOtherC8Documents(caseDataMap,caseData);
                 log.info("Packs present to serve");
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
             }
@@ -95,6 +97,8 @@ public class ConfidentialityCheckController {
                 caseData,
                 callbackRequest.getEventId()
             ));
+            //PRL-3466 - auto link citizen case if conf check is approved
+            serviceOfApplicationService.autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         } else {

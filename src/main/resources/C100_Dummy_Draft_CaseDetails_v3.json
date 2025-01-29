@@ -2814,6 +2814,7 @@
           "dxNumber": null,
           "landline": null,
           "lastName": "Doe",
+          "liveInRefuge": "No",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -3294,6 +3295,7 @@
           },
           "email": "applicant2@example.net",
           "gender": "male",
+          "liveInRefuge": "No",
           "address": {
             "County": "",
             "Country": "United Kingdom",
@@ -3787,6 +3789,7 @@
           },
           "email": "applicant3@example.net",
           "gender": "female",
+          "liveInRefuge": "No",
           "address": {
             "County": "",
             "Country": "United Kingdom",
