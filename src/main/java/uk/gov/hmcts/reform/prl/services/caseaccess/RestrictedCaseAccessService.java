@@ -72,7 +72,7 @@ public class RestrictedCaseAccessService {
     public static final String RESTRICTED_CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
     public static final String A_HREF = "<a href=\"";
     public static final String RESTRICTED_CONFIRMATION_BODY = "</br> You can return to " + A_HREF + MY_WORK_URL + "\">My Work</a>" + ".";
-    public static final String PUBLIC_CONFIRMATION_HEADER = "# Case marked as public";
+    public static final String PUBLIC_CONFIRMATION_HEADER = "# Case marked as public\n\n";
     public static final String PUBLIC_CONFIRMATION_SUBTEXT = """
         ## This case will now appear in search results
         and any previous access restrictions will be removed""";
@@ -201,15 +201,12 @@ public class RestrictedCaseAccessService {
         }
     }
 
-    public AboutToStartOrSubmitCallbackResponse changeCaseAccess(CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse  changeCaseAccess(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseSecurityClassificationEnum caseSecurityClassification
             = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
-        Map<String, Object> dataClassification
-            = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            .dataClassification(dataClassification)
             .securityClassification(String.valueOf(caseSecurityClassification))
             .build();
     }
