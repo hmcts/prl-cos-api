@@ -1797,6 +1797,7 @@ public class SendAndReplyService {
                 docs.addAll(attachedDocs);
 
                 bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
+                log.info("message bulk print details {}",bulkPrintDetails);
             }
         } catch (Exception e) {
             log.error("There is an issue while sending post to the party {}", partyDetails.getPartyId());
