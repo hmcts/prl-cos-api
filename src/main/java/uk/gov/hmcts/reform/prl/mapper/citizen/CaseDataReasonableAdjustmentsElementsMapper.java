@@ -131,8 +131,12 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         } else if (languageList.contains(READ_WRITE_WELSH)) {
             spokenOrWrittenWelshEnums.add(written);
         }
-        WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Applicant").spokenOrWritten(spokenOrWrittenWelshEnums).build();
-        return List.of(Element.<WelshNeed>builder().value(welshNeed).build());
+        //If welsh needs are not selected, return an empty list
+        if (!spokenOrWrittenWelshEnums.isEmpty()) {
+            WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Applicant").spokenOrWritten(spokenOrWrittenWelshEnums).build();
+            return List.of(Element.<WelshNeed>builder().value(welshNeed).build());
+        }
+        return List.of(Element.<WelshNeed>builder().value(WelshNeed.builder().build()).build());
     }
 
     private static YesOrNo buildIsWelshNeeded(List<String> languageList) {
