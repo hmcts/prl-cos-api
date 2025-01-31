@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
@@ -57,7 +58,8 @@ public class CaseDataOtherPersonsElementsMapper {
         List<OtherPersonDetail> otherPersonDetailsList = c100RebuildOtherPersonDetailsElements.getOtherPersonDetails();
 
         return nonNull(otherPersonDetailsList) ? otherPersonDetailsList.stream()
-                .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).build())
+                .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).id(
+                    UUID.fromString(otherPersonDetail.getId())).build())
                 .toList() : emptyList();
     }
 
@@ -152,6 +154,10 @@ public class CaseDataOtherPersonsElementsMapper {
                                                 .childAndOtherPeopleRelation(RelationshipsEnum.getEnumForDisplayedValue(
                                                     childRelationship.getRelationshipType()))
                                                 .childAndOtherPeopleRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                                .isChildLivesWithPersonConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
+                                                .isOtherPeopleIdConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
+                                                .otherPeopleId(otherPeopleDetails.getId())
+                                                .childId(childDetail.getId())
                                                 .build()).build();
                              }
                              return null;

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -557,7 +558,8 @@ public class ApplicationsTabService implements TabService {
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 
-        if (null != caseData.getIsCourtNavCase() && YesOrNo.Yes.equals(caseData.getIsCourtNavCase())) {
+        if ((null != caseData.getIsCourtNavCase() && YesOrNo.Yes.equals(caseData.getIsCourtNavCase()))
+            || (null != caseData.getCaseCreatedBy()) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             declarationText = declarationText + "I believe that the facts stated in this application are true.";
         } else {
             declarationText = declarationText + "The applicant believes that the facts stated in this form and any "

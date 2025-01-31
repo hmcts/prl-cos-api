@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -23,16 +24,21 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +75,8 @@ public class CitizenPartyDetailsMapperTest {
     CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
     @Mock
     ConfidentialityC8RefugeService confidentialityC8RefugeService;
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -609,6 +617,30 @@ public class CitizenPartyDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
+        Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
+            .firstName("c1")
+            .lastName("c1")
+            .liveInRefuge(YesOrNo.Yes)
+            .refugeConfidentialityC8Form(Document.builder()
+               .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
+               .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
+               .documentFileName("Sample_doc_2.pdf")
+               .documentCreatedOn(
+                   Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
+               .build())
+            .address(Address.builder()
+                 .addressLine1("add1")
+                 .addressLine2("add2")
+                 .addressLine3("add3")
+                 .postTown("")
+                 .county("thames")
+                 .country("uk")
+                 .postCode("tw22tr8")
+                 .build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
+            .build());
+        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
         assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
@@ -638,6 +670,30 @@ public class CitizenPartyDetailsMapperTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .c100RebuildData(c100RebuildData)
             .build();
+        Element<PartyDetails> otherPartyElement = element(PartyDetails.builder()
+              .firstName("c1")
+              .lastName("c1")
+              .liveInRefuge(YesOrNo.Yes)
+              .refugeConfidentialityC8Form(Document.builder()
+                   .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac")
+                   .documentBinaryUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/79e841a4-f232-4f2e-9e86-e4fc8f70fcac/binary")
+                   .documentFileName("Sample_doc_2.pdf")
+                   .documentCreatedOn(
+                       Date.from(ZonedDateTime.parse("2024-05-14T14:13:44Z").toInstant()))
+                   .build())
+              .address(Address.builder()
+                   .addressLine1("add1")
+                   .addressLine2("add2")
+                   .addressLine3("add3")
+                   .postTown("")
+                   .county("thames")
+                   .country("uk")
+                   .postCode("tw22tr8")
+                   .build())
+              .isAddressConfidential(YesOrNo.No)
+              .liveInRefuge(YesOrNo.No)
+              .build());
+        when(confidentialityTabService.updateOtherPeopleConfidentiality(any(), any())).thenReturn(Collections.singletonList(otherPartyElement));
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
         assertNotNull(caseDataResult);
         assertEquals(YesOrNo.No, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
