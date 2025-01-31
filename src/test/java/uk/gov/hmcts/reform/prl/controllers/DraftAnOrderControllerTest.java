@@ -138,7 +138,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(
             0,
-            draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest).getData().size()
+            draftAnOrderController.resetFields(authToken, s2sToken, null, callbackRequest).getData().size()
         );
     }
 
@@ -745,7 +745,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest);
+            draftAnOrderController.resetFields(authToken, s2sToken, null, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

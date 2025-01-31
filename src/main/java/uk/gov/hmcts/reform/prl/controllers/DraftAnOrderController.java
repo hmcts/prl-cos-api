@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -47,8 +48,11 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse resetFields(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
+            log.info("Language: {}", language);
             return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.resetFields(callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
