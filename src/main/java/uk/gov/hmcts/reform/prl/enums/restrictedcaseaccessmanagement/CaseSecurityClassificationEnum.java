@@ -15,9 +15,9 @@ import java.util.Arrays;
 public enum CaseSecurityClassificationEnum {
     @JsonProperty("public")
     PUBLIC("public"),
-    @JsonProperty("public")
+    @JsonProperty("private")
     PRIVATE("private"),
-    @JsonProperty("public")
+    @JsonProperty("restricted")
     RESTRICTED("restricted");
 
     private final String value;
