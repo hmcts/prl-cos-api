@@ -13,11 +13,11 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 @Getter
 public enum CaseSecurityClassificationEnum {
-    @JsonProperty("public")
+    @JsonProperty("PUBLIC")
     PUBLIC("PUBLIC"),
-    @JsonProperty("private")
+    @JsonProperty("PRIVATE")
     PRIVATE("PRIVATE"),
-    @JsonProperty("restricted")
+    @JsonProperty("RESTRICTED")
     RESTRICTED("RESTRICTED");
 
     private final String value;
