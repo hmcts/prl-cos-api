@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.wa;
+package uk.gov.hmcts.reform.prl.models.languagecontext;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientContext {
-    @JsonProperty("user_task")
-    private UserTask userTask;
+
+    @JsonProperty("user_language")
+    private UserLanguage userLanguage;
 }

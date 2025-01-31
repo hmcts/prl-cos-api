@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.wa;
+package uk.gov.hmcts.reform.prl.models.languagecontext;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLanguage {
+public class LanguageContextMapper {
 
-    @JsonProperty("language")
-    private String language;
+    @JsonProperty("client_context")
+    private ClientContext clientContext;
 }

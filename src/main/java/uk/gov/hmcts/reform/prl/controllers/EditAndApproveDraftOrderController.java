@@ -98,6 +98,8 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String language = CaseUtils.getLanguage(clientContext);
+            log.info("Language: {}", language);
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 caseData = caseData.toBuilder()
