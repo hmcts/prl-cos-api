@@ -14,11 +14,11 @@ import java.util.Arrays;
 @Getter
 public enum CaseSecurityClassificationEnum {
     @JsonProperty("public")
-    PUBLIC("public"),
+    PUBLIC("PUBLIC"),
     @JsonProperty("private")
-    PRIVATE("private"),
+    PRIVATE("PRIVATE"),
     @JsonProperty("restricted")
-    RESTRICTED("restricted");
+    RESTRICTED("RESTRICTED");
 
     private final String value;
 
