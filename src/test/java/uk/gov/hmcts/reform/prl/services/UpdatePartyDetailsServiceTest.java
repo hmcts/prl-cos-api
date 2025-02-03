@@ -179,10 +179,546 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
 
+    }
+
+    @Test
+    public void updateApplicantsAddressInCitizenResponseFl401() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails applicantUpdated = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole(null).organisation(null).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant1)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseData caseDataUpdated1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicantUpdated)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMapUpdated = caseDataUpdated1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("amendApplicantsDetails")
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
+            .caseDetails(CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
+    }
+
+    @Test
+    public void updateApplicantsAddressInCitizenResponse() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails applicantUpdated = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicantUpdated = Element.<PartyDetails>builder().value(applicantUpdated).build();
+        List<Element<PartyDetails>> applicantListUpdated = Collections.singletonList(wrappedApplicantUpdated);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole(null).organisation(null).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseData caseDataUpdated1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantListUpdated)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMapUpdated = caseDataUpdated1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("amendApplicantsDetails")
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
+            .caseDetails(CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
+    }
+
+    @Test
+    public void updateApplicantsPhoneInCitizenResponse() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails applicantUpdated = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicantUpdated = Element.<PartyDetails>builder().value(applicantUpdated).build();
+        List<Element<PartyDetails>> applicantListUpdated = Collections.singletonList(wrappedApplicantUpdated);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole(null).organisation(null).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseData caseDataUpdated1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantListUpdated)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMapUpdated = caseDataUpdated1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("amendApplicantsDetails")
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
+            .caseDetails(CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
+    }
+
+    @Test
+    public void updateApplicantsEmailInCitizenResponse() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .response(Response.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails applicantUpdated = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicantUpdated = Element.<PartyDetails>builder().value(applicantUpdated).build();
+        List<Element<PartyDetails>> applicantListUpdated = Collections.singletonList(wrappedApplicantUpdated);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole(null).organisation(null).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseData caseDataUpdated1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantListUpdated)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMapUpdated = caseDataUpdated1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("amendApplicantsDetails")
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
+            .caseDetails(CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
+    }
+
+    @Test
+    public void newApplicantAdded() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .response(Response.builder().build())
+            .build();
+        PartyDetails applicant2 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .response(Response.builder().build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        applicantList.add(wrappedApplicant2);
+
+        PartyDetails applicantUpdated = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicantUpdated = Element.<PartyDetails>builder().value(applicantUpdated).build();
+        List<Element<PartyDetails>> applicantListUpdated = Collections.singletonList(wrappedApplicantUpdated);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .response(Response.builder().keepDetailsPrivate(KeepDetailsPrivate.builder().build()).build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole(null).organisation(null).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseData caseDataUpdated1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantListUpdated)
+            .respondents(respondentList)
+            .applicantOrganisationPolicy(organisationPolicy)
+            .children(listOfChildren)
+            .build();
+        Map<String, Object> stringObjectMapUpdated = caseDataUpdated1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("applicantsDetails")
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
+            .caseDetails(CaseDetails.builder()
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
     }
 
     @Test
@@ -225,6 +761,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -570,6 +1107,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(caseDataUpdated.get("applicants"));
@@ -669,6 +1207,7 @@ public class UpdatePartyDetailsServiceTest {
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
     }
@@ -767,6 +1306,7 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
     }
@@ -976,6 +1516,7 @@ public class UpdatePartyDetailsServiceTest {
                                    .build())
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
@@ -1412,6 +1953,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> updatedCaseData = updatePartyDetailsService

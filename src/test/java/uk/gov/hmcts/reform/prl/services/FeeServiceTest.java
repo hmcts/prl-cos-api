@@ -40,7 +40,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
@@ -732,10 +731,10 @@ public class FeeServiceTest {
 
     @Test
     public void testFetchFeeInvalidFeeType() {
-        FeeResponseForCitizen response = feeService.fetchFee(anyString());
+        FeeResponseForCitizen response = feeService.fetchFee("INVALID_FEE_TYPE");
 
         assertNotNull(response);
-        assertEquals(FETCH_FEE_INVALID_APPLICATION_TYPE, response.getErrorRetrievingResponse());
+        assertEquals(FETCH_FEE_INVALID_APPLICATION_TYPE.concat("INVALID_FEE_TYPE"), response.getErrorRetrievingResponse());
     }
 
     @Test

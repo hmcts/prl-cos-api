@@ -71,7 +71,8 @@ public enum CaseEvent {
     ENABLE_REQUEST_SOLICITOR_ORDER_TASK("enableRequestSolicitorOrderTask"),
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
-    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised");
+    AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
+    APPLICANT_DETAILS("applicantsDetails");
 
     private final String value;
 
