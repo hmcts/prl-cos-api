@@ -50,6 +50,7 @@ public class PartyDetails {
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private YesOrNo isEmailAddressConfidential;
+    private YesOrNo isPartyIdentityConfidential;
     private final String landline;
     private YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
