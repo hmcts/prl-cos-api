@@ -72,7 +72,7 @@ public class RestrictedCaseAccessControllerFunctionalTest {
             .post("/restricted-case-access/about-to-submit")
             .then()
             .assertThat().statusCode(200)
-            .body("data.caseSecurityClassification", equalTo("restricted"));
+            .body("data.caseSecurityClassification", equalTo("RESTRICTED"));
 
     }
 
