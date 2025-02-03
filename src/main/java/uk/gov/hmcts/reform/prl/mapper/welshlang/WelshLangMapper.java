@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -33,6 +34,13 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
@@ -42,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+@Slf4j
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
@@ -905,7 +914,88 @@ public class WelshLangMapper {
             "Pryderon amddiffyn plant"
         );
 
+        welshMap.put("Behaviour is not ongoing", "Nid yw’r ymddygiad yn parhau");
+
+        welshMap.put("Behaviour is ongoing", "Mae’r ymddygiad yn parhau");
+
+        /**
+         * Welsh translations for special arrangements enum
+         */
+        getSpecialArrangementsWelsh(welshMap);
+        getReasonbleAdjustmentsWelsh(welshMap);
         return welshMap;
+    }
+
+    public static void getSpecialArrangementsWelsh(Map<String, String> welshMap) {
+        welshMap.put(SpecialArrangementEnum.separateWaitingRoom.getDisplayedValue(), "Ystafell aros ar wahân");
+        welshMap.put(SpecialArrangementEnum.separateExitEntrance.getDisplayedValue(), "Drysau ar wahân i fynd i mewn ac allan o'r llys");
+        welshMap.put(SpecialArrangementEnum.screenWithOtherPeople.getDisplayedValue(),
+                     "Sgriniau i atal chi a’r bobl eraill yn yr achos rhag gweld eich gilydd");
+        welshMap.put(SpecialArrangementEnum.noSafetyRequirements.getDisplayedValue(),
+                     "Nac oes, nid oes arnaf angen unrhyw ofynion o ran diogelwch ar hyn o bryd");
+        welshMap.put(SpecialArrangementEnum.separateToilets.getDisplayedValue(), "Toiledau ar wahân");
+        welshMap.put(SpecialArrangementEnum.videoLinks.getDisplayedValue(), "Cyswllt fideo");
+        welshMap.put(SpecialArrangementEnum.visitCourtBeforeHearing.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
+        welshMap.put(SpecialArrangementEnum.specialArrangementsOther.getDisplayedValue(), "Arall");
+    }
+
+
+    public static void getReasonbleAdjustmentsWelsh(Map<String, String> welshMap) {
+        welshMap.put("No, I do not need any support at this time", "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(DocsSupportEnum.docsprint.getDisplayedValue(), "Dogfennau mewn lliw penodol");
+        welshMap.put(DocsSupportEnum.docsreadformat.getDisplayedValue(), "Dogfennau mewn fformat hawdd i’w darllen");
+        welshMap.put(DocsSupportEnum.brailledocs.getDisplayedValue(), "Dogfennau Braille");
+        welshMap.put(DocsSupportEnum.largeprintdocs.getDisplayedValue(), "Dogfennau mewn print bras");
+        welshMap.put(DocsSupportEnum.docsaudio.getDisplayedValue(), "Help i ddefnyddio lifft");
+        welshMap.put(DocsSupportEnum.docsReadOut.getDisplayedValue(), "Cyfieithiad sain o ddogfennau");
+        welshMap.put(DocsSupportEnum.emailInfo.getDisplayedValue(), "Gwybodaeth yn cael ei hanfon ataf drwy e-bost");
+        welshMap.put(DocsSupportEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(DocsSupportEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(TravellingToCourtEnum.parkingspace.getDisplayedValue(), "Lle parcio yn agos i'r lleoliad");
+        welshMap.put(TravellingToCourtEnum.stepfree.getDisplayedValue(), "Dim gris / mynediad ar gyfer cadair olwyn");
+        welshMap.put(TravellingToCourtEnum.wheelchair.getDisplayedValue(), "Dim gris / mynediad ar gyfer cadair olwyn");
+        welshMap.put(TravellingToCourtEnum.toilet.getDisplayedValue(), "Toiledau hygyrch");
+        welshMap.put(TravellingToCourtEnum.lift.getDisplayedValue(), "Help i ddefnyddio lifft");
+        welshMap.put(TravellingToCourtEnum.differentchair.getDisplayedValue(), "Math gwahanol o gadair");
+        welshMap.put(TravellingToCourtEnum.building.getDisplayedValue(), "Cymorth i fynd o amgylch yr adeilad");
+        welshMap.put(TravellingToCourtEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(TravellingToCourtEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(CourtComfortEnum.appropriatelighting.getDisplayedValue(), "Goleuadau priodol");
+        welshMap.put(CourtComfortEnum.breaks.getDisplayedValue(), "Seibiannau rheolaidd");
+        welshMap.put(CourtComfortEnum.space.getDisplayedValue(), "Lle i allu codi a symud o gwmpas");
+        welshMap.put(CourtComfortEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(CourtComfortEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(CourtHearingEnum.supportworker.getDisplayedValue(), "Gweithiwr cymorth neu ofalwr");
+        welshMap.put(CourtHearingEnum.familymember.getDisplayedValue(), "ffrind neu aelod o'r teulu");
+        welshMap.put(CourtHearingEnum.assistance.getDisplayedValue(), "Ci cymorth / ci tywys");
+        welshMap.put(CourtHearingEnum.animal.getDisplayedValue(), "Anifail therapi");
+        welshMap.put(CourtHearingEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(CourtHearingEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(HelpCommunicationEnum.hearingloop.getDisplayedValue(), "Dolen sain (system gwella clyw)");
+        welshMap.put(HelpCommunicationEnum.infraredreceiver.getDisplayedValue(), "Derbynnydd isgoch (system gwella clyw)");
+        welshMap.put(HelpCommunicationEnum.needspeakinghelp.getDisplayedValue(), "Angen bod yn agos at bwy bynnag sy'n siarad");
+        welshMap.put(HelpCommunicationEnum.signlanguage.getDisplayedValue(), "Dehonglydd iaith arwyddion");
+        welshMap.put(HelpCommunicationEnum.speechreporter.getDisplayedValue(), "Cofnodwr iaith lafar i destun (palanteipydd)");
+        welshMap.put(HelpCommunicationEnum.extratime.getDisplayedValue(), "Amser ychwanegol i feddwl ac egluro fy hun");
+        welshMap.put(HelpCommunicationEnum.courtvisit.getDisplayedValue(), "Ymweld â'r llys cyn y gwrandawiad");
+        welshMap.put(HelpCommunicationEnum.courthearing.getDisplayedValue(), "Esboniad o osodiad y llys a phwy fydd yn yr ystafell wrandawiadau");
+        welshMap.put(HelpCommunicationEnum.intermediary.getDisplayedValue(), "Cyfryngwr");
+        welshMap.put(HelpCommunicationEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(HelpCommunicationEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
+
+        welshMap.put(ReasonableAdjustmentsEnum.docsformat.getDisplayedValue(), "Rwyf angen dogfennau mewn fformat arall");
+        welshMap.put(ReasonableAdjustmentsEnum.commhelp.getDisplayedValue(), "Rwyf angen cymorth gyda chyfathrebu a deall pethau");
+        welshMap.put(ReasonableAdjustmentsEnum.hearingsupport.getDisplayedValue(), "Rwyf angen dod â rhywun efo fi i fy nghefnogi mewn gwrandawiad");
+        welshMap.put(ReasonableAdjustmentsEnum.hearingcomfort.getDisplayedValue(),
+            "Rwyf angen rhywbeth i wneud i mi deimlo’n gyfforddus yn ystod gwrandawiad");
+        welshMap.put(ReasonableAdjustmentsEnum.travellinghelp.getDisplayedValue(),
+            "Rwyf angen cymorth i deithio i, neu symud o gwmpas adeiladau’r llys");
+        welshMap.put(ReasonableAdjustmentsEnum.nosupport.getDisplayedValue(), "Nac oes, nid oes arnaf angen unrhyw gymorth ar hyn o bryd");
     }
 
     /**

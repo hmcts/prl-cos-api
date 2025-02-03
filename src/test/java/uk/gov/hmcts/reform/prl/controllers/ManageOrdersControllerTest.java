@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -1146,6 +1147,10 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isTheOrderAboutAllChildren", No);
         stringObjectMap.put("isTheOrderAboutChildren", Yes);
+        DraftOrder draftOrder = DraftOrder.builder().orderTypeId("abc").build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(element(draftOrder));
+        stringObjectMap.put("draftOrderCollection", draftOrderCollection);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
@@ -1856,6 +1861,31 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
     public void testAddUploadOrder() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -2292,6 +2322,7 @@ public class ManageOrdersControllerTest {
             .children(List.of(element(Child.builder().firstName("ch").build())))
             .courtName("testcourt")
             .caseTypeOfApplication("C100")
+            .isCafcass(Yes)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
             .build();

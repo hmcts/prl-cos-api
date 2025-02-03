@@ -4,7 +4,7 @@
 
 ## Notes
 
-This is manage order changes base branch  test.
+This is manage order changes base branch test.
 
 Update with master - Respondent dynamic task list with stop representation.
 
@@ -92,7 +92,7 @@ docker image rm <image-id>
 
 There is no need to remove postgres and java or similar core images.
 
-#### Troubleshooting
+### Troubleshooting
 
 ### Managing Preview environment PODs
 Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.

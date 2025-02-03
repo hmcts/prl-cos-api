@@ -168,16 +168,18 @@ public class Fl401ListOnNoticeServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .state(State.JUDICIAL_REVIEW.getValue())
             .data(stringObjectMap)
             .build();
-
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
-            .sendNotification(stringObjectMap, authToken);
+            .sendNotification(callbackRequest, authToken);
         assertEquals(CONFIRMATION_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
 
     }
@@ -194,16 +196,18 @@ public class Fl401ListOnNoticeServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .state(State.JUDICIAL_REVIEW.getValue())
             .data(stringObjectMap)
             .build();
-
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
-            .sendNotification(stringObjectMap, authToken);
+            .sendNotification(callbackRequest, authToken);
         assertEquals(CONFIRMATION_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
     }
 
@@ -223,13 +227,15 @@ public class Fl401ListOnNoticeServiceTest {
             .state(State.JUDICIAL_REVIEW.getValue())
             .data(stringObjectMap)
             .build();
-
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
-            .sendNotification(stringObjectMap, authToken);
+            .sendNotification(callbackRequest, authToken);
         assertEquals(CONFIRMATION_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
 
     }
@@ -251,10 +257,12 @@ public class Fl401ListOnNoticeServiceTest {
             .state(State.JUDICIAL_REVIEW.getValue())
             .data(stringObjectMap)
             .build();
-
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeService
-            .sendNotification(stringObjectMap, authToken);
+            .sendNotification(callbackRequest, authToken);
         assertEquals(CONFIRMATION_BODY, Objects.requireNonNull(response.getBody()).getConfirmationBody());
 
     }

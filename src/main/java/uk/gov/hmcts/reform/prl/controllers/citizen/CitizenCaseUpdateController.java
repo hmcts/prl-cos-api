@@ -9,10 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +26,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.AwpProcessHwfPaymentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -43,6 +47,8 @@ public class CitizenCaseUpdateController {
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private final CaseService caseService;
+
+    private final AwpProcessHwfPaymentService awpProcessHwfPaymentService;
 
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
@@ -105,7 +111,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) throws JsonProcessingException {
+    ) throws JsonProcessingException, NotFoundException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
@@ -174,5 +180,31 @@ public class CitizenCaseUpdateController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping(value = "{caseId}/save-citizen-awp-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Save citizen awp application into case data")
+    public ResponseEntity<Object> saveCitizenAwpApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                            @PathVariable("caseId") String caseId,
+                                                            @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("*** Inside saveCitizenAwpApplication -> citizen awp request  {}", citizenAwpRequest);
+            CaseDetails caseDetails = citizenCaseUpdateService.saveCitizenAwpApplication(authorisation, caseId, citizenAwpRequest);
+
+            if (null != caseDetails) {
+                return ResponseEntity.ok("Success");
+            } else {
+                return ResponseEntity.internalServerError().body("Error happened in saving citizen awp application");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "/awp-process-hwf-payment")
+    @Operation(description = "Save citizen awp application into case data")
+    public void processAwpWithHwfPayment() {
+        awpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
     }
 }

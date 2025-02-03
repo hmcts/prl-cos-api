@@ -58,7 +58,9 @@ public class ApplicationsTabServiceHelper {
                            .gender(otherPerson.getGender() != null
                                        ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
                            .build()).build();
-            otherPersonsInTheCase.add(wrappedPerson);
+            if (currentOtherPerson.getIsPartyIdentityConfidential() != YesOrNo.Yes) {
+                otherPersonsInTheCase.add(wrappedPerson);
+            }
         }
         return otherPersonsInTheCase;
     }
@@ -105,6 +107,8 @@ public class ApplicationsTabServiceHelper {
                 .cafcassOfficerName(child.getCafcassOfficerName())
                 .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
                 .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
+            .finalDecisionResolutionDate(child.getFinalDecisionResolutionDate())
+            .finalDecisionResolutionReason(child.getFinalDecisionResolutionReason())
             .build();
     }
 
@@ -175,16 +179,55 @@ public class ApplicationsTabServiceHelper {
             .toList();
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
-            ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
-            Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
+            ChildAndOtherPeopleRelation childAndOtherPeopleRelation = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
+            childAndOtherPeopleRelation = maskChildAndOtherPeopleConfidentialDetails(childAndOtherPeopleRelation, otherPeople);
+            Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(childAndOtherPeopleRelation).build();
+            log.info("childAndOtherPeopleRelation after builder---> " + app);
             otherPeopleRelations.add(app);
         }
         log.info("-->getChildAndOtherPeopleRelationsTable()--->End");
         return otherPeopleRelations;
     }
 
+    private ChildAndOtherPeopleRelation maskChildAndOtherPeopleConfidentialDetails(ChildAndOtherPeopleRelation childAndOtherPeopleRelation,
+                                                                                   ChildrenAndOtherPeopleRelation otherPeople) {
+
+        if (YesOrNo.Yes.equals(otherPeople.getIsOtherPeopleIdConfidential())) {
+            ChildAndOtherPeopleRelation.ChildAndOtherPeopleRelationBuilder builder = childAndOtherPeopleRelation.toBuilder();
+
+            if (StringUtils.isNotBlank(childAndOtherPeopleRelation.getOtherPeopleFullName())) {
+                builder.otherPeopleFullName(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if (StringUtils.isNotBlank(childAndOtherPeopleRelation.getChildAndOtherPeopleRelation())) {
+                builder.childAndOtherPeopleRelationInfo(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if (StringUtils.isNotBlank(childAndOtherPeopleRelation.getChildAndOtherPeopleRelationOtherDetails())) {
+                builder.childAndOtherPeopleRelationOtherDetails(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+
+            childAndOtherPeopleRelation = builder.build();
+        }
+        return childAndOtherPeopleRelation;
+    }
+
 
     public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
+        for (PartyDetails applicantDetails : currentApplicants) {
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential()) && applicantDetails.getPhoneNumber() != null) {
+                applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential()) && applicantDetails.getEmail() != null) {
+                applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential()) && applicantDetails.getAddress() != null
+                && applicantDetails.getAddress().getAddressLine1() != null) {
+                applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            }
+        }
+        return currentApplicants;
+    }
+
+    public List<PartyDetails> maskOtherPeopleConfidentialDetails(List<PartyDetails> currentApplicants) {
         for (PartyDetails applicantDetails : currentApplicants) {
             if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
                 applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
