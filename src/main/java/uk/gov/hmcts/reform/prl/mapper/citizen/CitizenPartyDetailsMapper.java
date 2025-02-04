@@ -872,6 +872,10 @@ public class CitizenPartyDetailsMapper {
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
             );
             caseDataMapToBeUpdated.put(
+                "applicantPcqId",
+                citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
+            );
+            caseDataMapToBeUpdated.put(
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
