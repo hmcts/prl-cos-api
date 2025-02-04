@@ -23,11 +23,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -227,16 +227,20 @@ public class CaseController {
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody DssCaseData dssCaseData) {
+        @RequestBody CaseData dssCaseData) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            caseDetails = caseService.updateCaseForDss(
+            CaseDetails caseDetails = caseService.updateCaseForDss(
                 authorisation,
                 caseId,
                 eventId,
                 dssCaseData
             );
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("Edge case update/submit has failed for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Edge case update/submit has failed for this transaction");
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -247,7 +251,7 @@ public class CaseController {
     public String getEdgeCaseCourtList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
-        if (true) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return caseService.getEdgeCasesCourtList();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

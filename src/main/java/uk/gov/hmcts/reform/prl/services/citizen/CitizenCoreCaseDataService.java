@@ -112,11 +112,11 @@ public class CitizenCoreCaseDataService {
 
         if (userDetails.getRoles().contains(CITIZEN_ROLE)) {
             caseData.setCaseCreatedBy(CITIZEN);
-        }
-        //Added for DS WEB create case by court staff
-        if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+        } else if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+            //Added for DS WEB create case by court staff
             caseData.setCaseCreatedBy(COURT_STAFF);
         }
+
         StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
             authorisation,
             cosApis2sToken,

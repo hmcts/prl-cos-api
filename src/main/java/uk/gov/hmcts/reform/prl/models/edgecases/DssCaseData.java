@@ -1,38 +1,39 @@
-package uk.gov.hmcts.reform.prl.models.dto.ccd;
+package uk.gov.hmcts.reform.prl.models.edgecases;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import uk.gov.hmcts.reform.ccd.client.model.Document;
+import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
 @Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DssCaseData {
 
-    private String namedApplicant;
     private String caseTypeOfApplication;
+    private String namedApplicant;
     private String applicantFirstName;
     private String applicantLastName;
-    private String applicantDateOfBirth;
-    private String applicantContactPreference;
+    private DateofBirth applicantDateOfBirth;
     private String applicantEmailAddress;
     private String applicantPhoneNumber;
     private String applicantHomeNumber;
+    private String contactPreferenceType;
     private String applicantAddress1;
     private String applicantAddress2;
     private String applicantAddressTown;
+    private String applicantAddressCounty;
     private String applicantAddressPostCode;
+    private String applicantAddressCountry;
+    private String selectedCourtId;
     private String applicantStatementOfTruth;
-    private String selectedCourt;
 
     private List<Document> applicantApplicationFormDocuments;
     private List<Document> applicantAdditionalDocuments;

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -33,7 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.mapper.edgecases.DssEdgeCaseDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -48,20 +49,17 @@ import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.citizen.NotificationNames;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
-import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
@@ -75,6 +73,7 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -123,6 +122,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
@@ -131,7 +131,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -186,6 +185,8 @@ public class CaseService {
     private final DashboardNotificationsConfig notificationsConfig;
     private final LocationRefDataApi locationRefDataApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
+    private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
 
     @Value("${courts.edgeCaseCourtList}")
     protected String edgeCaseCourtList;
@@ -316,86 +317,65 @@ public class CaseService {
         return edgeCaseCourtList;
     }
 
-    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) {
+    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, CaseData caseData) throws JsonProcessingException {
+        log.info("DSS CaseData received {}", caseData.getDssCaseDetails());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.fromValue(eventId).getValue(),
+                authToken
+            );
+        Map<String, Object> caseDataMapToBeUpdated;
 
-        log.info("dssCaseData received {}", dssCaseData);
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        //Update the case data with the edge case details
+        if (CaseEvent.UPDATE_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+            log.info("Update case data with DSS case details for caseId: {}", caseId);
+            caseDataMapToBeUpdated = dssEdgeCaseDetailsMapper.updateCase(caseData);
+        } else if (CaseEvent.SUBMIT_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+            //Submit the case data to CCD with data mapped from DSS
+            log.info("Submit case data with DSS case details for caseId: {}", caseId);
+            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.submitCase(caseData);
 
-        List<Element<Document>> uploadDssDocs = new ArrayList<Element<Document>>();
-        List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<Element<Document>>();
-        dssCaseData.getApplicantApplicationFormDocuments().forEach(edgeCaseDocument -> {
-            uploadDssDocs.add(element(Document.builder().documentUrl(edgeCaseDocument.getDocumentURL()).documentBinaryUrl(
-                edgeCaseDocument.getDocumentBinaryURL()).documentFileName(edgeCaseDocument.getDocumentFilename()).build()));
-            log.info("uploadDssDocs ========== {}", uploadDssDocs);
-        });
+            caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
 
-        dssCaseData.getApplicantAdditionalDocuments().forEach(edgeCaseDocument -> {
-            uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(edgeCaseDocument.getDocumentURL()).documentBinaryUrl(
-                edgeCaseDocument.getDocumentBinaryURL()).documentFileName(edgeCaseDocument.getDocumentFilename()).build()));
-            log.info("uploadAdditionalDssDocs ========== {}", uploadAdditionalDssDocs);
-        });
+            updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
 
-        PartyDetails partyDetails = PartyDetails.builder().firstName(dssCaseData.getApplicantFirstName()).email(
-            dssCaseData.getApplicantEmailAddress()).address(Address.builder().addressLine1(dssCaseData.getApplicantAddress1()).addressLine2(
-            dssCaseData.getApplicantAddress2()).country("United Kingdom").postCode(dssCaseData.getApplicantAddressPostCode()).build()).dateOfBirth(
-            LocalDate.parse(
-                dssCaseData.getApplicantDateOfBirth(),
-                dateTimeFormatter
-            )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
-            .dssCaseDetails(
-            caseData.getDssCaseDetails().toBuilder()
-                .dssUploadedDocuments(uploadDssDocs)
-                .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
-                .selectedCourt(dssCaseData.getSelectedCourt())
-                .build()).build();
-        updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
-        log.info("updatedCaseData -- {}", updatedCaseData);
+        } else {
+            log.error("Invalid Event ID for DSS Case Update");
+            return null;
+        }
 
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
-
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
+        );
     }
 
-    private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
+    private void updateCourtDetails(String authToken,
+                                    CaseData updatedCaseData,
+                                    Map<String, Object> caseDataMapToBeUpdated) {
         if (null != updatedCaseData.getDssCaseDetails()
             && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
             || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
-            && null != dssCaseData.getSelectedCourt()) {
+            && null != updatedCaseData.getDssCaseDetails().getSelectedCourtId()) {
 
-            CaseManagementLocation courtLocationByEpmsId = getCourtLocationByEpmsId(
-                dssCaseData.getSelectedCourt(),
-                authToken
+            List<CourtVenue> courtVenues = locationRefDataApi.getCourtDetailsById(
+                authToken,
+                authTokenGenerator.generate(),
+                updatedCaseData.getDssCaseDetails().getSelectedCourtId()
             );
-            updatedCaseData = updatedCaseData.toBuilder()
-                .caseManagementLocation(courtLocationByEpmsId)
-                .courtName(courtLocationByEpmsId.getBaseLocationName())
-                .courtId(courtLocationByEpmsId.getBaseLocation())
-                .build();
-        }
-        return updatedCaseData;
-    }
 
-    private CaseManagementLocation getCourtLocationByEpmsId(String epmsId, String authorisation) {
-        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
-            authorisation,
-            authTokenGenerator.generate(),
-            SERVICE_ID
-        );
-
-        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream()
-            .filter(location -> epmsId.equalsIgnoreCase(location.getCourtEpimmsId()))
-            .findFirst();
-        if (courtVenue.isPresent()) {
-            return CaseManagementLocation.builder()
-                .baseLocation(courtVenue.get().getCourtEpimmsId())
-                .baseLocationName(courtVenue.get().getCourtName())
-                .region(courtVenue.get().getRegionId())
-                .regionName(courtVenue.get().getRegion()).build();
+            if (CollectionUtils.isNotEmpty(courtVenues)) {
+                caseDataMapToBeUpdated.putAll(CaseUtils.getCourtDetails(Optional.ofNullable(courtVenues.get(0)),
+                                                                        updatedCaseData.getDssCaseDetails().getSelectedCourtId()));
+                //REMOVE Cafcass flag as it's not needed for Edge Cases
+                caseDataMapToBeUpdated.remove(IS_CAFCASS);
+            }
         }
-        return CaseManagementLocation.builder().build();
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
