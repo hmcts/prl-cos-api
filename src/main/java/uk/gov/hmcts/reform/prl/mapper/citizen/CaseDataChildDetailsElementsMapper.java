@@ -105,6 +105,8 @@ public class CaseDataChildDetailsElementsMapper {
         DynamicList dynamicListElements = null;
         List<Element<PartyDetails>> listOfParties = new ArrayList<>();
         CaseData caseData = caseDataBuilder.build();
+        log.info("caseDataBuilder: {}", caseDataBuilder);
+        log.info("caseData: {}", caseData);
 
         if (null != caseData.getApplicants()) {
             listOfParties.addAll(caseData.getApplicants());
