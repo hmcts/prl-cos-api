@@ -116,10 +116,14 @@ public class CaseDataChildDetailsElementsMapper {
             listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
         }
 
+        log.info("listOfParties: {}", listOfParties);
+
         AtomicReference<String> label = new AtomicReference<>("");
         listOfParties.stream().forEach(partyDetailsElement -> {
             PartyDetails partyDetails = partyDetailsElement.getValue();
-            if (partyDetails.getPartyId().equals(childDetail.getMainlyLiveWith().getId())) {
+            if (partyDetails.getFirstName().equals(childDetail.getMainlyLiveWith().getFirstName())
+                && partyDetails.getLastName().equals(childDetail.getMainlyLiveWith().getLastName())) {
+                log.info("isnide if condition");
                 String address = populateAddressInDynamicList(partyDetailsElement);
                 String name = populateNameInDynamicList(partyDetailsElement, address);
 
