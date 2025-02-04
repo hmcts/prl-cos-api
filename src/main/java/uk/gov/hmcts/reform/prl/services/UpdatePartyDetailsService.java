@@ -774,6 +774,9 @@ public class UpdatePartyDetailsService {
                                     ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
                                 .build())
                         .build())));
+                listOfChildren.forEach(child ->
+                    log.info("whoDoesTheChildLiveWith: " + child.getValue().getWhoDoesTheChildLiveWith().getValue()));
+
                 caseDataUpdated.put(NEW_CHILDREN, listOfChildrenRevised);
             }
         } else {
