@@ -186,14 +186,18 @@ public class CaseDataApplicantElementsMapper {
 
                                  return Element.<ChildrenAndApplicantRelation>builder()
                                      .value(ChildrenAndApplicantRelation.builder()
-                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                                .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                                    .anyMatch(c -> c.getId().equals(applicantDto.getId())) ? Yes : No)
-                                                .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
-                                                .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                                    childRelationship.getRelationshipType()))
-                                                .childAndApplicantRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                                .build()).build();
+                                         .childId(childDetail.getId())
+                                         .applicantId(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(applicantDto.getId())) ? applicantDto.getId() : null)
+                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                         .childLivesWith(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(applicantDto.getId())) ? Yes : No)
+                                         .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
+                                         .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                             childRelationship.getRelationshipType()))
+                                         .childAndApplicantRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                         .build())
+                                     .build();
                              }
                              return null;
                          })

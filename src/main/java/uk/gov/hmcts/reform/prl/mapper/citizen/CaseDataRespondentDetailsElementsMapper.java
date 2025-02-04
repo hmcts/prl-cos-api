@@ -151,14 +151,18 @@ public class CaseDataRespondentDetailsElementsMapper {
 
                                  return Element.<ChildrenAndRespondentRelation>builder()
                                      .value(ChildrenAndRespondentRelation.builder()
-                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                                .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                                    .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
-                                                .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
-                                                .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                                    childRelationship.getRelationshipType()))
-                                                .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                                .build()).build();
+                                         .childId(childDetail.getId())
+                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                         .childLivesWith(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
+                                         .respondentId(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? respondentDetails.getId() : null)
+                                         .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
+                                         .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                             childRelationship.getRelationshipType()))
+                                         .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                         .build())
+                                     .build();
                              }
                              return null;
                          })
