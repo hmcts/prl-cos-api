@@ -61,20 +61,20 @@ public class DssEdgeCaseDetailsMapper {
 
     private Element<PartyDetails> getDssApplicantPartyDetails(DssCaseData dssCaseData) {
         return element(PartyDetails.builder()
-                           .firstName(dssCaseData.getApplicantFirstName())
-                           .lastName(dssCaseData.getApplicantLastName())
-                           .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
-                           .email(dssCaseData.getApplicantEmailAddress())
-                           .phoneNumber(dssCaseData.getApplicantPhoneNumber())
-                           //TODO: ADD HOME PHONE NUMBER
-                           .address(Address.builder()
-                                        .addressLine1(dssCaseData.getApplicantAddress1())
-                                        .addressLine2(dssCaseData.getApplicantAddress2())
-                                        .postTown(dssCaseData.getApplicantAddressTown())
-                                        .county(dssCaseData.getApplicantAddressCounty())
-                                        .postCode(dssCaseData.getApplicantAddressPostCode())
-                                        .country(dssCaseData.getApplicantAddressCountry())
-                                        .build())
-                           .build());
+                .firstName(dssCaseData.getApplicantFirstName())
+                .lastName(dssCaseData.getApplicantLastName())
+                .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
+                .email(dssCaseData.getApplicantEmailAddress())
+                .phoneNumber(dssCaseData.getApplicantPhoneNumber())
+                .landline(dssCaseData.getApplicantHomeNumber()) //recheck
+                .address(Address.builder()
+                        .addressLine1(dssCaseData.getApplicantAddress1())
+                        .addressLine2(dssCaseData.getApplicantAddress2())
+                        .postTown(dssCaseData.getApplicantAddressTown())
+                        .county(dssCaseData.getApplicantAddressCounty())
+                        .postCode(dssCaseData.getApplicantAddressPostCode())
+                        .country(dssCaseData.getApplicantAddressCountry())
+                        .build())
+                .build());
     }
 }
