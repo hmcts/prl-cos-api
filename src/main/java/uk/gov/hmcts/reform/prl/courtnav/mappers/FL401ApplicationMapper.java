@@ -236,6 +236,7 @@ public class FL401ApplicationMapper {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            .daApplicantContactInstructions(CaseUtils.getContactInstructions(caseData.getApplicantsFL401()))
             .build();
 
         caseData = populateCourtDetailsForCourtNavCase(authorization, caseData,
@@ -245,6 +246,8 @@ public class FL401ApplicationMapper {
         return caseData;
 
     }
+
+
 
     private List<Element<InterpreterNeed>> getInterpreterNeeds(CourtNavFl401 courtNavCaseData) {
         return Boolean.FALSE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())

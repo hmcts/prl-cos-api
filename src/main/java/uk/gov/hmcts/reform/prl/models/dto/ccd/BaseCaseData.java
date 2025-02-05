@@ -127,4 +127,7 @@ public class BaseCaseData {
 
     @JsonProperty("respondentSolicitorName")
     private String respondentSolicitorName;
+
+    @JsonProperty("daApplicantContactInstructions")
+    private String daApplicantContactInstructions;
 }
