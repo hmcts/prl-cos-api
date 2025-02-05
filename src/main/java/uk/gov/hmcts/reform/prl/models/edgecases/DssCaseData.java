@@ -17,7 +17,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DssCaseData {
 
-    private String caseTypeOfApplication;
+    private String edgeCaseTypeOfApplication;
     private String namedApplicant;
     private String applicantFirstName;
     private String applicantLastName;

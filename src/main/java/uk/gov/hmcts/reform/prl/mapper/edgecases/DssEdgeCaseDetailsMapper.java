@@ -26,16 +26,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DssEdgeCaseDetailsMapper {
 
-    public Map<String, Object> updateCase(CaseData caseData) {
+    public Map<String, Object> updateDssCaseData(CaseData caseData) {
+        log.info("Update case data with DSS case details for caseId: {}", caseData.getId());
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        if (null != caseData && null != caseData.getDssCaseDetails()) {
+        if (null != caseData.getDssCaseDetails()) {
             caseDataMapToBeUpdated.put("dssCaseData", caseData.getDssCaseDetails().getDssCaseData());
         }
 
         return caseDataMapToBeUpdated;
     }
 
-    public CaseData submitCase(CaseData caseData) throws JsonProcessingException {
+    public CaseData mapDssCaseData(CaseData caseData) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
 
@@ -47,7 +48,7 @@ public class DssEdgeCaseDetailsMapper {
             caseDataBuilder
                 .applicants(List.of(getDssApplicantPartyDetails(dssCaseData)))
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
-                                    .edgeCaseTypeOfApplication(dssCaseData.getCaseTypeOfApplication())
+                                    .edgeCaseTypeOfApplication(dssCaseData.getEdgeCaseTypeOfApplication())
                                     .selectedCourtId(dssCaseData.getSelectedCourtId())
                                     .dssApplicationFormDocuments(
                                         wrapElements(dssCaseData.getApplicantApplicationFormDocuments()))

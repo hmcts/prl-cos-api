@@ -325,24 +325,19 @@ public class CaseService {
                 CaseEvent.fromValue(eventId).getValue(),
                 authToken
             );
-        Map<String, Object> caseDataMapToBeUpdated;
 
         //Update the case data with the edge case details
-        if (CaseEvent.UPDATE_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
-            log.info("Update case data with DSS case details for caseId: {}", caseId);
-            caseDataMapToBeUpdated = dssEdgeCaseDetailsMapper.updateCase(caseData);
-        } else if (CaseEvent.SUBMIT_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
-            //Submit the case data to CCD with data mapped from DSS
+        Map<String, Object> caseDataMapToBeUpdated = dssEdgeCaseDetailsMapper.updateDssCaseData(caseData);
+
+        if (CaseEvent.SUBMIT_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+            //Map the case data fields with DSS data
             log.info("Submit case data with DSS case details for caseId: {}", caseId);
-            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.submitCase(caseData);
+            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(caseData);
 
             caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
 
             updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
 
-        } else {
-            log.error("Invalid Event ID for DSS Case Update");
-            return null;
         }
 
         return allTabService.submitUpdateForSpecificUserEvent(
