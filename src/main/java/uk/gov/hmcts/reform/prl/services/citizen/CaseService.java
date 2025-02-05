@@ -55,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -84,6 +85,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -121,6 +123,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -131,6 +134,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -189,7 +193,7 @@ public class CaseService {
     private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
 
     @Value("${courts.edgeCaseCourtList}")
-    protected String edgeCaseCourtList;
+    protected String edgeCasesFgmFmpoCourtsToFilter;
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -313,8 +317,29 @@ public class CaseService {
         return caseDataWithHearingResponse;
     }
 
-    public String getEdgeCasesCourtList() {
-        return edgeCaseCourtList;
+    public List<CourtVenue> getEdgeCasesCourtList(String authorisation) {
+        //Fetch courts list from ref data for PRL
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+
+        //Filter the court list for the edge cases - FGM & FMPO
+        if (null != courtDetails
+            && CollectionUtils.isNotEmpty(courtDetails.getCourtVenues())) {
+            String[] courtsToFilter = edgeCasesFgmFmpoCourtsToFilter.split(",");
+            return courtDetails.getCourtVenues().stream()
+                .filter(venue -> FAMILY_COURT_TYPE_ID.equals(venue.getCourtTypeId()))
+                .filter(venue -> {
+                    if (courtsToFilter.length == 1) {
+                        return true;
+                    }
+                    return Arrays.asList(courtsToFilter).contains(venue.getCourtEpimmsId());
+                }).toList();
+        }
+
+        return Collections.emptyList();
     }
 
     public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, CaseData caseData) throws JsonProcessingException {

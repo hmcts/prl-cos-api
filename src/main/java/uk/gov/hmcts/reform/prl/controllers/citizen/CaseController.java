@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -248,11 +249,11 @@ public class CaseController {
 
     @GetMapping(value = "/get-edge-case/court-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Get edge case court-list.")
-    public String getEdgeCaseCourtList(
+    public List<CourtVenue> getEdgeCaseCourtList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return caseService.getEdgeCasesCourtList();
+            return caseService.getEdgeCasesCourtList(authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
