@@ -318,21 +318,17 @@ public class CaseService {
     }
 
     public List<CourtVenue> getEdgeCasesCourtList(String authorisation) {
-        log.info("Fetching edge cases court list");
-        log.info("Courts fetched from secrets {}", edgeCasesFgmFmpoCourtsToFilter);
         //Fetch courts list from ref data for PRL
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
             authorisation,
             authTokenGenerator.generate(),
             SERVICE_ID
         );
-        log.info("List of courts fetched from ref data for PRL {}", courtDetails);
 
         //Filter the court list for the edge cases - FGM & FMPO
         if (null != courtDetails
             && CollectionUtils.isNotEmpty(courtDetails.getCourtVenues())) {
             String[] courtsToFilter = edgeCasesFgmFmpoCourtsToFilter.split(",");
-            log.info("Courts to filter for edge cases {}", courtsToFilter);
             return courtDetails.getCourtVenues().stream()
                 .filter(venue -> FAMILY_COURT_TYPE_ID.equals(venue.getCourtTypeId()))
                 .filter(venue -> {
