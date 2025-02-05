@@ -247,7 +247,7 @@ public class CaseController {
         }
     }
 
-    @GetMapping(value = "/get-edge-case/court-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(value = "/edge-case/court-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Get edge case court-list.")
     public List<CourtVenue> getEdgeCaseCourtList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,

@@ -79,5 +79,10 @@ public enum FeeType {
         Map.entry("C100_C4_RESPONDENT", C4_WHEREABOUTS_OF_A_MISSING_CHILD),
 
         //PRL-6806 - C100 application fees
-        Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE));
+        Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE),
+
+        //Edge cases
+        Map.entry("PO_C51", PARENTAL_ORDER),
+        Map.entry("SGO_C1_C13A", SPECIAL_GUARDIANSHIP_ORDER),
+        Map.entry("DOP_C63", DECLARATION_OF_PARENTAGE));
 }

@@ -239,6 +239,4 @@ public class LocationRefDataService {
         log.error("******Default court Id is failing, as fallback defaulted to Ctsc stoke****");
         return defaultCaseManagementLocation;
     }
-
-
 }
