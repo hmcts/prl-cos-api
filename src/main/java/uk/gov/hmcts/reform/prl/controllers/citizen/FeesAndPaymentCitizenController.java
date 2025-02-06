@@ -166,7 +166,7 @@ public class FeesAndPaymentCitizenController {
     @ApiResponse(responseCode = "400", description = APPLICATION_TYPE_EMPTY)
     public FeeResponseForCitizen fetchFee(
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @PathVariable @Valid
+        @PathVariable("applicationType") @Valid
         @NotEmpty(message = APPLICATION_TYPE_EMPTY) String applicationType) {
         if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
             log.info("### Fetch fees for application type: {}", applicationType);
