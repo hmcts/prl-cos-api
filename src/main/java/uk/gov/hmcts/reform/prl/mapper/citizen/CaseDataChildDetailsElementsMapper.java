@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -16,14 +15,12 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -57,8 +54,7 @@ public class CaseDataChildDetailsElementsMapper {
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         log.info("C100 rebuild child detail element {}", c100RebuildChildDetailsElements.getChildDetails());
         caseDataBuilder
-            .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails(),
-                caseDataBuilder))
+            .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
             .childrenKnownToLocalAuthority(
                 YesNoDontKnow.getDisplayedValueIgnoreCase(
                     c100RebuildChildDetailsElements.getChildrenKnownToSocialServices()))
@@ -69,21 +65,26 @@ public class CaseDataChildDetailsElementsMapper {
                     c100RebuildChildDetailsElements.getChildrenSubjectOfProtectionPlan()));
     }
 
-    private static List<Element<ChildDetailsRevised>> buildChildDetails(List<ChildDetail> childDetails,
-                                                                        CaseData.CaseDataBuilder<?,?> caseDataBuilder) {
-
-        List<Element<ChildDetailsRevised>> childDetailsElements = new ArrayList<>();
-        for (ChildDetail childDetail : childDetails) {
-            Element<ChildDetailsRevised> childDetailsRevisedElement = mapToChildDetails(childDetail, caseDataBuilder);
-            childDetailsElements.add(childDetailsRevisedElement);
-        }
-
-        return childDetailsElements;
+    private static List<Element<ChildDetailsRevised>> buildChildDetails(List<ChildDetail> childDetails) {
+        return childDetails.stream()
+            .map(CaseDataChildDetailsElementsMapper::mapToChildDetails)
+            .toList();
     }
 
-    private static Element<ChildDetailsRevised> mapToChildDetails(ChildDetail childDetail,
-                                                                  CaseData.CaseDataBuilder<?,?> caseDataBuilder) {
-        log.info("Child detail {}", childDetail);
+    private static Element<ChildDetailsRevised> mapToChildDetails(ChildDetail childDetail) {
+        DynamicList whoDoesTheChildLiveWithDynamicList = null;
+        if (childDetail.getMainlyLiveWith() != null) {
+            whoDoesTheChildLiveWithDynamicList = DynamicList
+                .builder()
+                .value(DynamicListElement
+                           .builder()
+                           .code(UUID.fromString(childDetail.getMainlyLiveWith().getId()))
+                           .label(childDetail.getMainlyLiveWith().getFirstName()
+                                      + childDetail.getMainlyLiveWith().getLastName())
+                           .build()).build();
+        }
+
+
         return Element.<ChildDetailsRevised>builder()
             .id(UUID.fromString(childDetail.getId()))
             .value(ChildDetailsRevised.builder()
@@ -97,101 +98,10 @@ public class CaseDataChildDetailsElementsMapper {
                        .parentalResponsibilityDetails(
                            buildParentalResponsibility(
                                childDetail.getParentialResponsibility()))
-            .whoDoesTheChildLiveWith(setWhoDoesTheChildLiveWithDynamicList(childDetail, caseDataBuilder))
+            .whoDoesTheChildLiveWith(whoDoesTheChildLiveWithDynamicList)
             .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
             .build())
             .id(UUID.fromString(childDetail.getId())).build();
-    }
-
-    private static DynamicList setWhoDoesTheChildLiveWithDynamicList(ChildDetail childDetail,
-                                                                     CaseData.CaseDataBuilder<?,?> caseDataBuilder) {
-        DynamicList dynamicListElements = null;
-        List<Element<PartyDetails>> listOfParties = new ArrayList<>();
-        CaseData caseData = caseDataBuilder.build();
-        log.info("caseDataBuilder: {}", caseDataBuilder);
-        log.info("caseData: {}", caseData);
-
-        if (null != caseData.getApplicants()) {
-            listOfParties.addAll(caseData.getApplicants());
-        }
-        if (null != caseData.getRespondents()) {
-            listOfParties.addAll(caseData.getRespondents());
-        }
-        if (null != caseData.getOtherPartyInTheCaseRevised()) {
-            listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
-        }
-
-        log.info("listOfParties: {}", listOfParties);
-
-        AtomicReference<String> label = new AtomicReference<>("");
-        listOfParties.stream().forEach(partyDetailsElement -> {
-            PartyDetails partyDetails = partyDetailsElement.getValue();
-            if (partyDetails.getFirstName().equalsIgnoreCase(childDetail.getMainlyLiveWith().getFirstName())
-                && partyDetails.getLastName().equalsIgnoreCase(childDetail.getMainlyLiveWith().getLastName())) {
-                log.info("isnide if condition");
-                String address = populateAddressInDynamicList(partyDetailsElement);
-                String name = populateNameInDynamicList(partyDetailsElement, address);
-
-                if (null != name && null != address) {
-                    label.set(name + address);
-                } else if (null != name) {
-                    label.set(name);
-                }
-            }
-        });
-
-        if (childDetail.getMainlyLiveWith() != null) {
-            dynamicListElements = DynamicList
-                .builder()
-                .value(DynamicListElement
-                    .builder()
-                    .code(UUID.fromString(childDetail.getMainlyLiveWith().getId()))
-                    .label(label.get())
-                    .build()).build();
-        }
-
-        return dynamicListElements;
-    }
-
-    private static String populateAddressInDynamicList(Element<PartyDetails> parties) {
-        String address = null;
-        if (null != parties.getValue().getAddress()
-            && !StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())) {
-
-            //Address line 2 is an optional field
-            String addressLine2 = "";
-
-            //Postcode is an optional field
-            String postcode = !StringUtils.isBlank(parties.getValue().getAddress().getPostCode())
-                ? parties.getValue().getAddress().getPostCode() : "";
-
-            //Adding comma to address line 2 if the postcode is there
-            if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
-                addressLine2 = !StringUtils.isBlank(postcode)
-                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
-                    : parties.getValue().getAddress().getAddressLine2();
-            }
-
-            //Comma is required if postcode or address line 2 is not blank
-            String addressLine1 = !StringUtils.isBlank(postcode) || !StringUtils.isBlank(addressLine2)
-                ? parties.getValue().getAddress().getAddressLine1().concat(", ")
-                : parties.getValue().getAddress().getAddressLine1();
-
-            address = addressLine1 + addressLine2 + postcode;
-        }
-
-        return address;
-    }
-
-    private static String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
-        String name = null;
-        if (!StringUtils.isBlank(parties.getValue().getFirstName())
-            && !StringUtils.isBlank(parties.getValue().getLastName())) {
-            name = !StringUtils.isBlank(address)
-                ? parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
-                : parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
-        }
-        return name;
     }
 
     private static LocalDate getDateOfBirth(ChildDetail childDetail) {
