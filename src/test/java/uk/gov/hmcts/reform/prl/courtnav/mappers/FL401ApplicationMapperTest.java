@@ -1514,8 +1514,8 @@ public class FL401ApplicationMapperTest {
                           .build())
             .build();
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401, "Bearer:test");
         assertEquals("Test", caseData.getDaApplicantContactInstructions());
-        }
+    }
 
 }
