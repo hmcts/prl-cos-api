@@ -82,7 +82,9 @@ public enum FeeType {
         Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE),
 
         //Edge cases
-        Map.entry("PO_C51", PARENTAL_ORDER),
-        Map.entry("SGO_C1_C13A", SPECIAL_GUARDIANSHIP_ORDER),
-        Map.entry("DOP_C63", DECLARATION_OF_PARENTAGE));
+        Map.entry("FGM", NO_FEE),
+        Map.entry("FMPO", NO_FEE),
+        Map.entry("PO", PARENTAL_ORDER),
+        Map.entry("SG", SPECIAL_GUARDIANSHIP_ORDER),
+        Map.entry("DOP", DECLARATION_OF_PARENTAGE));
 }
