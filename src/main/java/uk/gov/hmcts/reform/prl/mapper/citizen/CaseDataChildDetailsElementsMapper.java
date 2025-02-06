@@ -85,6 +85,7 @@ public class CaseDataChildDetailsElementsMapper {
                                                                   CaseData.CaseDataBuilder<?,?> caseDataBuilder) {
         log.info("Child detail {}", childDetail);
         return Element.<ChildDetailsRevised>builder()
+            .id(UUID.fromString(childDetail.getId()))
             .value(ChildDetailsRevised.builder()
                        .firstName(childDetail.getFirstName())
                        .lastName(childDetail.getLastName())

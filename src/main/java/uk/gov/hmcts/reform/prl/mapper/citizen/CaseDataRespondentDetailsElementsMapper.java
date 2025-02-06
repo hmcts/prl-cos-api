@@ -19,10 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -49,9 +46,9 @@ public class CaseDataRespondentDetailsElementsMapper {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
 
-        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
-            buildPartyDetails(respondentDetails)).build()).toList();
-
+        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder()
+            .id(UUID.fromString(respondentDetails.getId()))
+            .value(buildPartyDetails(respondentDetails)).build()).toList();
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {

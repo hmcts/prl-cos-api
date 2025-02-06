@@ -24,12 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -71,7 +66,9 @@ public class CaseDataApplicantElementsMapper {
         List<ApplicantDto> applicantDtoList = c100RebuildApplicantDetailsElements.getApplicants();
 
         return applicantDtoList.stream()
-                .map(applicantDto -> Element.<PartyDetails>builder().value(buildPartyDetails(applicantDto)).build())
+                .map(applicantDto -> Element.<PartyDetails>builder()
+                    .id(StringUtils.isNotEmpty(applicantDto.getId()) ? UUID.fromString(applicantDto.getId()) : UUID.randomUUID())
+                    .value(buildPartyDetails(applicantDto)).build())
                 .toList();
     }
 
