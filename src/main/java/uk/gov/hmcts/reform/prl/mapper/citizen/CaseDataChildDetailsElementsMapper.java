@@ -55,6 +55,7 @@ public class CaseDataChildDetailsElementsMapper {
 
     public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+        log.info("C100 rebuild child detail element {}", c100RebuildChildDetailsElements.getChildDetails());
         caseDataBuilder
             .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails(),
                 caseDataBuilder))
@@ -82,6 +83,7 @@ public class CaseDataChildDetailsElementsMapper {
 
     private static Element<ChildDetailsRevised> mapToChildDetails(ChildDetail childDetail,
                                                                   CaseData.CaseDataBuilder<?,?> caseDataBuilder) {
+        log.info("Child detail {}", childDetail);
         return Element.<ChildDetailsRevised>builder()
             .value(ChildDetailsRevised.builder()
                        .firstName(childDetail.getFirstName())
@@ -123,8 +125,8 @@ public class CaseDataChildDetailsElementsMapper {
         AtomicReference<String> label = new AtomicReference<>("");
         listOfParties.stream().forEach(partyDetailsElement -> {
             PartyDetails partyDetails = partyDetailsElement.getValue();
-            if (partyDetails.getFirstName().equals(childDetail.getMainlyLiveWith().getFirstName())
-                && partyDetails.getLastName().equals(childDetail.getMainlyLiveWith().getLastName())) {
+            if (partyDetails.getFirstName().equalsIgnoreCase(childDetail.getMainlyLiveWith().getFirstName())
+                && partyDetails.getLastName().equalsIgnoreCase(childDetail.getMainlyLiveWith().getLastName())) {
                 log.info("isnide if condition");
                 String address = populateAddressInDynamicList(partyDetailsElement);
                 String name = populateNameInDynamicList(partyDetailsElement, address);

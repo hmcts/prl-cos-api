@@ -147,19 +147,18 @@ public class CaseDataOtherPersonsElementsMapper {
 
                                  return Element.<ChildrenAndOtherPeopleRelation>builder()
                                      .value(ChildrenAndOtherPeopleRelation.builder()
-                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                         .childLivesWith(childDetail.getChildLiveWith().stream()
-                                             .anyMatch(c -> c.getId().equals(otherPeopleDetails.getId())) ? Yes : No)
-                                         .otherPeopleFullName(otherPeopleDetails.getFirstName() + " " + otherPeopleDetails.getLastName())
-                                         .childAndOtherPeopleRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                             childRelationship.getRelationshipType()))
-                                         .childAndOtherPeopleRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                         .isChildLivesWithPersonConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
-                                         .isOtherPeopleIdConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
-                                         .otherPeopleId(otherPeopleDetails.getId())
-                                         .childId(childDetail.getId())
-                                         .build())
-                                     .build();
+                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                                .childLivesWith(childDetail.getChildLiveWith().stream()
+                                                                    .anyMatch(c -> c.getId().equals(otherPeopleDetails.getId())) ? Yes : No)
+                                                .otherPeopleFullName(otherPeopleDetails.getFirstName() + " " + otherPeopleDetails.getLastName())
+                                                .childAndOtherPeopleRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                                    childRelationship.getRelationshipType()))
+                                                .childAndOtherPeopleRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                                .isChildLivesWithPersonConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
+                                                .isOtherPeopleIdConfidential(otherPeopleDetails.getIsOtherPersonAddressConfidential())
+                                                .otherPeopleId(otherPeopleDetails.getId())
+                                                .childId(childDetail.getId())
+                                                .build()).build();
                              }
                              return null;
                          })

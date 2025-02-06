@@ -924,13 +924,6 @@ public class CitizenPartyDetailsMapper {
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
         }
 
-        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
-            c100RebuildChildDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
-
-            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
-        }
-
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
@@ -953,6 +946,13 @@ public class CitizenPartyDetailsMapper {
                 caseDataBuilder.build().getRelations().getChildAndOtherPeopleRelations(),
                 caseDataBuilder.build().getOtherPartyInTheCaseRevised()
             ));
+        }
+
+        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
+            c100RebuildChildDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+
+            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
