@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2147,7 +2146,6 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSetDefaultEmptyForChildDetails_whenRevisedChildDetailsPresent() {
         ChildDetailsRevised child1 = ChildDetailsRevised.builder()
             .firstName("Test")
