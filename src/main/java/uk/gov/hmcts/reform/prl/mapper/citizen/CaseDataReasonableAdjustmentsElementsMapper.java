@@ -56,7 +56,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
     private static final String NEED_INTERPRETER = "needInterpreterInCertainLanguage";
     private static final String SPEAK_WELSH = "speakInWelsh";
     private static final String READ_WRITE_WELSH = "readAndWriteInWelsh";
-    private static final String OPEN_BRACKET = "(";
+    private static final String OPEN_BRACKET = " (";
     private static final String CLOSE_BRACKET = ")";
     private static final String COLON = ": ";
 
@@ -131,8 +131,12 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         } else if (languageList.contains(READ_WRITE_WELSH)) {
             spokenOrWrittenWelshEnums.add(written);
         }
-        WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Applicant").spokenOrWritten(spokenOrWrittenWelshEnums).build();
-        return List.of(Element.<WelshNeed>builder().value(welshNeed).build());
+        //If welsh needs are not selected, return an empty list
+        if (!spokenOrWrittenWelshEnums.isEmpty()) {
+            WelshNeed welshNeed = WelshNeed.builder().whoNeedsWelsh("Applicant").spokenOrWritten(spokenOrWrittenWelshEnums).build();
+            return List.of(Element.<WelshNeed>builder().value(welshNeed).build());
+        }
+        return List.of(Element.<WelshNeed>builder().value(WelshNeed.builder().build()).build());
     }
 
     private static YesOrNo buildIsWelshNeeded(List<String> languageList) {
@@ -156,33 +160,44 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         if (disabilityRequirementsList.contains(documentsHelp.name())) {
             documentInformation = buildDocumentInformation(c100RebuildReasonableAdjustmentsElements
                     .getDocumentInformation(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(documentsHelp.getDisplayedValue()).append(COLON).append(documentInformation);
+            appendData(adjustmentRequired, documentsHelp.getDisplayedValue(), documentInformation);
         }
         if (disabilityRequirementsList.contains(communicationHelp.name())) {
             communicationHelpDetails = buildCommunicationHelp(c100RebuildReasonableAdjustmentsElements
                     .getCommunicationHelp(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(communicationHelp.getDisplayedValue()).append(COLON)
-                    .append(communicationHelpDetails);
+            appendData(adjustmentRequired, communicationHelp.getDisplayedValue(), communicationHelpDetails);
         }
         if (disabilityRequirementsList.contains(extraSupport.name())) {
             extraSupportDetails = buildExtraSupport(c100RebuildReasonableAdjustmentsElements
                     .getSupportCourt(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(extraSupport.getDisplayedValue()).append(COLON)
-                    .append(extraSupportDetails);
+            appendData(adjustmentRequired, extraSupport.getDisplayedValue(), extraSupportDetails);
         }
         if (disabilityRequirementsList.contains(feelComfortableSupport.name())) {
             feelComfortableSupportDetails = buildFeelComfortableSupport(c100RebuildReasonableAdjustmentsElements
                     .getFeelComfortable(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(feelComfortableSupport.getDisplayedValue()).append(COLON)
-                    .append(feelComfortableSupportDetails);
+            appendData(adjustmentRequired, feelComfortableSupport.getDisplayedValue(), feelComfortableSupportDetails);
         }
         if (disabilityRequirementsList.contains(helpTravellingMovingBuildingSupport.name())) {
             helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(c100RebuildReasonableAdjustmentsElements
                     .getTravellingCourt(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(helpTravellingMovingBuildingSupport.getDisplayedValue()).append(COLON)
-                    .append(helpTravellingMovingBuildingSupportDetails);
+            appendData(adjustmentRequired, helpTravellingMovingBuildingSupport.getDisplayedValue(),
+                    helpTravellingMovingBuildingSupportDetails);
         }
         return String.valueOf(adjustmentRequired);
+    }
+
+    private static void appendData(StringBuilder stringBuilder,
+                                   String adjustmentType,
+                                   String adjustmentValue) {
+        if (!stringBuilder.isEmpty()) {
+            stringBuilder.append(COMMA_SEPARATOR)
+                .append(adjustmentType).append(COLON)
+                .append(adjustmentValue);
+        } else {
+            stringBuilder.append(adjustmentType)
+                .append(COLON)
+                .append(adjustmentValue);
+        }
     }
 
     private static String buildHelpTravellingMovingBuildingSupport(String[] travellingCourt,
