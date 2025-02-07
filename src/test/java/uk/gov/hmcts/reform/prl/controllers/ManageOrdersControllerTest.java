@@ -1814,7 +1814,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
-        when(amendOrderService.updateOrder(caseData, authToken))
+        when(amendOrderService.updateOrder(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);

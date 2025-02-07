@@ -260,8 +260,9 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
 
+            String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation, loggedInUserType));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -297,7 +298,6 @@ public class ManageOrdersController {
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
@@ -436,7 +436,8 @@ public class ManageOrdersController {
             if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation, loggedInUserService
+                        .getLoggedInUserType(authorisation)));
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,

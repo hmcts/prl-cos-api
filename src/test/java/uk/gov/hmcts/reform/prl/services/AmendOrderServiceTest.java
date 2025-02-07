@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -53,9 +52,6 @@ public class AmendOrderServiceTest {
     private UserService userService;
 
     @Mock
-    LoggedInUserService loggedInUserService;
-
-    @Mock
     ManageOrderService manageOrderService;
 
     @Mock
@@ -101,7 +97,6 @@ public class AmendOrderServiceTest {
             validAuth
         )).thenReturn(stampedDocument);*/
         when(time.now()).thenReturn(LocalDateTime.now());
-        when(loggedInUserService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
 
         UserDetails userDetails = UserDetails.builder().forename("test").build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -109,7 +104,7 @@ public class AmendOrderServiceTest {
 
     @Test
     public void documentUpdateAndReturnedInMap() throws IOException {
-        assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
+        assertNotNull(amendOrderService.updateOrder(caseData, validAuth, "test"));
     }
 
     @Test
@@ -117,7 +112,7 @@ public class AmendOrderServiceTest {
         caseData = caseData.toBuilder()
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .build();
-        assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
+        assertNotNull(amendOrderService.updateOrder(caseData, validAuth, "test"));
     }
 
     @Test
@@ -127,7 +122,7 @@ public class AmendOrderServiceTest {
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
                                 .build())
             .build();
-        assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
+        assertNotNull(amendOrderService.updateOrder(caseData, validAuth, "test"));
     }
 
     @Test
@@ -268,7 +263,7 @@ public class AmendOrderServiceTest {
             .orderCollection(orderList)
             .manageOrders(caseData.getManageOrders().toBuilder().currentOrderCreatedDateTime(LocalDateTime.now()).build())
             .build();
-        assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
+        assertNotNull(amendOrderService.updateOrder(caseData, validAuth, "test"));
     }
 
     public static Document testDocument() {
