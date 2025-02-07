@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.edgecases.DssCaseData;
 
 import java.util.HashMap;
@@ -35,14 +36,14 @@ public class DssEdgeCaseDetailsMapper {
         return caseDataMapToBeUpdated;
     }
 
-    public CaseData mapDssCaseData(CaseData caseData) throws JsonProcessingException {
+    public CaseData mapDssCaseData(CaseData caseData, DssCaseDetails dssCaseDetails) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
 
         //Submit the case data to CCD with data mapped from DSS
-        if (null != caseData.getDssCaseDetails()
-            && StringUtils.isNotEmpty(caseData.getDssCaseDetails().getDssCaseData())) {
-            DssCaseData dssCaseData = mapper.readValue(caseData.getDssCaseDetails().getDssCaseData(), DssCaseData.class);
+        if (null != dssCaseDetails
+            && StringUtils.isNotEmpty(dssCaseDetails.getDssCaseData())) {
+            DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
 
             caseDataBuilder
                 .applicants(List.of(getDssApplicantPartyDetails(dssCaseData)))
@@ -54,7 +55,7 @@ public class DssEdgeCaseDetailsMapper {
                                     .dssAdditionalDocuments(
                                         wrapElements(dssCaseData.getApplicantAdditionalDocuments())).build());
         }
-
+        log.info("Case data mapped from DSS: {}", caseDataBuilder.build());
         return caseDataBuilder.build();
     }
 

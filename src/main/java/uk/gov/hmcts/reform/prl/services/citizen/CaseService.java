@@ -141,6 +141,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
@@ -159,6 +160,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getStringsSplitByDelimiter;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Service
@@ -362,8 +364,22 @@ public class CaseService {
             || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)
             || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue().equalsIgnoreCase(eventId)) {
             //Map the case data fields with DSS data
-            log.info("Submit case data with DSS case details for caseId: {}", caseId);
-            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(caseData);
+            log.info("Map case data with DSS case details for caseId: {}", caseId);
+            UserDetails userDetails = startAllTabsUpdateDataContent.userDetails();
+            uk.gov.hmcts.reform.prl.models.user.UserInfo userInfo = uk.gov.hmcts.reform.prl.models.user.UserInfo
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
+            CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
+            dbCaseData = dbCaseData.toBuilder()
+                .userInfo(wrapElements(userInfo))
+                .taskListVersion(TASK_LIST_VERSION_V3)
+                .build();
+
+            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(dbCaseData, caseData.getDssCaseDetails());
             caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
 
             //For FGM & FMPO cases, update the court details
@@ -371,7 +387,7 @@ public class CaseService {
                 updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
             }
         }
-
+        log.info("Submit mapped DSS case data for caseId: {}", caseId);
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -389,7 +405,7 @@ public class CaseService {
             && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
             || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
             && null != updatedCaseData.getDssCaseDetails().getSelectedCourtId()) {
-
+            log.info("Fetch court details for courtId: {}", updatedCaseData.getDssCaseDetails().getSelectedCourtId());
             List<CourtVenue> courtVenues = locationRefDataApi.getCourtDetailsById(
                 authToken,
                 authTokenGenerator.generate(),
@@ -397,6 +413,7 @@ public class CaseService {
             );
 
             if (CollectionUtils.isNotEmpty(courtVenues)) {
+                log.info("Court venue details for courtId: {}", courtVenues.get(0));
                 caseDataMapToBeUpdated.putAll(CaseUtils.getCourtDetails(Optional.ofNullable(courtVenues.get(0)),
                                                                         updatedCaseData.getDssCaseDetails().getSelectedCourtId()));
                 //Add court seal
