@@ -49,6 +49,9 @@ public class DgsServiceTest {
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     @Mock
+    ManageOrderService manageOrderService;
+
+    @Mock
     private HearingDataService hearingDataService;
 
     public static final String authToken = "Bearer TestAuthToken";
