@@ -33,6 +33,8 @@ public class DgsService {
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
 
+    private final ManageOrderService manageOrderService;
+
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
@@ -63,6 +65,9 @@ public class DgsService {
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
+        //prl-6790 - getting user-role and adding to datamap
+        tempCaseDetails.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+        log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)

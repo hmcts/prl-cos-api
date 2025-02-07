@@ -51,6 +51,9 @@ public class DgsServiceTest {
     @Mock
     private HearingDataService hearingDataService;
 
+    @Mock
+    private ManageOrderService manageOrderService;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
     private CaseData caseData;
