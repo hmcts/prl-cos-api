@@ -33,7 +33,7 @@ public class DgsService {
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
 
-    private final ManageOrderService manageOrderService;
+    private final LoggedInUserService loggedInUserService;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -67,7 +67,7 @@ public class DgsService {
         }
 
         //prl-6815 - getting user-role and adding to datamap
-        tempCaseDetails.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+        tempCaseDetails.put("loggedInUserRole", loggedInUserService.getLoggedInUserType(authorisation));
         log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
         tempCaseDetails.put(
             CASE_DETAILS_STRING,

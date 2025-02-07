@@ -50,10 +50,13 @@ public class AmendOrderServiceTest {
     private UploadDocumentService uploadDocumentService;
 
     @Mock
-    private ManageOrderService manageOrderService;
+    private UserService userService;
 
     @Mock
-    private UserService userService;
+    LoggedInUserService loggedInUserService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     @Mock
     private Time time;
@@ -98,7 +101,7 @@ public class AmendOrderServiceTest {
             validAuth
         )).thenReturn(stampedDocument);*/
         when(time.now()).thenReturn(LocalDateTime.now());
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
+        when(loggedInUserService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
 
         UserDetails userDetails = UserDetails.builder().forename("test").build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);

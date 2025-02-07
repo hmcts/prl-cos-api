@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.LoggedInUserService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -109,6 +110,9 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    LoggedInUserService loggedInUserService;
 
     private CaseDetails caseDetails;
 

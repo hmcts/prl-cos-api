@@ -46,6 +46,7 @@ public class AmendOrderService {
 
     private final Time time;
     private final ManageOrderService manageOrderService;
+    private final LoggedInUserService loggedInUserService;
     private final UserService userService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
@@ -53,7 +54,7 @@ public class AmendOrderService {
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName(amendedFileName)

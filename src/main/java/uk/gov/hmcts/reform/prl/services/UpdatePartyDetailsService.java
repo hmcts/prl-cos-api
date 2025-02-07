@@ -97,7 +97,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final ManageOrderService manageOrderService;
+    private final LoggedInUserService loggedInUserService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -596,7 +596,7 @@ public class UpdatePartyDetailsService {
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
         //prl-6790 - getting user-role and adding to datamap
-        dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+        dataMap.put("loggedInUserRole", loggedInUserService.getLoggedInUserType(authorisation));
 
         log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {

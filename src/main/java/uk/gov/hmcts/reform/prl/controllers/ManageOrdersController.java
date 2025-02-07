@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.LoggedInUserService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -94,6 +95,7 @@ public class ManageOrdersController {
     private final AllTabServiceImpl allTabService;
     private final RoleAssignmentService roleAssignmentService;
     private final HearingService hearingService;
+    private final LoggedInUserService loggedInUserService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -295,7 +297,7 @@ public class ManageOrdersController {
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
@@ -409,7 +411,7 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
             }
 
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", loggedInUserService.getLoggedInUserType(authorisation));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

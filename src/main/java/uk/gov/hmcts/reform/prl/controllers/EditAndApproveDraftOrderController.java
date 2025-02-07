@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
+import uk.gov.hmcts.reform.prl.services.LoggedInUserService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -67,6 +68,7 @@ public class EditAndApproveDraftOrderController {
     private final ObjectMapper objectMapper;
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
+    private final LoggedInUserService loggedInUserService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
     private final EditReturnedOrderService editReturnedOrderService;
@@ -176,7 +178,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = objectMapper.convertValue(

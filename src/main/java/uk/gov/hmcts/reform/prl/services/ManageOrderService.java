@@ -10,12 +10,9 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -23,12 +20,10 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -79,7 +74,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -161,7 +155,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -596,6 +589,7 @@ public class ManageOrderService {
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     private final DgsService dgsService;
+    private final LoggedInUserService loggedInUserService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -613,9 +607,6 @@ public class ManageOrderService {
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
-    private final RoleAssignmentApi roleAssignmentApi;
-    private final AuthTokenGenerator authTokenGenerator;
-    private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -994,7 +985,7 @@ public class ManageOrderService {
                                                         String flagSelectedOrderId,
                                                         UserDetails userDetails) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
-        String loggedInUserType = getLoggedInUserType(authorisation);
+        String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
@@ -1150,7 +1141,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
-        String loggedInUserType = getLoggedInUserType(authorisation);
+        String loggedInUserType = loggedInUserService.getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
@@ -2317,7 +2308,7 @@ public class ManageOrderService {
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
                                              .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
-                                                                    getLoggedInUserType(authorisation), null, null
+                                                                    loggedInUserService.getLoggedInUserType(authorisation), null, null
                                              ))
                                              .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
                                                      caseData.getManageOrders().getOrdersHearingDetails(),
@@ -2398,53 +2389,6 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
-    }
-
-    public String getLoggedInUserType(String authorisation) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String loggedInUserType;
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            //This would check for roles from AM for Judge/Legal advisor/Court admin
-            //if it doesn't find then it will check for idam roles for rest of the users
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                authorisation,
-                authTokenGenerator.generate(),
-                null,
-                userDetails.getId()
-            );
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).collect(
-                Collectors.toList());
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        } else {
-            if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        }
-
-        return loggedInUserType;
     }
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
@@ -3188,7 +3132,7 @@ public class ManageOrderService {
         caseDataUpdated.put(DA_ORDER_FOR_CA_CASE,
                             ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
                                                                          caseData) ? Yes : No);
-        caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
+        caseDataUpdated.put("loggedInUserType", loggedInUserService.getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
         caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
@@ -3258,7 +3202,7 @@ public class ManageOrderService {
                     dateTime.now()
                 );
             }
-            performingUser = getLoggedInUserType(authorisation);
+            performingUser = loggedInUserService.getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {

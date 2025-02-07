@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.LoggedInUserService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -106,6 +107,9 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     private ManageOrderService manageOrderService;
+
+    @Mock
+    LoggedInUserService loggedInUserService;
 
     @Mock
     private ManageOrderEmailService manageOrderEmailService;

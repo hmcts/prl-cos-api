@@ -173,6 +173,8 @@ public class DraftAnOrderServiceTest {
 
     @Mock
     private LocationRefDataService locationRefDataService;
+    @Mock
+    private LoggedInUserService loggedInUserService;
 
     @Mock
     private PartiesListGenerator partiesListGenerator;
@@ -396,7 +398,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(loggedInUserService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
 
@@ -426,7 +428,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(loggedInUserService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
 
@@ -548,7 +550,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderList)
             .build();
         when(manageOrderService.getCurrentCreateDraftOrderDetails(any(), anyString(),any())).thenReturn(draftOrder);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(loggedInUserService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         List<Element<DraftOrder>> result = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         System.out.println(result);
         assertNotNull(result);
@@ -577,7 +579,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(loggedInUserService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
@@ -608,7 +610,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(loggedInUserService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
@@ -3380,7 +3382,7 @@ public class DraftAnOrderServiceTest {
         );
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(loggedInUserService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
                                                                   Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
@@ -3419,7 +3421,7 @@ public class DraftAnOrderServiceTest {
         );
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(loggedInUserService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
             Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
@@ -4148,7 +4150,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(loggedInUserService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData)).thenReturn(caseData);
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(null);
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -4735,7 +4737,7 @@ public class DraftAnOrderServiceTest {
             .isCafcass(Yes)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(loggedInUserService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
