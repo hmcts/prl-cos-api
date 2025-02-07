@@ -65,7 +65,8 @@ public class DgsService {
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
-        //prl-6790 - getting user-role and adding to datamap
+
+        //prl-6815 - getting user-role and adding to datamap
         tempCaseDetails.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
         log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
         tempCaseDetails.put(
