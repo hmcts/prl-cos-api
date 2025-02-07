@@ -74,7 +74,9 @@ public enum CaseEvent {
     APPLICANT_DETAILS("applicantsDetails"),
 
     UPDATE_DSS_EDGE_CASE("updateDssEdgeCase"),
-    SUBMIT_DSS_EDGE_CASE("submitDssEdgeCase");
+    SUBMIT_DSS_DA_EDGE_CASE("submitDssDaEdgeCase"),
+    SUBMIT_DSS_CA_EDGE_CASE("submitDssCaEdgeCase"),
+    SUBMIT_DSS_CA_EDGE_CASE_HWF("submitDssCaEdgeCaseWithHwf");
 
     private final String value;
 

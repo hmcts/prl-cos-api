@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
@@ -120,6 +121,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
@@ -191,6 +193,7 @@ public class CaseService {
     private final AuthTokenGenerator authTokenGenerator;
     private final AllTabServiceImpl allTabService;
     private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
+    private final CourtSealFinderService courtSealFinderService;
 
     @Value("${courts.edgeCaseCourtList}")
     protected String edgeCasesFgmFmpoCourtsToFilter;
@@ -352,17 +355,21 @@ public class CaseService {
             );
 
         //Update the case data with the edge case details
+        log.info("Update case data with DSS case details for caseId: {}", caseId);
         Map<String, Object> caseDataMapToBeUpdated = dssEdgeCaseDetailsMapper.updateDssCaseData(caseData);
 
-        if (CaseEvent.SUBMIT_DSS_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+        if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue().equalsIgnoreCase(eventId)) {
             //Map the case data fields with DSS data
             log.info("Submit case data with DSS case details for caseId: {}", caseId);
             CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(caseData);
-
             caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
 
-            updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
-
+            //For FGM & FMPO cases, update the court details
+            if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+                updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
+            }
         }
 
         return allTabService.submitUpdateForSpecificUserEvent(
@@ -392,7 +399,9 @@ public class CaseService {
             if (CollectionUtils.isNotEmpty(courtVenues)) {
                 caseDataMapToBeUpdated.putAll(CaseUtils.getCourtDetails(Optional.ofNullable(courtVenues.get(0)),
                                                                         updatedCaseData.getDssCaseDetails().getSelectedCourtId()));
-                //REMOVE Cafcass flag as it's not needed for Edge Cases
+                //Add court seal
+                caseDataMapToBeUpdated.put(COURT_SEAL_FIELD, courtSealFinderService.getCourtSeal(courtVenues.get(0).getRegionId()));
+                //REMOVE Cafcass flag as it's not needed for DA Cases
                 caseDataMapToBeUpdated.remove(IS_CAFCASS);
             }
         }

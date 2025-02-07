@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class DssEdgeCaseDetailsMapper {
 
     public Map<String, Object> updateDssCaseData(CaseData caseData) {
-        log.info("Update case data with DSS case details for caseId: {}", caseData.getId());
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (null != caseData.getDssCaseDetails()) {
             caseDataMapToBeUpdated.put("dssCaseData", caseData.getDssCaseDetails().getDssCaseData());
