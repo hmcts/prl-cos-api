@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -301,6 +302,7 @@ public class DocumentGenService {
     private final CaseDocumentClient caseDocumentClient;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final ManageOrderService manageOrderService;
 
     private final DgsApiClient dgsApiClient;
 
@@ -346,6 +348,10 @@ public class DocumentGenService {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
+        caseData = caseData.toBuilder()
+            .loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation))
+            .build();
+        log.info("logged in {}", caseData.getLoggedInUserRole());
         Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
@@ -1326,11 +1332,14 @@ public class DocumentGenService {
 
     public Map<String, Object> generateDocumentsForTestingSupport(String authorisation, CaseData caseData) throws Exception {
 
-        Map<String, Object> updatedCaseData = new HashMap<>();
-
         caseData = fillOrgDetails(caseData);
+        caseData = caseData.toBuilder()
+            .loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation))
+            .build();
+        log.info("logged in {}", caseData.getLoggedInUserRole());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
+        Map<String, Object> updatedCaseData = new HashMap<>();
         documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {

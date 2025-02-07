@@ -32,7 +32,6 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
-    private final ManageOrderService manageOrderService;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -68,8 +67,7 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        tempCaseDetails.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
-        log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
+        log.info("tempCaseDetails: {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =

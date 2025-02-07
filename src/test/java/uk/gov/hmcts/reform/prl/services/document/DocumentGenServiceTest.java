@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -154,6 +155,9 @@ public class DocumentGenServiceTest {
 
     @InjectMocks
     DocumentGenService documentGenService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     @Mock
     CaseDocumentClient caseDocumentClient;
