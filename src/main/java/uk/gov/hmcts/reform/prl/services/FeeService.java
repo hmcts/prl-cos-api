@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
@@ -65,6 +66,7 @@ public class FeeService {
     private final FeesRegisterApi feesRegisterApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
@@ -256,15 +258,14 @@ public class FeeService {
     }
 
     public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
-                                              String authorization,
-                                              String serviceAuthorization) throws Exception {
+                                              String authorization) throws Exception {
 
         String caseId = feeRequest.getCaseId();
 
         FeeResponse feeResponse;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
-            serviceAuthorization,
+            authTokenGenerator.generate(),
             caseId
         );
 
