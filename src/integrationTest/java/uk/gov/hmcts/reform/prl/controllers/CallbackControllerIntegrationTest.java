@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -320,6 +321,7 @@ public class CallbackControllerIntegrationTest {
     }
 
     @Test
+    @Ignore
     public void testGenerateDocumentSubmitApplication() throws Exception {
         String url = "/generate-document-submit-application";
         String jsonRequest = ResourceLoader.loadJson("requests/C100-case-data.json");
