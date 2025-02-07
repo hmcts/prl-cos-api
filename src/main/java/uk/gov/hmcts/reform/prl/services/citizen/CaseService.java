@@ -72,6 +72,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecip
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -196,6 +197,7 @@ public class CaseService {
     private final AllTabServiceImpl allTabService;
     private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
     private final CourtSealFinderService courtSealFinderService;
+    private final SystemUserService systemUserService;
 
     @Value("${courts.edgeCaseCourtList}")
     protected String edgeCasesFgmFmpoCourtsToFilter;
@@ -353,7 +355,7 @@ public class CaseService {
             allTabService.getStartUpdateForSpecificUserEvent(
                 caseId,
                 CaseEvent.fromValue(eventId).getValue(),
-                authToken
+                systemUserService.getSysUserToken()
             );
 
         //Update the case data with the edge case details
