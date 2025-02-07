@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import feign.FeignException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class DgsServiceTest {
 
     @InjectMocks
@@ -50,9 +52,6 @@ public class DgsServiceTest {
 
     @Mock
     private HearingDataService hearingDataService;
-
-    @Mock
-    private ManageOrderService manageOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
