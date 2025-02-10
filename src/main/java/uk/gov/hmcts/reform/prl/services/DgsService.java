@@ -59,6 +59,8 @@ public class DgsService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
+        caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
+            .getLoggedInUserType(authorisation)).build());
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -68,8 +70,6 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        tempCaseDetails.put("loggedInUserRole", userRoleService.getLoggedInUserType(authorisation));
-        log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
         log.info("tempCasedetails {}", tempCaseDetails);
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
