@@ -453,20 +453,20 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData, String loggedInUserType)
         throws Exception {
-        Map<String, Object> docFieldMap = Map.of("loggedInUserRole", loggedInUserType);
-        docFieldMap.putAll(AppObjectMapper.getObjectMapper().convertValue(caseData, Map.class));
+        Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseData, Map.class);
+        caseDataMap.put("loggedInUserRole", loggedInUserType);
         if (isConfidentialInformationPresentForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, docFieldMap));
+                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, caseDataMap));
             } else {
                 updatedCaseData.put(
                     DOCUMENT_FIELD_DRAFT_C8,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false, docFieldMap)
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false, caseDataMap)
                 );
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && isApplicantOrChildDetailsConfidential(caseData)) {
-            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, docFieldMap));
+            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, caseDataMap));
         } else {
             updatedCaseData.put(DOCUMENT_FIELD_C8, null);
         }
