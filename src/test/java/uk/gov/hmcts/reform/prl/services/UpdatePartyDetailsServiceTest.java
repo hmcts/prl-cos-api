@@ -71,6 +71,8 @@ public class UpdatePartyDetailsServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
+    @Mock
+    ManageOrderService manageOrderService;
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
