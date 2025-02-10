@@ -67,6 +67,9 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
+        log.info("logged in user role: {}", caseData.getLoggedInUserRole());
+        tempCaseDetails.put("loggedInUserRole", caseData.getLoggedInUserRole());
+        log.info("logged in user role: {}", tempCaseDetails.get("loggedInUserRole"));
         log.info("tempCaseDetails: {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
