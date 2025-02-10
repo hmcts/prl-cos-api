@@ -77,6 +77,8 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private ManageOrderService manageOrderService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;

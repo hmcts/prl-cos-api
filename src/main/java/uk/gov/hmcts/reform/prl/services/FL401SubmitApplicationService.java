@@ -55,6 +55,7 @@ public class FL401SubmitApplicationService {
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
+    private final ManageOrderService manageOrderService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
@@ -62,6 +63,7 @@ public class FL401SubmitApplicationService {
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         caseData = caseData.toBuilder()
             .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation))
             .build();
 
         final LocalDate localDate = LocalDate.now();
