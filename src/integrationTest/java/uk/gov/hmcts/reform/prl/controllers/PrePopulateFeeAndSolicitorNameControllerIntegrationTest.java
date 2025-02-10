@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,7 @@ public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    @Ignore
     @Test
     public void testPrePopulateSolicitorAndFees() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);

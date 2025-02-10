@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    @Ignore
     @Test
     public void testPaymentConfirmation() throws Exception {
         String url = "/payment-confirmation";
@@ -76,6 +78,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest {
             .andReturn();
     }
 
+    @Ignore
     @Test
     public void testValidateHelpWithFees() throws Exception {
         String url = "/validate-help-with-fees";

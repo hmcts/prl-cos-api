@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -181,6 +182,7 @@ public class CallbackController {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
 
+    private final ManageOrderService manageOrderService;
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
@@ -348,8 +350,9 @@ public class CallbackController {
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
-
-            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData,
+                                                                           Map.of("loggedInUserRole", loggedInUserType));
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);

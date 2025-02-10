@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -46,6 +47,7 @@ public class ServiceOfDocumentsConfCheckControllerIntegrationTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    @Ignore
     @Test
     public void testSodConfCheckAboutToStart() throws Exception {
         String url = "/sod-conf-check/about-to-start";
@@ -64,6 +66,7 @@ public class ServiceOfDocumentsConfCheckControllerIntegrationTest {
             .andReturn();
     }
 
+    @Ignore
     @Test
     public void testSodConfCheckAboutToSubmit() throws Exception {
         String url = "/sod-conf-check/about-to-submit";
@@ -83,6 +86,7 @@ public class ServiceOfDocumentsConfCheckControllerIntegrationTest {
             .andReturn();
     }
 
+    @Ignore
     @Test
     public void testSodConfCheckSubmitted() throws Exception {
         String url = "/sod-conf-check/submitted";

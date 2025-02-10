@@ -457,16 +457,22 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseData);
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
 
-        verify(dgsService, times(3)).generateDocument(
+        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
@@ -497,7 +503,7 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -506,10 +512,16 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
             Mockito.anyString(),
@@ -539,16 +551,22 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -641,7 +659,7 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -650,9 +668,15 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
 
-        verify(dgsService, times(3)).generateDocument(
+        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
@@ -682,14 +706,20 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -719,7 +749,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData1);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData1, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
@@ -728,9 +758,15 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -826,10 +862,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        documentGenService.generateDocuments(authToken, fl401CaseData);
-        verify(dgsService, times(2)).generateDocument(
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -922,10 +964,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        documentGenService.generateDocuments(authToken, fl401CaseData);
-        verify(dgsService, times(2)).generateDocument(
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -1001,10 +1049,16 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
-        verify(dgsService, times(2)).generateDocument(
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
@@ -1065,7 +1119,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1129,7 +1183,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1185,7 +1239,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        documentGenService.generateDocuments(authToken, fl401CaseData);
+        documentGenService.generateDocuments(authToken, fl401CaseData, new HashMap<>());
         verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1438,16 +1492,22 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataNotIssued);
 
-        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataNotIssued);
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataNotIssued, new HashMap<>());
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C1A));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
             Mockito.any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
