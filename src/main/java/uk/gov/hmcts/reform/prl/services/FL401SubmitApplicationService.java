@@ -100,7 +100,8 @@ public class FL401SubmitApplicationService {
         caseData = caseData.setDateSubmittedDate();
 
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, loggedInUserType));
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData,
+                                                                    Map.of("loggedInUserRole", loggedInUserType)));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 

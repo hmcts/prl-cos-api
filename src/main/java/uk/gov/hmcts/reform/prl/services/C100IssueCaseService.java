@@ -23,10 +23,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
@@ -86,7 +83,7 @@ public class C100IssueCaseService {
         }
 
         // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, ""));
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, new HashMap<>()));
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..

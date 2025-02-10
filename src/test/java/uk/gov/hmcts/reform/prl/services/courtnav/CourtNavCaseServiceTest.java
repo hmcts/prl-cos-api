@@ -269,7 +269,8 @@ public class CourtNavCaseServiceTest {
     @Test
     public void testRefreshTabs() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(documentGenService.generateDocuments(authToken, caseData, "")).thenReturn(stringObjectMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.any()))
+            .thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
@@ -278,7 +279,7 @@ public class CourtNavCaseServiceTest {
         courtNavCaseService.refreshTabs(authToken,"1234567891234567");
         verify(documentGenService, times(1))
             .generateDocuments(Mockito.anyString(),
-                               Mockito.any(CaseData.class), Mockito.anyString());
+                               Mockito.any(CaseData.class), Mockito.any());
     }
 
     public static Document testDocument() {

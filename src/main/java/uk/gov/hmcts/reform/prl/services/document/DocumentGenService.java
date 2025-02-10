@@ -341,7 +341,7 @@ public class DocumentGenService {
 
     }
 
-    public Map<String, Object> generateDocuments(String authorisation, CaseData caseData, String loggedInUserType) throws Exception {
+    public Map<String, Object> generateDocuments(String authorisation, CaseData caseData, Map<String, Object> loggedInUserType) throws Exception {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
@@ -418,7 +418,7 @@ public class DocumentGenService {
     }
 
     private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                       DocumentLanguage documentLanguage, String loggedInUserType) throws Exception {
+                                       DocumentLanguage documentLanguage, Map<String, Object> loggedInUserType) throws Exception {
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData, loggedInUserType);
@@ -451,10 +451,10 @@ public class DocumentGenService {
     }
 
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
-                                                            Map<String, Object> updatedCaseData, String loggedInUserType)
+                                                            Map<String, Object> updatedCaseData, Map<String, Object> loggedInUserType)
         throws Exception {
         Map<String, Object> docFieldMap = AppObjectMapper.getObjectMapper().convertValue(caseData, Map.class);
-        docFieldMap.put("loggedInUserRole", loggedInUserType);
+        docFieldMap.putAll(loggedInUserType);
         if (isConfidentialInformationPresentForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, docFieldMap));

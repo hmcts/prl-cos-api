@@ -316,7 +316,8 @@ public class TaskListService {
                     );
                 }
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData, loggedInUserType));
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData,
+                                                                    Map.of("loggedInUserRole", loggedInUserType)));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())

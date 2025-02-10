@@ -351,7 +351,8 @@ public class CallbackController {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData, loggedInUserType);
+            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData,
+                                                                           Map.of("loggedInUserRole", loggedInUserType));
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
