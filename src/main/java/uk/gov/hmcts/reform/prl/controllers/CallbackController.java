@@ -332,7 +332,6 @@ public class CallbackController {
             cleanUpC8RefugeFields(caseData, caseDataUpdated);
             caseData = caseData
                 .toBuilder()
-                .loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation))
                 .applicantsConfidentialDetails(
                     confidentialityTabService
                         .getConfidentialApplicantDetails(
@@ -346,7 +345,6 @@ public class CallbackController {
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
 
-            log.info("logged in {}", caseData.getLoggedInUserRole());
 
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
                 && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())

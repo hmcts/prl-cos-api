@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -33,6 +32,7 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
+    private final UserRoleService userRoleService;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -68,12 +68,10 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        LinkedHashMap<String, Object> newMap = (LinkedHashMap<String, Object>) tempCaseDetails.get(CASE_DETAILS_STRING);
-        LinkedHashMap<String, Object> caseDetails2 = (LinkedHashMap<String, Object>) newMap.get("case_data");
-        caseDetails2.put("loggedInUserRole", caseData.getLoggedInUserRole());
-        log.info("logged in user role: {}", caseData.getLoggedInUserRole());
-        log.info("logged in user role: {}", caseDetails2.get("loggedInUserRole"));
-        log.info("tempCaseDetails: {}", tempCaseDetails);
+        tempCaseDetails.put("loggedInUserRole", userRoleService.getLoggedInUserType(authorisation));
+        log.info("loggedInUserRole: {}", tempCaseDetails.get("loggedInUserRole"));
+        log.info("tempCasedetails {}", tempCaseDetails);
+
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
