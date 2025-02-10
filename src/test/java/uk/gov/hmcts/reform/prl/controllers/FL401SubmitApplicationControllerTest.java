@@ -359,8 +359,8 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            fl401DocsMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(fl401DocsMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model

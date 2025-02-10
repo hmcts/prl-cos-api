@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -87,6 +88,9 @@ public class ResubmitApplicationControllerTest {
 
     @Mock
     SolicitorEmailService solicitorEmailService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     @Mock
     CaseWorkerEmailService caseWorkerEmailService;
@@ -257,6 +261,7 @@ public class ResubmitApplicationControllerTest {
             .countyLocationCode(123)
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(Mockito.any())).thenReturn("test");
     }
 
     @Test
@@ -317,7 +322,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
@@ -352,7 +357,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
@@ -398,7 +403,7 @@ public class ResubmitApplicationControllerTest {
             caseDataNoAllegations);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             caseDataNoAllegations);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
 
@@ -450,7 +455,7 @@ public class ResubmitApplicationControllerTest {
                 caseDataNoAllegations);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
                 caseDataNoAllegations);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
                 .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
                 ));
 
@@ -492,7 +497,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test",
                                DOCUMENT_FIELD_FINAL_WELSH, "test",
                                DOCUMENT_FIELD_C1A_WELSH, "test"

@@ -94,6 +94,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -201,6 +202,9 @@ public class CallbackControllerTest {
 
     @Mock
     private SystemUserService systemUserService;
+
+    @Mock
+    private ManageOrderService manageOrderService;
 
     @Mock
     private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
@@ -324,7 +328,7 @@ public class CallbackControllerTest {
 
     @Before
     public void setUp() {
-
+        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("test");
         courtVenue = CourtVenue.builder()
             .courtName("test")
             .regionId("1")
@@ -450,9 +454,8 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            c100DraftMap);
-
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(c100DraftMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -1521,16 +1524,18 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            Map.of("c8Document", "document",
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
-            )
-        );
+            ));
+        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("test");
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -1689,17 +1694,18 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            Map.of("c8Document", "document",
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
-            )
-        );
+            ));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -1991,17 +1997,18 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(childConfidentialityDetails);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            Map.of("c1ADocument", "document",
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
-            )
-        );
+            ));
         when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
@@ -2188,18 +2195,19 @@ public class CallbackControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any(CaseData.class))).thenReturn(
             childConfidentialityDetails);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            Map.of("c1ADocument", "document",
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
-            )
-        );
+            ));
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -3096,16 +3104,17 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
-            Map.of("c8Document", "document",
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
-            )
-        );
+            ));
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);

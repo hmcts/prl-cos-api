@@ -278,7 +278,7 @@ public class CourtNavCaseServiceTest {
         courtNavCaseService.refreshTabs(authToken,"1234567891234567");
         verify(documentGenService, times(1))
             .generateDocuments(Mockito.anyString(),
-                               Mockito.any(CaseData.class), "");
+                               Mockito.any(CaseData.class), Mockito.anyString());
     }
 
     public static Document testDocument() {

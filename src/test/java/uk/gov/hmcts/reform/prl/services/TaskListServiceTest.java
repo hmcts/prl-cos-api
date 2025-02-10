@@ -704,7 +704,8 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(dgsService.generateDocuments(authToken, caseData, "")).thenReturn(documentMap);
+        when(dgsService.generateDocuments(Mockito.anyString(), Mockito.any(), Mockito.anyString()))
+            .thenReturn(documentMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "senior-tribunal-caseworker");
