@@ -257,7 +257,7 @@ public class CourtNavCaseService {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
-        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
+        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class), ""));
         data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
         data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();

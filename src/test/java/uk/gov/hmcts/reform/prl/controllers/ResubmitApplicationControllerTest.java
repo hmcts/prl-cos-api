@@ -317,7 +317,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
@@ -352,7 +352,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
@@ -398,7 +398,7 @@ public class ResubmitApplicationControllerTest {
             caseDataNoAllegations);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             caseDataNoAllegations);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
 
@@ -450,7 +450,7 @@ public class ResubmitApplicationControllerTest {
                 caseDataNoAllegations);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
                 caseDataNoAllegations);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
                 .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
                 ));
 
@@ -492,7 +492,7 @@ public class ResubmitApplicationControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), ""))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test",
                                DOCUMENT_FIELD_FINAL_WELSH, "test",
                                DOCUMENT_FIELD_C1A_WELSH, "test"

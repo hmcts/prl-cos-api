@@ -56,6 +56,7 @@ public class FL401SubmitApplicationService {
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final ManageOrderService manageOrderService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
@@ -98,7 +99,8 @@ public class FL401SubmitApplicationService {
 
         caseData = caseData.setDateSubmittedDate();
 
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, loggedInUserType));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 

@@ -326,7 +326,7 @@ public class CallbackControllerIntegrationTest {
         List<Element<ApplicantConfidentialityDetails>> applicants = List.of(element(ApplicantConfidentialityDetails.builder().build()));
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Mockito.when(documentGenService.generateDocuments(any(), any())).thenReturn(new HashMap<>());
+        Mockito.when(documentGenService.generateDocuments(any(), any(), "")).thenReturn(new HashMap<>());
         Mockito.when(confidentialityTabService.getConfidentialApplicantDetails(any())).thenReturn(applicants);
         Mockito.when(paymentRequestService.createServiceRequestFromCcdCallack(any(), anyString())).thenReturn(
             PaymentServiceResponse.builder()

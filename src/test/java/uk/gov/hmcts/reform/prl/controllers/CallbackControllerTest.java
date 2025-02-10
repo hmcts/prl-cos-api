@@ -450,7 +450,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             c100DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1524,7 +1524,7 @@ public class CallbackControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -1693,7 +1693,7 @@ public class CallbackControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -1996,7 +1996,7 @@ public class CallbackControllerTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(childConfidentialityDetails);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
@@ -2194,7 +2194,7 @@ public class CallbackControllerTest {
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any(CaseData.class))).thenReturn(
             childConfidentialityDetails);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document"
@@ -3099,7 +3099,7 @@ public class CallbackControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             Map.of("c8Document", "document",
                    "c1ADocument", "document",
                    "c1AWelshDocument", "document",

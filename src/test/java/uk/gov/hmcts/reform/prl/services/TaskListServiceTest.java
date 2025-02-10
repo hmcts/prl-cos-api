@@ -704,7 +704,7 @@ public class TaskListServiceTest {
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        when(dgsService.generateDocuments(authToken, caseData, "")).thenReturn(documentMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "senior-tribunal-caseworker");
@@ -746,7 +746,7 @@ public class TaskListServiceTest {
             roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        when(dgsService.generateDocuments(authToken, caseData, "")).thenReturn(documentMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -831,7 +831,7 @@ public class TaskListServiceTest {
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        when(dgsService.generateDocuments(authToken, caseData, "")).thenReturn(documentMap);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

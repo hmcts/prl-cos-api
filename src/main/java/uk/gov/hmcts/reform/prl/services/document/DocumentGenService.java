@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
+import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -340,7 +341,7 @@ public class DocumentGenService {
 
     }
 
-    public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
+    public Map<String, Object> generateDocuments(String authorisation, CaseData caseData, String loggedInUserType) throws Exception {
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
@@ -348,7 +349,7 @@ public class DocumentGenService {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage, loggedInUserType);
         documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
             updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
@@ -417,10 +418,10 @@ public class DocumentGenService {
     }
 
     private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                       DocumentLanguage documentLanguage) throws Exception {
+                                       DocumentLanguage documentLanguage, String loggedInUserType) throws Exception {
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
+            isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData, loggedInUserType);
             isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
                 caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
@@ -450,19 +451,22 @@ public class DocumentGenService {
     }
 
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
-                                                            Map<String, Object> updatedCaseData) throws Exception {
+                                                            Map<String, Object> updatedCaseData, String loggedInUserType)
+        throws Exception {
+        Map<String, Object> docFieldMap = Map.of("loggedInUserRole", loggedInUserType);
+        docFieldMap.putAll(AppObjectMapper.getObjectMapper().convertValue(caseData, Map.class));
         if (isConfidentialInformationPresentForC100(caseData)) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, docFieldMap));
             } else {
                 updatedCaseData.put(
                     DOCUMENT_FIELD_DRAFT_C8,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false, docFieldMap)
                 );
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && isApplicantOrChildDetailsConfidential(caseData)) {
-            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false, docFieldMap));
         } else {
             updatedCaseData.put(DOCUMENT_FIELD_C8, null);
         }
@@ -494,18 +498,22 @@ public class DocumentGenService {
         );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false
+            ));
             if (isAohPresent(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, getDocument(authorisation, caseData, C1A_DRAFT_HINT, false));
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, getDocument(authorisation, caseData, C1A_DRAFT_HINT, false
+                ));
             } else {
                 updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
             }
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true
+            ));
             if (isAohPresent(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, getDocument(authorisation, caseData, C1A_DRAFT_HINT, true));
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, getDocument(authorisation, caseData, C1A_DRAFT_HINT, true
+                ));
             } else {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
             }
@@ -523,11 +531,13 @@ public class DocumentGenService {
 
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false
+            ));
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true
+            ));
         }
 
         return updatedCaseData;
@@ -1352,7 +1362,8 @@ public class DocumentGenService {
             isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
             updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false
+            ));
         }
     }
 
@@ -1396,7 +1407,8 @@ public class DocumentGenService {
                 DOCUMENT_FIELD_FINAL_WELSH,
                 getDocument(authorisation, caseData, FINAL_HINT, true)
             );
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true
+            ));
         }
     }
 

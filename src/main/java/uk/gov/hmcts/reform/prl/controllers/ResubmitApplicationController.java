@@ -28,18 +28,7 @@ import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
-import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
-import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -82,7 +71,7 @@ public class ResubmitApplicationController {
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final AuthorisationService authorisationService;
     private final EventService eventPublisher;
-
+    private final ManageOrderService manageOrderService;
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
@@ -184,7 +173,8 @@ public class ResubmitApplicationController {
                 eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
-            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, loggedInUserType));
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForC100CaseResubmission(
                     authorisation,
@@ -286,7 +276,8 @@ public class ResubmitApplicationController {
             //set the resubmit fields to null so they are blank if multiple resubmissions
             caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
             caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
-            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData, loggedInUserType));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             fl401SubmitApplicationService.cleanUpC8RefugeFields(caseData, caseDataUpdated);
             confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);

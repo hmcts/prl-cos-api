@@ -2412,36 +2412,9 @@ public class ManageOrderService {
                 null,
                 userDetails.getId()
             );
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).collect(
-                Collectors.toList());
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
+            loggedInUserType = CaseUtils.getLoggedInUserTypeFromResponse(userDetails, roleAssignmentServiceResponse);
         } else {
-            if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
+            loggedInUserType = CaseUtils.getLoggedInUserTypeFromDetails(userDetails);
         }
 
         return loggedInUserType;

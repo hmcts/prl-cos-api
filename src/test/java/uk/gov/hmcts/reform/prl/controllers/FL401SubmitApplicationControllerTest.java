@@ -359,7 +359,7 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class), "")).thenReturn(
             fl401DocsMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 

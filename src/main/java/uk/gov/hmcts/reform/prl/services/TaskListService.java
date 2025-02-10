@@ -106,6 +106,7 @@ public class TaskListService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final ManageOrderService manageOrderService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
@@ -314,7 +315,8 @@ public class TaskListService {
                         startAllTabsUpdateDataContent.authorisation()
                     );
                 }
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData, loggedInUserType));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())

@@ -62,24 +62,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.AmendCourtService;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
-import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
@@ -181,6 +164,7 @@ public class CallbackController {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
 
+    private final ManageOrderService manageOrderService;
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
@@ -348,8 +332,8 @@ public class CallbackController {
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
-
-            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData, loggedInUserType);
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
