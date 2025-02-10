@@ -59,7 +59,7 @@ public class DgsService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
-        if (null != caseData.getLoggedInUserRole()) {
+        if (null == caseData.getLoggedInUserRole()) {
             caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
                 .getLoggedInUserType(authorisation)).build());
         }
