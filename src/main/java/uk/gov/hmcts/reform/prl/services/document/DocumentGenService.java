@@ -341,12 +341,14 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
-        Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
