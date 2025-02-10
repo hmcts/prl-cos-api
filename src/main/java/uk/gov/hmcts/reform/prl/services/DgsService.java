@@ -59,8 +59,10 @@ public class DgsService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
-        caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
-            .getLoggedInUserType(authorisation)).build());
+        if (null != caseData.getLoggedInUserRole()) {
+            caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
+                .getLoggedInUserType(authorisation)).build());
+        }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
