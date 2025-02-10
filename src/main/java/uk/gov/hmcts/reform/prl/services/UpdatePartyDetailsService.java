@@ -112,7 +112,8 @@ public class UpdatePartyDetailsService {
         CaseData caseDataBefore = objectMapper.convertValue(caseDataMap, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        caseDataTemp = caseDataTemp.toBuilder().loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation)).build();
+        caseData = caseData.toBuilder().loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation)).build();
+        log.info("admin user role {}", caseData.getLoggedInUserRole());
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
