@@ -102,6 +102,7 @@ public class TaskListService {
     private final UserService userService;
     private final DocumentGenService dgsService;
     private final ObjectMapper objectMapper;
+    private final ManageOrderService manageOrderService;
     private final EventService eventPublisher;
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
@@ -299,6 +300,7 @@ public class TaskListService {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        caseData = caseData.toBuilder().loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation)).build();
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
