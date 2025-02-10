@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -108,6 +109,7 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
@@ -870,6 +872,10 @@ public class CitizenPartyDetailsMapper {
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
             );
             caseDataMapToBeUpdated.put(
+                "applicantPcqId",
+                citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
+            );
+            caseDataMapToBeUpdated.put(
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
@@ -943,6 +949,10 @@ public class CitizenPartyDetailsMapper {
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
+            caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(
+                caseDataBuilder.build().getRelations().getChildAndOtherPeopleRelations(),
+                caseDataBuilder.build().getOtherPartyInTheCaseRevised()
+            ));
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {

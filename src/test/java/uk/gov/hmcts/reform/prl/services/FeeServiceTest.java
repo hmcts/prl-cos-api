@@ -41,6 +41,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCEL_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -699,5 +701,68 @@ public class FeeServiceTest {
         assertNotNull(response);
         assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
         assertEquals("0.00",response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeSuccess() throws Exception {
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0336")
+            .feeType(FeeType.C100_SUBMISSION_FEE.toString())
+            .amount(BigDecimal.valueOf(255.00))
+            .build();
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse1);
+
+        FeeResponseForCitizen response = feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
+
+        assertNotNull(response);
+        assertEquals(FeeType.C100_SUBMISSION_FEE.toString(),response.getFeeType());
+        assertEquals("255.0", response.getAmount());
+    }
+
+    @Test
+    public void testFetchZeroFee() {
+        FeeResponseForCitizen response = feeService.fetchFee("C100_EX740_APPLICANT");
+
+        assertNotNull(response);
+        assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
+        assertEquals(ZERO_AMOUNT, response.getAmount());
+    }
+
+    @Test
+    public void testFetchFeeInvalidFeeType() {
+        FeeResponseForCitizen response = feeService.fetchFee("INVALID_FEE_TYPE");
+
+        assertNotNull(response);
+        assertEquals(FETCH_FEE_INVALID_APPLICATION_TYPE.concat("INVALID_FEE_TYPE"), response.getErrorRetrievingResponse());
+    }
+
+    @Test
+    public void testFetchFeeNullFeeResponse() throws Exception {
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(null);
+        FeeResponseForCitizen response = feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
+
+        assertNotNull(response);
+        assertEquals(FETCH_FEE_ERROR.concat(FeeType.C100_SUBMISSION_FEE.toString()), response.getErrorRetrievingResponse());
+    }
+
+    @Test
+    public void testFetchFeeNullFeeAmount() throws Exception {
+        FeeResponse feeResponse1 = FeeResponse.builder().amount(null).build();
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse1);
+        FeeResponseForCitizen response = feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
+
+        assertNotNull(response);
+        assertEquals(FETCH_FEE_ERROR.concat(FeeType.C100_SUBMISSION_FEE.toString()), response.getErrorRetrievingResponse());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testFetchFeeThrowsException() throws Exception {
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new RuntimeException());
+
+        feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString());
     }
 }
