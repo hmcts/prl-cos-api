@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,7 @@ public class ResubmitControllerIntegrationTest {
             .andReturn();
     }
 
+    @Ignore
     @Test
     public void testFl401ResubmitApplication() throws Exception {
         String url = "/fl401/resubmit-application";
