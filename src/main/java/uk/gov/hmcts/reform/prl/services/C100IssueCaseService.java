@@ -86,12 +86,6 @@ public class C100IssueCaseService {
                 .build();
         }
 
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            caseData = caseData.toBuilder().loggedInUserRole("CITIZEN").build();
-        } else {
-            caseData = caseData.toBuilder().loggedInUserRole("SOLICITOR").build();
-        }
-
 
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));

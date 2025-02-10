@@ -63,7 +63,6 @@ public class FL401SubmitApplicationService {
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         caseData = caseData.toBuilder()
             .solicitorName(userService.getUserDetails(authorisation).getFullName())
-            .loggedInUserRole(manageOrderService.getLoggedInUserType(authorisation))
             .build();
 
         final LocalDate localDate = LocalDate.now();
