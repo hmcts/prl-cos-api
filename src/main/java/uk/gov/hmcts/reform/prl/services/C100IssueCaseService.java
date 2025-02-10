@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
@@ -84,6 +85,13 @@ public class C100IssueCaseService {
                 .courtName(caseDataUpdated.containsKey(COURT_NAME_FIELD) ? caseDataUpdated.get(COURT_NAME_FIELD).toString() : null)
                 .build();
         }
+
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            caseData = caseData.toBuilder().loggedInUserRole("CITIZEN").build();
+        } else {
+            caseData = caseData.toBuilder().loggedInUserRole("SOLICITOR").build();
+        }
+
 
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
