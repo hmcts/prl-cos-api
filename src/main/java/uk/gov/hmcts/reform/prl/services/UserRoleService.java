@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+//Class required to stop having circular dependencies in dgsservice. Duplicated from manageordersservice.
 public class UserRoleService {
 
     private final LaunchDarklyClient launchDarklyClient;
