@@ -72,7 +72,6 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        log.info("tempCasedetails {}", tempCaseDetails);
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
