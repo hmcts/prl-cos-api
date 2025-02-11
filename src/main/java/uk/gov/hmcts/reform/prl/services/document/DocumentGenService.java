@@ -345,6 +345,7 @@ public class DocumentGenService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
+
         Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
