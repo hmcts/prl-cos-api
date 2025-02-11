@@ -70,7 +70,6 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -161,7 +160,6 @@ public class CallbackController {
     private final AllTabServiceImpl allTabsService;
     private final CaseSummaryTabService caseSummaryTab;
     private final UserService userService;
-    private final ManageOrderService manageOrderService;
     private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
@@ -344,7 +342,6 @@ public class CallbackController {
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
-
 
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
                 && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())

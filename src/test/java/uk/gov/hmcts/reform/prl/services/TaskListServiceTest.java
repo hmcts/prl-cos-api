@@ -119,8 +119,6 @@ public class TaskListServiceTest {
 
     @Mock
     EventsChecker eventsChecker;
-    @Mock
-    ManageOrderService manageOrderService;
 
     @Mock
     RespondentEventsChecker respondentEventsChecker;

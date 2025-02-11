@@ -102,7 +102,6 @@ public class TaskListService {
     private final UserService userService;
     private final DocumentGenService dgsService;
     private final ObjectMapper objectMapper;
-    private final ManageOrderService manageOrderService;
     private final EventService eventPublisher;
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
