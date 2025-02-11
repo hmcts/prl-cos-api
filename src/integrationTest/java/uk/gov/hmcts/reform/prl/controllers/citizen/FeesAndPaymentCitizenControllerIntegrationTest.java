@@ -127,7 +127,7 @@ public class FeesAndPaymentCitizenControllerIntegrationTest {
 
         when(authorisationService.authoriseUser(anyString())).thenReturn(true);
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
-        when(feeService.fetchFeeCode(any(FeeRequest.class), anyString(), anyString()))
+        when(feeService.fetchFeeCode(any(FeeRequest.class), anyString()))
             .thenReturn(FeeResponseForCitizen.builder()
                         .amount("100")
                         .feeType("C100")
