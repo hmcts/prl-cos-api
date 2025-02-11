@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -22,12 +23,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.junit.Assert.assertThrows;
@@ -162,6 +165,8 @@ public class HearingsManagementControllerTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
+        when(hearingManagementService.getNextHearingDate(Mockito.anyString()))
+            .thenReturn(NextHearingDetails.builder().hearingDateTime(LocalDateTime.now()).build());
 
         hearingsManagementController.updateNextHearingDetailsCallback("auth",callbackRequest);
         assertTrue(true);
