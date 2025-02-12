@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -61,6 +62,7 @@ public class DssEdgeCaseDetailsMapper {
                         .applicants(List.of(element(getDssApplicantPartyDetails(dssCaseData))));
             } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
                 caseDataBuilder
+                        .state(State.SUBMITTED_PAID)
                         .applicantsFL401(getDssApplicantPartyDetails(dssCaseData));
                 generatePartyUuidForFL401(caseDataBuilder.build());
             }

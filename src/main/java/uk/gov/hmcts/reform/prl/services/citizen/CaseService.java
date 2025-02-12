@@ -390,8 +390,6 @@ public class CaseService {
             if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
                 updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
             }
-            // Do not remove this line as it will overwrite the case state change
-            caseDataMapToBeUpdated.remove("state");
         }
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         log.info("Submit mapped DSS case data for caseId: {}", caseId);

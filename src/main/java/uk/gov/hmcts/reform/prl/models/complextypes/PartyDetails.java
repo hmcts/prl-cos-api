@@ -95,8 +95,8 @@ public class PartyDetails {
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
     public boolean hasConfidentialInfo() {
-        return this.isAddressConfidential.equals(YesOrNo.Yes)
-            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+        return YesOrNo.Yes.equals(this.isAddressConfidential)
+            || YesOrNo.Yes.equals(this.isPhoneNumberConfidential);
     }
 
     public boolean isCanYouProvideEmailAddress() {
