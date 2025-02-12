@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -84,6 +85,8 @@ public class DssEdgeCaseDetailsMapper {
                         .postCode(dssCaseData.getApplicantAddressPostCode())
                         .country(dssCaseData.getApplicantAddressCountry())
                         .build())
+                //SET GENDER FOR TEMP TO CHECK TAB REFRESH ISSUE
+                .gender(Gender.female)
                 .build();
     }
 }
