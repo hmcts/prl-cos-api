@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
@@ -75,6 +76,9 @@ public class FeeServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
     CaseData newCaseData;
 
     CaseDetails caseDetails;
@@ -116,6 +120,7 @@ public class FeeServiceTest {
             .keyword("GAOnNotice")
             .build();
 
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
     }
 
     @Test
@@ -256,7 +261,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
@@ -276,7 +281,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
@@ -297,7 +302,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
@@ -325,7 +330,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
@@ -352,7 +357,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.N161_APPELLANT_NOTICE_DA.toString(),response.getFeeType());
@@ -375,7 +380,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
@@ -398,7 +403,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
@@ -421,7 +426,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
@@ -444,7 +449,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.CHILD_ARRANGEMENTS_ORDER.toString(),response.getFeeType());
@@ -466,7 +471,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals("Invalid Parameters to fetch fee code",response.getErrorRetrievingResponse());
@@ -501,7 +506,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
         assertNotNull(response);
         assertEquals(FeeType.FL403_EXTEND_AN_ORDER.toString(),response.getFeeType());
         assertEquals("167.0",response.getAmount());
@@ -524,7 +529,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
@@ -548,7 +553,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
@@ -571,7 +576,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITHOUT_NOTICE.toString(),response.getFeeType());
@@ -596,7 +601,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITHOUT_NOTICE.toString(),response.getFeeType());
@@ -621,7 +626,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITHOUT_NOTICE.toString(),response.getFeeType());
@@ -646,7 +651,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals(FeeType.C2_WITH_NOTICE.toString(),response.getFeeType());
@@ -671,7 +676,7 @@ public class FeeServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
 
         assertNotNull(response);
         assertEquals("Invalid Parameters to fetch fee code",response.getErrorRetrievingResponse());
@@ -697,7 +702,7 @@ public class FeeServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
             .getCaseId())).thenReturn(caseDetails);
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
+        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken);
         assertNotNull(response);
         assertEquals(FeeType.NO_FEE.toString(),response.getFeeType());
         assertEquals("0.00",response.getAmount());

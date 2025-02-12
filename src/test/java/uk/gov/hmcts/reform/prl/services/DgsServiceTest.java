@@ -41,6 +41,8 @@ public class DgsServiceTest {
 
     @Mock
     private DgsApiClient dgsApiClient;
+    @Mock
+    private UserRoleService userRoleService;
 
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;

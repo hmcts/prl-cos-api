@@ -148,7 +148,7 @@ public class FeesAndPaymentCitizenController {
         try {
             log.info("#### FeeRequest {}", feeRequest);
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
+                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
@@ -157,6 +157,7 @@ public class FeesAndPaymentCitizenController {
                 .errorRetrievingResponse(e.getMessage())
                 .build();
         }
+        log.info("#### FeeResponse {}", feeResponseForCitizen);
         return feeResponseForCitizen;
     }
 
