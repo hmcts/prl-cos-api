@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
@@ -18,7 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.buildDateOfBirth;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.generatePartyUuidForFL401;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -46,7 +48,6 @@ public class DssEdgeCaseDetailsMapper {
             DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
 
             caseDataBuilder
-                .applicants(List.of(getDssApplicantPartyDetails(dssCaseData)))
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
                                     .edgeCaseTypeOfApplication(dssCaseData.getEdgeCaseTypeOfApplication())
                                     .selectedCourtId(dssCaseData.getSelectedCourtId())
@@ -54,13 +55,21 @@ public class DssEdgeCaseDetailsMapper {
                                         wrapElements(dssCaseData.getApplicantApplicationFormDocuments()))
                                     .dssAdditionalDocuments(
                                         wrapElements(dssCaseData.getApplicantAdditionalDocuments())).build());
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                caseDataBuilder
+                        .applicants(List.of(element(getDssApplicantPartyDetails(dssCaseData))));
+            } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                caseDataBuilder
+                        .applicantsFL401(getDssApplicantPartyDetails(dssCaseData));
+                generatePartyUuidForFL401(caseDataBuilder.build());
+            }
         }
         log.info("Case data mapped from DSS: {}", caseDataBuilder.build());
         return caseDataBuilder.build();
     }
 
-    private Element<PartyDetails> getDssApplicantPartyDetails(DssCaseData dssCaseData) {
-        return element(PartyDetails.builder()
+    private PartyDetails getDssApplicantPartyDetails(DssCaseData dssCaseData) {
+        return PartyDetails.builder()
                 .firstName(dssCaseData.getApplicantFirstName())
                 .lastName(dssCaseData.getApplicantLastName())
                 .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
@@ -75,6 +84,6 @@ public class DssEdgeCaseDetailsMapper {
                         .postCode(dssCaseData.getApplicantAddressPostCode())
                         .country(dssCaseData.getApplicantAddressCountry())
                         .build())
-                .build());
+                .build();
     }
 }

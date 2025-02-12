@@ -367,7 +367,7 @@ public class CaseService {
             || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue().equalsIgnoreCase(eventId)) {
             //Map the case data fields with DSS data
             log.info("Map case data with DSS case details for caseId: {}", caseId);
-            UserDetails userDetails = startAllTabsUpdateDataContent.userDetails();
+            UserDetails userDetails = userService.getUserDetails(authToken);
             uk.gov.hmcts.reform.prl.models.user.UserInfo userInfo = uk.gov.hmcts.reform.prl.models.user.UserInfo
                 .builder()
                 .idamId(userDetails.getId())
@@ -379,6 +379,7 @@ public class CaseService {
             dbCaseData = dbCaseData.toBuilder()
                 .userInfo(wrapElements(userInfo))
                 .taskListVersion(TASK_LIST_VERSION_V3)
+                .selectedCaseTypeID(caseData.getCaseTypeOfApplication())
                 .build();
 
             CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(dbCaseData, caseData.getDssCaseDetails());
@@ -388,6 +389,8 @@ public class CaseService {
             if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
                 updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
             }
+            // Do not remove this line as it will overwrite the case state change
+            caseDataMapToBeUpdated.remove("state");
         }
         log.info("Submit mapped DSS case data for caseId: {}", caseId);
         return allTabService.submitUpdateForSpecificUserEvent(
