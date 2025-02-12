@@ -1113,4 +1113,7 @@ public class CaseUtils {
         return null;
     }
 
+    public static String getContactInstructions(PartyDetails applicantsFL401) {
+        return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
+    }
 }

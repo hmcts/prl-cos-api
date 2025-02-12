@@ -187,7 +187,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
-        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenReturn(feeResponseForCitizen);
+        when(feeService.fetchFeeCode(feeRequest,authToken)).thenReturn(feeResponseForCitizen);
 
         //When
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
@@ -205,7 +205,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
-        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenThrow(new RuntimeException());
+        when(feeService.fetchFeeCode(feeRequest,authToken)).thenThrow(new RuntimeException());
 
         //When
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
