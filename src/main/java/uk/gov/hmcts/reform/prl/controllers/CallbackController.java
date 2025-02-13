@@ -509,6 +509,27 @@ public class CallbackController {
         }
     }
 
+    @PostMapping(path = "/case-withdrawn-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse caseWithdrawAboutToStart(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            WithdrawApplication withdrawApplication = WithdrawApplication.builder().withDrawApplication(Yes).build();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("withDrawApplicationData", withdrawApplication);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/case-withdrawn-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case Withdraw")
     @ApiResponses(value = {
@@ -556,6 +577,7 @@ public class CallbackController {
                     caseDataUpdated.putAll(allTabsFields);
                 }
                 if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+                    log.info("Updating case status");
                     caseDataUpdated.put("state", WITHDRAWN_STATE);
                     caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
                     caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
