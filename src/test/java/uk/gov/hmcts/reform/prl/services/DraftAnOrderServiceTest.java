@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -144,8 +142,6 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGate
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
-@Disabled
 public class DraftAnOrderServiceTest {
 
     @InjectMocks
@@ -622,8 +618,6 @@ public class DraftAnOrderServiceTest {
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
-    @Ignore
-    @Disabled
     @Test
     public void testRemoveDraftOrderAndAddToFinalOrderForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()

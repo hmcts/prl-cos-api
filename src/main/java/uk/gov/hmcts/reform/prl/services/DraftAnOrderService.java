@@ -599,9 +599,7 @@ public class DraftAnOrderService {
         StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             try {
-                //standardDirectionOrder = copyPropertiesToStandardDirectionOrder(draftOrder.getSdoDetails());
-                throw new JsonProcessingException("Dummy JsonProcessingException for testing"){};
-
+                standardDirectionOrder = copyPropertiesToStandardDirectionOrder(draftOrder.getSdoDetails());
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
