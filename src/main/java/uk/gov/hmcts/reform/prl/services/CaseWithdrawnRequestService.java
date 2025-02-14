@@ -59,9 +59,8 @@ public class CaseWithdrawnRequestService {
         String caseWithdrawnConfirmationBodyPrefix;
         UserDetails userDetails = userService.getUserDetails(authorisation);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            // TODO: Add the states here
             if (State.CASE_ISSUED.equals(caseData.getState())
-                || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+                || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_REQUEST_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL;
                 sendWithdrawEmails(caseDetails, caseData, userDetails);
