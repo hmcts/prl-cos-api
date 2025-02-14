@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataChildDetailsElementsMapper {
     private CaseDataChildDetailsElementsMapper() {
     }
@@ -50,6 +52,7 @@ public class CaseDataChildDetailsElementsMapper {
 
     public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+        log.info("C100 rebuild child detail element {}", c100RebuildChildDetailsElements.getChildDetails());
         caseDataBuilder
             .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
             .childrenKnownToLocalAuthority(
@@ -83,6 +86,7 @@ public class CaseDataChildDetailsElementsMapper {
 
 
         return Element.<ChildDetailsRevised>builder()
+            .id(UUID.fromString(childDetail.getId()))
             .value(ChildDetailsRevised.builder()
                        .firstName(childDetail.getFirstName())
                        .lastName(childDetail.getLastName())

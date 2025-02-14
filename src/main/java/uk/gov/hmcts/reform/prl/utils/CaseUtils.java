@@ -578,9 +578,6 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
-        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
-        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
         if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
@@ -759,8 +756,6 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside checkIfAddressIsChanged old {} , new {}",
-                 updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
             ? updatedParty.getAddress() : Address.builder().build();
@@ -781,7 +776,6 @@ public class CaseUtils {
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
                                              updatedParty.getIsEmailAddressConfidential()))
@@ -792,7 +786,6 @@ public class CaseUtils {
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
                                              updatedParty.getIsPhoneNumberConfidential()))
