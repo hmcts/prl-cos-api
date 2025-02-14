@@ -32,6 +32,7 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
+    private final UserRoleService userRoleService;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -57,6 +58,10 @@ public class DgsService {
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+        }
+        if (null == caseData.getLoggedInUserRole()) {
+            caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
+                .getLoggedInUserType(authorisation)).build());
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names

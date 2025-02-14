@@ -99,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElements
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Component
@@ -872,6 +873,10 @@ public class CitizenPartyDetailsMapper {
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
             );
             caseDataMapToBeUpdated.put(
+                "applicantPcqId",
+                citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
+            );
+            caseDataMapToBeUpdated.put(
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
@@ -981,8 +986,16 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        //Set case type, applicant name & respondent names for case list table
+        caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
+        caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
+        caseDataBuilder.respondentName(getPartyName(caseDataBuilder.build().getRespondents()));
 
         return caseDataBuilder.build();
+    }
+
+    private String getPartyName(List<Element<PartyDetails>> parties) {
+        return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
     }
 
     public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
