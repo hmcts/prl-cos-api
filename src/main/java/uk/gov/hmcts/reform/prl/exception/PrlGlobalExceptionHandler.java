@@ -20,7 +20,7 @@ public class PrlGlobalExceptionHandler {
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public void handleNullPointerException(ManageOrderRuntimeException ex) {
+    public void handleNullPointerException(NullPointerException ex) {
         log.error("Exception occurred: {}", ex.getMessage());
     }
 }
