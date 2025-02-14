@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.prl.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
@@ -20,7 +25,10 @@ public class PrlGlobalExceptionHandler {
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public void handleNullPointerException(NullPointerException ex) {
+    public ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException ex) {
         log.error("Exception occurred: {}", ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
+                                                                                         ex.getMessage())).build();
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
