@@ -44,7 +44,8 @@ public class RespondentsMapper {
 
     private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent,
                                      Map<String, PartyDetails> respondentSolicitorMap) {
-        if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
+        if (null != respondent.getDoTheyHaveLegalRepresentation()
+            && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
             respondentSolicitorMap.put("RES_SOL_" + counter, respondent);
         }
         return new NullAwareJsonObjectBuilder()
@@ -77,7 +78,8 @@ public class RespondentsMapper {
             .add("addressLivedLessThan5YearsDetails", respondent.getAddressLivedLessThan5YearsDetails())
             .add(
                 "solicitorID",
-                respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
+                (null != respondent.getDoTheyHaveLegalRepresentation()
+                    && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes))
                     ? "RES_SOL_" + counter.getAndIncrement() : null
             )
             .add("dxNumber", respondent.getDxNumber())
