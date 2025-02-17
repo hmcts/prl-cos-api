@@ -16,7 +16,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
@@ -34,6 +37,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -69,6 +73,9 @@ public class CafcassDocumentManagementControllerTest {
     private final String userToken = "Bearer testToken";
 
     private UUID documentId;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @BeforeEach
     public void setUp() {
@@ -259,5 +266,75 @@ public class CafcassDocumentManagementControllerTest {
 
         };
         return documentResource;
+    }
+
+    @Test
+    public void shouldDownloadDocumentWhenFeatureEnabledAndUserAndServiceAuthorized() throws Exception {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList(CafcassAppConstants.CAFCASS_USER_ROLE));
+        when(cafcassCdamService.getDocument(any(), any(), any())).thenReturn(ResponseEntity.ok().build());
+
+        ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenFeatureDisabled() {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID()));
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenUserNotAuthorized() {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID()));
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenServiceNotAuthorized() {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID()));
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedWhenUserRoleNotCafcass() {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("other-role"));
+
+        assertThrows(ResponseStatusException.class, () -> cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID()));
+    }
+
+    @Test
+    public void shouldReturnFeignExceptionStatus() throws IOException {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList(CafcassAppConstants.CAFCASS_USER_ROLE));
+        when(cafcassCdamService.getDocument(any(), any(), any())).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Bad Request"));
+
+        ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    public void shouldReturnInternalServerErrorOnException() throws IOException {
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-download")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList(CafcassAppConstants.CAFCASS_USER_ROLE));
+        when(cafcassCdamService.getDocument(any(), any(), any())).thenThrow(new RuntimeException());
+
+        ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument("auth", "Bearer s2s token", UUID.randomUUID());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 }
