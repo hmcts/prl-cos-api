@@ -14,7 +14,7 @@ public class PrlAppsConstants {
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
 
-    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String NEXT_HEARING_DATE = "nextHearingDate";
     public static final String STATE = "state";
 
 
@@ -1105,5 +1105,8 @@ public class PrlAppsConstants {
     public static final String RESPONDENT = "respondent";
 
     public static final String CASE_STATUS = "caseStatus";
+
+    public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
+    public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
 
 }

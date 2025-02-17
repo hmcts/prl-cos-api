@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -781,7 +782,7 @@ public class CaseService {
         } else {
             String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineDoc.getCategoryId(),
-                null
+                quarantineDoc.getUploaderRole()
             );
             existingDocument = objectMapper.convertValue(
                 objectMapper.convertValue(quarantineDoc, Map.class).get(attributeName),
@@ -881,7 +882,7 @@ public class CaseService {
 
     private boolean isPersonalService(OrderDetails order) {
         return null != order.getServeOrderDetails()
-            && YesOrNo.Yes.equals(order.getServeOrderDetails().getServeOnRespondent())
+            && YesNoNotApplicable.Yes.equals(order.getServeOrderDetails().getServeOnRespondent())
             && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
             .equals(order.getServeOrderDetails().getWhoIsResponsibleToServe());
     }

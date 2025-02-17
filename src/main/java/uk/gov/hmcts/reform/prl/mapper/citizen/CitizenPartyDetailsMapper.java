@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -98,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElements
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Component
@@ -108,6 +110,7 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
@@ -126,7 +129,8 @@ public class CitizenPartyDetailsMapper {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsDa(
                 dbCaseData,
                 citizenUpdatedCaseData,
-                caseEvent
+                caseEvent,
+                authorisation
             ));
         }
 
@@ -322,7 +326,8 @@ public class CitizenPartyDetailsMapper {
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                            CaseEvent caseEvent) {
+                                                                 CaseEvent caseEvent,
+                                                                 String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -345,6 +350,12 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                //PRL-6790 - create C8 for DA respondent
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    reGenerateRespondentC8Documents(caseDataMapToBeUpdated,
+                                                    element(partyDetails.getPartyId(), partyDetails),
+                                                    caseData, 0, authorisation);
+                }
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -862,6 +873,10 @@ public class CitizenPartyDetailsMapper {
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
             );
             caseDataMapToBeUpdated.put(
+                "applicantPcqId",
+                citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
+            );
+            caseDataMapToBeUpdated.put(
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
@@ -935,6 +950,10 @@ public class CitizenPartyDetailsMapper {
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
+            caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(
+                caseDataBuilder.build().getRelations().getChildAndOtherPeopleRelations(),
+                caseDataBuilder.build().getOtherPartyInTheCaseRevised()
+            ));
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
@@ -967,8 +986,16 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        //Set case type, applicant name & respondent names for case list table
+        caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
+        caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
+        caseDataBuilder.respondentName(getPartyName(caseDataBuilder.build().getRespondents()));
 
         return caseDataBuilder.build();
+    }
+
+    private String getPartyName(List<Element<PartyDetails>> parties) {
+        return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
     }
 
     public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {

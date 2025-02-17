@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
@@ -39,6 +40,8 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.CHILD_ARRANGEMENTS_ORDER_TO_LIVE_SPEND_TIME;
@@ -63,6 +66,7 @@ public class FeeService {
     private final FeesRegisterApi feesRegisterApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
@@ -254,15 +258,14 @@ public class FeeService {
     }
 
     public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
-                                              String authorization,
-                                              String serviceAuthorization) throws Exception {
+                                              String authorization) throws Exception {
 
         String caseId = feeRequest.getCaseId();
 
         FeeResponse feeResponse;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
-            serviceAuthorization,
+            authTokenGenerator.generate(),
             caseId
         );
 
@@ -287,6 +290,38 @@ public class FeeService {
                 .feeType(feeType.toString())
                 .build();
 
+        }
+    }
+
+    public FeeResponseForCitizen fetchFee(String applicationType) {
+        FeeType feeType = applicationToFeeMapForCitizen.get(applicationType);
+        if (null == feeType) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE.concat(applicationType))
+                .build();
+        } else if (NO_FEE.equals(feeType)) {
+            return FeeResponseForCitizen.builder()
+                .amount(ZERO_AMOUNT)
+                .feeType(feeType.toString())
+                .build();
+        } else {
+            try {
+                //Fetch fee details
+                FeeResponse feeResponse = fetchFeeDetails(feeType);
+                if (null == feeResponse || null == feeResponse.getAmount()) {
+                    return FeeResponseForCitizen.builder()
+                        .errorRetrievingResponse(FETCH_FEE_ERROR.concat(applicationType))
+                        .build();
+                }
+
+                return FeeResponseForCitizen.builder()
+                    .amount(feeResponse.getAmount().toString())
+                    .feeType(feeType.toString())
+                    .build();
+            } catch (Exception e) {
+                log.error("Exception while fetching fee for application: {}", applicationType, e);
+                throw (new RuntimeException(e.getMessage()));
+            }
         }
     }
 }

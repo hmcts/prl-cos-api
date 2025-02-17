@@ -72,7 +72,7 @@ public class RestrictedCaseAccessControllerFunctionalTest {
             .post("/restricted-case-access/about-to-submit")
             .then()
             .assertThat().statusCode(200)
-            .body("data.caseSecurityClassification", equalTo("restricted"));
+            .body("data.caseSecurityClassification", equalTo("RESTRICTED"));
 
     }
 
@@ -87,6 +87,6 @@ public class RestrictedCaseAccessControllerFunctionalTest {
             .contentType("application/json")
             .post("/restricted-case-access/change-case-access")
             .then()
-            .assertThat().statusCode(500);
+            .assertThat().statusCode(200);
     }
 }

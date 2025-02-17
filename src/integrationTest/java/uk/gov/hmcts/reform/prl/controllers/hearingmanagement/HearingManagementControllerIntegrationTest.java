@@ -1,53 +1,146 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
-import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.prl.Application;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import static org.junit.Assert.assertEquals;
+import java.util.HashMap;
+import java.util.Map;
 
-@Ignore
-@RunWith(SpringIntegrationSerenityRunner.class)
-@SpringBootTest(classes = {Application.class, HearingManagementControllerIntegrationTest.class})
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+@Slf4j
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@ContextConfiguration
 public class HearingManagementControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
-
-    private final String hearingManagementStateEndpoint = "/hearing-management-state-update";
-
-    private static final String VALID_HEARING_MANAGEMENT_REQUEST_BODY = "requests/hearing-management-controller.json";
+    private MockMvc mockMvc;
 
     @Autowired
-    CaseService caseService;
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
-    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+    ObjectMapper objectMapper;
 
-    @Test
-    public void testHearingManagementStateEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
-        HttpPut httpPut = new HttpPut(serviceUrl + hearingManagementStateEndpoint);
-        httpPut.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPut.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
-        StringEntity body = new StringEntity(requestBody);
-        httpPut.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPut);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    @MockBean
+    AuthorisationService authorisationService;
+
+    @MockBean
+    HearingManagementService hearingManagementService;
+
+    @MockBean
+    AllTabServiceImpl allTabService;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
+    @Test
+    public void testHearingManagementStateUpdate() throws Exception {
+        String url = "/hearing-management-state-update/CASE_ISSUED";
+        String jsonRequest = ResourceLoader.loadJson("requests/hearing-management-controller.json");
+
+        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(any(), any());
+
+        mockMvc.perform(
+                put(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .header("ServiceAuthorization", "testServiceAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testNextHearingDateUpdate() throws Exception {
+        String url = "/hearing-management-next-hearing-date-update";
+        String jsonRequest = ResourceLoader.loadJson("requests/hearing-mgmnt-controller-next-hearing-details.json");
+
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(any());
+
+        mockMvc.perform(
+                put(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .header("ServiceAuthorization", "testServiceAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testUpdateNextHearingDetailsCallback() throws Exception {
+        String url = "/update-next-hearing-details-callback/about-to-submit";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+
+        Mockito.when(hearingManagementService.getNextHearingDate(any())).thenReturn(NextHearingDetails.builder().build());
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testUpdateAllTabsAfterHmcCaseState() throws Exception {
+        String url = "/update-allTabs-after-hmc-case-state/submitted";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+
+        Map<String, Object> caseDatMap = new HashMap<>();
+        caseDatMap.put("caseId", 123L);
+
+        Mockito.when(allTabService.getStartAllTabsUpdate(any())).thenReturn(new StartAllTabsUpdateDataContent(
+            "testAuthToken",
+            null,
+            null,
+            caseDatMap,
+            null,
+            null
+        ));
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "Bearer testAuthToken")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 }

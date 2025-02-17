@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChil
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -66,6 +67,9 @@ public class RelationshipsControllerTest {
     private ApplicantsListGenerator applicantsListGenerator;
     @Mock
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
+
+    @Mock
+    private ConfidentialityTabService confidentialityTabService;
 
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -1161,6 +1165,7 @@ public class RelationshipsControllerTest {
             .childLivesWith(YesOrNo.No)
             .childAndOtherPeopleRelationOtherDetails(null)
             .isChildLivesWithPersonConfidential(null)
+            .isOtherPeopleIdConfidential(YesOrNo.No)
             .build();
         List<Element<ChildrenAndOtherPeopleRelation>> expectedRelationList = Collections.singletonList(
             Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
@@ -1202,6 +1207,7 @@ public class RelationshipsControllerTest {
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
             .childAndOtherPeopleRelationOtherDetails("test")
             .childLivesWith(YesOrNo.Yes)
+            .isOtherPeopleIdConfidential(YesOrNo.Yes)
             .isChildLivesWithPersonConfidential(YesOrNo.Yes)
             .build();
 
