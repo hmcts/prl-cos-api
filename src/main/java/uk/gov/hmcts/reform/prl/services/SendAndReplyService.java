@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1594,7 +1595,16 @@ public class SendAndReplyService {
         List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
             judgeIdamId
         );
+
         return roleAssignmentResponseList.stream()
+            .peek(roleAssignmentResponse -> {
+                try {
+                    log.info("RoleAssignmentResponse: {}", objectMapper.writeValueAsString(roleAssignmentResponse));
+                    log.info("CaseId: ", String.valueOf(caseId));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
                 ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
                 String.valueOf(caseId))).toList().get(0).getId();
