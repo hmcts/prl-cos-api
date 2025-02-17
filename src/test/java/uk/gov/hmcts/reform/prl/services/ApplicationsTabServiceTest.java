@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -546,7 +545,6 @@ public class ApplicationsTabServiceTest {
         assertEquals(applicationsTabService.getChildDetails(CaseData.builder().build()), childFinalList);
     }
 
-    @Ignore
     @Test
     public void testUpdateTab() {
         when(objectMapper.convertValue(partyDetails, Applicant.class))
@@ -566,7 +564,6 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }
 
-    @Ignore
     @Test
     public void testUpdateTabWithAllegationOfHarmRevised() {
 
@@ -641,7 +638,6 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
 
-    @Ignore
     @Test
     public void testUpdateTabWithTaskListV3() {
 
@@ -703,7 +699,6 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
 
-    @Ignore
     @Test
     public void testUpdateTabWithTaskListV3WithDetails() {
 
@@ -1853,7 +1848,6 @@ public class ApplicationsTabServiceTest {
     }
 
 
-    @Ignore
     @Test
     public void testUpdateTabWithChildren() {
         List<Element<Child>> children = new ArrayList<>();
