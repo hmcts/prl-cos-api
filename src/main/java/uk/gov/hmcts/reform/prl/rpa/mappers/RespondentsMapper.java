@@ -44,7 +44,8 @@ public class RespondentsMapper {
 
     private JsonObject getRespondent(AtomicInteger counter, PartyDetails respondent,
                                      Map<String, PartyDetails> respondentSolicitorMap) {
-        if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
+        if (null != respondent.getDoTheyHaveLegalRepresentation()
+            && respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
             respondentSolicitorMap.put("RES_SOL_" + counter, respondent);
         }
         return new NullAwareJsonObjectBuilder()
