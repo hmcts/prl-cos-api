@@ -73,7 +73,6 @@ public class BundlingController extends AbstractCallbackController {
                 callbackRequest.getEventId(),
                 authorization
             );
-            log.info("Bundle create response is : {}", bundleCreateResponse);
             if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
                 caseDataUpdated.put(
                     "bundleInformation",
@@ -106,7 +105,6 @@ public class BundlingController extends AbstractCallbackController {
             }
             if (nonNull(existingBundleInformation.getCaseBundles())) {
                 List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles();
-                log.info("The existing Bundles are {}",existingCaseBundles);
 
                 existingCaseBundles.stream().forEach(existingBundle -> {
                     BundleDetails bundleDetails = existingBundle.getValue().toBuilder()
@@ -117,7 +115,6 @@ public class BundlingController extends AbstractCallbackController {
 
                 );
                 historicalBundles.addAll(existingCaseBundles);
-                log.info("The historical bundles are {}",historicalBundles);
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
             existingBundleInformation.setCaseBundles(null);
