@@ -1596,15 +1596,16 @@ public class SendAndReplyService {
             judgeIdamId
         );
 
-        return roleAssignmentResponseList.stream()
-            .peek(roleAssignmentResponse -> {
+        roleAssignmentResponseList.stream()
+            .forEach(roleAssignmentResponse -> {
                 try {
                     log.info("RoleAssignmentResponse: {}", objectMapper.writeValueAsString(roleAssignmentResponse));
                     log.info("CaseId: ", String.valueOf(caseId));
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                    log.error("Error while converting roleAssignmentResponse to string", e.getMessage());
                 }
-            })
+            });
+        return roleAssignmentResponseList.stream()
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
                 ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
                 String.valueOf(caseId))).toList().get(0).getId();
