@@ -1600,7 +1600,7 @@ public class SendAndReplyService {
             .forEach(roleAssignmentResponse -> {
                 try {
                     log.info("RoleAssignmentResponse: {}", objectMapper.writeValueAsString(roleAssignmentResponse));
-                    log.info("CaseId: ", String.valueOf(caseId));
+                    log.info("CaseId: {}", String.valueOf(caseId));
                 } catch (JsonProcessingException e) {
                     log.error("Error while converting roleAssignmentResponse to string", e.getMessage());
                 }
