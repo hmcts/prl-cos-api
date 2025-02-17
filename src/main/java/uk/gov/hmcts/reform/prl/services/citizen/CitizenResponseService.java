@@ -117,7 +117,7 @@ public class CitizenResponseService {
     }
 
     private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
-        log.info("data map creating");
+        log.info("Updating respondent details");
         Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
@@ -129,12 +129,6 @@ public class CitizenResponseService {
                 dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
                                                                partyElement, CITIZEN
                 );
-                try {
-                    log.info("data map generated is ===>" + objectMapper.writeValueAsString(dataMap));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
-                log.info("data map processed");
             }
         }
         return dataMap;
