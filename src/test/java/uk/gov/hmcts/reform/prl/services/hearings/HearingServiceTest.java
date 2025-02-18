@@ -381,14 +381,14 @@ public class HearingServiceTest {
         Assert.assertNull(automatedHearingsResponse);
     }
 
-     @Test
+    @Test
     @DisplayName("test case for Automated Hearing Management with failure response.")
     public void createAutomatedHearingManagementTestFailure() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn (ResponseEntity.internalServerError().build());
+            .thenReturn(ResponseEntity.internalServerError().build());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
     }
