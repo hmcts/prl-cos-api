@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,6 +57,25 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 public class ManageOrderControllerIntegrationTest {
 
     private MockMvc mockMvc;
+    @Value("${case.orchestration.service.base.uri}")
+    protected String serviceUrl;
+
+    private final String populatePreviewOrderEndpoint = "/populate-preview-order";
+    private final String fetchChildDetailsEndpoint = "/fetch-child-details";
+    private final String populateHeaderEndpoint = "/populate-header";
+    private final String caseOrderEmailNotificationEndpoint = "/case-order-email-notification";
+    private final String editAndApproveOrderSubmittedEndpoint = "/edit-and-approve/submitted";
+    private final String manageOrdersEndpoint = "/manage-orders/about-to-submit";
+    private final String addressValidationEndpoint = "/manage-orders/recipients-validations";
+
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+
+    private static final String VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY = "requests/auto-hearing-case-data-request.json";
+
+    private static final String VALID_MANAGE_ORDER_REQUEST_BODY_REVISED = "requests/manage-order-fetch-children-request-integration.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS = "requests/manage-order-fetch-children-request-integration.json";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -290,6 +310,19 @@ public class ManageOrderControllerIntegrationTest {
             .andReturn();
     }
 
+    /*@Test
+    public void testCaseOrderEmailNotificationEndpointForAutoHearing() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + caseOrderEmailNotificationEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, httpResponse.getStatusLine().getStatusCode());
+    }*/
+
     @Test
     public void testManageOrdersServeOrderMidEvent() throws Exception {
         String url = "/manage-orders/serve-order/mid-event";
@@ -325,6 +358,19 @@ public class ManageOrderControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+    /*@Test
+    public void testCaseOrderSubmittedEndPointForAutoHearing() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + editAndApproveOrderSubmittedEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }*/
 
     @Test
     public void testValidateAndPopulateHearingData() throws Exception {
