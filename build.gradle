@@ -94,11 +94,11 @@ allprojects {
     }
   }
 
-  java {
-    toolchain {
-      languageVersion = JavaLanguageVersion.of(17)
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
-  }
 
   tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
