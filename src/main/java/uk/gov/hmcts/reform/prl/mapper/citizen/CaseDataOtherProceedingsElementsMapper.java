@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.PredicateUtils;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -187,7 +188,8 @@ public class CaseDataOtherProceedingsElementsMapper {
                 .dateEnded(buildDate(endDate))
                 .typeOfOrder(List.of(typeOfOrderEnum))
                 .nameOfCourt(order.getOrderDetail())
-                .uploadRelevantOrder(buildDocument(order.getOrderDocument()))
+                .uploadRelevantOrder(PrlAppsConstants.YES.equals(order.getOrderCopy())
+                                         ? buildDocument(order.getOrderDocument()) : null)
                 .build()).build();
     }
 
@@ -200,7 +202,8 @@ public class CaseDataOtherProceedingsElementsMapper {
     }
 
     public static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document orderDocument) {
-        if (isNotEmpty(orderDocument)) {
+        if (isNotEmpty(orderDocument)
+            && isNotEmpty(orderDocument.getUrl())) {
             return Document.builder()
                     .documentUrl(orderDocument.getUrl())
                     .documentBinaryUrl(orderDocument.getBinaryUrl())

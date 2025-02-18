@@ -1066,7 +1066,6 @@ public class C100RespondentSolicitorService {
                 .build();
         }
 
-        log.info("Refuge documents are {}", caseData.getRefugeDocuments());
 
         return caseData;
     }
