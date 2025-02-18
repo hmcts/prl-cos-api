@@ -81,6 +81,7 @@ public class CaseWithdrawnRequestService {
     }
 
     private void sendWithdrawEmails(CaseDetails caseDetails, CaseData caseData, UserDetails userDetails) {
+        log.info("Sending email start");
         SolicitorNotificationEmailEvent solicitorWithdrawNotification = SolicitorNotificationEmailEvent.builder()
             .caseDetailsModel(caseDetails)
             .userDetails(userDetails)
@@ -115,15 +116,18 @@ public class CaseWithdrawnRequestService {
     }
 
     private void sendWithdrawEmailsBeforeIssuedState(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
+        log.info("Sending email before issued state");
         SolicitorNotificationEmailEvent solicitorWithdrawNotification = SolicitorNotificationEmailEvent.builder()
             .caseDetailsModel(caseDetails)
             .userDetails(userDetails)
             .build();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("Sending CA email before issued state");
             solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
                 .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawC100BeforeIssue.getDisplayedValue())
                 .build();
         } else {
+            log.info("Sending DA email before issued state");
             solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
                 .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawFL401BeforeIssue.getDisplayedValue())
                 .build();
