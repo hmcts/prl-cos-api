@@ -63,14 +63,12 @@ public class CitizenAwpMapper {
             .otherApplicationsBundle(getOtherApplicationBundle(citizenAwpRequest))
             .build();
 
-        log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
         //Map citizen awp payment details & then remove from in progress
         additionalApplicationsBundle = mapPaymentDetailsAndRemove(
             caseData,
             citizenAwpRequest,
             additionalApplicationsBundle
         );
-        log.info("Mapped data with payment details {}", additionalApplicationsBundle);
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
             isNotEmpty(caseData.getAdditionalApplicationsBundle())
