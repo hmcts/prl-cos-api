@@ -54,7 +54,7 @@ public class RespondentsMapper {
             .add("previousName", respondent.getPreviousName())
             .add("isDateOfBirthKnown", CommonUtils.getYesOrNoValue(respondent.getIsDateOfBirthKnown()))
             .add("dateOfBirth", String.valueOf(respondent.getDateOfBirth()))
-            .add("gender", respondent.getGender().getDisplayedValue())
+            .add("gender", null != respondent.getGender() ? respondent.getGender().getDisplayedValue() : null)
             .add("otherGender", respondent.getOtherGender())
             .add("placeOfBirth", respondent.getPlaceOfBirth())
             .add("isPlaceOfBirthKnown", CommonUtils.getYesOrNoValue(respondent.getIsPlaceOfBirthKnown()))
