@@ -23,7 +23,7 @@ plugins {
 
 def versions = [
   awaitility                   : '4.2.2',
-  bcpkixJdk18on                : '1.78.1',
+  bcpkixJdk18on                : '1.80',
   ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.16.1',
@@ -365,28 +365,17 @@ dependencies {
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson)
 
   implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-  implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk18on) {
-    force = true
-  }
+  implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk18on)
 
-  implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa) {
-    force = true
-  }
-
-  implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
-    force = true
-  }
+  implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
+  implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
   implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.118.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
 
-  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16'){
-    force = true
-  }
-  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16'){
-    force = true
-  }
+  implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16')
+  implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16')
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
@@ -571,8 +560,8 @@ jacocoTestReport {
   executionData(test)
 
   reports {
-    xml.enabled = true
-    csv.enabled = false
+    xml.required.set(true)
+    csv.required.set(false)
     xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
