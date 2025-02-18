@@ -391,6 +391,7 @@ public class HearingServiceTest {
             .thenReturn(ResponseEntity.internalServerError().build());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
+
     }
 
     private CaseDataContent buildCaseDataContent() {
