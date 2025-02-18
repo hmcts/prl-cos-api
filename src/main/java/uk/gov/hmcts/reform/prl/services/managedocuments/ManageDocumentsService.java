@@ -269,7 +269,6 @@ public class ManageDocumentsService {
                     quarantineLegalDoc
                 );
             }
-            log.info("quarantineLegalDoc with restrictedKey ==> " + quarantineLegalDoc);
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
