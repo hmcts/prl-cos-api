@@ -96,7 +96,6 @@ public class PaymentRequestService {
 
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
-        log.info("Inside createPayment -> request {}", createPaymentRequest);
         log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificEvent(
