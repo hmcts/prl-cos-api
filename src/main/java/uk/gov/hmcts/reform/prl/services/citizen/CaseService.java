@@ -351,7 +351,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, CaseData caseData) throws JsonProcessingException {
-        log.info("DSS CaseData received {}", caseData.getDssCaseDetails());
+        log.info("DSS CaseData received {}", caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
                 caseId,

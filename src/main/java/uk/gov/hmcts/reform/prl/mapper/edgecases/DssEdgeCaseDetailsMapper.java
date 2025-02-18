@@ -49,6 +49,7 @@ public class DssEdgeCaseDetailsMapper {
             DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
 
             caseDataBuilder
+                .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
                                     .edgeCaseTypeOfApplication(dssCaseData.getEdgeCaseTypeOfApplication())
                                     .selectedCourtId(dssCaseData.getSelectedCourtId())
@@ -85,8 +86,6 @@ public class DssEdgeCaseDetailsMapper {
                         .postCode(dssCaseData.getApplicantAddressPostCode())
                         .country(dssCaseData.getApplicantAddressCountry())
                         .build())
-                //SET GENDER FOR TEMP TO CHECK TAB REFRESH ISSUE
-                .gender(Gender.female)
                 .build();
     }
 }

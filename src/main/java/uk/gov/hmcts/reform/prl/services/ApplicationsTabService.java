@@ -468,11 +468,17 @@ public class ApplicationsTabService implements TabService {
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
-                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
+                .value(applicant.toBuilder().gender(getGender(applicant.getGender())).build())
                 .build();
             applicants.add(applicantElement);
         }
         return applicants;
+    }
+
+    private String getGender(String gender) {
+        return ObjectUtils.isNotEmpty(gender)
+            ? Gender.getDisplayedValueFromEnumString(gender).getDisplayedValue()
+            : null;
     }
 
     public List<Element<PartyDetails>> maskConfidentialDetails(List<Element<PartyDetails>> parties) {
@@ -1254,7 +1260,7 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
         FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
+        return toMap(applicant.toBuilder().gender(getGender(applicant.getGender())).build());
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
