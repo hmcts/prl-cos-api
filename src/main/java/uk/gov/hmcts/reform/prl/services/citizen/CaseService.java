@@ -690,10 +690,19 @@ public class CaseService {
             .applicantDocuments(applicantDocuments)
             .respondentDocuments(respondentDocuments)
             .citizenOtherDocuments(otherDocuments.stream()
-                                .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
+                                .filter(this::filterUnReturnedCategoriesForUI)
                                 .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
                                 .toList())
             .build();
+    }
+
+    private boolean filterUnReturnedCategoriesForUI(CitizenDocuments citizenDoc) {
+        //PRL-6975 - Fix NPE for bulk scan uploaded docs, where categoryId is null
+        if (null == citizenDoc.getCategoryId()) {
+            return true;
+        } else {
+            return !unReturnedCategoriesForUI.contains(citizenDoc.getCategoryId());
+        }
     }
 
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
