@@ -555,11 +555,9 @@ public class CallbackController {
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
                     caseDataUpdated.putAll(allTabsFields);
                 }
-                if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-                    caseDataUpdated.put("state", WITHDRAWN_STATE);
-                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                }
+                caseDataUpdated.put("state", WITHDRAWN_STATE);
+                caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             }
         }
     }
