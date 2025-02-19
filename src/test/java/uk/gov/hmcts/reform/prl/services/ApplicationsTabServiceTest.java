@@ -1866,7 +1866,7 @@ public class ApplicationsTabServiceTest {
             "welshLanguageRequirementsTable", "homeDetailsTable", "applicantFamilyTable", "internationalElementTable",
             "respondentBehaviourTable", "relationshipToRespondentTable", "otherProceedingsTable", "fl401ApplicantTable",
             "fl401OtherProceedingsDetailsTable", "declarationTable", "fl401SolicitorDetailsTable",
-            "fl401TypeOfApplicationTable",
+            "fl401TypeOfApplicationTable","otherPeopleInTheCaseRevisedTable",
             "attendingTheHearingTable", "withoutNoticeOrderTable", "fl401RespondentTable", "isHomeEntered"
         );
         Map<String, Object> result = applicationsTabService.updateTab(caseData);

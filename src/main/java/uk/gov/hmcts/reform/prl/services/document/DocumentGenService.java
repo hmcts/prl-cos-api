@@ -1282,7 +1282,6 @@ public class DocumentGenService {
                 file.getContentType(),
                 authorization
             );
-            log.info("Stored Doc Detail: " + stampedDocument.toString());
             return DocumentResponse.builder().status("Success").document(Document.builder()
                                                                              .documentBinaryUrl(stampedDocument.links.binary.href)
                                                                              .documentUrl(stampedDocument.links.self.href)

@@ -206,6 +206,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
+            applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
         }
         return applicationTab;
     }

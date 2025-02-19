@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.PartyRelationshipToTheCaseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -166,4 +167,5 @@ public class PartyDetails {
 
     private YesOrNo liveInRefuge;
     private Document refugeConfidentialityC8Form;
+    private final PartyRelationshipToTheCaseEnum relationshipToTheCase;
 }
