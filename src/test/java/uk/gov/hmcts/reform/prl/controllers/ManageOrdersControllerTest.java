@@ -3687,10 +3687,10 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testValidateAddressFailedToAuthorisation() throws Exception {
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3714,7 +3714,7 @@ public class ManageOrdersControllerTest {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
@@ -3731,7 +3731,7 @@ public class ManageOrdersControllerTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3743,12 +3743,12 @@ public class ManageOrdersControllerTest {
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
                                                                                                         stringObjectMap,
-                                                                                                        caseData,
+                                                                                                        caseData1,
                                                                                                         null
         );
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
