@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -129,34 +130,35 @@ public class ConfidentialityTabService {
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         for (Child child : children) {
-            List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
-            List<OtherPersonWhoLivesWithChild> otherPerson =
-                child.getPersonWhoLivesWithChild()
-                    .stream()
-                    .map(Element::getValue)
-                    .toList()
-                    .stream().filter(other -> other.getIsPersonIdentityConfidential().equals(YesOrNo.Yes))
-                    .toList();
-            for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPerson) {
-                Element<OtherPersonConfidentialityDetails> otherElement = Element
-                    .<OtherPersonConfidentialityDetails>builder()
-                    .value(OtherPersonConfidentialityDetails.builder()
-                               .firstName(otherPersonWhoLivesWithChild.getFirstName())
-                               .lastName(otherPersonWhoLivesWithChild.getLastName())
-                               .relationshipToChildDetails(otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                               .address(otherPersonWhoLivesWithChild.getAddress()).build()).build();
-                tempOtherPersonConfidentialDetails.add(otherElement);
+            if (!CollectionUtils.isEmpty(child.getPersonWhoLivesWithChild())) {
+                List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
+                List<OtherPersonWhoLivesWithChild> otherPerson =
+                    child.getPersonWhoLivesWithChild()
+                        .stream()
+                        .map(Element::getValue)
+                        .toList()
+                        .stream().filter(other -> other.getIsPersonIdentityConfidential().equals(YesOrNo.Yes))
+                        .toList();
+                for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPerson) {
+                    Element<OtherPersonConfidentialityDetails> otherElement = Element
+                        .<OtherPersonConfidentialityDetails>builder()
+                        .value(OtherPersonConfidentialityDetails.builder()
+                                   .firstName(otherPersonWhoLivesWithChild.getFirstName())
+                                   .lastName(otherPersonWhoLivesWithChild.getLastName())
+                                   .relationshipToChildDetails(otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                                   .address(otherPersonWhoLivesWithChild.getAddress()).build()).build();
+                    tempOtherPersonConfidentialDetails.add(otherElement);
+                }
+                if (!tempOtherPersonConfidentialDetails.isEmpty()) {
+                    Element<ChildConfidentialityDetails> childElement = Element
+                        .<ChildConfidentialityDetails>builder()
+                        .value(ChildConfidentialityDetails.builder()
+                                   .firstName(child.getFirstName())
+                                   .lastName(child.getLastName())
+                                   .otherPerson(tempOtherPersonConfidentialDetails).build()).build();
+                    childrenConfidentialDetails.add(childElement);
+                }
             }
-            if (!tempOtherPersonConfidentialDetails.isEmpty()) {
-                Element<ChildConfidentialityDetails> childElement = Element
-                    .<ChildConfidentialityDetails>builder()
-                    .value(ChildConfidentialityDetails.builder()
-                               .firstName(child.getFirstName())
-                               .lastName(child.getLastName())
-                               .otherPerson(tempOtherPersonConfidentialDetails).build()).build();
-                childrenConfidentialDetails.add(childElement);
-            }
-
         }
         return childrenConfidentialDetails;
     }
