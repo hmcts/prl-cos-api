@@ -571,9 +571,9 @@ jacocoTestReport {
   executionData(test)
 
   reports {
-    xml.required.set(true)
-    csv.required.set(false)
-    xml.outputLocation.set(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
+    xml.required = true
+    csv.required = false
+    xml.outputLocation = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 jacoco {
