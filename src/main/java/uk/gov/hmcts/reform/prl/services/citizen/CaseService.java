@@ -782,7 +782,7 @@ public class CaseService {
         } else {
             String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                 quarantineDoc.getCategoryId(),
-                null
+                quarantineDoc.getUploaderRole()
             );
             existingDocument = objectMapper.convertValue(
                 objectMapper.convertValue(quarantineDoc, Map.class).get(attributeName),

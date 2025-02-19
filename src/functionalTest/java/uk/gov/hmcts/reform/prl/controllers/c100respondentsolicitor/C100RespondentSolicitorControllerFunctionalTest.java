@@ -78,7 +78,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Test
     @Order(2)
     public void givenRequestBody_whenRespondent_solicitor_about_to_start_then200Response() throws Exception {
-        log.info("viola");
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         AboutToStartOrSubmitCallbackResponse responseData = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())

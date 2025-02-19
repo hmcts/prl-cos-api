@@ -26,7 +26,6 @@ public class CaseDataHelpWithFeesElementsMapper {
 
             caseDataBuilder
                 .helpWithFees(YesOrNo.Yes.equals(c100RebuildHelpWithFeesElements.getNeedHelpWithFees())
-                                  && YesOrNo.Yes.equals(c100RebuildHelpWithFeesElements.getFeesAppliedDetails())
                                   ? YesOrNo.Yes : YesOrNo.No);
         }
     }

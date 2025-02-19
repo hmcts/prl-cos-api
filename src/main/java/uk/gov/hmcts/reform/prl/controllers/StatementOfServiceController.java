@@ -127,7 +127,6 @@ public class StatementOfServiceController {
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
-            log.info("sos object {}", sosObject);
             stmtOfServImplService.saveCitizenSos(caseId, eventId, authorisation, sosObject);
             return ResponseEntity.ok().build();
         } else {

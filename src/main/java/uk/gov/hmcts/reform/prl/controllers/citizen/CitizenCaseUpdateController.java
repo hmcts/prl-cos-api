@@ -189,7 +189,6 @@ public class CitizenCaseUpdateController {
                                                             @PathVariable("caseId") String caseId,
                                                             @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** Inside saveCitizenAwpApplication -> citizen awp request  {}", citizenAwpRequest);
             CaseDetails caseDetails = citizenCaseUpdateService.saveCitizenAwpApplication(authorisation, caseId, citizenAwpRequest);
 
             if (null != caseDetails) {

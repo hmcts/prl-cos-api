@@ -530,7 +530,6 @@ public class StmtOfServImplService {
                                                      CaseData updatedCaseData, List<String> partiesList, Map<String, Object> updatedCaseDataMap) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
         List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnservedCitizenRespondentPack().getPackDocument();
-        log.info("pack docs {}", packDocs);
         if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
             log.info("*** fetching finalServedApplicationDetailsList ***");
             finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
@@ -574,7 +573,6 @@ public class StmtOfServImplService {
 
     private Element<BulkPrintDetails> getServedSosPartyElement(String authorisation, Element<PartyDetails> party,
                                                                   List<Document> respondentDocs) {
-        log.info("respondent docs {}", respondentDocs);
         return element(BulkPrintDetails.builder()
                                    .bulkPrintId("Application personally served by "
                                                     + userService.getUserDetails(authorisation)
@@ -628,7 +626,6 @@ public class StmtOfServImplService {
                                                     .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
                                                   .build()));
 
-        log.info("Statement of service list :: {}", stmtOfServiceforApplication);
         if (ObjectUtils.isNotEmpty(updatedCaseData.getStatementOfService())
                 && CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
             stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
