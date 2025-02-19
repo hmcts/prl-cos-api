@@ -6185,6 +6185,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
+
     }
 
 }
