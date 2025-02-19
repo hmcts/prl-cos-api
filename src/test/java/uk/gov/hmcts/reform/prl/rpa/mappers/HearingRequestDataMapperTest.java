@@ -447,11 +447,6 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
-
-        PartyDetails partyDetails = PartyDetails.builder()
-            .representativeFirstName("testF")
-            .representativeLastName("testL")
-            .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .build();
@@ -459,5 +454,5 @@ public class HearingRequestDataMapperTest {
         assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
         assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
-    
+
 }

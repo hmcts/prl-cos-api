@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -88,7 +87,6 @@ public class HearingServiceTest {
 
     PartyDetails applicant;
     PartyDetails respondent;
-    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     @Before
     public void init() {
@@ -392,12 +390,6 @@ public class HearingServiceTest {
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
 
-    }
-
-    private CaseDataContent buildCaseDataContent() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("caseTypeOfApplication", "C100");
-        return CaseDataContent.builder().data(caseData).eventToken("EventToken").caseReference("CaseReference").build();
     }
 }
 
