@@ -646,8 +646,6 @@ public class CitizenPartyDetailsMapper {
             .address(null != existingPartyDetails.getAddress()
                          ? citizenProvidedPartyDetails.getAddress() : null)
             .isCurrentAddressKnown(YesOrNo.valueOf(null != existingPartyDetails.getAddress() ? "Yes" : "No"))
-//            .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
-//            .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
                                                    ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
                                                    : existingPartyDetails.getAddressLivedLessThan5YearsDetails())
