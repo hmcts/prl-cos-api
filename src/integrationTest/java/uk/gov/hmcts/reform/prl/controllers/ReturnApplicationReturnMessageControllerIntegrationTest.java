@@ -108,7 +108,7 @@ public class ReturnApplicationReturnMessageControllerIntegrationTest {
             any(CaseData.class),
             anyMap()
         )).thenReturn(CaseData.builder().build());
-        when(returnApplicationService.getReturnMessageForTaskList(any(CaseData.class), anyString())).thenReturn(
+        when(returnApplicationService.getReturnMessageForTaskList(any(CaseData.class))).thenReturn(
             "Return message for task list");
         when(caseEventHandler.getUpdatedTaskList(any(CaseData.class))).thenReturn("Updated task list");
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(new HashMap<>());
