@@ -306,7 +306,18 @@ public class ManageOrdersController {
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            newDraftOrderCollectionId = getUuid(authorisation, caseData, caseDataUpdated, newDraftOrderCollectionId);
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
+                && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+                && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
+                List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
+                    DRAFT_ORDER_COLLECTION);
+
+                newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                    ? draftOrderCollection.get(0).getId() : null;
+            }
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
@@ -322,22 +333,6 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private UUID getUuid(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated, UUID newDraftOrderCollectionId) {
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-            && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
-            && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
-            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-            List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
-                DRAFT_ORDER_COLLECTION);
-
-            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? draftOrderCollection.get(0).getId() : null;
-        }
-        return newDraftOrderCollectionId;
     }
 
     private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {
