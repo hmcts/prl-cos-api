@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
@@ -159,7 +160,8 @@ public class ReturnApplicationReturnMessageControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
+            returnApplicationReturnMessageController
+                .returnApplicationEmailNotification(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
 
         verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }
@@ -204,7 +206,8 @@ public class ReturnApplicationReturnMessageControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
+            returnApplicationReturnMessageController
+                .returnApplicationEmailNotification(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -253,7 +256,7 @@ public class ReturnApplicationReturnMessageControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, PrlAppsConstants.WELSH, callbackRequest);
 
         verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }

@@ -92,6 +92,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -103,8 +104,9 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             // Refreshing the page in the same event. Hence no external event call needed.
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String language = CaseUtils.getLanguage(clientContext);
             caseData = returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(caseData, caseDataUpdated);
-            caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
+            caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData, language));
 
             String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);
             caseDataUpdated.put("taskList", updatedTaskList);
