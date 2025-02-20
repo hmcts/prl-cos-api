@@ -180,7 +180,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.8.16'
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.34') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.36') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -402,8 +402,8 @@ dependencies {
   }
 
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.0'
-  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.0'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.1'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '5.5.1'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.5.0'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
