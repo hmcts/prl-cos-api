@@ -169,7 +169,7 @@ public class CallbackControllerFT {
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody.replaceAll("1721225361954869", caseDetails.getId().toString()))
             .when()
