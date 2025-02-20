@@ -116,6 +116,21 @@ public class StatementOfServiceControllerFunctionalTest {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+        caseDetails = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
 
         request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
@@ -123,7 +138,7 @@ public class StatementOfServiceControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .pathParam("caseId", "1711105989241323")
+            .pathParam("caseId", caseDetails.getId())
             .pathParam("eventId","citizenStatementOfService")
             .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
             .then()
