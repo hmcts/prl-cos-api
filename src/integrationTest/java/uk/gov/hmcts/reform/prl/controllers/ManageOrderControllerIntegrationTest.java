@@ -64,7 +64,6 @@ public class ManageOrderControllerIntegrationTest {
     private final String fetchChildDetailsEndpoint = "/fetch-child-details";
     private final String populateHeaderEndpoint = "/populate-header";
     private final String caseOrderEmailNotificationEndpoint = "/case-order-email-notification";
-    private final String editAndApproveOrderSubmittedEndpoint = "/edit-and-approve/submitted";
     private final String manageOrdersEndpoint = "/manage-orders/about-to-submit";
     private final String addressValidationEndpoint = "/manage-orders/recipients-validations";
 
@@ -370,7 +369,7 @@ public class ManageOrderControllerIntegrationTest {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         mockMvc.perform(
-                post(editAndApproveOrderSubmittedEndpoint)
+                post(manageOrdersEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
