@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -397,10 +398,22 @@ public class ManageOrderControllerIntegrationTest {
 
     @Test
     public void testCaseOrderSubmittedEndPointForAutoHearing() throws Exception {
-        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
-
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
+        List<Element<HearingData>>  hearingDataList = new ArrayList<>();
+        hearingDataList.add(ElementUtils.element(
+            HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam).build()));
+        ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).manageOrderHearingDetails(hearingDataList).build());
+        CaseData caseData = CaseData.builder()
+            .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder().isCaseWithdrawn(No).checkForAutomatedHearing(Yes)
+                              .ordersHearingDetails(hearingDataList).amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck).build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
         mockMvc.perform(
                 post(manageOrdersEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
