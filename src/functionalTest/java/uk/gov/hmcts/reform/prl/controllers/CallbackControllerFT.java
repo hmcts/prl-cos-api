@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
@@ -21,6 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
 public class CallbackControllerFT {
@@ -163,6 +165,7 @@ public class CallbackControllerFT {
             .extract()
             .as(CaseDetails.class);
 
+        log.info("givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData caseId:" + caseDetails.getId());
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
 
