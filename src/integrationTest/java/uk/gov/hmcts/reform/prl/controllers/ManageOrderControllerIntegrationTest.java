@@ -413,7 +413,7 @@ public class ManageOrderControllerIntegrationTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
         mockMvc.perform(
                 post(manageOrdersEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
