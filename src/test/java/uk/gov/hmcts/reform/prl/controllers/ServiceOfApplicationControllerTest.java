@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -25,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -58,9 +60,9 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.anyString(),Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.anyString(), Mockito.any(CaseDetails.class), anyString())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(authToken,s2sToken,callbackRequest);
+            .handleAboutToStart(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
@@ -126,7 +128,8 @@ public class ServiceOfApplicationControllerTest {
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
                     "").build()));
-        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken,s2sToken,callbackRequest));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken,s2sToken,
+            anyString(), callbackRequest));
     }
 
     @Test

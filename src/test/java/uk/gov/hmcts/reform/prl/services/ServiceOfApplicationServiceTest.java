@@ -1534,7 +1534,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1617,7 +1618,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.WELSH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1687,7 +1689,8 @@ public class ServiceOfApplicationServiceTest {
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1760,7 +1763,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1834,7 +1838,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1907,7 +1912,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService
+            .getSoaCaseFieldsMap(authorization, caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1982,7 +1988,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2056,7 +2063,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2142,7 +2150,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization,
+            caseDetails, PrlAppsConstants.ENGLISH);
 
         assertNotNull(soaCaseFieldsMap);
 

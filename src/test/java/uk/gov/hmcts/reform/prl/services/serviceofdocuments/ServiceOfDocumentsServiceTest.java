@@ -175,7 +175,7 @@ public class ServiceOfDocumentsServiceTest {
     @Test
     public void testHandleAboutToStart() {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        when(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(any(CaseData.class))).thenReturn(
+        when(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(any(CaseData.class), anyString())).thenReturn(
             EMPTY_STRING);
         List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
                                                                           .label("otherPeople")
@@ -200,7 +200,7 @@ public class ServiceOfDocumentsServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(categoriesAndDocuments).build());
 
-        Map<String, Object> response = serviceOfDocumentsService.handleAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        Map<String, Object> response = serviceOfDocumentsService.handleAboutToStart(TEST_AUTHORIZATION, callbackRequest, "en");
         assertNotNull(response);
         assertEquals(YesOrNo.Yes, response.get(SOA_OTHER_PEOPLE_PRESENT_IN_CASE));
         assertEquals(combinedRecipients, response.get(SOA_RECIPIENT_OPTIONS));

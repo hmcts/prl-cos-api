@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,11 @@ public class ServiceOfDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataMap = serviceOfDocumentsService.handleAboutToStart(authorisation, callbackRequest);
+            String language = CaseUtils.getLanguage(clientContext);
+            Map<String, Object> caseDataMap = serviceOfDocumentsService.handleAboutToStart(authorisation, callbackRequest, language);
             if (caseDataMap.containsKey("errors")) {
                 List<String> errorList = (List<String>) caseDataMap.get("errors");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();

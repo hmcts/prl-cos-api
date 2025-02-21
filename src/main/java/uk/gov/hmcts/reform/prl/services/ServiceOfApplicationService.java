@@ -177,17 +177,33 @@ public class ServiceOfApplicationService {
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
         + "other people in the case</strong></div>";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
+        + "other people in the case - welsh</strong></div>";
+
     public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent"
+        + "</strong></div>";
+
+    public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent - welsh"
         + "</strong></div>";
 
     public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent"
         + "</strong></div>";
 
+    public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent - welsh"
+        + "</strong></div>";
+
     public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
         + "case</strong></div>";
+
+    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
+        + "case - welsh</strong></div>";
 
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
@@ -330,6 +346,31 @@ public class ServiceOfApplicationService {
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
+    }
+
+    public String getCollapsableOfSentDocumentsWelsh() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack - welsh");
+        collapsible.add("</h3>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack this is served on parties(the people in the case) - welsh");
+        collapsible.add(
+            "This includes - welsh");
+        collapsible.add(
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (if applicable) - welsh </li>"
+                + "<li>C8 (Cafcass/Cafcass Cymru, if applicable) - welsh</li>");
+        collapsible.add("<li>Any orders and"
+            + " hearing notices created at the initial gatekeeping stage - welsh</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself - welsh");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
@@ -2771,7 +2812,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
+    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails, String language) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -2796,12 +2837,21 @@ public class ServiceOfApplicationService {
             SOA_ORDER_LIST_EMPTY,
             CollectionUtils.isEmpty(caseData.getOrderCollection()) ? YesOrNo.Yes : YesOrNo.No
         );
-        caseDataUpdated.put(
-            SOA_DOCUMENT_PLACE_HOLDER,
-            C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getCollapsableOfSentDocuments()
-                : getCollapsableOfSentDocumentsFL401()
-        );
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            caseDataUpdated.put(
+                SOA_DOCUMENT_PLACE_HOLDER,
+                C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? getCollapsableOfSentDocuments()
+                    : getCollapsableOfSentDocumentsFL401()
+            );
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            caseDataUpdated.put(
+                SOA_DOCUMENT_PLACE_HOLDER,
+                C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? getCollapsableOfSentDocumentsWelsh()
+                    : getCollapsableOfSentDocumentsFL401Welsh()
+            );
+        }
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -2818,12 +2868,12 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(WA_IS_APPLICANT_REPRESENTED, caseData.getIsApplicantRepresented());
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
-            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
+            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData, language)
         );
         return caseDataUpdated;
     }
 
-    public String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
+    public String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData, String language) {
         String warningText = BLANK_STRING;
         boolean isRespondentAddressPresent = true;
         boolean isOtherPeopleAddressPresent = true;
@@ -2852,16 +2902,30 @@ public class ServiceOfApplicationService {
         } else {
             isRespondentAddressPresent = isPartiesAddressPresent(caseData.getRespondentsFL401());
         }
-        if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
-            warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
-        } else if (!isRespondentAddressPresent
-            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT;
-        } else if (!isRespondentAddressPresent
-            && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT;
-        } else if (!isOtherPeopleAddressPresent) {
-            warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
+            } else if (!isRespondentAddressPresent
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT;
+            } else if (!isRespondentAddressPresent
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT;
+            } else if (!isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
+            }
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES_WELSH;
+            } else if (!isRespondentAddressPresent
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH;
+            } else if (!isRespondentAddressPresent
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH;
+            } else if (!isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES_WELSH;
+            }
         }
         return warningText;
     }
@@ -2964,6 +3028,29 @@ public class ServiceOfApplicationService {
                 + "<li>witness statement</li><li>privacy notice</li><li>cover letter (if not represented)</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself.");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
+    }
+
+    public String getCollapsableOfSentDocumentsFL401Welsh() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack - welsh");
+        collapsible.add("</h3>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack that is sent out on parties (the people in the case). - welsh");
+        collapsible.add(
+            "This includes: - welsh");
+        collapsible.add(
+            "<ul><li>an application form (FL401) - welsh</li>"
+                + "<li>witness statement - welsh</li><li>privacy notice - welsh</li><li>cover letter (if not represented) - welsh</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself. - welsh");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);

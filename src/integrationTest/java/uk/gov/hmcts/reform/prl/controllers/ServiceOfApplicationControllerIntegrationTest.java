@@ -57,7 +57,7 @@ public class ServiceOfApplicationControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any())).thenReturn(new HashMap<>());
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(anyString(), any(), anyString())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
