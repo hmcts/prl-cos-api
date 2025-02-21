@@ -1108,5 +1108,7 @@ public class PrlAppsConstants {
 
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
 
 }
