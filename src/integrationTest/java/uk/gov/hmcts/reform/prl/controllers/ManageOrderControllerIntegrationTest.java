@@ -20,9 +20,15 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
@@ -34,7 +40,10 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
@@ -311,9 +320,34 @@ public class ManageOrderControllerIntegrationTest {
 
     @Test
     public void testCaseOrderEmailNotificationEndpointForAutoHearing() throws Exception {
-        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        List<Element<HearingData>>  hearingDataList = new ArrayList<>();
+        hearingDataList.add(ElementUtils.element(
+            HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam).build()));
+        ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).manageOrderHearingDetails(hearingDataList).build());
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).build()));
+        CaseData caseData = CaseData.builder()
+            .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).checkForAutomatedHearing(Yes).build())
+            .draftOrderCollection(draftOrderCollection)
+            .build();
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "authToken",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(hearingService.createAutomatedHearing(anyString(),any(AutomatedHearingCaseData.class))).thenReturn(
+            AutomatedHearingResponse.builder().hearingRequestID("123").build());
+        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
         mockMvc.perform(
                 post(caseOrderEmailNotificationEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
