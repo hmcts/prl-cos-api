@@ -175,7 +175,7 @@ public class ManageDocumentsService {
             if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
                 if (PrlAppsConstants.ENGLISH.equals(language)) {
                     errorList.add(DETAILS_ERROR_MESSAGE);
-                } else {
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add(DETAILS_ERROR_MESSAGE_WELSH);
                 }
             }
@@ -184,7 +184,7 @@ public class ManageDocumentsService {
                 && (restricted || confidential)) {
                 if (PrlAppsConstants.ENGLISH.equals(language)) {
                     errorList.add(FM5_ERROR);
-                } else {
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add(FM5_ERROR_WELSH);
                 }
             }

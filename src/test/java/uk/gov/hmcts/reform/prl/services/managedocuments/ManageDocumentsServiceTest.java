@@ -1358,6 +1358,43 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRole_whenTriedWithOutReasonWelsh() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .restrictedDetails(null)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement))
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.WELSH);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(!caseDataMapUpdated.isEmpty());
+        assertEquals("You must give a reason why the document should be restricted - welsh", caseDataMapUpdated.get(0));
+
+    }
+
+    @Test
     public void testCopyDocumentMidEventIfRestrictedWithSoliRoleWhenTriedWithReason() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -1534,6 +1571,44 @@ public class ManageDocumentsServiceTest {
         assertNotNull(caseDataMapUpdated);
         assertEquals("The statement of position on non-court dispute resolution (form FM5) "
             + "cannot contain confidential information or be restricted.", caseDataMapUpdated.get(0));
+    }
+
+    @Test
+    public void testCopyDocumentMidEventFm5StatementConfidentialWelsh() {
+
+        DynamicList dynamicList1 = DynamicList.builder().value(DynamicListElement.builder()
+                .code("fm5Statements")
+                .label("fm5Statements").build())
+            .listItems(dynamicListElementList).build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList1)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement))
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.WELSH);
+        assertNotNull(caseDataMapUpdated);
+        assertEquals("The statement of position on non-court dispute resolution (form FM5) "
+            + "cannot contain confidential information or be restricted. - welsh", caseDataMapUpdated.get(0));
     }
 
     @Test
