@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
@@ -152,7 +153,7 @@ public class CallbackControllerFT {
 
     @Test
     public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         CaseDetails caseDetails =  request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -169,12 +170,13 @@ public class CallbackControllerFT {
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
 
+        String withdrawRequestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody.replaceAll("1721225361954869", caseDetails.getId().toString()))
+            .body(withdrawRequestBody.replaceAll("1721225361954869", caseDetails.getId().toString()))
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post("/case-withdrawn-about-to-submit")
