@@ -196,8 +196,6 @@ public class CafCassCaseData {
                                                 )
                                                 .build())
                                      .build());
-                    log.info("Party type map {}", partyIdAndPartyTypeMap);
-                    log.info("Children {}", children);
                 }
             );
         }

@@ -52,7 +52,6 @@ public class CaseDataChildDetailsElementsMapper {
 
     public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
-        log.info("C100 rebuild child detail element {}", c100RebuildChildDetailsElements.getChildDetails());
         caseDataBuilder
             .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
             .childrenKnownToLocalAuthority(
