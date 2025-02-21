@@ -311,12 +311,11 @@ public class ManageOrderControllerIntegrationTest {
 
     @Test
     public void testCaseOrderEmailNotificationEndpointForAutoHearing() throws Exception {
-        String url = "/caseOrderEmailNotificationEndpoint";
         String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         mockMvc.perform(
-                post(url)
+                post(caseOrderEmailNotificationEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
