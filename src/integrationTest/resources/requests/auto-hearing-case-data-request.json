@@ -6,6 +6,10 @@
       "id": 1711105989241323,
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "FL401",
+      "manageOrders": {
+        "markedToServeEmailNotification": "Yes",
+        "checkForAutomatedHearing": "Yes"
+      },
       "applicants": [
         {
           "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
