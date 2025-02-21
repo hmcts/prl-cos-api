@@ -84,10 +84,12 @@ public class ServiceOfApplicationController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
             return serviceOfApplicationService
-                .handleSoaSubmitted(authorisation, callbackRequest);
+                .handleSoaSubmitted(authorisation, callbackRequest, language);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

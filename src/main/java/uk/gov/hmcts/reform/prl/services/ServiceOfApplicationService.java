@@ -237,6 +237,7 @@ public class ServiceOfApplicationService {
         A new service pack will need to be created by admin as this version will be deleted.""";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_HEADER_WELSH = "# The application will be reviewed for confidential details - welsh";
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
@@ -244,8 +245,17 @@ public class ServiceOfApplicationService {
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX_WELSH = """
+        ### What happens next
+        The service pack needs to be reviewed for confidential details before it can be served.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
+
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
+    public static final String CONFIRMATION_HEADER_NON_PERSONAL_WELSH = "# The application has been served - welsh";
     public static final String CONFIRMATION_HEADER_PERSONAL = "# The application is ready to be personally served";
+    public static final String CONFIRMATION_HEADER_PERSONAL_WELSH = "# The application is ready to be personally served - welsh";
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack has been served on the parties selected.
@@ -259,6 +269,13 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA_WELSH = """
+        ### What happens next
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant and any other selected parties have been served.
+
+        You can view the service packs in the <a href="%s">service of application - welah</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
@@ -266,7 +283,22 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA_WELSH = """
+        ### What happens next
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA = """
+        ### What happens next
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA_WELSH = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
         \n The service pack has been served on the applicant and any other selected parties.
@@ -281,6 +313,13 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant has been served.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
@@ -288,12 +327,26 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
         \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
         """;
 
     public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personal service";
@@ -303,6 +356,7 @@ public class ServiceOfApplicationService {
         The person arranging personal service will be notified
         """;
     private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
+    private static final String SERVICE_OF_APPLICATION_ENDPOINT_WELSH = PrlAppsConstants.URL_STRING + "#Service of application";
 
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
@@ -1849,7 +1903,7 @@ public class ServiceOfApplicationService {
         return responsibleForService;
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest, String language) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
@@ -1863,28 +1917,35 @@ public class ServiceOfApplicationService {
         }
 
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
-            return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+            return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent, language);
         }
         return processNonConfidentialSoa(
             authorisation,
             caseData,
             caseDataMap,
             startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            language
         );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
                                                                                 Map<String, Object> caseDataMap,
                                                                                 StartAllTabsUpdateDataContent updatedCaseDataContent,
-                                                                                String caseId) {
+                                                                                String caseId,
+                                                                                String language) {
         log.info("Confidential details are NOT present");
         Map<String,String> confirmationBanner = new HashMap<>();
-        getConfirmationBanner(caseData, confirmationBanner);
+        getConfirmationBanner(caseData, confirmationBanner, language);
         String confirmationBody = confirmationBanner.get(CONFIRMATION_BODY);
         if (StringUtils.isNotEmpty(confirmationBody)) {
-            confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
-                + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+            if (PrlAppsConstants.ENGLISH.equals(language)) {
+                confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                    + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+            } else if (PrlAppsConstants.WELSH.equals(language)) {
+                confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                    + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT_WELSH);
+            }
         }
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
@@ -1912,57 +1973,107 @@ public class ServiceOfApplicationService {
                       .confirmationBody(confirmationBody).build());
     }
 
-    private void getConfirmationBanner(CaseData caseData, Map<String, String> confirmationBanner) {
-        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
-            confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
-        } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA);
+    private void getConfirmationBanner(CaseData caseData, Map<String, String> confirmationBanner, String language) {
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
+            } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA);
+                    } else if (SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA);
+                    } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA);
+                    }
+                } else {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
+                    }
                 }
             } else {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
-                }
+                confirmationBanner.put(CONFIRMATION_BODY, "");
             }
-        } else {
-            confirmationBanner.put(CONFIRMATION_BODY, "");
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL_WELSH);
+            } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL_WELSH);
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA_WELSH);
+                    } else if (SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA_WELSH);
+                    } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA_WELSH);
+                    }
+                } else {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA_WELSH);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA_WELSH);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA_WELSH);
+                    }
+                }
+            } else {
+                confirmationBanner.put(CONFIRMATION_BODY, "");
+            }
         }
+
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, Map<String, Object> caseDataMap,
                                                                                     CaseData caseData,
-                                                                                    StartAllTabsUpdateDataContent updatedCaseDataContent) {
+                                                                                    StartAllTabsUpdateDataContent updatedCaseDataContent,
+                                                                                    String language) {
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             generatePacksForConfidentialCheckC100(authorisation, caseData, caseDataMap);
         } else {
@@ -1979,12 +2090,20 @@ public class ServiceOfApplicationService {
                 updatedCaseDataContent.eventRequestData(),
                 caseDataMap
         );
-        String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
-                                                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-                                                    + SERVICE_OF_APPLICATION_ENDPOINT);
+        String confirmationBody = null;
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
+                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + SERVICE_OF_APPLICATION_ENDPOINT);
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX_WELSH,
+                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + SERVICE_OF_APPLICATION_ENDPOINT_WELSH);
+        }
         log.info("Confidential details are present, case needs to be reviewed and served later");
         return ok(SubmittedCallbackResponse.builder()
-                      .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
+                      .confirmationHeader(PrlAppsConstants.ENGLISH.equals(language)
+                          ? CONFIDENTIAL_CONFIRMATION_HEADER : CONFIDENTIAL_CONFIRMATION_HEADER_WELSH)
                       .confirmationBody(confirmationBody).build());
     }
 

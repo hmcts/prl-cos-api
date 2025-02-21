@@ -91,12 +91,12 @@ public class ServiceOfApplicationControllerTest {
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
 
-        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class), any()))
             .thenReturn(ok(
             SubmittedCallbackResponse.builder().confirmationHeader(
                 "").confirmationBody(
                 "").build()));
-        assertNotNull(serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+        assertNotNull(serviceOfApplicationController.handleSubmitted(authToken,s2sToken,PrlAppsConstants.ENGLISH, callbackRequest));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class), any()))
             .thenReturn(ok(
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
@@ -123,7 +123,7 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class), any()))
             .thenReturn(ok(
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
@@ -140,12 +140,13 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class), any()))
             .thenReturn(ok(
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
                     "").build()));
-        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController
+            .handleSubmitted(authToken,s2sToken,PrlAppsConstants.ENGLISH, callbackRequest));
     }
 
     @Test
@@ -163,7 +164,7 @@ public class ServiceOfApplicationControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         assertExpectedException(() -> {
-            serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
+            serviceOfApplicationController.handleSubmitted(authToken, s2sToken,PrlAppsConstants.ENGLISH, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

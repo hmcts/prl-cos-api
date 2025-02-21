@@ -2198,7 +2198,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
     }
 
@@ -2258,8 +2259,9 @@ public class ServiceOfApplicationServiceTest {
                                               StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh", response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -2301,7 +2303,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }
 
@@ -2348,7 +2351,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
@@ -2393,7 +2397,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }
 
@@ -2948,7 +2953,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }
 
@@ -3665,7 +3671,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }
 
@@ -3705,7 +3712,8 @@ public class ServiceOfApplicationServiceTest {
                                                                                                         dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details",
                      Objects.requireNonNull(response.getBody()).getConfirmationHeader());
     }
@@ -3746,7 +3754,8 @@ public class ServiceOfApplicationServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
@@ -4309,7 +4318,8 @@ public class ServiceOfApplicationServiceTest {
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(
             authorization,
-            callBackRequest
+            callBackRequest,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
