@@ -22,12 +22,14 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse validateManageDocumentsData(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -91,7 +94,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
 
-        List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails);
+        String language = CaseUtils.getLanguage(clientContext);
+        List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails, language);
 
         //validation for documentParty - COURT to be selected only for court staff
         errorList.addAll(manageDocumentsService.validateCourtUser(callbackRequest, updatedUserDetails));

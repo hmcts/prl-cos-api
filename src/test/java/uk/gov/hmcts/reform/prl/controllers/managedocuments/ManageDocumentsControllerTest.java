@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -183,8 +184,7 @@ public class ManageDocumentsControllerTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
-        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        manageDocumentsController.validateManageDocumentsData(auth, PrlAppsConstants.ENGLISH, callbackRequest);
 
     }
 
@@ -200,8 +200,7 @@ public class ManageDocumentsControllerTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
         when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(List.of("errors"));
 
-        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
-        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        manageDocumentsController.validateManageDocumentsData(auth, PrlAppsConstants.ENGLISH, callbackRequest);
 
     }
 
@@ -216,7 +215,7 @@ public class ManageDocumentsControllerTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
 
-        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
-        verify(manageDocumentsService, times(1)).validateRestrictedReason(any(),any());
+        manageDocumentsController.validateManageDocumentsData(auth, PrlAppsConstants.ENGLISH, callbackRequest);
+        verify(manageDocumentsService, times(1)).validateRestrictedReason(any(),any(), any());
     }
 }

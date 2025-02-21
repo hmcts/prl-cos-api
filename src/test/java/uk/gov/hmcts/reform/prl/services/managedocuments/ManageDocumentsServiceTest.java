@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -1347,7 +1348,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(!caseDataMapUpdated.isEmpty());
@@ -1382,7 +1384,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.WELSH);
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());
@@ -1414,7 +1417,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());
     }
@@ -1450,7 +1454,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());
     }
@@ -1486,7 +1491,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataMapUpdated);
         assertEquals("The statement of position on non-court dispute resolution (form FM5)"
             + " cannot contain confidential information or be restricted.", caseDataMapUpdated.get(1));
@@ -1523,7 +1529,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
+            userDetailsSolicitorRole, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataMapUpdated);
         assertEquals("The statement of position on non-court dispute resolution (form FM5) "
             + "cannot contain confidential information or be restricted.", caseDataMapUpdated.get(0));
