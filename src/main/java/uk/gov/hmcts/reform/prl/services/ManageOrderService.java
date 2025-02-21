@@ -2536,11 +2536,9 @@ public class ManageOrderService {
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<String> hearingStatusFilterList = Arrays.stream(hearingStatusesToFilter.trim().split(COMMA)).map(String::trim).toList();
-        log.info("Hearing statuses to filter {}", hearingStatusFilterList);
         List<CaseHearing> filteredHearings = caseHearings.stream()
             .filter(caseHearing -> hearingStatusFilterList.contains(caseHearing.getHmcStatus()))
             .toList();
-        log.info("Filtered hearing {}", filteredHearings);
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
@@ -3145,7 +3143,6 @@ public class ManageOrderService {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-        log.info("Fetched Hearings {}", hearings);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
 
@@ -3304,18 +3301,14 @@ public class ManageOrderService {
 
 
     private CaseData updateIsSdoSelected(CaseData caseData) {
-        log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
-        log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
         if (null != caseData.getManageOrdersOptions()
             && caseData.getManageOrdersOptions().equals(createAnOrder)
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
                 caseData.setIsSdoSelected(Yes);
-                log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
             } else {
                 caseData.setIsSdoSelected(No);
-                log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
             }
         }
         return  caseData;
@@ -3342,7 +3335,6 @@ public class ManageOrderService {
                 additionalRequirementsForHearingReqList
             );
         }
-        log.info("additionalRequirementsForHearingReqList " + additionalRequirementsForHearingReqList);
         if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
             return String.join(", ", additionalRequirementsForHearingReqList);
         } else {

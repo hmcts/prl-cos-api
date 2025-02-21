@@ -216,7 +216,6 @@ public class ReviewDocumentService {
                                                .build())
                                            .toList());
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList());
-            log.info("dynamicListElements " + dynamicListElements);
             log.info("exit prepare for courtnav uploaded docs");
         }
         caseDataUpdated.put("tempQuarantineDocumentList", tempQuarantineDocumentList);
