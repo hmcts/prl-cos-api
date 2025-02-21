@@ -95,6 +95,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
             .build();
 
         String language = CaseUtils.getLanguage(clientContext);
+        log.info("language is {}", language);
         List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails, language);
 
         //validation for documentParty - COURT to be selected only for court staff
