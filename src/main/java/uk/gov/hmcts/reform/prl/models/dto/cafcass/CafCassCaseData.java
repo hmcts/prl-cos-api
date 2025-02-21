@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -44,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChec
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
 
-@Slf4j
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
