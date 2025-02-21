@@ -192,10 +192,10 @@ public class ServiceOfApplicationControllerTest {
                              .builder().data(caseData)
                              .build())
             .build();
-        when(serviceOfApplicationService.soaValidation(Mockito.any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(serviceOfApplicationService.soaValidation(Mockito.any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .soaValidation("","", callbackRequest);
+            .soaValidation("","", "", callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
@@ -209,7 +209,7 @@ public class ServiceOfApplicationControllerTest {
                              .data(new HashMap<>()).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
+            serviceOfApplicationController.soaValidation(authToken, s2sToken, "", callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

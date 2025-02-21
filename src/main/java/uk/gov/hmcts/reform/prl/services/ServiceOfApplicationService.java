@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.M;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
@@ -227,6 +228,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE_WELSH = "Please select at least one party to serve - welsh";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -4365,7 +4367,7 @@ public class ServiceOfApplicationService {
         return response;
     }
 
-    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest, String language) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -4377,7 +4379,11 @@ public class ServiceOfApplicationService {
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && isCafcasOptedToBeServed(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
-            errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            if (PrlAppsConstants.ENGLISH.equals(language)) {
+                errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            } else if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE_WELSH);
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
@@ -4399,7 +4405,11 @@ public class ServiceOfApplicationService {
             }
 
             if (c6aOrderIds.isEmpty()) {
-                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                if (PrlAppsConstants.ENGLISH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH);
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -4412,7 +4422,11 @@ public class ServiceOfApplicationService {
             log.info("isPresent {}", isPresent);
 
             if (!isPresent) {
-                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                if (PrlAppsConstants.ENGLISH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH);
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();

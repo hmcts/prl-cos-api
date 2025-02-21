@@ -103,10 +103,12 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse soaValidation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return serviceOfApplicationService.soaValidation(callbackRequest);
+            String language = CaseUtils.getLanguage(clientContext);
+            return serviceOfApplicationService.soaValidation(callbackRequest, language);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

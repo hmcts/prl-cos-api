@@ -107,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -3675,7 +3676,32 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
+        );
+        assertNull(response.getErrors());
+
+    }
+
+    @Test
+    public void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected_welsh() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
+            DynamicMultiSelectList.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
+            callbackRequest,
+            PrlAppsConstants.WELSH
         );
         assertNull(response.getErrors());
 
@@ -3713,10 +3739,50 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+    }
+
+    @Test
+    public void checkC6AOrderExistenceForSoaParties_whenOtherPeopleSelected_welsh() {
+
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
+            "code").label("label").build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().value(List.of(
+            dynamicMultiselectListElement)).build();
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
+            dynamicMultiSelectList).build();
+
+        OrderDetails orderDetails = OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()).build();
+        Element<OrderDetails> element = element(UUID.randomUUID(), orderDetails);
+
+        DynamicMultiSelectList soaScreen1 = DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .orderCollection(List.of(element))
+            .serviceOfApplicationScreen1(soaScreen1)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
+            callbackRequest,
+            PrlAppsConstants.WELSH
+        );
+
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH, response.getErrors().get(0));
     }
 
 
@@ -3752,10 +3818,50 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+    }
+
+    @Test
+    public void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent_Welsh() {
+
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
+            "code").label("label").build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().value(List.of(
+            dynamicMultiselectListElement)).build();
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
+            dynamicMultiSelectList).build();
+
+        OrderDetails orderDetails = OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.appointmentOfGuardian.toString()).build();
+        Element<OrderDetails> element = element(UUID.randomUUID(), orderDetails);
+
+        DynamicMultiSelectList soaScreen1 = DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .orderCollection(List.of(element))
+            .serviceOfApplicationScreen1(soaScreen1)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
+            callbackRequest,
+            PrlAppsConstants.WELSH
+        );
+
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH, response.getErrors().get(0));
     }
 
     @Test
