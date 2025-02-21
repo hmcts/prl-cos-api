@@ -2204,6 +2204,48 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                .build())
+            .respondentsFL401(parties.get(0).getValue())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtBailiff)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application has been served - welsh", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleConfidentialSoaSubmitted() {
         PartyDetails partydetails = PartyDetails.builder()
             .partyId(UUID.fromString(TEST_UUID))
@@ -2309,6 +2351,50 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedConfidentialWelsh() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                .partyId(testUuid)
+                .build())
+            .respondentsFL401(parties.get(0).getValue())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
+                .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleSoaSubmittedForNonConfidential() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2357,6 +2443,54 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedForNonConfidentialWelsh() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                .partyId(testUuid)
+                .build())
+            .respondentsFL401(PartyDetails.builder()
+                .partyId(testUuid)
+                .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .soaCitizenServingRespondentsOptions(unrepresentedApplicant)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application is ready to be personally served - welsh", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleSoaSubmittedForConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2400,6 +2534,52 @@ public class ServiceOfApplicationServiceTest {
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
             .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleSoaSubmittedForConfidentialWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                .partyId(UUID.fromString(TEST_UUID))
+                .build())
+            .respondentsFL401(PartyDetails.builder()
+                .partyId(UUID.fromString(TEST_UUID))
+                .build())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh", response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -2956,6 +3136,53 @@ public class ServiceOfApplicationServiceTest {
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
             .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleSoaSubmittedWithC8Welsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder()
+                .partyId(UUID.randomUUID())
+                .build())
+            .respondentsFL401(PartyDetails.builder()
+                .partyId(UUID.randomUUID())
+                .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .c8Document(Document.builder().build())
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh", response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -3677,6 +3904,50 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedForConfidentialPersonalCaCbWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.randomUUID())
+                .build())
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.randomUUID())
+                .build())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleSoaSubmittedForConfidentialPersonalAppLip() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3719,6 +3990,48 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedForConfidentialPersonalAppLipWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
+                .build())
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
+                .build())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaCitizenServingRespondentsOptions(unrepresentedApplicant)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application will be reviewed for confidential details - welsh",
+            Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3757,6 +4070,47 @@ public class ServiceOfApplicationServiceTest {
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
             .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.ENGLISH);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCbWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicants(parties)
+            .respondents(parties)
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService
+            .handleSoaSubmitted(authorization, callBackRequest, PrlAppsConstants.WELSH);
+        assertEquals("# The application is ready to be personally served - welsh", response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -4322,6 +4676,55 @@ public class ServiceOfApplicationServiceTest {
             PrlAppsConstants.ENGLISH
         );
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleSoaSubmittedForC100ConfidentialPersonalCourtBailiffWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicants(parties)
+            .respondents(parties)
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtBailiff)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            dataMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(
+            authorization,
+            callBackRequest,
+            PrlAppsConstants.WELSH
+        );
+        assertEquals("# The application is ready to be personally served - welsh", response.getBody().getConfirmationHeader());
     }
 
     @Test
