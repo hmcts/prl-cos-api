@@ -93,7 +93,7 @@ public class C100IssueCaseService {
         }
 
         // Generate All Docs and set to casedataupdated.
-        if (CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy())) {
+        if (!CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy())) {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         }
 
