@@ -71,7 +71,7 @@ public class ManageOrderControllerIntegrationTest {
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
-    private static final String VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY = "requests/CallBackRequest.json";
+    private static final String VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY = "requests/auto-hearing-case-data-request.json";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY_REVISED = "requests/manage-order-fetch-children-request-integration.json";
 
