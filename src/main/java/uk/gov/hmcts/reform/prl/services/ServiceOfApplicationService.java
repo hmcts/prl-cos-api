@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.M;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
@@ -177,17 +178,33 @@ public class ServiceOfApplicationService {
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
         + "other people in the case</strong></div>";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
+        + "other people in the case - welsh</strong></div>";
+
     public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent"
+        + "</strong></div>";
+
+    public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent - welsh"
         + "</strong></div>";
 
     public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent"
         + "</strong></div>";
 
+    public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent - welsh"
+        + "</strong></div>";
+
     public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
         + "case</strong></div>";
+
+    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES_WELSH = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
+        + "case - welsh</strong></div>";
 
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
@@ -211,6 +228,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE_WELSH = "Please select at least one party to serve - welsh";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -221,6 +239,7 @@ public class ServiceOfApplicationService {
         A new service pack will need to be created by admin as this version will be deleted.""";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_HEADER_WELSH = "# The application will be reviewed for confidential details - welsh";
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
@@ -228,8 +247,17 @@ public class ServiceOfApplicationService {
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX_WELSH = """
+        ### What happens next
+        The service pack needs to be reviewed for confidential details before it can be served.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
+
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
+    public static final String CONFIRMATION_HEADER_NON_PERSONAL_WELSH = "# The application has been served - welsh";
     public static final String CONFIRMATION_HEADER_PERSONAL = "# The application is ready to be personally served";
+    public static final String CONFIRMATION_HEADER_PERSONAL_WELSH = "# The application is ready to be personally served - welsh";
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack has been served on the parties selected.
@@ -243,6 +271,13 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA_WELSH = """
+        ### What happens next
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant and any other selected parties have been served.
+
+        You can view the service packs in the <a href="%s">service of application - welah</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
@@ -250,7 +285,22 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA_WELSH = """
+        ### What happens next
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA = """
+        ### What happens next
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA_WELSH = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
         \n The service pack has been served on the applicant and any other selected parties.
@@ -265,6 +315,13 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant has been served.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
@@ -272,12 +329,26 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
+        """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
         \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA_WELSH = """
+        ### What happens next
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant.
+
+        You can view the service packs in the <a href="%s">service of application - welsh</a> tab.
         """;
 
     public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personal service";
@@ -287,6 +358,7 @@ public class ServiceOfApplicationService {
         The person arranging personal service will be notified
         """;
     private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
+    private static final String SERVICE_OF_APPLICATION_ENDPOINT_WELSH = PrlAppsConstants.URL_STRING + "#Service of application";
 
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
@@ -330,6 +402,31 @@ public class ServiceOfApplicationService {
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
+    }
+
+    public String getCollapsableOfSentDocumentsWelsh() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack - welsh");
+        collapsible.add("</h3>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack this is served on parties(the people in the case) - welsh");
+        collapsible.add(
+            "This includes - welsh");
+        collapsible.add(
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (if applicable) - welsh </li>"
+                + "<li>C8 (Cafcass/Cafcass Cymru, if applicable) - welsh</li>");
+        collapsible.add("<li>Any orders and"
+            + " hearing notices created at the initial gatekeeping stage - welsh</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself - welsh");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
@@ -1808,7 +1905,7 @@ public class ServiceOfApplicationService {
         return responsibleForService;
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest, String language) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
@@ -1822,28 +1919,35 @@ public class ServiceOfApplicationService {
         }
 
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
-            return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+            return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent, language);
         }
         return processNonConfidentialSoa(
             authorisation,
             caseData,
             caseDataMap,
             startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            language
         );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
                                                                                 Map<String, Object> caseDataMap,
                                                                                 StartAllTabsUpdateDataContent updatedCaseDataContent,
-                                                                                String caseId) {
+                                                                                String caseId,
+                                                                                String language) {
         log.info("Confidential details are NOT present");
         Map<String,String> confirmationBanner = new HashMap<>();
-        getConfirmationBanner(caseData, confirmationBanner);
+        getConfirmationBanner(caseData, confirmationBanner, language);
         String confirmationBody = confirmationBanner.get(CONFIRMATION_BODY);
         if (StringUtils.isNotEmpty(confirmationBody)) {
-            confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
-                + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+            if (PrlAppsConstants.ENGLISH.equals(language)) {
+                confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                    + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+            } else if (PrlAppsConstants.WELSH.equals(language)) {
+                confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                    + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT_WELSH);
+            }
         }
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
@@ -1871,57 +1975,107 @@ public class ServiceOfApplicationService {
                       .confirmationBody(confirmationBody).build());
     }
 
-    private void getConfirmationBanner(CaseData caseData, Map<String, String> confirmationBanner) {
-        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
-            confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
-        } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA);
+    private void getConfirmationBanner(CaseData caseData, Map<String, String> confirmationBanner, String language) {
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
+            } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA);
+                    } else if (SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA);
+                    } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA);
+                    }
+                } else {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
+                    }
                 }
             } else {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-                    confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
-                }
+                confirmationBanner.put(CONFIRMATION_BODY, "");
             }
-        } else {
-            confirmationBanner.put(CONFIRMATION_BODY, "");
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL_WELSH);
+            } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL_WELSH);
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA_WELSH);
+                    } else if (SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA_WELSH);
+                    } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                        || SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA_WELSH);
+                    }
+                } else {
+                    if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA_WELSH);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtAdmin
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA_WELSH);
+                    } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                        || SoaCitizenServingRespondentsEnum.courtBailiff
+                        .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                        confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA_WELSH);
+                    }
+                }
+            } else {
+                confirmationBanner.put(CONFIRMATION_BODY, "");
+            }
         }
+
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, Map<String, Object> caseDataMap,
                                                                                     CaseData caseData,
-                                                                                    StartAllTabsUpdateDataContent updatedCaseDataContent) {
+                                                                                    StartAllTabsUpdateDataContent updatedCaseDataContent,
+                                                                                    String language) {
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             generatePacksForConfidentialCheckC100(authorisation, caseData, caseDataMap);
         } else {
@@ -1938,12 +2092,20 @@ public class ServiceOfApplicationService {
                 updatedCaseDataContent.eventRequestData(),
                 caseDataMap
         );
-        String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
-                                                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-                                                    + SERVICE_OF_APPLICATION_ENDPOINT);
+        String confirmationBody = null;
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
+                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + SERVICE_OF_APPLICATION_ENDPOINT);
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX_WELSH,
+                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + SERVICE_OF_APPLICATION_ENDPOINT_WELSH);
+        }
         log.info("Confidential details are present, case needs to be reviewed and served later");
         return ok(SubmittedCallbackResponse.builder()
-                      .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
+                      .confirmationHeader(PrlAppsConstants.ENGLISH.equals(language)
+                          ? CONFIDENTIAL_CONFIRMATION_HEADER : CONFIDENTIAL_CONFIRMATION_HEADER_WELSH)
                       .confirmationBody(confirmationBody).build());
     }
 
@@ -2771,7 +2933,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
+    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails, String language) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -2796,12 +2958,21 @@ public class ServiceOfApplicationService {
             SOA_ORDER_LIST_EMPTY,
             CollectionUtils.isEmpty(caseData.getOrderCollection()) ? YesOrNo.Yes : YesOrNo.No
         );
-        caseDataUpdated.put(
-            SOA_DOCUMENT_PLACE_HOLDER,
-            C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getCollapsableOfSentDocuments()
-                : getCollapsableOfSentDocumentsFL401()
-        );
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            caseDataUpdated.put(
+                SOA_DOCUMENT_PLACE_HOLDER,
+                C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? getCollapsableOfSentDocuments()
+                    : getCollapsableOfSentDocumentsFL401()
+            );
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            caseDataUpdated.put(
+                SOA_DOCUMENT_PLACE_HOLDER,
+                C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    ? getCollapsableOfSentDocumentsWelsh()
+                    : getCollapsableOfSentDocumentsFL401Welsh()
+            );
+        }
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -2818,12 +2989,12 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(WA_IS_APPLICANT_REPRESENTED, caseData.getIsApplicantRepresented());
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
-            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
+            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData, language)
         );
         return caseDataUpdated;
     }
 
-    public String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
+    public String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData, String language) {
         String warningText = BLANK_STRING;
         boolean isRespondentAddressPresent = true;
         boolean isOtherPeopleAddressPresent = true;
@@ -2852,16 +3023,30 @@ public class ServiceOfApplicationService {
         } else {
             isRespondentAddressPresent = isPartiesAddressPresent(caseData.getRespondentsFL401());
         }
-        if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
-            warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
-        } else if (!isRespondentAddressPresent
-            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT;
-        } else if (!isRespondentAddressPresent
-            && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT;
-        } else if (!isOtherPeopleAddressPresent) {
-            warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
+        if (PrlAppsConstants.ENGLISH.equals(language)) {
+            if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
+            } else if (!isRespondentAddressPresent
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT;
+            } else if (!isRespondentAddressPresent
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT;
+            } else if (!isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
+            }
+        } else if (PrlAppsConstants.WELSH.equals(language)) {
+            if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES_WELSH;
+            } else if (!isRespondentAddressPresent
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH;
+            } else if (!isRespondentAddressPresent
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT_WELSH;
+            } else if (!isOtherPeopleAddressPresent) {
+                warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES_WELSH;
+            }
         }
         return warningText;
     }
@@ -2964,6 +3149,29 @@ public class ServiceOfApplicationService {
                 + "<li>witness statement</li><li>privacy notice</li><li>cover letter (if not represented)</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself.");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
+    }
+
+    public String getCollapsableOfSentDocumentsFL401Welsh() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack - welsh");
+        collapsible.add("</h3>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack that is sent out on parties (the people in the case). - welsh");
+        collapsible.add(
+            "This includes: - welsh");
+        collapsible.add(
+            "<ul><li>an application form (FL401) - welsh</li>"
+                + "<li>witness statement - welsh</li><li>privacy notice - welsh</li><li>cover letter (if not represented) - welsh</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself. - welsh");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
@@ -4159,7 +4367,7 @@ public class ServiceOfApplicationService {
         return response;
     }
 
-    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest, String language) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -4171,7 +4379,11 @@ public class ServiceOfApplicationService {
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && isCafcasOptedToBeServed(caseData)
             && !YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())) {
-            errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            if (PrlAppsConstants.ENGLISH.equals(language)) {
+                errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE);
+            } else if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE_WELSH);
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
@@ -4193,7 +4405,11 @@ public class ServiceOfApplicationService {
             }
 
             if (c6aOrderIds.isEmpty()) {
-                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                if (PrlAppsConstants.ENGLISH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH);
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -4206,7 +4422,11 @@ public class ServiceOfApplicationService {
             log.info("isPresent {}", isPresent);
 
             if (!isPresent) {
-                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                if (PrlAppsConstants.ENGLISH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH);
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();

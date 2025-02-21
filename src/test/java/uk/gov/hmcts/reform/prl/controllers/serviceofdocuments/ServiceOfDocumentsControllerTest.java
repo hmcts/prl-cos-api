@@ -1,6 +1,8 @@
 
 package uk.gov.hmcts.reform.prl.controllers.serviceofdocuments;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.languagecontext.LanguageContextMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.serviceofdocuments.ServiceOfDocumentsService;
 
@@ -50,6 +54,8 @@ public class ServiceOfDocumentsControllerTest {
 
     @Mock
     private ServiceOfDocumentsService serviceOfDocumentsService;
+    @Mock
+    private ObjectMapper objectMapper;
 
     private CallbackRequest callbackRequest;
     private Map<String, Object> caseDataMap;
@@ -68,28 +74,30 @@ public class ServiceOfDocumentsControllerTest {
 
     @Test
     public void testHandleAboutToStart() {
-        when(serviceOfDocumentsService.handleAboutToStart(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(caseDataMap);
+        when(serviceOfDocumentsService.handleAboutToStart(Mockito.anyString(), Mockito.any(CallbackRequest.class),
+            anyString())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .handleAboutToStart(any(),any(),callbackRequest);
+            .handleAboutToStart("test","test","en", callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
-    public void testHandleAboutToStartUnServedDocsPresent() {
+    public void testHandleAboutToStartUnServedDocsPresent() throws JsonProcessingException {
         caseDataMap.put("sodUnServedPack", SodPack.builder().documents(List.of(Element.<Document>builder().build())).build());
         callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseDataMap).build())
             .build();
+        LanguageContextMapper languageContextMapper = LanguageContextMapper.builder().build();
         caseDataMap.put("errors", List.of(UN_SERVED_DOCUMENTS_PRESENT_ERROR));
-        when(serviceOfDocumentsService.handleAboutToStart(anyString(), any(CallbackRequest.class))).thenReturn(caseDataMap);
+        when(serviceOfDocumentsService.handleAboutToStart(anyString(), any(CallbackRequest.class), any())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
-            .handleAboutToStart(anyString(), anyString(), callbackRequest);
+            .handleAboutToStart("test", "test", PrlAppsConstants.ENGLISH, callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
@@ -147,7 +155,7 @@ public class ServiceOfDocumentsControllerTest {
     public void testExceptionHandleAboutToStart() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfDocumentsController.handleAboutToStart(any(), any(), callbackRequest);
+            serviceOfDocumentsController.handleAboutToStart("", "", "", callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
