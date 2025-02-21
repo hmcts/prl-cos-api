@@ -1003,6 +1003,8 @@ public class PrlAppsConstants {
     public static final String WITHOUT_NOTICE_REJECTION = "Without notice rejection";
     public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
         + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
+    public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR_WELSH = "You can only serve other people in the case if there is a C6A."
+        + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders. - welsh";
 
     public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
@@ -1108,5 +1110,7 @@ public class PrlAppsConstants {
 
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
 
 }

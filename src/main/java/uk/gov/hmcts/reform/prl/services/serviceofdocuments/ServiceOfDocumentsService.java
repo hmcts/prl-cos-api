@@ -133,7 +133,7 @@ public class ServiceOfDocumentsService {
     private String citizenDashboardUrl;
 
     public Map<String, Object> handleAboutToStart(String authorisation,
-                                                  CallbackRequest callbackRequest) {
+                                                  CallbackRequest callbackRequest, String language) {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -148,7 +148,7 @@ public class ServiceOfDocumentsService {
         caseDataMap.put(DISPLAY_LEGAL_REP_OPTION, CaseUtils.isCitizenCase(caseData) ? "No" : "Yes");
         caseDataMap.put(
             MISSING_ADDRESS_WARNING_TEXT,
-            serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
+            serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(caseData, language)
         );
         caseDataMap.put("sodDocumentsList", List.of(element(DocumentsDynamicList.builder()
                                                                 .documentsList(sendAndReplyService.getCategoriesAndDocuments(
