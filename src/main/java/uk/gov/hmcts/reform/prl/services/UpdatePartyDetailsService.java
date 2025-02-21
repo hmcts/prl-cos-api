@@ -160,6 +160,8 @@ public class UpdatePartyDetailsService {
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            //Expecting a null pointer here
+            caseData.getOrderCollection().get(100).getValue().getCafcassEmailId();
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());

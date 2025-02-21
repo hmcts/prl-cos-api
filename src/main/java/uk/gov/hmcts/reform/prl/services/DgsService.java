@@ -53,7 +53,8 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
-    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -106,7 +107,8 @@ public class DgsService {
         );
     }
 
-    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
 
         CaseData caseData = caseDetails.getCaseData();
