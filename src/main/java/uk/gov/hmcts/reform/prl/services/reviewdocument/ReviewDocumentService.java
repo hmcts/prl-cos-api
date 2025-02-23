@@ -195,7 +195,7 @@ public class ReviewDocumentService {
                                                           + HYPHEN_SEPARATOR
                                                           + CommonUtils.formatDate(
                                                    D_MMM_YYYY,
-                                                   element.getValue().getScannedDate().toLocalDate()
+                                                   element.getValue().getScannedDatebulkscan().toLocalDate()
                                                ))
                                                .build()).toList());
             tempQuarantineDocumentList.addAll(convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments()));
@@ -468,11 +468,13 @@ public class ReviewDocumentService {
             .subtype(scannedDocument.getSubtype())
             .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
             .url(scannedDocument.getUrl())
-            .scannedDate(scannedDocument.getScannedDate())
+            .scannedDate(scannedDocument.getScannedDate() != null ? scannedDocument.getScannedDate()
+                                      : scannedDocument.getScannedDatebulkscan())
             .deliveryDate(scannedDocument.getDeliveryDate())
             .documentParty(BULK_SCAN)
             .uploadedBy(BULK_SCAN)
-            .documentUploadedDate(scannedDocument.getScannedDate())
+            .documentUploadedDate(scannedDocument.getScannedDate() != null ? scannedDocument.getScannedDate()
+                                      : scannedDocument.getScannedDatebulkscan())
             .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
             .isRestricted(YesOrNo.No) //fix to getRestrictedOrConfidentialKey=confidential
             .uploaderRole(BULK_SCAN);
