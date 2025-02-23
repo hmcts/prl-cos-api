@@ -3564,4 +3564,32 @@ public class CallbackControllerTest {
             callbackController.updateOtherPeoplePartyDetails(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
+
+    @Test
+    public void testExceptionForBulkScanCaseSubmission() {
+        Map<String, Object> caseDetails = new HashMap<>();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDetails).build()).build();
+
+        assertExpectedException(() -> {
+            callbackController.bulkScanCaseSubmission(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testBulkScanCaseSubmission() throws Exception {
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any()))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("1234").build());
+        when(allTabsService.updateAllTabsIncludingConfTab(Mockito.any()))
+            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .bulkScanCaseSubmission(authToken, s2sToken, CallbackRequest.builder().build());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherPartyInTheCaseRevised"));
+    }
 }
