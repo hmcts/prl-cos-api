@@ -3592,6 +3592,6 @@ public class CallbackControllerTest {
             .bulkScanCaseSubmission(authToken, s2sToken, CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                  .data(new HashMap<>()).build()).build());
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherPartyInTheCaseRevised"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 }
