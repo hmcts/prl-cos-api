@@ -253,7 +253,7 @@ public class PaymentRequestService {
             CaseData.class
         );
         log.info("Logger bulk scan case id {}", caseData.getId());
-        log.info("Logger bulk scan case id {}", callbackRequest.getCaseDetails().getId());
+        log.info("Logger bulk scan request case id {}", callbackRequest.getCaseDetails().getId());
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }

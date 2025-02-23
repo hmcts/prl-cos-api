@@ -1094,11 +1094,13 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
+            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
             PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                 callbackRequest,
                 authorisation
             );
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
