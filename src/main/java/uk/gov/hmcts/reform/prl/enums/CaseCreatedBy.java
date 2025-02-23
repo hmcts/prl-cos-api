@@ -8,5 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum CaseCreatedBy {
     SOLICITOR,
     CITIZEN,
-    COURT_ADMIN
+    COURT_ADMIN,
+    BULK_SCAN
 }

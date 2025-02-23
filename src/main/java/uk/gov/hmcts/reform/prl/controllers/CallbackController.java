@@ -1084,5 +1084,27 @@ public class CallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-}
 
+    @PostMapping(path = "/bulkscan-case-submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to refresh the tabs")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse bulkScanCaseSubmission(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
+            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
+            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                callbackRequest,
+                authorisation
+            );
+            caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+}

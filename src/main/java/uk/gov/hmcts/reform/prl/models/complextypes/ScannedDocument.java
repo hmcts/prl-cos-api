@@ -25,4 +25,16 @@ public class ScannedDocument {
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
 
+    @JsonProperty("control_number")
+    public final String controlNumberbulkscan;
+
+    @JsonProperty("file_name")
+    public final String fileNamebulkscan;
+
+    @JsonProperty("scanned_date")
+    public final LocalDateTime scannedDatebulkscan;
+
+    @JsonProperty("delivery_date")
+    public final LocalDateTime deliveryDatebulkscan;
+
 }
