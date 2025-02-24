@@ -303,10 +303,9 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            newDraftOrderCollectionId = getUuid(authorisation, caseData, caseDataUpdated, newDraftOrderCollectionId);
+            UUID newDraftOrderCollectionId = getDraftOrderId(authorisation, caseData, caseDataUpdated);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
@@ -324,7 +323,8 @@ public class ManageOrdersController {
         }
     }
 
-    private UUID getUuid(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated, UUID newDraftOrderCollectionId) {
+    private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        UUID newDraftOrderCollectionId = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
             && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
