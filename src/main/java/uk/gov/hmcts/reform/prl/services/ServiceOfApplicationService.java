@@ -4020,7 +4020,7 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails,
                     element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
                     packDocs,
-                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_PER_CA_CB,
                     fieldsMap,
                     EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV
                 );
