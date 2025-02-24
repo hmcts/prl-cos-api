@@ -789,4 +789,119 @@ public class ServiceOfDocumentsServiceTest {
         assertNotNull(response);
     }
 
+    @Test
+    public void testHandleConfCheckSubmitted() {
+        partyDetails = partyDetails.toBuilder()
+            .partyId(UUID.randomUUID())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("solicitorEmail")
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        Document document = Document.builder().build();
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            TEST_AUTHORIZATION,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData1.toMap(new ObjectMapper()),
+            caseData1,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent1);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleConfCheckSubmitted(TEST_AUTHORIZATION,callbackRequest1);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckSubmittedWhenNoDocumentsBeServed() {
+        partyDetails = partyDetails.toBuilder()
+            .partyId(UUID.randomUUID())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("solicitorEmail")
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        Document document = Document.builder().build();
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.No)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            TEST_AUTHORIZATION,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData1.toMap(new ObjectMapper()),
+            caseData1,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent1);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage
+                                                                                          .builder()
+                                                                                          .isGenEng(true)
+                                                                                          .isGenWelsh(true)
+                                                                                          .build());
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleConfCheckSubmitted(TEST_AUTHORIZATION,callbackRequest1);
+        assertNotNull(response);
+    }
+
+
 }
