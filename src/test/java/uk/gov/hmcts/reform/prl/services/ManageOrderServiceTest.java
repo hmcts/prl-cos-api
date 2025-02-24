@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -1880,7 +1879,7 @@ public class ManageOrderServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ManageOrders manageOrders = ManageOrders.builder()
+        ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
@@ -1924,9 +1923,8 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
+            .manageOrders(manageOrders1)
             .build();
-        ResponseEntity<Object> response = ResponseEntity.ok(caseData.getId());
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build())))
             .thenReturn(AutomatedHearingResponse.builder().build());
@@ -1947,37 +1945,6 @@ public class ManageOrderServiceTest {
             .code("1234")
             .label("test label").build();
         elements.add(element);
-        ManageOrders manageOrders = ManageOrders.builder()
-            .cafcassCymruServedOptions(YesOrNo.No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
-            .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
-            .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
-                                                       .value(Document.builder().documentFileName(
-                                                           "abc.pdf").build())
-                                                       .build()))
-            .recipientsOptions(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(elements)
-                             .build())
-            .otherParties(DynamicMultiSelectList.builder()
-                              .listItems(elements)
-                              .build())
-            .serveToRespondentOptions(YesNoNotApplicable.Yes)
-            .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-            .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
-                                                      .hearingDateConfirmOptionEnum(
-                                                          HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-                                                      .build())))
-            .build();
-
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
                                                                                           .orderDocument(Document
@@ -1990,20 +1957,6 @@ public class ManageOrderServiceTest {
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(orderList)
-            .dateOrderMade(LocalDate.now())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
-            .build();
-
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -5599,7 +5552,7 @@ public class ManageOrderServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ManageOrders manageOrders = ManageOrders.builder()
+        ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
@@ -5643,7 +5596,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
+            .manageOrders(manageOrders1)
             .build();
 
         HearingData hearingData = HearingData.builder()
@@ -5727,7 +5680,7 @@ public class ManageOrderServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ManageOrders manageOrders = ManageOrders.builder()
+        ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
@@ -5771,7 +5724,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
+            .manageOrders(manageOrders1)
             .build();
 
         HearingData hearingData = HearingData.builder()
@@ -5824,7 +5777,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCreateAutomatedHearingManagementException() throws Exception {
+    public void testCreateAutomatedHearingManagementException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -5837,7 +5790,7 @@ public class ManageOrderServiceTest {
             .code("1234")
             .label("test label").build();
         elements.add(element);
-        ManageOrders manageOrders = ManageOrders.builder()
+        ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
@@ -5891,7 +5844,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
+            .manageOrders(manageOrders1)
             .build();
 
         when(hearingService.createAutomatedHearing(authToken, null))
@@ -6232,6 +6185,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
+
     }
 
 }
