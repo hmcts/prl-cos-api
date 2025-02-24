@@ -65,8 +65,8 @@ public class CaseWithdrawnRequestControllerTest {
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, callbackRequest);
-        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(Mockito.any(CallbackRequest.class), Mockito.anyString());
+        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken,"", callbackRequest);
+        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(Mockito.any(CallbackRequest.class), Mockito.anyString(), any());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class CaseWithdrawnRequestControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, callbackRequest);
+            caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, "", callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

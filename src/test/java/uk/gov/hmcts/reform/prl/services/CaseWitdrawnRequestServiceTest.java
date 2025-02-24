@@ -69,7 +69,8 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
@@ -91,8 +92,32 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
+    }
+
+    @Test
+    public void testCaseWithdrawnRequestSubmittedInGateKeepingStateWelsh() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
+            .state(State.JUDICIAL_REVIEW)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.JUDICIAL_REVIEW.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.WELSH);
+        Assert.assertEquals("# Requested Application Withdrawal - welsh", response.getConfirmationHeader());
     }
 
     @Test
@@ -113,7 +138,8 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
@@ -135,7 +161,8 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Application withdrawn", response.getConfirmationHeader());
     }
 
@@ -157,7 +184,8 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Application withdrawn", response.getConfirmationHeader());
     }
 
@@ -179,7 +207,8 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth",
+            PrlAppsConstants.ENGLISH);
         Assert.assertEquals("# Application withdrawn cancelled", response.getConfirmationHeader());
     }
 }
