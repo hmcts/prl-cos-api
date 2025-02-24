@@ -46,7 +46,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
+    public static final String CONFIRMATION_HEADER_WELSH = "# Documents submitted - welsh";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
+    public static final String CONFIRMATION_BODY_WELSH = "### What happens next \n\n The court will review the submitted documents. - welsh";
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -95,7 +97,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
             .build();
 
         String language = CaseUtils.getLanguage(clientContext);
-        log.info("language is {}", language);
         List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails, language);
 
         //validation for documentParty - COURT to be selected only for court staff
@@ -132,16 +133,21 @@ public class ManageDocumentsController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
-                                                                     @Parameter(hidden = true) String authorisation) {
+                                                                     @Parameter(hidden = true) String authorisation,
+                                                                     @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                                         required = false) String clientContext) {
 
         manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(
             callbackRequest,
             authorisation
         );
+        String language = CaseUtils.getLanguage(clientContext);
 
         return ok(SubmittedCallbackResponse.builder()
-                      .confirmationHeader(CONFIRMATION_HEADER)
-                      .confirmationBody(CONFIRMATION_BODY)
+                      .confirmationHeader(PrlAppsConstants.WELSH.equals(language) ? CONFIRMATION_HEADER_WELSH
+                          : CONFIRMATION_HEADER)
+                      .confirmationBody(PrlAppsConstants.WELSH.equals(language) ? CONFIRMATION_BODY_WELSH
+                          : CONFIRMATION_BODY)
                       .build());
     }
 }

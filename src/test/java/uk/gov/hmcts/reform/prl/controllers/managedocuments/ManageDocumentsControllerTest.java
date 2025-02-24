@@ -166,7 +166,7 @@ public class ManageDocumentsControllerTest {
     @Test
     public void testHandleSubmitted() {
 
-        ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
+        ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth, PrlAppsConstants.ENGLISH);
         abc.getBody().getConfirmationHeader();
         Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
