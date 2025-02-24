@@ -14,6 +14,7 @@ def component = "cos"
 def channel = '#prl-tech-notifications'
 
 // Vars for Kubernetes
+// Adding comments to create test PR
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 static Map<String, Object> secret(String secretName, String envVariable) {
