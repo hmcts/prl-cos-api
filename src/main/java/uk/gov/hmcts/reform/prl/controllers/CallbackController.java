@@ -1101,6 +1101,8 @@ public class CallbackController {
                 callbackRequest,
                 authorisation
             );
+            log.info("Payment service response: {}", paymentServiceResponse);
+            log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
             caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
