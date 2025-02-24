@@ -191,7 +191,7 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(element.getValue().getFileName()
+                                               .label(element.getValue().getFileNamebulkscan()
                                                           + HYPHEN_SEPARATOR
                                                           + CommonUtils.formatDate(
                                                    D_MMM_YYYY,
