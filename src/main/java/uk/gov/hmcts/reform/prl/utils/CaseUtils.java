@@ -804,8 +804,6 @@ public class CaseUtils {
 
     private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
         log.info("inside isConfidentialityRemainsSame");
-        log.info("newConfidentiality ==> " + newConfidentiality);
-        log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
             && ObjectUtils.isEmpty(newConfidentiality)) {
             return true;
@@ -1086,5 +1084,9 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getContactInstructions(PartyDetails applicantsFL401) {
+        return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
     }
 }
