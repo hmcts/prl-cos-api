@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.PartyRelationshipToTheCaseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -27,12 +28,15 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DynamicMultiSelectListServiceTest {
@@ -200,6 +204,39 @@ public class DynamicMultiSelectListServiceTest {
 
     @Test
     public void testOtherPeopleDetails() {
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getOtherPeopleMultiSelectList(caseData);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testOtherPeopleDetailsFL401() {
+        partyDetails = Arrays.asList(element(PartyDetails.builder()
+                                                .firstName("TestFirst")
+                                                .lastName("TestLast")
+                                                .partyId(UUID.fromString(TEST_UUID))
+                                                .build()));
+        caseData = caseData.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .otherPartyInTheCaseRevised(partyDetails)
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getOtherPeopleMultiSelectList(caseData);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testOtherPeopleDetailsFL401PartyRelationToCase() {
+        partyDetails = Arrays.asList(element(PartyDetails.builder()
+                                                 .firstName("TestFirst")
+                                                 .lastName("TestLast")
+                                                 .relationshipToTheCase(PartyRelationshipToTheCaseEnum.PTOP)
+                                                 .partyId(UUID.fromString(TEST_UUID))
+                                                 .build()));
+        caseData = caseData.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .otherPartyInTheCaseRevised(partyDetails)
+            .build();
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
             .getOtherPeopleMultiSelectList(caseData);
         assertNotNull(listItems);
