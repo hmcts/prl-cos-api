@@ -198,7 +198,7 @@ public class ManageDocumentsControllerTest {
             .build();
 
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(List.of("errors"));
+        when(manageDocumentsService.validateCourtUser(any(), any(), any())).thenReturn(List.of("errors"));
 
         manageDocumentsController.validateManageDocumentsData(auth, PrlAppsConstants.ENGLISH, callbackRequest);
 

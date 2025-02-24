@@ -1092,7 +1092,6 @@ public class CaseUtils {
         LanguageContextMapper languageContextMapper = null;
 
         if (clientContextString != null) {
-            log.info("clientContext is present");
             byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
             String decodedString = new String(decodedBytes);
             try {

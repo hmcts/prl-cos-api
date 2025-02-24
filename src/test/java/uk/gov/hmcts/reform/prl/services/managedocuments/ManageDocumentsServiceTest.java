@@ -1634,9 +1634,37 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         UserDetails userDetails = UserDetails.builder().roles(List.of(CAFCASS_ROLE)).build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
-        List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails);
+        List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.ENGLISH);
         Assert.assertNotNull(list);
         Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", list.get(0));
+    }
+
+    @Test
+    public void validateNonCourtUserWelsh() {
+        ManageDocuments manageDocument = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.COURT)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        List<Element<ManageDocuments>> manageDocumentsList = List.of(element(manageDocument));
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(manageDocumentsList)
+                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        UserDetails userDetails = UserDetails.builder().roles(List.of(CAFCASS_ROLE)).build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
+        List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.WELSH);
+        Assert.assertNotNull(list);
+        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh", list.get(0));
     }
 
     @Test
@@ -1663,7 +1691,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_STAFF)).build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
-        List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails);
+        List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.ENGLISH);
         Assert.assertTrue(list.isEmpty());
     }
 

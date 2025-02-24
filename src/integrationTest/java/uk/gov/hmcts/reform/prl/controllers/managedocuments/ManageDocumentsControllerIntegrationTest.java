@@ -77,7 +77,7 @@ public class ManageDocumentsControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.when(manageDocumentsService.validateRestrictedReason(any(), any(), any())).thenReturn(new ArrayList<>());
-        Mockito.when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(new ArrayList<>());
+        Mockito.when(manageDocumentsService.validateCourtUser(any(), any(), any())).thenReturn(new ArrayList<>());
         Mockito.when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
 
         mockMvc.perform(

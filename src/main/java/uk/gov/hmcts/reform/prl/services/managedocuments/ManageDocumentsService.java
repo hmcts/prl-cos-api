@@ -564,9 +564,14 @@ public class ManageDocumentsService {
     }
 
     public List<String> validateCourtUser(CallbackRequest callbackRequest,
-                                          UserDetails userDetails) {
+                                          UserDetails userDetails, String language) {
         if (isCourtSelectedInDocumentParty(callbackRequest)
             && !checkIfUserIsCourtStaff(userDetails)) {
+            if (PrlAppsConstants.ENGLISH.equals(language)) {
+                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
+            } else if (PrlAppsConstants.WELSH.equals(language)) {
+                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh");
+            }
             return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
         }
         return Collections.emptyList();

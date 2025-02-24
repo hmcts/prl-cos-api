@@ -99,7 +99,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails, language);
 
         //validation for documentParty - COURT to be selected only for court staff
-        errorList.addAll(manageDocumentsService.validateCourtUser(callbackRequest, updatedUserDetails));
+        errorList.addAll(manageDocumentsService.validateCourtUser(callbackRequest, updatedUserDetails, language));
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         if (CollectionUtils.isNotEmpty(errorList)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
