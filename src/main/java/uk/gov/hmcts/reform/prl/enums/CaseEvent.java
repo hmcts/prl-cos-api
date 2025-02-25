@@ -63,7 +63,7 @@ public enum CaseEvent {
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
 
     HWF_PROCESS_CASE_UPDATE("hwfProcessCaseUpdate"),
-    HWF_PROCESS_CASE_UPDATE_BULKSCAN("hwfProcessCaseUpdateBulkscan"),
+    HWF_PROCESS_CASE_UPDATE_BULKSCAN("processHwfPaymentForBulkscan"),
     HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
 
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
