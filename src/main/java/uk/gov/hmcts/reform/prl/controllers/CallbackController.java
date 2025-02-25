@@ -113,21 +113,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
@@ -523,28 +517,18 @@ public class CallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
-
-            Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
-                .filter(
-                    CallbackController::getPreviousState).findFirst();
-
-            List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-                                             PENDING_STATE,
-                                             SUBMITTED_STATE, RETURN_STATE
-            );
             WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
             Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            updateTabsOrWithdrawFlag(caseData, previousState, stateList, withdrawApplication, caseDataUpdated);
+            updateTabsOrWithdrawFlag(caseData, withdrawApplication, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
-    private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<String> previousState, List<String> stateList,
-                                          Optional<YesOrNo> withdrawApplication, Map<String, Object> caseDataUpdated) {
+    private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<YesOrNo> withdrawApplication,
+                                          Map<String, Object> caseDataUpdated) {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 // Refreshing the page in the same event. Hence no external event call needed.
@@ -807,16 +791,6 @@ public class CallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private static boolean getPreviousState(String eachState) {
-        return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
-            && (!DRAFT_STATE.equalsIgnoreCase(eachState))
-            && (!RETURN_STATE.equalsIgnoreCase(eachState))
-            && (!PENDING_STATE.equalsIgnoreCase(eachState))
-            && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
-            || ISSUED_STATE.equalsIgnoreCase(eachState)
-            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(eachState);
     }
 
     @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
