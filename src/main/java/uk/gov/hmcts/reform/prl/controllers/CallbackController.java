@@ -546,19 +546,15 @@ public class CallbackController {
     private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<String> previousState, List<String> stateList,
                                           Optional<YesOrNo> withdrawApplication, Map<String, Object> caseDataUpdated) {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-            } else {
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    // Refreshing the page in the same event. Hence no external event call needed.
-                    // Getting the tab fields and add it to the casedetails..
-                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                    caseDataUpdated.putAll(allTabsFields);
-                }
-                caseDataUpdated.put("state", WITHDRAWN_STATE);
-                caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                // Refreshing the page in the same event. Hence no external event call needed.
+                // Getting the tab fields and add it to the casedetails..
+                Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                caseDataUpdated.putAll(allTabsFields);
             }
+            caseDataUpdated.put("state", WITHDRAWN_STATE);
+            caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+            caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         }
     }
 
