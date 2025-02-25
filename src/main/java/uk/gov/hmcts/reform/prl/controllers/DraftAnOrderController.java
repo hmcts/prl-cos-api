@@ -64,10 +64,12 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation);
+            String language = CaseUtils.getLanguage(clientContext);
+            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation, language);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -98,8 +100,7 @@ public class DraftAnOrderController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null,
-                    language)).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

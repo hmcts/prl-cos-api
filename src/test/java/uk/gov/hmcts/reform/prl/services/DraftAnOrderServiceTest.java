@@ -3203,7 +3203,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
         );
     }
 
@@ -3249,7 +3249,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
         );
     }
 
@@ -3291,7 +3291,7 @@ public class DraftAnOrderServiceTest {
         ));
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
         );
     }
 
@@ -3353,7 +3353,7 @@ public class DraftAnOrderServiceTest {
         ));
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.WELSH)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
         );
     }
 
@@ -3460,7 +3460,8 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.WELSH
         );
         assertEquals("Test order", response.getData().get("selectedOrder"));
         //assertEquals(1, response.getData().get("children").size());
@@ -3498,7 +3499,8 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals("Test order", response.getData().get("selectedOrder"));
         //assertEquals(1, response.getData().get("children").size());
@@ -3534,9 +3536,47 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        //assertEquals(1, response.getData().get("children").size());
+
+    }
+
+    @Test
+    public void testSelectedOrderForUploadScenarioStandardDirectionWelsh() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+            .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .children(children)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
+            .manageOrders(ManageOrders.builder()
+                .isTheOrderAboutChildren(Yes)
+                .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.standardDirectionsOrder)
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
+            callbackRequest,
+            authToken,
+            PrlAppsConstants.WELSH
+        );
+        assertEquals("This order is not available to be drafted - welsh", response.getErrors().get(0));
         //assertEquals(1, response.getData().get("children").size());
 
     }
@@ -3568,10 +3608,48 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(
             BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
+            response.getData().get("selectedOrder")
+        );
+        //assertEquals(1, response.getData().getChildren().size());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioWelsh() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+            .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .children(children)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .manageOrders(ManageOrders.builder()
+                .isTheOrderAboutChildren(Yes)
+                .build())
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
+            callbackRequest,
+            authToken,
+            PrlAppsConstants.WELSH
+        );
+        assertEquals(
+            BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43) - welsh" + BOLD_END,
             response.getData().get("selectedOrder")
         );
         //assertEquals(1, response.getData().getChildren().size());
@@ -3606,7 +3684,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(
             BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
@@ -3641,7 +3720,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3669,7 +3748,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.WELSH));
     }
 
     @Test
@@ -3697,7 +3776,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3725,7 +3804,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3753,7 +3832,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3781,7 +3860,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
@@ -3814,7 +3893,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3842,7 +3921,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3870,7 +3949,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3898,7 +3977,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3926,7 +4005,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3954,7 +4033,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3982,7 +4061,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken));
+        assertNotNull(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4012,7 +4091,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
         assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().get(0));
@@ -4045,7 +4125,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
         assertEquals("This order is not available to be drafted", response.getErrors().get(0));
@@ -4079,7 +4160,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
-            authToken
+            authToken,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(1, response.getErrors().size());
         assertEquals("This order is not available to be drafted", response.getErrors().get(0));
@@ -4458,8 +4540,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(
             callbackRequest,
             authToken,
-            null,
-            PrlAppsConstants.ENGLISH
+            null
         );
 
         Assert.assertEquals(stringObjectMap, caseDataMap);
@@ -4920,7 +5001,8 @@ public class DraftAnOrderServiceTest {
             when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
             AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
                 callbackRequest,
-                authToken
+                authToken,
+                PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
             assertEquals("This order is not available to be drafted", response.getErrors().get(0));
@@ -4960,7 +5042,8 @@ public class DraftAnOrderServiceTest {
             when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
             AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
                 callbackRequest,
-                authToken
+                authToken,
+                PrlAppsConstants.ENGLISH
             );
             assertEquals(1, response.getErrors().size());
             assertEquals("This order is not available to be drafted", response.getErrors().get(0));
