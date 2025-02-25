@@ -79,6 +79,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
         = "requests/court-admin-manage-order-noapproval-required-request.json";
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
     private static CaseDetails caseDetails;
     private final String userToken = "Bearer testToken";
     private final String targetInstance =
@@ -276,7 +277,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     }
 
-    /*@Test
+    @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
         request1
@@ -287,12 +288,10 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/edit-and-approve/submitted")
             .then()
-            .body("data", contains(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)
-            )
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-    }*/
+    }
 
     /**
      * Judge editApprove - approves the order with one hearing which is created by solicitor.
