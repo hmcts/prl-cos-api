@@ -157,7 +157,6 @@ public class FeesAndPaymentCitizenController {
                 .errorRetrievingResponse(e.getMessage())
                 .build();
         }
-        log.info("#### FeeResponse {}", feeResponseForCitizen);
         return feeResponseForCitizen;
     }
 
