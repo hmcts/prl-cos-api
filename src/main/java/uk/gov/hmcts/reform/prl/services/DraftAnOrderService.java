@@ -2217,7 +2217,8 @@ public class DraftAnOrderService {
 
     public Map<String, Object> handlePopulateDraftOrderFields(CallbackRequest callbackRequest,
                                                               String authorisation,
-                                                              String clientContext) throws Exception {
+                                                              String clientContext,
+                                                              String language) throws Exception {
 
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2266,9 +2267,15 @@ public class DraftAnOrderService {
         } else {
             ManageOrders manageOrders = caseData.getManageOrders();
             if (manageOrders.getC21OrderOptions() != null) {
-                manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
-                        .getC21OrderOptions().getDisplayedValue() + BOLD_END)
-                    .build();
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
+                            .getC21OrderOptions().getDisplayedValueWelsh() + BOLD_END)
+                        .build();
+                } else {
+                    manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
+                            .getC21OrderOptions().getDisplayedValue() + BOLD_END)
+                        .build();
+                }
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
             caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData, clientContext);

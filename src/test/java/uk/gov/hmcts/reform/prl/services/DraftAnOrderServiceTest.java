@@ -3203,7 +3203,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
@@ -3249,7 +3249,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
@@ -3291,7 +3291,7 @@ public class DraftAnOrderServiceTest {
         ));
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
         );
     }
 
@@ -3353,7 +3353,7 @@ public class DraftAnOrderServiceTest {
         ));
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.WELSH)
         );
     }
 
@@ -4458,7 +4458,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(
             callbackRequest,
             authToken,
-            null
+            null,
+            PrlAppsConstants.ENGLISH
         );
 
         Assert.assertEquals(stringObjectMap, caseDataMap);

@@ -44,7 +44,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -268,15 +270,23 @@ public class ManageOrdersUtils {
         }
     }
 
-    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData) {
+    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData, String language) {
         List<String> errorList = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(caseData.getManageOrders())) {
             if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isBlank(caseData.getJusticeLegalAdviserFullName()))) {
-                errorList.add(MANDATORY_JUDGE);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(MANDATORY_JUDGE_WELSH);
+                } else {
+                    errorList.add(MANDATORY_JUDGE);
+                }
             } else if (JudgeOrMagistrateTitleEnum.magistrate.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isEmpty(caseData.getMagistrateLastName()))) {
-                errorList.add(MANDATORY_MAGISTRATE);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(MANDATORY_MAGISTRATE_WELSH);
+                } else {
+                    errorList.add(MANDATORY_MAGISTRATE);
+                }
             }
         }
         return errorList;

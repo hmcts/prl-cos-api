@@ -299,7 +299,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, PrlAppsConstants.ENGLISH);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)

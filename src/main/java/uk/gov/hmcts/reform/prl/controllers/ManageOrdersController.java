@@ -107,7 +107,7 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, PrlAppsConstants.ENGLISH);
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()

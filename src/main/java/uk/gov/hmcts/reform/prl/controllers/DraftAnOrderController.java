@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -80,6 +81,7 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateFl404Fields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -87,7 +89,8 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            String language = CaseUtils.getLanguage(clientContext);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -95,7 +98,8 @@ public class DraftAnOrderController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null)).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null,
+                    language)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -252,10 +252,10 @@ public class DraftAnOrderControllerTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(stringObjectMap);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
         );
     }
 
@@ -322,10 +322,10 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
         );
     }
 
@@ -361,8 +361,9 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,callbackRequest).getData());
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,
+            PrlAppsConstants.ENGLISH,callbackRequest).getData());
     }
 
     @Test
@@ -398,10 +399,10 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest).getData()
         );
     }
 
@@ -457,7 +458,8 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
+            PrlAppsConstants.ENGLISH,callbackRequest);
         Assert.assertEquals(MANDATORY_JUDGE,
                             response.getErrors().get(0));
     }
@@ -483,7 +485,8 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
+            PrlAppsConstants.ENGLISH,callbackRequest);
         Assert.assertEquals(MANDATORY_MAGISTRATE,
                             response.getErrors().get(0));
     }
@@ -515,8 +518,10 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
-        Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest),
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
+            PrlAppsConstants.ENGLISH,callbackRequest);
+        Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken,
+                PrlAppsConstants.ENGLISH,callbackRequest),
                             response);
     }
 
@@ -817,7 +822,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest);
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

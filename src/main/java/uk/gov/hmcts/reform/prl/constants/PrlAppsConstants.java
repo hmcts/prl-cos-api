@@ -949,6 +949,9 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+
+    public static final String MANDATORY_JUDGE_WELSH =
+        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser - welsh";
     public static final String DUMMY = "Dummy";
 
 
@@ -961,6 +964,8 @@ public class PrlAppsConstants {
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
+    public static final String MANDATORY_MAGISTRATE_WELSH = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+        + " Magistrates - welsh";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
