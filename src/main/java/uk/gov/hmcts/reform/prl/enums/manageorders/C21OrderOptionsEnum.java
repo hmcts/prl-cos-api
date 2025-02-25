@@ -33,7 +33,6 @@ public enum C21OrderOptionsEnum {
         return displayedValue;
     }
 
-    @JsonValue
     public String getDisplayedValueWelsh() {
         return displayedValueWelsh;
     }
