@@ -1,13 +1,24 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.Fm5ReminderService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,6 +52,46 @@ public class Fm5ReminderControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         fm5ReminderController.sendFm5ReminderNotifications(18L, authToken, s2sToken);
         verifyNoInteractions(fm5ReminderService);
+    }
+
+    @Test
+    public void test_FetchFm5ReminderEligibleCases() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        List<CaseDetails> caseDetailsList = new ArrayList<>();
+        caseDetailsList.add(CaseDetails.builder().build());
+        when(fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders()).thenReturn(caseDetailsList);
+        when(fm5ReminderService.getQualifiedCasesAndHearingsForNotifications(
+            any(List.class),
+            any(Long.class))).thenReturn(new HashMap<>());
+        fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
+        verify(fm5ReminderService, times(1)).retrieveCasesInHearingStatePendingFm5Reminders();
+    }
+
+    @Test
+    public void test_FetchFm5ReminderEligibleCasesWhenCaseDetailsEmpty() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders()).thenReturn(null);
+        ResponseEntity response = fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
+        assertNotNull(response);
+        assertEquals("No Cases Eligible for FM5 notification", response.getBody());
+    }
+
+    @Test
+    public void test_FetchFm5ReminderEligibleCasesWhenNoAuthorization() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(
+            () -> {
+                fm5ReminderController.fetchFm5ReminderEligibleCases(18L, authToken, s2sToken);
+            }, RuntimeException.class, "Invalid Client"
+        );
+
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 }
