@@ -159,6 +159,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.CREATE_URGENT_CASES_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
@@ -170,6 +171,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
@@ -1326,6 +1328,7 @@ public class CallbackControllerTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
             .applicantsFL401(fl401Applicant)
+            .state(SUBMITTED_PAID)
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
@@ -1333,13 +1336,16 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
-            .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(ISSUED_STATE)
+                                                       .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken,s2sToken, callbackRequest));
+        AboutToStartOrSubmitCallbackResponse response = callbackController.caseWithdrawAboutToSubmit(
+            authToken, s2sToken, callbackRequest);
+        assertNotNull(response);
+        assertEquals(WITHDRAWN_STATE, response.getData().get("state"));
 
     }
 
