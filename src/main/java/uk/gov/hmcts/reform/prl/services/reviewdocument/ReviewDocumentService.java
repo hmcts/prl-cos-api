@@ -193,10 +193,8 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getFileNamebulkscan()
                                                           + HYPHEN_SEPARATOR
-                                                          + CommonUtils.formatDate(
-                                                   D_MMM_YYYY,
-                                                   element.getValue().getScannedDatebulkscan().toLocalDate()
-                                               ))
+                                                          + CommonUtils.formatDate(D_MMM_YYYY,
+                                                   element.getValue().getScannedDatebulkscan().toLocalDate()))
                                                .build()).toList());
             tempQuarantineDocumentList.addAll(convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments()));
         }
@@ -273,7 +271,6 @@ public class ReviewDocumentService {
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
-        log.info("submittedBy " + submittedBy);
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
         String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);

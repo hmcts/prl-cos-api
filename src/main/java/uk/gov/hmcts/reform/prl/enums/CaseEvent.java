@@ -63,6 +63,7 @@ public enum CaseEvent {
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate"),
 
     HWF_PROCESS_CASE_UPDATE("hwfProcessCaseUpdate"),
+    HWF_PROCESS_CASE_UPDATE_BULKSCAN("hwfProcessCaseUpdateBulkscan"),
     HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
 
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
@@ -72,7 +73,8 @@ public enum CaseEvent {
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
-    APPLICANT_DETAILS("applicantsDetails");
+    APPLICANT_DETAILS("applicantsDetails"),
+    PROCESS_PAYMENT_FOR_BULKSCAN("processPaymentForBulkscan");
 
     private final String value;
 
