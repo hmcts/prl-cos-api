@@ -903,5 +903,97 @@ public class ServiceOfDocumentsServiceTest {
         assertNotNull(response);
     }
 
+    @Test
+    public void testValidateDocuments() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        Document document = Document.builder().documentUrl("url").documentFileName("docFileName")
+            .documentBinaryUrl("docBinaryUrl").build();
+        List<Element<Document>> documentsList = new ArrayList<>();
+        documentsList.add(ElementUtils.element(document));
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(documentsList)
+            .build();
+        ServiceOfDocuments serviceOfDocuments = ServiceOfDocuments.builder()
+            .sodUnServedPack(sodPack)
+            .sodAdditionalDocumentsList(documentsList)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.No)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .build();
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    public void testValidateDocumentsWhenSodAdditionalDocsListEmpty() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();
+        documentsList.add(ElementUtils.element(DocumentsDynamicList.builder().documentsList(DynamicList.builder().build()).build()));
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder().sodDocumentsList(documentsList).build())
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(0,response.size());
+    }
+
+    @Test
+    public void testValidateDocumentsWhenSodAdditionalDocsListEmptyAndSodDocsEmpty() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder().sodDocumentsList(documentsList).build())
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(1,response.size());
+    }
+
 
 }
