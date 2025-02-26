@@ -76,7 +76,8 @@ public class CaseOrder {
         final String[] hearingId = {""};
         manageOrderHearingDetails.stream().forEach(
             manageOrderHearingDetailElement -> {
-                if (null != manageOrderHearingDetailElement.getValue().getConfirmedHearingDates()) {
+                if (null != manageOrderHearingDetailElement.getValue().getConfirmedHearingDates()
+                    && null != manageOrderHearingDetailElement.getValue().getConfirmedHearingDates().getValue()) {
                     if (hearingId[0].equals("")) {
                         hearingId[0] = manageOrderHearingDetailElement.getValue()
                             .getConfirmedHearingDates().getValue().getCode();
