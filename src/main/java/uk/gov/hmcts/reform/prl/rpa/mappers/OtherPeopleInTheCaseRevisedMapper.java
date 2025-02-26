@@ -37,7 +37,7 @@ public class OtherPeopleInTheCaseRevisedMapper {
             .add("previousName", otherPeople.getPreviousName())
             .add("isDateOfBirthKnown", CommonUtils.getYesOrNoValue(otherPeople.getIsDateOfBirthKnown()))
             .add("dateOfBirth", String.valueOf(otherPeople.getDateOfBirth()))
-            .add("gender", otherPeople.getGender().getDisplayedValue())
+            .add("gender", null != otherPeople.getGender() ? otherPeople.getGender().getDisplayedValue() : null)
             .add("otherGender", otherPeople.getOtherGender())
             .add(
                 "canYouProvideEmailAddress",

@@ -34,7 +34,7 @@ public class ChildDetailsRevisedMapper {
             .add("firstName", child.getFirstName())
             .add("lastName", child.getLastName())
             .add("dateOfBirth", String.valueOf(child.getDateOfBirth()))
-            .add("gender", child.getGender().getDisplayedValue())
+            .add("gender", null != child.getGender() ? child.getGender().getDisplayedValue() : null)
             .add("otherGender", child.getOtherGender())
             .add("orderAppliedFor", child.getOrderAppliedFor().isEmpty()
                 ? null : child.getOrderAppliedFor().stream()

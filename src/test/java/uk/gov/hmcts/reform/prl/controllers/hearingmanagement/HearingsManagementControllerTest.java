@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -20,12 +23,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.junit.Assert.assertThrows;
@@ -160,6 +165,8 @@ public class HearingsManagementControllerTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
+        when(hearingManagementService.getNextHearingDate(Mockito.anyString()))
+            .thenReturn(NextHearingDetails.builder().hearingDateTime(LocalDateTime.now()).build());
 
         hearingsManagementController.updateNextHearingDetailsCallback("auth",callbackRequest);
         assertTrue(true);
@@ -192,5 +199,26 @@ public class HearingsManagementControllerTest {
         hearingsManagementController.updateAllTabsAfterHmcCaseState("authToken", callbackRequest);
         assertTrue(true);
 
+    }
+
+    @Test
+    public void testValidateHearingState() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(caseDetails)
+                .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = hearingsManagementController.validateHearingState("authToken", callbackRequest);
+        Assert.assertNotNull(response.getData());
     }
 }

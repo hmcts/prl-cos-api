@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -546,6 +547,9 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> declarationMap = new HashMap<>();
         String solicitor = caseData.getSolicitorName();
         String statementOfTruthPlaceHolder = null;
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. ";
 
         if (nonNull(solicitor)) {
             statementOfTruthPlaceHolder = solicitor;
@@ -554,11 +558,14 @@ public class ApplicationsTabService implements TabService {
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 
-        String declarationText = "I understand that proceedings for contempt of court may be brought"
-            + " against anyone who makes, or causes to be made, a false statement in a document verified"
-            + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. " + statementOfTruthPlaceHolder
-            + " is authorised by the applicant to sign this statement.";
+        if ((null != caseData.getIsCourtNavCase() && YesOrNo.Yes.equals(caseData.getIsCourtNavCase()))
+            || (null != caseData.getCaseCreatedBy()) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            declarationText = declarationText + "I believe that the facts stated in this application are true.";
+        } else {
+            declarationText = declarationText + "The applicant believes that the facts stated in this form and any "
+                + "continuation sheets are true. " + statementOfTruthPlaceHolder
+                + " is authorised by the applicant to sign this statement.";
+        }
 
         declarationMap.put("declarationText", declarationText);
         declarationMap.put("agreedBy", statementOfTruthPlaceHolder);
@@ -1270,6 +1277,15 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
         FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
+
+        //Fix for PRL-6615 due to the respondent lived with applicant not being set in the respondent object
+        if (null != a) {
+            a = a.toBuilder()
+                .isRespondentLiveWithApplicant(null
+                    != currentRespondent.getRespondentLivedWithApplicant()
+                    ? currentRespondent.getRespondentLivedWithApplicant() : null)
+                .build();
+        }
         return toMap(a);
     }
 
@@ -1309,7 +1325,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getRespondentRelationDateInfoObject() != null) {
             RespondentRelationDateInfo resRelInfo = caseData.getRespondentRelationDateInfoObject();
             if (resRelInfo.getRelationStartAndEndComplexType() != null) {
-                rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
+                rs.relationshipDateComplexStartDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
                 rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
             }
             rs.applicantRelationshipDate(resRelInfo.getApplicantRelationshipDate());
@@ -1346,7 +1362,7 @@ public class ApplicationsTabService implements TabService {
             .address(home.getAddress())
             .doAnyChildrenLiveAtAddress(home.getDoAnyChildrenLiveAtAddress())
             .everLivedAtTheAddress(home.getEverLivedAtTheAddress() != null ? home.getEverLivedAtTheAddress().getDisplayedValue() : "")
-            .howIsThePropertyAdapted(home.getIsPropertyAdapted())
+            .howIsThePropertyAdaptedText(home.getHowIsThePropertyAdapted())
             .furtherInformation(home.getFurtherInformation())
             .doesApplicantHaveHomeRights(home.getDoesApplicantHaveHomeRights())
             .intendToLiveAtTheAddress(home.getIntendToLiveAtTheAddress() != null ? home.getIntendToLiveAtTheAddress().getDisplayedValue() : "")
