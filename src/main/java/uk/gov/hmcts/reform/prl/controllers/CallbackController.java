@@ -85,7 +85,6 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.tasks.ValidateMiamApplicationOrExemptionTask;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -226,8 +225,7 @@ public class CallbackController {
 
             String language = CaseUtils.getLanguage(clientContext);
             if (PrlAppsConstants.WELSH.equals(language)
-                && isNotEmpty(workflowResult.getErrors())
-                && workflowResult.getErrors().contains(ValidateMiamApplicationOrExemptionTask.ERROR_MSG_MIAM)) {
+                && isNotEmpty(workflowResult.getErrors())) {
                 List<String> errorlist = new ArrayList<>();
                 errorlist
                     .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
