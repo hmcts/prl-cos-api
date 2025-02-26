@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 @RunWith(MockitoJUnitRunner.class)
- class CaseDataMapperTest {
+class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";
     private final ObjectMapper mapper = new ObjectMapper();
