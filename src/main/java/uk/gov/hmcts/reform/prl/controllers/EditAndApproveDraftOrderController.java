@@ -424,8 +424,8 @@ public class EditAndApproveDraftOrderController {
             );
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, PrlAppsConstants.ENGLISH)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.ENGLISH)) {
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(

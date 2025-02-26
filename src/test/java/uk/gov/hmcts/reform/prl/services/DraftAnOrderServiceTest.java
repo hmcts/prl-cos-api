@@ -1681,7 +1681,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertFalse(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertFalse(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1712,7 +1712,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1743,7 +1743,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1774,7 +1774,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1802,7 +1802,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1827,7 +1827,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1852,7 +1852,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1877,7 +1877,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
 
@@ -1898,7 +1898,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>(), PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5056,7 +5056,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testValidationIfDirectionForFactFindingSelectedScenario1() throws Exception {
+    public void testValidationIfDirectionForFactFindingSelectedScenario1Welsh() throws Exception {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5080,7 +5080,35 @@ public class DraftAnOrderServiceTest {
             .doYouWantToEditTheOrder(No)
             .build();
         List<String> errorList = new ArrayList<>();
-        assertFalse(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList));
+        assertFalse(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.WELSH));
+    }
+
+    @Test
+    public void testValidationIfDirectionForFactFindingSelectedScenario1() throws Exception {
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        PartyDetails details1 = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement1 = element(details1);
+        partyDetails.add(partyDetailsElement1);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+                .build())
+            .doYouWantToEditTheOrder(No)
+            .build();
+        List<String> errorList = new ArrayList<>();
+        assertFalse(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5103,7 +5131,7 @@ public class DraftAnOrderServiceTest {
             .doYouWantToEditTheOrder(No)
             .build();
         List<String> errorList = new ArrayList<>();
-        assertTrue(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList));
+        assertTrue(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.ENGLISH));
     }
 
     @Test

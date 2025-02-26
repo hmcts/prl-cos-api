@@ -600,7 +600,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
         );
     }
 
@@ -639,7 +639,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
         );
 
     }
@@ -858,7 +858,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest);
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

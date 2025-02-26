@@ -114,6 +114,7 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateSdoFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -122,9 +123,10 @@ public class DraftAnOrderController {
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
+            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
                 draftAnOrderService.populateStandardDirectionOrderDefaultFields(
                     authorisation,
                     caseData,

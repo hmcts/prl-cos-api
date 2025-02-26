@@ -1399,7 +1399,7 @@ public class DraftAnOrderService {
         return fl404CustomFields;
     }
 
-    public static boolean checkStandingOrderOptionsSelected(CaseData caseData, List<String> errorList) {
+    public static boolean checkStandingOrderOptionsSelected(CaseData caseData, List<String> errorList, String language) {
         if (caseData.getStandardDirectionOrder() != null
             && caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -1409,22 +1409,28 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty()) {
-            errorList.add(
-                "Please select at least one options from below");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Please select at least one options from below - welsh");
+            } else {
+                errorList.add("Please select at least one options from below");
+            }
             return false;
         } else {
             return true;
         }
     }
 
-    public static boolean validationIfDirectionForFactFindingSelected(CaseData caseData, List<String> errorList) {
+    public static boolean validationIfDirectionForFactFindingSelected(CaseData caseData, List<String> errorList, String language) {
         if (caseData.getStandardDirectionOrder() != null
             && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)
             && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (caseData.getApplicants().size() > 1 || caseData.getRespondents().size() > 1)) {
-            errorList.add(
-                "You cannot add directions for a fact-finding hearing. Upload the order in manage orders");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("You cannot add directions for a fact-finding hearing. Upload the order in manage orders - welsh");
+            } else {
+                errorList.add("You cannot add directions for a fact-finding hearing. Upload the order in manage orders");
+            }
             return false;
         } else {
             return true;
