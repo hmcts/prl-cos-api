@@ -1600,7 +1600,8 @@ public class DraftAnOrderServiceTest {
         CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData,
-            null
+            null,
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals("C100", caseDataUpdated.getCaseTypeOfApplication());
@@ -1657,7 +1658,8 @@ public class DraftAnOrderServiceTest {
         CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData,
-            null
+            null,
+            PrlAppsConstants.ENGLISH
         );
         assertEquals("FL401", caseDataUpdated.getCaseTypeOfApplication());
     }
@@ -4427,7 +4429,8 @@ public class DraftAnOrderServiceTest {
                                                                                    List.of(element(HearingData.builder().build())),
                                                                                    false,
                                                                                    CreateSelectOrderOptionsEnum.standardDirectionsOrder,
-                                                                                   null
+                                                                                   null,
+            PrlAppsConstants.ENGLISH
         );
         assertNotNull(stringObjectMap);
     }
@@ -4491,7 +4494,8 @@ public class DraftAnOrderServiceTest {
                                                                                    List.of(element(HearingData.builder().build())),
                                                                                    true,
                                                                                    CreateSelectOrderOptionsEnum.standardDirectionsOrder,
-                                                                                   null
+                                                                                   null,
+            PrlAppsConstants.WELSH
         );
         assertNotNull(stringObjectMap);
     }
@@ -4695,7 +4699,7 @@ public class DraftAnOrderServiceTest {
             .eventId(Event.DRAFT_AN_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4724,7 +4728,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
             TEST_UUID));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4751,7 +4755,7 @@ public class DraftAnOrderServiceTest {
             .eventId(Event.DRAFT_AN_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
 
@@ -4792,7 +4796,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4868,7 +4872,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4916,7 +4920,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -4966,7 +4970,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5629,7 +5633,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5680,7 +5684,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test

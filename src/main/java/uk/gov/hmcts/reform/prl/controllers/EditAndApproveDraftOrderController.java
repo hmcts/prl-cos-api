@@ -328,7 +328,8 @@ public class EditAndApproveDraftOrderController {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
                     callbackRequest,
                     caseData,
-                    clientContext
+                    clientContext,
+                    PrlAppsConstants.ENGLISH
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()

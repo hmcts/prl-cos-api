@@ -433,7 +433,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(DraftOrder.builder().build());
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken,"clcx", callbackRequest).getData());
     }
 
@@ -1002,7 +1002,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);
@@ -1041,7 +1041,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken,"clcx", callbackRequest);
 
@@ -1084,7 +1084,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken,"clcx", callbackRequest);
 
@@ -1129,7 +1129,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);
@@ -1169,7 +1169,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);
