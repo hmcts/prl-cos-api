@@ -86,7 +86,7 @@ public class HwfProcessUpdateCaseStateService {
                 if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
                     && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
                     String event = CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy())
-                        ? HWF_PROCESS_CASE_UPDATE_BULKSCAN.getValue() : HWF_PROCESS_CASE_UPDATE.getValue();
+                        ? PROCESS_PAYMENT_FOR_BULKSCAN.getValue() : HWF_PROCESS_CASE_UPDATE.getValue();
                     updateCaseStateAndSubmitevent(event, caseDetails, caseData);
                 }
                 if (CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy()) && StringUtils.isEmpty(caseData.getHelpWithFeesNumber())) {
