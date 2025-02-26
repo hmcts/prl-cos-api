@@ -100,7 +100,7 @@ public class DraftAnOrderController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null)).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null, language)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

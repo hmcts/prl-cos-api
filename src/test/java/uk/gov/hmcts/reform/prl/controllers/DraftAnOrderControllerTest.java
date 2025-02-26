@@ -252,7 +252,7 @@ public class DraftAnOrderControllerTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(stringObjectMap);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
@@ -322,7 +322,7 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
@@ -361,7 +361,7 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,
             PrlAppsConstants.ENGLISH,callbackRequest).getData());
     }
@@ -399,7 +399,7 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest).getData()
