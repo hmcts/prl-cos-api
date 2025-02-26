@@ -65,8 +65,6 @@ public class SendgridService {
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
     public void sendEmail(JsonObject caseData) throws IOException {
-        log.info("RPA caseData: {}", caseData);
-        log.info("to email: {}", toEmail);
         String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();

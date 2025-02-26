@@ -45,10 +45,8 @@ public class SolicitorEmailNotificationEventHandler {
 
     @EventListener(condition = "#event.typeOfEvent eq 'RPA notification'")
     public void notifyRPaForCaseIssuance(final SolicitorNotificationEmailEvent event) throws IOException {
-        log.info("Inside RPA ");
         CaseData caseData = CaseUtils.getCaseData(event.getCaseDetailsModel(), objectMapper);
         requireNonNull(caseData);
-        log.info("Before send RPA ");
         sendgridService.sendEmail(c100JsonMapper.map(caseData));
     }
 
