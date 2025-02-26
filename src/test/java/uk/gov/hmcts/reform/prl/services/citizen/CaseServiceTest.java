@@ -562,30 +562,30 @@ public class CaseServiceTest {
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .build();
-        UserDetails userDetails = UserDetails
+        UserDetails userDetails1 = UserDetails
             .builder()
             .email("test@gmail.com")
             .build();
 
-        CaseDetails caseDetails = mock(CaseDetails.class);
+        CaseDetails caseDetails1 = mock(CaseDetails.class);
 
-        CaseData updatedCaseData = caseData.toBuilder()
+        CaseData updatedCaseData = caseData1.toBuilder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
 
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails1);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData,
-                                       C100_REQUEST_SUPPORT)).thenReturn(caseDetails);
+                                       C100_REQUEST_SUPPORT)).thenReturn(caseDetails1);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -1159,8 +1159,6 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenOrders()));
         //Assert notifications
         assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        //assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
-        //assertEquals(DN1_SOA_PERSONAL_NON_PERSONAL_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(1).getId());
     }
 
     @Test

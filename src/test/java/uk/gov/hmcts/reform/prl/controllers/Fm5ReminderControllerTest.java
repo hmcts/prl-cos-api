@@ -57,7 +57,6 @@ public class Fm5ReminderControllerTest {
     @Test
     public void test_FetchFm5ReminderEligibleCases() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        CaseDetails caseDetails = CaseDetails.builder().build();
         List<CaseDetails> caseDetailsList = new ArrayList<>();
         caseDetailsList.add(CaseDetails.builder().build());
         when(fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders()).thenReturn(caseDetailsList);

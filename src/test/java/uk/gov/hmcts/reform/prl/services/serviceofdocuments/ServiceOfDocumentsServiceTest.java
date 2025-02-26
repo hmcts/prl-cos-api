@@ -694,7 +694,6 @@ public class ServiceOfDocumentsServiceTest {
             .solicitorEmail(null)
             .contactPreferences(ContactPreferences.email)
             .build();
-        Document document = Document.builder().build();
         sodPack = sodPack.toBuilder().documents(new ArrayList<>())
             .build();
         serviceOfDocuments = serviceOfDocuments.toBuilder()
@@ -722,7 +721,6 @@ public class ServiceOfDocumentsServiceTest {
             .solicitorEmail(null)
             .contactPreferences(ContactPreferences.email)
             .build();
-        Document document = Document.builder().build();
         sodPack = sodPack.toBuilder().documents(new ArrayList<>())
             .build();
         serviceOfDocuments = serviceOfDocuments.toBuilder()
@@ -759,7 +757,6 @@ public class ServiceOfDocumentsServiceTest {
             .solicitorEmail(null)
             .contactPreferences(ContactPreferences.email)
             .build();
-        Document document = Document.builder().build();
         sodPack = sodPack.toBuilder().documents(new ArrayList<>())
             .build();
         serviceOfDocuments = serviceOfDocuments.toBuilder()
@@ -797,7 +794,6 @@ public class ServiceOfDocumentsServiceTest {
             .solicitorEmail("solicitorEmail")
             .contactPreferences(ContactPreferences.email)
             .build();
-        Document document = Document.builder().build();
         sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
             .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
             .documents(new ArrayList<>())
@@ -854,7 +850,6 @@ public class ServiceOfDocumentsServiceTest {
             .solicitorEmail("solicitorEmail")
             .contactPreferences(ContactPreferences.email)
             .build();
-        Document document = Document.builder().build();
         sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
             .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
             .documents(new ArrayList<>())
@@ -915,14 +910,14 @@ public class ServiceOfDocumentsServiceTest {
             .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
             .documents(documentsList)
             .build();
-        ServiceOfDocuments serviceOfDocuments = ServiceOfDocuments.builder()
+        ServiceOfDocuments serviceOfDocuments1 = ServiceOfDocuments.builder()
             .sodUnServedPack(sodPack)
             .sodAdditionalDocumentsList(documentsList)
             .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.No)
             .build();
 
         CaseData caseData1 = CaseData.builder()
-            .serviceOfDocuments(serviceOfDocuments)
+            .serviceOfDocuments(serviceOfDocuments1)
             .applicantsFL401(partyDetails)
             .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
             .respondents(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
