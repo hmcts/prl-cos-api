@@ -48,7 +48,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -341,20 +343,33 @@ public class ManageOrdersUtils {
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
-                                                                   List<String> errorList) {
+                                                                   List<String> errorList,
+                                                                   String language) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
-                    errorList.add("This order is not available to be created");
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        errorList.add("This order is not available to be created - welsh");
+                    } else {
+                        errorList.add("This order is not available to be created");
+                    }
                 }
                 if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
-                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH);
+                    } else {
+                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
+                    }
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                     .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_FL401);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(ORDER_NOT_AVAILABLE_FL401_WELSH);
+                } else {
+                    errorList.add(ORDER_NOT_AVAILABLE_FL401);
+                }
             }
         }
         return !errorList.isEmpty();

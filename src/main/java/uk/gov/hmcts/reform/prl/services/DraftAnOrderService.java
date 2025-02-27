@@ -2386,7 +2386,8 @@ public class DraftAnOrderService {
         if (getErrorsForOrdersProhibitedForC100FL401(
             caseData,
             caseData.getCreateSelectOrderOptions(),
-            errorList
+            errorList,
+            language
         )) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {

@@ -147,7 +147,8 @@ public class ManageOrdersController {
             if (getErrorsForOrdersProhibitedForC100FL401(
                 caseData,
                 caseData.getCreateSelectOrderOptions(),
-                errorList
+                errorList,
+                PrlAppsConstants.ENGLISH
             )) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
