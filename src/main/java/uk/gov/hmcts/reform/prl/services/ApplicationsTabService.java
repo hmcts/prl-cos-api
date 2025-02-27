@@ -1340,7 +1340,7 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getHomeDetails(CaseData caseData) {
         log.info("Home details {}", caseData.getHome());
-        if (caseData.getHome() == null) {
+        if (ObjectUtils.isEmpty(caseData.getHome())) {
             return Collections.emptyMap();
         }
 
