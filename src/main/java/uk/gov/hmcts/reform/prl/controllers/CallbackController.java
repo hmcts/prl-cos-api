@@ -224,16 +224,21 @@ public class CallbackController {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
             String language = CaseUtils.getLanguage(clientContext);
-            if (PrlAppsConstants.WELSH.equals(language)
-                && isNotEmpty(workflowResult.getErrors())) {
-                List<String> errorlist = new ArrayList<>();
-                errorlist
-                    .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
-                return ok(
-                    AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(errorlist)
-                        .build()
-                );
+            log.info("Language is {}", language);
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                log.info("Language is Welsh");
+                log.info("Errors are {}", workflowResult.getErrors());
+                if (isNotEmpty(workflowResult.getErrors())) {
+                    log.info("Errors are not empty");
+                    List<String> errorlist = new ArrayList<>();
+                    errorlist
+                        .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
+                    return ok(
+                        AboutToStartOrSubmitCallbackResponse.builder()
+                            .errors(errorlist)
+                            .build()
+                    );
+                }
             }
 
             return ok(
