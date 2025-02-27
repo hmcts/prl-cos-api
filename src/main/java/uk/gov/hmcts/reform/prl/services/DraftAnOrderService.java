@@ -1322,9 +1322,7 @@ public class DraftAnOrderService {
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
                                   .childOption(manageOrderService.getChildOption(caseData))
-                                  .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
-                                                      ? BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions()
-                                      .getDisplayedValue() + BOLD_END : null)
+                                  .typeOfC21Order(checkIfC21IsWelsh(caseData, language))
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
             caseData = manageOrderService.populateCustomOrderFields(caseData, getOrderType(callbackRequest, caseData, clientContext));
@@ -2306,6 +2304,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
+                log.info("Selected order: {}", caseData.getSelectedOrder());
                 caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
