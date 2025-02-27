@@ -4252,10 +4252,15 @@ public class ServiceOfApplicationService {
                     User user = null != party.getValue().getUser()
                         ? party.getValue().getUser().toBuilder().build()
                         : User.builder().build();
-                    user = user.toBuilder()
-                        .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
-                        .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
-                        .build();
+
+                    if (CollectionUtils.isNotEmpty(caseData.getUserInfo()) && isNotEmpty(caseData.getUserInfo().get(0).getValue())) {
+                        user = user.toBuilder()
+                            .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
+                            .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
+                            .build();
+                    } else {
+                        user = user.toBuilder().build();
+                    }
 
                     PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
