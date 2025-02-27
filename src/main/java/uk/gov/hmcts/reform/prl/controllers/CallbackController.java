@@ -221,6 +221,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Client context is {}", clientContext);
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
             String language = CaseUtils.getLanguage(clientContext);
