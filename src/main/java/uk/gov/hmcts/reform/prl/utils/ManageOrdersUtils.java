@@ -292,13 +292,17 @@ public class ManageOrdersUtils {
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType, String language) {
         List<String> errorList = new ArrayList<>();
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
             && ObjectUtils.isNotEmpty(fl404CustomFields)
             && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
-            errorList.add("Please enter either applicant or respondent section");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Please enter either applicant or respondent section - welsh");
+            } else {
+                errorList.add("Please enter either applicant or respondent section");
+            }
         }
         return errorList;
     }

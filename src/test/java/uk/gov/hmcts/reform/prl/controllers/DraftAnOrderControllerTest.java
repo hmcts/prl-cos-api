@@ -306,7 +306,7 @@ public class DraftAnOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation))
+        when(manageOrderService.populateCustomOrderFields(any(), any(), any()))
             .thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -318,7 +318,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation);
+            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -357,7 +357,7 @@ public class DraftAnOrderControllerTest {
 
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
+            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -395,7 +395,7 @@ public class DraftAnOrderControllerTest {
 
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.blankOrderOrDirections);
+            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 

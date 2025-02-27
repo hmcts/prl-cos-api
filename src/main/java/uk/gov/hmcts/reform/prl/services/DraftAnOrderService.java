@@ -1325,7 +1325,7 @@ public class DraftAnOrderService {
                                   .typeOfC21Order(checkIfC21IsWelsh(caseData, language))
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
-            caseData = manageOrderService.populateCustomOrderFields(caseData, getOrderType(callbackRequest, caseData, clientContext));
+            caseData = manageOrderService.populateCustomOrderFields(caseData, getOrderType(callbackRequest, caseData, clientContext), language);
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
@@ -1338,7 +1338,7 @@ public class DraftAnOrderService {
                                   .build()).build();
             CreateSelectOrderOptionsEnum selectedOrder = getOrderType(callbackRequest, caseData, clientContext);
             if (ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(selectedOrder), caseData)) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData, selectedOrder);
+                caseData = manageOrderService.populateCustomOrderFields(caseData, selectedOrder, language);
             }
 
         }
@@ -2264,8 +2264,6 @@ public class DraftAnOrderService {
                                                               String authorisation,
                                                               String clientContext,
                                                               String language) throws Exception {
-
-        log.info("inside handlePopulateDraftOrderFields");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2298,14 +2296,14 @@ public class DraftAnOrderService {
             if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(
                     caseData,
-                    caseData.getCreateSelectOrderOptions()
+                    caseData.getCreateSelectOrderOptions(),
+                    language
                 );
             }
             if (Objects.nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                log.info("Selected order: {}", caseData.getSelectedOrder());
                 caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
@@ -2445,7 +2443,7 @@ public class DraftAnOrderService {
             .build();
     }
 
-    private List<String> validateDraftOrderDetails(CaseData caseData) {
+    private List<String> validateDraftOrderDetails(CaseData caseData, String language) {
         List<String> errorList = new ArrayList<>();
         if (ManageOrdersUtils.isHearingPageNeeded(
             caseData.getCreateSelectOrderOptions(),
@@ -2461,17 +2459,17 @@ public class DraftAnOrderService {
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
         }
 
         return errorList;
     }
 
-    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder) {
+    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder, String language) {
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
         }
         if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
             //PRL-4260 - hearing screen validations
@@ -2509,7 +2507,7 @@ public class DraftAnOrderService {
 
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
-            errorList = validateDraftOrderDetails(caseData);
+            errorList = validateDraftOrderDetails(caseData, language);
             if (!errorList.isEmpty()) {
                 return Map.of("errorList", errorList);
             }
@@ -2534,7 +2532,7 @@ public class DraftAnOrderService {
             draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList, clientContext, callbackRequest.getEventId());
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                errorList = validateEditedOrderDetails(caseData, draftOrder);
+                errorList = validateEditedOrderDetails(caseData, draftOrder, language);
                 if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
                 }

@@ -103,12 +103,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, PrlAppsConstants.ENGLISH);
-            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+            String language = CaseUtils.getLanguage(clientContext);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -116,7 +118,8 @@ public class ManageOrdersController {
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                authorisation
+                authorisation,
+                language
             )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -150,7 +153,7 @@ public class ManageOrdersController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
+                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -279,7 +282,8 @@ public class ManageOrdersController {
                 }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
-                    caseData
+                    caseData,
+                    PrlAppsConstants.ENGLISH
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(
@@ -437,7 +441,8 @@ public class ManageOrdersController {
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        caseData
+                        caseData,
+                        PrlAppsConstants.ENGLISH
                     ));
                 }
                 CaseData modifiedCaseData = objectMapper.convertValue(
@@ -546,7 +551,7 @@ public class ManageOrdersController {
 
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
