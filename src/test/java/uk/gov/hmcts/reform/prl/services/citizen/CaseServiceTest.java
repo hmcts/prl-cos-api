@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -70,6 +71,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
@@ -100,8 +102,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -112,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_C
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.OCCUPATION_ORDER;
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -945,6 +950,130 @@ public class CaseServiceTest {
     }
 
     @Test
+    public void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
+
+        //Given
+        OrderDetails orderDetails1 = orderDetails.toBuilder()
+            .otherDetails(OtherOrderDetails.builder().build())
+            .dateCreated(LocalDateTime.now())
+            .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
+                                   .cafcassServed(No)
+                                   .cafcassCymruServed(No)
+                                   .multipleOrdersServed(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
+                                   .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.courtAdmin.getId())
+                                   .servedParties(List.of(Element.<ServedParties>builder()
+                                                              .value(ServedParties.builder()
+                                                                         .partyId("00000000-0000-0000-0000-000000000000")
+                                                                         .build()).build()))
+                                   .build())
+            .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(YES).fl404bIsPowerOfArrest2(YES)
+                                   .fl404bIsPowerOfArrest3(YES).fl404bIsPowerOfArrest4(YES)
+                                   .fl404bIsPowerOfArrest5(YES).fl404bIsPowerOfArrest6(YES)
+                                   .build())
+            .orderType(OCCUPATION_ORDER)
+            .sosStatus(SOS_COMPLETED)
+            .build();
+        CaseData caseData1 = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder().partyId(testUuid)
+                                 .user(User.builder().idamId(userDetails.getId()).build()).build())
+            .respondentsFL401(partyDetails)
+            .orderCollection(List.of(element(orderDetails1)))
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
+                                                              .builder()
+                                                              .uploadedDateTime("04-Sep-2024 01:38:33 PM")
+                                                              .partyType(PartyEnum.applicant)
+                                                              .selectedParties(List.of(element(ServedParties.builder().partyId(
+                                                                  testUuid.toString()).build())))
+                                                              .c2DocumentBundle(C2DocumentBundle
+                                                                                    .builder()
+                                                                                    .supportingEvidenceBundle(List.of(
+                                                                                        element(SupportingEvidenceBundle
+                                                                                                    .builder()
+                                                                                                    .build())))
+                                                                                    .build())
+                                                              .build())))
+            .state(State.DECISION_OUTCOME)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+    }
+
+    @Test
+    public void testCitizenOrdersSosCompletedFL401ForOccupationOrderWithNoPowerOfArrest() {
+        //Given
+        OrderDetails orderDetails1 = orderDetails.toBuilder()
+            .dateCreated(LocalDateTime.now())
+            .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
+                                   .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.courtAdmin.getId())
+                                   .cafcassServed(Yes)
+                                   .cafcassCymruServed(Yes)
+                                   .servedParties(List.of(Element.<ServedParties>builder()
+                                                              .value(ServedParties.builder().partyId(
+                                                                  "00000000-0000-0000-0000-000000000000").build()).build()))
+                                   .build())
+            .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(NO).fl404bIsPowerOfArrest2(NO)
+                                   .fl404bIsPowerOfArrest3(NO).fl404bIsPowerOfArrest4(NO)
+                                   .fl404bIsPowerOfArrest5(NO).fl404bIsPowerOfArrest6(NO)
+                                   .build())
+            .orderType(OCCUPATION_ORDER)
+            .sosStatus(SOS_COMPLETED)
+            .build();
+
+        servedApplicationDetails = servedApplicationDetails.toBuilder()
+            .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_BAILIFF)
+            .build();
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+
+        CaseData caseData1 = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder().partyId(testUuid)
+                                 .user(User.builder().idamId(userDetails.getId()).build()).build())
+            .respondentsFL401(partyDetails)
+            .orderCollection(List.of(element(orderDetails1)))
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
+                                                              .builder()
+                                                              .uploadedDateTime("04-Sep-2024 01:38:33 PM")
+                                                              .partyType(PartyEnum.applicant)
+                                                              .selectedParties(List.of(element(ServedParties.builder().partyId(
+                                                                  testUuid.toString()).build())))
+                                                              .c2DocumentBundle(C2DocumentBundle
+                                                                                    .builder()
+                                                                                    .supportingEvidenceBundle(List.of(
+                                                                                        element(SupportingEvidenceBundle
+                                                                                                    .builder()
+                                                                                                    .build())))
+                                                                                    .build())
+                                                              .build())))
+            .state(State.DECISION_OUTCOME)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+    }
+
+
+    @Test
     public void testCitizenApplicantSoaPersonalServiceC100() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
@@ -1109,13 +1238,27 @@ public class CaseServiceTest {
 
     @Test
     public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStatePrepareForHearingConductHearing() {
+        OrderDetails orderDetails1 = orderDetails.toBuilder()
+            .dateCreated(LocalDateTime.now())
+            .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(NO).fl404bIsPowerOfArrest2(YES)
+                                   .fl404bIsPowerOfArrest3(YES).fl404bIsPowerOfArrest4(YES)
+                                   .fl404bIsPowerOfArrest5(YES).fl404bIsPowerOfArrest6(YES)
+                                   .build())
+            .orderType(OCCUPATION_ORDER)
+            .sosStatus(SOS_COMPLETED)
+            .build();
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder().build())
             .respondentsFL401(partyDetails)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .orderCollection(List.of(ElementUtils.element(orderDetails1)))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDoc(Document.builder().categoryId("16aRiskAssessment").build())
+                                 .build())
+
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
                                                                                      .selectedPartyId(testUuid.toString())
@@ -1124,7 +1267,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1138,7 +1281,7 @@ public class CaseServiceTest {
     @Test
     public void testCitizenApplicantSosCompletedPostOnlyWhenBothPartiesIdamIdIsNull() {
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder().build())
             .respondentsFL401(PartyDetails.builder().build())
@@ -1152,7 +1295,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1164,7 +1307,7 @@ public class CaseServiceTest {
     @Test
     public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStateIsJudicialReview() {
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder().user(User.builder().build()).build())
             .respondentsFL401(PartyDetails.builder()
@@ -1179,7 +1322,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1191,7 +1334,7 @@ public class CaseServiceTest {
     @Test
     public void testRespondentCitizenDocOrders() {
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder().build())
             .respondentsFL401(partyDetails)
@@ -1205,7 +1348,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1219,7 +1362,7 @@ public class CaseServiceTest {
     @Test
     public void testCitizenDocOrdersWhenRespondentsFl401IdamIdIsNull() {
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder().build())
             .respondentsFL401(PartyDetails.builder().user(User.builder().build()).build())
@@ -1233,7 +1376,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1246,7 +1389,7 @@ public class CaseServiceTest {
     @Test
     public void testCitizenDocOrdersWhenC100IsCaseType() {
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
@@ -1260,7 +1403,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1279,7 +1422,7 @@ public class CaseServiceTest {
                                  .value(PartyDetails.builder()
                                             .user(User.builder().build()).build()).build());
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .applicants(partyDetailsList)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantsFL401(partyDetails)
@@ -1296,7 +1439,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1314,7 +1457,7 @@ public class CaseServiceTest {
                                  .value(PartyDetails.builder()
                                             .user(User.builder().build()).build()).build());
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .applicants(partyDetailsList)
             .respondents(partyDetailsList)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1332,7 +1475,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1352,7 +1495,7 @@ public class CaseServiceTest {
                                             .build()).build());
 
         //Given
-        caseData = caseData.toBuilder()
+        CaseData caseData1 = caseData.toBuilder()
             .applicants(partyDetailsList)
             .respondents(partyDetailsList)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1370,7 +1513,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
