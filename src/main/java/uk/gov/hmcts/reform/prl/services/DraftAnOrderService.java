@@ -2265,6 +2265,7 @@ public class DraftAnOrderService {
                                                               String clientContext,
                                                               String language) throws Exception {
 
+        log.info("inside handlePopulateDraftOrderFields");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2343,6 +2344,7 @@ public class DraftAnOrderService {
             }
         }
 
+        log.info("Casedata updated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
