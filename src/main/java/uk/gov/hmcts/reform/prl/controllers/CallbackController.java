@@ -221,16 +221,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("Client context is {}", clientContext);
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
             String language = CaseUtils.getLanguage(clientContext);
-            log.info("Language is {}", language);
             if (PrlAppsConstants.WELSH.equals(language)) {
-                log.info("Language is Welsh");
-                log.info("Errors are {}", workflowResult.getErrors());
                 if (isNotEmpty(workflowResult.getErrors())) {
-                    log.info("Errors are not empty");
                     List<String> errorlist = new ArrayList<>();
                     errorlist
                         .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
