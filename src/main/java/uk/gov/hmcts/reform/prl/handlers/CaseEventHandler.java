@@ -150,11 +150,9 @@ public class CaseEventHandler {
                     } else {
                         respondentTaskErrorService.clearErrors();
                         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue(),caseData);
-                        log.info("Tasks are as : {} ", tasks);
                         List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
 
                         List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents(caseData);
-                        log.info("Events  are as : {} ", events);
                         eventErrors.removeIf(e -> !events.contains(e.getEvent()));
                         return respondentSolicitorTaskListRenderer
                                 .render(

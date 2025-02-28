@@ -116,7 +116,7 @@ public class CitizenResponseService {
     }
 
     private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
-        log.info("data map creating");
+        log.info("Updating respondent details");
         Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {

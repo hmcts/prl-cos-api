@@ -194,7 +194,6 @@ public class CafCassCaseData {
                                                 )
                                                 .build())
                                      .build());
-
                 }
             );
         }
