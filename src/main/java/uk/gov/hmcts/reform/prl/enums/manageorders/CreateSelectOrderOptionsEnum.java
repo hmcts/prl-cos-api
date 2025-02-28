@@ -13,54 +13,77 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
-    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1"),
+    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1",
+        "Standard directions order - welsh"),
     @JsonProperty("directionOnIssue")
-    directionOnIssue("directionOnIssue", "Directions on issue","2"),
+    directionOnIssue("directionOnIssue", "Directions on issue","2",
+        "Directions on issue - welsh"),
     @JsonProperty("blankOrderOrDirections")
-    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3"),
+    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3",
+        "Blank order or directions (C21) - welsh"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
-         "Child arrangements, specific issue or prohibited steps order (C43)","4"),
+         "Child arrangements, specific issue or prohibited steps order (C43)","4",
+        "Child arrangements, specific issue or prohibited steps order (C43) - welsh"),
     @JsonProperty("parentalResponsibility")
-    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5"),
+    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5",
+        "Parental responsibility order (C45A) - welsh"),
     @JsonProperty("specialGuardianShip")
-    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6"),
+    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6",
+        "Special guardianship order (C43A) - welsh"),
     @JsonProperty("noticeOfProceedingsParties")
     noticeOfProceedingsParties("noticeOfProceedingsParties",
-                                  "Notice of proceedings (C6) (Notice to parties)","7"),
+                                  "Notice of proceedings (C6) (Notice to parties)","7",
+                  "Notice of proceedings (C6) (Notice to parties) - welsh"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
-                                  "Notice of proceedings (C6a) (Notice to non-parties)","8"),
+                                  "Notice of proceedings (C6a) (Notice to non-parties)","8",
+                  "Notice of proceedings (C6a) (Notice to non-parties) - welsh"),
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
-                                  "Transfer of case to another court (C49)","9"),
+                                  "Transfer of case to another court (C49)","9",
+                  "Transfer of case to another court (C49) - welsh"),
     @JsonProperty("appointmentOfGuardian")
-    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10"),
+    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
+        "Appointment of a guardian (C47A) - welsh"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11"),
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11",
+        "Non-molestation order (FL404A) - welsh"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order (FL404)","12"),
+    occupation("occupation", "Occupation order (FL404)","12",
+        "Occupation order (FL404) - welsh"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13"),
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13",
+        "Power of arrest (FL406) - welsh"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14"),
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14",
+        "Amended, discharged or varied order (FL404B) - welsh"),
     @JsonProperty("blank")
-    blank("blank", "Blank order (FL404B)","15"),
+    blank("blank", "Blank order (FL404B)","15",
+        "Blank order (FL404B) - welsh"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking (N117)","16"),
+    generalForm("generalForm", "General form of undertaking (N117)","16",
+        "General form of undertaking (N117) - welsh"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17"),
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17",
+        "Notice of proceedings (FL402) - welsh"),
     @JsonProperty("other")
-    other("other", "Other (upload an order)","18");
+    other("other", "Other (upload an order)","18",
+        "Other (upload an order) - welsh");
 
     private final String id;
     private final String displayedValue;
     private final String optionValue;
+    private final String displayedValueWelsh;
 
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    public String getDisplayedValueWelsh() {
+        return displayedValueWelsh;
     }
 
     @JsonCreator
