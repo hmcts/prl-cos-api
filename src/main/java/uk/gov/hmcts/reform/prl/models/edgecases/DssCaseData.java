@@ -18,14 +18,12 @@ import java.util.List;
 public class DssCaseData {
 
     private String edgeCaseTypeOfApplication;
-    private String namedApplicant;
+    private String whomYouAreApplying;
     private String applicantFirstName;
     private String applicantLastName;
     private DateofBirth applicantDateOfBirth;
     private String applicantEmailAddress;
     private String applicantPhoneNumber;
-    private String applicantHomeNumber;
-    private String contactPreferenceType;
     private String applicantAddress1;
     private String applicantAddress2;
     private String applicantAddressTown;

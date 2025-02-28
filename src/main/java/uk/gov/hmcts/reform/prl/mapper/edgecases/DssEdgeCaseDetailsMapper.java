@@ -76,7 +76,6 @@ public class DssEdgeCaseDetailsMapper {
                 .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
                 .email(dssCaseData.getApplicantEmailAddress())
                 .phoneNumber(dssCaseData.getApplicantPhoneNumber())
-                .landline(dssCaseData.getApplicantHomeNumber()) //recheck
                 .address(Address.builder()
                         .addressLine1(dssCaseData.getApplicantAddress1())
                         .addressLine2(dssCaseData.getApplicantAddress2())
