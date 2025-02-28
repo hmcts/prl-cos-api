@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
@@ -45,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE_BULKSCAN;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PROCESS_PAYMENT_FOR_BULKSCAN;
 
 @Slf4j
 @Service
@@ -62,61 +65,73 @@ public class HwfProcessUpdateCaseStateService {
 
 
     public void checkHwfPaymentStatusAndUpdateCaseState() {
-        long startTime = System.currentTimeMillis();
         log.info("inside checkHwfPaymentStatus");
         //Fetch all C100 pending cases with Help with fees
-        List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState();
-        if (isNotEmpty(caseDetailsList)) {
-            caseDetailsList.forEach(caseDetails -> {
-                log.info("caseDetails caseId - " + caseDetails.getId());
-                CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-                if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
-                    && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
-                    log.info("Going to check service request payment status");
-                    ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
-                        paymentRequestService.fetchServiceRequestReferenceStatus(
-                        systemUserService.getSysUserToken(),
-                        caseData.getPaymentServiceRequestReferenceNumber()
-                    );
-                    log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
-                    if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
-                        Map<String, Object> caseDataUpdated = new HashMap<>();
-                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(
-                            caseDetails.getId().toString(),
-                            HWF_PROCESS_CASE_UPDATE.getValue()
-                        );
-
-                        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
-
-                        //Save case data
-                        allTabService.submitAllTabsUpdate(
-                            startAllTabsUpdateDataContent.authorisation(),
-                            caseDetails.getId().toString(),
-                            startAllTabsUpdateDataContent.startEventResponse(),
-                            startAllTabsUpdateDataContent.eventRequestData(),
-                            caseDataUpdated
-                        );
-                    }
-                }
-            });
-
-        } else {
-            log.info("Retrieve Cases With HelpWithFees In Pending State is empty");
-        }
+        List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(false);
+        List<CaseDetails> bulkScanCaseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(true);
+        checkAndProcessHwfAndUpdateCase(caseDetailsList);
+        checkAndProcessHwfAndUpdateCase(bulkScanCaseDetailsList);
+        long startTime = System.currentTimeMillis();
         log.info(
             "*** Total time taken to run HWF processing check payment status task - {}s ***",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
         );
     }
 
-    public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState() {
+    private void checkAndProcessHwfAndUpdateCase(List<CaseDetails> caseDetailsList) {
+        if (isNotEmpty(caseDetailsList)) {
+            caseDetailsList.forEach(caseDetails -> {
+                log.info("caseDetails caseId - " + caseDetails.getId());
+                CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+                if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
+                    && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
+                    String event = CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy())
+                        ? HWF_PROCESS_CASE_UPDATE_BULKSCAN.getValue() : HWF_PROCESS_CASE_UPDATE.getValue();
+                    updateCaseStateAndSubmitevent(event, caseDetails, caseData);
+                }
+                if (CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy()) && StringUtils.isEmpty(caseData.getHelpWithFeesNumber())) {
+                    updateCaseStateAndSubmitevent(PROCESS_PAYMENT_FOR_BULKSCAN.getValue(), caseDetails, caseData);
+                }
+            });
+        } else {
+            log.info("Retrieve Cases With HelpWithFees In Pending State is empty");
+        }
+    }
+
+    private void updateCaseStateAndSubmitevent(String event, CaseDetails caseDetails, CaseData caseData) {
+        log.info("Going to check service request payment status");
+        ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
+            paymentRequestService.fetchServiceRequestReferenceStatus(
+                systemUserService.getSysUserToken(),
+                caseData.getPaymentServiceRequestReferenceNumber()
+        );
+        log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+        if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
+            //Save case data
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseDetails.getId().toString(),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated
+            );
+        }
+    }
+
+    public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState(boolean isBulkScan) {
 
         SearchResultResponse searchResultResponse = SearchResultResponse.builder()
             .cases(new ArrayList<>()).build();
-
-        QueryParam ccdQueryParam = buildCcdQueryParam();
-
+        QueryParam ccdQueryParam;
+        if (isBulkScan) {
+            ccdQueryParam = buildCcdQueryParamForBulkScan();
+        } else {
+            ccdQueryParam = buildCcdQueryParam();
+        }
         try {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -164,7 +179,52 @@ public class HwfProcessUpdateCaseStateService {
                                                       .helpWithFees("Yes")
                                                       .build())
                                            .build());
-        //Hearing state
+
+        Bool finalFilter = Bool.builder()
+            .should(shoulds)
+            .minimumShouldMatch(3)
+            .filter(getFilter())
+            .must(getMustFilter())
+            .build();
+
+        return getQueryParam(finalFilter);
+    }
+
+    private QueryParam buildCcdQueryParamForBulkScan() {
+        //Bulk scan c100 cases
+        List<Should> shoulds = List.of(Should.builder()
+                                           .match(Match.builder()
+                                                      .caseTypeOfApplication("C100")
+                                                      .build())
+                                           .build(),
+                                       Should.builder()
+                                           .match(Match.builder()
+                                                      .caseCreatedBy("BULK_SCAN")
+                                                      .build())
+                                           .build());
+
+        Bool finalFilter = Bool.builder()
+            .should(shoulds)
+            .minimumShouldMatch(2)
+            .filter(getFilter())
+            .must(getMustFilter())
+            .build();
+
+        return getQueryParam(finalFilter);
+    }
+
+    private QueryParam getQueryParam(Bool finalFilter) {
+        return QueryParam.builder()
+            .query(Query.builder().bool(finalFilter).build())
+            .dataToReturn(List.of(
+                "data.caseCreatedBy",
+                "data.helpWithFeesNumber",
+                "data.paymentServiceRequestReferenceNumber"
+            ))
+            .build();
+    }
+
+    private Must getMustFilter() {
         StateFilter stateFilter = StateFilter.builder()
             .should(List.of(Should.builder().match(Match.builder()
                                                        .state(State.SUBMITTED_NOT_PAID.getValue())
@@ -172,20 +232,14 @@ public class HwfProcessUpdateCaseStateService {
                                 .build()))
             .build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
+        return mustFilter;
+    }
 
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(3).toString()).build();
+    private Filter getFilter() {
+        // Below filter added to reduce the case count, expectation is case payments are processed within 2 days (SLA)
+        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(5).toString()).build();
         Range range = Range.builder().lastModified(lastModified).build();
         Filter filter = Filter.builder().range(range).build();
-
-        Bool finalFilter = Bool.builder()
-            .should(shoulds)
-            .minimumShouldMatch(3)
-            .filter(filter)
-            .must(mustFilter)
-            .build();
-
-        return QueryParam.builder()
-            .query(Query.builder().bool(finalFilter).build())
-            .build();
+        return filter;
     }
 }
