@@ -68,6 +68,8 @@ public class HwfProcessUpdateCaseStateService {
         //Fetch all C100 pending cases with Help with fees
         List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(false);
         List<CaseDetails> bulkScanCaseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(true);
+        log.info("Case details {}", caseDetailsList);
+        log.info("Bulk scan case details {}", bulkScanCaseDetailsList);
         checkAndProcessHwfAndUpdateCase(caseDetailsList);
         checkAndProcessHwfAndUpdateCase(bulkScanCaseDetailsList);
         long startTime = System.currentTimeMillis();
