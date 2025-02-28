@@ -32,6 +32,7 @@ public class DssCaseData {
     private String applicantAddressCountry;
     private String selectedCourtId;
     private String applicantStatementOfTruth;
+    private String hwfPaymentSelection;
     private String helpWithFeesReferenceNumber;
 
     private List<Document> applicantApplicationFormDocuments;

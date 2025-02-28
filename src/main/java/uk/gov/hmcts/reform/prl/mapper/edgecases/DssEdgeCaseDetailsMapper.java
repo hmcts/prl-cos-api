@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -21,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.buildDateOfBirth;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.generatePartyUuidForFL401;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -49,9 +52,11 @@ public class DssEdgeCaseDetailsMapper {
 
             caseDataBuilder
                 .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
+                .helpWithFees(isNotEmpty(dssCaseData.getHelpWithFeesReferenceNumber()) ? YesOrNo.Yes : null)
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
                                     .edgeCaseTypeOfApplication(dssCaseData.getEdgeCaseTypeOfApplication())
                                     .selectedCourtId(dssCaseData.getSelectedCourtId())
+                                    .isEdgeCase(YesOrNo.Yes)
                                     .dssApplicationFormDocuments(
                                         wrapElements(dssCaseData.getApplicantApplicationFormDocuments()))
                                     .dssAdditionalDocuments(
@@ -71,19 +76,22 @@ public class DssEdgeCaseDetailsMapper {
 
     private PartyDetails getDssApplicantPartyDetails(DssCaseData dssCaseData) {
         return PartyDetails.builder()
-                .firstName(dssCaseData.getApplicantFirstName())
-                .lastName(dssCaseData.getApplicantLastName())
-                .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
-                .email(dssCaseData.getApplicantEmailAddress())
-                .phoneNumber(dssCaseData.getApplicantPhoneNumber())
-                .address(Address.builder()
-                        .addressLine1(dssCaseData.getApplicantAddress1())
-                        .addressLine2(dssCaseData.getApplicantAddress2())
-                        .postTown(dssCaseData.getApplicantAddressTown())
-                        .county(dssCaseData.getApplicantAddressCounty())
-                        .postCode(dssCaseData.getApplicantAddressPostCode())
-                        .country(dssCaseData.getApplicantAddressCountry())
-                        .build())
-                .build();
+            .firstName(dssCaseData.getApplicantFirstName())
+            .lastName(dssCaseData.getApplicantLastName())
+            .dateOfBirth(buildDateOfBirth(dssCaseData.getApplicantDateOfBirth()))
+            .email(dssCaseData.getApplicantEmailAddress())
+            .canYouProvideEmailAddress(isNotEmpty(dssCaseData.getApplicantEmailAddress()) ? YesOrNo.Yes : null)
+            .phoneNumber(dssCaseData.getApplicantPhoneNumber())
+            .address(Address.builder()
+                         .addressLine1(dssCaseData.getApplicantAddress1())
+                         .addressLine2(dssCaseData.getApplicantAddress2())
+                         .postTown(dssCaseData.getApplicantAddressTown())
+                         .county(dssCaseData.getApplicantAddressCounty())
+                         .postCode(dssCaseData.getApplicantAddressPostCode())
+                         .country(dssCaseData.getApplicantAddressCountry())
+                         .build())
+            //Default gender to Female for FGM cases
+            .gender("FGM".equals(dssCaseData.getEdgeCaseTypeOfApplication()) ? Gender.female : null)
+            .build();
     }
 }
