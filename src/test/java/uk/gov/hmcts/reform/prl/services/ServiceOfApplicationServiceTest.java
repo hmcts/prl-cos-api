@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -3918,7 +3919,8 @@ public class ServiceOfApplicationServiceTest {
                                                                    .surname("test").build());
         when(serviceOfApplicationEmailService
                  .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
-                                                        Mockito.any(),Mockito.anyString())).thenThrow(IOException.class);
+                                                        Mockito.any(),Mockito.anyString())).thenThrow(
+            SendGridNotificationException.class);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             TEST_AUTH,

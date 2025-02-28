@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import feign.FeignException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -120,7 +121,7 @@ public class RefDataUserServiceTest {
             RD_STAFF_PAGE_SIZE,
             RD_STAFF_FIRST_PAGE
         ))
-            .thenThrow(NullPointerException.class);
+            .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.get(0).getCode());
     }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.GovUkNotificationException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
@@ -110,10 +111,10 @@ public class EmailServiceTest {
     @Test
     public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
-            .thenThrow(NotificationClientException.class);
+            .thenThrow(GovUkNotificationException.class);
 
         assertThrows(
-            IllegalArgumentException.class,
+            GovUkNotificationException.class,
             () -> emailService.send(
                 TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.welsh
             )

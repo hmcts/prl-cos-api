@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -43,7 +44,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -637,7 +637,7 @@ public class ManageOrderEmailService {
                     .languagePreference(LanguagePreference.english)
                     .build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("There is a failure in sending send grid email with exception {}",
                       e.getMessage());
         }
@@ -657,7 +657,7 @@ public class ManageOrderEmailService {
                     dynamicData).listOfAttachments(
                     orderDocuments).languagePreference(LanguagePreference.english).build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
                       cafcassCymruEmailId, e.getMessage());
         }

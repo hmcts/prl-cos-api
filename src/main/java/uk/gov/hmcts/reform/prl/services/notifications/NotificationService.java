@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -36,7 +37,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -307,7 +307,7 @@ public class NotificationService {
                     .languagePreference(LanguagePreference.english)
                     .build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage());
             throw (new RuntimeException(e));
         }

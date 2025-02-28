@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.apache.commons.collections.ListUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -846,7 +849,11 @@ public class SendAndReplyServiceTest {
     public void testGetCategoriesAndDocumentsException() {
 
         when(authTokenGenerator.generate())
-            .thenThrow(new RuntimeException());
+            .thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+                .status(500)
+                .reason("Internal Server Error")
+                .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
+                .build()));
 
         DynamicList dynamicList1 = sendAndReplyService.getCategoriesAndDocuments("test", "test");
 

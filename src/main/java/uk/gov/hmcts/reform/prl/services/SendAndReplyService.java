@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -736,7 +738,7 @@ public class SendAndReplyService {
                 caseReference
             );
             return createDynamicList(categoriesAndDocuments);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return DynamicList.builder()
@@ -1849,7 +1851,7 @@ public class SendAndReplyService {
                             .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                             .build()
                     );
-                } catch (IOException e) {
+                } catch (SendGridNotificationException e) {
                     log.error("Failed to send Email", e);
                 }
             });

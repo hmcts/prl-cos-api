@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +39,7 @@ public class DgsService {
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
-                                                  Map<String, Object> dataMap) throws Exception {
+                                                  Map<String, Object> dataMap) throws DocumentGenerationException {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
@@ -46,6 +47,9 @@ public class DgsService {
                     .builder().template(templateName).values(dataMap).build()
                 );
 
+        } catch (FeignException ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -80,7 +84,7 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
@@ -144,7 +148,7 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }

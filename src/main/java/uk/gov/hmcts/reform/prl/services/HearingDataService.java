@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -171,6 +173,7 @@ public class HearingDataService {
                 }
                 return dynamicListElements;
             }
+        //unnecessary try-catch block
         } catch (Exception e) {
             log.error("List of Hearing Start Date Values look up failed - {}", e.getMessage(), e);
         }
@@ -244,6 +247,7 @@ public class HearingDataService {
                 });
 
             }
+        //unnecessary try-catch block
         } catch (Exception e) {
             log.error("Exception occurred in Linked case method for hmc api calls {}", e.getMessage());
         }
@@ -511,8 +515,13 @@ public class HearingDataService {
     private List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser hearingJudgeNameAndEmail) {
 
         String[] judgePersonalCode = getPersonalCode(hearingJudgeNameAndEmail);
-        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                .personalCode(judgePersonalCode).build());
+        try {
+            return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                .personalCode(judgePersonalCode).build());
+        } catch (FeignException e) {
+            log.error("Error retrieving judicial user details: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     public DynamicList getDynamicList(List<DynamicListElement> listItems) {
