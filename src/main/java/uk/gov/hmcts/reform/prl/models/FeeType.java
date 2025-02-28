@@ -17,6 +17,9 @@ public enum FeeType {
     C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD,
     C4_WHEREABOUTS_OF_A_MISSING_CHILD,
     FL407_ARREST_WARRANT,
+    PARENTAL_ORDER,
+    SPECIAL_GUARDIANSHIP_ORDER,
+    DECLARATION_OF_PARENTAGE,
     NO_FEE;
 
     public static final Map<String, FeeType> applicationToFeeMap = Map.of(
@@ -76,5 +79,12 @@ public enum FeeType {
         Map.entry("C100_C4_RESPONDENT", C4_WHEREABOUTS_OF_A_MISSING_CHILD),
 
         //PRL-6806 - C100 application fees
-        Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE));
+        Map.entry("C100_SUBMISSION_FEE", C100_SUBMISSION_FEE),
+
+        //Edge cases
+        Map.entry("FGM", NO_FEE),
+        Map.entry("FMPO", NO_FEE),
+        Map.entry("PO", PARENTAL_ORDER),
+        Map.entry("SG", SPECIAL_GUARDIANSHIP_ORDER),
+        Map.entry("DOP", DECLARATION_OF_PARENTAGE));
 }

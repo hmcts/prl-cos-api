@@ -418,6 +418,32 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
+    public void testApplicantTableMapperFl401WithoutGender() {
+
+        Applicant applicant = Applicant.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicants(partyList)
+            .build();
+        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
+        List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
+        Applicant emptyApplicant = Applicant.builder().build();
+        Element<Applicant> emptyApplicantElement = Element.<Applicant>builder().value(emptyApplicant).build();
+        List<Element<Applicant>> emptyApplicantList = Collections.singletonList(emptyApplicantElement);
+
+        when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(applicant);
+        assertEquals(expectedApplicantList, applicationsTabService.getApplicantsTable(caseData));
+        assertEquals(emptyApplicantList, applicationsTabService.getApplicantsTable(emptyCaseData));
+    }
+
+    @Test
     public void testApplicantsConfidentialDetails() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("First name")
@@ -1840,7 +1866,7 @@ public class ApplicationsTabServiceTest {
             "welshLanguageRequirementsTable", "homeDetailsTable", "applicantFamilyTable", "internationalElementTable",
             "respondentBehaviourTable", "relationshipToRespondentTable", "otherProceedingsTable", "fl401ApplicantTable",
             "fl401OtherProceedingsDetailsTable", "declarationTable", "fl401SolicitorDetailsTable",
-            "fl401TypeOfApplicationTable",
+            "fl401TypeOfApplicationTable","otherPeopleInTheCaseRevisedTable",
             "attendingTheHearingTable", "withoutNoticeOrderTable", "fl401RespondentTable", "isHomeEntered"
         );
         Map<String, Object> result = applicationsTabService.updateTab(caseData);
