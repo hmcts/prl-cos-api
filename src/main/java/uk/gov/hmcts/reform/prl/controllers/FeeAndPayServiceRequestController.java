@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 
@@ -128,10 +129,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse helpWithFeesValidator(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        String language = CaseUtils.getLanguage(clientContext);
         List<String> errorList =
-            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest);
+            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest, language);
         return CallbackResponse.builder()
             .errors(errorList)
             .build();
