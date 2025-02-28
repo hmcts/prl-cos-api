@@ -766,6 +766,7 @@ public class UpdatePartyDetailsService {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
                 listOfChildren.forEach(child -> listOfChildrenRevised.add(element(
+                    child.getId(),
                     child.getValue().toBuilder()
                         .whoDoesTheChildLiveWith(
                             populateWhoDoesTheChildLiveWith(caseData)
