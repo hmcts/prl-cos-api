@@ -137,7 +137,11 @@ public class ManageOrdersUtils {
                     if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        errorList.add("You must select a hearing type");
+                        if (PrlAppsConstants.WELSH.equals(language)) {
+                            errorList.add("You must select a hearing type - welsh");
+                        } else {
+                            errorList.add("You must select a hearing type");
+                        }
                     }
                     //numeric estimated timings validation
                     validateHearingEstimatedTimings(errorList, hearingData, language);
