@@ -2455,7 +2455,8 @@ public class DraftAnOrderService {
             errorList.addAll(getHearingScreenValidations(
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 caseData.getCreateSelectOrderOptions(),
-                true
+                true,
+                language
             ));
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
@@ -2478,10 +2479,11 @@ public class DraftAnOrderService {
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 draftOrder.getOrderType(),
                 (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails()))
+                    && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())),
+                language
             ));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
-            errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder()));
+            errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), language));
         }
         return errorList;
     }

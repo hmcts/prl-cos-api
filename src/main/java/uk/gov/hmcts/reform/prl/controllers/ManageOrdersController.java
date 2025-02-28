@@ -536,12 +536,12 @@ public class ManageOrdersController {
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
-                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), PrlAppsConstants.ENGLISH);
             } else {
                 //PRL-4260 - hearing screen validations
                 errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                         caseData.getCreateSelectOrderOptions(),
-                                                        false);
+                                                        false, PrlAppsConstants.ENGLISH);
             }
 
             if (isNotEmpty(errorList)) {
