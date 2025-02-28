@@ -173,19 +173,19 @@ public class ManageDocumentsService {
                 || element.getValue().getRestrictedDetails().isEmpty();
 
             if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
-                if (PrlAppsConstants.ENGLISH.equals(language)) {
-                    errorList.add(DETAILS_ERROR_MESSAGE);
-                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add(DETAILS_ERROR_MESSAGE_WELSH);
+                } else {
+                    errorList.add(DETAILS_ERROR_MESSAGE);
                 }
             }
 
             if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
                 && (restricted || confidential)) {
-                if (PrlAppsConstants.ENGLISH.equals(language)) {
-                    errorList.add(FM5_ERROR);
-                } else if (PrlAppsConstants.WELSH.equals(language)) {
+                if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add(FM5_ERROR_WELSH);
+                } else {
+                    errorList.add(FM5_ERROR);
                 }
             }
         }
@@ -567,12 +567,11 @@ public class ManageDocumentsService {
                                           UserDetails userDetails, String language) {
         if (isCourtSelectedInDocumentParty(callbackRequest)
             && !checkIfUserIsCourtStaff(userDetails)) {
-            if (PrlAppsConstants.ENGLISH.equals(language)) {
-                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
-            } else if (PrlAppsConstants.WELSH.equals(language)) {
+            if (PrlAppsConstants.WELSH.equals(language)) {
                 return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh");
+            } else {
+                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
             }
-            return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
         }
         return Collections.emptyList();
     }
