@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -37,6 +38,7 @@ public class CafcassDocumentManagementController {
     private final CafcassCdamService cafcassCdamService;
     private final AuthorisationService authorisationService;
     private final SystemUserService systemUserService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")
@@ -50,11 +52,16 @@ public class CafcassDocumentManagementController {
                                                      @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
                                                      @PathVariable UUID documentId) {
         try {
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            if (launchDarklyClient.isFeatureEnabled("cafcass-doc-download") && Boolean.TRUE.equals(authorisationService.authoriseUser(
+                authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing cafcass request after authorization");
-                return (ResponseEntity<T>) cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
+                return (ResponseEntity<T>) cafcassCdamService.getDocument(
+                    authorisation,
+                    serviceAuthorisation,
+                    documentId
+                );
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
