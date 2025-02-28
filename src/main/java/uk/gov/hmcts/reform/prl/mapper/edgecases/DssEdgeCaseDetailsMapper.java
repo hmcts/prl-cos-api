@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -49,14 +50,15 @@ public class DssEdgeCaseDetailsMapper {
         if (null != dssCaseDetails
             && StringUtils.isNotEmpty(dssCaseDetails.getDssCaseData())) {
             DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
-
+            EdgeCaseTypeOfApplicationEnum edgeCaseType = EdgeCaseTypeOfApplicationEnum.fromKey(dssCaseData.getEdgeCaseTypeOfApplication());
             caseDataBuilder
                 .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
                 .helpWithFees(isNotEmpty(dssCaseData.getHelpWithFeesReferenceNumber()) ? YesOrNo.Yes : null)
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
-                                    .edgeCaseTypeOfApplication(dssCaseData.getEdgeCaseTypeOfApplication())
-                                    .selectedCourtId(dssCaseData.getSelectedCourtId())
                                     .isEdgeCase(YesOrNo.Yes)
+                                    .edgeCaseTypeOfApplication(edgeCaseType)
+                                    .edgeCaseTypeOfApplicationDisplayValue(edgeCaseType.getDisplayedValue())
+                                    .selectedCourtId(dssCaseData.getSelectedCourtId())
                                     .dssApplicationFormDocuments(
                                         wrapElements(dssCaseData.getApplicantApplicationFormDocuments()))
                                     .dssAdditionalDocuments(

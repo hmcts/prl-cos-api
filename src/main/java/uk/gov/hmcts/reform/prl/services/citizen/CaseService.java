@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
@@ -409,8 +410,8 @@ public class CaseService {
                                     CaseData updatedCaseData,
                                     Map<String, Object> caseDataMapToBeUpdated) {
         if (null != updatedCaseData.getDssCaseDetails()
-            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
-            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
+            && (EdgeCaseTypeOfApplicationEnum.FGM.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || EdgeCaseTypeOfApplicationEnum.FMPO.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
             && null != updatedCaseData.getDssCaseDetails().getSelectedCourtId()) {
             log.info("Fetch court details for courtId: {}", updatedCaseData.getDssCaseDetails().getSelectedCourtId());
             List<CourtVenue> courtVenues = locationRefDataApi.getCourtDetailsById(

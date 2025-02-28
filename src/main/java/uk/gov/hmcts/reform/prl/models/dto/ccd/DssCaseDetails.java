@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -17,7 +18,8 @@ import java.util.List;
 public class DssCaseDetails {
     private final List<Element<Document>> dssApplicationFormDocuments;
     private final List<Element<Document>> dssAdditionalDocuments;
-    private final String edgeCaseTypeOfApplication;
+    private final EdgeCaseTypeOfApplicationEnum edgeCaseTypeOfApplication;
+    private final String edgeCaseTypeOfApplicationDisplayValue;
     private final String selectedCourtId;
     private YesOrNo isEdgeCase;
 
