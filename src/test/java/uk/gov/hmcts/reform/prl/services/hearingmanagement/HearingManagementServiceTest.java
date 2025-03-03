@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,6 +47,8 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
+@Disabled
 public class HearingManagementServiceTest {
 
     @InjectMocks

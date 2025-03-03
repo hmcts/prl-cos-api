@@ -83,7 +83,10 @@ public class DgsService {
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
-
+            if (true) {
+                log.info("Before throwing custom DocumentGenerationException ");
+                throw new DocumentGenerationException("Dummy DocumentGenerationException", new Exception());
+            }
         } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
