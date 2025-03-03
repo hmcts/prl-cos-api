@@ -2827,26 +2827,28 @@ public class ServiceOfApplicationService {
         String warningText = BLANK_STRING;
         boolean isRespondentAddressPresent = true;
         boolean isOtherPeopleAddressPresent = true;
+        //PRL-6038 -Enable address check for other parties in the case for C100 & FL401
+        if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
+            for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
+                if (!isPartiesAddressPresent(otherParty.getValue())) {
+                    isOtherPeopleAddressPresent = false;
+                    break;
+                }
+            }
+        } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
+            for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
+                if (!isPartiesAddressPresent(otherParty.getValue())) {
+                    isOtherPeopleAddressPresent = false;
+                    break;
+                }
+            }
+        }
+
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
                 if (!isPartiesAddressPresent(respondent.getValue())) {
                     isRespondentAddressPresent = false;
                     break;
-                }
-            }
-            if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
-                for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
-                    if (!isPartiesAddressPresent(otherParty.getValue())) {
-                        isOtherPeopleAddressPresent = false;
-                        break;
-                    }
-                }
-            } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
-                for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
-                    if (!isPartiesAddressPresent(otherParty.getValue())) {
-                        isOtherPeopleAddressPresent = false;
-                        break;
-                    }
                 }
             }
         } else {

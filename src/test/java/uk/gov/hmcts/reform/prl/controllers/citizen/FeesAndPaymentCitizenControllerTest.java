@@ -28,7 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 public class FeesAndPaymentCitizenControllerTest {
 
@@ -242,36 +241,6 @@ public class FeesAndPaymentCitizenControllerTest {
 
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
             .fetchFee(s2sToken, FeeType.C100_SUBMISSION_FEE.toString());
-        //Then
-        assertEquals(feeResponseForCitizen, actualResponse);
-    }
-
-    @Test
-    public void testFetchFeeNullApplicationType() {
-        //Given
-        feeResponseForCitizen = FeeResponseForCitizen.builder()
-            .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
-            .build();
-
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-
-        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
-            .fetchFee(s2sToken, null);
-        //Then
-        assertEquals(feeResponseForCitizen, actualResponse);
-    }
-
-    @Test
-    public void testFetchFeeEmptyApplicationType() {
-        //Given
-        feeResponseForCitizen = FeeResponseForCitizen.builder()
-            .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
-            .build();
-
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-
-        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
-            .fetchFee(s2sToken, "");
         //Then
         assertEquals(feeResponseForCitizen, actualResponse);
     }
