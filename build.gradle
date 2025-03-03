@@ -590,7 +590,7 @@ jacocoTestCoverageVerification {
   }
 }
 
-project.tasks['sonarqube'].dependsOn integration, jacocoTestReport
+project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
@@ -621,8 +621,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailServiceTest.java',
-  '**uk/gov/hmcts/reform/prl/services/**/*',
-  '**uk/gov/hmcts/reform/prl/controllers/**/*'
+  '**uk/gov/hmcts/reform/prl/services/**/*'
 ]
 
 sonarqube {
