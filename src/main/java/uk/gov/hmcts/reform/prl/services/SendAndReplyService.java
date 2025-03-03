@@ -79,7 +79,6 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -1813,7 +1812,7 @@ public class SendAndReplyService {
     }
 
 
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();

@@ -442,5 +442,20 @@ public class RefDataUserServiceTest {
         assertEquals(1, legalAdvisorList.size());
     }
 
+    @Test
+    public void testRetrieveCategoryValuesFeignException() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
+                                                               authTokenGenerator.generate(),
+                                                               HEARINGTYPE,
+                                                               SERVICE_ID,
+                                                               IS_HEARINGCHILDREQUIRED_N)).thenThrow(FeignException.class);
+        CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
+            authToken,
+            HEARINGTYPE,
+            IS_HEARINGCHILDREQUIRED_N
+        );
+        assertNull(commonResponse);
+    }
 }
 

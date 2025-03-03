@@ -194,4 +194,70 @@ public class EmailServiceTest {
 
     }
 
+    @Test
+    public void sendShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+        when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_1), any(), any(), any()))
+            .thenThrow(new NotificationClientException("Test exception"));
+
+        assertThrows(
+            GovUkNotificationException.class,
+            () -> emailService.send(
+                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.english
+            )
+        );
+
+        verify(notificationClient).sendEmail(
+            eq(EMAIL_TEMPLATE_ID_1),
+            eq(TEST_EMAIL),
+            eq(expectedEmailVarsAsMap),
+            anyString()
+        );
+    }
+
+    @Test
+    public void sendSoaShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                            .canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .email("test@applicant.com")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+        String applicantName = "FirstName LastName";
+
+        final EmailTemplateVars emailTemplateVars = CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .applicantName(applicantName)
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state(State.CASE_ISSUED.getValue())
+            .build();
+        //when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("soa-gov-notify")).thenReturn(true);
+        when(notificationClient.sendEmail(any(), any(), any(), any())).thenThrow(new NotificationClientException("Test exception"));
+
+        assertThrows(
+            GovUkNotificationException.class,
+            () -> emailService.sendSoa("test@applicant.com", EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                                       emailTemplateVars, LanguagePreference.english)
+        );
+
+        verify(launchDarklyClient, times(1)).isFeatureEnabled("soa-gov-notify");
+        verify(notificationClient).sendEmail(any(), any(), any(), any());
+    }
 }

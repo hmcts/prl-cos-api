@@ -919,7 +919,7 @@ public class ManageOrderEmailService {
                                           Address address,
                                           String name,
                                           String authorisation,
-                                          List<Document> orderDocuments) throws Exception {
+                                          List<Document> orderDocuments) {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(

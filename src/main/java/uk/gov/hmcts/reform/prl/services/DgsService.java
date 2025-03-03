@@ -92,7 +92,7 @@ public class DgsService {
     }
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
-                                                       Map<String, Object> dataMap) throws Exception {
+                                                       Map<String, Object> dataMap) {
 
         Map<String, Object> welshDataMap = new HashMap<>();
         welshDataMap.putAll(dataMap);
