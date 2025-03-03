@@ -17,57 +17,57 @@ public enum CreateSelectOrderOptionsEnum {
         "Standard directions order - welsh"),
     @JsonProperty("directionOnIssue")
     directionOnIssue("directionOnIssue", "Directions on issue","2",
-        "Directions on issue - welsh"),
+        "Cyfarwyddyd ar gychwyn achos"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3",
-        "Blank order or directions (C21) - welsh"),
+        "Gorchymyn gwag neu gyfarwyddiadau (C21)"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
          "Child arrangements, specific issue or prohibited steps order (C43)","4",
-        "Child arrangements, specific issue or prohibited steps order (C43) - welsh"),
+        "Gorchymyn Trefniadau Plant, Mater Penodol neu Gamau Gwaharddedig (C43)"),
     @JsonProperty("parentalResponsibility")
     parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5",
         "Parental responsibility order (C45A) - welsh"),
     @JsonProperty("specialGuardianShip")
     specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6",
-        "Special guardianship order (C43A) - welsh"),
+        "Gorchymyn Gwarcheidiaeth Arbennig (C43A)"),
     @JsonProperty("noticeOfProceedingsParties")
     noticeOfProceedingsParties("noticeOfProceedingsParties",
                                   "Notice of proceedings (C6) (Notice to parties)","7",
-                  "Notice of proceedings (C6) (Notice to parties) - welsh"),
+                  "Hysbysiad o achosion (C6) (Hysbysiad i bartïon)"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
                                   "Notice of proceedings (C6a) (Notice to non-parties)","8",
-                  "Notice of proceedings (C6a) (Notice to non-parties) - welsh"),
+                  "Hysbysiad o achosion (C6a) (Hysbysiad i bobl nad ydynt yn bartïon)"),
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
                                   "Transfer of case to another court (C49)","9",
                   "Transfer of case to another court (C49) - welsh"),
     @JsonProperty("appointmentOfGuardian")
     appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
-        "Appointment of a guardian (C47A) - welsh"),
+        "Penodi gwarcheidwad (C47A)"),
     @JsonProperty("nonMolestation")
     nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11",
-        "Non-molestation order (FL404A) - welsh"),
+        "Gorchymyn rhag molestu (FL404A)"),
     @JsonProperty("occupation")
     occupation("occupation", "Occupation order (FL404)","12",
-        "Occupation order (FL404) - welsh"),
+        "Gorchymyn Anheddu (FL404)"),
     @JsonProperty("powerOfArrest")
     powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13",
         "Power of arrest (FL406) - welsh"),
     @JsonProperty("amendDischargedVaried")
     amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14",
-        "Amended, discharged or varied order (FL404B) - welsh"),
+        "Gorchymyn sydd wedi ei ddiwygio, ei ryddhau neu ei amrywio (FL404B)"),
     @JsonProperty("blank")
     blank("blank", "Blank order (FL404B)","15",
-        "Blank order (FL404B) - welsh"),
+        "Gorchymyn gwag (FL404B)"),
     @JsonProperty("generalForm")
     generalForm("generalForm", "General form of undertaking (N117)","16",
-        "General form of undertaking (N117) - welsh"),
+        "Ffurfeln gyffredinol am ymgymeriad (N117)"),
     @JsonProperty("noticeOfProceedings")
     noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17",
-        "Notice of proceedings (FL402) - welsh"),
+        "Rhybudd o achos (FL402)"),
     @JsonProperty("other")
     other("other", "Other (upload an order)","18",
         "Other (upload an order) - welsh");

@@ -13,16 +13,16 @@ public enum C21OrderOptionsEnum {
 
     @JsonProperty("c21ApplicationRefused")
     c21ApplicationRefused("c21ApplicationRefused", "Blank order or directions (C21): application refused",
-        "Blank order or directions (C21): application refused - welsh"),
+        "Gorchymyn gwag neu gyfarwyddiadau (C21): cais wedi’i wrthod"),
     @JsonProperty("c21WithdrawApplication")
     c21WithdrawApplication("c21WithdrawApplication", "Blank order or directions (C21): to withdraw application",
-        "Blank order or directions (C21): to withdraw application - welsh"),
+        "Gorchymyn gwag neu gyfarwyddiadau (C21): tynnu cais yn ôl"),
     @JsonProperty("c21NoOrderMade")
     c21NoOrderMade("c21NoOrderMade", "Blank order or directions (C21): no order made",
-        "Blank order or directions (C21): no order made - welsh"),
+        "Gorchymyn gwag neu gyfarwyddiadau (C21): dim gorchymyn wedi’i wneud"),
     @JsonProperty("c21other")
     c21other("c21other", "Blank order or directions (C21): Other",
-        "Blank order or directions (C21): Other - welsh");
+        "Gorchymyn gwag neu gyfarwyddiadau (C21): Arall");
 
     private final String id;
     private final String displayedValue;

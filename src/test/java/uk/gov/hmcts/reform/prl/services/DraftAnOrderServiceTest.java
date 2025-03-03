@@ -3652,7 +3652,7 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.WELSH
         );
         assertEquals(
-            BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43) - welsh" + BOLD_END,
+            BOLD_BEGIN + "Gorchymyn Trefniadau Plant, Mater Penodol neu Gamau Gwaharddedig (C43)" + BOLD_END,
             response.getData().get("selectedOrder")
         );
         //assertEquals(1, response.getData().getChildren().size());
