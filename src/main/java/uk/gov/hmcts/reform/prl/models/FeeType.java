@@ -20,7 +20,12 @@ public enum FeeType {
     PARENTAL_ORDER,
     SPECIAL_GUARDIANSHIP_ORDER,
     DECLARATION_OF_PARENTAGE,
-    NO_FEE;
+    NO_FEE,
+
+    PARENTAL_RESPONSIBILITY,
+    PARENTAL_RESPONSIBILITY_SECOND_FEMALE_PARENT,
+    APPOINTING_CHILD_GUARDIAN,
+    CHANGE_CHILD_SURNAME;
 
     public static final Map<String, FeeType> applicationToFeeMap = Map.of(
         "C1_CHILD_ORDER", CHILD_ARRANGEMENTS_ORDER,
@@ -85,6 +90,12 @@ public enum FeeType {
         Map.entry("FGM", NO_FEE),
         Map.entry("FMPO", NO_FEE),
         Map.entry("PO", PARENTAL_ORDER),
+        Map.entry("DOP", DECLARATION_OF_PARENTAGE),
+        //C1 applications
         Map.entry("SG", SPECIAL_GUARDIANSHIP_ORDER),
-        Map.entry("DOP", DECLARATION_OF_PARENTAGE));
+        Map.entry("PR", PARENTAL_RESPONSIBILITY),
+        Map.entry("PRSFP", PARENTAL_RESPONSIBILITY_SECOND_FEMALE_PARENT),
+        Map.entry("ACG", APPOINTING_CHILD_GUARDIAN),
+        Map.entry("CCS", CHANGE_CHILD_SURNAME)
+    );
 }

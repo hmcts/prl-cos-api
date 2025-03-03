@@ -371,10 +371,15 @@ public class PaymentRequestService {
             );
     }
 
+    //CHANGE THIS LOGIC TO CHECK FOR APPLICATION TYPE OR AWP TYPE
     private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
         return FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())
             || FeeType.PARENTAL_ORDER.equals(createPaymentRequest.getFeeType())
             || FeeType.DECLARATION_OF_PARENTAGE.equals(createPaymentRequest.getFeeType())
-            || FeeType.SPECIAL_GUARDIANSHIP_ORDER.equals(createPaymentRequest.getFeeType());
+            || FeeType.SPECIAL_GUARDIANSHIP_ORDER.equals(createPaymentRequest.getFeeType())
+            || FeeType.PARENTAL_RESPONSIBILITY.equals(createPaymentRequest.getFeeType())
+            || FeeType.PARENTAL_RESPONSIBILITY_SECOND_FEMALE_PARENT.equals(createPaymentRequest.getFeeType())
+            || FeeType.APPOINTING_CHILD_GUARDIAN.equals(createPaymentRequest.getFeeType())
+            || FeeType.CHANGE_CHILD_SURNAME.equals(createPaymentRequest.getFeeType());
     }
 }
