@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
@@ -69,7 +70,7 @@ public class AttendingTheHearingMapper {
             .add("whoNeedsWelsh", welshNeed.getWhoNeedsWelsh())
             .add(
                 "spokenOrWritten",
-                welshNeed.getSpokenOrWritten().isEmpty() ? null : welshNeed.getSpokenOrWritten().stream()
+                ObjectUtils.isEmpty(welshNeed.getSpokenOrWritten()) ? null : welshNeed.getSpokenOrWritten().stream()
                     .map(SpokenOrWrittenWelshEnum::getDisplayedValue).collect(Collectors.joining(", "))
             )
             .build()).collect(JsonCollectors.toJsonArray());
