@@ -63,6 +63,7 @@ public class UpdateHearingActualsService {
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
+        log.info("Running Hearing actual task cron job...");
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
         if (isNotEmpty(caseDetailsList)) {
             log.info("Cases exist with current hearing");
@@ -165,6 +166,7 @@ public class UpdateHearingActualsService {
         }
 
         if (null != response) {
+            log.info("Total no. of cases retrieved {}", response.getTotal());
             return response.getCases();
         }
         return Collections.emptyList();
