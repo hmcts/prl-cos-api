@@ -80,7 +80,7 @@ public class ServiceOfApplicationPostService {
         return sendBulkPrint(caseData, authorisation, docs, party, servedParty);
     }
 
-    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
+    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         List<Document> coversheets = new ArrayList<>();
         if (null != address && null != address.getAddressLine1()) {
@@ -102,7 +102,7 @@ public class ServiceOfApplicationPostService {
 
     private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
                                                                            Address address, String name,
-                                                                           boolean isWelsh, String coverSheetTemplate) throws Exception {
+                                                                           boolean isWelsh, String coverSheetTemplate) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverPagePartyName", null != name ? name : " ");
         dataMap.put("coverPageAddress", address);
@@ -272,7 +272,7 @@ public class ServiceOfApplicationPostService {
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
         PartyDetails partyDetails = party.getValue();
-        try {
+        try { //unnecessary try-catch block
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
             if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {

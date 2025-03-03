@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -1485,11 +1486,18 @@ public class DocumentGenService {
                 .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
-            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-                document.getDocumentFileName(),
-                authorisation, GenerateDocumentRequest
-                    .builder().template(DUMMY).values(tempCaseDetails).build()
-            );
+            GeneratedDocumentInfo generatedDocumentInfo = null;
+            try {
+                generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                    document.getDocumentFileName(),
+                    authorisation, GenerateDocumentRequest
+                        .builder().template(DUMMY).values(tempCaseDetails).build()
+                );
+            } catch (FeignException fe) {
+                log.error("FeignException while converting document to PDF: {}", fe.getMessage());
+            } catch (Exception e) {
+                log.error("Exception while converting document to PDF: {}", e.getMessage());
+            }
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

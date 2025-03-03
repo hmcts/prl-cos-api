@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.exception.BulkPrintException;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -58,7 +59,7 @@ public class BulkPrintService {
                 pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
             }
         } catch (NullPointerException e) {
-            throw new NullPointerException("Null Pointer exception at bulk print send : " + e);
+            throw new BulkPrintException("Null Pointer exception at bulk print send : " + e);
         } catch (Exception e) {
             log.info("The bulk print service has failed during convertToPdf", e);
         }

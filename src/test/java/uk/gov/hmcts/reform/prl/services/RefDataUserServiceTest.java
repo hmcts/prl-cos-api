@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import feign.FeignException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -120,7 +121,7 @@ public class RefDataUserServiceTest {
             RD_STAFF_PAGE_SIZE,
             RD_STAFF_FIRST_PAGE
         ))
-            .thenThrow(NullPointerException.class);
+            .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.get(0).getCode());
     }
@@ -441,5 +442,20 @@ public class RefDataUserServiceTest {
         assertEquals(1, legalAdvisorList.size());
     }
 
+    @Test
+    public void testRetrieveCategoryValuesFeignException() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
+                                                               authTokenGenerator.generate(),
+                                                               HEARINGTYPE,
+                                                               SERVICE_ID,
+                                                               IS_HEARINGCHILDREQUIRED_N)).thenThrow(FeignException.class);
+        CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
+            authToken,
+            HEARINGTYPE,
+            IS_HEARINGCHILDREQUIRED_N
+        );
+        assertNull(commonResponse);
+    }
 }
 

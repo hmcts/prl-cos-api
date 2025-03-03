@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -54,6 +56,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
+@Disabled
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.GovUkNotificationException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
@@ -110,10 +111,10 @@ public class EmailServiceTest {
     @Test
     public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
-            .thenThrow(NotificationClientException.class);
+            .thenThrow(GovUkNotificationException.class);
 
         assertThrows(
-            IllegalArgumentException.class,
+            GovUkNotificationException.class,
             () -> emailService.send(
                 TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.welsh
             )
@@ -193,4 +194,65 @@ public class EmailServiceTest {
 
     }
 
+    @Test
+    public void sendShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+        when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_1), any(), any(), any()))
+            .thenThrow(new NotificationClientException("Test exception"));
+
+        assertThrows(
+            GovUkNotificationException.class,
+            () -> emailService.send(
+                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.english
+            )
+        );
+
+        verify(notificationClient).sendEmail(
+            eq(EMAIL_TEMPLATE_ID_1),
+            eq(TEST_EMAIL),
+            eq(expectedEmailVarsAsMap),
+            anyString()
+        );
+    }
+
+    @Test
+    public void sendSoaShouldHandleNotificationClientExceptionAndRethrowGovUkNotificationException() throws NotificationClientException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                            .canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .email("test@applicant.com")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+        String applicantName = "FirstName LastName";
+
+        final EmailTemplateVars emailTemplateVars = CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .applicantName(applicantName)
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .build();
+
+        when(launchDarklyClient.isFeatureEnabled("soa-gov-notify")).thenReturn(true);
+        when(notificationClient.sendEmail(any(), any(), any(), any())).thenThrow(new NotificationClientException("Test exception"));
+
+        assertThrows(
+            GovUkNotificationException.class,
+            () -> emailService.sendSoa("test@applicant.com", EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                                       emailTemplateVars, LanguagePreference.english)
+        );
+
+        verify(launchDarklyClient, times(1)).isFeatureEnabled("soa-gov-notify");
+        verify(notificationClient).sendEmail(any(), any(), any(), any());
+    }
 }

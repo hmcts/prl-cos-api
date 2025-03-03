@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,7 +107,11 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService.")
     public void getHearingsTestException() {
-        when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
+        when(authTokenGenerator.generate()).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+            .status(500)
+            .reason("Internal Server Error")
+            .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
+            .build()));
 
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);

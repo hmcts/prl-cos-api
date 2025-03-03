@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.apache.commons.collections.ListUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -84,7 +87,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -846,7 +848,11 @@ public class SendAndReplyServiceTest {
     public void testGetCategoriesAndDocumentsException() {
 
         when(authTokenGenerator.generate())
-            .thenThrow(new RuntimeException());
+            .thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+                .status(500)
+                .reason("Internal Server Error")
+                .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
+                .build()));
 
         DynamicList dynamicList1 = sendAndReplyService.getCategoriesAndDocuments("test", "test");
 
@@ -2327,7 +2333,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testSendEmailNotificationToExternalPartiesC100Case() throws IOException {
+    public void testSendEmailNotificationToExternalPartiesC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
@@ -2427,7 +2433,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testSendEmailNotificationToCafcassAndOthersC100Case() throws IOException {
+    public void testSendEmailNotificationToCafcassAndOthersC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
@@ -2531,7 +2537,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
+    public void testSendEmailNotificationToExternalPartiesForFL401Case() {
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .representativeFirstName("Abc")
@@ -2632,7 +2638,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() throws IOException {
+    public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() {
         CaseData caseDataC100V2 = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .caseTypeOfApplication("C100")

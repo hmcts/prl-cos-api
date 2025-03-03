@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -70,7 +72,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -511,7 +512,7 @@ public class ServiceOfApplicationService {
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
             if (!docsForLa.isEmpty()) {
-                try {
+                try { //unnecessary try-catch block
                     EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                         .sendEmailNotificationToLocalAuthority(
                             authorization,
@@ -523,7 +524,7 @@ public class ServiceOfApplicationService {
                     if (null != emailNotification) {
                         emailNotificationDetails.add(element(emailNotification));
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error("Failed to serve email to Local Authority {}", e.getMessage());
                 }
             }
@@ -1208,7 +1209,7 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                            List<Document> packSdocs, Element<PartyDetails> party) {
         if (party.getValue().getSolicitorEmail() != null) {
-            try {
+            try { //unnecessary try-catch block
                 log.info(
                     "Sending the email notification to respondent solicitor for C100 Application for caseId {}",
                     caseData.getId()
@@ -2052,6 +2053,8 @@ public class ServiceOfApplicationService {
                 }
             }
             return selectedDoc;
+        } catch (FeignException e) {
+            log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         } catch (Exception e) {
             log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
@@ -2259,7 +2262,7 @@ public class ServiceOfApplicationService {
     private void sendEmailToApplicantSolicitor(CaseData caseData, String authorization, List<Document> packQ, String servedParty,
                                                List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                Element<PartyDetails> party) {
-        try {
+        try { //unnecessary try-catch block
             log.info(
                 "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                 caseData.getId()
@@ -2279,6 +2282,7 @@ public class ServiceOfApplicationService {
             if (null != emailNotification) {
                 emailNotificationDetails.add(element(emailNotification));
             }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -2310,7 +2314,7 @@ public class ServiceOfApplicationService {
             )));
         } catch (Exception e) {
             log.info("error while generating coversheet {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new ServiceOfApplicationException("error while generating coversheet", e);
         }
     }
 
@@ -2998,7 +3002,7 @@ public class ServiceOfApplicationService {
         return Collections.emptyList();
     }
 
-    private Document getCoverLetterDocument(String authorisation, String template, Map<String, Object> dataMap) throws Exception {
+    private Document getCoverLetterDocument(String authorisation, String template, Map<String, Object> dataMap) {
         GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
             authorisation,
             String.valueOf(dataMap.get("id")),
@@ -3538,7 +3542,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
-    private Map<String, Object> getPacksForConfidentialCheckDaApplicantSolicitor(String authorization, CaseData caseData,
+    private Map<String, Object>  getPacksForConfidentialCheckDaApplicantSolicitor(String authorization, CaseData caseData,
                                                                                  List<Document> fl401StaticDocs) {
         log.info("serving Fl401 applicant legal representative with confidential check");
         // Applicants pack
@@ -3908,7 +3912,7 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
-            try {
+            try { //unnecessary try-catch block
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,
@@ -3919,7 +3923,7 @@ public class ServiceOfApplicationService {
                 if (null != emailNotification) {
                     return emailNotification;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
         }
