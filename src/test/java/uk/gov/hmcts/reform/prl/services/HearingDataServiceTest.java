@@ -1613,9 +1613,7 @@ public class HearingDataServiceTest {
             .personalCode("Test")
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
-        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenThrow(FeignException.class);
+        when(refDataUserService.getAllJudicialUserDetails(any())).thenThrow(FeignException.class);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
             .build();

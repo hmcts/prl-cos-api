@@ -243,11 +243,6 @@ public class EmailServiceTest {
             .caseLink(citizenUrl + CITIZEN_DASHBOARD)
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .state(State.CASE_ISSUED.getValue())
-            .build();
-        //when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(launchDarklyClient.isFeatureEnabled("soa-gov-notify")).thenReturn(true);
         when(notificationClient.sendEmail(any(), any(), any(), any())).thenThrow(new NotificationClientException("Test exception"));
 

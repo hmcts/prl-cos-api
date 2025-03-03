@@ -174,7 +174,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateWelshDocumentWithCaseData() throws Exception {
+    public void testToGenerateWelshDocumentWithCaseData() {
 
         Map<String, Object> respondentDetails = new HashMap<>();
         respondentDetails.put("fullName", "test");
