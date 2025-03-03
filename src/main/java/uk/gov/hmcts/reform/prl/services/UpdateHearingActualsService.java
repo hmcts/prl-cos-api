@@ -63,8 +63,10 @@ public class UpdateHearingActualsService {
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
+        log.info("Running Hearing actual task cron job...");
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
         if (isNotEmpty(caseDetailsList)) {
+            log.info("Cases exist with current hearing");
             createUpdateHearingActualWaTask(
                 caseDetailsList,
                 fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
@@ -155,18 +157,16 @@ public class UpdateHearingActualsService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("Search string {}", searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
-            log.info("Search result {}", searchResult);
-
             response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
         }
 
         if (null != response) {
+            log.info("Total no. of cases retrieved {}", response.getTotal());
             return response.getCases();
         }
         return Collections.emptyList();

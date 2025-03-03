@@ -893,7 +893,6 @@ public class NoticeOfChangePartiesService {
                         tokenGenerator.generate(),
                         decisionRequest(callbackRequest.getCaseDetails())
                     );
-                    log.info("applyDecision response ==> " + response);
                 }
             });
         }

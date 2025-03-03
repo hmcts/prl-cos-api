@@ -225,7 +225,6 @@ public class ManageOrdersController {
                 log.info("Initiating court seal for the orders");
                 manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             } catch (Exception e) {
-                log.info("Error while adding court seal to the order {}", (Object) e.getStackTrace());
                 log.error(e.getMessage());
             }
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
