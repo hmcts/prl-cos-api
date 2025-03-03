@@ -56,12 +56,14 @@ public class RespondentsMapperTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .isDateOfBirthKnown(YesOrNo.Yes)
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorOrg(organisation)
+            .isCurrentAddressKnown(YesOrNo.Yes)
             .build();
 
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();

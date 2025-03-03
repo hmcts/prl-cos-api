@@ -70,6 +70,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
+            .isCurrentAddressKnown(respondentDetails.getAddressUnknown() != null ? No : Yes)
             .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetails(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))

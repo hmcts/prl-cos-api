@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @Builder(toBuilder = true)
@@ -29,6 +30,7 @@ public class RespondentDetails {
     private C100ContactDetail respondentContactDetail;
     @JsonProperty("relationshipDetails")
     private RelationshipDetails relationshipDetails;
+    private YesOrNo addressUnknown;
 }
 
 
