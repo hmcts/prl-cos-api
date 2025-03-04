@@ -155,7 +155,7 @@ allprojects {
         }
 
       // CVE-2019-10086
-      dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+      dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.10.1'
 
 
       //CVE-2023-24998
