@@ -117,8 +117,6 @@ public class NotificationService {
     public void sendNotificationsAsync(CaseData caseData,
                                        QuarantineLegalDoc quarantineLegalDoc,
                                        String userRole) {
-        log.info("Async method thread id: {}", Thread.currentThread().getId());
-        log.info("Time before scheduling send notification: {}", LocalDateTime.now());
         scheduler.schedule(() -> sendNotifications(caseData,
                                                    quarantineLegalDoc,
                                                    userRole), 500, TimeUnit.MILLISECONDS);
@@ -127,8 +125,6 @@ public class NotificationService {
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
                                   String userRole) {
-        log.info("Notification thread thread id: {}", Thread.currentThread().getId());
-        log.info("Time when notification sent: {}", LocalDateTime.now());
         log.info("*** Send notifications, uploader role {}", userRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             String respondentName = getNameOfRespondent(quarantineLegalDoc, userRole);

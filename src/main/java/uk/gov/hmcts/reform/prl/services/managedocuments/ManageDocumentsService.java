@@ -199,7 +199,6 @@ public class ManageDocumentsService {
             updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
-        log.info("Time before about to submit ends: {}", LocalDateTime.now());
         return caseDataUpdated;
     }
 
@@ -310,12 +309,9 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            log.info("Before async method thread id: {}", Thread.currentThread().getId());
-            log.info("Time before async send notification method: {}", LocalDateTime.now());
             notificationService.sendNotificationsAsync(caseData,
                                    quarantineLegalDoc,
                                    userRole);
-            log.info("Time after async send notification method: {}", LocalDateTime.now());
         }
     }
 
