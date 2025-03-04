@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
-    public static final String CONFIRMATION_HEADER = "# Continue to payment";
+    public static final String CONFIRMATION_HEADER = "# Parhau i dalu<br/>Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
         ### What happens next
@@ -52,13 +52,15 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
         The court will review your help with fees application and tell you what happens next.""";
     public static final String HWF_NO_EMAIL_CONTENT = """
-        ### What happens next
+        ### Beth fydd yn digwydd nesaf<br/>What happens next
 
 
+        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. 
+        Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.<br/>
         The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
 
         """;
-    public static final String PAY_CONTENT = "\">Pay the application fee.</a>";
+    public static final String PAY_CONTENT = "\">Talu ffi’r gwneud cais./Pay the application fee.</a>";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
     private final SolicitorEmailService solicitorEmailService;

@@ -45,10 +45,9 @@ import static org.springframework.http.ResponseEntity.ok;
 public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
-    public static final String CONFIRMATION_HEADER = "# Documents submitted";
-    public static final String CONFIRMATION_HEADER_WELSH = "# Documents submitted - welsh";
-    public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
-    public static final String CONFIRMATION_BODY_WELSH = "### What happens next \n\n The court will review the submitted documents. - welsh";
+    public static final String CONFIRMATION_HEADER = "# Cyflwynwyd y ddogfen<br/>Documents submitted";
+    public static final String CONFIRMATION_BODY = "### Beth fydd yn digwydd nesaf<br/>What happens next \n\n "
+        + "Bydd y llys yn adolygu'r dogfennau a gyflwynwyd.<br/>The court will review the submitted documents.";
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -133,21 +132,16 @@ public class ManageDocumentsController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
-                                                                     @Parameter(hidden = true) String authorisation,
-                                                                     @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER,
-                                                                         required = false) String clientContext) {
+                                                                     @Parameter(hidden = true) String authorisation) {
 
         manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(
             callbackRequest,
             authorisation
         );
-        String language = CaseUtils.getLanguage(clientContext);
 
         return ok(SubmittedCallbackResponse.builder()
-                      .confirmationHeader(PrlAppsConstants.WELSH.equals(language) ? CONFIRMATION_HEADER_WELSH
-                          : CONFIRMATION_HEADER)
-                      .confirmationBody(PrlAppsConstants.WELSH.equals(language) ? CONFIRMATION_BODY_WELSH
-                          : CONFIRMATION_BODY)
+                      .confirmationHeader(CONFIRMATION_HEADER)
+                      .confirmationBody(CONFIRMATION_BODY)
                       .build());
     }
 }
