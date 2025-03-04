@@ -1,0 +1,329 @@
+{
+  "case_details": {
+    "state": "AWAITING_SUBMISSION_TO_HMCTS",
+    "id": "1701870369166430",
+    "case_data": {
+      "chooseSendOrReply": "SEND",
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": null,
+        "messageSubject": null,
+        "messageUrgency": null
+      },
+      "applicantOrRespondentCaseName": "testString",
+      "gatekeeper": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "email": "test@email.com"
+          }
+        }
+      ],
+      "markedToServeEmailNotification": "Yes",
+      "serveToRespondentOptions": "No",
+      "isCaseUrgent": "No",
+      "id": 0,
+      "applicantCaseName": "John Smith",
+      "caseTypeOfApplication": "C100",
+      "recipientsOptions": {
+        "value": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          }
+        ]
+      },
+      "applicants": [
+        {
+          "id": "7663081e-778d-4317-b278-7642b740d317",
+          "value": {
+            "firstName": "test",
+            "lastName": "data",
+            "previousName": null,
+            "dateOfBirth": "1989-11-30",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "placeOfBirth": "London",
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "",
+              "County": "",
+              "Country": "",
+              "PostCode": "RH117RQ"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": "No",
+            "isAtAddressLessThan5Years": "No",
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "Yes",
+            "email": "applicant@test.com",
+            "isEmailAddressConfidential": "No",
+            "landline": null,
+            "phoneNumber": "4635635636",
+            "isPhoneNumberConfidential": "No",
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": null,
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "isPlaceOfBirthKnown": null,
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "doTheyHaveLegalRepresentation": null,
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "orderCollection": [
+        {
+          "value": {
+            "dateCreated": "2023-12-14T18:25:54.290951",
+            "isWithdrawnRequestApproved": "",
+            "typeOfOrder": "Interim",
+            "orderType": "Blank order or directions (C21)",
+            "orderTypeId": "blankOrderOrDirections",
+            "isTheOrderAboutAllChildren": "Yes",
+            "childrenList": "Joe Doe, Simon Anderson, Lilly Anderson, Charlotte Saxon, Selena Lees",
+            "orderDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/87b044fb-6cf4-4210-9312-9f4bb83b94d7",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/87b044fb-6cf4-4210-9312-9f4bb83b94d7/binary",
+              "document_filename": "Blank_Order_Directions_C21.pdf",
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "orderDocumentWelsh": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/885f08f3-2c68-4780-84d3-eae201b8a27f",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/885f08f3-2c68-4780-84d3-eae201b8a27f/binary",
+              "document_filename": "Blank_Order_Directions_C21_Welsh.pdf",
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "otherDetails": {
+              "createdBy": "kj",
+              "orderCreatedDate": "14 Dec 2023",
+              "orderMadeDate": "14 Dec 2023",
+              "orderRecipients": "",
+              "orderServedDate": "14 Dec 2023",
+              "status": "Created by Admin"
+            },
+            "serveOrderDetails": {
+              "serveOnRespondent": "No",
+              "recipientsOptions": "John Doe",
+              "otherParties": "",
+              "cafcassServed": "No",
+              "cafcassCymruServed": "No",
+              "otherPartiesServed": "No",
+              "cafcassOrCymruNeedToProvideReport": "No",
+              "orderEndsInvolvementOfCafcassOrCymru": "No",
+              "servedParties": [
+                {
+                  "value": {
+                    "partyId": "7663081e-778d-4317-b278-7642b740d317",
+                    "partyName": "John Doe (Applicant 1)"
+                  },
+                  "id": "6aa80ead-bf71-49ea-86c8-5adcf0e02e30"
+                }
+              ]
+            },
+            "typeOfChildArrangementsOrder": "",
+            "c21OrderOptions": "c21ApplicationRefused",
+            "childOption": {
+              "value": null,
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "isOrderUploaded": "No"
+          },
+          "id": "f75b410a-0370-4b87-b095-48121804c07f"
+        }
+      ],
+      "applicantsFL401":
+      {
+          "firstName": "test",
+          "lastName": "data",
+          "previousName": null,
+          "dateOfBirth": "1989-11-30",
+          "isDateOfBirthUnknown": null,
+          "gender": "male",
+          "otherGender": null,
+          "placeOfBirth": "London",
+          "address": {
+            "AddressLine1": "Ministry Of Justice",
+            "AddressLine2": "Seventh Floor 102 Petty France",
+            "AddressLine3": "",
+            "PostTown": "",
+            "County": "",
+            "Country": "",
+            "PostCode": "RH117RQ"
+          },
+          "isAddressUnknown": null,
+          "isAddressConfidential": "No",
+          "isAtAddressLessThan5Years": "No",
+          "addressLivedLessThan5YearsDetails": null,
+          "canYouProvideEmailAddress": "Yes",
+          "email": "applicant@test.com",
+          "isEmailAddressConfidential": "No",
+          "landline": null,
+          "phoneNumber": "4635635636",
+          "isPhoneNumberConfidential": "No",
+          "relationshipToChildren": null,
+          "isDateOfBirthKnown": null,
+          "isCurrentAddressKnown": null,
+          "canYouProvidePhoneNumber": null,
+          "isPlaceOfBirthKnown": null,
+          "solicitorOrg": {},
+          "solicitorAddress": {
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null,
+            "PostTown": null,
+            "County": null,
+            "Country": null,
+            "PostCode": null
+          },
+          "dxNumber": null,
+          "solicitorReference": null,
+          "representativeFirstName": null,
+          "representativeLastName": null,
+          "isAtAddressLessThan5YearsWithDontKnow": null,
+          "doTheyHaveLegalRepresentation": null,
+          "sendSignUpLink": null,
+          "solicitorEmail": null
+        },
+      "children": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "firstName": "Test",
+            "lastName": "Child",
+            "dateOfBirth": "2000-10-10",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "orderAppliedFor": [
+              "childArrangementsOrder"
+            ],
+            "applicantsRelationshipToChild": "grandParent",
+            "otherApplicantsRelationshipToChild": null,
+            "respondentsRelationshipToChild": "mother",
+            "otherRespondentsRelationshipToChild": null,
+            "childLiveWith": [
+              "anotherPerson",
+              "respondent",
+              "applicant"
+            ],
+            "childrenKnownToLocalAuthority": null,
+            "childrenKnownToLocalAuthorityTextArea": null,
+            "childrenSubjectOfChildProtectionPlan": null,
+            "otherPersonWhoLivesWithChild": null,
+            "isChildCurrentAddressKnown": "Yes",
+            "childUnsupervisedTime": "No",
+            "childContactFromOtherRecipients": "No",
+            "relationshipToApplicant": null,
+            "relationshipToRespondent": null
+          }
+        }
+      ],
+      "respondents": [
+        {
+          "id": "29959b30-f49e-483b-a963-d53a88a93209",
+          "value": {
+            "firstName": "Ball",
+            "lastName": "Lowe",
+            "previousName": null,
+            "dateOfBirth": null,
+            "isDateOfBirthUnknown": null,
+            "gender": "female",
+            "otherGender": null,
+            "placeOfBirth": null,
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "London",
+              "County": "",
+              "Country": "",
+              "PostCode": "N14 5AL"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": null,
+            "isAtAddressLessThan5Years": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "Yes",
+            "email": "respondent@test.com",
+            "isEmailAddressConfidential": "No",
+            "landline": null,
+            "phoneNumber": null,
+            "isPhoneNumberConfidential": null,
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": "No",
+            "isCurrentAddressKnown": "Yes",
+            "canYouProvidePhoneNumber": "No",
+            "isPlaceOfBirthKnown": "No",
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
+            "doTheyHaveLegalRepresentation": "no",
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ]
+    }
+  },
+  "event_id": "litigationCapacity"
+}
