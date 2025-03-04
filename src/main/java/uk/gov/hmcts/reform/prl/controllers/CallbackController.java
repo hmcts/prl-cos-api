@@ -1093,7 +1093,6 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
             callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
@@ -1104,6 +1103,7 @@ public class CallbackController {
             log.info("Payment service response: {}", paymentServiceResponse);
             log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
             caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
+            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
