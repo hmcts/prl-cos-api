@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseWithdrawnRequestService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -59,14 +58,10 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> caseWithdrawnEmailNotificationWhenSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
-
-        String language = CaseUtils.getLanguage(clientContext);
-
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return ok(caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, authorisation, language));
+            return ok(caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, authorisation));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
