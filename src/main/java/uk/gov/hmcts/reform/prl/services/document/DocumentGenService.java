@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import com.auth0.jwt.JWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -1431,21 +1430,7 @@ public class DocumentGenService {
         }
     }
 
-    public String getServiceNameFromS2SToken(String serviceAuthenticationToken) {
-        // NB: this grabs the service name straight from the token under the assumption
-        // that the S2S token has already been verified elsewhere
-        return JWT.decode(removeBearerFromToken(serviceAuthenticationToken)).getSubject();
-    }
-
-
-    private String removeBearerFromToken(String token) {
-        return token.startsWith("Bearer ") ? token.substring("Bearer ".length()) : token;
-    }
-
     public byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
-
-        String serviceName = getServiceNameFromS2SToken(s2sToken);
-        log.info("serviceName.................................: {}", serviceName);
 
         String fileName = FilenameUtils.getName(docUrl);
         ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(

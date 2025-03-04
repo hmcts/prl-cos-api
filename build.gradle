@@ -353,9 +353,6 @@ dependencies {
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
-  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.37.2'
-  implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-  implementation group: 'com.auth0', name: 'java-jwt', version: '4.5.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.8.16'
@@ -622,9 +619,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
   '**uk/gov/hmcts/reform/prl/services/serviceofdocuments/ServiceOfDocumentsService.java',
-  '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/notifications/NotificationService.java',
-  '**uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java'
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java'
 ]
 
 sonarqube {

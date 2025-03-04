@@ -59,7 +59,7 @@ public class ManageDocumentsControllerIntegrationTest {
         String url = "/manage-documents/about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        Mockito.when(manageDocumentsService.copyDocument(any(), any())).thenReturn(new HashMap<>());
+        Mockito.when(manageDocumentsService.copyDocument(any(), any(), any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(
                 post(url)
@@ -91,25 +91,8 @@ public class ManageDocumentsControllerIntegrationTest {
     }
 
     @Test
-    public void testCopyManageDocs() throws Exception {
-        String url = "/manage-documents/copy-manage-docs";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(manageDocumentsService.copyDocument(any(), any())).thenReturn(new HashMap<>());
-
-        mockMvc.perform(
-                post(url)
-                    .header("Authorization", "Bearer testAuthToken")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
     public void testSubmittedManageDocuments() throws Exception {
-        String url = "/manage-documents/submitted";
+        String url = "/manage-documents/copy-manage-docs";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.doNothing().when(manageDocumentsService).appendConfidentialDocumentNameForCourtAdminAndUpdate(any(), any());

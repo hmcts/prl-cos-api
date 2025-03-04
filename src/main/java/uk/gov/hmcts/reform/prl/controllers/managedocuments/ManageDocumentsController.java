@@ -107,24 +107,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
     }
 
-    @PostMapping(path = "/copy-manage-docs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy manage docs for tabs")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse copyManageDocs(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
-            .build();
-    }
-
-    @PostMapping("/submitted")
+    @PostMapping("/copy-manage-docs")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
