@@ -512,7 +512,7 @@ public class ServiceOfApplicationService {
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
             if (!docsForLa.isEmpty()) {
-                try { //unnecessary try-catch block
+                try {
                     EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                         .sendEmailNotificationToLocalAuthority(
                             authorization,
@@ -1209,7 +1209,7 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                            List<Document> packSdocs, Element<PartyDetails> party) {
         if (party.getValue().getSolicitorEmail() != null) {
-            try { //unnecessary try-catch block
+            try {
                 log.info(
                     "Sending the email notification to respondent solicitor for C100 Application for caseId {}",
                     caseData.getId()
@@ -2262,7 +2262,7 @@ public class ServiceOfApplicationService {
     private void sendEmailToApplicantSolicitor(CaseData caseData, String authorization, List<Document> packQ, String servedParty,
                                                List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                Element<PartyDetails> party) {
-        try { //unnecessary try-catch block
+        try {
             log.info(
                 "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                 caseData.getId()
@@ -3912,7 +3912,7 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
-            try { //unnecessary try-catch block
+            try {
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,

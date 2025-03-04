@@ -173,7 +173,6 @@ public class HearingDataService {
                 }
                 return dynamicListElements;
             }
-        //unnecessary try-catch block
         } catch (Exception e) {
             log.error("List of Hearing Start Date Values look up failed - {}", e.getMessage(), e);
         }
@@ -247,7 +246,6 @@ public class HearingDataService {
                 });
 
             }
-        //unnecessary try-catch block
         } catch (Exception e) {
             log.error("Exception occurred in Linked case method for hmc api calls {}", e.getMessage());
         }

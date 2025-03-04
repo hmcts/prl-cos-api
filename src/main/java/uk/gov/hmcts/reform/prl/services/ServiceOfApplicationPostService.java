@@ -272,7 +272,7 @@ public class ServiceOfApplicationPostService {
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
         PartyDetails partyDetails = party.getValue();
-        try { //unnecessary try-catch block
+        try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
             if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {

@@ -115,10 +115,6 @@ public class CaseUtils {
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
-        if (true) {
-            log.info("Before throwing custom NoCaseDataFoundException ");
-            throw new NoCaseDataFoundException(HttpStatus.NOT_FOUND, "No case data found in the response");
-        }
         if (caseDetails == null) {
             throw new NoCaseDataFoundException(HttpStatus.NOT_FOUND, "No case data found in the response");
         }
