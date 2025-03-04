@@ -365,7 +365,6 @@ public class Fm5NotificationService {
         } catch (Exception e) {
             log.error("Error occurred in generating cover sheets {}", e.getMessage());
         }
-        log.info("Cover sheets generated {}", coverSheets);
         return coverSheets;
     }
 

@@ -82,6 +82,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
+    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE =
+        "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
@@ -101,12 +103,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
-            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+            String language = CaseUtils.getLanguage(clientContext);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -114,7 +118,8 @@ public class ManageOrdersController {
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                authorisation
+                authorisation,
+                language
             )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -142,13 +147,14 @@ public class ManageOrdersController {
             if (getErrorsForOrdersProhibitedForC100FL401(
                 caseData,
                 caseData.getCreateSelectOrderOptions(),
-                errorList
+                errorList,
+                PrlAppsConstants.ENGLISH
             )) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
+                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -213,7 +219,6 @@ public class ManageOrdersController {
                 log.info("Initiating court seal for the orders");
                 manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
             } catch (Exception e) {
-                log.info("Error while adding court seal to the order {}", (Object) e.getStackTrace());
                 log.error(e.getMessage());
             }
             log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
@@ -278,7 +283,8 @@ public class ManageOrdersController {
                 }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
-                    caseData
+                    caseData,
+                    PrlAppsConstants.ENGLISH
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(
@@ -292,13 +298,16 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
+            //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
                 && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
                 && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
                 List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
                     DRAFT_ORDER_COLLECTION);
+
                 newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
                     ? draftOrderCollection.get(0).getId() : null;
             }
@@ -433,7 +442,8 @@ public class ManageOrdersController {
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        caseData
+                        caseData,
+                        PrlAppsConstants.ENGLISH
                     ));
                 }
                 CaseData modifiedCaseData = objectMapper.convertValue(
@@ -461,6 +471,10 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
+            }
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
@@ -522,12 +536,12 @@ public class ManageOrdersController {
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
-                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), PrlAppsConstants.ENGLISH);
             } else {
                 //PRL-4260 - hearing screen validations
                 errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                         caseData.getCreateSelectOrderOptions(),
-                                                        false);
+                                                        false, PrlAppsConstants.ENGLISH);
             }
 
             if (isNotEmpty(errorList)) {
@@ -538,7 +552,7 @@ public class ManageOrdersController {
 
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

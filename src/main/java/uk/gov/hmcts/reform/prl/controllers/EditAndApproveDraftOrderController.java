@@ -205,6 +205,7 @@ public class EditAndApproveDraftOrderController {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
+            manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -298,7 +299,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, PrlAppsConstants.ENGLISH);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -327,7 +328,8 @@ public class EditAndApproveDraftOrderController {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
                     callbackRequest,
                     caseData,
-                    clientContext
+                    clientContext,
+                    PrlAppsConstants.ENGLISH
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -422,8 +424,8 @@ public class EditAndApproveDraftOrderController {
             );
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, PrlAppsConstants.ENGLISH)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.ENGLISH)) {
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(

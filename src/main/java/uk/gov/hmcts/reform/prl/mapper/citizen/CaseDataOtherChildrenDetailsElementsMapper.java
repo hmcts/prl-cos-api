@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -39,7 +40,7 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
 
     private static Element<Child> mapToChildDetails(ChildDetail childDetail) {
 
-        return Element.<Child>builder().value(Child.builder()
+        return Element.<Child>builder().id(UUID.fromString(childDetail.getId())).value(Child.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
                    .dateOfBirth(getDateOfBirth(childDetail))

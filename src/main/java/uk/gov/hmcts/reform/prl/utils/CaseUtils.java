@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.models.languagecontext.LanguageContextMapper;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
@@ -517,10 +518,10 @@ public class CaseUtils {
     }
 
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        log.info("Sate from callbackRequest " + callbackRequest.getCaseDetails().getState());
+        log.info("State from callbackRequest " + callbackRequest.getCaseDetails().getState());
         State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
         if (null != state) {
-            log.info("Sate " + state.getLabel());
+            log.info("State " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
     }
@@ -578,9 +579,6 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
-        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
-        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
         if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
@@ -759,8 +757,7 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside checkIfAddressIsChanged old {} , new {}",
-                 updatedParty.getAddress(), currentParty.getAddress());
+        log.info("verifying address change");
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
             ? updatedParty.getAddress() : Address.builder().build();
@@ -781,7 +778,7 @@ public class CaseUtils {
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
+        log.info("Verify email address change");
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
                                              updatedParty.getIsEmailAddressConfidential()))
@@ -792,7 +789,7 @@ public class CaseUtils {
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
+        log.info("verifying phone number change");
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
                                              updatedParty.getIsPhoneNumberConfidential()))
@@ -804,8 +801,6 @@ public class CaseUtils {
 
     private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
         log.info("inside isConfidentialityRemainsSame");
-        log.info("newConfidentiality ==> " + newConfidentiality);
-        log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
             && ObjectUtils.isEmpty(newConfidentiality)) {
             return true;
@@ -1086,5 +1081,32 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getLanguage(String clientContextString) {
+
+        LanguageContextMapper languageContextMapper = null;
+
+        if (clientContextString != null) {
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
+            String decodedString = new String(decodedBytes);
+            try {
+                languageContextMapper = new ObjectMapper().readValue(decodedString, LanguageContextMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+
+        if (null != languageContextMapper
+            && null != languageContextMapper.getClientContext()
+            && null != languageContextMapper.getClientContext().getUserLanguage()) {
+            return languageContextMapper.getClientContext().getUserLanguage().getLanguage();
+        }
+
+        return null;
+    }
+
+    public static String getContactInstructions(PartyDetails applicantsFL401) {
+        return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
     }
 }

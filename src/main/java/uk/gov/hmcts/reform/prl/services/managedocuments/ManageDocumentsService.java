@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -94,6 +95,8 @@ public class ManageDocumentsService {
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
     public static final String FM5_ERROR = "The statement of position on non-court dispute resolution "
         + "(form FM5) cannot contain confidential information or be restricted.";
+    public static final String FM5_ERROR_WELSH = "The statement of position on non-court dispute resolution "
+        + "(form FM5) cannot contain confidential information or be restricted. - welsh";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
@@ -110,6 +113,8 @@ public class ManageDocumentsService {
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
+    public static final String DETAILS_ERROR_MESSAGE_WELSH
+        = "You must give a reason why the document should be restricted - welsh";
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -155,7 +160,7 @@ public class ManageDocumentsService {
     }
 
     public List<String> validateRestrictedReason(CallbackRequest callbackRequest,
-                                                 UserDetails userDetails) {
+                                                 UserDetails userDetails, String language) {
         List<String> errorList = new ArrayList<>();
         String userRole = CaseUtils.getUserRole(userDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -168,12 +173,20 @@ public class ManageDocumentsService {
                 || element.getValue().getRestrictedDetails().isEmpty();
 
             if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
-                errorList.add(DETAILS_ERROR_MESSAGE);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(DETAILS_ERROR_MESSAGE_WELSH);
+                } else {
+                    errorList.add(DETAILS_ERROR_MESSAGE);
+                }
             }
 
             if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
                 && (restricted || confidential)) {
-                errorList.add(FM5_ERROR);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(FM5_ERROR_WELSH);
+                } else {
+                    errorList.add(FM5_ERROR);
+                }
             }
         }
 
@@ -213,6 +226,15 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
+            if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+                || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
+                quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                    quarantineLegalDoc,
+                    caseData.getIsPathfinderCase()
+                );
+            }
+
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
@@ -231,6 +253,14 @@ public class ManageDocumentsService {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
+    }
+
+    private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc, YesOrNo isPathfinderCase) {
+        return quarantineLegalDoc.toBuilder()
+            .isConfidential(YesOrNo.Yes)
+            .categoryName(YesOrNo.Yes.equals(isPathfinderCase) ? "Pathfinder" : quarantineLegalDoc.getCategoryName())
+            .categoryId(YesOrNo.Yes.equals(isPathfinderCase) ? "pathfinder" : quarantineLegalDoc.getCategoryId())
+            .build();
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
@@ -252,7 +282,6 @@ public class ManageDocumentsService {
                     quarantineLegalDoc
                 );
             }
-            log.info("quarantineLegalDoc with restrictedKey ==> " + quarantineLegalDoc);
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
@@ -309,6 +338,7 @@ public class ManageDocumentsService {
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
+            .documentType(quarantineLegalDoc.getDocumentType())
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentType(COURTNAV.equals(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getDocumentType() : null)
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
@@ -534,10 +564,14 @@ public class ManageDocumentsService {
     }
 
     public List<String> validateCourtUser(CallbackRequest callbackRequest,
-                                          UserDetails userDetails) {
+                                          UserDetails userDetails, String language) {
         if (isCourtSelectedInDocumentParty(callbackRequest)
             && !checkIfUserIsCourtStaff(userDetails)) {
-            return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh");
+            } else {
+                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
+            }
         }
         return Collections.emptyList();
     }

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -71,8 +72,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndApplicantRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndOtherPeopleRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -81,7 +87,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapa
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCaseRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.TypeOfApplication;
@@ -337,6 +345,20 @@ public class ApplicationsTabServiceTest {
         emptyCaseData = CaseData.builder()
             .miamDetails(MiamDetails.builder()
                              .build()).build();
+        when(applicationsTabServiceHelper.getChildAndApplicantsRelationTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndApplicantRelation.builder().build())));
+        when(applicationsTabServiceHelper.getChildAndOtherPeopleRelationsTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndOtherPeopleRelation.builder().build())));
+        when(applicationsTabServiceHelper.getChildAndRespondentRelationsTable(Mockito.any()))
+            .thenReturn(List.of(element(ChildAndRespondentRelation.builder().build())));
+        when(applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherChildrenNotInTheCase.builder().build())));
+        when(applicationsTabServiceHelper.getChildRevisedDetails(Mockito.any()))
+            .thenReturn(List.of(element(ChildDetailsRevised.builder().build())));
+        when(applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherPersonInTheCaseRevised.builder().build())));
+        when(applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(Mockito.any()))
+            .thenReturn(List.of(element(OtherChildrenNotInTheCase.builder().build())));
     }
 
     @Test
@@ -816,6 +838,68 @@ public class ApplicationsTabServiceTest {
             + " is authorised by the applicant to sign this statement.";
         expectedDeclarationMap.put("declarationText", declarationText);
         expectedDeclarationMap.put("agreedBy", solicitor);
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testDeclarationTableForCourtNavCaseNo() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. The applicant believes "
+            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + " is authorised by the applicant to sign this statement.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().isCourtNavCase(No).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testDeclarationTableForCourtNavCaseYes() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. "
+            + "I believe that the facts stated in this application are true.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().isCourtNavCase(Yes).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testDeclarationTableForCaseCreatedByCitizen() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. "
+            + "I believe that the facts stated in this application are true.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testDeclarationTableForCaseNotCreatedByCitizen() {
+        String solicitor = caseDataWithParties.getSolicitorName();
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        String declarationText = "I understand that proceedings for contempt of court may be brought"
+            + " against anyone who makes, or causes to be made, a false statement in a document verified"
+            + " by a statement of truth without an honest belief in its truth. The applicant believes "
+            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + " is authorised by the applicant to sign this statement.";
+        expectedDeclarationMap.put("declarationText", declarationText);
+        expectedDeclarationMap.put("agreedBy", solicitor);
+        caseDataWithParties = caseDataWithParties.toBuilder().caseCreatedBy(CaseCreatedBy.SOLICITOR).build();
 
         assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
     }
@@ -1358,6 +1442,8 @@ public class ApplicationsTabServiceTest {
                                               "isAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL
         );
+        FL401Respondent fl401Respondent = FL401Respondent.builder().build();
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(FL401Respondent.class))).thenReturn(fl401Respondent);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);

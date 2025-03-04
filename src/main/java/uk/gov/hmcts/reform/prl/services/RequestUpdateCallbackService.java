@@ -140,7 +140,6 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto,
                 allTabsUpdateCaseData
             );
-            log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
             allTabService.mapAndSubmitAllTabsUpdate(
                 systemAuthorisation,

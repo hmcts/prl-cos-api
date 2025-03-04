@@ -14,7 +14,7 @@ public class PrlAppsConstants {
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
 
-    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String NEXT_HEARING_DATE = "nextHearingDate";
     public static final String STATE = "state";
 
 
@@ -590,6 +590,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
+    public static final String APPLICANT = "applicant";
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
     public static final String CAFCASS_REPORTS = "Cafcass reports";
@@ -801,6 +802,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
+    public static final String OTHER_PARTY = "otherPartyInTheCaseRevised";
     public static final String COMMA = ",";
     public static final String EMPTY_STRING = "";
 
@@ -948,6 +950,9 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+
+    public static final String MANDATORY_JUDGE_WELSH =
+        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser - welsh";
     public static final String DUMMY = "Dummy";
 
 
@@ -960,14 +965,20 @@ public class PrlAppsConstants {
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
+    public static final String MANDATORY_MAGISTRATE_WELSH = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+        + " Magistrates - welsh";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
+    public static final String ORDER_NOT_AVAILABLE_FL401_WELSH = "This order is not available to be created for FL401 cases - welsh";
 
     public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
         + "upload an order, as this case has multiple applicants or respondents.";
+
+    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH = "You need to go back to the previous screen and "
+        + "upload an order, as this case has multiple applicants or respondents. - welsh";
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
@@ -1070,6 +1081,10 @@ public class PrlAppsConstants {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
+    public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
+
+    public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";
+
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
     public static final String COURTNAV_USER = "courtnav";
@@ -1086,9 +1101,24 @@ public class PrlAppsConstants {
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
 
+    public static final String FINAL_CASE_CLOSED_DATE = "finalCaseClosedDate";
+    public static final String CASE_CLOSED = "caseClosed";
+    public static final String CHILD_DETAILS_REVISED_TABLE = "childDetailsRevisedTable";
+    public static final String DOES_APPLICANT_HAVE_CHILDREN = "doesApplicantHaveChildren";
+    public static final String APPLICANT_FAMILY_TABLE = "applicantFamilyTable";
+    public static final String FL401_CHILD_DETAILS_TABLE = "fl401ChildDetailsTable";
+    public static final String APPLICANT_CHILD = "applicantChild";
+
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+    public static final String REFUGE_DOCUMENTS = "refugeDocuments";
+    public static final String HISTORICAL_REFUGE_DOCUMENTS = "historicalRefugeDocuments";
     public static final String RESPONDENT = "respondent";
 
     public static final String CASE_STATUS = "caseStatus";
+
+    public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
+    public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
 
 }

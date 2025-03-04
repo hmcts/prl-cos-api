@@ -96,7 +96,6 @@ public class PaymentRequestService {
 
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
-        log.info("Inside createPayment -> request {}", createPaymentRequest);
         log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificEvent(
@@ -132,6 +131,7 @@ public class PaymentRequestService {
             //update service request & payment request reference
             caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
             caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
         } else {
             log.info("*** Citizen awp payment ***");
             paymentResponse = handleCitizenAwpPayment(authorization,

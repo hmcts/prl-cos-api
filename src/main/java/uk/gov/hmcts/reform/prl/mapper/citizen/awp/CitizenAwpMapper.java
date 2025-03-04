@@ -63,14 +63,12 @@ public class CitizenAwpMapper {
             .otherApplicationsBundle(getOtherApplicationBundle(citizenAwpRequest))
             .build();
 
-        log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
         //Map citizen awp payment details & then remove from in progress
         additionalApplicationsBundle = mapPaymentDetailsAndRemove(
             caseData,
             citizenAwpRequest,
             additionalApplicationsBundle
         );
-        log.info("Mapped data with payment details {}", additionalApplicationsBundle);
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
             isNotEmpty(caseData.getAdditionalApplicationsBundle())
@@ -93,6 +91,32 @@ public class CitizenAwpMapper {
         //PRL-4023 - postfix to awp task name
         if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
             return "C2";
+        } else if (null != additionalApplicationsBundle.getOtherApplicationsBundle()
+            && null != additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType()) {
+            return switch (additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType()) {
+                case C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY, C1_REQUEST_APPOINT_A_GUARDIAN_FOR_CHILD ->
+                    "C1 - Apply for certain orders under the Children Act";
+                case C3_ORDER_AUTHORISING_SEARCH_FOR_TAKING_CHARGE_OF_AND_DELIVERY_OF_A_CHILD ->
+                    "C3 - Application for an order authorizing search and taking charge of a child";
+                case C4_ASK_COURT_TO_ORDER_SOMEONE_TO_PROVIDE_CHILD_INFORMATION ->
+                    "C4 - Application for an order for disclosure of a child’s whereabouts";
+                case C79_ENFORCE_A_CHILD_ARRANGEMENTS_ORDER ->
+                    "C79 - Application to enforce a child arrangements order";
+                case D89_ASK_TO_DELIVER_PAPER_TO_OTHER_PARTY -> "D89 - Request for personal service by a court bailiff";
+                case EX740_PREVENT_QUESTIONING_IN_PERSON_ACCUSING_SOMEONE ->
+                    "EX740 - Application to prohibit cross examination (victim)";
+                case EX741_PREVENT_QUESTIONING_IN_PERSON_SOMEONE_ACCUSING_YOU ->
+                    "EX741 - Application to prohibit cross examination (perpetrator)";
+                case FP25_REQUEST_TO_ORDER_A_WITNESS_TO_ATTEND_COURT -> "FP25 - Witness summons";
+                case FC600_REQUEST_COURT_TO_ACT_WHEN_SOMEONE_IN_THE_CASE_IS_DISOBEYING_COURT_ORDER ->
+                    "FC600 - Committal application";
+                case N161_APPEAL_A_ORDER_OR_ASK_PERMISSION_TO_APPEAL -> "N161 - Appellant’s notice";
+                case FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER ->
+                    "FL403 - Application to vary, discharge or extend an order";
+                case FL407_REQUEST_THE_COURT_ISSUES_AN_ARREST_WARRANT -> "FL407 - Application for a warrant of arrest";
+                default ->
+                    additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationType().getDisplayedValue();
+            };
         }
         return null;
     }

@@ -15,5 +15,5 @@ import java.util.List;
 public class KeepDetailsPrivate {
     private final YesNoIDontKnow otherPeopleKnowYourContactDetails;
     private final YesOrNo confidentiality;
-    private List<ConfidentialityListEnum> confidentialityList;
+    private final List<ConfidentialityListEnum> confidentialityList;
 }

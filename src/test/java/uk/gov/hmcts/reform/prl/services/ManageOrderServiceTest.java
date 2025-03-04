@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -103,6 +104,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,13 +128,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
@@ -277,7 +284,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.ENGLISH);
         assertEquals("testChild", caseDataUpdated.get("childrenList"));
         assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
@@ -312,7 +319,42 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.ENGLISH);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
+    }
+
+    @Test
+    public void getUpdatedCaseDataFl401Welsh() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenLiveAtAddress homeChild = ChildrenLiveAtAddress.builder()
+            .childFullName("Test Child Name")
+            .build();
+
+        Element<ChildrenLiveAtAddress> wrappedHomeChildren = Element.<ChildrenLiveAtAddress>builder().value(homeChild).build();
+        List<Element<ChildrenLiveAtAddress>> listOfHomeChildren = Collections.singletonList(wrappedHomeChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .manageOrders(manageOrders)
+            .home(Home.builder()
+                .children(listOfHomeChildren)
+                .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.WELSH);
         assertEquals("testChild", caseDataUpdated.get("childrenList"));
         assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
@@ -386,7 +428,8 @@ public class ManageOrderServiceTest {
             .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
             .build();
 
-        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank);
+        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank,
+            PrlAppsConstants.ENGLISH);
 
         assertEquals(updatedCaseData.getManageOrders().getFl404CustomFields(), expectedDetails);
 
@@ -429,7 +472,7 @@ public class ManageOrderServiceTest {
             .build();
 
 
-        CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData);
+        CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData, PrlAppsConstants.ENGLISH);
 
         assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
 
@@ -957,7 +1000,8 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1022,7 +1066,7 @@ public class ManageOrderServiceTest {
 
         ReflectionTestUtils.setField(manageOrderService, "sdoWelshTemplate", "sdo-WEL-Template");
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1072,7 +1116,8 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1103,7 +1148,8 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1147,7 +1193,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1239,7 +1285,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
 
@@ -1292,7 +1338,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1443,7 +1489,8 @@ public class ManageOrderServiceTest {
 
         CaseData caseData2 = manageOrderService.populateCustomOrderFields(
             caseData,
-            CreateSelectOrderOptionsEnum.nonMolestation
+            CreateSelectOrderOptionsEnum.nonMolestation,
+            PrlAppsConstants.ENGLISH
         );
 
         assertNotNull(caseData2.getManageOrders().getFl404CustomFields().getFl404bApplicantName());
@@ -1600,7 +1647,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1646,7 +1693,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1759,7 +1806,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1792,7 +1839,8 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm);
+        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData,
+            CreateSelectOrderOptionsEnum.generalForm, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersApplicantReference());
         assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersRespondentReference());
@@ -1822,7 +1870,8 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData,
+            CreateSelectOrderOptionsEnum.noticeOfProceedings, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1860,7 +1909,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -1895,7 +1944,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1914,7 +1963,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -1952,7 +2001,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1974,7 +2023,7 @@ public class ManageOrderServiceTest {
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2009,7 +2058,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2094,7 +2143,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2152,7 +2201,35 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank, PrlAppsConstants.ENGLISH));
+    }
+
+    @Test
+    public void testpopulateCustomOrderFieldsForUploadAnOrderWelsh() {
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersFl402CaseNo("12345674")
+            .manageOrdersFl402CourtName("Court name")
+            .manageOrdersFl402Applicant("app testLast")
+            .manageOrdersFl402ApplicantRef("test test1")
+            .orderDirections("order dir")
+            .furtherDirectionsIfRequired("fur dir")
+            .recitalsOrPreamble("reci")
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
+            .build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .manageOrders(expectedDetails)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank, PrlAppsConstants.WELSH));
     }
 
     @Test
@@ -2337,7 +2414,7 @@ public class ManageOrderServiceTest {
                               .childOption(dynamicMultiSelectList)
                               .build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData).get(
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH).get(
             "draftOrderCollection"));
     }
 
@@ -2432,7 +2509,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2465,7 +2542,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2598,7 +2675,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2638,7 +2715,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2666,7 +2743,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2711,7 +2788,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2730,7 +2807,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
@@ -2791,7 +2868,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2889,7 +2966,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2919,7 +2996,7 @@ public class ManageOrderServiceTest {
             .appointedGuardianName(null)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .build();
-        Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
+        Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData, PrlAppsConstants.ENGLISH);
         Assert.assertTrue(!result.isEmpty());
     }
 
@@ -2970,7 +3047,7 @@ public class ManageOrderServiceTest {
 
         ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3154,7 +3231,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3247,7 +3324,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -3294,7 +3371,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3358,7 +3435,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3406,7 +3483,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.Yes)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .build();
 
@@ -3433,7 +3510,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.No)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .build();
 
@@ -3497,7 +3574,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3524,7 +3601,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -3731,7 +3808,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3989,7 +4066,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -4213,7 +4290,7 @@ public class ManageOrderServiceTest {
             .id(123L).respondents(respondents)
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .otherParties(null)
-                              .serveToRespondentOptions(YesOrNo.Yes).build())
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4247,7 +4324,7 @@ public class ManageOrderServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .otherParties(null)
-                              .serveToRespondentOptions(YesOrNo.Yes).build()).build();
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build()).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -4316,7 +4393,7 @@ public class ManageOrderServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties)
             .manageOrders(caseData.getManageOrders().toBuilder()
-                              .serveToRespondentOptions(YesOrNo.Yes).build())
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4395,7 +4472,7 @@ public class ManageOrderServiceTest {
                                  .label("Sam Nolan")
                                  .build());
         CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
+            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesNoNotApplicable.No)
                               .recipientsOptions(DynamicMultiSelectList.builder()
                                                      .value(elementList)
                                                      .listItems(elementList)
@@ -4661,7 +4738,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -4753,7 +4830,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
             "test token",
-            caseData
+            caseData,
+            PrlAppsConstants.ENGLISH
         );
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
@@ -5020,7 +5098,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
 
     }
@@ -5065,7 +5143,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
         assertEquals("<div class=\"govuk-inset-text\"> "
                          + "If you need to include directions for a fact-finding hearing, you need to upload the"
@@ -5114,7 +5192,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
     }
 
@@ -5245,7 +5323,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -5580,6 +5658,100 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertNull(updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+
+    }
+
+    @Test
     public void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
@@ -5633,7 +5805,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
     }
 
@@ -5696,7 +5868,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5724,7 +5896,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
     }
 
@@ -5754,7 +5926,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -5783,7 +5955,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -5812,9 +5984,8 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
-
     }
 
 }
