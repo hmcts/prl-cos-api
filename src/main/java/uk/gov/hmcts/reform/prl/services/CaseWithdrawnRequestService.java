@@ -36,20 +36,35 @@ public class CaseWithdrawnRequestService {
     private final EventService eventPublisher;
     private final ObjectMapper objectMapper;
     public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn";
+    public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL_WELSH = "# Application withdrawn - welsh";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
         ### What happens next
 
         This case will now display as “withdrawn” in your case list.""";
 
+    public static final String APPLICATION_WITHDRAWN_STATUS_LABEL_WELSH = """
+        ### What happens next
+
+        This case will now display as “withdrawn” in your case list. - welsh""";
+
     public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Requested Application Withdrawal";
+
+    public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL_WELSH = "# Requested Application Withdrawal - welsh";
     public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = """
         ### What happens next
 
         The court will consider your withdrawal request.""";
 
+    public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL_WELSH = """
+        ### What happens next
+
+        The court will consider your withdrawal request. - welsh""";
+
     public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled";
 
-    public SubmittedCallbackResponse caseWithdrawnEmailNotification(CallbackRequest callbackRequest, String authorisation) {
+    public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL_WELSH = "# Application withdrawn cancelled - welsh";
+
+    public SubmittedCallbackResponse caseWithdrawnEmailNotification(CallbackRequest callbackRequest, String authorisation, String language) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -57,27 +72,37 @@ public class CaseWithdrawnRequestService {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         String caseWithdrawnConfirmationHeader;
         String caseWithdrawnConfirmationBodyPrefix;
+        String caseWithdrawnConfirmationHeaderWelsh;
+        String caseWithdrawnConfirmationBodyPrefixWelsh;
         UserDetails userDetails = userService.getUserDetails(authorisation);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (State.CASE_ISSUED.equals(caseData.getState())
                 || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_REQUEST_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL;
+                caseWithdrawnConfirmationHeaderWelsh = APPLICATION_WITHDRAWN_REQUEST_LABEL_WELSH;
+                caseWithdrawnConfirmationBodyPrefixWelsh = APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL_WELSH;
                 sendWithdrawEmails(caseDetails, caseData, userDetails);
             } else {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_SUCCESS_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_STATUS_LABEL;
+                caseWithdrawnConfirmationHeaderWelsh = APPLICATION_WITHDRAWN_SUCCESS_LABEL_WELSH;
+                caseWithdrawnConfirmationBodyPrefixWelsh = APPLICATION_WITHDRAWN_STATUS_LABEL_WELSH;
                 sendWithdrawEmailsBeforeIssuedState(caseData, userDetails, caseDetails);
             }
         } else {
             caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL;
             caseWithdrawnConfirmationBodyPrefix = " \n\n ";
+            caseWithdrawnConfirmationHeaderWelsh = APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL_WELSH;
+            caseWithdrawnConfirmationBodyPrefixWelsh = " \n\n ";
         }
 
-        return SubmittedCallbackResponse.builder().confirmationHeader(
-            caseWithdrawnConfirmationHeader).confirmationBody(
-            caseWithdrawnConfirmationBodyPrefix
-        ).build();
+        return SubmittedCallbackResponse.builder()
+            .confirmationHeader(PrlAppsConstants.WELSH.equals(language) ? caseWithdrawnConfirmationHeaderWelsh
+                : caseWithdrawnConfirmationHeader)
+            .confirmationBody(PrlAppsConstants.WELSH.equals(language) ? caseWithdrawnConfirmationBodyPrefixWelsh
+                : caseWithdrawnConfirmationBodyPrefix)
+            .build();
     }
 
     private void sendWithdrawEmails(CaseDetails caseDetails, CaseData caseData, UserDetails userDetails) {

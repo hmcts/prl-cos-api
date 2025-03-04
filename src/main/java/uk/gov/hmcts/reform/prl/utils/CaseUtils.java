@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.models.languagecontext.LanguageContextMapper;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
@@ -1079,6 +1080,29 @@ public class CaseUtils {
                 return otherPerson.get().getValue();
             }
         }
+        return null;
+    }
+
+    public static String getLanguage(String clientContextString) {
+
+        LanguageContextMapper languageContextMapper = null;
+
+        if (clientContextString != null) {
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
+            String decodedString = new String(decodedBytes);
+            try {
+                languageContextMapper = new ObjectMapper().readValue(decodedString, LanguageContextMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+
+        if (null != languageContextMapper
+            && null != languageContextMapper.getClientContext()
+            && null != languageContextMapper.getClientContext().getUserLanguage()) {
+            return languageContextMapper.getClientContext().getUserLanguage().getLanguage();
+        }
+
         return null;
     }
 
