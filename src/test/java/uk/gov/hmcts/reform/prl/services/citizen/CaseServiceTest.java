@@ -131,6 +131,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_C
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_FORMATTER_D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.OCCUPATION_ORDER;
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
@@ -763,19 +764,24 @@ public class CaseServiceTest {
 
     @Test
     public void testGetCitizenDocumentsWithFm5Reminders() {
-
-        /*QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder()
-            .fm5StatementsDocument(Document.builder().build())
-             .categoryId("fm5Statements")
-            .uploadedBy("test")
-            .uploaderRole(CITIZEN)
-            .uploadedByIdamId("00000000-0000-0000-0000-0000")
-            .documentUploadedDate(LocalDateTime.now())
-            .citizenQuarantineDocument(Document.builder().documentUrl("url").build())
-            .url(Document.builder().documentUrl("url").build())
-            .build();*/
         CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
                 FM5ReminderNotificationDetails.builder().fm5RemindersSent("YES").build())
+            .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
+                element(fm5QuarantineLegalDoc))).build()).build();
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertFalse(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
+        assertEquals(10, citizenDocumentsManagement.getApplicantDocuments().size());
+    }
+
+    @Test
+    public void testGetCitizenDocumentsWithFm5RemindersSetToNO() {
+        CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
+                FM5ReminderNotificationDetails.builder().fm5RemindersSent("NO").build())
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(fm5QuarantineLegalDoc))).build()).build();
         //Action
@@ -1066,6 +1072,62 @@ public class CaseServiceTest {
             .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(YES).fl404bIsPowerOfArrest2(YES)
                                    .fl404bIsPowerOfArrest3(YES).fl404bIsPowerOfArrest4(YES)
                                    .fl404bIsPowerOfArrest5(YES).fl404bIsPowerOfArrest6(YES)
+                                   .build())
+            .orderType(OCCUPATION_ORDER)
+            .sosStatus(SOS_COMPLETED)
+            .build();
+        CaseData caseData1 = caseData.toBuilder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder().partyId(testUuid)
+                                 .user(User.builder().idamId(userDetails.getId()).build()).build())
+            .respondentsFL401(partyDetails)
+            .orderCollection(List.of(element(orderDetails1)))
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle
+                                                              .builder()
+                                                              .uploadedDateTime("04-Sep-2024 01:38:33 PM")
+                                                              .partyType(PartyEnum.applicant)
+                                                              .selectedParties(List.of(element(ServedParties.builder().partyId(
+                                                                  testUuid.toString()).build())))
+                                                              .c2DocumentBundle(C2DocumentBundle
+                                                                                    .builder()
+                                                                                    .supportingEvidenceBundle(List.of(
+                                                                                        element(SupportingEvidenceBundle
+                                                                                                    .builder()
+                                                                                                    .build())))
+                                                                                    .build())
+                                                              .build())))
+            .state(State.DECISION_OUTCOME)
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+    }
+
+    @Test
+    public void testCitizenOrdersSosCompletedFL401CustomFields1() {
+
+        //Given
+        OrderDetails orderDetails1 = orderDetails.toBuilder()
+            .otherDetails(OtherOrderDetails.builder().orderCreatedDate(LocalDateTime.now().format(DATE_FORMATTER_D_MMM_YYYY)).build())
+            .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
+                                   .multipleOrdersServed(Yes)
+                                   .serveOnRespondent(YesNoNotApplicable.Yes)
+                                   .servedParties(List.of(Element.<ServedParties>builder()
+                                                              .value(ServedParties.builder()
+                                                                         .partyId("00000000-0000-0000-0000-000000000000")
+                                                                         .build()).build()))
+                                   .build())
+            .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(YES).fl404bIsPowerOfArrest2(YES)
+                                   .fl404bIsPowerOfArrest3(YES).fl404bIsPowerOfArrest4(YES)
+                                   .fl404bIsPowerOfArrest5(YES).fl404bIsPowerOfArrest6(NO)
                                    .build())
             .orderType(OCCUPATION_ORDER)
             .sosStatus(SOS_COMPLETED)
@@ -1647,21 +1709,24 @@ public class CaseServiceTest {
                                             .build()).build());
         List<Element<Document>> docs = new ArrayList<>();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds(SERVED_PARTY_APPLICANT).docs(
-            docs).servedParty(SERVED_PARTY_APPLICANT).build()));
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").docs(
+            docs).servedParty(SERVED_PARTY_APPLICANT).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds(SERVED_PARTY_APPLICANT).printDocs(List.of(
-            element(Document.builder().build()))).build()));
-        List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
-        servedApplicationDetails.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").printDocs(List.of(
+            element(Document.builder().build()))).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<ServedApplicationDetails>> servedApplicationDetails1 = new ArrayList<>();
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
                 emailNotificationDetails).servedBy("courtAdmin").servedAt(LocalDateTime.now().format(
                 DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).whoIsResponsible("courtAdmin")
                                                  .modeOfService(SOA_BY_EMAIL_AND_POST).build()));
-        servedApplicationDetails.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
                 DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_EMAIL).bulkPrintDetails(bulkPrintDetails)
                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
-        servedApplicationDetails.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
                 DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_POST).bulkPrintDetails(bulkPrintDetails)
+                                                 .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService("SOA").bulkPrintDetails(bulkPrintDetails)
                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
 
         //Given
@@ -1674,7 +1739,7 @@ public class CaseServiceTest {
                                   .user(User.builder().idamId("00000000-0000-0000-0000-000000000000").build())
                                   .partyId(UUID.randomUUID()).build())
             .state(State.DECISION_OUTCOME)
-            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails).build())
+            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails1).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
