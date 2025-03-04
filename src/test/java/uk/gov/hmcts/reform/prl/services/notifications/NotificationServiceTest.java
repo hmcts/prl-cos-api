@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.notifications;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -140,17 +139,6 @@ public class NotificationServiceTest {
         );
     }
 
-    @Ignore
-    @Test
-    public void testNotificationsWhenRespondentSubmitsResponse_C1AApplication() throws IOException {
-        testNotificationsWhenRespondentSubmitsResponse(
-            "respondentC1AApplication",
-            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR
-        );
-    }
-
     @Test
     public void testNotificationsWhenRespondentSubmitsResponse_C1AResponse() throws IOException {
         testNotificationsWhenRespondentSubmitsResponse(
@@ -202,15 +190,6 @@ public class NotificationServiceTest {
         testCafcassCymruNotifications(
             "respondentApplication",
             EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS
-        );
-    }
-
-    @Ignore
-    @Test
-    public void testCafcassCymruNotifications_C1AApplication() {
-        testCafcassCymruNotifications(
-            "respondentC1AApplication",
-            EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS
         );
     }
 
