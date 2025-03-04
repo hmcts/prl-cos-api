@@ -92,7 +92,7 @@ public class ManageDocumentsControllerIntegrationTest {
 
     @Test
     public void testSubmittedManageDocuments() throws Exception {
-        String url = "/manage-documents/copy-manage-docs";
+        String url = "/manage-documents/submitted";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.doNothing().when(manageDocumentsService).appendConfidentialDocumentNameForCourtAdminAndUpdate(any(), any());
