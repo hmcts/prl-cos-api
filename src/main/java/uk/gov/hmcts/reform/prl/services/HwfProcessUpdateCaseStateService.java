@@ -102,26 +102,29 @@ public class HwfProcessUpdateCaseStateService {
 
     private void updateCaseStateAndSubmitevent(String event, CaseDetails caseDetails, CaseData caseData) {
         log.info("Going to check service request payment status");
-        ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
-            paymentRequestService.fetchServiceRequestReferenceStatus(
-                systemUserService.getSysUserToken(),
-                caseData.getPaymentServiceRequestReferenceNumber()
-        );
-        log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
-        log.info("Event - " + event);
-        if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
-            //Save case data
-            allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseDetails.getId().toString(),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataUpdated
-            );
+        log.info("PaymentServiceRequestReferenceNumber - " + caseData.getPaymentServiceRequestReferenceNumber());
+        if (StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
+            ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
+                paymentRequestService.fetchServiceRequestReferenceStatus(
+                    systemUserService.getSysUserToken(),
+                    caseData.getPaymentServiceRequestReferenceNumber()
+                );
+            log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+            log.info("Event - " + event);
+            if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
+                Map<String, Object> caseDataUpdated = new HashMap<>();
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
+                caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
+                //Save case data
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseDetails.getId().toString(),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated
+                );
+            }
         }
     }
 
