@@ -107,7 +107,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
     }
 
-    @PostMapping("/copy-manage-docs")
+    @PostMapping("/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {

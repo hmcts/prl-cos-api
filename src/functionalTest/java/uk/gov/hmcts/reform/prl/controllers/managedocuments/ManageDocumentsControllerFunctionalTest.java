@@ -175,7 +175,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .assertThat().statusCode(200);
     }
@@ -264,7 +264,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
@@ -280,7 +280,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.legalProfUploadDocListDocTab[0].value.categoryId",
                   equalTo(APPLICANT_APPLICATION),
@@ -302,7 +302,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
@@ -316,7 +316,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.cafcassUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
                   "data.cafcassUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
@@ -334,7 +334,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
             .assertThat().statusCode(200)
@@ -357,7 +357,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBodyRevised)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
+            .post("/manage-documents/submitted")
             .then()
             .body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
                   "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
