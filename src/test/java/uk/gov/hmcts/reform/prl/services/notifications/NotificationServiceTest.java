@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -255,4 +257,36 @@ public class NotificationServiceTest {
         );
     }
 
+    @Test
+    public void testSendNotificationsAsync() {
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId("respondentApplication")
+            .document(Document.builder().build())
+            .uploaderRole(SOLICITOR)
+            .build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
+            true).build());
+
+        notificationService.sendNotificationsAsync(caseData,
+                                              quarantineLegalDoc,
+                                              SOLICITOR);
+
+        await().untilAsserted(() -> {
+            verify(emailService, times(1)).send(eq("afl11@test.com"),
+                                                eq(EmailTemplateNames.C7_NOTIFICATION_APPLICANT), any(),
+                                                eq(LanguagePreference.english)
+            );
+            verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+                eq(SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT),
+                anyString(),
+                any(SendgridEmailConfig.class)
+            );
+            verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+                eq(SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR),
+                anyString(),
+                any(SendgridEmailConfig.class)
+            );
+        });
+    }
 }
