@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -45,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
@@ -53,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +69,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -121,6 +127,9 @@ public class ServiceOfDocumentsServiceTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
+
+    @Mock
+    private ConfidentialityCheckService confidentialityCheckService;
 
     @Before
     public void setUp() {
@@ -206,6 +215,63 @@ public class ServiceOfDocumentsServiceTest {
         assertEquals(combinedRecipients, response.get(SOA_RECIPIENT_OPTIONS));
     }
 
+    @Test
+    public void testHandleAboutToStartWhenFl401() {
+
+        when(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(any(CaseData.class))).thenReturn(
+            EMPTY_STRING);
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
+            .thenReturn(new ArrayList<DynamicMultiselectListElement>());
+        List<DynamicMultiselectListElement> applicantRespondentList = List.of(DynamicMultiselectListElement.builder()
+                                                                                  .label("applicant")
+                                                                                  .code("applicant")
+                                                                                  .build(),
+                                                                              DynamicMultiselectListElement.builder()
+                                                                                  .label("respondent")
+                                                                                  .code("respondent")
+                                                                                  .build()
+        );
+        DynamicMultiSelectList combinedRecipients = DynamicMultiSelectList.builder()
+            .listItems(applicantRespondentList)
+            .build();
+        when(serviceOfApplicationService.getCombinedRecipients(any(CaseData.class))).thenReturn(combinedRecipients);
+        List<DynamicListElement> categoriesAndDocuments = new ArrayList<>();
+        categoriesAndDocuments.add(DynamicListElement.builder().label(EMPTY_STRING).build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(categoriesAndDocuments).build());
+
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .firstName("test")
+            .lastName("test")
+            .email("test@hmcts.com")
+            .address(Address.builder().addressLine1("addressLine1").postCode("postcode").build())
+            .build();
+        CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantsFL401(partyDetails1)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails1)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails1)))
+            .othersToNotify(List.of(element(UUID.fromString(TEST_UUID),partyDetails1)))
+            .build();
+
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        Map<String, Object> response = serviceOfDocumentsService.handleAboutToStart(TEST_AUTHORIZATION, callbackRequest1);
+        assertNotNull(response);
+        assertEquals("No", response.get(DISPLAY_LEGAL_REP_OPTION));
+        assertEquals(YesOrNo.No,response.get(SOA_OTHER_PEOPLE_PRESENT_IN_CASE));
+    }
+
+
     /*@Test
     public void testHandleAboutToStartWithSodUnServedPack() {
         serviceOfDocuments = serviceOfDocuments.toBuilder()
@@ -237,6 +303,35 @@ public class ServiceOfDocumentsServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().surname("admin").forename("test").build());
         Map<String, Object> response = serviceOfDocumentsService.handleAboutToSubmit(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitorWhenSodServToResOptNA() {
+
+        ServiceOfDocuments serviceOfDocuments1 = ServiceOfDocuments.builder()
+            .sodServeToRespondentOptions(YesNoNotApplicable.NotApplicable)
+            .sodSolicitorServingRespondentsOptions(SodSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .build();
+
+        DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments1)
+            .serviceOfApplication(ServiceOfApplication.builder().soaOtherParties(soaOtherParties).build())
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().surname("admin").forename("test").build());
+        Map<String, Object> response = serviceOfDocumentsService.handleAboutToSubmit(TEST_AUTHORIZATION, callbackRequest1);
         assertNotNull(response);
     }
 
@@ -523,5 +618,377 @@ public class ServiceOfDocumentsServiceTest {
         assertNotNull(response);
 
     }
+
+    @Test
+    public void testHandleConfCheckAboutToStart() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        List<Element<Document>> documentsList = new ArrayList<>();
+        documentsList.add(ElementUtils.element(Document.builder().build()));
+        sodPack = sodPack.toBuilder().documents(documentsList)
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .sodDocumentsCheckOptions(ServiceOfDocumentsCheckEnum.managerCheck)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        doNothing().when(confidentialityCheckService).processRespondentsC8Documents(any(Map.class), any(CaseData.class));
+        AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckAboutToStartWhenNoServiceOfDocs() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        CaseData caseData1 = CaseData.builder()
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        doNothing().when(confidentialityCheckService).processRespondentsC8Documents(any(Map.class), any(CaseData.class));
+        AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckAboutToStartWhenNoSdoUnServedPack() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        CaseData caseData1 = CaseData.builder()
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .serviceOfDocuments(ServiceOfDocuments.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        doNothing().when(confidentialityCheckService).processRespondentsC8Documents(any(Map.class), any(CaseData.class));
+        AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckAboutToStartWhenSodUnServedPackWithNoDocs() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .sodDocumentsCheckOptions(ServiceOfDocumentsCheckEnum.managerCheck)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+        doNothing().when(confidentialityCheckService).processRespondentsC8Documents(any(Map.class), any(CaseData.class));
+        AboutToStartOrSubmitCallbackResponse response = serviceOfDocumentsService.handleConfCheckAboutToStart(TEST_AUTHORIZATION, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckAboutToSubmitForServiceOfDocumentsEvents() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .sodDocumentsCheckOptions(ServiceOfDocumentsCheckEnum.managerCheck)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.SERVICE_OF_DOCUMENTS.getId())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+
+        Map response = serviceOfDocumentsService.handleConfCheckAboutToSubmit(callbackRequest1);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckAboutToSubmitForConfidentialCheckDocuments() {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .canDocumentsBeServed(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+
+
+        Map response = serviceOfDocumentsService.handleConfCheckAboutToSubmit(callbackRequest1);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckSubmitted() {
+        partyDetails = partyDetails.toBuilder()
+            .partyId(UUID.randomUUID())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("solicitorEmail")
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            TEST_AUTHORIZATION,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData1.toMap(new ObjectMapper()),
+            caseData1,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent1);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleConfCheckSubmitted(TEST_AUTHORIZATION,callbackRequest1);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testHandleConfCheckSubmittedWhenNoDocumentsBeServed() {
+        partyDetails = partyDetails.toBuilder()
+            .partyId(UUID.randomUUID())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("solicitorEmail")
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(new ArrayList<>())
+            .build();
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.No)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId(Event.CONFIDENTIAL_CHECK_DOCUMENTS.getId())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            TEST_AUTHORIZATION,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData1.toMap(new ObjectMapper()),
+            caseData1,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent1);
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage
+                                                                                          .builder()
+                                                                                          .isGenEng(true)
+                                                                                          .isGenWelsh(true)
+                                                                                          .build());
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleConfCheckSubmitted(TEST_AUTHORIZATION,callbackRequest1);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testValidateDocuments() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        Document document = Document.builder().documentUrl("url").documentFileName("docFileName")
+            .documentBinaryUrl("docBinaryUrl").build();
+        List<Element<Document>> documentsList = new ArrayList<>();
+        documentsList.add(ElementUtils.element(document));
+        sodPack = sodPack.toBuilder().isPersonalService(YesOrNo.Yes)
+            .servedBy(SodCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue())
+            .documents(documentsList)
+            .build();
+        ServiceOfDocuments serviceOfDocuments1 = ServiceOfDocuments.builder()
+            .sodUnServedPack(sodPack)
+            .sodAdditionalDocumentsList(documentsList)
+            .canDocumentsBeServed(YesOrNo.Yes).canDocumentsBeServed(YesOrNo.No)
+            .build();
+
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(serviceOfDocuments1)
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .build();
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    public void testValidateDocumentsWhenSodAdditionalDocsListEmpty() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();
+        documentsList.add(ElementUtils.element(DocumentsDynamicList.builder().documentsList(DynamicList.builder().build()).build()));
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder().sodDocumentsList(documentsList).build())
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(0,response.size());
+    }
+
+    @Test
+    public void testValidateDocumentsWhenSodAdditionalDocsListEmptyAndSodDocsEmpty() {
+        partyDetails = partyDetails.toBuilder()
+            .build();
+        List<Element<DocumentsDynamicList>> documentsList = new ArrayList<>();
+        CaseData caseData1 = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder().sodDocumentsList(documentsList).build())
+            .applicantsFL401(partyDetails)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .build();
+        CaseDetails caseDetails1  = CaseDetails.builder()
+            .id(Long.valueOf(TEST_CASE_ID))
+            .data(caseData1.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .eventId("eventID")
+            .build();
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData1);
+        List<String> response = serviceOfDocumentsService.validateDocuments(callbackRequest1);
+        assertNotNull(response);
+        assertEquals(1,response.size());
+    }
+
 
 }
