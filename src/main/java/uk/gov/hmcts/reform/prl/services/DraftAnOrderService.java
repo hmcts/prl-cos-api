@@ -1141,6 +1141,8 @@ public class DraftAnOrderService {
                 } else {
                     log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    //PRL-7018 - Fix to trigger AHR when Judge/Manager approves without editing order
+                    caseData.getManageOrders().setOrdersHearingDetails(draftOrder.getManageOrderHearingDetails());
                 }
                 //AHR - Judge/Manager approves an order or Admin edits an order & saves as draft
                 if (!UserRoles.SOLICITOR.name().equals(loggedInUserType)
