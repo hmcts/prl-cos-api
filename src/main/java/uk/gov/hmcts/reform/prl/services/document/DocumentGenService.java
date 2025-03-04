@@ -1446,7 +1446,6 @@ public class DocumentGenService {
 
         String serviceName = getServiceNameFromS2SToken(s2sToken);
         log.info("serviceName.................................: {}", serviceName);
-        uk.gov.hmcts.reform.ccd.document.am.model.Document documentMetadata = caseDocumentClient.getMetadataForDocument(authToken, s2sToken, docUrl);
 
         String fileName = FilenameUtils.getName(docUrl);
         ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
