@@ -93,7 +93,8 @@ public class DssEdgeCaseDetailsMapper {
                          .country(dssCaseData.getApplicantAddressCountry())
                          .build())
             //Default gender to Female for FGM cases
-            .gender("FGM".equals(dssCaseData.getEdgeCaseTypeOfApplication()) ? Gender.female : null)
+            .gender("FGM".equals(dssCaseData.getEdgeCaseTypeOfApplication())
+                && "self".equalsIgnoreCase(dssCaseData.getWhomYouAreApplying()) ? Gender.female : null)
             .build();
     }
 }
