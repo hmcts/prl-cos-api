@@ -1373,7 +1373,7 @@ public class CaseService {
                                                                  proceeding.getUploadRelevantOrder(),
                                                                  ORDERS_FROM_OTHER_PROCEEDINGS,
                                                                  SERVED_PARTY_RESPONDENT,
-                                                                 party.getValue().getPartyId()
+                                                                 party.getId()
                                                              ))
                                                              .toList()
                                                          ).flatMap(Collection::stream)
