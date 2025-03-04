@@ -182,7 +182,6 @@ public class AwpProcessHwfPaymentService {
                 }
             }
         }
-        log.info("All AwP HwF Payment completed Application Ids " + processedApplicationIds);
         return allCitizenAwpWithHwfHasBeenProcessed;
     }
 
@@ -198,7 +197,6 @@ public class AwpProcessHwfPaymentService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-            log.info("searchString " + searchString);
             String sysUserToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchCases = coreCaseDataApi.searchCases(

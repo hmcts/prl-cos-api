@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -79,6 +79,7 @@ public class CitizenResponseService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    private final ManageOrderService manageOrderService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
     public static final String C1A_RESPONSE = "C1Aresponse";
@@ -115,7 +116,7 @@ public class CitizenResponseService {
     }
 
     private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
-        log.info("data map creating");
+        log.info("Updating respondent details");
         Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
@@ -127,11 +128,6 @@ public class CitizenResponseService {
                 dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
                                                                partyElement, CITIZEN
                 );
-                try {
-                    log.info("data map generated is ===>" + objectMapper.writeValueAsString(dataMap));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
                 log.info("data map processed");
             }
         }
@@ -256,10 +252,6 @@ public class CitizenResponseService {
         Document c1aFinalResponseEngDocument = null;
         Document c1aFinalResponseWelDocument = null;
         log.info("inside generateRespondentC1aResponseDocuments()");
-        log.info("responseToAllegationsOfHarm options {}",
-                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
-        log.info("responseToAllegationsOfHarm text {}",
-                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm());
         respondentC1aResponseDocuments = null != respondentC1aResponseDocuments ? respondentC1aResponseDocuments : new HashMap<>();
         if (isNotEmpty(updatedPartyDetails.getResponse())
             && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
@@ -395,6 +387,9 @@ public class CitizenResponseService {
                                                    UserDetails userDetails) throws Exception {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             int partyIndex = caseData.getRespondents().indexOf(partyDetailsElement);
+            //prl-6790 - getting user-role and adding to datamap
+            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+
             Document c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,

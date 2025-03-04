@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -103,6 +104,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,13 +128,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
@@ -1860,7 +1867,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -1914,7 +1921,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -1974,7 +1981,7 @@ public class ManageOrderServiceTest {
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2598,7 +2605,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2666,7 +2673,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2730,7 +2737,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
@@ -2791,7 +2798,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -2889,7 +2896,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3154,7 +3161,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3294,7 +3301,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3358,7 +3365,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3406,7 +3413,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.Yes)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .build();
 
@@ -3433,7 +3440,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.No)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .build();
 
@@ -3497,7 +3504,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3731,7 +3738,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -3989,7 +3996,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -4213,7 +4220,7 @@ public class ManageOrderServiceTest {
             .id(123L).respondents(respondents)
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .otherParties(null)
-                              .serveToRespondentOptions(YesOrNo.Yes).build())
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4247,7 +4254,7 @@ public class ManageOrderServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .otherParties(null)
-                              .serveToRespondentOptions(YesOrNo.Yes).build()).build();
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build()).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -4316,7 +4323,7 @@ public class ManageOrderServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties)
             .manageOrders(caseData.getManageOrders().toBuilder()
-                              .serveToRespondentOptions(YesOrNo.Yes).build())
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes).build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4395,7 +4402,7 @@ public class ManageOrderServiceTest {
                                  .label("Sam Nolan")
                                  .build());
         CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
+            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesNoNotApplicable.No)
                               .recipientsOptions(DynamicMultiSelectList.builder()
                                                      .value(elementList)
                                                      .listItems(elementList)
@@ -5245,7 +5252,7 @@ public class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
@@ -5580,6 +5587,100 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.Yes)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertNull(updatedCaseData.get(WA_SER_DUE_DATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            MANAGE_ORDERS.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+    }
+
+    @Test
+    public void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(YesOrNo.No)
+                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
+                                .build())
+            .isPathfinderCase(YesOrNo.Yes)
+            .build();
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
+            caseData,
+            updatedCaseData,
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+        );
+
+        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
+
+    }
+
+    @Test
     public void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
@@ -5814,7 +5915,6 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
-
     }
 
 }

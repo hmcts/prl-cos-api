@@ -65,6 +65,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -104,6 +105,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -119,7 +121,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
@@ -164,6 +168,7 @@ public class CallbackController {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final PaymentRequestService paymentRequestService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
@@ -322,6 +327,7 @@ public class CallbackController {
                 CASE_DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
             );
+            cleanUpC8RefugeFields(caseData, caseDataUpdated);
             caseData = caseData
                 .toBuilder()
                 .applicantsConfidentialDetails(
@@ -349,10 +355,8 @@ public class CallbackController {
             caseDataUpdated.putAll(map);
 
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                // updating Summary tab to update case status
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-                caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+                //PRL-6627 - Removed duplicate calls to generate documents
+                caseDataUpdated.putAll(documentGenService.generateC100DraftDocuments(authorisation, caseData));
                 //Update version V2 here to get latest data refreshed in tabs
                 if (launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
                     caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
@@ -377,10 +381,37 @@ public class CallbackController {
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
+            confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
+                caseDataUpdated,
+                caseData
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void cleanUpC8RefugeFields(CaseData caseData, Map<String, Object> updatedCaseData) {
+        log.info("Start cleaning up on submit");
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            ofNullable(caseData.getApplicants()),
+            updatedCaseData,
+            APPLICANTS,
+            true
+        );
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            ofNullable(caseData.getRespondents()),
+            updatedCaseData,
+            RESPONDENTS,
+            true
+        );
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            ofNullable(caseData.getOtherPartyInTheCaseRevised()),
+            updatedCaseData,
+            OTHER_PARTY,
+            true
+        );
+        log.info("close cleaning up on submit");
     }
 
     private CaseData populateMiamPolicyUpgradeDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -647,6 +678,28 @@ public class CallbackController {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/amend-other-people-in-case/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Update Applicants, Children and Respondents details for future processing")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse amendOtherPeopleInTheCase(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(updatePartyDetailsService.amendOtherPeopleInTheCase(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -1008,6 +1061,28 @@ public class CallbackController {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyChildDetails(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-other-people-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Update confidentiality for other people in the case while staying in refuge")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateOtherPeoplePartyDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
 

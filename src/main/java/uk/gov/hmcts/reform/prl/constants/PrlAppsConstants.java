@@ -14,7 +14,7 @@ public class PrlAppsConstants {
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
 
-    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String NEXT_HEARING_DATE = "nextHearingDate";
     public static final String STATE = "state";
 
 
@@ -590,6 +590,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
+    public static final String APPLICANT = "applicant";
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
     public static final String CAFCASS_REPORTS = "Cafcass reports";
@@ -801,6 +802,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
+    public static final String OTHER_PARTY = "otherPartyInTheCaseRevised";
     public static final String COMMA = ",";
     public static final String EMPTY_STRING = "";
 
@@ -1069,6 +1071,10 @@ public class PrlAppsConstants {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
+    public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
+
+    public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";
+
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
     public static final String COURTNAV_USER = "courtnav";
@@ -1085,9 +1091,22 @@ public class PrlAppsConstants {
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
 
+    public static final String FINAL_CASE_CLOSED_DATE = "finalCaseClosedDate";
+    public static final String CASE_CLOSED = "caseClosed";
+    public static final String CHILD_DETAILS_REVISED_TABLE = "childDetailsRevisedTable";
+    public static final String DOES_APPLICANT_HAVE_CHILDREN = "doesApplicantHaveChildren";
+    public static final String APPLICANT_FAMILY_TABLE = "applicantFamilyTable";
+    public static final String FL401_CHILD_DETAILS_TABLE = "fl401ChildDetailsTable";
+    public static final String APPLICANT_CHILD = "applicantChild";
+
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+    public static final String REFUGE_DOCUMENTS = "refugeDocuments";
+    public static final String HISTORICAL_REFUGE_DOCUMENTS = "historicalRefugeDocuments";
     public static final String RESPONDENT = "respondent";
 
     public static final String CASE_STATUS = "caseStatus";
+
+    public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
+    public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
 
 }

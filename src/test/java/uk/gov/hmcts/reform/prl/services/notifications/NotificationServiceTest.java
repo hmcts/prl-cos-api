@@ -5,11 +5,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -21,12 +23,16 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
@@ -60,11 +66,20 @@ public class NotificationServiceTest {
     @Mock
     private SystemUserService systemUserService;
 
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Mock
+    private BulkPrintService bulkPrintService;
+
     private CaseData caseData;
     private QuarantineLegalDoc quarantineLegalDoc;
 
     @Before
-    public void init() {
+    public void init() throws Exception {
         when(systemUserService.getSysUserToken()).thenReturn("auth");
 
         quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -97,15 +112,23 @@ public class NotificationServiceTest {
         PartyDetails applicant4 = PartyDetails.builder()
             .firstName("af4").lastName("al4")
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .representativeFirstName("asf4").representativeLastName("asl4")
             .email("afl41@test.com")
+            .address(Address.builder().addressLine1("test").build())
             .build();
+        List<Document> documents = new ArrayList<>();
+        documents.add(Document.builder().documentFileName("TestFileName").build());
         caseData = CaseData.builder()
             .id(123)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("test_case")
             .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4)))
             .build();
+        when(serviceOfApplicationPostService.getCoverSheets(Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.anyString(),
+                                                            Mockito.anyString()))
+            .thenReturn(documents);
+        when(serviceOfApplicationService.fetchCoverLetter(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyBoolean(),
+                                                          Mockito.anyBoolean()))
+            .thenReturn(documents);
     }
 
     @Test

@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
@@ -167,6 +168,7 @@ public class FL401ApplicationMapperTest {
             .applicantEmailAddress("test@courtNav.com")
             .applicantPhoneNumber("12345678907")
             .applicantHasLegalRepresentative(false)
+            .applicantPreferredContact(List.of(PreferredContactEnum.email))
             .applicantAddress(CourtnavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
@@ -685,7 +687,7 @@ public class FL401ApplicationMapperTest {
                        .respondentBehaviour(respondentBehaviour)
                        .theHome(home1)
                        .statementOfTruth(stmtOfTruth)
-                       .goingToCourt(goingToCourt)
+                       .goingToCourt(goingToCourt.toBuilder().interpreterDialect(null).build())
                        .build())
             .metaData(courtNavMetaData)
             .build();
@@ -1488,4 +1490,32 @@ public class FL401ApplicationMapperTest {
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
     }
+
+
+    @Test
+    public void testCourtNavContactInfirmation() throws NotFoundException {
+
+        applicantsDetails = applicantsDetails.toBuilder().applicantContactInstructions("Test").build();
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData.toBuilder()
+                          .courtSpecialRequirements(null)
+                          .build())
+            .build();
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401, "Bearer:test");
+        assertEquals("Test", caseData.getDaApplicantContactInstructions());
+    }
+
 }

@@ -25,20 +25,18 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -62,6 +60,7 @@ public class UpdateHearingActualsServiceTest {
     HearingApiClient hearingApiClient;
     private CaseDetails caseDetails;
     private CaseData caseData;
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
     @InjectMocks
     private UpdateHearingActualsService updateHearingActualsService;
 
@@ -93,21 +92,21 @@ public class UpdateHearingActualsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        List<Hearings> hearings = List.of(Hearings.hearingsWith()
-                                              .caseRef("123")
-                                              .caseHearings(List.of(CaseHearing.caseHearingWith()
-                                                                        .hmcStatus("LISTED")
-                                                                        .hearingID(123L)
-                                                                        .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                                                                                        .hearingStartDateTime(
-                                                                                                            LocalDateTime.now())
-                                                                                                        .build()))
-                                                                        .build()))
-                                              .build());
-
-        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+        Map<String, List<String>> caseIdHearigIdMap = new HashMap<>();
+        caseIdHearigIdMap.put("123", Arrays.asList("123"));
+        when(hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(any(), any(), anyList())).thenReturn(caseIdHearigIdMap);
+        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            s2sAuthToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(
+                objectMapper),
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
     }
-
 
     @Test
     public void testUpdateHearingActualTaskCreatedSuccessfully() {
@@ -130,7 +129,7 @@ public class UpdateHearingActualsServiceTest {
                                                                          .confirmedHearingDates(DynamicList.builder()
                                                                                                     .value(
                                                                                                         DynamicListElement.builder().code(
-                                                                                                            "123").build()).build())
+                                                                                                            "1234").build()).build())
                                                                          .build())))
                                                  .build())))
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
@@ -152,20 +151,9 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
-            s2sAuthToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            caseData.toMap(
-                objectMapper),
-            caseData,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(Mockito.anyString())).thenReturn(startAllTabsUpdateDataContent1);
+
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(1)).getStartAllTabsUpdate(
-            Mockito.any()
-        );
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -209,6 +197,6 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
         updateHearingActualsService.updateHearingActuals();
 
-        verifyNoInteractions(allTabService);
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 }
