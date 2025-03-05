@@ -39,7 +39,7 @@ public class CaseWithdrawnRequestService {
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
         ### What happens next - welsh <br/> What happens next 
         
-        This case will now display as “withdrawn” in your case list. - welsh
+        This case will now display as “withdrawn” in your case list. - welsh <br/>
         This case will now display as “withdrawn” in your case list.""";
 
     public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Requested Application Withdrawal - welsh <br/> "
@@ -47,7 +47,7 @@ public class CaseWithdrawnRequestService {
     public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = """
         ### What happens next - welsh <br/> What happens next
 
-        The court will consider your withdrawal request. - welsh
+        The court will consider your withdrawal request. - welsh <br/>
         The court will consider your withdrawal request.""";
 
     public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled - welsh <br/> "
