@@ -15,19 +15,26 @@ public class RespondentSolicitorMiamService {
 
     private static final String PULTAG = "</p><ul>";
     private static final String ULPPTAG = "</ul><p></p>";
+    private static final String SUMMARYCLASS = "<summary class=\"govuk-details__summary\">";
+    private static final String SPANCLASS = "<span class=\"govuk-details__summary-text\">>";
+    private static final String SPAN = "</span>";
+    private static final String DIV = "</div>";
+    private static final String DETAILS = "</details>";
+    private static final String SUMMARY = "</summary>";
+    private static final String DIVCLASS = "<div class=\"govuk-details__text\">";
 
     public String getCollapsableOfWhatIsMiamPlaceHolder() {
         final List<String> collapsible = new ArrayList<>();
 
         collapsible.add("<details class=\"govuk-details\">");
 
-        collapsible.add("<summary class=\"govuk-details__summary\">");
-        collapsible.add("<span class=\"govuk-details__summary-text\">");
+        collapsible.add(SUMMARYCLASS);
+        collapsible.add(SPANCLASS);
         collapsible.add("What is a Mediation Information and Assessment Meeting (MIAM)?");
-        collapsible.add("</span>");
-        collapsible.add("</summary>");
+        collapsible.add(SPAN);
+        collapsible.add(SUMMARY);
 
-        collapsible.add("<div class=\"govuk-details__text\">");
+        collapsible.add(DIVCLASS);
         collapsible.add("<p>A MIAM is a first meeting with a mediator.</p>");
         collapsible.add("<p>The MIAM will:");
         collapsible.add(PULTAG);
@@ -46,9 +53,9 @@ public class RespondentSolicitorMiamService {
         collapsible.add("<li>help with moving on to the next stage of your lives</li>");
         collapsible.add(ULPPTAG);
         collapsible.add("<p>The MIAM process works, with agreement reached in over 70% of cases.</p>");
-        collapsible.add("</div>");
+        collapsible.add(DIV);
 
-        collapsible.add("</details>");
+        collapsible.add(DETAILS);
 
         return String.join("\n\n", collapsible);
     }
@@ -58,21 +65,21 @@ public class RespondentSolicitorMiamService {
 
         collapsible.add("<details class=\"govuk-details\">");
 
-        collapsible.add("<summary class=\"govuk-details__summary\">");
-        collapsible.add("<span class=\"govuk-details__summary-text\">");
-        collapsible.add("What is a Mediation Information and Assessment Meeting (MIAM)?");
-        collapsible.add("</span>");
-        collapsible.add("</summary>");
+        collapsible.add(SUMMARYCLASS);
+        collapsible.add(SPANCLASS);
+        collapsible.add("What is a Mediation Information and Assessment Meeting (MIAM)? - welsh");
+        collapsible.add(SPAN);
+        collapsible.add(SUMMARY);
 
-        collapsible.add("<div class=\"govuk-details__text\">");
-        collapsible.add("<p>A MIAM is a first meeting with a mediator.</p>");
-        collapsible.add("<p>The MIAM will:");
+        collapsible.add(DIVCLASS);
+        collapsible.add("<p>A MIAM is a first meeting with a mediator. - welsh</p>");
+        collapsible.add("<p>The MIAM will: - welsh");
         collapsible.add(PULTAG);
         collapsible.add("<li>last about an hour</li>");
-        collapsible.add("<li>give you the opportunity to tell the mediator about your situation, and the issues to be decided</li>");
-        collapsible.add("<li>explain the mediation process, and other options for reaching agreements</li>");
+        collapsible.add("<li>give you the opportunity to tell the mediator about your situation, and the issues to be decided - welsh</li>");
+        collapsible.add("<li>explain the mediation process, and other options for reaching agreements - welsh</li>");
         collapsible.add(ULPPTAG);
-        collapsible.add("<p>At the end of the meeting, the mediator will tell you if your case is suitable for mediation. "
+        collapsible.add("<p>At the end of the meeting, the mediator will tell you if your case is suitable for mediation."
             + "You can then decide if you want to proceed, or explore other options.</p>");
         collapsible.add("<p>The benefits of a MIAM are:");
         collapsible.add(PULTAG);
@@ -83,9 +90,9 @@ public class RespondentSolicitorMiamService {
         collapsible.add("<li>help with moving on to the next stage of your lives</li>");
         collapsible.add(ULPPTAG);
         collapsible.add("<p>The MIAM process works, with agreement reached in over 70% of cases. - welsh</p>");
-        collapsible.add("</div>");
+        collapsible.add(DIV);
 
-        collapsible.add("</details>");
+        collapsible.add(DETAILS);
 
         return String.join("\n\n", collapsible);
     }
@@ -94,12 +101,12 @@ public class RespondentSolicitorMiamService {
         final List<String> collapsibleWillingnessToAttendMiam = new ArrayList<>();
 
         collapsibleWillingnessToAttendMiam.add("<details class=\"govuk-details\" data-module=\"govuk-details\">");
-        collapsibleWillingnessToAttendMiam.add("<summary class=\"govuk-details__summary\">");
-        collapsibleWillingnessToAttendMiam.add("<span class=\"govuk-details__summary-text\">");
+        collapsibleWillingnessToAttendMiam.add(SUMMARYCLASS);
+        collapsibleWillingnessToAttendMiam.add(SPANCLASS);
         collapsibleWillingnessToAttendMiam.add("Help with MIAM costs and exemptions");
-        collapsibleWillingnessToAttendMiam.add("</span>");
-        collapsibleWillingnessToAttendMiam.add("</summary>");
-        collapsibleWillingnessToAttendMiam.add("<div class=\"govuk-details__text\">");
+        collapsibleWillingnessToAttendMiam.add(SPAN);
+        collapsibleWillingnessToAttendMiam.add(SUMMARY);
+        collapsibleWillingnessToAttendMiam.add(DIVCLASS);
         collapsibleWillingnessToAttendMiam.add("<p>The price of mediation will vary depending on:");
         collapsibleWillingnessToAttendMiam.add(PULTAG);
         collapsibleWillingnessToAttendMiam.add("<li>where you live</li>");
@@ -121,8 +128,8 @@ public class RespondentSolicitorMiamService {
             + "you or the children are at risk of harm.</p>");
         collapsibleWillingnessToAttendMiam.add("<p>Find out more about <a href=\"https://apply-to-court-about-child-arrangements.service.justice.gov.uk/about/miam_exemptions\" "
             + "class=\"govuk-link\" target=\"_blank\">the reasons for a MIAM exemption</a>.</p>");
-        collapsibleWillingnessToAttendMiam.add("</div>");
-        collapsibleWillingnessToAttendMiam.add("</details>");
+        collapsibleWillingnessToAttendMiam.add(DIV);
+        collapsibleWillingnessToAttendMiam.add(DETAILS);
 
         return String.join("\n\n", collapsibleWillingnessToAttendMiam);
     }
@@ -131,12 +138,12 @@ public class RespondentSolicitorMiamService {
         final List<String> collapsibleWillingnessToAttendMiam = new ArrayList<>();
 
         collapsibleWillingnessToAttendMiam.add("<details class=\"govuk-details\" data-module=\"govuk-details\">");
-        collapsibleWillingnessToAttendMiam.add("<summary class=\"govuk-details__summary\">");
-        collapsibleWillingnessToAttendMiam.add("<span class=\"govuk-details__summary-text\">");
+        collapsibleWillingnessToAttendMiam.add(SUMMARYCLASS);
+        collapsibleWillingnessToAttendMiam.add(SPANCLASS);
         collapsibleWillingnessToAttendMiam.add("Help with MIAM costs and exemptions");
-        collapsibleWillingnessToAttendMiam.add("</span>");
-        collapsibleWillingnessToAttendMiam.add("</summary>");
-        collapsibleWillingnessToAttendMiam.add("<div class=\"govuk-details__text\">");
+        collapsibleWillingnessToAttendMiam.add(SPAN);
+        collapsibleWillingnessToAttendMiam.add(SUMMARY);
+        collapsibleWillingnessToAttendMiam.add(DIVCLASS);
         collapsibleWillingnessToAttendMiam.add("<p>The price of mediation will vary depending on:");
         collapsibleWillingnessToAttendMiam.add(PULTAG);
         collapsibleWillingnessToAttendMiam.add("<li>where you live</li>");
@@ -152,14 +159,14 @@ public class RespondentSolicitorMiamService {
         collapsibleWillingnessToAttendMiam.add("<p>See the <a href=\"https://www.gov.uk\" class=\"govuk-link\""
             + "target=\"_blank\">GOV.UK</a> guidance on the <a href=\"https://www.gov.uk/guidance/family-mediation-voucher-scheme\" "
             + "class=\"govuk-link\" target=\"_blank\">Family Mediation Voucher Scheme</a> for more information.</p>");
-        collapsibleWillingnessToAttendMiam.add("<p>The MIAM process works, with agreement reached in over 70% of cases.</p>");
+        collapsibleWillingnessToAttendMiam.add("<p>The MIAM process works, with agreement reached in over 70% of cases. - welsh</p>");
         collapsibleWillingnessToAttendMiam.add("<h3 class=\"govuk-heading-s\">Exemptions</h3>");
         collapsibleWillingnessToAttendMiam.add("<p>You don't need to attend a MIAM if you have a valid reason. For example, "
             + "you or the children are at risk of harm.</p>");
         collapsibleWillingnessToAttendMiam.add("<p>Find out more about <a href=\"https://apply-to-court-about-child-arrangements.service.justice.gov.uk/about/miam_exemptions\" "
             + "class=\"govuk-link\" target=\"_blank\">the reasons for a MIAM exemption</a>. - welsh</p>");
-        collapsibleWillingnessToAttendMiam.add("</div>");
-        collapsibleWillingnessToAttendMiam.add("</details>");
+        collapsibleWillingnessToAttendMiam.add(DIV);
+        collapsibleWillingnessToAttendMiam.add(DETAILS);
 
         return String.join("\n\n", collapsibleWillingnessToAttendMiam);
     }
