@@ -47,7 +47,7 @@ public class ApplicantsMapper {
             .add("lastName", applicant.getLastName())
             .add("previousName", applicant.getPreviousName())
             .add("dateOfBirth", String.valueOf(applicant.getDateOfBirth()))
-            .add("gender", applicant.getGender().getDisplayedValue())
+            .add("gender", null != applicant.getGender() ? applicant.getGender().getDisplayedValue() : null)
             .add("otherGender", applicant.getOtherGender())
             .add("email", applicant.getEmail())
             .add("phoneNumber", applicant.getPhoneNumber())
