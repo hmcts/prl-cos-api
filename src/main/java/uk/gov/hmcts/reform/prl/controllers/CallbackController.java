@@ -223,18 +223,18 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
-            if (PrlAppsConstants.WELSH.equals(CaseUtils.getLanguage(clientContext))) {
-                if (isNotEmpty(workflowResult.getErrors())) {
-                    List<String> errorlist = new ArrayList<>();
-                    errorlist
-                        .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
-                    return ok(
-                        AboutToStartOrSubmitCallbackResponse.builder()
-                            .errors(errorlist)
-                            .build()
-                    );
-                }
+            if (PrlAppsConstants.WELSH.equals(CaseUtils.getLanguage(clientContext))
+                && (isNotEmpty(workflowResult.getErrors()))) {
+                List<String> errorlist = new ArrayList<>();
+                errorlist
+                    .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
+                return ok(
+                    AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorlist)
+                        .build()
+                );
             }
+
 
             return ok(
                 AboutToStartOrSubmitCallbackResponse.builder()

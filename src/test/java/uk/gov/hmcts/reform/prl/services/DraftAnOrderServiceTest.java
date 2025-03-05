@@ -3467,7 +3467,6 @@ public class DraftAnOrderServiceTest {
             PrlAppsConstants.WELSH
         );
         assertEquals("Test order", response.getData().get("selectedOrder"));
-        //assertEquals(1, response.getData().get("children").size());
 
     }
 
@@ -3551,7 +3550,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioStandardDirectionWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        CaseData caseData2 = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3563,17 +3562,17 @@ public class DraftAnOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.standardDirectionsOrder)
             .selectedOrder("Test order")
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                 .data(stringObjectMap)
                 .build())
             .build();
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
+            .getChildrenMultiSelectList(caseData2);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData2)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
+        when(manageOrderService.getSelectedOrderInfoForUpload(caseData2)).thenReturn("Test order");
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
             authToken,
@@ -3618,14 +3617,13 @@ public class DraftAnOrderServiceTest {
             BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
             response.getData().get("selectedOrder")
         );
-        //assertEquals(1, response.getData().getChildren().size());
     }
 
     @Test
     public void testSelectedOrderForDraftAnOrderScenarioWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        CaseData caseData2 = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
@@ -3636,16 +3634,16 @@ public class DraftAnOrderServiceTest {
                 .build())
             .selectedOrder("Test order")
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                 .data(stringObjectMap)
                 .build())
             .build();
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+            .getChildrenMultiSelectList(caseData2);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData2)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
             authToken,
@@ -4105,7 +4103,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsErrorWelsh() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        CaseData caseData2 = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
@@ -4116,16 +4114,16 @@ public class DraftAnOrderServiceTest {
                 .build())
             .selectedOrder("Test order")
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                 .data(stringObjectMap)
                 .build())
             .build();
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+            .getChildrenMultiSelectList(caseData2);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData2)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
             callbackRequest,
             authToken,
@@ -5091,7 +5089,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testValidationIfDirectionForFactFindingSelectedScenario1Welsh() throws Exception {
+    public void testValidationIfDirectionForFactFindingSelectedScenario1Welsh() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5104,7 +5102,7 @@ public class DraftAnOrderServiceTest {
         Element<PartyDetails> partyDetailsElement1 = element(details1);
         partyDetails.add(partyDetailsElement1);
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData2 = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(partyDetails)
@@ -5115,7 +5113,7 @@ public class DraftAnOrderServiceTest {
             .doYouWantToEditTheOrder(No)
             .build();
         List<String> errorList = new ArrayList<>();
-        assertFalse(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.WELSH));
+        assertFalse(draftAnOrderService.validationIfDirectionForFactFindingSelected(caseData2, errorList, PrlAppsConstants.WELSH));
     }
 
     @Test

@@ -260,38 +260,8 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            setHearingData(caseData, caseDataUpdated, authorisation);
 
-            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                    && isHearingPageNeeded(
-                    caseData.getCreateSelectOrderOptions(),
-                    caseData.getManageOrders().getC21OrderOptions()
-                )) {
-                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(
-                                                                               caseData,
-                                                                               hearings,
-                                                                               authorisation
-                                                                           ));
-                } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                    && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
-                }
-                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                    authorisation,
-                    caseData,
-                    PrlAppsConstants.ENGLISH
-                ));
-            } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(
-                    ORDER_COLLECTION,
-                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
-                );
-            }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
@@ -323,6 +293,41 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private Map<String, Object> setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) throws Exception {
+        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+        } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                && isHearingPageNeeded(
+                caseData.getCreateSelectOrderOptions(),
+                caseData.getManageOrders().getC21OrderOptions()
+            )) {
+                caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                    .getHearingDataForSelectedHearing(
+                        caseData,
+                        hearings,
+                        authorisation
+                    ));
+            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
+            }
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation,
+                caseData,
+                PrlAppsConstants.ENGLISH
+            ));
+        } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            caseDataUpdated.put(
+                ORDER_COLLECTION,
+                manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
+            );
+        }
+        return caseDataUpdated;
     }
 
     private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {

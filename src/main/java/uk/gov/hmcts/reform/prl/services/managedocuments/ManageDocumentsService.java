@@ -173,11 +173,7 @@ public class ManageDocumentsService {
                 || element.getValue().getRestrictedDetails().isEmpty();
 
             if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(DETAILS_ERROR_MESSAGE_WELSH);
-                } else {
-                    errorList.add(DETAILS_ERROR_MESSAGE);
-                }
+                errorList.add(checkLanguageforDetailsError(language));
             }
 
             if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
@@ -191,6 +187,11 @@ public class ManageDocumentsService {
         }
 
         return errorList;
+    }
+
+    public String checkLanguageforDetailsError(String language) {
+        return PrlAppsConstants.WELSH.equals(language) ? DETAILS_ERROR_MESSAGE_WELSH
+            : DETAILS_ERROR_MESSAGE;
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {

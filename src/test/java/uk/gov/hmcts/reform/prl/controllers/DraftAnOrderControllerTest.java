@@ -393,10 +393,6 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
-        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
