@@ -27,4 +27,6 @@ public class FL401Applicant {
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final ContactPreferences contactPreferences;
+    private final String nameOfOrganisation;
+    private final String positionHeldInOrganisation;
 }
