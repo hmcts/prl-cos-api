@@ -167,5 +167,10 @@ public class PartyDetails {
 
     private YesOrNo liveInRefuge;
     private Document refugeConfidentialityC8Form;
+
+    //Edge cases
     private final PartyRelationshipToTheCaseEnum relationshipToTheCase;
+    //PRL-4141
+    private final String nameOfOrganisation;
+    private final String positionHeldInOrganisation;
 }
