@@ -448,4 +448,13 @@ public class ConfidentialityCheckServiceTest {
 
         Assert.assertEquals(null, caseDetails.get("otherAC8RefugeDocument"));
     }
+
+    @Test
+    public void processOtherPeopleC8DocumentsC100NullPartyList() {
+        List<Element<PartyDetails>> otherPeople = null;
+        CaseData caseData = CaseData.builder().id(12345L).otherPartyInTheCaseRevised(otherPeople).caseTypeOfApplication(C100_CASE_TYPE).build();
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
+        Assert.assertNull(caseData.getOtherPartyInTheCaseRevised());
+    }
 }
