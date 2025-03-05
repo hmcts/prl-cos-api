@@ -140,6 +140,16 @@ public class NotificationServiceTest {
     }
 
     @Test
+    public void testNotificationsWhenRespondentSubmitsResponse_C1AApplication() throws IOException {
+        testNotificationsWhenRespondentSubmitsResponse(
+            "respondentC1AApplication",
+            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR
+        );
+    }
+
+    @Test
     public void testNotificationsWhenRespondentSubmitsResponse_C1AResponse() throws IOException {
         testNotificationsWhenRespondentSubmitsResponse(
             "respondentC1AResponse",
@@ -190,6 +200,14 @@ public class NotificationServiceTest {
         testCafcassCymruNotifications(
             "respondentApplication",
             EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS
+        );
+    }
+
+    @Test
+    public void testCafcassCymruNotifications_C1AApplication() {
+        testCafcassCymruNotifications(
+            "respondentC1AApplication",
+            EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS
         );
     }
 

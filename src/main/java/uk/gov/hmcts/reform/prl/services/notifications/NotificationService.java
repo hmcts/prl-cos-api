@@ -45,8 +45,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP13;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP14;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP15;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -60,10 +62,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C7_NOTIFICATION_APPLICANT;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
@@ -129,6 +134,23 @@ public class NotificationService {
                                           respondentName,
                                           cafcassCymruEmail);
 
+            } else if (RESPONDENT_C1A_APPLICATION.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
+                log.info("*** Sending respondent C1A documents to applicants/solicitor ***");
+                //C1A
+                sendNotificationToApplicantsLipOrSolicitor(
+                    caseData,
+                    C1A_NOTIFICATION_APPLICANT,
+                    SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+                    PRL_LET_ENG_C100_AP14,
+                    C1A_NOTIFICATION_APPLICANT_SOLICITOR,
+                    respondentName,
+                    responseDocument
+                );
+
+                sendNotificationToCafCass(caseData,
+                                          RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS,
+                                          respondentName,
+                                          cafcassCymruEmail);
 
             } else if (RESPONDENT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
                 log.info("*** Sending respondent response to C1A documents to applicants/solicitor ***");
