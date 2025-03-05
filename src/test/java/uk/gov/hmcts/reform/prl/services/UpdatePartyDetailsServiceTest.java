@@ -30,11 +30,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesServ
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,7 +62,9 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService.HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -2229,4 +2234,89 @@ public class UpdatePartyDetailsServiceTest {
             "newChildDetails");
         assertEquals(1, updatedChildDetails.size());
     }
+
+
+    @Test
+    public void testUpdateOtherPeopleInTheCaseConfidentialityData() {
+        PartyDetails applicant = PartyDetails.builder().firstName("test").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder().firstName("test")
+            .address(Address
+                         .builder()
+                         .build()).lastName("test").build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent);
+
+        PartyDetails otherParties = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
+        PartyDetails otherParties2 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").addressLine2("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties2 = Element.<PartyDetails>builder().value(otherParties2).build();
+        PartyDetails otherParties3 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").postCode("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties3 = Element.<PartyDetails>builder().value(otherParties3).build();
+        List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
+        PartyDetails otherParties4 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").postCode("test").addressLine2("test").build()).lastName(
+                "test").build();
+        Element<PartyDetails> wrappedOtherParties4 = Element.<PartyDetails>builder().value(otherParties4).build();
+        otherPartiesList.add(wrappedOtherParties);
+        otherPartiesList.add(wrappedOtherParties2);
+        otherPartiesList.add(wrappedOtherParties3);
+        otherPartiesList.add(wrappedOtherParties4);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .otherPartyInTheCaseRevised(otherPartiesList)
+            .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        objectMap.put("caseTypeOfApplication", "C100");
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
+                                                                                    .data(objectMap).id(1L)
+                                                                                    .createdDate(LocalDateTime.now())
+                                                                                    .lastModified(LocalDateTime.now())
+                                                                                    .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .data(objectMap)
+                                   .id(1L)
+                                   .createdDate(LocalDateTime.now())
+                                   .lastModified(LocalDateTime.now())
+                                   .build())
+            .eventId(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])
+            .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
+
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
+            List.of(element(
+                RefugeConfidentialDocuments.builder().build())),
+            List.of(element(RefugeConfidentialDocuments.builder().build()))
+        );
+        when(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+            caseData, caseData, HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])).thenReturn(
+            refugeConfidentialDocumentsRecord);
+        doNothing().when(partyLevelCaseFlagsService).amendCaseFlags(
+            Mockito.anyMap(),
+            Mockito.anyMap(),
+            Mockito.anyString()
+        );
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
+            callbackRequest);
+        assertNotNull(updatedCaseData);
+
+    }
+
 }
