@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
@@ -84,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
@@ -1080,6 +1082,28 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getLanguage(String clientContextString) {
+
+        ClientContext clientContext = null;
+
+        if (clientContextString != null) {
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
+            String decodedString = new String(decodedBytes);
+            try {
+                clientContext = new ObjectMapper().readValue(decodedString, ClientContext.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+
+        if (null != clientContext
+            && null != clientContext.getUserLanguage()) {
+            return clientContext.getUserLanguage().getLanguage();
+        }
+
+        return ENGLISH;
     }
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {

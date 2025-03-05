@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -881,7 +882,8 @@ public class C100RespondentSolicitorServiceTest {
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-                    callbackRequest
+                    callbackRequest,
+                PrlAppsConstants.WELSH
             );
 
             assertTrue(response.containsKey("respondents"));
@@ -1789,7 +1791,8 @@ public class C100RespondentSolicitorServiceTest {
                     .build();
 
             Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-                    callbackRequest
+                    callbackRequest,
+                PrlAppsConstants.ENGLISH
             );
 
             assertTrue(response.containsKey("respondents"));

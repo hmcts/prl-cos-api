@@ -25,9 +25,27 @@ public class RespondentSolicitorMiamServiceTest {
     }
 
     @Test
+    public void testCollapsableOfWhatIsMiamGettingPopulatedWelsh() {
+
+        String responseMap = respondentSolicitorMiamService.getCollapsableOfWhatIsMiamPlaceHolderWelsh();
+
+        assertNotNull(responseMap);
+
+    }
+
+    @Test
     public void testCollapsableOfHelpMiamCostsExemptionsPlaceHolder() {
 
         String responseMap = respondentSolicitorMiamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder();
+
+        assertNotNull(responseMap);
+
+    }
+
+    @Test
+    public void testCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh() {
+
+        String responseMap = respondentSolicitorMiamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh();
 
         assertNotNull(responseMap);
 
