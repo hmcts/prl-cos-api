@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper.getBundleDateTime;
 
 @Slf4j
 @RestController
@@ -73,15 +73,13 @@ public class BundlingController extends AbstractCallbackController {
                 callbackRequest.getEventId(),
                 authorization
             );
-            log.info("Bundle create response is : {}", bundleCreateResponse);
             if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
                 caseDataUpdated.put(
                     "bundleInformation",
                     BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                         .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                         .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
-                        .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                                                       .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                        .bundleCreationDateAndTime(getBundleDateTime(ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime()))
                         .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
                                                       && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
                                                       ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
@@ -98,7 +96,6 @@ public class BundlingController extends AbstractCallbackController {
         }
     }
 
-
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
         List<Bundle> historicalBundles = new ArrayList<>();
         BundlingInformation existingBundleInformation = caseData.getBundleInformation();
@@ -108,7 +105,6 @@ public class BundlingController extends AbstractCallbackController {
             }
             if (nonNull(existingBundleInformation.getCaseBundles())) {
                 List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles();
-                log.info("The existing Bundles are {}",existingCaseBundles);
 
                 existingCaseBundles.stream().forEach(existingBundle -> {
                     BundleDetails bundleDetails = existingBundle.getValue().toBuilder()
@@ -119,7 +115,6 @@ public class BundlingController extends AbstractCallbackController {
 
                 );
                 historicalBundles.addAll(existingCaseBundles);
-                log.info("The historical bundles are {}",historicalBundles);
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
             existingBundleInformation.setCaseBundles(null);

@@ -322,7 +322,7 @@ public class Fm5NotificationService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
-            log.error("generate FM5 cover letter failed for {} ",caseData.getId(), e);
+            log.error("generate FM5 cover letter failed for {} {}",caseData.getId(), e.getMessage());
         }
         return null;
     }
@@ -363,9 +363,8 @@ public class Fm5NotificationService {
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
-            log.error("Error occurred in generating cover sheets", e);
+            log.error("Error occurred in generating cover sheets {}", e.getMessage());
         }
-        log.info("Cover sheets generated {}", coverSheets);
         return coverSheets;
     }
 

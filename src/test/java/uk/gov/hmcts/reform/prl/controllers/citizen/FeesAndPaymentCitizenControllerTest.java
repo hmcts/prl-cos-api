@@ -26,7 +26,9 @@ import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 public class FeesAndPaymentCitizenControllerTest {
 
@@ -61,7 +63,7 @@ public class FeesAndPaymentCitizenControllerTest {
         MockitoAnnotations.openMocks(this);
 
         feeResponse = FeeResponse.builder()
-            .amount(BigDecimal.valueOf(232.00))
+            .amount(BigDecimal.valueOf(255.00))
             .build();
     }
 
@@ -115,7 +117,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(paymentRequestService.createPayment(authToken,s2sToken,createPaymentRequest)).thenReturn(paymentResponse);
+        when(paymentRequestService.createPayment(authToken, createPaymentRequest)).thenReturn(paymentResponse);
 
         //When
         PaymentResponse actualPaymentResponse = feesAndPaymentCitizenController
@@ -145,7 +147,8 @@ public class FeesAndPaymentCitizenControllerTest {
     public void retrievePaymentStatusSuccessfully() throws Exception {
 
         PaymentStatusResponse paymentStatusResponse = PaymentStatusResponse.builder()
-            .amount("232").reference(PAYMENT_REFERENCE)
+            .amount(feeResponse.getAmount().toString())
+            .reference(PAYMENT_REFERENCE)
             .ccdcaseNumber("1647959867368635").caseReference("1647959867368635")
             .channel("online").method("card").status("Success")
             .externalReference("uau4i1elcbmf36kshfp6f33npv")
@@ -184,7 +187,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
-        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenReturn(feeResponseForCitizen);
+        when(feeService.fetchFeeCode(feeRequest,authToken)).thenReturn(feeResponseForCitizen);
 
         //When
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
@@ -202,7 +205,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
-        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenThrow(new RuntimeException());
+        when(feeService.fetchFeeCode(feeRequest,authToken)).thenThrow(new RuntimeException());
 
         //When
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
@@ -228,6 +231,55 @@ public class FeesAndPaymentCitizenControllerTest {
 
     }
 
+    @Test
+    public void testFetchFeeSuccess() {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build();
 
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(feeService.fetchFee(FeeType.C100_SUBMISSION_FEE.toString())).thenReturn(feeResponseForCitizen);
+
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFee(s2sToken, FeeType.C100_SUBMISSION_FEE.toString());
+        //Then
+        assertEquals(feeResponseForCitizen, actualResponse);
+    }
+
+    @Test
+    public void testFetchFeeNullApplicationType() {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
+            .build();
+
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFee(s2sToken, null);
+        //Then
+        assertEquals(feeResponseForCitizen, actualResponse);
+    }
+
+    @Test
+    public void testFetchFeeEmptyApplicationType() {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
+            .build();
+
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFee(s2sToken, "");
+        //Then
+        assertEquals(feeResponseForCitizen, actualResponse);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testFetchFeeInvalidClient() {
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.FALSE);
+        feesAndPaymentCitizenController.fetchFee(s2sToken, anyString());
+    }
 
 }

@@ -149,7 +149,7 @@ public class HearingDataService {
             );
             return refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
         } catch (Exception e) {
-            log.error("Category Values look up failed - ", e);
+            log.error("Category Values look up failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -172,7 +172,7 @@ public class HearingDataService {
                 return dynamicListElements;
             }
         } catch (Exception e) {
-            log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
+            log.error("List of Hearing Start Date Values look up failed - {}", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -203,7 +203,7 @@ public class HearingDataService {
                 commonDataResponse, TELEPHONEPLATFORM));
             return values;
         } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
+            log.error("Category Values look up failed - {}", e.getMessage());
         }
         return new HashMap<>();
 
@@ -245,7 +245,7 @@ public class HearingDataService {
 
             }
         } catch (Exception e) {
-            log.error("Exception occurred in Linked case method for hmc api calls ", e);
+            log.error("Exception occurred in Linked case method for hmc api calls {}", e.getMessage());
         }
         return dynamicListElements;
     }
@@ -584,7 +584,7 @@ public class HearingDataService {
                     .toList();
             }
         } catch (Exception e) {
-            log.error("Exception occured in getLinkedCasesDynamicList {}", e);
+            log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
         }
         return dynamicListElements;
     }
@@ -717,8 +717,7 @@ public class HearingDataService {
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
                                                                                            CaseData caseData, String hearingType) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
-            log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
-                .getHearingStartDateTime(), caseData.getId());
+
 
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
@@ -810,7 +809,7 @@ public class HearingDataService {
             }
 
         } catch (Exception e) {
-            log.error("Exception occurred in Linked case method for hmc api calls ", e);
+            log.error("Exception occurred in Linked case method for hmc api calls {}", e.getMessage());
         }
         return dynamicListElements;
     }

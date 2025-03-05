@@ -254,7 +254,6 @@ public class NoticeOfChangeEventHandler {
                                             Element<PartyDetails> party, String accessCode) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
-            log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
             if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
@@ -314,7 +313,7 @@ public class NoticeOfChangeEventHandler {
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
-            log.error("Error occurred in generating cover sheets", e);
+            log.error("Error occurred in generating cover sheets {}", e.getMessage());
         }
         if (CollectionUtils.isNotEmpty(coverSheets)) {
             documents.addAll(coverSheets);
@@ -324,7 +323,7 @@ public class NoticeOfChangeEventHandler {
     private void generateCoverLetter(CaseData caseData,
                                      Element<PartyDetails> party,
                                      List<Document> documents, String accessCode) {
-        Document coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
+        List<Document> coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
             systemUserService.getSysUserToken(),
             caseData,
             party,
@@ -332,7 +331,7 @@ public class NoticeOfChangeEventHandler {
             PRL_LEGAL_REP_COVER_LETTER_TEMPLATE
             );
         if (isNotEmpty(coverLetterWithAccessCode)) {
-            documents.add(coverLetterWithAccessCode);
+            documents.addAll(coverLetterWithAccessCode);
         }
     }
 }

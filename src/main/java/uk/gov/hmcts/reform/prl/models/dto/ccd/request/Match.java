@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -21,5 +24,21 @@ public class Match {
 
     @JsonProperty("data.fm5RemindersSent")
     private String fm5RemindersSent;
+
+    @JsonProperty("data.cafcassServedOptions")
+    private YesOrNo cafcassServedOptions;
+
+    @JsonProperty("data.caseCreatedBy")
+    private String caseCreatedBy;
+
+    @JsonProperty("data.helpWithFees")
+    private String helpWithFees;
+
+
+    @JsonProperty("data.hwfRequestedForAdditionalApplicationsFlag")
+    private String hwfRequestedForAdditionalApplicationsFlag;
+
+    @JsonProperty("data.nextHearingDate")
+    private LocalDate nextHearingDate;
 
 }

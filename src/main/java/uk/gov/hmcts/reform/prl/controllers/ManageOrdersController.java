@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -48,16 +51,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -74,6 +82,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
+    public static final String THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE =
+        "This feature is not currently available. Please refer to HMCTS guidance.";
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
@@ -164,7 +174,15 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseDataUpdated.put(
+                    "isInHearingState",
+                    (PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equals(callbackRequest.getCaseDetails().getState())
+                        || DECISION_OUTCOME.getValue().equals(callbackRequest.getCaseDetails().getState())) ? Yes : No
+                );
                 caseDataUpdated.put(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
+                if (Yes.equals(caseData.getIsCafcass())) {
+                    caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
+                }
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -193,8 +211,15 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-
+            try {
+                log.info("Initiating court seal for the orders");
+                manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+            log.info("Notifications to be sent? - {}", caseData.getManageOrders().getMarkedToServeEmailNotification());
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                log.info("Preparing to send notifications to parties");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
@@ -266,7 +291,25 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
+            UUID newDraftOrderCollectionId = null;
+            //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
+            //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
+                && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+                && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
+                List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
+                    DRAFT_ORDER_COLLECTION);
+
+                newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                    ? draftOrderCollection.get(0).getId() : null;
+            }
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
+                                                                         caseData,
+                                                                         callbackRequest.getEventId(),
+                                                                         newDraftOrderCollectionId));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -303,7 +346,7 @@ public class ManageOrdersController {
     }
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
+        if ((No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
@@ -403,7 +446,7 @@ public class ManageOrdersController {
                 );
                 manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             } else {
-                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.No);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, No);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -422,6 +465,10 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
+            }
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);

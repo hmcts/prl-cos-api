@@ -119,12 +119,14 @@ public class CaseApplicantResponseServiceTest {
         )).thenReturn(caseDetails);
 
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
-        when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(new HashMap<>());
+        when(c100RespondentSolicitorService.populateDataMap(any(), any(), any())).thenReturn(new HashMap<>());
     }
 
     @Test
     public void testGenerateC7finalDocument() throws Exception {
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -176,7 +178,9 @@ public class CaseApplicantResponseServiceTest {
         caseData = caseData.toBuilder()
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -250,7 +254,9 @@ public class CaseApplicantResponseServiceTest {
         caseData = caseData.toBuilder()
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -325,7 +331,9 @@ public class CaseApplicantResponseServiceTest {
         caseData = caseData.toBuilder()
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -393,7 +401,9 @@ public class CaseApplicantResponseServiceTest {
         caseData = caseData.toBuilder()
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -453,7 +463,9 @@ public class CaseApplicantResponseServiceTest {
         caseData = caseData.toBuilder()
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
@@ -521,7 +533,9 @@ public class CaseApplicantResponseServiceTest {
             .citizenResponseDocuments(CitizenResponseDocuments.builder().build())
             .respondents(elementList).build();
 
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class),
+                                                            Mockito.any(Element.class), Mockito.anyString()))
+            .thenReturn(dataMap);
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
