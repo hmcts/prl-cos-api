@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE_BULKSCAN;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PROCESS_PAYMENT_FOR_BULKSCAN;
 
 @Slf4j
@@ -69,6 +68,8 @@ public class HwfProcessUpdateCaseStateService {
         //Fetch all C100 pending cases with Help with fees
         List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(false);
         List<CaseDetails> bulkScanCaseDetailsList = retrieveCasesWithHelpWithFeesInPendingState(true);
+        log.info("Case details {}", caseDetailsList);
+        log.info("Bulk scan case details {}", bulkScanCaseDetailsList);
         checkAndProcessHwfAndUpdateCase(caseDetailsList);
         checkAndProcessHwfAndUpdateCase(bulkScanCaseDetailsList);
         long startTime = System.currentTimeMillis();
@@ -81,12 +82,13 @@ public class HwfProcessUpdateCaseStateService {
     private void checkAndProcessHwfAndUpdateCase(List<CaseDetails> caseDetailsList) {
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
-                log.info("caseDetails caseId - " + caseDetails.getId());
+                log.info("checking payment for caseId - " + caseDetails.getId());
                 CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
                 if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
                     && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
                     String event = CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy())
-                        ? HWF_PROCESS_CASE_UPDATE_BULKSCAN.getValue() : HWF_PROCESS_CASE_UPDATE.getValue();
+                        ? PROCESS_PAYMENT_FOR_BULKSCAN.getValue() : HWF_PROCESS_CASE_UPDATE.getValue();
+                    log.info("Processing help with fees with event - " + event);
                     updateCaseStateAndSubmitevent(event, caseDetails, caseData);
                 }
                 if (CaseCreatedBy.BULK_SCAN.equals(caseData.getCaseCreatedBy()) && StringUtils.isEmpty(caseData.getHelpWithFeesNumber())) {
