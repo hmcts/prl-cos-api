@@ -29,13 +29,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @RequestMapping("/testing-support")
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestingSupportController {
 
-    @Autowired
     private final TestingSupportService testingSupportService;
 
-    @Autowired
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
