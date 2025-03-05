@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @Service("caseRepository")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CcdCaseRepository implements CaseRepository {
-    @Autowired
-    CcdCaseApi ccdCaseApi;
+
+    private final CcdCaseApi ccdCaseApi;
 
     @Override
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {

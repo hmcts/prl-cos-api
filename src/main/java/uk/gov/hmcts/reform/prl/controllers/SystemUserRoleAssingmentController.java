@@ -24,8 +24,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SystemUserRoleAssingmentController {
 
-    @Autowired
-    private RoleAssignmentServiceForSystemUser roleAssignmentServiceForSystemUser;
+    private final RoleAssignmentServiceForSystemUser roleAssignmentServiceForSystemUser;
 
     private final AuthorisationService authorisationService;
 
