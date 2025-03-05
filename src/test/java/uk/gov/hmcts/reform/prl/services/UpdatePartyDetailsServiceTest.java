@@ -2450,13 +2450,13 @@ public class UpdatePartyDetailsServiceTest {
             "authToken", updatedCaseData, caseData, dataMap, false, 5, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
-        assertTrue(updatedCaseData.size() == 0);
+        assertEquals(0,updatedCaseData.size());
 
         updatePartyDetailsService.populateC8Documents(
             "authToken", updatedCaseData, caseData, dataMap, false, -1, element(
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
-        assertTrue(updatedCaseData.size() == 0);
+        assertEquals(0,updatedCaseData.size());
     }
 
     @Test
