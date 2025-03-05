@@ -37,22 +37,20 @@ public class CaseWithdrawnRequestService {
     private final ObjectMapper objectMapper;
     public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn - welsh<br/> Application withdrawn";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
-        ### What happens next - welsh
-        What happens next 
-
-This case will now display as “withdrawn” in your case list. - welsh
+        ### What happens next - welsh <br/> What happens next 
+        
+        This case will now display as “withdrawn” in your case list. - welsh
         This case will now display as “withdrawn” in your case list.""";
 
     public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Requested Application Withdrawal - welsh <br/> "
         + "Requested Application Withdrawal";
     public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = """
-        ### What happens next - welsh
-        What happens next
+        ### What happens next - welsh <br/> What happens next
 
         The court will consider your withdrawal request. - welsh
         The court will consider your withdrawal request.""";
 
-    public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled - welsh <br?> "
+    public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled - welsh <br/> "
         + "Application withdrawn cancelled";
 
     public SubmittedCallbackResponse caseWithdrawnEmailNotification(CallbackRequest callbackRequest, String authorisation) {
