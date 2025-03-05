@@ -2845,10 +2845,12 @@ public class ServiceOfApplicationService {
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if (!isPartiesAddressPresent(respondent.getValue())) {
-                    isRespondentAddressPresent = false;
-                    break;
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) { //Added for handle for edge cases
+                for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                    if (!isPartiesAddressPresent(respondent.getValue())) {
+                        isRespondentAddressPresent = false;
+                        break;
+                    }
                 }
             }
         } else {
@@ -2869,7 +2871,8 @@ public class ServiceOfApplicationService {
     }
 
     private static boolean isPartiesAddressPresent(PartyDetails partyDetails) {
-        return !No.equals(partyDetails.getIsCurrentAddressKnown())
+        return null != partyDetails //Added for handle for edge cases
+            && !No.equals(partyDetails.getIsCurrentAddressKnown())
             && !ObjectUtils.isEmpty(partyDetails.getAddress())
             && !StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1());
     }
