@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,5 +37,8 @@ public class Match {
 
     @JsonProperty("data.hwfRequestedForAdditionalApplicationsFlag")
     private String hwfRequestedForAdditionalApplicationsFlag;
+
+    @JsonProperty("data.nextHearingDate")
+    private LocalDate nextHearingDate;
 
 }

@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 
 @Slf4j
@@ -68,8 +68,10 @@ public class HearingManagementService {
         Map<String, Object> fields = new HashMap<>();
 
         if (hearingRequest.getNextHearingDateRequest() != null
-            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
-            fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
+            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null
+            && hearingRequest.getNextHearingDateRequest().getNextHearingDetails().getHearingDateTime() != null) {
+            fields.put(NEXT_HEARING_DATE, hearingRequest.getNextHearingDateRequest().getNextHearingDetails()
+                .getHearingDateTime().toLocalDate());
         }
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
@@ -98,35 +100,6 @@ public class HearingManagementService {
                 }
             }
         }
-    }
-
-    public CaseData updateTabsWithLatestData(Map<String, Object> fields) {
-        EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
-            CaseEvent.UPDATE_ALL_TABS,
-            (String) fields.get(SYSTEM_UPDATE_USER_ID)
-        );
-        StartEventResponse allTabsUpdateStartEventResponse =
-            coreCaseDataService.startUpdate(
-                (String) fields.get(USER_TOKEN),
-                allTabsUpdateEventRequestData,
-                (String) fields.get(CASE_REF_ID),
-                true
-            );
-
-        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
-            allTabsUpdateStartEventResponse,
-            objectMapper
-        );
-        log.info("Refreshing tab based on the payment response for caseid {} ", fields.get("id"));
-
-        allTabService.mapAndSubmitAllTabsUpdate(
-            (String) fields.get(USER_TOKEN),
-            (String) fields.get(CASE_REF_ID),
-            allTabsUpdateStartEventResponse,
-            allTabsUpdateEventRequestData,
-            allTabsUpdateCaseData
-        );
-        return allTabsUpdateCaseData;
     }
 
     private void submitUpdate(Map<String, Object> data, Map<String, Object> fields) {
@@ -175,6 +148,10 @@ public class HearingManagementService {
         customFields.put(EVENT_ID, CaseEvent.UPDATE_NEXT_HEARING_DATE_IN_CCD);
         Map<String, Object> data = new HashMap<>();
         data.put("nextHearingDetails", nextHearingDateRequest.getNextHearingDetails());
+        if (nextHearingDateRequest.getNextHearingDetails() != null
+            && nextHearingDateRequest.getNextHearingDetails().getHearingDateTime() != null) {
+            data.put(NEXT_HEARING_DATE, nextHearingDateRequest.getNextHearingDetails().getHearingDateTime().toLocalDate());
+        }
         submitUpdate(data, customFields);
     }
 

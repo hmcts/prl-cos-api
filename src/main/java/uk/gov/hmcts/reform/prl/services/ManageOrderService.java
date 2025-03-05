@@ -1515,7 +1515,6 @@ public class ManageOrderService {
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
         servedOrderDetails.put(SERVE_ON_RESPONDENT, caseData.getManageOrders().getServeToRespondentOptions());
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        log.info("Serve order details {}", servedOrderDetails);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
@@ -1740,7 +1739,6 @@ public class ManageOrderService {
         String serveRecipientName = null;
         String whoIsResponsibleToServe = null;
         YesOrNo multipleOrdersServed = null;
-        log.info("Serve order details {} serve on respondent {}", servedOrderDetails, serveOnRespondent);
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
         }
@@ -2510,7 +2508,6 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
-        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
         caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
         log.info("---- Check display legal rep options  ----");
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -2539,11 +2536,9 @@ public class ManageOrderService {
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<String> hearingStatusFilterList = Arrays.stream(hearingStatusesToFilter.trim().split(COMMA)).map(String::trim).toList();
-        log.info("Hearing statuses to filter {}", hearingStatusFilterList);
         List<CaseHearing> filteredHearings = caseHearings.stream()
             .filter(caseHearing -> hearingStatusFilterList.contains(caseHearing.getHmcStatus()))
             .toList();
-        log.info("Filtered hearing {}", filteredHearings);
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
@@ -3148,7 +3143,6 @@ public class ManageOrderService {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-        log.info("Fetched Hearings {}", hearings);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
 
@@ -3307,18 +3301,14 @@ public class ManageOrderService {
 
 
     private CaseData updateIsSdoSelected(CaseData caseData) {
-        log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
-        log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
         if (null != caseData.getManageOrdersOptions()
             && caseData.getManageOrdersOptions().equals(createAnOrder)
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
                 caseData.setIsSdoSelected(Yes);
-                log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
             } else {
                 caseData.setIsSdoSelected(No);
-                log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
             }
         }
         return  caseData;
@@ -3345,7 +3335,6 @@ public class ManageOrderService {
                 additionalRequirementsForHearingReqList
             );
         }
-        log.info("additionalRequirementsForHearingReqList " + additionalRequirementsForHearingReqList);
         if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
             return String.join(", ", additionalRequirementsForHearingReqList);
         } else {

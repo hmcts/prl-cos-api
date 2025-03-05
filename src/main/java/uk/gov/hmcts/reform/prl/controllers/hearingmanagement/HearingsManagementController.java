@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
@@ -35,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DATE;
 
 @Slf4j
 @RestController
@@ -102,9 +105,11 @@ public class HearingsManagementController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseDataUpdated.put("nextHearingDetails",
-                            hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
+        NextHearingDetails nextHearingDetails = hearingManagementService
+            .getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        if (ObjectUtils.isNotEmpty(nextHearingDetails) && null != nextHearingDetails.getHearingDateTime()) {
+            caseDataUpdated.put(NEXT_HEARING_DATE, nextHearingDetails.getHearingDateTime().toLocalDate());
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
