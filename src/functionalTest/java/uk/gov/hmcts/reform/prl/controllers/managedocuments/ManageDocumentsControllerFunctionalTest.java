@@ -118,7 +118,7 @@ public class ManageDocumentsControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
         String requestBodyRevised = requestBody
-            .replace("1705348332562551", caseDetails.getId().toString());
+            .replace("123456789", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
