@@ -157,7 +157,7 @@ public class CallbackControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
+    public void given_C100Case_whenCaseWithdrawn_shouldReturn_200() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -167,7 +167,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-withdrawn-about-to-submit")
             .then()
-            .assertThat().statusCode(500);
+            .assertThat().statusCode(200);
     }
 
     @Test
