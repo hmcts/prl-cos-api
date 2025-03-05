@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
@@ -67,6 +69,9 @@ public class CourtNavCaseControllerTest {
 
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Before
     public void setUp() {
@@ -225,4 +230,73 @@ public class CourtNavCaseControllerTest {
                             "", file, "fl401Doc1"
             );
     }
+
+    @Test
+    public void shouldReturnForbiddenWhenFeatureDisabled() {
+        when(launchDarklyClient.isFeatureEnabled("courtnav-case-creation")).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("auth", "s2s token", null));
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenUserNotAuthorized() {
+        when(launchDarklyClient.isFeatureEnabled("courtnav-case-creation")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("auth", "s2s token", null));
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenServiceNotAuthorized() {
+        when(launchDarklyClient.isFeatureEnabled("courtnav-case-creation")).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("auth", "s2s token", null));
+    }
+
+    @Test
+    public void shouldUploadCafcassDocumentWhenFeatureEnabled() {
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo()).thenReturn(UserInfo.builder().roles(List.of(CAFCASS_USER_ROLE)).build());
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-upload")).thenReturn(true);
+        doNothing().when(cafcassUploadDocService).uploadDocument(any(), any(), any(), any());
+
+        ResponseEntity response = courtNavCaseController.uploadDocument(AUTH, "s2s token", "1234567891234567", file, "fl401Doc1");
+        assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenCafcassFeatureDisabled() {
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo()).thenReturn(UserInfo.builder().roles(List.of(CAFCASS_USER_ROLE)).build());
+        when(launchDarklyClient.isFeatureEnabled("cafcass-doc-upload")).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(AUTH, "s2s token", "1234567891234567", file, "fl401Doc1"));
+    }
+
+    @Test
+    public void shouldUploadCourtNavDocumentWhenFeatureEnabled() {
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo()).thenReturn(UserInfo.builder().roles(List.of("COURTNAV")).build());
+        when(launchDarklyClient.isFeatureEnabled("courtnav-doc-upload")).thenReturn(true);
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+
+        ResponseEntity response = courtNavCaseController.uploadDocument(AUTH, "s2s token", "1234567891234567", file, "fl401Doc1");
+        assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
+    public void shouldReturnForbiddenWhenCourtNavFeatureDisabled() {
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.getUserInfo()).thenReturn(UserInfo.builder().roles(List.of("COURTNAV")).build());
+        when(launchDarklyClient.isFeatureEnabled("courtnav-doc-upload")).thenReturn(false);
+
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(AUTH, "s2s token", "1234567891234567", file, "fl401Doc1"));
+    }
+
 }
