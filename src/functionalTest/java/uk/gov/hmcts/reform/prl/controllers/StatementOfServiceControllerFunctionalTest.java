@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.jupiter.api.Order;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest
@@ -56,6 +58,7 @@ public class StatementOfServiceControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
+    @Order(2)
     public void testStmtOfServiceAboutToStart() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
@@ -77,6 +80,7 @@ public class StatementOfServiceControllerFunctionalTest {
     }
 
     @Test
+    @Order(3)
     public void testStmtOfServiceAboutToSubmit() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
@@ -96,6 +100,7 @@ public class StatementOfServiceControllerFunctionalTest {
     }
 
     @Test
+    @Order(4)
     public void testStmtOfServiceSubmitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
@@ -113,7 +118,8 @@ public class StatementOfServiceControllerFunctionalTest {
     }
 
     @Test
-    public void createCcdTestCase() throws Exception {
+    @Order(5)
+    public void saveStatementOfServiceByCitizen() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
@@ -123,11 +129,31 @@ public class StatementOfServiceControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .pathParam("caseId", "1711105989241323")
+            .pathParam("caseId", caseDetails.getId())
             .pathParam("eventId","citizenStatementOfService")
             .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
             .then()
             .statusCode(200);
 
+    }
+
+    @Test
+    @Order(1)
+    public void createCcdTestCase() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
     }
 }
