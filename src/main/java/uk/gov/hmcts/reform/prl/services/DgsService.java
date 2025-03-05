@@ -136,6 +136,8 @@ public class DgsService {
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        log.info("Generating document for template {} and case data {}",
+                 templateName, AppObjectMapper.getObjectMapper().writeValueAsString(tempCaseDetails));
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
