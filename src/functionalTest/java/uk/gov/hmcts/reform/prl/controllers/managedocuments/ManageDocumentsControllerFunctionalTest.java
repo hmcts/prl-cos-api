@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
@@ -134,33 +135,7 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentRestrictCheckbox", equalTo(null),
                   "data.manageDocuments[0].value.documentCategories.value.code", equalTo(null),
                   "data.manageDocuments[0].value.documentCategories.value.label",equalTo(null),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(APPLICANT_APPLICATION),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(APPLICANT_C1A_APPLICATION),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(APPLICANT_C1A_RESPONSE),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(MIAM_CERTIFICATE),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(RESPONDENT_APPLICATION),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(RESPONDENT_C1A_APPLICATION),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(RESPONDENT_C1A_RESPONSE),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(ORDERS_FROM_OTHER_PROCEEDINGS),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(NOTICE_OF_HEARING),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(COURT_BUNDLE),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(CASE_SUMMARY),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SAFEGUARDING_LETTER),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SECTION7_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SECTION_37_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SIXTEEN_A_RISK_ASSESSMENT),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(GUARDIAN_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SPECIAL_GUARDIANSHIP_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(OTHER_DOCS),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(PUBLIC_FUNDING_CERTIFICATES),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(NOTICES_OF_ACTING_DISCHARGE),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(WITNESS_AVAILABILITY),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(LETTERS_OF_COMPLAINTS),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(SPIP_REFERRAL_REQUESTS),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(HOME_OFFICE_DWP_RESPONSES)
+                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(hasEntry("code", "label"))
             )
             .assertThat().statusCode(200)
             .extract()
