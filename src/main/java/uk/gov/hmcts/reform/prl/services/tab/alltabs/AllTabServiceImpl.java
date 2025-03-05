@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -150,6 +149,10 @@ public class AllTabServiceImpl implements AllTabsService {
                                                  EventRequestData eventRequestData,
                                                  CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
+        //PRL-6779 - fix 0 id in caseData for court nav cases
+        if (null == combinedFieldsMap.get("id") || 0 == (Long)combinedFieldsMap.get("id")) {
+            combinedFieldsMap.put("id", Long.parseLong(caseId));
+        }
 
         return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
     }
@@ -181,6 +184,11 @@ public class AllTabServiceImpl implements AllTabsService {
         documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
         documentMap.put("submitAndPayDownloadApplicationLink", caseData.getSubmitAndPayDownloadApplicationLink());
         documentMap.put("submitAndPayDownloadApplicationWelshLink", caseData.getSubmitAndPayDownloadApplicationWelshLink());
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) && State.SUBMITTED_PAID.equals(
+            caseData.getState())) {
+            documentMap.put("c1ADraftDocument", caseData.getC1ADraftDocument());
+            documentMap.put("c1AWelshDraftDocument", caseData.getC1AWelshDraftDocument());
+        }
 
         return documentMap;
     }
@@ -223,8 +231,7 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(List<Element<CaseInvite>> caseInvites,
-                                         String authorisation,
+    public void updatePartyDetailsForNoc(String authorisation,
                                          String caseId,
                                          StartEventResponse startEventResponse,
                                          EventRequestData eventRequestData,
@@ -239,7 +246,6 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
-            setCaseInvitesIfNeeded(caseInvites, dataMap);
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
@@ -277,11 +283,6 @@ public class AllTabServiceImpl implements AllTabsService {
         return combinedFieldsMap;
     }
 
-    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
-        if (CollectionUtils.isNotEmpty(caseInvites)) {
-            caseDataUpdatedMap.put("caseInvites", caseInvites);
-        }
-    }
 
     @Override
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,

@@ -319,12 +319,14 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                .id(124L)
+                .data(stringObjectMap).build())
             .build();
 
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(

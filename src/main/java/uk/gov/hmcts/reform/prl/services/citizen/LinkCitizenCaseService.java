@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -57,7 +58,6 @@ public class LinkCitizenCaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
@@ -132,13 +132,23 @@ public class LinkCitizenCaseService {
             caseDataUpdated.putAll(getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId));
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
-                User user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
+                User user;
+                if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())) {
+                    user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
+                } else {
+                    user = User.builder().email(emailId).idamId(userId).build();
+                }
                 caseData.getApplicantsFL401().setUser(user);
                 caseDataUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
             } else {
-                User user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
+                User user;
+                if (ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser())) {
+                    user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
+                } else {
+                    user = User.builder().email(emailId).idamId(userId).build();
+                }
                 caseData.getRespondentsFL401().setUser(user);
                 caseDataUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
 
@@ -177,7 +187,7 @@ public class LinkCitizenCaseService {
         String accessCodeStatus = INVALID;
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
             || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && !launchDarklyClient.isFeatureEnabled(CITIZEN_ALLOW_DA_JOURNEY))) {
+            && !launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY))) {
             return accessCodeStatus;
         }
         List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()

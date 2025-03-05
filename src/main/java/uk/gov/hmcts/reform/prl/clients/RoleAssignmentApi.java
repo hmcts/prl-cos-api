@@ -2,13 +2,18 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAssignmentDeleteQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 @FeignClient(name = "amRoleAssignment",
@@ -30,4 +35,25 @@ public interface RoleAssignmentApi {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @PathVariable("actorId") String actorId);
+
+    @DeleteMapping(value = "/am/role-assignments/{assignmentId}", consumes = "application/json")
+    void removeRoleAssignments(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("x-correlation-id") String xcorrelationId,
+        @PathVariable("assignmentId") String assignmentId);
+
+    @PostMapping(path = "/am/role-assignments/query?includeLabels=true", consumes = "application/json")
+    RoleAssignmentServiceResponse queryRoleAssignments(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("x-correlation-id") String xcorrelationId,
+        @RequestBody RoleAssignmentQueryRequest roleAssignmentQueryRequest);
+
+    @PostMapping(path = "/am/role-assignments/query/delete", consumes = "application/json")
+    ResponseEntity<HttpStatus> deleteQueryRoleAssignments(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("x-correlation-id") String xcorrelationId,
+        @RequestBody RoleAssignmentDeleteQueryRequest roleAssignmentDeleteQueryRequest);
 }

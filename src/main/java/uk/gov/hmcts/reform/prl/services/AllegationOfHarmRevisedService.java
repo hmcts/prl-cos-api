@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,44 +61,70 @@ public class AllegationOfHarmRevisedService {
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
-            for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
-
-                switch (eachBehavior.name()) {
-                    case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
-                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
-                    case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
-                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
-                    case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
-                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
-                    case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
-                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
-                    case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
-                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
-                    default : {
-                        //
+            if (CollectionUtils.isNotEmpty(allegationOfHarmRevised.get().getChildAbuses())) {
+                for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
+                    switch (eachBehavior.name()) {
+                        case PHYSICAL_ABUSE:
+                            childPhysicalAbuse.ifPresent(abuse ->
+                                                             checkAndAddChildAbuse(
+                                                                 allegationOfHarmRevised.get(),
+                                                                 childAbuseBehaviourList,
+                                                                 eachBehavior,
+                                                                 abuse
+                                                             )
+                            );
+                            break;
+                        case PSYCHOLOGICAL_ABUSE:
+                            childPsychologicalAbuse.ifPresent(abuse ->
+                                                                  checkAndAddChildAbuse(
+                                                                      allegationOfHarmRevised.get(),
+                                                                      childAbuseBehaviourList,
+                                                                      eachBehavior,
+                                                                      abuse
+                                                                  )
+                            );
+                            break;
+                        case SEXUAL_ABUSE:
+                            childSexualAbuse.ifPresent(abuse ->
+                                                           checkAndAddChildAbuse(
+                                                               allegationOfHarmRevised.get(),
+                                                               childAbuseBehaviourList,
+                                                               eachBehavior,
+                                                               abuse
+                                                           )
+                            );
+                            break;
+                        case EMOTIONAL_ABUSE:
+                            childEmotionalAbuse.ifPresent(abuse ->
+                                                              checkAndAddChildAbuse(
+                                                                  allegationOfHarmRevised.get(),
+                                                                  childAbuseBehaviourList,
+                                                                  eachBehavior,
+                                                                  abuse
+                                                              )
+                            );
+                            break;
+                        case FINANCIAL_ABUSE:
+                            childFinancialAbuse.ifPresent(abuse ->
+                                                              checkAndAddChildAbuse(
+                                                                  allegationOfHarmRevised.get(),
+                                                                  childAbuseBehaviourList,
+                                                                  eachBehavior,
+                                                                  abuse
+                                                              )
+                            );
+                            break;
+                        default: {
+                            //
+                        }
                     }
                 }
             }
+
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
         }
-
         return caseData;
     }
 
@@ -288,5 +316,21 @@ public class AllegationOfHarmRevisedService {
 
 
         return caseDataMap;
+    }
+
+    public void resetFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
+        if (Objects.nonNull(allegationOfHarmRevised)) {
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
+                caseDataUpdated.put("newAllegationsOfHarmSubstanceAbuseDetails", "");
+            }
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmOtherConcerns())) {
+                caseDataUpdated.put("newAllegationsOfHarmOtherConcernsDetails", "");
+            }
+            if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
+                caseDataUpdated.put("childAbuses", Collections.emptyList());
+            }
+
+        }
     }
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -48,9 +50,9 @@ public class CaseDataRespondentDetailsElementsMapper {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
 
-        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
-            buildPartyDetails(respondentDetails)).build()).toList();
-
+        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder()
+            .id(UUID.fromString(respondentDetails.getId()))
+            .value(buildPartyDetails(respondentDetails)).build()).toList();
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
@@ -63,11 +65,12 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(respondentDetails.getPersonalDetails().getDateOfBirth() != null ? Yes : No)
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
-            .isAtAddressLessThan5Years(buildAddressLivedLessThan5YearsDetails(respondentDetails))
+            .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetails(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
@@ -98,9 +101,15 @@ public class CaseDataRespondentDetailsElementsMapper {
         return null;
     }
 
-    private static YesOrNo buildAddressLivedLessThan5YearsDetails(RespondentDetails respondentDetails) {
+    private static YesNoDontKnow buildAddressLivedLessThan5YearsDetails(RespondentDetails respondentDetails) {
 
-        return (!"Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) ? Yes : YesOrNo.No;
+        if ("Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) {
+            return YesNoDontKnow.yes;
+        } else if ("No".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) {
+            return YesNoDontKnow.no;
+        } else {
+            return YesNoDontKnow.dontKnow;
+        }
     }
 
     private static String buildPreviousName(RespondentDetails respondentDetails) {
@@ -143,14 +152,17 @@ public class CaseDataRespondentDetailsElementsMapper {
 
                                  return Element.<ChildrenAndRespondentRelation>builder()
                                      .value(ChildrenAndRespondentRelation.builder()
-                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                                .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                                    .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
-                                                .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
-                                                .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                                    childRelationship.getRelationshipType()))
-                                                .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                                .build()).build();
+                                         .childId(childDetail.getId())
+                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                         .childLivesWith(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
+                                         .respondentId(respondentDetails.getId())
+                                         .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
+                                         .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                             childRelationship.getRelationshipType()))
+                                         .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                         .build())
+                                     .build();
                              }
                              return null;
                          })

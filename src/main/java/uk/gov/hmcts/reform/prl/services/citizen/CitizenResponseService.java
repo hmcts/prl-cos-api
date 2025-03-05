@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -51,6 +54,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -74,33 +79,59 @@ public class CitizenResponseService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    private final ManageOrderService manageOrderService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
-    public static final String C_1_ARESPONSE = "C1Aresponse";
+    public static final String C1A_RESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
 
-
-    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation) throws Exception {
+    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        updateCurrentRespondent(caseData, partyId);
-
+        log.info("Inside generateAndReturnDraftC7");
         return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 DOCUMENT_C7_DRAFT_HINT,
-                false
+                isWelsh,
+                updateCurrentRespondent(caseData, partyId)
         );
     }
 
-    private void updateCurrentRespondent(CaseData caseData, String partyId) {
+    public Document generateAndReturnDraftC1A(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("Inside generateAndReturnDraftC1A");
+        Map<String, Object> dataMap = updateCurrentRespondent(caseData, partyId);
+        if (isWelsh) {
+            c100RespondentSolicitorService.populateAohDataMapForWelsh(dataMap);
+        }
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C1A_DRAFT_HINT,
+            isWelsh,
+            dataMap
+        );
+    }
 
+    private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
+        log.info("Updating respondent details");
+        Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
                 PartyDetails respondent = partyElement.getValue();
                 respondent.setCurrentRespondent(Yes);
+                CaseDetails caseDetails = CaseDetails.builder().id(caseData.getId())
+                    .data(caseData.toMap(objectMapper)).build();
+                CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+                dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
+                                                               partyElement, CITIZEN
+                );
+                log.info("data map processed");
             }
         }
+        return dataMap;
     }
 
     public CaseDetails generateAndSubmitCitizenResponse(String authorisation,
@@ -116,22 +147,15 @@ public class CitizenResponseService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                     = allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authorisation);
             CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
-            CaseData caseDataToGenerateC7 = dbCaseData;
-            caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(citizenUpdatedCaseData, caseDataToGenerateC7);
-
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
-
-            generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7);
-
             Optional<Element<PartyDetails>> optionalCurrentRespondent
-                    = dbCaseData.getRespondents()
-                    .stream()
-                    .filter(party -> Objects.equals(
-                                    party.getValue().getUser().getIdamId(),
-                                    citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
-                            )
-                    )
-                    .findFirst();
+                = dbCaseData.getRespondents()
+                .stream()
+                .filter(party -> Objects.equals(
+                            party.getValue().getUser().getIdamId(),
+                            citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
+                        )
+                )
+                .findFirst();
 
             if (optionalCurrentRespondent.isPresent()) {
                 Element<PartyDetails> partyDetailsElement = optionalCurrentRespondent.get();
@@ -141,8 +165,15 @@ public class CitizenResponseService {
 
                 Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                         callbackRequest,
-                        partyDetailsElement
+                        partyDetailsElement,
+                        CITIZEN
                 );
+                CaseData caseDataToGenerateC7 = dbCaseData;
+                caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(citizenUpdatedCaseData, caseDataToGenerateC7);
+
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
+
+                generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7, dataMap);
 
                 if (isNotEmpty(partyDetailsElement.getValue().getResponse())) {
                     Response response = partyDetailsElement.getValue().getResponse();
@@ -160,7 +191,7 @@ public class CitizenResponseService {
                                     citizenUpdatedCaseData.getPartyDetails(),
                                     party.getValue(),
                                     CaseEvent.REVIEW_AND_SUBMIT,dbCaseData.getNewChildDetails());
-                                updatedPartyDetails = generateRespondentC1aResponseDocument(
+                                generateRespondentC1aResponseDocument(
                                     updatedPartyDetails,
                                     documentLanguage,
                                     dataMap,
@@ -175,8 +206,8 @@ public class CitizenResponseService {
                         caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
                     }
 
-
                     checkPreviousProceedings(responseDocs, response);
+
                     generateC1A(authorisation, response, documentLanguage, responseDocs, dbCaseData, dataMap);
 
                     caseDataMapToBeUpdated.putAll(addCitizenDocumentsToTheQuarantineList(
@@ -212,7 +243,7 @@ public class CitizenResponseService {
         }
     }
 
-    private PartyDetails generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
+    private void generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
                                                                DocumentLanguage documentLanguage,
                                                                Map<String, Object> dataMap,
                                                                CaseData caseData, String authorisation,
@@ -221,17 +252,13 @@ public class CitizenResponseService {
         Document c1aFinalResponseEngDocument = null;
         Document c1aFinalResponseWelDocument = null;
         log.info("inside generateRespondentC1aResponseDocuments()");
-        log.info("responseToAllegationsOfHarm options {}",
-                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
-        log.info("responseToAllegationsOfHarm text {}",
-                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm());
         respondentC1aResponseDocuments = null != respondentC1aResponseDocuments ? respondentC1aResponseDocuments : new HashMap<>();
         if (isNotEmpty(updatedPartyDetails.getResponse())
             && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
             && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
                               .getResponseToAllegationsOfHarmYesOrNoResponse())) {
             String fileName = updatedPartyDetails.getLabelForDynamicList()
-                + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
+                + UNDERSCORE + C1A_RESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
                 LONDON_TIME_ZONE)).format(dateTimeFormatter);
             log.info("generating respondent C1A response documents");
             try {
@@ -258,17 +285,6 @@ public class CitizenResponseService {
                     respondentC1aResponseDocuments.put(c1aFinalResponseWelDocument, WELSH);
                 }
                 log.info("generated respondent C1A response documents");
-                updatedPartyDetails = updatedPartyDetails.toBuilder()
-                    .response(updatedPartyDetails.getResponse().toBuilder()
-                                  .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-                                                                   .toBuilder()
-                                                                   .responseToAllegationsOfHarmDocument(isNotEmpty(
-                                                                       c1aFinalResponseEngDocument) ? c1aFinalResponseEngDocument : null)
-                                                                   .responseToAllegationsOfHarmWelshDocument(isNotEmpty(
-                                                                       c1aFinalResponseWelDocument) ? c1aFinalResponseWelDocument : null)
-                                                                   .build())
-                                  .build())
-                    .build();
 
             } catch (Exception e) {
                 log.info(
@@ -279,18 +295,18 @@ public class CitizenResponseService {
                 dataMap.remove(DYNAMIC_FILE_NAME);
             }
         }
-        return updatedPartyDetails;
     }
 
     private void generateC7Response(String authorisation,
                                     DocumentLanguage documentLanguage,
                                     Map<Element<Document>, String> responseDocs,
-                                    CaseData caseDataToGenerateC7) throws Exception {
+                                    CaseData caseDataToGenerateC7,
+                                    Map<String, Object> dataMap) throws Exception {
         if (documentLanguage.isGenEng()) {
-            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false)), "en");
+            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false, dataMap)), "en");
         }
         if (documentLanguage.isGenWelsh()) {
-            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true)), "cy");
+            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true, dataMap)), "cy");
         }
     }
 
@@ -302,13 +318,14 @@ public class CitizenResponseService {
                              Map<String, Object> dataMap) throws Exception {
         if (isNotEmpty(response.getRespondentAllegationsOfHarmData())
                 && Yes.equals(response.getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            //Reset data map again with RespondentAllegationsOfHarmData to fix the Welsh translation issue
+            dataMap.putAll(objectMapper.convertValue(response.getRespondentAllegationsOfHarmData(),new TypeReference<Map<String, Object>>() {}));
             if (documentLanguage.isGenEng()) {
                 responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)), "en");
             }
             if (documentLanguage.isGenWelsh()) {
-                Map<String, Object> welshDataMap = new HashMap<>();
-                welshDataMap.putAll(dataMap);
-                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, welshDataMap)), "cy");
+                c100RespondentSolicitorService.populateAohDataMapForWelsh(dataMap);
+                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)), "cy");
             }
         }
     }
@@ -332,13 +349,14 @@ public class CitizenResponseService {
         return caseData;
     }
 
-    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh) throws Exception {
+    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh, Map<String, Object> dataMap) throws Exception {
 
         return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 "c7FinalEng",
-                isWelsh
+                isWelsh,
+                dataMap
         );
     }
 
@@ -369,6 +387,9 @@ public class CitizenResponseService {
                                                    UserDetails userDetails) throws Exception {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             int partyIndex = caseData.getRespondents().indexOf(partyDetailsElement);
+            //prl-6790 - getting user-role and adding to datamap
+            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+
             Document c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -462,11 +483,15 @@ public class CitizenResponseService {
                                                                                            .toInstant()))
                                                           .build())
                            .categoryId(getCategoryId(element))
+                           .categoryName(getCategoryName(element.getValue()))
                            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                            .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                            .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                            .uploaderRole(PrlAppsConstants.CITIZEN)
+                           .fileName(element.getValue().getDocumentFileName())
+                           .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
                            .documentLanguage(language)
+                           .isConfidential(Yes)
                            .build())
                 .id(element.getId()).build();
             finalQuarantineDocs.add(quarantineLegalDoc);
@@ -489,7 +514,10 @@ public class CitizenResponseService {
                                .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                                .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                                .uploaderRole(PrlAppsConstants.CITIZEN)
+                               .fileName(document.getDocumentFileName())
+                               .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
                                .documentLanguage(language)
+                               .isConfidential(Yes)
                                .build())
                     .id(CommonUtils.generateUuid()).build();
                 finalQuarantineDocs.add(quarantineLegalDoc);
@@ -514,6 +542,18 @@ public class CitizenResponseService {
             };
         }
 
+        return "";
+    }
+
+    private String getCategoryName(Document document) {
+        if (null != document && null != document.getDocumentFileName()) {
+            return switch (document.getDocumentFileName()) {
+                case "C7_Document.pdf", "Final_C7_response_Welsh.pdf" -> "Respondent application";
+                case "C1A_allegation_of_harm.pdf",
+                     "Final_C1A_allegation_of_harm_Welsh.pdf" -> "Respondent C1A application";
+                default -> "";
+            };
+        }
         return "";
     }
 }
