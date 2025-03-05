@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.bulkscan;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -42,9 +41,6 @@ public class BulkScanControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
-
-    @Before
-    public void setUp() {}
 
     @Test
     public void testExceptionForBulkScanCaseSubmission() {
