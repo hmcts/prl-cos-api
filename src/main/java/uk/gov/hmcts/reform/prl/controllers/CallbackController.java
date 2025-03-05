@@ -1084,6 +1084,7 @@ public class CallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+<<<<<<< Updated upstream
 
     @PostMapping(path = "/bulkscan-case-submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to refresh the tabs")
@@ -1107,4 +1108,6 @@ public class CallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+=======
+>>>>>>> Stashed changes
 }
