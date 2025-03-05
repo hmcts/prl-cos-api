@@ -118,7 +118,7 @@ public class ManageDocumentsControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
         String requestBodyRevised = requestBody
-            .replace("1705348332562551", caseDetails.getId().toString());
+            .replace("123456789", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -250,7 +250,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
         String requestBodyRevised = requestBody
-            .replace("1705348332562551", caseDetails.getId().toString());
+            .replace("123456789", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBodyRevised)
@@ -267,7 +267,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
         String requestBodyRevised = requestBody
-            .replace("1705348332562551", caseDetails.getId().toString());
+            .replace("123456789", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBodyRevised)
