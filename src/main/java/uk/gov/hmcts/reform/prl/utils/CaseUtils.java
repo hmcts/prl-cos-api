@@ -41,9 +41,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
-import uk.gov.hmcts.reform.prl.models.languagecontext.LanguageContextMapper;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
@@ -72,30 +72,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -1085,25 +1062,24 @@ public class CaseUtils {
 
     public static String getLanguage(String clientContextString) {
 
-        LanguageContextMapper languageContextMapper = null;
+        ClientContext clientContext = null;
 
         if (clientContextString != null) {
             byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
             String decodedString = new String(decodedBytes);
             try {
-                languageContextMapper = new ObjectMapper().readValue(decodedString, LanguageContextMapper.class);
+                clientContext = new ObjectMapper().readValue(decodedString, ClientContext.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());
             }
         }
 
-        if (null != languageContextMapper
-            && null != languageContextMapper.getClientContext()
-            && null != languageContextMapper.getClientContext().getUserLanguage()) {
-            return languageContextMapper.getClientContext().getUserLanguage().getLanguage();
+        if (null != clientContext
+            && null != clientContext.getUserLanguage()){
+           return clientContext.getUserLanguage().getLanguage();
         }
 
-        return null;
+        return ENGLISH;
     }
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {

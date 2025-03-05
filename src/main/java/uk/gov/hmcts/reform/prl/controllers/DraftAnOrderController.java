@@ -68,8 +68,7 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String language = CaseUtils.getLanguage(clientContext);
-            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation, language);
+            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation, CaseUtils.getLanguage(clientContext));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -189,7 +188,6 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String language = CaseUtils.getLanguage(clientContext);
             if (!Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 clientContext = null;
@@ -198,7 +196,7 @@ public class DraftAnOrderController {
                 authorisation,
                 callbackRequest,
                 clientContext,
-                language
+                CaseUtils.getLanguage(clientContext)
             );
             if (caseDataUpdated.containsKey("errorList")) {
                 return AboutToStartOrSubmitCallbackResponse.builder()

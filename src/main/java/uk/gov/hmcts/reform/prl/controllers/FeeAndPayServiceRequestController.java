@@ -55,7 +55,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         ### Beth fydd yn digwydd nesaf<br/>What happens next
 
 
-        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion. 
+        Bydd yr achos nawr yn dangos fel Ar y Gweill yn eich rhestr achosion.
         Mae angen i chi fynd i’r tab Cais am Wasanaeth i dalu am eich cais.<br/>
         The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
 
@@ -134,9 +134,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        String language = CaseUtils.getLanguage(clientContext);
         List<String> errorList =
-            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest, language);
+            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest, CaseUtils.getLanguage(clientContext));
         return CallbackResponse.builder()
             .errors(errorList)
             .build();

@@ -67,12 +67,11 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
             List<String> errorList = new ArrayList<>();
-            String language = CaseUtils.getLanguage(clientContext);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(respondentSolicitorService.populateAboutToStartCaseData(
                     callbackRequest,
-                    language
+                    CaseUtils.getLanguage(clientContext)
                 )).errors(errorList).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

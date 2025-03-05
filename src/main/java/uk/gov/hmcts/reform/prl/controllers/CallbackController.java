@@ -223,8 +223,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
-            String language = CaseUtils.getLanguage(clientContext);
-            if (PrlAppsConstants.WELSH.equals(language)) {
+            if (PrlAppsConstants.WELSH.equals(CaseUtils.getLanguage(clientContext))) {
                 if (isNotEmpty(workflowResult.getErrors())) {
                     List<String> errorlist = new ArrayList<>();
                     errorlist
