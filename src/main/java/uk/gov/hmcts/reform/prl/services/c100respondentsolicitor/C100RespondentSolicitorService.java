@@ -187,7 +187,7 @@ public class C100RespondentSolicitorService {
     private static final String CLOSE_BRACKET = ")";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
-    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
+    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String language) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -197,9 +197,10 @@ public class C100RespondentSolicitorService {
         }
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue() != null) {
             retrieveExistingResponseForSolicitor(
-                    callbackRequest,
-                    caseDataUpdated,
-                    solicitorRepresentedRespondent
+                callbackRequest,
+                caseDataUpdated,
+                solicitorRepresentedRespondent,
+                language
             );
             String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
                     + solicitorRepresentedRespondent.getValue().getLastName();
@@ -210,7 +211,7 @@ public class C100RespondentSolicitorService {
     }
 
     private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String,
-            Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent) {
+            Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent, String language) {
         String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
             switch (event) {
@@ -269,8 +270,13 @@ public class C100RespondentSolicitorService {
                         caseDataUpdated.put(miamFields[1], existingMiam.getWillingToAttendMiam());
                         caseDataUpdated.put(miamFields[2], existingMiam.getReasonNotAttendingMiam());
                     }
-                    caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
-                    caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolderWelsh());
+                        caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh());
+                    } else {
+                        caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                        caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+                    }
                     break;
                 case OTHER_PROCEEDINGS:
                     String[] proceedingsFields = event.getCaseFieldName().split(",");
