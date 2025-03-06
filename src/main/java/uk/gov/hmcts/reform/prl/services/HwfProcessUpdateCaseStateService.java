@@ -35,7 +35,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PROCESS_PAYMENT_FOR_BULKSCAN;
 
@@ -113,6 +118,9 @@ public class HwfProcessUpdateCaseStateService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
+            caseDataUpdated.put(DATE_SUBMITTED_FIELD, dateSubmitted);
             //Save case data
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
