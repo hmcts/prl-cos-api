@@ -111,8 +111,10 @@ public class HwfProcessUpdateCaseStateService {
             ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
                 paymentRequestService.fetchServiceRequestReferenceStatus(
                     systemUserService.getSysUserToken(),
-                    caseData.getPaymentServiceRequestReferenceNumber());
+                    caseData.getPaymentServiceRequestReferenceNumber()
+                );
             log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+            log.info("Event - " + event);
             if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                 Map<String, Object> caseDataUpdated = new HashMap<>();
                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent

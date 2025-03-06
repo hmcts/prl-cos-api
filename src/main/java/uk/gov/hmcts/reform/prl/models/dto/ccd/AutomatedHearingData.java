@@ -29,9 +29,9 @@ import java.util.List;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(toBuilder = true)
+@Builder(builderMethodName = "automatedHearingDataBuilder")
 @AllArgsConstructor
-public class HearingData {
+public class AutomatedHearingData {
 
     private DynamicList hearingTypes;
 
@@ -147,57 +147,16 @@ public class HearingData {
     @JsonProperty("fillingFormRenderingInfo")
     private String fillingFormRenderingInfo;
 
-    private DynamicList applicantHearingChannel1;
-    private DynamicList applicantHearingChannel2;
-    private DynamicList applicantHearingChannel3;
-    private DynamicList applicantHearingChannel4;
-    private DynamicList applicantHearingChannel5;
-
-    private DynamicList applicantSolicitorHearingChannel1;
-    private DynamicList applicantSolicitorHearingChannel2;
-    private DynamicList applicantSolicitorHearingChannel3;
-    private DynamicList applicantSolicitorHearingChannel4;
-    private DynamicList applicantSolicitorHearingChannel5;
-
-    private DynamicList respondentHearingChannel1;
-    private DynamicList respondentHearingChannel2;
-    private DynamicList respondentHearingChannel3;
-    private DynamicList respondentHearingChannel4;
-    private DynamicList respondentHearingChannel5;
-
-    private DynamicList respondentSolicitorHearingChannel1;
-    private DynamicList respondentSolicitorHearingChannel2;
-    private DynamicList respondentSolicitorHearingChannel3;
-    private DynamicList respondentSolicitorHearingChannel4;
-    private DynamicList respondentSolicitorHearingChannel5;
-
-    private String applicantName1;
-    private String applicantName2;
-    private String applicantName3;
-    private String applicantName4;
-    private String applicantName5;
-
-    private String applicantSolicitor1;
-    private String applicantSolicitor2;
-    private String applicantSolicitor3;
-    private String applicantSolicitor4;
-    private String applicantSolicitor5;
-
-    private String respondentName1;
-    private String respondentName2;
-    private String respondentName3;
-    private String respondentName4;
-    private String respondentName5;
-
-    private String respondentSolicitor1;
-    private String respondentSolicitor2;
-    private String respondentSolicitor3;
-    private String respondentSolicitor4;
-    private String respondentSolicitor5;
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
+
+    private AutomatedHearingDataApplicantDetails hearingDataApplicantDetails;
+
+    private AutomatedHearingDataRespondentDetails hearingDataRespondentDetails;
 
     private final YesOrNo isCafcassCymru;
 
     @JsonProperty("additionalDetailsForHearingDateOptions")
     private String additionalDetailsForHearingDateOptions;
+
+
 }
