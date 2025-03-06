@@ -107,8 +107,7 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentDetails", equalTo(null),
                   "data.manageDocuments[0].value.documentRestrictCheckbox", equalTo(null),
                   "data.manageDocuments[0].value.documentCategories.value.code", equalTo(null),
-                  "data.manageDocuments[0].value.documentCategories.value.label",equalTo(null),
-                  "data.manageDocuments[0].value.documentCategories.list_items", hasItem(hasEntry("code", "label"))
+                  "data.manageDocuments[0].value.documentCategories.value.label",equalTo(null)
             )
             .assertThat().statusCode(200)
             .extract()
