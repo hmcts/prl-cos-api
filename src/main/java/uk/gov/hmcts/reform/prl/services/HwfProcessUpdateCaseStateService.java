@@ -244,15 +244,13 @@ public class HwfProcessUpdateCaseStateService {
                                                        .build())
                                 .build()))
             .build();
-        Must mustFilter = Must.builder().stateFilter(stateFilter).build();
-        return mustFilter;
+        return Must.builder().stateFilter(stateFilter).build();
     }
 
     private Filter getFilter() {
         // Below filter added to reduce the case count, expectation is case payments are processed within 2 days (SLA)
         LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(5).toString()).build();
         Range range = Range.builder().lastModified(lastModified).build();
-        Filter filter = Filter.builder().range(range).build();
-        return filter;
+        return Filter.builder().range(range).build();
     }
 }
