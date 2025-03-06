@@ -49,18 +49,19 @@ public class BulkScanController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
-            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
+            Map<String, Object> dataMap = callbackRequest.getCaseDetails().getData();
+            dataMap.put("id", callbackRequest.getCaseDetails().getId());
+            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(dataMap).build());
             PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                 callbackRequest,
                 authorisation
             );
             log.info("Payment service response: {}", paymentServiceResponse);
             log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
-            caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
-            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            dataMap.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
+            allTabsService.updateAllTabsIncludingConfTabWithAdditionalData(
+                String.valueOf(callbackRequest.getCaseDetails().getId()), dataMap);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(dataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

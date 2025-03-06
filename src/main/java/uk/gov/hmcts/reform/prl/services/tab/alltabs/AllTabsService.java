@@ -16,6 +16,8 @@ public interface AllTabsService {
 
     CaseDetails updateAllTabsIncludingConfTab(String caseId);
 
+    CaseDetails updateAllTabsIncludingConfTabWithAdditionalData(String caseId, Map<String, Object> additionalData);
+
     Map<String, Object> getAllTabsFields(CaseData caseData);
 
     StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
