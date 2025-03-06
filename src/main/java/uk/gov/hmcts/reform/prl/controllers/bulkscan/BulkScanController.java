@@ -83,6 +83,7 @@ public class BulkScanController {
                 .build());
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE
                 .format(ZonedDateTime.now(ZoneId.of("Europe/London"))));
+            log.info("case status updated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
