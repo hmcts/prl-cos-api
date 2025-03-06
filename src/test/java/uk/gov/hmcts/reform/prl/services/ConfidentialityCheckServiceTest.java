@@ -475,7 +475,12 @@ public class ConfidentialityCheckServiceTest {
         applicants.add(partyDetailsElement);
         applicants.add(partyDetailsElement1);
 
-        CaseData caseData = CaseData.builder().id(12345L).otherPartyInTheCaseRevised(otherPeople).applicants(applicants).caseTypeOfApplication(C100_CASE_TYPE).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .otherPartyInTheCaseRevised(otherPeople)
+            .applicants(applicants)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
