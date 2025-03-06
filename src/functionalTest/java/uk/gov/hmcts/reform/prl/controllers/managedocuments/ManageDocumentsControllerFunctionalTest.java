@@ -23,8 +23,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.DETAILS_ERROR_MESSAGE;
 
 @Slf4j
