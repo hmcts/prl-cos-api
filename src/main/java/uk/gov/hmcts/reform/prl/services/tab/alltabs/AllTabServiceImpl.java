@@ -99,6 +99,7 @@ public class AllTabServiceImpl implements AllTabsService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             log.info("all tab update triggered");
             additionalData.putAll(startAllTabsUpdateDataContent.caseDataMap());
+            log.info("additional data {}", additionalData);
             CaseData caseData = objectMapper.convertValue(additionalData, CaseData.class);
             return mapAndSubmitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
