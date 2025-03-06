@@ -1339,24 +1339,25 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getHomeDetails(CaseData caseData) {
-        if (caseData.getHome() == null) {
+        log.info("Home details {}", caseData.getHome());
+        if (ObjectUtils.isEmpty(caseData.getHome())) {
             return Collections.emptyMap();
         }
 
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
-        List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
+        List<String> peopleLivingAtThisAddressEnum = isNotEmpty(home.getPeopleLivingAtThisAddress())
+            ? home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
-            .toList();
+            .toList() : new ArrayList<>();
 
-        List<String> familyHomeEnum = home.getFamilyHome().stream()
-            .map(FamilyHomeEnum::getDisplayedValue)
-            .toList();
+        List<String> familyHomeEnum = isNotEmpty(home.getFamilyHome())
+            ? home.getFamilyHome().stream()
+            .map(FamilyHomeEnum::getDisplayedValue).toList() : new ArrayList<>();
 
-        List<String> livingSituationEnum = home.getLivingSituation().stream()
-            .map(LivingSituationEnum::getDisplayedValue)
-            .toList();
+        List<String> livingSituationEnum = isNotEmpty(home.getLivingSituation())
+            ? home.getLivingSituation().stream().map(LivingSituationEnum::getDisplayedValue).toList() : new ArrayList<>();
 
         builder
             .address(home.getAddress())
@@ -1373,7 +1374,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if (home.getMortgages() != null && home.getMortgages().getMortgageNamedAfter() != null) {
+        if (home.getMortgages() != null && isNotEmpty(home.getMortgages().getMortgageNamedAfter())) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -1385,7 +1386,7 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
-        if (home.getLandlords() != null && home.getLandlords().getMortgageNamedAfterList() != null) {
+        if (home.getLandlords() != null && isNotEmpty(home.getLandlords().getMortgageNamedAfterList())) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()

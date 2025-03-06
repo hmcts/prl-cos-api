@@ -106,28 +106,30 @@ public class HwfProcessUpdateCaseStateService {
 
     private void updateCaseStateAndSubmitevent(String event, CaseDetails caseDetails, CaseData caseData) {
         log.info("Going to check service request payment status");
-        ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
-            paymentRequestService.fetchServiceRequestReferenceStatus(
-                systemUserService.getSysUserToken(),
-                caseData.getPaymentServiceRequestReferenceNumber()
-        );
-        log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
-        if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
-            caseDataUpdated.put(DATE_SUBMITTED_FIELD, dateSubmitted);
-            //Save case data
-            allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseDetails.getId().toString(),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataUpdated
-            );
+        log.info("PaymentServiceRequestReferenceNumber - " + caseData.getPaymentServiceRequestReferenceNumber());
+        if (StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
+            ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
+                paymentRequestService.fetchServiceRequestReferenceStatus(
+                    systemUserService.getSysUserToken(),
+                    caseData.getPaymentServiceRequestReferenceNumber());
+            log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+            if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
+                Map<String, Object> caseDataUpdated = new HashMap<>();
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(caseDetails.getId().toString(), event);
+                caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
+                caseDataUpdated.put(DATE_SUBMITTED_FIELD, dateSubmitted);
+                //Save case data
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseDetails.getId().toString(),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated
+                );
+            }
         }
     }
 
@@ -240,15 +242,13 @@ public class HwfProcessUpdateCaseStateService {
                                                        .build())
                                 .build()))
             .build();
-        Must mustFilter = Must.builder().stateFilter(stateFilter).build();
-        return mustFilter;
+        return Must.builder().stateFilter(stateFilter).build();
     }
 
     private Filter getFilter() {
         // Below filter added to reduce the case count, expectation is case payments are processed within 2 days (SLA)
         LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(5).toString()).build();
         Range range = Range.builder().lastModified(lastModified).build();
-        Filter filter = Filter.builder().range(range).build();
-        return filter;
+        return Filter.builder().range(range).build();
     }
 }
