@@ -85,39 +85,6 @@ public class AllTabServiceImpl implements AllTabsService {
         }
     }
 
-    /**
-     * This method updates all tabs based on latest case data from DB.
-     * If additional params needs to be stored, then use getStartAllTabsUpdate
-     * followed by mapAndSubmitAllTabsUpdate.
-     * Use additional data field to add any data to existing data from db
-     * @param caseId it will be used to start the transaction
-     * @return CaseDetails will be returned
-     **/
-    @Override
-    public CaseDetails updateAllTabsIncludingConfTabWithAdditionalData(String caseId, Map<String, Object> additionalData) {
-        if (StringUtils.isNotEmpty(caseId)) {
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
-            log.info("all tab update triggered");
-            Map<String, Object> updatedMap = new HashMap<>();
-            updatedMap.putAll(startAllTabsUpdateDataContent.caseDataMap());
-            updatedMap.putAll(additionalData);
-            log.info("additional data {}", updatedMap);
-            CaseData caseData = objectMapper.convertValue(updatedMap, CaseData.class);
-            log.info("case data state{}", caseData.getState());
-            log.info("case data  payment service req {}", caseData.getPaymentServiceRequestReferenceNumber());
-            return mapAndSubmitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseData
-            );
-        } else {
-            log.error("All tabs update failed as no case found");
-            return null;
-        }
-    }
-
     @Override
     public StartAllTabsUpdateDataContent getStartAllTabsUpdate(String caseId) {
         String systemAuthorisation = systemUserService.getSysUserToken();

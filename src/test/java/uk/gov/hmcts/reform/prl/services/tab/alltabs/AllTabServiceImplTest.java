@@ -145,28 +145,6 @@ public class AllTabServiceImplTest {
     }
 
     @Test
-    public void testUpdateAllTabsIncludingConfTabWithAdditionalData() {
-        CaseDetails returnedCaseDetails = allTabService.updateAllTabsIncludingConfTabWithAdditionalData(caseId, new HashMap<>());
-        assertNotNull(returnedCaseDetails);
-        verify(ccdCoreCaseDataService, Mockito.times(1)).startUpdate(anyString(), any(), anyString(), anyBoolean());
-        verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
-        verify(applicationsTabService, Mockito.times(1)).updateTab(caseData);
-        verify(caseSummaryTabService, Mockito.times(1)).updateTab(caseData);
-        verify(confidentialityTabService, Mockito.times(1)).updateConfidentialityDetails(caseData);
-    }
-
-    @Test
-    public void testUpdateAllTabsIncludingConfTabAdditionalDataWithInvalidCaseId() {
-        CaseDetails returnedCaseDetails = allTabService.updateAllTabsIncludingConfTabWithAdditionalData("", new HashMap<>());
-        assertNull(returnedCaseDetails);
-        verify(ccdCoreCaseDataService, Mockito.never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
-        verify(ccdCoreCaseDataService, Mockito.never()).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
-        verify(applicationsTabService, Mockito.never()).updateTab(caseData);
-        verify(caseSummaryTabService, Mockito.never()).updateTab(caseData);
-        verify(confidentialityTabService, Mockito.never()).updateConfidentialityDetails(caseData);
-    }
-
-    @Test
     public void testGetStartUpdateForSpecificEvent() {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, eventName);
         assertNotNull(startAllTabsUpdateDataContent);

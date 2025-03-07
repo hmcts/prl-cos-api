@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,12 +35,11 @@ import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.
 @RestController
 @RequiredArgsConstructor
 public class BulkScanController {
-    private final AllTabServiceImpl allTabsService;
     private final PaymentRequestService paymentRequestService;
     private final AuthorisationService authorisationService;
 
 
-    @PostMapping(path = "/bulkscan-case-submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/bsp-service-request/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to refresh the tabs")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse bulkScanCaseSubmission(
@@ -57,11 +55,9 @@ public class BulkScanController {
                 authorisation
             );
             log.info("Case state in call back {}", callbackRequest.getCaseDetails().getState());
-            log.info("Payment service response: {}", paymentServiceResponse);
             log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
             dataMap.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
-            allTabsService.updateAllTabsIncludingConfTabWithAdditionalData(
-                String.valueOf(callbackRequest.getCaseDetails().getId()), dataMap);
+            log.info("Payment service response: {}", dataMap);
             return AboutToStartOrSubmitCallbackResponse.builder().data(dataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
