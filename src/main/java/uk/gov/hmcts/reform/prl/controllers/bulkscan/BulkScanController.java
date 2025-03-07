@@ -56,6 +56,7 @@ public class BulkScanController {
                 callbackRequest,
                 authorisation
             );
+            log.info("Case state in call back {}", callbackRequest.getCaseDetails().getState());
             log.info("Payment service response: {}", paymentServiceResponse);
             log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
             dataMap.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
