@@ -227,6 +227,7 @@ public class HwfProcessUpdateCaseStateService {
     private QueryParam getQueryParam(Bool finalFilter) {
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
+            .size("100")
             .dataToReturn(List.of(
                 "data.caseCreatedBy",
                 "data.helpWithFeesNumber",
