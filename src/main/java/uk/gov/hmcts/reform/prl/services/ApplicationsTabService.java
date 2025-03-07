@@ -820,7 +820,8 @@ public class ApplicationsTabService implements TabService {
                 .collect(Collectors.joining(", "));
 
             OtherProceedingsDetails otherProceedingsDetails = OtherProceedingsDetails.builder()
-                .previousOrOngoingProceedings(p.getPreviousOrOngoingProceedings().getDisplayedValue())
+                .previousOrOngoingProceedings(null != p.getPreviousOrOngoingProceedings()
+                                                  ? p.getPreviousOrOngoingProceedings().getDisplayedValue() : null)
                 .caseNumber(p.getCaseNumber())
                 .dateStarted(p.getDateStarted())
                 .dateEnded(p.getDateEnded())
