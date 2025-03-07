@@ -329,12 +329,6 @@ public class ManageOrderEmailService {
                                                        bulkPrintOrderDetails
                 );
             }
-            //PRL-4225 - send order & additional docs to other people via post only
-            if (isNotEmpty(manageOrders.getOtherParties())) {
-                serveOrderToOtherPersons(authorisation,
-                                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
-                );
-            }
             //Send email notification to Cafcass or Cafcass cymru based on selection
             String cafcassCymruEmailId = getCafcassCymruEmail(manageOrders);
             if (cafcassCymruEmailId != null) {
@@ -355,6 +349,13 @@ public class ManageOrderEmailService {
             log.info("Send notifications for FL401 parties");
             handleFL401ServeOrderNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                bulkPrintOrderDetails, otherOrganisationEmailList, otherOrganisationPostList);
+        }
+        //PRL-4144 - Other people enabled for FL401 FGM/FMPO edge cases
+        //PRL-4225 - send order & additional docs to other people via post only
+        if (isNotEmpty(manageOrders.getOtherParties())) {
+            serveOrderToOtherPersons(authorisation,
+                                     manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
+            );
         }
         // Send email notification to other organisations
         if (!otherOrganisationEmailList.isEmpty()) {
