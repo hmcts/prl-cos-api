@@ -98,9 +98,11 @@ public class AllTabServiceImpl implements AllTabsService {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             log.info("all tab update triggered");
-            startAllTabsUpdateDataContent.caseDataMap().putAll(additionalData);
-            log.info("additional data {}", startAllTabsUpdateDataContent.caseDataMap());
-            CaseData caseData = objectMapper.convertValue(startAllTabsUpdateDataContent.caseDataMap(), CaseData.class);
+            Map<String, Object> updatedMap = new HashMap<>();
+            updatedMap.putAll(startAllTabsUpdateDataContent.caseDataMap());
+            updatedMap.putAll(additionalData);
+            log.info("additional data {}", updatedMap);
+            CaseData caseData = objectMapper.convertValue(updatedMap, CaseData.class);
             log.info("case data state{}", caseData.getState());
             log.info("case data  payment service req {}", caseData.getPaymentServiceRequestReferenceNumber());
             return mapAndSubmitAllTabsUpdate(
