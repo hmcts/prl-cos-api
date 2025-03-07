@@ -436,7 +436,7 @@ public class CallbackController {
             if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 courtList = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
                     ? locationRefDataService.getFilteredCourtLocations(authorisation) :
-                    locationRefDataService.getDaFilteredCourtLocations(authorisation);
+                    locationRefDataService.getDaFilteredCourtLocations(authorisation, caseData);
             } else {
                 courtList = locationRefDataService.getCourtLocations(authorisation);
             }
