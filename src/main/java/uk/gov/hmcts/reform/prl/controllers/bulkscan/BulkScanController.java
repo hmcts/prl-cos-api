@@ -68,7 +68,7 @@ public class BulkScanController {
         }
     }
 
-    @PostMapping(path = "/bulkscan/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/bulkscan/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to submit callback for Process Urgent Help with Fees event.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -86,8 +86,6 @@ public class BulkScanController {
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE
                 .format(ZonedDateTime.now(ZoneId.of("Europe/London"))));
             log.info("case status updated {}", caseDataUpdated);
-            allTabsService.updateAllTabsIncludingConfTabWithAdditionalData(
-                String.valueOf(callbackRequest.getCaseDetails().getId()), caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
