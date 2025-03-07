@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,10 +10,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,13 +43,12 @@ public class LocationRefDataServiceTest {
     private LocationRefDataService locationRefDataService;
 
     @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
     private LocationRefDataApi locationRefDataApi;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
+    private CaseData caseData;
 
     @Before
     public void setUp() {
@@ -55,6 +56,9 @@ public class LocationRefDataServiceTest {
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
         ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "1:email,2:email,3:email,4:email");
         ReflectionTestUtils.setField(locationRefDataService,"caDefaultCourtEpimmsID", "12345");
+        ReflectionTestUtils.setField(locationRefDataService,"edgeCasesFgmFmpoCourtsToFilter", "12345");
+
+        caseData = CaseData.builder().build();
     }
 
     @Test
@@ -78,7 +82,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test
@@ -86,7 +90,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
-        assertNull(courtLocations.get(0).getCode());
+        assertNull(courtLocations.getFirst().getCode());
     }
 
     @Test
@@ -223,7 +227,7 @@ public class LocationRefDataServiceTest {
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
-        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
         assertNotNull(test);
     }
 
@@ -241,7 +245,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
-        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
         assertNotNull(test);
     }
 
@@ -250,7 +254,7 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(null);
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
-        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
         assertNotNull(test);
     }
 
@@ -313,5 +317,58 @@ public class LocationRefDataServiceTest {
         assertEquals("CTSC Stoke", caseManagementLocation.getBaseLocationName());
         assertEquals(MIDLANDS, caseManagementLocation.getRegionName());
         assertEquals("2", caseManagementLocation.getRegion());
+    }
+
+    @Test
+    public void testFilterEdgeCaseCourtsList() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("12345")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        caseData = caseData.toBuilder()
+            .dssCaseDetails(DssCaseDetails.builder()
+                                .edgeCaseTypeOfApplication(EdgeCaseTypeOfApplicationEnum.FGM)
+                                .build())
+            .build();
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilterEdgeCaseCourtsListWithNoMatchingCourts() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("12345")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        caseData = caseData.toBuilder()
+            .dssCaseDetails(DssCaseDetails.builder()
+                                .edgeCaseTypeOfApplication(EdgeCaseTypeOfApplicationEnum.FMPO)
+                                .build())
+            .build();
+        ReflectionTestUtils.setField(locationRefDataService,"edgeCasesFgmFmpoCourtsToFilter", "123");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilterEdgeCaseCourtsListWhenRefDataApiFails() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenThrow(NullPointerException.class);
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilterEdgeCaseCourtsListWithEmptyCourtList() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(null);
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
+        assertNotNull(test);
     }
 }

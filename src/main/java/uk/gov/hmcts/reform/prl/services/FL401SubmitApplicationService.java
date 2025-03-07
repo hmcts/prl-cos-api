@@ -122,7 +122,7 @@ public class FL401SubmitApplicationService {
 
         // Work Allocation court list
         List<DynamicListElement> workAllocationEnabledCourtList;
-        workAllocationEnabledCourtList = locationRefDataService.getDaFilteredCourtLocations(authorisation);
+        workAllocationEnabledCourtList = locationRefDataService.getDaFilteredCourtLocations(authorisation, caseData);
         if (workAllocationEnabledCourtList.stream()
             .noneMatch(workAllocationEnabledCourt -> workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(COURT_ID_FIELD))))) {

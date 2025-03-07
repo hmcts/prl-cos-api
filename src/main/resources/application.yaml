@@ -224,7 +224,7 @@ payments:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data,ds-ui}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -379,6 +379,55 @@ fees-register:
       jurisdiction2: family court
       keyword: GeneralAppWithoutNotice
       service: other
+    PARENTAL_ORDER:
+      channel: default
+      event: issue
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: AppnParent
+      service: other
+    SPECIAL_GUARDIANSHIP_ORDER:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: SpecialGuardian
+      service: private law
+    DECLARATION_OF_PARENTAGE:
+      channel: default
+      event: issue
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: Private
+      service: other
+    PARENTAL_RESPONSIBILITY:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ParentalResponsibility
+      service: private law
+    PARENTAL_RESPONSIBILITY_SECOND_FEMALE_PARENT:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ParentalResponsibChg
+      service: private law
+    APPOINTING_CHILD_GUARDIAN:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: Guardians
+      service: private law
+    CHANGE_CHILD_SURNAME:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ResidenceChildChange
+      service: private law
 # NEW BELOW THIS LINE
 
 idam:
@@ -752,7 +801,7 @@ courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
   caDefaultCourtEpimmsID: ${CA_DEFAULT_COURT_EPIMMS_ID:}
-
+  edgeCaseCourtList: ${EDGE_CASE_COURT_LIST:}
 fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
