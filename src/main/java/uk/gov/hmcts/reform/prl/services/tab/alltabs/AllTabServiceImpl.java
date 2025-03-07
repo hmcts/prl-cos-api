@@ -102,6 +102,7 @@ public class AllTabServiceImpl implements AllTabsService {
             log.info("additional data {}", startAllTabsUpdateDataContent.caseDataMap());
             CaseData caseData = objectMapper.convertValue(startAllTabsUpdateDataContent.caseDataMap(), CaseData.class);
             log.info("case data state{}", caseData.getState());
+            log.info("case data  payment service req {}", caseData.getPaymentServiceRequestReferenceNumber());
             return mapAndSubmitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
