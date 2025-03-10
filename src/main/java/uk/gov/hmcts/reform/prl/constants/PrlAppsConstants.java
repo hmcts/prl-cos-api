@@ -905,9 +905,10 @@ public class PrlAppsConstants {
     public static final String DA_APPLICANT = "DAAPPLICANT";
     public static final String CA_RESPONDENT = "CARESPONDENT";
     public static final String DA_RESPONDENT = "DARESPONDENT";
-    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
-    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+    public static final String SOS_CONFIRMATION_HEADER = "# Cais wedi’i gyflwyno<br/>Application was served";
+    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### Beth fydd yn digwydd nesaf <br/>What happens next \n\n "
         + System.lineSeparator()
+        + "Os yw Cafcass yn rhan o’r achos, byddant yn darparu llythyr diogelu i’r llys.<br/>"
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
@@ -949,6 +950,9 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+
+    public static final String MANDATORY_JUDGE_WELSH =
+        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser - welsh";
     public static final String DUMMY = "Dummy";
 
 
@@ -961,14 +965,20 @@ public class PrlAppsConstants {
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
+    public static final String MANDATORY_MAGISTRATE_WELSH = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+        + " Magistrates - welsh";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
+    public static final String ORDER_NOT_AVAILABLE_FL401_WELSH = "This order is not available to be created for FL401 cases - welsh";
 
     public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
         + "upload an order, as this case has multiple applicants or respondents.";
+
+    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH = "You need to go back to the previous screen and "
+        + "upload an order, as this case has multiple applicants or respondents. - welsh";
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
@@ -1108,5 +1118,7 @@ public class PrlAppsConstants {
 
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
 
 }

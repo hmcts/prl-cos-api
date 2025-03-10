@@ -211,10 +211,24 @@ public class CallbackController {
     public ResponseEntity<CallbackResponse> validateMiamApplicationOrExemption(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
+
+            if (PrlAppsConstants.WELSH.equals(CaseUtils.getLanguage(clientContext))
+                && (isNotEmpty(workflowResult.getErrors()))) {
+                List<String> errorlist = new ArrayList<>();
+                errorlist
+                    .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
+                return ok(
+                    AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorlist)
+                        .build()
+                );
+            }
+
 
             return ok(
                 AboutToStartOrSubmitCallbackResponse.builder()
