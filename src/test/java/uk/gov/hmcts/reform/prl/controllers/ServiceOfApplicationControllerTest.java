@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -74,7 +75,7 @@ public class ServiceOfApplicationControllerTest {
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
 
-        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class), Mockito.anyString()))
             .thenReturn(caseData);
         assertNotNull(serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest).getData());
     }
@@ -110,7 +111,7 @@ public class ServiceOfApplicationControllerTest {
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
                     "").build()));
-        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest));
+        assertThrows(InvalidClientException.class, () -> serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class ServiceOfApplicationControllerTest {
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
                     "").build()));
-        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken,s2sToken,callbackRequest));
+        assertThrows(InvalidClientException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken, s2sToken, callbackRequest));
     }
 
     @Test
@@ -142,7 +143,7 @@ public class ServiceOfApplicationControllerTest {
                 SubmittedCallbackResponse.builder().confirmationHeader(
                     "").confirmationBody(
                     "").build()));
-        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+        assertThrows(InvalidClientException.class, () -> serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
     }
 
     @Test
@@ -161,7 +162,7 @@ public class ServiceOfApplicationControllerTest {
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         assertExpectedException(() -> {
             serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        }, InvalidClientException.class, "Invalid Client");
     }
 
     @Test
@@ -206,7 +207,7 @@ public class ServiceOfApplicationControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
             serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        }, InvalidClientException.class, "Invalid Client");
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,8 +46,6 @@ public class ServiceOfApplicationEmailService {
 
     private final SendgridService sendgridService;
 
-    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
         sendGovNotifyEmail(
             LanguagePreference.english,
@@ -60,7 +58,8 @@ public class ServiceOfApplicationEmailService {
             .servedParty(servedParty)
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                           .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)))).build();
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseData caseData) {
@@ -93,11 +92,12 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                   .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                     .build();
             }
-        } catch (IOException e) {
-            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
+        } catch (SendGridNotificationException e) {
+            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
         }
         log.error("there is a failure in sending email for party {}", servedParty);
         return null;
@@ -105,7 +105,7 @@ public class ServiceOfApplicationEmailService {
 
     public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
                                                                           String email,
-                                                                          List<Document> docs,String servedParty) throws IOException {
+                                                                          List<Document> docs,String servedParty) {
         Map<String, Object> combinedMap = new HashMap<>();
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseReference", String.valueOf(caseData.getId()));
@@ -127,11 +127,12 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                   .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)))).build();
             }
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
-                      email, e.getMessage(), e
+                      email, e.getMessage()
             );
         }
         return null;

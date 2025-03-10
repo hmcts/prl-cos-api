@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
@@ -12,7 +13,9 @@ import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,10 +29,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 
 @Service
 @Slf4j
@@ -81,6 +86,12 @@ public class C100IssueCaseService {
                 .build();
         }
 
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            caseData = caseData.toBuilder().loggedInUserRole("CITIZEN").build();
+        } else {
+            caseData = caseData.toBuilder().loggedInUserRole("SOLICITOR").build();
+        }
+
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
@@ -88,6 +99,18 @@ public class C100IssueCaseService {
         // Getting the tab fields and add it to the casedetails..
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
+        // Check if the selected court is Work Allocation enabled.
+        String chosenCourtId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
+        List<DynamicListElement> courtListWorkAllocated = locationRefDataService.getFilteredCourtLocations(authorisation);
+        if (courtListWorkAllocated.stream()
+            .noneMatch(workAllocationEnabledCourt ->
+                           workAllocationEnabledCourt.getCode().split(COLON_SEPERATOR)[0]
+                               .equalsIgnoreCase(chosenCourtId))) {
+            caseDataUpdated.put("isNonWorkAllocationEnabledCourtSelected", "Yes");
+            caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
+                .state(PROCEEDS_IN_HERITAGE_SYSTEM.getLabel())
+                .build());
+        }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
         return caseDataUpdated;
     }

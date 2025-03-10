@@ -56,10 +56,10 @@ public class AllocatedJudgeDetailsGeneratorTest {
     public void testGenerateWhenTierOfJudiciaryDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-                .tierOfJudiciary(TierOfJudiciaryEnum.CIRCUIT_JUDGE).build()).build());
+                .tierOfJudiciary(TierOfJudiciaryEnum.circuitJudge).build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
-            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue())
+            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.circuitJudge.getDisplayedValue())
                 .emailAddress(" ").lastName(" ").isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
                 .courtName("Test Court")
                 .tierOfJudge(EMPTY_STRING)

@@ -89,6 +89,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
@@ -96,10 +97,10 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
@@ -475,14 +476,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     /**
      * Send and reply to messages.
      */
-    @JsonProperty("openMessages")
-    private final List<Element<Message>> openMessages;
 
-    @JsonProperty("closedMessages")
-    private final List<Element<Message>> closedMessages;
+    @JsonUnwrapped
+    SendOrReplyDto sendOrReplyDto;
 
-    @JsonProperty("messageObject")
-    MessageMetaData messageMetaData;
     String messageContent;
     Object replyMessageDynamicList;
     Message messageReply;
@@ -518,7 +515,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     private final List<Element<Document>> fl401UploadWitnessDocuments;
     private final List<Element<Document>> fl401UploadSupportDocuments;
-
     /**
      * Send to Gatekeeper.
      */
@@ -793,14 +789,18 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
+    /**
+     * PRL-4044 - This is store citizen awp payment data for temp & will be removed once awp is submitted successfully.
+     */
+    @JsonProperty("citizenAwpPayments")
+    private List<Element<CitizenAwpPayment>> citizenAwpPayments;
+
     //For case documents tab
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
     @JsonUnwrapped
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
-    //Amend Draft order
-    private String removeDraftOrderText;
-
-    private Object removeDraftOrdersDynamicList;
+    @JsonUnwrapped
+    private RemoveDraftOrderFields removeDraftOrderFields;
 }

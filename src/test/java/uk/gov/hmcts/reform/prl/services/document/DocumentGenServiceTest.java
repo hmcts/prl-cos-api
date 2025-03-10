@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -19,21 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
-import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -48,7 +41,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
@@ -60,29 +52,19 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
-import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
-import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +76,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -110,9 +91,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -128,13 +111,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -170,9 +153,6 @@ public class DocumentGenServiceTest {
     @Mock
     OrganisationService organisationService;
 
-    @Mock
-    DeleteDocumentService deleteDocumentService;
-
     @InjectMocks
     DocumentGenService documentGenService;
 
@@ -181,9 +161,6 @@ public class DocumentGenServiceTest {
 
     @Mock
     DgsApiClient dgsApiClient;
-
-    @Mock
-    IdamClient idamClient;
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
@@ -215,34 +192,12 @@ public class DocumentGenServiceTest {
     CaseData fl401CaseData;
     CaseData fl401CaseData1;
     CaseData c100CaseDataNotIssued;
-    PartyDetails partyDetails;
     AllegationOfHarm allegationOfHarmYes;
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
     MockMultipartFile file;
 
     private DocumentRequest documentRequest;
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private CaseService caseService;
-
-    @Mock
-    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-
-    @Mock
-    AllTabServiceImpl allTabService;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private ManageDocumentsService manageDocumentsService;
-
-    private Document caseDoc;
-    private QuarantineLegalDoc quarantineCaseDoc;
-
 
     @Before
     public void setUp() {
@@ -469,19 +424,6 @@ public class DocumentGenServiceTest {
         ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
         ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
         ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
-        ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
-
-        doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(), any(), any(), any());
-        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(
-            any(),
-            any(),
-            any(),
-            any(),
-            any()
-        );
-        doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
-        doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(), any());
-        doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(), any(), any(), any());
 
         documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -491,20 +433,6 @@ public class DocumentGenServiceTest {
             .partyType("applicant")
             .restrictDocumentDetails("test details")
             .freeTextStatements("free text to generate document")
-            .build();
-
-        caseDoc = Document.builder()
-            .documentFileName("test.pdf")
-            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
-            .documentBinaryUrl(null)
-            .documentHash(null)
-            .categoryId(null)
-            .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))
-            .build();
-
-        quarantineCaseDoc = QuarantineLegalDoc.builder()
-            .categoryId("positionStatements")
-            .positionStatementsDocument(caseDoc)
             .build();
     }
 
@@ -635,7 +563,8 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -646,7 +575,8 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateDraftDocumentWelsh() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -2887,6 +2817,68 @@ public class DocumentGenServiceTest {
         }, InvalidResourceException.class, "Doc name FL401-Final.docx");
     }
 
+    // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
+    @Test
+    public void testForConvertToPdfFeignException() {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
+            .thenThrow(FeignException.class);
+
+        assertExpectedException(() -> {
+            documentGenService.convertToPdf(authToken, document);
+        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+            + "because \"generatedDocumentInfo\" is null");
+    }
+
+    @Test
+    public void testForConvertToPdfRuntimeException() {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
+            .thenThrow(RuntimeException.class);
+
+        assertExpectedException(() -> {
+            documentGenService.convertToPdf(authToken, document);
+        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+                                    + "because \"generatedDocumentInfo\" is null");
+    }
 
     @Test
     public void testUploadDocument() throws Exception {
@@ -2950,127 +2942,6 @@ public class DocumentGenServiceTest {
         assertNotNull(documentResponse);
         assertNotNull(documentResponse.getDocument());
         assertEquals(SUCCESS, documentResponse.getStatus());
-    }
-
-    @Test
-    public void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
-        //Given
-        documentRequest = documentRequest.toBuilder()
-            .isConfidential(Yes)
-            .isRestricted(Yes)
-            .restrictDocumentDetails("test")
-            .documents(List.of(Document.builder().build())).build();
-
-        CaseData caseData = CaseData.builder()
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .reviewDocuments(ReviewDocuments.builder().build())
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .build();
-
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                         EventRequestData.builder().build(),
-                                                                                                         StartEventResponse.builder().build(),
-                                                                                                         stringObjectMap,
-                                                                                                         caseData,
-                                                                                                         null
-        );
-
-        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
-            startAllTabsUpdateDataContents);
-        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
-            quarantineCaseDoc);
-        when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
-                                                                 .roles(List.of(Roles.CITIZEN.getValue())).build());
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
-
-        //Action
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
-            authToken,
-            documentRequest
-        );
-
-        assertNotNull(caseDetails);
-        assertNotNull(caseDetailsUpdated);
-        assertNotNull(caseDetailsUpdated.getData());
-    }
-
-    @Test
-    public void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
-        //Given
-        documentRequest = documentRequest.toBuilder()
-            .categoryId("FM5_STATEMENTS")
-            .isConfidential(No)
-            .isRestricted(No)
-            .restrictDocumentDetails("test")
-            .documents(List.of(caseDoc)).build();
-        CaseData caseData = CaseData.builder()
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .reviewDocuments(ReviewDocuments.builder().build())
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .build();
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-            .id(123L)
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-
-        //When
-        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("fm5StatementsDocument", caseDoc);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc
-            .builder()
-            .hasTheConfidentialDocumentBeenRenamed(
-                YesOrNo.No)
-            .isConfidential(null)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentUrl("00000000-0000-0000-0000-000000000000")
-                          .documentFileName("test")
-                          .build())
-            .isRestricted(null)
-            .restrictedDetails(null)
-            .categoryId("test")
-            .uploaderRole("Citizen")
-            .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
-            quarantineLegalDoc);
-        when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
-                                                                 .roles(List.of(Roles.CITIZEN.getValue())).build());
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents = new StartAllTabsUpdateDataContent(
-            authToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            stringObjectMap,
-            caseData,
-            null
-        );
-        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
-            startAllTabsUpdateDataContents);
-
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
-
-        //Action
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
-            authToken,
-            documentRequest
-        );
-
-        //Then
-        assertNotNull(caseDetails);
-        //CORRECT ASSERTIONS LATER
-        assertNotNull(caseDetailsUpdated);
-        assertNotNull(caseDetailsUpdated.getData());
-
     }
 
     @Test
@@ -3164,7 +3035,79 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
     }
+
+    @Test
+    public void testSendReplyMessageTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageTemplate", "send_reply_message_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, false);
+
+        assertNotNull(template);
+        assertEquals("send_reply_message_letter_en", template);
+    }
+
+    @Test
+    public void testCitizenDocumentC1aDraftHintWelsh() {
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "solicitorC1ADraftWelshTemplate",
+            "citizen_c1a_wel"
+        );
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("citizen_c1a_wel", template);
+    }
+
+    @Test
+    public void testCitizenDocumentC1aDraftHintEnglish() {
+        ReflectionTestUtils.setField(
+            documentGenService,
+            "solicitorC1ADraftTemplate",
+            "citizen_c1a_wel"
+        );
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("citizen_c1a_wel", template);
+    }
+
+    @Test
+    public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
+        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+
+    @Test
+    public void testSendReplyMessageTemplateWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageWelshTemplate", "send_reply_message_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, true);
+
+        assertNotNull(template);
+        assertEquals("send_reply_message_letter_wel", template);
+    }
+
+    @Test
+    public void testC8RespFL401FinalHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8Template", "fl401_resp_c8_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("fl401_resp_c8_letter_en", template);
+    }
+
+    @Test
+    public void testC8RespFL401FinalHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8TemplateWelsh", "fl401_resp_c8_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_FINAL_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("fl401_resp_c8_letter_wel", template);
+    }
 }
-
-
-

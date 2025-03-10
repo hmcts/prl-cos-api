@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,12 +33,13 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
+    private final UserRoleService userRoleService;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
-                                                  Map<String, Object> dataMap) throws Exception {
+                                                  Map<String, Object> dataMap) throws DocumentGenerationException {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
@@ -45,6 +47,9 @@ public class DgsService {
                     .builder().template(templateName).values(dataMap).build()
                 );
 
+        } catch (FeignException ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -52,11 +57,16 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
-    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+        }
+        if (null == caseData.getLoggedInUserRole()) {
+            caseDetails.setCaseData(caseData.toBuilder().loggedInUserRole(userRoleService
+                .getLoggedInUserType(authorisation)).build());
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         //PRL-4981 - Populate applicants/respondents & representing solicitors names
@@ -73,8 +83,7 @@ public class DgsService {
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
-
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
@@ -82,25 +91,27 @@ public class DgsService {
     }
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
-                                                       Map<String, Object> dataMap) throws Exception {
+                                                       Map<String, Object> dataMap) {
 
-        dataMap.forEach((k, v) -> {
+        Map<String, Object> welshDataMap = new HashMap<>();
+        welshDataMap.putAll(dataMap);
+        welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseTypeOfApplication)
                 );
-                dataMap.put(k, updatedWelshObj);
+                welshDataMap.put(k, updatedWelshObj);
             }
         });
-
         return generateDocument(authorisation, caseId, templateName,
-                                dataMap
+                                welshDataMap
         );
     }
 
-    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
 
         CaseData caseData = caseDetails.getCaseData();
@@ -136,7 +147,7 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
@@ -198,10 +209,11 @@ public class DgsService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation,
-                                              GenerateDocumentRequest.builder()
-                                                  .template(prlCitizenUploadTemplate)
-                                                  .values(tempCaseDetails).build()
+                dgsApiClient.generateDocument(
+                    authorisation,
+                    GenerateDocumentRequest.builder()
+                        .template(prlCitizenUploadTemplate)
+                        .values(tempCaseDetails).build()
                 );
 
         } catch (Exception ex) {

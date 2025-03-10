@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
@@ -50,7 +51,7 @@ public class ServiceOfApplicationController {
                                                                            .getSoaCaseFieldsMap(authorisation,
                 callbackRequest.getCaseDetails())).build();
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
@@ -66,9 +67,9 @@ public class ServiceOfApplicationController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
-                callbackRequest)).build();
+                callbackRequest, authorisation)).build();
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
@@ -81,12 +82,12 @@ public class ServiceOfApplicationController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) throws InvalidClientException {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
@@ -103,7 +104,7 @@ public class ServiceOfApplicationController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return serviceOfApplicationService.soaValidation(callbackRequest);
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 }

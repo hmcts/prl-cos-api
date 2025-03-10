@@ -91,7 +91,6 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("Qualified cases meeting all system rules {}", qualifiedCasesAndPartiesBeforeHearing);
 
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
@@ -275,7 +274,7 @@ public class Fm5ReminderService {
                 SearchResultResponse.class
             );
         } catch (JsonProcessingException e) {
-            log.error("Exception happened in parsing query param ", e);
+            log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
         if (null != response) {
@@ -320,6 +319,8 @@ public class Fm5ReminderService {
 
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
+            //Revert to default size 100 cases
+            .size("100")
             .build();
     }
 

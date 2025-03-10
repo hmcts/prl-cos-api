@@ -88,7 +88,7 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
         Optional<YesOrNo> isDateOfBirthKnown = ofNullable(applicant.getIsDateOfBirthKnown());
-        if (!isDateOfBirthKnown.isEmpty() && Yes.equals(isDateOfBirthKnown.get())) {
+        if (isDateOfBirthKnown.isPresent() && Yes.equals(isDateOfBirthKnown.get())) {
             fields.add(ofNullable(applicant.getDateOfBirth()));
         }
         Optional<Gender> gender = ofNullable(applicant.getGender());
@@ -97,13 +97,33 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
         Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(applicant.getIsPlaceOfBirthKnown());
-        if (!isPlaceOfBirthKnown.isEmpty() && Yes.equals(isPlaceOfBirthKnown.get())) {
+        if (isPlaceOfBirthKnown.isPresent() && Yes.equals(isPlaceOfBirthKnown.get())) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
+        validateAddress(applicant, fields);
+
+        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
+        fields.add(canYouProvideEmailAddress);
+        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
+            fields.add(ofNullable(applicant.getEmail()));
+        }
+        Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(applicant.getCanYouProvidePhoneNumber());
+        if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
+            fields.add(ofNullable(applicant.getPhoneNumber()));
+        }
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    }
+
+    private static void validateAddress(PartyDetails applicant, List<Optional<?>> fields) {
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(applicant.getIsCurrentAddressKnown());
-        if (!isCurrentAddressKnown.isEmpty() && Yes.equals(isCurrentAddressKnown.get())) {
+        if (isCurrentAddressKnown.isPresent() && Yes.equals(isCurrentAddressKnown.get())) {
+            Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
+            fields.add(liveInRefuge);
+            if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
+                fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
+            }
             fields.add(ofNullable(applicant.getAddress()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
 
         Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
@@ -111,20 +131,6 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
         }
-
-        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
-        fields.add(canYouProvideEmailAddress);
-        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
-            fields.add(ofNullable(applicant.getEmail()));
-            fields.add(ofNullable(applicant.getIsEmailAddressConfidential()));
-        }
-        Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(applicant.getCanYouProvidePhoneNumber());
-        if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
-            fields.add(ofNullable(applicant.getPhoneNumber()));
-            fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
-        }
-        return fields.stream().noneMatch(Optional::isEmpty)
-            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
     public boolean verifyAddressCompleted(Address address) {
