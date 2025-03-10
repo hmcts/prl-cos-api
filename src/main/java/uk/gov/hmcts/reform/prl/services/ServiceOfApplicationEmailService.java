@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -96,7 +96,7 @@ public class ServiceOfApplicationEmailService {
                                    .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                     .build();
             }
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
         }
         log.error("there is a failure in sending email for party {}", servedParty);
@@ -105,7 +105,7 @@ public class ServiceOfApplicationEmailService {
 
     public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
                                                                           String email,
-                                                                          List<Document> docs,String servedParty) throws IOException {
+                                                                          List<Document> docs,String servedParty) {
         Map<String, Object> combinedMap = new HashMap<>();
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseReference", String.valueOf(caseData.getId()));
@@ -130,7 +130,7 @@ public class ServiceOfApplicationEmailService {
                     .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                                    .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)))).build();
             }
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
                       email, e.getMessage()
             );
