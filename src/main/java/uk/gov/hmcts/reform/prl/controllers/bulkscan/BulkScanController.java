@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,12 +35,11 @@ import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.
 @RestController
 @RequiredArgsConstructor
 public class BulkScanController {
-    private final AllTabServiceImpl allTabsService;
     private final PaymentRequestService paymentRequestService;
     private final AuthorisationService authorisationService;
 
 
-    @PostMapping(path = "/bulkscan-case-submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/bsp-service-request/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to refresh the tabs")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse bulkScanCaseSubmission(
@@ -49,24 +47,24 @@ public class BulkScanController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
-            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
+            Map<String, Object> dataMap = callbackRequest.getCaseDetails().getData();
+            dataMap.put("id", callbackRequest.getCaseDetails().getId());
+            callbackRequest.setCaseDetails(callbackRequest.getCaseDetails().toBuilder().data(dataMap).build());
             PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                 callbackRequest,
                 authorisation
             );
-            log.info("Payment service response: {}", paymentServiceResponse);
+            log.info("Case state in call back {}", callbackRequest.getCaseDetails().getState());
             log.info("Payment service request reference number: {}", paymentServiceResponse.getServiceRequestReference());
-            caseDataUpdated.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
-            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            dataMap.put("paymentServiceRequestReferenceNumber", paymentServiceResponse.getServiceRequestReference());
+            log.info("Payment service response: {}", dataMap);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(dataMap).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
-    @PostMapping(path = "/bulkscan/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/bulkscan/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to submit callback for Process Urgent Help with Fees event.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -83,6 +81,7 @@ public class BulkScanController {
                 .build());
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE
                 .format(ZonedDateTime.now(ZoneId.of("Europe/London"))));
+            log.info("case status updated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
