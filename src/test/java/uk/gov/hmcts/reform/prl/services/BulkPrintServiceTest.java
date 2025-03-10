@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.BulkPrintException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -177,7 +178,7 @@ public class BulkPrintServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         assertThrows(
-            NullPointerException.class,
+            BulkPrintException.class,
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
@@ -219,7 +220,7 @@ public class BulkPrintServiceTest {
     @Test
     public void sendLetterServiceWithInValidInput() {
         assertThrows(
-            NullPointerException.class,
+            BulkPrintException.class,
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
