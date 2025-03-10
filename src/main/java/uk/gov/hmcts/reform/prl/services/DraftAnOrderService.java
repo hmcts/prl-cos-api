@@ -215,7 +215,7 @@ public class DraftAnOrderService {
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private static final String ORDER_NAME = "orderName";
     private static final String MANAGE_ORDER_SDO_FAILURE
-        = "Failed to update SDO order details";
+        = "Failed to parse SDO order details";
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
