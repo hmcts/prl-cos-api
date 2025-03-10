@@ -5013,7 +5013,10 @@ public class ManageOrderServiceTest {
             .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
+            .manageOrders(manageOrders)/*
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoNewPartnerPartiesCafcass(DynamicMultiSelectList.builder().build())
+                                        .build())*/
             .build();
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

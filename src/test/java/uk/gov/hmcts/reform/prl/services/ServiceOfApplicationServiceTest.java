@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -78,7 +79,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2629,7 +2629,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
@@ -2736,7 +2736,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -3780,7 +3780,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForLa() throws Exception {
+    public void testSendNotificationForLa() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3862,7 +3862,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForLaWithException() throws Exception {
+    public void testSendNotificationForLaWithException() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3917,7 +3917,8 @@ public class ServiceOfApplicationServiceTest {
                                                                    .surname("test").build());
         when(serviceOfApplicationEmailService
                  .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
-                                                        Mockito.any(),Mockito.anyString())).thenThrow(IOException.class);
+                                                        Mockito.any(),Mockito.anyString())).thenThrow(
+            SendGridNotificationException.class);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             TEST_AUTH,
@@ -4136,7 +4137,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {

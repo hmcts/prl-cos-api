@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,7 +82,7 @@ public class LocationRefDataServiceTest {
     @Test
     public void testgetCourtDetailsWithException() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
-            .thenThrow(NullPointerException.class);
+            .thenThrow(FeignException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
         assertNull(courtLocations.getFirst().getCode());
     }

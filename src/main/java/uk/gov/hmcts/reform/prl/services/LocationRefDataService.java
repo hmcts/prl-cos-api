@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +62,7 @@ public class LocationRefDataService {
             return onlyEnglandAndWalesLocations(courtDetails).stream()
                 .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
                 .toList();
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
