@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -424,10 +423,13 @@ public class ManageOrderEmailService {
                                                             List<Document> orderDocuments,
                                                             Map<String, Object> dynamicDataForEmail) {
 
-        List<Element<PartyDetails>> partyList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
-                                                                      caseData.getApplicantsFL401()),
-                                                              element(caseData.getRespondentsFL401().getPartyId(),
-                                                                      caseData.getRespondentsFL401()));
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        partyList.add(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()));
+        //PRL-4144 - Fix potential NPE for FGM/FMPO edge cases
+        if (null != caseData.getRespondentsFL401()) {
+            partyList.add(element(caseData.getRespondentsFL401().getPartyId(),
+                                  caseData.getRespondentsFL401()));
+        }
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
                                              partyList,
@@ -681,14 +683,17 @@ public class ManageOrderEmailService {
                                                 orderDocuments
             );
             //respondents
-            sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
-                                                caseData.getRespondents(),
-                                                caseData,
-                                                authorisation,
-                                                dynamicDataForEmail,
-                                                bulkPrintOrderDetails,
-                                                orderDocuments
-            );
+            //PRL-4144 - Fix potential NPE for edge cases
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
+                                                    caseData.getRespondents(),
+                                                    caseData,
+                                                    authorisation,
+                                                    dynamicDataForEmail,
+                                                    bulkPrintOrderDetails,
+                                                    orderDocuments
+                );
+            }
         }
     }
 
