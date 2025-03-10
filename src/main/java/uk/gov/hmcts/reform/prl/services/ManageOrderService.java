@@ -1629,12 +1629,6 @@ public class ManageOrderService {
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            //other parties
-            if (caseData.getManageOrders().getOtherParties() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherParties()
-                ));
-            }
             //personal service
             updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
                                         servedParties, representativeName);
@@ -1649,6 +1643,13 @@ public class ManageOrderService {
                                         servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
             servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
+        }
+        //other parties
+        //PRL-4144 - Other people enabled for FL401 FGM/FMPO edge cases
+        if (caseData.getManageOrders().getOtherParties() != null) {
+            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                caseData.getManageOrders().getOtherParties()
+            ));
         }
 
         return servedParties;

@@ -122,7 +122,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_AD
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -1694,7 +1693,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(DA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test
@@ -1730,7 +1729,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .caseInvites(caseInviteList)
-            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .otherPartyInTheCaseRevised(Collections.singletonList(element(otherPerson)))
             .build();
 
         List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
@@ -1767,7 +1766,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(DA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test

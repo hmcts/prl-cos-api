@@ -795,6 +795,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("citizenAwpPayments")
     private List<Element<CitizenAwpPayment>> citizenAwpPayments;
 
+    @JsonUnwrapped
+    private final DssCaseDetails dssCaseDetails;
     //For case documents tab
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
