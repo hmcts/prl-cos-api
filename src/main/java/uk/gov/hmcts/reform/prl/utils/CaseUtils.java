@@ -6,7 +6,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.exception.NoCaseDataFoundException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -116,7 +116,7 @@ public class CaseUtils {
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
         if (caseDetails == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new NoCaseDataFoundException(HttpStatus.NOT_FOUND, "No case data found in the response");
         }
         return getCaseData(caseDetails, objectMapper);
     }
