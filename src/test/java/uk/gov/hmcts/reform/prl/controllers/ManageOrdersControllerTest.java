@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -3595,7 +3596,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
         assertExpectedException(() -> {
             manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        }, InvalidClientException.class, "Invalid Client");
 
     }
 

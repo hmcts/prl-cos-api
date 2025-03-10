@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -195,7 +196,7 @@ public class CommonUtils {
         try {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
                                                                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);
         }
         return personalCodes;

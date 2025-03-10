@@ -2683,7 +2683,7 @@ public class DraftAnOrderServiceTest {
 
         assertExpectedException(() -> {
             draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false, null, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
-        }, ManageOrderRuntimeException.class, "Failed to update SDO order details");
+        }, ManageOrderRuntimeException.class, "Failed to parse SDO order details");
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 

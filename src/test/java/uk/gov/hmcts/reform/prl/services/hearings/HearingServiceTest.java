@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,10 +194,14 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
-            any(),
-            any(),
-            any()
-        )).thenThrow(new RuntimeException());
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+            .status(500)
+            .reason("Internal Server Error")
+            .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
+            .build()));
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
 
@@ -273,10 +280,14 @@ public class HearingServiceTest {
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
 
         when(hearingApiClient.getCaseLinkedData(
-            any(),
-            any(),
-            any()
-        )).thenThrow(new RuntimeException());
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+            .status(500)
+            .reason("Internal Server Error")
+            .request(Request.create(Request.HttpMethod.POST, "/serviceLinkedCases", Map.of(), null, null, null))
+            .build()));
 
         List<CaseLinkedData> response =
             hearingService.getCaseLinkedData(auth,caseLinkedRequest);
