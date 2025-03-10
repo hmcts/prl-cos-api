@@ -23,8 +23,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -156,6 +158,7 @@ public class CaseController {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
+
     @PostMapping("/case/create")
     @Operation(description = "Call CCD to create case")
     @ApiResponses(value = {
@@ -213,6 +216,44 @@ public class CaseController {
         boolean isAuthorised = authorisationService.authoriseUser(authorisation);
         if (isAuthorised) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/{eventId}/update-dss-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata")
+    public CaseData updateDssCase(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("eventId") String eventId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CaseData dssCaseData) throws JsonProcessingException {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.updateCaseForDss(
+                authorisation,
+                caseId,
+                eventId,
+                dssCaseData
+            );
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("Edge case update/submit has failed for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Edge case update/submit has failed for this transaction");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/edge-case/court-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get edge case court-list.")
+    public List<CourtVenue> getEdgeCaseCourtList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return caseService.getEdgeCasesCourtList(authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -465,7 +465,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)
+                || isCreateOrderForEdgeCase(caseData)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
             }
@@ -479,6 +480,13 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private boolean isCreateOrderForEdgeCase(CaseData caseData) {
+        //PRL-4144 - Block create order for edge case
+        return null != caseData.getDssCaseDetails()
+            && Yes.equals(caseData.getDssCaseDetails().getIsEdgeCase())
+            && createAnOrder.equals(caseData.getManageOrdersOptions());
     }
 
     @PostMapping(path = "/manage-orders/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

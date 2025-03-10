@@ -2831,24 +2831,28 @@ public class ServiceOfApplicationService {
         String warningText = BLANK_STRING;
         boolean isRespondentAddressPresent = true;
         boolean isOtherPeopleAddressPresent = true;
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if (!isPartiesAddressPresent(respondent.getValue())) {
-                    isRespondentAddressPresent = false;
+        //PRL-6038 -Enable address check for other parties in the case for C100 & FL401
+        if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
+            for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
+                if (!isPartiesAddressPresent(otherParty.getValue())) {
+                    isOtherPeopleAddressPresent = false;
                     break;
                 }
             }
-            if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
-                for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
-                    if (!isPartiesAddressPresent(otherParty.getValue())) {
-                        isOtherPeopleAddressPresent = false;
-                        break;
-                    }
+        } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
+            for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
+                if (!isPartiesAddressPresent(otherParty.getValue())) {
+                    isOtherPeopleAddressPresent = false;
+                    break;
                 }
-            } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
-                for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
-                    if (!isPartiesAddressPresent(otherParty.getValue())) {
-                        isOtherPeopleAddressPresent = false;
+            }
+        }
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) { //Added for handle for edge cases
+                for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                    if (!isPartiesAddressPresent(respondent.getValue())) {
+                        isRespondentAddressPresent = false;
                         break;
                     }
                 }
@@ -2871,7 +2875,8 @@ public class ServiceOfApplicationService {
     }
 
     private static boolean isPartiesAddressPresent(PartyDetails partyDetails) {
-        return !No.equals(partyDetails.getIsCurrentAddressKnown())
+        return null != partyDetails //Added for handle for edge cases
+            && !No.equals(partyDetails.getIsCurrentAddressKnown())
             && !ObjectUtils.isEmpty(partyDetails.getAddress())
             && !StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1());
     }

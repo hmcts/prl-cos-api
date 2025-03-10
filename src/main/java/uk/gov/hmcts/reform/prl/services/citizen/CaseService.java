@@ -2,15 +2,18 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,17 +22,21 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofdocuments.SodSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.mapper.edgecases.DssEdgeCaseDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -50,6 +57,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -63,10 +72,13 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -77,6 +89,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -111,10 +124,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
@@ -123,10 +139,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
@@ -145,6 +163,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getStringsSplitByDelimiter;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Service
@@ -175,6 +194,15 @@ public class CaseService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
     private final DashboardNotificationsConfig notificationsConfig;
+    private final LocationRefDataApi locationRefDataApi;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
+    private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
+    private final CourtSealFinderService courtSealFinderService;
+    private final SystemUserService systemUserService;
+
+    @Value("${courts.edgeCaseCourtList}")
+    protected String edgeCasesFgmFmpoCourtsToFilter;
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -296,6 +324,112 @@ public class CaseService {
                         .valueOf(caseData.getId()))).build();
         }
         return caseDataWithHearingResponse;
+    }
+
+    public List<CourtVenue> getEdgeCasesCourtList(String authorisation) {
+        //Fetch courts list from ref data for PRL
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+
+        //Filter the court list for the edge cases - FGM & FMPO
+        if (null != courtDetails
+            && CollectionUtils.isNotEmpty(courtDetails.getCourtVenues())) {
+            String[] courtsToFilter = edgeCasesFgmFmpoCourtsToFilter.split(",");
+            return courtDetails.getCourtVenues().stream()
+                .filter(venue -> FAMILY_COURT_TYPE_ID.equals(venue.getCourtTypeId()))
+                .filter(venue -> {
+                    if (courtsToFilter.length == 1) {
+                        return true;
+                    }
+                    return Arrays.asList(courtsToFilter).contains(venue.getCourtEpimmsId());
+                }).toList();
+        }
+
+        return Collections.emptyList();
+    }
+
+    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, CaseData caseData) throws JsonProcessingException {
+        log.info("DSS CaseData received {}", caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.fromValue(eventId).getValue(),
+                systemUserService.getSysUserToken()
+            );
+
+        //Update the case data with the edge case details
+        log.info("Update case data with DSS case details for caseId: {}", caseId);
+        Map<String, Object> caseDataMapToBeUpdated = dssEdgeCaseDetailsMapper.updateDssCaseData(caseData);
+
+        if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)
+            || CaseEvent.SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue().equalsIgnoreCase(eventId)) {
+            //Map the case data fields with DSS data
+            log.info("Map case data with DSS case details for caseId: {}", caseId);
+            UserDetails userDetails = userService.getUserDetails(authToken);
+            uk.gov.hmcts.reform.prl.models.user.UserInfo userInfo = uk.gov.hmcts.reform.prl.models.user.UserInfo
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
+            CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
+            dbCaseData = dbCaseData.toBuilder()
+                .userInfo(wrapElements(userInfo))
+                .taskListVersion(TASK_LIST_VERSION_V3)
+                .selectedCaseTypeID(caseData.getCaseTypeOfApplication())
+                .build();
+
+            CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(dbCaseData, caseData.getDssCaseDetails());
+            caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
+
+            //For FGM & FMPO cases, update the court details
+            if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
+                updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
+            }
+            // Do not remove this line as it will overwrite the case state change
+            caseDataMapToBeUpdated.remove("state");
+        }
+        Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+        log.info("Submit mapped DSS case data for caseId: {}", caseId);
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+    }
+
+    private void updateCourtDetails(String authToken,
+                                    CaseData updatedCaseData,
+                                    Map<String, Object> caseDataMapToBeUpdated) {
+        if (null != updatedCaseData.getDssCaseDetails()
+            && (EdgeCaseTypeOfApplicationEnum.FGM.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || EdgeCaseTypeOfApplicationEnum.FMPO.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
+            && null != updatedCaseData.getDssCaseDetails().getSelectedCourtId()) {
+            log.info("Fetch court details for courtId: {}", updatedCaseData.getDssCaseDetails().getSelectedCourtId());
+            List<CourtVenue> courtVenues = locationRefDataApi.getCourtDetailsById(
+                authToken,
+                authTokenGenerator.generate(),
+                updatedCaseData.getDssCaseDetails().getSelectedCourtId()
+            );
+
+            if (CollectionUtils.isNotEmpty(courtVenues)) {
+                log.info("Court venue details for courtId: {}", courtVenues.get(0));
+                caseDataMapToBeUpdated.putAll(CaseUtils.getCourtDetails(Optional.ofNullable(courtVenues.get(0)),
+                                                                        updatedCaseData.getDssCaseDetails().getSelectedCourtId()));
+                //Add court seal
+                caseDataMapToBeUpdated.put(COURT_SEAL_FIELD, courtSealFinderService.getCourtSeal(courtVenues.get(0).getRegionId()));
+                //REMOVE Cafcass flag as it's not needed for DA Cases
+                caseDataMapToBeUpdated.remove(IS_CAFCASS);
+            }
+        }
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {

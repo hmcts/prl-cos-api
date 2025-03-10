@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.exception.NoCaseDataFoundException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -1084,5 +1085,18 @@ public class CaseUtils {
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {
         return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
+    }
+
+    public static LocalDate buildDateOfBirth(DateofBirth date) {
+        if (ObjectUtils.isNotEmpty(date)
+            && ObjectUtils.isNotEmpty(date.getYear())
+            && ObjectUtils.isNotEmpty(date.getMonth())
+            && ObjectUtils.isNotEmpty(date.getDay())) {
+            return LocalDate.of(Integer.parseInt(date.getYear()),
+                                Integer.parseInt(date.getMonth()),
+                                Integer.parseInt(date.getDay())
+            );
+        }
+        return null;
     }
 }

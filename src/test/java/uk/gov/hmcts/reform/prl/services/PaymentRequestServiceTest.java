@@ -159,8 +159,8 @@ public class PaymentRequestServiceTest {
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName(APPLICANT_NAME)
-                .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
-                .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
+            .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
+            .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
@@ -369,7 +369,7 @@ public class PaymentRequestServiceTest {
         )).thenReturn(paymentResponse);
         caseData = caseData.builder()
             .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                .paymentReferenceNumber(paymentResponse.getPaymentReference())
+            .paymentReferenceNumber(paymentResponse.getPaymentReference())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -792,23 +792,23 @@ public class PaymentRequestServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
-                Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(
-                CaseData.builder().applicantCaseName(APPLICANT_NAME)
-                        .id(Long.parseLong(TEST_CASE_ID)).build(),
-                CaseData.class
+            CaseData.builder().applicantCaseName(APPLICANT_NAME)
+                .id(Long.parseLong(TEST_CASE_ID)).build(),
+            CaseData.class
         )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
-                caseDetails);
+            caseDetails);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTSRREFERENCENUMBER).build();
         when(paymentApi.createPaymentServiceRequest(authToken, serviceAuthToken, paymentServiceRequest)).thenReturn(
-                paymentServiceResponse);
+            paymentServiceResponse);
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -825,26 +825,26 @@ public class PaymentRequestServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
-                Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(
-                CaseData.builder().applicantCaseName(APPLICANT_NAME)
-                        .id(Long.parseLong(TEST_CASE_ID)).build(),
-                CaseData.class
+            CaseData.builder().applicantCaseName(APPLICANT_NAME)
+                .id(Long.parseLong(TEST_CASE_ID)).build(),
+            CaseData.class
         )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
-                caseDetails);
+            caseDetails);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTREFERENCENUMBER).build();
         when(paymentApi.fetchPaymentStatus(authToken, serviceAuthToken, PAYMENTREFERENCENUMBER)).thenReturn(
-                PaymentStatusResponse.builder().status("Success").build());
+            PaymentStatusResponse.builder().status("Success").build());
 
         caseData = caseData.toBuilder()
-                .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                .build();
+            .paymentReferenceNumber(paymentResponse.getPaymentReference())
+            .build();
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PartyRelationshipToTheCaseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -57,6 +58,9 @@ public class ApplicationsTabServiceHelper {
                 .value(otherPerson.toBuilder()
                            .gender(otherPerson.getGender() != null
                                        ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .relationshipToTheCase(null != otherPerson.getRelationshipToTheCase()
+                                                      ? PartyRelationshipToTheCaseEnum.getDisplayedValue(otherPerson.getRelationshipToTheCase())
+                                                      : null)
                            .build()).build();
             if (currentOtherPerson.getIsPartyIdentityConfidential() != YesOrNo.Yes) {
                 otherPersonsInTheCase.add(wrappedPerson);

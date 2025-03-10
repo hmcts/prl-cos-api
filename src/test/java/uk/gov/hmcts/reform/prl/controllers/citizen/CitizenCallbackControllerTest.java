@@ -158,4 +158,19 @@ public class CitizenCallbackControllerTest {
         citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
         verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(anyString());
     }
+
+    @Test
+    public void updateDssEdgeCaseApplicationTest() {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+        when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        citizenCallbackController.updateDssEdgeCaseApplication(authToken, callbackRequest);
+
+        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
+    }
 }

@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +48,9 @@ public class LocationRefDataService {
 
     @Value("${courts.caDefaultCourtEpimmsID}")
     protected String caDefaultCourtEpimmsID;
+
+    @Value("${courts.edgeCaseCourtList}")
+    protected String edgeCasesFgmFmpoCourtsToFilter;
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
@@ -91,14 +96,22 @@ public class LocationRefDataService {
         return List.of(DynamicListElement.builder().build());
     }
 
-    public List<DynamicListElement> getDaFilteredCourtLocations(String authToken) {
+    public List<DynamicListElement> getDaFilteredCourtLocations(String authToken,
+                                                                CaseData caseData) {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
                 authToken,
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return filterOnboardedCourtList(this.daCourtsToFilter, courtDetails);
+            //PRL-7021 - Filter courts for FGM/FMPO edge cases
+            if (null != caseData.getDssCaseDetails()
+                && (EdgeCaseTypeOfApplicationEnum.FGM.equals(caseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+                || EdgeCaseTypeOfApplicationEnum.FMPO.equals(caseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))) {
+                return filterEdgeCaseCourtsList(courtDetails);
+            } else {
+                return filterOnboardedCourtList(this.daCourtsToFilter, courtDetails);
+            }
         } catch (Exception e) {
             log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
@@ -239,5 +252,17 @@ public class LocationRefDataService {
         }
         log.error("******Default court Id is failing, as fallback defaulted to Ctsc stoke****");
         return defaultCaseManagementLocation;
+    }
+
+    public List<DynamicListElement> filterEdgeCaseCourtsList(CourtDetails courtDetails) {
+        //Filter the courts list for the edge cases - FGM & FMPO
+        return null == courtDetails
+            ? new ArrayList<>()
+            : courtDetails.getCourtVenues()
+            .stream()
+            .filter(venue -> FAMILY_COURT_TYPE_ID.equals(venue.getCourtTypeId())
+                && Arrays.asList(edgeCasesFgmFmpoCourtsToFilter.split(",")).contains(venue.getCourtEpimmsId()))
+            .map(this::getDisplayEntry)
+            .toList();
     }
 }

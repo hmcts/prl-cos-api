@@ -143,7 +143,7 @@ public class DynamicMultiSelectListService {
         } else if (caseData.getApplicantsFL401() != null) {
             String name = caseData.getApplicantsFL401().getFirstName() + " "
                 + caseData.getApplicantsFL401().getLastName()
-                + "(Applicant)";
+                + " (Applicant)";
             String code = caseData.getApplicantsFL401().getPartyId().toString();
             applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(code)
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
@@ -166,9 +166,7 @@ public class DynamicMultiSelectListService {
             caseData.getOtherPartyInTheCaseRevised().forEach(others ->
                     otherPeopleList.add(DynamicMultiselectListElement.builder()
                             .code(others.getId().toString())
-                            .label(others.getValue().getFirstName()
-                                    + " "
-                                    + others.getValue().getLastName())
+                            .label(getLabelForOtherPeople(others.getValue()))
                             .build())
             );
             return otherPeopleList;
@@ -185,6 +183,15 @@ public class DynamicMultiSelectListService {
             );
         }
         return otherPeopleList;
+    }
+
+    private String getLabelForOtherPeople(PartyDetails party) {
+        if (null != party.getRelationshipToTheCase()) {
+            return party.getLabelForDynamicList()
+                + " (" + party.getRelationshipToTheCase().getDisplayedValue() + ")";
+        } else {
+            return party.getLabelForDynamicList();
+        }
     }
 
     public String getStringFromDynamicMultiSelectList(DynamicMultiSelectList dynamicMultiSelectList) {

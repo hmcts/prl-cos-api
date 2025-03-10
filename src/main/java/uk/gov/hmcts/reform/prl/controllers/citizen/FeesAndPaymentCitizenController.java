@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,6 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 
 @Slf4j
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVAL
 public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String LOGGERMESSAGE = "Invalid Client";
+    private static final String APPLICATION_TYPE_EMPTY = "Application type can not be null or empty";
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -100,8 +102,6 @@ public class FeesAndPaymentCitizenController {
 
     }
 
-
-
     @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Endpoint to retrieve the payment status")
     @ApiResponses(value = {
@@ -125,7 +125,6 @@ public class FeesAndPaymentCitizenController {
 
 
     }
-
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
@@ -162,15 +161,14 @@ public class FeesAndPaymentCitizenController {
 
     @GetMapping(path = "/getFee/{applicationType}", produces = APPLICATION_JSON)
     @Operation(description = "API to fetch the application fees by application type")
-    public FeeResponseForCitizen fetchFee(@RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-                                          @PathVariable String applicationType) {
+    @ApiResponse(responseCode = "200", description = "Success (with content)")
+    @ApiResponse(responseCode = "400", description = APPLICATION_TYPE_EMPTY)
+    public FeeResponseForCitizen fetchFee(
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @PathVariable("applicationType") @Valid
+        @NotEmpty(message = APPLICATION_TYPE_EMPTY) String applicationType) {
         if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
             log.info("### Fetch fees for application type: {}", applicationType);
-            if (null == applicationType || applicationType.isEmpty()) {
-                return FeeResponseForCitizen.builder()
-                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
-                    .build();
-            }
             return feeService.fetchFee(applicationType);
         } else {
             throw (new RuntimeException(LOGGERMESSAGE));

@@ -91,4 +91,14 @@ public class CitizenCallbackController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         citizenEmailService.sendCitizenCaseWithdrawalEmail(authorisation, caseData);
     }
+
+    @PostMapping(path = "/update-edge-case-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to refresh the tabs")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void updateDssEdgeCaseApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+    }
+
 }

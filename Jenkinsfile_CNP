@@ -52,7 +52,8 @@ def secrets = [
       secret('judge-testuser-one', 'JUDGE_USER_NAME'),
       secret('judge-testpassword', 'JUDGE_PASSWORD'),
       secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
-      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
+      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD"),
+      secret("edge-case-court-list", "EDGE_CASE_COURT_LIST")
    ]
 ]
 

@@ -33,6 +33,6 @@ public class OtherPersonInTheCaseRevised {
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
-
+    private final String relationshipToTheCase;
 
 }

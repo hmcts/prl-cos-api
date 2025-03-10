@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.PartyRelationshipToTheCaseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -95,8 +96,8 @@ public class PartyDetails {
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
     public boolean hasConfidentialInfo() {
-        return this.isAddressConfidential.equals(YesOrNo.Yes)
-            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+        return YesOrNo.Yes.equals(this.isAddressConfidential)
+            || YesOrNo.Yes.equals(this.isPhoneNumberConfidential);
     }
 
     public boolean isCanYouProvideEmailAddress() {
@@ -166,4 +167,10 @@ public class PartyDetails {
 
     private YesOrNo liveInRefuge;
     private Document refugeConfidentialityC8Form;
+
+    //Edge cases
+    private final PartyRelationshipToTheCaseEnum relationshipToTheCase;
+    //PRL-4141
+    private final String nameOfOrganisation;
+    private final String positionHeldInOrganisation;
 }

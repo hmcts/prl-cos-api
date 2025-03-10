@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -329,12 +328,6 @@ public class ManageOrderEmailService {
                                                        bulkPrintOrderDetails
                 );
             }
-            //PRL-4225 - send order & additional docs to other people via post only
-            if (isNotEmpty(manageOrders.getOtherParties())) {
-                serveOrderToOtherPersons(authorisation,
-                                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
-                );
-            }
             //Send email notification to Cafcass or Cafcass cymru based on selection
             String cafcassCymruEmailId = getCafcassCymruEmail(manageOrders);
             if (cafcassCymruEmailId != null) {
@@ -355,6 +348,13 @@ public class ManageOrderEmailService {
             log.info("Send notifications for FL401 parties");
             handleFL401ServeOrderNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                bulkPrintOrderDetails, otherOrganisationEmailList, otherOrganisationPostList);
+        }
+        //PRL-4144 - Other people enabled for FL401 FGM/FMPO edge cases
+        //PRL-4225 - send order & additional docs to other people via post only
+        if (isNotEmpty(manageOrders.getOtherParties())) {
+            serveOrderToOtherPersons(authorisation,
+                                     manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
+            );
         }
         // Send email notification to other organisations
         if (!otherOrganisationEmailList.isEmpty()) {
@@ -423,10 +423,13 @@ public class ManageOrderEmailService {
                                                             List<Document> orderDocuments,
                                                             Map<String, Object> dynamicDataForEmail) {
 
-        List<Element<PartyDetails>> partyList = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
-                                                                      caseData.getApplicantsFL401()),
-                                                              element(caseData.getRespondentsFL401().getPartyId(),
-                                                                      caseData.getRespondentsFL401()));
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        partyList.add(element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()));
+        //PRL-4144 - Fix potential NPE for FGM/FMPO edge cases
+        if (null != caseData.getRespondentsFL401()) {
+            partyList.add(element(caseData.getRespondentsFL401().getPartyId(),
+                                  caseData.getRespondentsFL401()));
+        }
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
                                              partyList,
@@ -680,14 +683,17 @@ public class ManageOrderEmailService {
                                                 orderDocuments
             );
             //respondents
-            sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
-                                                caseData.getRespondents(),
-                                                caseData,
-                                                authorisation,
-                                                dynamicDataForEmail,
-                                                bulkPrintOrderDetails,
-                                                orderDocuments
-            );
+            //PRL-4144 - Fix potential NPE for edge cases
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
+                                                    caseData.getRespondents(),
+                                                    caseData,
+                                                    authorisation,
+                                                    dynamicDataForEmail,
+                                                    bulkPrintOrderDetails,
+                                                    orderDocuments
+                );
+            }
         }
     }
 
