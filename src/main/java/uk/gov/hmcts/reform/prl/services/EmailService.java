@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.exception.GovUkNotificationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -42,7 +43,7 @@ public class EmailService {
                                                                       reference);
             onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
         } catch (NotificationClientException exception) {
-            throw new IllegalArgumentException(exception);
+            throw new GovUkNotificationException(exception.getMessage(), exception);
         }
     }
 
@@ -63,7 +64,7 @@ public class EmailService {
                 onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
             }
         } catch (NotificationClientException exception) {
-            throw new IllegalArgumentException(exception);
+            throw new GovUkNotificationException(exception.getMessage(), exception);
         }
     }
 
