@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
