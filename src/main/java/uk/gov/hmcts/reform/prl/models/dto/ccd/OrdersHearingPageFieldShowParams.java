@@ -67,4 +67,6 @@ public class OrdersHearingPageFieldShowParams {
     private final YesOrNo isRespondent4SolicitorPresent;
     @JsonProperty("isRespondent5SolicitorPresent")
     private final YesOrNo isRespondent5SolicitorPresent;
+    @JsonProperty("isAutomatedHearingPresent")
+    private final YesOrNo isAutomatedHearingPresent;
 }
