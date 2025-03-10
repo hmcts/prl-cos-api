@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

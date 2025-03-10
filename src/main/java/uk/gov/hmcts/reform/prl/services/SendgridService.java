@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -89,7 +90,7 @@ public class SendgridService {
     }
 
     public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
-                                                      String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
+                                                      String authorization, SendgridEmailConfig sendgridEmailConfig) {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
         Map<String, Object> dynamicFields = sendgridEmailConfig.getDynamicTemplateData();
@@ -121,7 +122,7 @@ public class SendgridService {
             return false;
         } catch (IOException ex) {
             log.info("Sendgrid exception is {}", ex.getMessage());
-            throw new IOException(ex.getMessage());
+            throw new SendGridNotificationException(ex.getMessage());
         } finally {
             log.info("*** Response time taken by sendgrid - {}s",
                      TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));

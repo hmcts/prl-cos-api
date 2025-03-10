@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ public class HearingService {
             }
             return hearings;
 
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Error in getting hearings {}", e.getMessage());
         }
         return null;
@@ -86,7 +87,7 @@ public class HearingService {
 
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Error in getCaseLinkedData {}", e.getMessage());
         }
         return caseLinkedData;
