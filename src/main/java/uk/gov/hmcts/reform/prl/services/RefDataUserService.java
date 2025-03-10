@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
@@ -78,22 +80,26 @@ public class RefDataUserService {
                 }
 
             }
-        } catch (Exception e) {
-            log.error("Staff details Lookup Failed - {}", e);
+        } catch (NoStaffResponseException e) {
+            log.error("Staff details Lookup Failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }
 
     public ResponseEntity<List<StaffResponse>> getStaffResponse(int pageNumber) {
-        return staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            pageNumber
-        );
+        try {
+            return staffResponseDetailsApi.getAllStaffResponseDetails(
+                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+                authTokenGenerator.generate(),
+                SERVICENAME,
+                STAFFSORTCOLUMN,
+                STAFFORDERASC,
+                RD_STAFF_PAGE_SIZE,
+                pageNumber
+            );
+        } catch (FeignException e) {
+            throw new NoStaffResponseException("Failed to retrieve staff response", e);
+        }
     }
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
@@ -138,7 +144,7 @@ public class RefDataUserService {
                 isHearingChildRequired
             );
 
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Category Values look up failed {} ", e);
         }
         return commonDataResponse;
