@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -40,6 +41,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.exception.ManageOrdersUnsupportedOperationException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -959,7 +962,7 @@ public class ManageOrderService {
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, UserDetails userDetails,
                                                                String language)
-        throws Exception {
+        throws DocumentGenerationException {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
@@ -1161,7 +1164,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData, String language) throws Exception {
+    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData, String language) throws DocumentGenerationException {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
@@ -1180,7 +1183,7 @@ public class ManageOrderService {
     }
 
     private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, UserDetails userDetails,
-                                                        String language) throws Exception {
+                                                        String language) throws DocumentGenerationException {
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
         List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, userDetails, language);
@@ -1943,8 +1946,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
-        throws Exception {
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
@@ -1992,6 +1994,8 @@ public class ManageOrderService {
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
+        } catch (DocumentGenerationException ex) {
+            log.error("Error occured while generating Draft document ==> ", ex);
         } catch (Exception ex) {
             log.error("Error occured while generating Draft document ==> ", ex);
         }
@@ -2218,7 +2222,7 @@ public class ManageOrderService {
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException(String.format(
+            .orElseThrow(() -> new ManageOrdersUnsupportedOperationException(String.format(
                 "Could not find action to amend order for order with id \"%s\"",
                 caseData.getManageOrders().getAmendOrderDynamicList().getValueCode()
             )));
@@ -2252,7 +2256,7 @@ public class ManageOrderService {
 
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
-                                                         CaseData caseData) throws Exception {
+                                                         CaseData caseData) throws DocumentGenerationException {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -2417,12 +2421,17 @@ public class ManageOrderService {
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                authorisation,
-                authTokenGenerator.generate(),
-                null,
-                userDetails.getId()
-            );
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = null;
+            try {
+                roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                    authorisation,
+                    authTokenGenerator.generate(),
+                    null,
+                    userDetails.getId()
+                );
+            } catch (FeignException e) {
+                log.error("Error fetching role assignments: {}", e.getMessage());
+            }
             List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).collect(
                 Collectors.toList());
             if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
@@ -2465,7 +2474,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData,
-                                                    String language) throws Exception {
+                                                    String language) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -2643,7 +2652,7 @@ public class ManageOrderService {
                 if (CollectionUtils.isNotEmpty(judicialUsersApiResponses)) {
                     judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
-            } catch (Exception e) {
+            } catch (FeignException e) {
                 log.error("User details not found for personal code {}", personalCodes, e);
             }
         }
@@ -2651,7 +2660,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation,
-                                                  String language) throws Exception {
+                                                  String language) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
+import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -2814,6 +2815,69 @@ public class DocumentGenServiceTest {
             documentGenService
                 .convertToPdf(authToken, document);
         }, InvalidResourceException.class, "Doc name FL401-Final.docx");
+    }
+
+    // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
+    @Test
+    public void testForConvertToPdfFeignException() {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
+            .thenThrow(FeignException.class);
+
+        assertExpectedException(() -> {
+            documentGenService.convertToPdf(authToken, document);
+        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+            + "because \"generatedDocumentInfo\" is null");
+    }
+
+    @Test
+    public void testForConvertToPdfRuntimeException() {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
+            .thenThrow(RuntimeException.class);
+
+        assertExpectedException(() -> {
+            documentGenService.convertToPdf(authToken, document);
+        }, NullPointerException.class, "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
+                                    + "because \"generatedDocumentInfo\" is null");
     }
 
     @Test
