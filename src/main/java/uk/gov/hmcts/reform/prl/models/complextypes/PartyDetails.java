@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 
@@ -49,6 +50,7 @@ public class PartyDetails {
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private YesOrNo isEmailAddressConfidential;
+    private YesOrNo isPartyIdentityConfidential;
     private final String landline;
     private YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
@@ -161,4 +163,7 @@ public class PartyDetails {
 
     @JsonIgnore
     private CitizenSos citizenSosObject;
+
+    private YesOrNo liveInRefuge;
+    private Document refugeConfidentialityC8Form;
 }

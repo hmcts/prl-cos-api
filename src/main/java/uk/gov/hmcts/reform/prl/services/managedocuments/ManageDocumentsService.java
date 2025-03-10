@@ -180,9 +180,7 @@ public class ManageDocumentsService {
         return errorList;
     }
 
-    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+    public Map<String, Object> copyDocument(CaseData caseData, Map<String, Object> caseDataUpdated, String authorization) {
         UserDetails userDetails = userService.getUserDetails(authorization);
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
@@ -213,6 +211,15 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
+            if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+                || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
+                quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                    quarantineLegalDoc,
+                    caseData.getIsPathfinderCase()
+                );
+            }
+
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
@@ -231,6 +238,14 @@ public class ManageDocumentsService {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
+    }
+
+    private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc, YesOrNo isPathfinderCase) {
+        return quarantineLegalDoc.toBuilder()
+            .isConfidential(YesOrNo.Yes)
+            .categoryName(YesOrNo.Yes.equals(isPathfinderCase) ? "Pathfinder" : quarantineLegalDoc.getCategoryName())
+            .categoryId(YesOrNo.Yes.equals(isPathfinderCase) ? "pathfinder" : quarantineLegalDoc.getCategoryId())
+            .build();
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
@@ -252,7 +267,6 @@ public class ManageDocumentsService {
                     quarantineLegalDoc
                 );
             }
-            log.info("quarantineLegalDoc with restrictedKey ==> " + quarantineLegalDoc);
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
@@ -309,6 +323,7 @@ public class ManageDocumentsService {
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
+            .documentType(quarantineLegalDoc.getDocumentType())
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentType(COURTNAV.equals(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getDocumentType() : null)
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
@@ -682,10 +697,13 @@ public class ManageDocumentsService {
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        Map<String, Object> updatedCaseDataMap
-                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.caseData());
+
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> updatedCaseDataMap = copyDocument(caseData,
+                                                              startAllTabsUpdateDataContent.caseDataMap(),
+                                                              authorisation);
+
+        updatedCaseDataMap = appendConfidentialDocumentNameForCourtAdmin(authorisation, updatedCaseDataMap, caseData);
         //update all tabs
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),

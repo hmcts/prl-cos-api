@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1861,6 +1862,31 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
     public void testAddUploadOrder() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -3604,7 +3630,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
         assertExpectedException(() -> {
             manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        }, InvalidClientException.class, "Invalid Client");
 
     }
 

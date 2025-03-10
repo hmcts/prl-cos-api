@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -140,6 +141,7 @@ public class CaseDataService {
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
+                    filteredCafcassData = removeUnnecessaryFieldsFromResponse(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -151,6 +153,41 @@ public class CaseDataService {
             throw e;
         }
         return cafCassResponse;
+    }
+
+    private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            caseData = caseData.toBuilder()
+                .applicants(removeResponse(caseData.getApplicants()))
+                .respondents(removeResponse(caseData.getRespondents()))
+                .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
+                .build();
+
+            cafCassCaseDetail.setCaseData(caseData);
+        });
+
+        return  filteredCafcassData;
+    }
+
+    private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
+        if (!CollectionUtils.isEmpty(orderCollection)) {
+            orderCollection.forEach(order -> {
+                if (null != order.getValue()) {
+                    order.getValue().setServeOrderDetails(null);
+                }
+            });
+        }
+        return orderCollection;
+    }
+
+    private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
+        partyDetails.forEach(partyDetail -> {
+            if (null != partyDetail.getValue()) {
+                partyDetail.getValue().setResponse(null);
+            }
+        });
+        return partyDetails;
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
@@ -259,7 +296,7 @@ public class CaseDataService {
         }
         if (null != caseData.getAdditionalDocuments()) {
             addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(),
-                                otherDocsList
+                otherDocsList
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalDocumentsList())) {
@@ -296,29 +333,29 @@ public class CaseDataService {
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getLegalProfUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCafcassUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab()
+                caseData.getCitizenUploadedDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
             parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab());
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
+            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments());
         }
     }
 
@@ -375,12 +412,12 @@ public class CaseDataService {
         }
         if (CollectionUtils.isNotEmpty(caseData.getC8FormDocumentsUploaded())) {
             caseData.getC8FormDocumentsUploaded().parallelStream().forEach(c8FormDocumentsUploaded ->
-                                                                               populateRespondentDocument(
-                                                                                   c8FormDocumentsUploaded,
-                                                                                   null,
-                                                                                   CONFIDENTIAL,
-                                                                                   otherDocsList
-                                                                               ));
+                populateRespondentDocument(
+                    c8FormDocumentsUploaded,
+                    null,
+                    CONFIDENTIAL,
+                    otherDocsList
+                ));
         }
     }
 
@@ -456,7 +493,6 @@ public class CaseDataService {
                                      List<Element<OtherDocuments>> otherDocsList) {
         try {
             if (null != caseDocument) {
-                log.info("Document is not null for category {}", category);
                 otherDocsList.add(Element.<OtherDocuments>builder().id(
                     UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
                     buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
@@ -558,18 +594,18 @@ public class CaseDataService {
             authorisation,
             caseIdWithRegionIdMap
         );
-        log.info("Filter cancelled hearings");
         //PRL-6431
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
-        log.info("Update hearing data for cafcass");
+
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
         return filteredCafcassResponse;
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        List<CaseHearing> filteredCaseHearings = new ArrayList<>();
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (Hearings hearings : listOfHearingDetails) {
+                List<CaseHearing> filteredCaseHearings = new ArrayList<>();
                 hearings.getCaseHearings().forEach(caseHearing -> {
                     if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
                         filteredCaseHearings.add(caseHearing);
@@ -601,6 +637,7 @@ public class CaseDataService {
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
+
                 if (filteredHearing != null) {
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
@@ -665,7 +702,6 @@ public class CaseDataService {
             "data.finalDocument",
             "data.ordersApplyingFor",
             "data.children",
-            "data.miamCertificationDocumentUpload1",
             "data.miamStatus",
             "data.miamExemptionsTable",
             "data.claimingExemptionMiam",
@@ -724,7 +760,29 @@ public class CaseDataService {
             "data.childAndApplicantRelations",
             "data.childAndRespondentRelations",
             "data.childAndOtherPeopleRelations",
-            "data.cafcassUploadedDocs"
+            "data.cafcassUploadedDocs",
+            "data.courtStaffUploadDocListDocTab",
+            "data.legalProfUploadDocListDocTab",
+            "data.bulkScannedDocListDocTab",
+            "data.cafcassUploadDocListDocTab",
+            "data.citizenUploadedDocListDocTab",
+            "data.restrictedDocuments",
+            "data.confidentialDocuments",
+            "data.respondentAc8Documents",
+            "data.respondentBc8Documents",
+            "data.respondentCc8Documents",
+            "data.respondentDc8Documents",
+            "data.respondentEc8Documents",
+            "data.c8FormDocumentsUploaded",
+            "data.bundleInformation",
+            "data.otherDocumentsUploaded",
+            "data.uploadOrderDoc",
+            "data.specialArrangementsLetter",
+            "data.additionalDocuments",
+            "data.additionalDocumentsList",
+            "data.stmtOfServiceAddRecipient",
+            "data.stmtOfServiceForOrder",
+            "data.stmtOfServiceForApplication"
         );
     }
 }

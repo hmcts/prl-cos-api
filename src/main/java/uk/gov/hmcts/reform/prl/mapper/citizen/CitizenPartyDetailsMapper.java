@@ -41,11 +41,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +66,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -92,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElements
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Component
@@ -102,6 +110,8 @@ public class CitizenPartyDetailsMapper {
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
     private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+    private final ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -119,7 +129,8 @@ public class CitizenPartyDetailsMapper {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsDa(
                 dbCaseData,
                 citizenUpdatedCaseData,
-                caseEvent
+                caseEvent,
+                authorisation
             ));
         }
 
@@ -127,11 +138,61 @@ public class CitizenPartyDetailsMapper {
             if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
+                findAndProcessRefugeFiles(dbCaseData, citizenUpdatedCaseData, citizenUpdatePartyDataContent.get());
             }
         } else {
             throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
         }
         return citizenUpdatePartyDataContent.get();
+    }
+
+    private void findAndProcessRefugeFiles(CaseData dbCaseData,
+                                           CitizenUpdatedCaseData citizenUpdatedCaseData,
+                                           CitizenUpdatePartyDataContent citizenUpdatePartyDataContent) {
+        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = null;
+        if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+            );
+        } else if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForFL401(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_APPLICANTS_DETAILS.getValue()
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())
+            && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
+            refugeConfidentialDocumentsRecord
+                = confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForFL401(
+                dbCaseData,
+                citizenUpdatePartyDataContent.updatedCaseData(),
+                CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue()
+            );
+        }
+        if (refugeConfidentialDocumentsRecord != null) {
+            citizenUpdatePartyDataContent.updatedCaseDataMap().put(
+                REFUGE_DOCUMENTS,
+                refugeConfidentialDocumentsRecord.refugeDocuments()
+            );
+            citizenUpdatePartyDataContent.updatedCaseDataMap().put(
+                HISTORICAL_REFUGE_DOCUMENTS,
+                refugeConfidentialDocumentsRecord.historicalRefugeDocuments()
+            );
+        }
     }
 
     private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
@@ -265,7 +326,8 @@ public class CitizenPartyDetailsMapper {
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                            CaseEvent caseEvent) {
+                                                                 CaseEvent caseEvent,
+                                                                 String authorisation) {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -288,6 +350,12 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent, caseData.getNewChildDetails()
                 );
+                //PRL-6790 - create C8 for DA respondent
+                if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                    reGenerateRespondentC8Documents(caseDataMapToBeUpdated,
+                                                    element(partyDetails.getPartyId(), partyDetails),
+                                                    caseData, 0, authorisation);
+                }
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
@@ -558,6 +626,10 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
+        boolean livingInRefuge = isNotEmpty(citizenProvidedPartyDetails.getLiveInRefuge());
+
+        existingPartyDetails = forceConfidentiality(existingPartyDetails, citizenProvidedPartyDetails);
+
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
             .email(isEmailNeedsToUpdate
@@ -571,7 +643,8 @@ public class CitizenPartyDetailsMapper {
             .isAtAddressLessThan5YearsWithDontKnow(null != citizenProvidedPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow()
                 ? mapRespondentHaveYouLivedAtThisAddressForLessThanFiveYears(citizenProvidedPartyDetails)
                 : existingPartyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
-            .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
+            .isCurrentAddressKnown(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getIsCurrentAddressKnown()
+                                       : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
                                                    ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
@@ -586,6 +659,8 @@ public class CitizenPartyDetailsMapper {
                                     ? YesOrNo.Yes : existingPartyDetails.getIsDateOfBirthKnown())
             .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
                               ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
+            .liveInRefuge(livingInRefuge ? citizenProvidedPartyDetails.getLiveInRefuge() : existingPartyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(citizenProvidedPartyDetails.getRefugeConfidentialityC8Form())
             .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
                                      ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(getPartyResponse(existingPartyDetails).toBuilder()
@@ -593,6 +668,30 @@ public class CitizenPartyDetailsMapper {
                           .safeToCallOption(fetchSafeToCallOption(citizenProvidedPartyDetails))
                           .build())
             .build();
+    }
+
+    private PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+            existingPartyDetails = existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .isPhoneNumberConfidential(Yes)
+                .isAddressConfidential(Yes)
+                .isEmailAddressConfidential(Yes)
+                .build();
+        }
+        return existingPartyDetails;
     }
 
     private String fetchSafeToCallOption(PartyDetails citizenProvidedPartyDetails) {
@@ -641,6 +740,30 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+            && null != citizenProvidedPartyDetails.getResponse()
+            && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
+            return existingPartyDetails.toBuilder()
+                .response(getPartyResponse(existingPartyDetails).toBuilder()
+                              .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
+                                                      .getKeepDetailsPrivate()
+                                                      .toBuilder()
+                                                      .otherPeopleKnowYourContactDetails(citizenProvidedPartyDetails
+                                                                                             .getResponse()
+                                                                                             .getKeepDetailsPrivate()
+                                                                                             .getOtherPeopleKnowYourContactDetails())
+                                                      .confidentiality(Yes)
+                                                      .confidentialityList(
+                                                          Arrays.asList(
+                                                              ConfidentialityListEnum.email,
+                                                              ConfidentialityListEnum.address,
+                                                              ConfidentialityListEnum.phoneNumber
+                                                          ))
+                                                      .build())
+                              .build())
+                .build();
+        }
+
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
@@ -751,6 +874,10 @@ public class CitizenPartyDetailsMapper {
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
             );
             caseDataMapToBeUpdated.put(
+                "applicantPcqId",
+                citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
+            );
+            caseDataMapToBeUpdated.put(
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
@@ -824,6 +951,10 @@ public class CitizenPartyDetailsMapper {
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
+            caseDataBuilder.otherPartyInTheCaseRevised(confidentialityTabService.updateOtherPeopleConfidentiality(
+                caseDataBuilder.build().getRelations().getChildAndOtherPeopleRelations(),
+                caseDataBuilder.build().getOtherPartyInTheCaseRevised()
+            ));
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
@@ -856,8 +987,16 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        //Set case type, applicant name & respondent names for case list table
+        caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
+        caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
+        caseDataBuilder.respondentName(getPartyName(caseDataBuilder.build().getRespondents()));
 
         return caseDataBuilder.build();
+    }
+
+    private String getPartyName(List<Element<PartyDetails>> parties) {
+        return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
     }
 
     public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
@@ -883,7 +1022,13 @@ public class CitizenPartyDetailsMapper {
                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
         String caseName = null;
         if (null != c100RebuildApplicantDetailsElements
-            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            && null != c100RebuildApplicantDetailsElements.getApplicants()
+            && !c100RebuildApplicantDetailsElements.getApplicants().isEmpty()
+            && null != c100RebuildApplicantDetailsElements.getApplicants().get(0)
+            && null != c100RebuildRespondentDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()
+            && !c100RebuildRespondentDetailsElements.getRespondentDetails().isEmpty()
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails().get(0)) {
             caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
                 + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
         }
