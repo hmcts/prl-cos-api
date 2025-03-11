@@ -15,4 +15,8 @@ public class TestConstants {
     public static final String CCD_STORE_SEARCH_CASE_ENDPOINT = "/searchCases";
     public static final String CAFCASS_SEARCH_CASE_PROVIDER = "ccd_store";
 
+
+    public static final String PRL_CAFCASS_SEARCH_CASE_PROVIDER = "prl_cafcass_search_cases";
+    public static final String PRL_CAFCASS_PACT_CONSUMER_NAME = "prl_cos_cafcass_search_cases";
+
 }

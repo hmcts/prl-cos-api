@@ -62,7 +62,8 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.33',
-  springFramework    : '6.1.14'
+  springFramework              : '6.1.14',
+  pact_version                 : '4.6.16',
 ]
 
 allprojects {
@@ -468,6 +469,7 @@ dependencies {
   contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestRuntimeOnly 'io.github.microutils:kotlin-logging-jvm:2.0.11'
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
@@ -481,6 +483,9 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
+
+  contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5', version: versions.pact_version
+  contractTestImplementation group: 'au.com.dius.pact.provider', name: 'spring6', version: versions.pact_version
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath

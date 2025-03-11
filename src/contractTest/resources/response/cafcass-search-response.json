@@ -1,0 +1,405 @@
+{
+  "total": 1,
+  "cases": [
+    {
+      "id": 1727708503642694,
+      "jurisdiction": "PRIVATELAW",
+      "state": "PREPARE_FOR_HEARING_CONDUCT_HEARING",
+      "caseTypeOfApplication": "C100",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2024-09-30T15:01:43.6",
+      "last_modified": "2024-12-18T16:04:56.925",
+      "case_data": {
+        "dateSubmitted": "2024-09-30",
+        "issueDate": "2024-12-18",
+        "caseTypeOfApplication": "C100",
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "Yes"
+        },
+        "childrenKnownToLocalAuthority": "no",
+        "finalDocument": {
+          "document_filename": "C100FinalDocument.pdf",
+          "document_id": "0e03abac-303b-4772-9522-8dc2139035b3"
+        },
+        "ordersApplyingFor": [
+          "childArrangementsOrder"
+        ],
+        "children": [
+          {
+            "id": "25c694c6-7fe1-479c-a2d3-5cbb5bdfa5ba",
+            "value": {
+              "firstName": "Melissa",
+              "lastName": "Mouse",
+              "dateOfBirth": "2016-03-11",
+              "gender": "female",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "parentalResponsibilityDetails": "Child's mother",
+              "whoDoesTheChildLiveWith": {
+                "partyId": "7fbe97eb-38b1-4675-8bbf-5ab2cdb315d0",
+                "partyFullName": "Minnie Souris",
+                "partyType": "RESPONDENT"
+              }
+            }
+          },
+          {
+            "id": "529dbe4d-7f6c-427b-a271-4c20bbfff7b2",
+            "value": {
+              "firstName": "Mikey",
+              "lastName": "Mouse",
+              "dateOfBirth": "2018-08-15",
+              "gender": "other",
+              "otherGender": "Non-binary",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "parentalResponsibilityDetails": "Child's mother",
+              "whoDoesTheChildLiveWith": {
+                "partyId": "7fbe97eb-38b1-4675-8bbf-5ab2cdb315d0",
+                "partyFullName": "Minnie Souris",
+                "partyType": "RESPONDENT"
+              }
+            }
+          }
+        ],
+        "miamExemptionsTable": {
+          "urgencyEvidence": "Urgency"
+        },
+        "claimingExemptionMiam": "Yes",
+        "applicantAttendedMiam": "No",
+        "mpuChildInvolvedInMiam": "No",
+        "miamUrgencyReason": "Any delay caused by attending a MIAM would cause significant financial hardship to the prospective applicant.",
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order",
+          "typeOfChildArrangementsOrder": "spendTimeWithOrder"
+        },
+        "applicants": [
+          {
+            "id": "d08abac8-2f1a-4e56-945b-572c0ac73a4b",
+            "value": {
+              "firstName": "Mickey",
+              "lastName": "Mouse",
+              "dateOfBirth": "1972-06-23",
+              "gender": "male",
+              "placeOfBirth": "Birmingham",
+              "isAddressConfidential": "Yes",
+              "isAtAddressLessThan5Years": "No",
+              "canYouProvideEmailAddress": "No",
+              "isPhoneNumberConfidential": "Yes",
+              "solicitorOrg": {
+                "OrganisationID": "M1YPZ85",
+                "OrganisationName": "Private solicitors"
+              },
+              "representativeFirstName": "Donald",
+              "representativeLastName": "Duck",
+              "solicitorEmail": "mm@gmail.com",
+              "phoneNumber": "07920398411",
+              "address": {
+                "AddressLine1": "2 Castle Stead Crescent",
+                "AddressLine3": "Cullingworth",
+                "PostTown": "Bradford",
+                "Country": "United Kingdom",
+                "PostCode": "BD13 5FB"
+              }
+            }
+          },
+          {
+            "id": "e2556b04-24d6-4878-9ef7-93d38977cfdc",
+            "value": {
+              "firstName": "Missy",
+              "lastName": "Mouse",
+              "previousName": "Rodent",
+              "dateOfBirth": "1988-09-06",
+              "gender": "female",
+              "placeOfBirth": "Chelmsford",
+              "isAddressConfidential": "Yes",
+              "isAtAddressLessThan5Years": "No",
+              "canYouProvideEmailAddress": "No",
+              "isPhoneNumberConfidential": "Yes",
+              "representativeFirstName": "Donald",
+              "representativeLastName": "Duck",
+              "solicitorEmail": "dduck@imasolicitor.com",
+              "phoneNumber": "07293856123",
+              "address": {
+                "AddressLine1": "1 Castle Stead Crescent",
+                "AddressLine3": "Cullingworth",
+                "PostTown": "Bradford",
+                "Country": "United Kingdom",
+                "PostCode": "BD13 5FB"
+              }
+            }
+          }
+        ],
+        "respondents": [
+          {
+            "id": "7fbe97eb-38b1-4675-8bbf-5ab2cdb315d0",
+            "value": {
+              "firstName": "Minnie",
+              "lastName": "Souris",
+              "previousName": "Mouse",
+              "dateOfBirth": "1974-07-03",
+              "gender": "female",
+              "canYouProvideEmailAddress": "No",
+              "isDateOfBirthKnown": "Yes",
+              "isCurrentAddressKnown": "No",
+              "canYouProvidePhoneNumber": "No",
+              "isPlaceOfBirthKnown": "No",
+              "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
+              "doTheyHaveLegalRepresentation": "dontKnow"
+            }
+          }
+        ],
+        "applicantsConfidentialDetails": [
+          {
+            "id": "64410959-52a4-4108-90d0-5d981a1533d8",
+            "value": {
+              "firstName": "Mickey",
+              "lastName": "Mouse",
+              "phoneNumber": "07920398411",
+              "address": {
+                "AddressLine1": "2 Castle Stead Crescent",
+                "AddressLine3": "Cullingworth",
+                "PostTown": "Bradford",
+                "Country": "United Kingdom",
+                "PostCode": "BD13 5FB"
+              }
+            }
+          },
+          {
+            "id": "97253b2b-91d5-4637-90ac-3cd53b1e9d31",
+            "value": {
+              "firstName": "Missy",
+              "lastName": "Mouse",
+              "phoneNumber": "07293856123",
+              "address": {
+                "AddressLine1": "1 Castle Stead Crescent",
+                "AddressLine3": "Cullingworth",
+                "PostTown": "Bradford",
+                "Country": "United Kingdom",
+                "PostCode": "BD13 5FB"
+              }
+            }
+          }
+        ],
+        "applicantSolicitorEmailAddress": "prl_demo_org1_solicitor_2@mailinator.com",
+        "solicitorName": "PRL DEMO ORG1 Solicitor 2",
+        "courtEpimsId": "36791",
+        "courtTypeId": "18",
+        "courtName": "Brentford County Court And Family Court",
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "d4be8b6f-a3c3-4dd8-8eeb-03ef6519d3b6",
+            "value": {
+              "firstName": "Marigold",
+              "lastName": "Mouse",
+              "isDateOfBirthKnown": "No",
+              "gender": "Female",
+              "isPlaceOfBirthKnown": "No",
+              "isCurrentAddressKnown": "No",
+              "canYouProvideEmailAddress": "No",
+              "canYouProvidePhoneNumber": "No"
+            }
+          }
+        ],
+        "hearingData": {
+          "hmctsServiceCode": "ABA5",
+          "caseRef": "1727708503642694",
+          "caseHearings": [
+            {
+              "hearingID": 2000012938,
+              "hearingType": "ABA5-FHR",
+              "hearingTypeValue": "First Hearing",
+              "hearingDaySchedule": [
+                {
+                  "hearingVenueName": "Brentford County Court And Family Court",
+                  "hearingStartDateTime": "2025-01-10T10:00:00",
+                  "hearingEndDateTime": "2025-01-10T10:30:00",
+                  "courtTypeId": "18",
+                  "epimsId": "36791"
+                }
+              ],
+              "hearingStatus": "LISTED"
+            }
+          ]
+        },
+        "orderCollection": [
+          {
+            "id": "651bd0d7-f640-4f34-84b5-5d08b4432f34",
+            "value": {
+              "courtReportType": [
+                "Section 7 report",
+                "S16A risk assessment"
+              ],
+              "dateCreated": "2024-12-18T16:02:00.465340",
+              "hearingId": "2000012938",
+              "orderDocument": {
+                "document_filename": "Notice_Of_Proceeding_Order_C6.pdf",
+                "document_id": "71a19473-5e61-4dce-837a-1ba1c8b85a3a"
+              },
+              "orderType": "noticeOfProceedingsParties",
+              "orderTypeId": "Notice of proceedings (C6) (Notice to parties)",
+              "originalFilingDate": "2025-01-05",
+              "otherDetails": {
+                "orderCreatedDate": "2024-12-18",
+                "orderMadeDate": "2024-12-18"
+              },
+              "serveOrderDetails": {
+                "cafcassCymruDocuments": [
+                  "section7Report",
+                  "s16RiskAssessment"
+                ],
+                "whenReportsMustBeFiled": "5 Jan 2025"
+              }
+            }
+          },
+          {
+            "id": "921ac960-ec2e-49c3-adbb-40277a39c291",
+            "value": {
+              "courtReportType": [
+                "Section 7 report",
+                "Safeguarding letter"
+              ],
+              "dateCreated": "2024-12-18T14:58:03.445428",
+              "orderDocument": {
+                "document_filename": "Parental_Responsibility_Order_C45A.pdf",
+                "document_id": "1745801e-d692-4749-88c9-5769b72f6570"
+              },
+              "orderType": "parentalResponsibility",
+              "orderTypeId": "Parental responsibility order (C45A)",
+              "originalFilingDate": "2025-01-01",
+              "otherDetails": {
+                "createdBy": "Test",
+                "orderCreatedDate": "2024-12-18",
+                "orderMadeDate": "2024-12-18"
+              },
+              "serveOrderDetails": {
+                "cafcassCymruDocuments": [
+                  "section7Report",
+                  "safeGuardingLetter"
+                ],
+                "whenReportsMustBeFiled": "1 Jan 2025"
+              }
+            }
+          }
+        ],
+        "caseManagementLocation": {
+          "regionName": "London",
+          "baseLocationName": "Brentford",
+          "region": "1",
+          "baseLocation": "36791"
+        },
+        "childAndApplicantRelations": [
+          {
+            "id": "99b36896-ca7b-4d9a-801e-87dea61b9865",
+            "value": {
+              "partyId": "d08abac8-2f1a-4e56-945b-572c0ac73a4b",
+              "partyFullName": "Mickey Mouse",
+              "partyType": "applicant",
+              "childId": "25c694c6-7fe1-479c-a2d3-5cbb5bdfa5ba",
+              "childFullName": "Melissa Mouse",
+              "relationType": "stepMother",
+              "childLivesWith": "No"
+            }
+          },
+          {
+            "id": "5013d23a-3839-4e79-ae77-78bd79fb353c",
+            "value": {
+              "partyId": "d08abac8-2f1a-4e56-945b-572c0ac73a4b",
+              "partyFullName": "Mickey Mouse",
+              "partyType": "applicant",
+              "childId": "529dbe4d-7f6c-427b-a271-4c20bbfff7b2",
+              "childFullName": "Mikey Mouse",
+              "relationType": "father",
+              "childLivesWith": "Yes"
+            }
+          },
+          {
+            "id": "1f0d827e-0793-4276-9976-981d6118c633",
+            "value": {
+              "partyId": "e2556b04-24d6-4878-9ef7-93d38977cfdc",
+              "partyFullName": "Missy Mouse",
+              "partyType": "applicant",
+              "childId": "25c694c6-7fe1-479c-a2d3-5cbb5bdfa5ba",
+              "childFullName": "Melissa Mouse",
+              "relationType": "mother",
+              "childLivesWith": "Yes"
+            }
+          },
+          {
+            "id": "b72092a6-a0e1-413a-9c37-96bb0b17c1ea",
+            "value": {
+              "partyId": "e2556b04-24d6-4878-9ef7-93d38977cfdc",
+              "partyFullName": "Missy Mouse",
+              "partyType": "applicant",
+              "childId": "529dbe4d-7f6c-427b-a271-4c20bbfff7b2",
+              "childFullName": "Mikey Mouse",
+              "relationType": "mother",
+              "childLivesWith": "Yes"
+            }
+          }
+        ],
+        "childAndRespondentRelations": [
+          {
+            "id": "f6f30c71-3bf1-4039-bfca-165e557a942a",
+            "value": {
+              "partyId": "7fbe97eb-38b1-4675-8bbf-5ab2cdb315d0",
+              "partyFullName": "Minnie Souris",
+              "partyType": "RESPONDENT",
+              "childId": "25c694c6-7fe1-479c-a2d3-5cbb5bdfa5ba",
+              "childFullName": "Melissa Mouse",
+              "relationType": "mother",
+              "childLivesWith": "Yes"
+            }
+          },
+          {
+            "id": "7a961e4b-ab53-4fff-bb72-b33c7214bc66",
+            "value": {
+              "partyId": "7fbe97eb-38b1-4675-8bbf-5ab2cdb315d0",
+              "partyFullName": "Minnie Souris",
+              "partyType": "RESPONDENT",
+              "childId": "529dbe4d-7f6c-427b-a271-4c20bbfff7b2",
+              "childFullName": "Mikey Mouse",
+              "relationType": "mother",
+              "childLivesWith": "Yes"
+            }
+          }
+        ],
+        "childAndOtherPeopleRelations": [
+          {
+            "id": "c44dc38d-5877-445d-830f-2d333a60c382",
+            "value": {
+              "partyId": "d4be8b6f-a3c3-4dd8-8eeb-03ef6519d3b6",
+              "partyFullName": "Marigold Mouse",
+              "partyType": "OtherPeople",
+              "childId": "25c694c6-7fe1-479c-a2d3-5cbb5bdfa5ba",
+              "childFullName": "Melissa Mouse",
+              "relationType": "grandParent",
+              "childLivesWith": "No"
+            }
+          },
+          {
+            "id": "a81a651a-6c55-4036-a2d9-16153922a027",
+            "value": {
+              "partyId": "d4be8b6f-a3c3-4dd8-8eeb-03ef6519d3b6",
+              "partyFullName": "Marigold Mouse",
+              "partyType": "OtherPeople",
+              "childId": "529dbe4d-7f6c-427b-a271-4c20bbfff7b2",
+              "childFullName": "Mikey Mouse",
+              "relationType": "grandParent",
+              "childLivesWith": "No"
+            }
+          }
+        ],
+        "submitAndPayDownloadApplicationLink": {
+          "document_filename": "Draft_C100_application.pdf",
+          "document_id": "050ae0f4-915f-4007-a61e-f2cae0f55813"
+        },
+        "c8Document": {
+          "document_filename": "C8Document.pdf",
+          "document_id": "c604668d-0eac-49b3-9bd6-a9c35a384ae0"
+        }
+      }
+    }
+  ]
+}
