@@ -50,7 +50,15 @@ public enum ChildArrangementOrdersEnum {
     @JsonProperty("committalWarrantFC604")
     committalWarrantFC604("committalWarrantFC604", "Warrant of committal (FC604)"),
     @JsonProperty("directionOnIssue")
-    directionOnIssueOrder("directionOnIssue", "Directions on issue");
+    directionOnIssueOrder("directionOnIssue", "Directions on issue"),
+    @JsonProperty("guardianAppointmentC46A")
+    guardianAppointmentC46A("guardianAppointmentC46A", "Appointment of a guardian (C46A)"),
+    @JsonProperty("parentalOrderC53")
+    parentalOrderC53("parentalOrderC53", "Parental Order (C53)"),
+    @JsonProperty("declarationOfParentageC63A")
+    declarationOfParentageC63A("declarationOfParentageC63A", "Declaration of Parentage (C63A)"),
+    @JsonProperty("refusalOfParentalOrderC64")
+    refusalOfParentalOrderC64("refusalOfParentalOrderC64", "Refusal of parental order (C64)");
 
 
     private final String id;

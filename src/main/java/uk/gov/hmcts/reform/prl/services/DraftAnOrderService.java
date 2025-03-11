@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -171,6 +170,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.rightToAskCourt;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.checkIfOrderCanBeUploadedBySolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
@@ -2335,12 +2335,7 @@ public class DraftAnOrderService {
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if ((null != caseData.getChildArrangementOrders()
-                && ChildArrangementOrdersEnum.standardDirectionsOrder
-                .name()
-                .equalsIgnoreCase(caseData
-                                      .getChildArrangementOrders()
-                                      .toString()))) {
+            if (checkIfOrderCanBeUploadedBySolicitor(caseData)) {
                 return prohibitedOrdersForSolicitor(errorList);
             }
 
