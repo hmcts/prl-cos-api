@@ -321,11 +321,12 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            notificationService.sendNotifications(caseData,
-                                                  quarantineLegalDoc,
-                                                  userRole);
+            notificationService.sendNotificationsAsync(caseData,
+                                   quarantineLegalDoc,
+                                   userRole);
         }
     }
+
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
