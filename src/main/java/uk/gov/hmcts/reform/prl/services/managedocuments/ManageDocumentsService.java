@@ -180,9 +180,7 @@ public class ManageDocumentsService {
         return errorList;
     }
 
-    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+    public Map<String, Object> copyDocument(CaseData caseData, Map<String, Object> caseDataUpdated, String authorization) {
         UserDetails userDetails = userService.getUserDetails(authorization);
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
@@ -700,10 +698,13 @@ public class ManageDocumentsService {
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        Map<String, Object> updatedCaseDataMap
-                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.caseData());
+
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> updatedCaseDataMap = copyDocument(caseData,
+                                                              startAllTabsUpdateDataContent.caseDataMap(),
+                                                              authorisation);
+
+        updatedCaseDataMap = appendConfidentialDocumentNameForCourtAdmin(authorisation, updatedCaseDataMap, caseData);
         //update all tabs
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
