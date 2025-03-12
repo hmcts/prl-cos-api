@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +39,7 @@ public class DgsService {
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
-                                                  Map<String, Object> dataMap) throws Exception {
+                                                  Map<String, Object> dataMap) throws DocumentGenerationException {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
@@ -46,6 +47,9 @@ public class DgsService {
                     .builder().template(templateName).values(dataMap).build()
                 );
 
+        } catch (FeignException ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -53,7 +57,8 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
-    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -78,8 +83,7 @@ public class DgsService {
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
-
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
@@ -87,7 +91,7 @@ public class DgsService {
     }
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
-                                                       Map<String, Object> dataMap) throws Exception {
+                                                       Map<String, Object> dataMap) {
 
         Map<String, Object> welshDataMap = new HashMap<>();
         welshDataMap.putAll(dataMap);
@@ -106,7 +110,8 @@ public class DgsService {
         );
     }
 
-    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
+        throws DocumentGenerationException {
 
 
         CaseData caseData = caseDetails.getCaseData();
@@ -142,7 +147,7 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (Exception ex) {
+        } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
