@@ -733,7 +733,7 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         List<Element<QuarantineLegalDoc>> confidentialTabDocuments = new ArrayList<>();
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        confidentialDocuments.parallelStream().forEach(
+        confidentialDocuments.forEach(
             element -> {
                 if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
                     quarantineLegalDoc[0] = element.getValue();
