@@ -199,6 +199,7 @@ public class ManageDocumentsService {
             updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
+        log.info("*** Confidential documents after about-to-submit *** \n{}", caseDataUpdated.get(CONFIDENTIAL_DOCUMENTS));
         return caseDataUpdated;
     }
 
