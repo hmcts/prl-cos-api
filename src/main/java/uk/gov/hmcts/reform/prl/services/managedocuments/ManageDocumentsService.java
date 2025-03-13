@@ -712,7 +712,7 @@ public class ManageDocumentsService {
 
     public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
         List<String> userRole = getLoggedInUserType(authorization);
-        if (userRole.contains(COURT_ADMIN) || userRole.contains(COURT_STAFF)) {
+        if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
@@ -733,14 +733,16 @@ public class ManageDocumentsService {
         confidentialDocuments.forEach(
             element -> {
                 if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
-
+                    log.info("Renaming document with prefix Confidential_ for court admin for {}\n", element);
                     String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(element.getValue().getCategoryId(), null);
+                    log.info("Document field name {}", attributeName);
                     Document existingDocument = objectMapper.convertValue(
                         objectMapper.convertValue(element.getValue(), Map.class).get(attributeName),
                         Document.class
                     );
-
+                    log.info("Existing document {}", existingDocument);
                     Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
+                    log.info("Renamed document {}", renamedDocument);
                     Map tempQuarantineObjectMap =
                         objectMapper.convertValue(element.getValue(), Map.class);
                     tempQuarantineObjectMap.put(
@@ -748,10 +750,12 @@ public class ManageDocumentsService {
                         renamedDocument
                     );
                     tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
+                    log.info("tempQuarantineObjectMap {}", tempQuarantineObjectMap);
                     QuarantineLegalDoc updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
                         tempQuarantineObjectMap,
                         QuarantineLegalDoc.class
                     );
+                    log.info("Updated quarantine legal document {}\n", updatedQuarantineLegalDocumentObject);
                     confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
                 } else {
                     confidentialTabDocuments.add(element);
