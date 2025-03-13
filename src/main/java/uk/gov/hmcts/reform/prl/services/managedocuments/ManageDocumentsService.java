@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -213,7 +211,8 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
-            if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+            if (!userRole.equals(COURT_ADMIN)
+                && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
                 || DocumentPartyEnum.CAFCASS_CYMRU.equals(
                 manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
                 quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
@@ -713,7 +712,7 @@ public class ManageDocumentsService {
 
     public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
         List<String> userRole = getLoggedInUserType(authorization);
-        if (userRole.contains(COURT_ADMIN) || userRole.contains(COURT_STAFF)) {
+        if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
@@ -731,28 +730,23 @@ public class ManageDocumentsService {
 
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         List<Element<QuarantineLegalDoc>> confidentialTabDocuments = new ArrayList<>();
-        final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        confidentialDocuments.parallelStream().forEach(
+        confidentialDocuments.forEach(
             element -> {
                 if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
-                    quarantineLegalDoc[0] = element.getValue();
-
-                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId(), null);
+                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(element.getValue().getCategoryId(), null);
                     Document existingDocument = objectMapper.convertValue(
-                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class).get(attributeName),
+                        objectMapper.convertValue(element.getValue(), Map.class).get(attributeName),
                         Document.class
                     );
-                    QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
-
                     Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
                     Map tempQuarantineObjectMap =
-                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
+                        objectMapper.convertValue(element.getValue(), Map.class);
                     tempQuarantineObjectMap.put(
                         attributeName,
                         renamedDocument
                     );
                     tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
-                    updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
+                    QuarantineLegalDoc updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
                         tempQuarantineObjectMap,
                         QuarantineLegalDoc.class
                     );
