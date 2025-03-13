@@ -14,12 +14,12 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FeeAndPayServiceRequestService {
+public class FeeAndPayServiceRequestService { //Welsh123
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE
         = "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
 
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE_WELSH
-        = "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application - welsh";
+        = "Nid yw Help i Dalu Ffioedd ar gael eto yng ngwasanaeth digidol Cyfraith Deulu Breifat. Dewiswch ‘Na’ i barhau â’ch cais";
 
     public List<String> validateSuppressedHelpWithFeesCheck(CallbackRequest callbackRequest, String language) {
         List<String> errorList = new ArrayList<>();

@@ -118,6 +118,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -221,7 +222,7 @@ public class CallbackController {
                 && (isNotEmpty(workflowResult.getErrors()))) {
                 List<String> errorlist = new ArrayList<>();
                 errorlist
-                    .add("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM - welsh");
+                    .add(MIAM_ERROR_WELSH);
                 return ok(
                     AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(errorlist)

@@ -121,8 +121,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
@@ -1423,9 +1427,9 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty()) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Please select at least one options from below - welsh");
+                errorList.add(PLEASE_SELECT_ONE_OPTION_WELSH);
             } else {
-                errorList.add("Please select at least one options from below");
+                errorList.add(PLEASE_SELECT_ONE_OPTION);
             }
             return false;
         } else {
@@ -2435,9 +2439,9 @@ public class DraftAnOrderService {
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {
         if (PrlAppsConstants.WELSH.equals(language)) {
-            errorList.add("This order is not available to be drafted - welsh");
+            errorList.add(ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH);
         } else {
-            errorList.add("This order is not available to be drafted");
+            errorList.add(ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR);
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errorList)

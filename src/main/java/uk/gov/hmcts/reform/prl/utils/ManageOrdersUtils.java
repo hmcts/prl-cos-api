@@ -102,7 +102,7 @@ public class ManageOrdersUtils {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
                     if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add("Please provide at least one hearing details - welsh");
+                        errorList.add("Darparwch fanylion o leiaf un gwrandawiad");//Welsh123
                     } else {
                         errorList.add("Please provide at least one hearing details");
                     }
@@ -110,14 +110,14 @@ public class ManageOrdersUtils {
             } else if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
                 if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add("Please provide at least one hearing details - welsh");
+                    errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
                 } else {
                     errorList.add("Please provide at least one hearing details");
                 }
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add("Only one hearing can be created - welsh");
+                    errorList.add("Dim ond un gwrandawiad y gellir creu");
                 } else {
                     errorList.add("Only one hearing can be created");
                 }
@@ -138,7 +138,7 @@ public class ManageOrdersUtils {
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
                         if (PrlAppsConstants.WELSH.equals(language)) {
-                            errorList.add("You must select a hearing type - welsh");
+                            errorList.add("Mae’n rhaid i chi ddewis math o wrandawiad");
                         } else {
                             errorList.add("You must select a hearing type");
                         }
@@ -159,7 +159,7 @@ public class ManageOrdersUtils {
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Please enter numeric value for Hearing estimated days - welsh");
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf dyddiau");
             } else {
                 errorList.add("Please enter numeric value for Hearing estimated days");
             }
@@ -167,7 +167,7 @@ public class ManageOrdersUtils {
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHours())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedHours())) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Please enter numeric value for Hearing estimated hours - welsh");
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf oriau");
             } else {
                 errorList.add("Please enter numeric value for Hearing estimated hours");
             }
@@ -175,7 +175,7 @@ public class ManageOrdersUtils {
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutes())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Please enter numeric value for Hearing estimated minutes - welsh");
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf munudau");
             } else {
                 errorList.add("Please enter numeric value for Hearing estimated minutes");
             }
@@ -332,7 +332,7 @@ public class ManageOrdersUtils {
             && ObjectUtils.isNotEmpty(fl404CustomFields)
             && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Please enter either applicant or respondent section - welsh");
+                errorList.add("Rhowch naill ai adran y ceisydd neu’r atebydd");
             } else {
                 errorList.add("Please enter either applicant or respondent section");
             }
@@ -381,7 +381,7 @@ public class ManageOrdersUtils {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
                     if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add("This order is not available to be created - welsh");
+                        errorList.add("Nid yw’r gorchymyn hwn ar gael i’w greu");
                     } else {
                         errorList.add("This order is not available to be created");
                     }

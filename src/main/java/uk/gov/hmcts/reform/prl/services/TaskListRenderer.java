@@ -85,11 +85,11 @@ public class TaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
-    public static final String ADD_REQUIRED_DETAILS = "Add required details";
-    public static final String MIAM_DETAILS = "MIAM details";
-    public static final String VIEW_PDF_APPLICATION = "View PDF application";
+    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol"; //Welsh123
+    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM"; //Welsh123
+    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF"; //Welsh123
     public static final String SUBMIT1 = "Submit";
-    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay";
+    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu"; //Welsh123
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -135,7 +135,9 @@ public class TaskListRenderer {
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-            .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+            .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise. /"
+                          + " Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn "
+                          + "cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. ")
             .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -414,7 +416,7 @@ public class TaskListRenderer {
                 .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); //Welsh123
     }
 
     private List<String> renderSectionErrors(List<EventValidationErrors> taskErrors) {

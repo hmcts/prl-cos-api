@@ -93,8 +93,8 @@ public class ManageDocumentsService {
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
     public static final String FM5_ERROR = "The statement of position on non-court dispute resolution "
         + "(form FM5) cannot contain confidential information or be restricted.";
-    public static final String FM5_ERROR_WELSH = "The statement of position on non-court dispute resolution "
-        + "(form FM5) cannot contain confidential information or be restricted. - welsh";
+    public static final String FM5_ERROR_WELSH = "Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys "
+        + "(ffurflen FM5) gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
@@ -112,7 +112,7 @@ public class ManageDocumentsService {
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
-        = "You must give a reason why the document should be restricted - welsh";
+        = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -186,13 +186,15 @@ public class ManageDocumentsService {
 
         return errorList;
     }
-  
+
     public String checkLanguageforDetailsError(String language) {
         return PrlAppsConstants.WELSH.equals(language) ? DETAILS_ERROR_MESSAGE_WELSH
             : DETAILS_ERROR_MESSAGE;
     }
 
-    public Map<String, Object> copyDocument(CaseData caseData, Map<String, Object> caseDataUpdated, String authorization) {
+    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
@@ -566,7 +568,7 @@ public class ManageDocumentsService {
         if (isCourtSelectedInDocumentParty(callbackRequest)
             && !checkIfUserIsCourtStaff(userDetails)) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh");
+                return List.of("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’");
             } else {
                 return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
             }

@@ -322,7 +322,7 @@ public class PrlAppsConstants {
         + "The reason for transfer is another court is in the area where the child usually lives / there are on-going "
         + "proceedings in another court / or other reason";
 
-    public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing, you may ask the court to reconsider this order. "
+    public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing, you may ask the court to reconsider this order."
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider. "
         + "Alternatively, the court may reconsider the directions at the first hearing";
@@ -564,7 +564,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "c) The list must end with a statement that it is true, and be signed and dated."
         + System.lineSeparator()
-        + "d) A statement must be sent with the list, giving more details of the allegations, referring to each allegation by its number in the list "
+        + "d) A statement must be sent with the list, giving more details of the allegations, referring to each allegation by its number in the list"
         + "and attaching all evidence relied upon in support."
         + System.lineSeparator()
         + "e) If there were other witnesses to the alleged incidents, or there are documents on which a party intends to rely, that should be "
@@ -912,10 +912,10 @@ public class PrlAppsConstants {
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
-    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
-    public static final String  ADD_APPLICATION_DETAILS = "Add application details";
-    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
+    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case / Ychwanegu pobl i’r achos"; //Welsh123
+    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol"; //Welsh123
+    public static final String  ADD_APPLICATION_DETAILS = "Add application details / Ychwanegu manylion y cais";//Welsh123
+    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information / Ychwanegu gwybodaeth ychwanegol"; //Welsh123
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
     public static final String  TASK_LIST_VERSION_V3 = "v3";
@@ -952,7 +952,7 @@ public class PrlAppsConstants {
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
     public static final String MANDATORY_JUDGE_WELSH =
-        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser - welsh";
+        "Mae enw llawn Cynghorydd Cyfreithiol yr Ynadon yn orfodol pan fydd Cynghorydd Cyfreithiol yr Ynadon yn cael ei ddewis fel teitl y Barnwr";
     public static final String DUMMY = "Dummy";
 
 
@@ -965,8 +965,7 @@ public class PrlAppsConstants {
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
-    public static final String MANDATORY_MAGISTRATE_WELSH = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
-        + " Magistrates - welsh";
+    public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
@@ -977,8 +976,8 @@ public class PrlAppsConstants {
     public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
         + "upload an order, as this case has multiple applicants or respondents.";
 
-    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH = "You need to go back to the previous screen and "
-        + "upload an order, as this case has multiple applicants or respondents. - welsh";
+    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH = "Mae arnoch angen mynd yn ôl i’r "
+        + "sgrin flaenorol ac uwchlwytho gorchymyn oherwydd bod gan yr achos hwn nifer o geiswyr neu atebwyr.";
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
@@ -1120,5 +1119,14 @@ public class PrlAppsConstants {
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
     public static final String ENGLISH = "en";
     public static final String WELSH = "cy";
+
+
+    public static final String MIAM_ERROR_WELSH = "Ni allwch wneud y cais hwn oni bai bod y ceisydd naill ai wedi mynychu"
+        + ", neu wedi’i esemptio rhag gorfod mynychu MIAM.";
+    public static final String ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR = "This order is not available to be drafted";
+    public static final String ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH = "Nid yw’r gorchymyn hwn ar gael i’w drafftio";
+    public static final String PLEASE_SELECT_ONE_OPTION = "Please select at least one options from below";
+    public static final String PLEASE_SELECT_ONE_OPTION_WELSH = "Dewiswch o leiaf un opsiwn o’r opsiynau isod";
+
 
 }
