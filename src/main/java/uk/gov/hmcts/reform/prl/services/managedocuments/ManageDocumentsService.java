@@ -212,7 +212,8 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
-            if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+            if (!userRole.equals(COURT_ADMIN)
+                && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
                 || DocumentPartyEnum.CAFCASS_CYMRU.equals(
                 manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
                 quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
