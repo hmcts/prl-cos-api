@@ -34,7 +34,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Tag(name = "fees-and-payment-controller")
 @RestController
 @RequestMapping("/fees-and-payment-apis")
@@ -43,14 +43,11 @@ public class FeesAndPaymentCitizenController {
     private static final String LOGGERMESSAGE = "Invalid Client";
     private static final String APPLICATION_TYPE_EMPTY = "Application type can not be null or empty";
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
-    @Autowired
-    private FeeService feeService;
+    private final FeeService feeService;
 
-    @Autowired
-    private PaymentRequestService paymentRequestService;
+    private final PaymentRequestService paymentRequestService;
 
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")

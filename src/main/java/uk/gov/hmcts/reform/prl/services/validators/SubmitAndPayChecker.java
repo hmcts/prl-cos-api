@@ -42,12 +42,10 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__({@Autowired, @Lazy}))
 public class SubmitAndPayChecker implements EventChecker {
 
-    @Autowired
-    @Lazy
-    private EventsChecker eventsChecker;
+    private final EventsChecker eventsChecker;
 
 
     @Override

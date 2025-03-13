@@ -180,7 +180,9 @@ public class ManageDocumentsService {
         return errorList;
     }
 
-    public Map<String, Object> copyDocument(CaseData caseData, Map<String, Object> caseDataUpdated, String authorization) {
+    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
@@ -307,12 +309,11 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            notificationService.sendNotificationsAsync(caseData,
-                                   quarantineLegalDoc,
-                                   userRole);
+            notificationService.sendNotifications(caseData,
+                                                  quarantineLegalDoc,
+                                                  userRole);
         }
     }
-
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
@@ -698,13 +699,10 @@ public class ManageDocumentsService {
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
-
-        CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        Map<String, Object> updatedCaseDataMap = copyDocument(caseData,
-                                                              startAllTabsUpdateDataContent.caseDataMap(),
-                                                              authorisation);
-
-        updatedCaseDataMap = appendConfidentialDocumentNameForCourtAdmin(authorisation, updatedCaseDataMap, caseData);
+        Map<String, Object> updatedCaseDataMap
+                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.caseData());
         //update all tabs
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
