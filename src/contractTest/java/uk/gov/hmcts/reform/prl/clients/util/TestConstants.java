@@ -18,5 +18,7 @@ public class TestConstants {
 
     public static final String PRL_CAFCASS_SEARCH_CASE_PROVIDER = "prl_cafcass_search_cases";
     public static final String PRL_CAFCASS_PACT_CONSUMER_NAME = "prl_cos_cafcass_search_cases";
-
+    public static final String CAFCASS_AUTHORIZATION_HEADER = "Authorization";
+    public static final String CAFCASS_SEARCH_CASE_ENDPOINT = "/cases/searchCases";
+    public static final String CAFCASS_SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
 }

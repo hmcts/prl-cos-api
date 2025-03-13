@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.V4Pact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,7 +33,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CAFCASS_CCD_CASE_TYPE_ID_QUERY_PARAM;
@@ -86,7 +86,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
     }
 
     @Pact(provider = CAFCASS_SEARCH_CASE_PROVIDER, consumer = CAFCASS_PACT_CONSUMER_NAME)
-    public RequestResponsePact executeGetSearchCases(PactDslWithProvider builder) {
+    public V4Pact executeGetSearchCases(PactDslWithProvider builder) {
         return
                 builder
                         .given("Search Cases exist in the datetime range for CafCass in CCD Store")
@@ -100,7 +100,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                         .willRespondWith()
                         .body(buildSearchCaseResponseDsl())
                         .status(HttpStatus.OK.value())
-                        .toPact();
+                        .toPact(V4Pact.class);
 
     }
 
@@ -132,7 +132,7 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
     }
 
     private DslPart buildSearchCaseResponseDsl() {
-        DslPart bodyPart = newJsonBody((body) -> {
+        /*DslPart bodyPart = newJsonBody((body) -> {
             body.numberType("total", 1)
                     .array("cases", (cases) -> {
                         cases.object((eachCase) -> {
@@ -308,8 +308,8 @@ public class CafcassApiConsumerCcdSearchCaseApiTest {
                                     });
                         });
                     });
-        }).build();
+        }).build();*/
 
-        return bodyPart;
+        return null;
     }
 }

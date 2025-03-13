@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.clients.refdata;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import org.junit.jupiter.api.TestInstance;
@@ -11,7 +12,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,7 +29,7 @@ public class ReferenceDataConsumerTestBase {
     static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     protected DslPart buildOrganisationResponseDsl() {
-        return newJsonBody(o -> {
+        /*return newJsonBody(o -> {
             o.stringType("name", "theKCompany")
                 .stringType("organisationIdentifier", "BJMSDFDS80808")
                 .stringType("companyNumber", "companyNumber")
@@ -45,19 +45,23 @@ public class ReferenceDataConsumerTestBase {
                             .stringType("postCode", "SM12SX");
 
                     });
-        }).build();
+        }).build();*/
+
+        return null;
     }
 
     protected DslPart buildOrganisationsResponsePactDsl() {
-        return newJsonBody(ob -> ob
+        /*return newJsonBody(ob -> ob
             .array("users", pa ->
                 pa.object(u -> u.stringType("userIdentifier", "userId"))
             ))
-            .build();
+            .build();*/
+        return null;
     }
 
     protected DslPart buildOrganisationUserResponsePactDsl() {
-        return newJsonBody(u -> u.stringType("userIdentifier", "userId"))
-            .build();
+        return null;
+        /*return newJsonBody(u -> u.stringType("userIdentifier", "userId"))
+            .build();*/
     }
 }

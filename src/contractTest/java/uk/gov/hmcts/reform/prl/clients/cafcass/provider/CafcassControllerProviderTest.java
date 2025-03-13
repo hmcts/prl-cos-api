@@ -8,10 +8,14 @@ import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
 import au.com.dius.pact.provider.spring.spring6.Spring6MockMvcTestTarget;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.controllers.cafcass.CafCassController;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -27,26 +31,27 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @Provider("prl_cafcass_search_cases")
 @PactBroker(
-    url = "${PACT_BROKER_URL:https://pact-broker.platform.hmcts.net}",
+    url = "http://localhost:80",
     consumerVersionSelectors = {
         @VersionSelector(tag = "${PACT_BRANCH_NAME:Dev}")
     },
-    providerTags = "${pactbroker.providerTags:master}",
+    providerTags = "${pactbroker.providerTags:Dev}",
     enablePendingPacts = "${pactbroker.enablePending:true}"
 )
 
+@ContextConfiguration(classes = CafcassControllerProviderContext.class)
 public class CafcassControllerProviderTest {
 
-    @MockBean
+    @Autowired
     CaseDataService caseDataService;
 
-    @MockBean
+    @Autowired
     AuthorisationService authService;
 
-    @MockBean
+    @Autowired
     EventService eventService;
 
-    ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
@@ -66,7 +71,8 @@ public class CafcassControllerProviderTest {
     public void toSetUpValidMicroservice() {
         CafCassResponse cafCassResponse;
         try {
-            cafCassResponse = objectMapper.convertValue(ResourceLoader.loadJson("response/cafcass-search-response.json"), CafCassResponse.class);
+            cafCassResponse = objectMapper.readValue(ResourceLoader.loadJson("response/cafcass-search-response.json"), CafCassResponse.class);
+            System.out.println();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
