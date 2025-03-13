@@ -410,7 +410,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
@@ -458,7 +458,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         citizenQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("citizenQuarantineDocsList");
         assertNotNull(citizenQuarantineDocsList);
@@ -508,7 +508,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
@@ -564,7 +564,7 @@ public class ManageDocumentsServiceTest {
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
@@ -616,7 +616,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
@@ -678,7 +678,7 @@ public class ManageDocumentsServiceTest {
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
@@ -737,7 +737,7 @@ public class ManageDocumentsServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
@@ -793,7 +793,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
@@ -841,7 +841,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
@@ -896,7 +896,7 @@ public class ManageDocumentsServiceTest {
         when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "234")).thenReturn(
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
@@ -953,7 +953,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
 
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
@@ -965,55 +965,12 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testAppendConfidentialDocumentNameForCourtAdminAndUpdate() {
 
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentFileName("test")
-                          .documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build())
-            .build();
-        HashMap hashMap = new HashMap();
-        hashMap.put("testDocument", manageDocuments.getDocument());
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocuments);
-
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
-
-        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-        courtStaffUploadDocListDocTabInitial.add(quarantineLegalDocElement);
-        caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffUploadDocListDocTabInitial).build();
-
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMapInitial).id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
-        when(startAllTabsUpdateDataContent.caseData()).thenReturn(caseData);
-        when(startAllTabsUpdateDataContent.caseDataMap()).thenReturn(caseDataMapInitial);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
-
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest,auth);
-
         verify(allTabService, times(1)).getStartAllTabsUpdate(Mockito.anyString());
     }
 
@@ -1141,7 +1098,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
         legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
@@ -1197,7 +1154,7 @@ public class ManageDocumentsServiceTest {
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
@@ -1286,7 +1243,7 @@ public class ManageDocumentsServiceTest {
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(caseData, callbackRequest.getCaseDetails().getData(), auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
