@@ -152,6 +152,17 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
+    public void testCopyManageDocs() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(manageDocumentsService.copyDocument(callbackRequest, auth)).thenReturn(caseDataUpdated);
+
+        manageDocumentsController.copyManageDocs(auth, callbackRequest);
+        verify(manageDocumentsService).copyDocument(callbackRequest, auth);
+    }
+
+    @Test
     public void testHandleSubmitted() {
 
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
