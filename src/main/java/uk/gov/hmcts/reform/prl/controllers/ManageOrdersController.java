@@ -296,7 +296,7 @@ public class ManageOrdersController {
         }
     }
 
-    private Map<String, Object> setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) throws Exception {
+    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -328,7 +328,6 @@ public class ManageOrdersController {
                 manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
             );
         }
-        return caseDataUpdated;
     }
 
     private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {
