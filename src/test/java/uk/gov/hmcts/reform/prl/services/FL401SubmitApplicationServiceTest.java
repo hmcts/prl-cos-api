@@ -262,7 +262,7 @@ public class FL401SubmitApplicationServiceTest {
                                                                               .label("Swansea Civil Justice Centre "
                                                                                          + "- Quay West, Quay Parade - SA1 1SP")
                                                                               .build());
-        when(locationRefDataService.getDaFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledCourtList);
+        when(locationRefDataService.getDaFilteredCourtLocations(authToken, caseData)).thenReturn(workAllocationEnabledCourtList);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -1114,7 +1114,7 @@ public class FL401SubmitApplicationServiceTest {
                                                                               .code("12345")
                                                                               .label("test")
                                                                               .build());
-        when(locationRefDataService.getDaFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledCourtList);
+        when(locationRefDataService.getDaFilteredCourtLocations(authToken, caseData)).thenReturn(workAllocationEnabledCourtList);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
