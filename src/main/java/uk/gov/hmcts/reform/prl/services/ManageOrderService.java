@@ -2659,6 +2659,9 @@ public class ManageOrderService {
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
                     .build()
             );
+            //PRL-4144 - populate edge case flag
+            caseDataUpdated.put("isEdgeCase", null != caseData.getDssCaseDetails()
+                ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
         } else {
             //PRL-4212 - update only if existing order hearings are present
             caseData = updateExistingHearingData(authorisation, caseData, caseDataUpdated);
