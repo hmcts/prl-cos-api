@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -48,6 +49,7 @@ public class CourtNavCaseController {
     private final FL401ApplicationMapper fl401ApplicationMapper;
     private  final CafcassUploadDocService cafcassUploadDocService;
     private final SystemUserService systemUserService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Third party to call this service to create a case in CCD")
@@ -63,7 +65,8 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+        if (launchDarklyClient.isFeatureEnabled("courtnav-case-creation") && Boolean.TRUE.equals(authorisationService.authoriseUser(
+            authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
             CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData, authorisation);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
@@ -75,6 +78,7 @@ public class CourtNavCaseController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
+            log.error("Feature flag is disabled or invalid user/service");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
     }
@@ -100,9 +104,26 @@ public class CourtNavCaseController {
 
             if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
-                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
+                if (launchDarklyClient.isFeatureEnabled("cafcass-doc-upload")) {
+                    log.info("processing cafcass request after authorization");
+                    cafcassUploadDocService.uploadDocument(
+                        systemUserService.getSysUserToken(),
+                        file,
+                        typeOfDocument,
+                        caseId
+                    );
+                } else {
+                    log.error("Feature flag is disabled");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
             } else {
-                courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                if (launchDarklyClient.isFeatureEnabled("courtnav-doc-upload")) {
+                    log.info("processing courtnav request after authorization");
+                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                } else {
+                    log.error("Feature flag is disabled");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
             }
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
