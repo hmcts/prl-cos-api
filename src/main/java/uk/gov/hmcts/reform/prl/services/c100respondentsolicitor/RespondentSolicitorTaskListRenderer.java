@@ -85,7 +85,7 @@ public class RespondentSolicitorTaskListRenderer {
         final RespondentTaskSection consent = newSection("1. Consent to the Application")
                 .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection yourDetails = newSection("2. Respondent's details")
+        final RespondentTaskSection yourDetails = newSection("2. Respondent's details / Manylion yr atebydd")
                 .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
                 .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
                 .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));

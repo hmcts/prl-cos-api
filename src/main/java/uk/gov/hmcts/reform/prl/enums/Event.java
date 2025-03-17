@@ -38,7 +38,7 @@ public enum Event {
     SUBMIT("submit", "Submit"),
     MANAGE_ORDERS("manageOrders", "Manage orders"),
     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildNotInTheCase","Other children not in the case / Plant eraill sydd ddim yn rhan o’r achos"),
-    CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants / "),
+    CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants / Plant a’r ceiswyr"),
     CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents / Plant a’r atebwyr"),
     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeople","Children and other people / Plant a phobl eraill"),
     // FL401 Events
@@ -50,7 +50,7 @@ public enum Event {
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application / Math o gais"),
     FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's family / Teulu’r ceisydd"),
     FL401_SOT_AND_SUBMIT("fl401StatementOfTruthAndSubmit", "Statement of truth and submit / Datganiad gwirionedd a chyflwyno"),
-    FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
+    FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit / Datganiad gwirionedd a chyflwyno"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings / Achosion eraill"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents / Uwchlwytho dogfennau"),
 
