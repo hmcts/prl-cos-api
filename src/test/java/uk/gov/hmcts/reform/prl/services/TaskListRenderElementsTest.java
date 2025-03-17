@@ -27,8 +27,8 @@ public class TaskListRenderElementsTest {
                                                  .build());
 
         assertThat(actual).isEqualToIgnoringCase(
-            "<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name"
-                + "</a>");
+            "<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name "
+                + "/ Enw'r achos</a>");
     }
 
     @Test
@@ -36,7 +36,7 @@ public class TaskListRenderElementsTest {
         String actual = underTest.renderDisabledLink(Task.builder()
                                                          .event(Event.CASE_NAME)
                                                          .build());
-        assertThat(actual).isEqualToIgnoringCase("Case name");
+        assertThat(actual).isEqualToIgnoringCase("Case name / Enw'r achos");
     }
 
     @Test

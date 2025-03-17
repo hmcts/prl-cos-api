@@ -447,7 +447,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
 
-        final TaskSection addCaseDetails = newSection("Add case details")
+        final TaskSection addCaseDetails = newSection("Add case details / Ychwanegu manylion yr achos")
             .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT));
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
