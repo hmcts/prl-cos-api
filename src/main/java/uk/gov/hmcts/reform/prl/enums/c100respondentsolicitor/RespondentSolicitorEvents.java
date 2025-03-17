@@ -25,13 +25,13 @@ public enum RespondentSolicitorEvents {
         "hasRespondentAttendedMiam,respondentWillingToAttendMiam,respondentReasonNotAttendingMiam,"
                     + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
-    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings",
+    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings / Achosion eraill",
             "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Make allegations of harm", "respondentAohYesNo,"
             + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
             + "respondentChildAbduction,respondentOtherConcerns"),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element / Elfen ryngwladol", "internationalElementChild"),
     RESPOND_ALLEGATION_OF_HARM("c100ResSolResponseToAllegationsOfHarm","Respond to allegations of harm",
             "responseToAllegationsOfHarmYesOrNoResponse,responseToAllegationsOfHarmDocument"),
     ABILITY_TO_PARTICIPATE(

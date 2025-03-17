@@ -188,8 +188,10 @@ public class TaskListRenderer {
                 .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
                 .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
-        final TaskSection relationships = newSection("Relationships")
-                .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application")
+        final TaskSection relationships = newSection("Relationships / Perthnasoedd")
+                .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application"
+                    + " / Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r "
+                    + "achos cyn i chi gyflwyno’r cais")
                 .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
                 .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
                 .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -268,8 +270,9 @@ public class TaskListRenderer {
             .withTask(tasks.get(CHILD_DETAILS_REVISED))
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
-        final TaskSection relationships = newSection("Relationships")
-            .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application")
+        final TaskSection relationships = newSection("Relationships / Perthnasoedd")
+            .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application"
+            + " / Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais")
             .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
             .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
             .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -429,7 +432,7 @@ public class TaskListRenderer {
                         .map(error -> format("%s to %s", error, taskListRenderElements.renderLink(task.getEvent()))))
                 .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I enter relationship details?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I enter relationship details? / Pam na fedraf nodi manylion perthynas?", errors);
     }
 
 
@@ -466,17 +469,17 @@ public class TaskListRenderer {
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection uploadDocuments = newSection("Upload documents")
+        final TaskSection uploadDocuments = newSection("Upload documents / Uwchlwytho dogfennau")
             .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
         final TaskSection checkAndSignApplication;
 
         if (caseData.getState().equals(AWAITING_SUBMISSION_TO_HMCTS)) {
-            checkAndSignApplication = newSection("Check and sign application")
+            checkAndSignApplication = newSection("Check and sign application / Gwirio a llofnodi’r cais")
                 .withTask(tasks.get(VIEW_PDF_DOCUMENT))
                 .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
         } else {
-            checkAndSignApplication = newSection("Check and sign application")
+            checkAndSignApplication = newSection("Check and sign application / Gwirio a llofnodi’r cais")
                 .withTask(tasks.get(VIEW_PDF_DOCUMENT))
                 .withTask(tasks.get(FL401_RESUBMIT));
         }
