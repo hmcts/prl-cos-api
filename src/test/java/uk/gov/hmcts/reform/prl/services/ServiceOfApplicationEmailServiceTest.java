@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -126,5 +128,92 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                                          .build(),
                                                                                  PartyDetails.builder().build(), "Yes");
         assertEquals("123", emailTemplateVars.getCaseReference());
+    }
+
+    @Test
+    public void testSendEmailWithAttachmentsWhenExceptionOccurs() {
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenThrow(SendGridNotificationException.class);
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+            "test",
+            "",
+            List.of(Document.builder().build()),
+            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+            new HashMap<>(),
+            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+        );
+        Assert.assertNull(emailNotificationDetails);
+    }
+
+    @Test
+    public void testSendEmailToLocalAuthorityWhenExceptionOccurs() {
+
+        CaseData caseData = CaseData.builder().id(12345L).caseTypeOfApplication("C100").applicantCaseName(
+            "Test Case 45678").build();
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenThrow(SendGridNotificationException.class);
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(
+            "",
+            caseData,
+            "email",
+            List.of(
+                Document.builder().build()),
+            "Local authority"
+        );
+        Assert.assertNull(emailNotificationDetails);
+    }
+
+    @Test
+    public void testsendEmailUsingTemplateWithAttachments1() {
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenReturn(false);
+        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+            "test",
+            "",
+            List.of(Document.builder().build()),
+            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+            new HashMap<>(),
+            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+        );
+
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+
+    }
+
+    @Test
+    public void testLocalAuthorityEmailNotification1() {
+        CaseData caseData = CaseData.builder().id(12345L).caseTypeOfApplication("C100").applicantCaseName(
+            "Test Case 45678").build();
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenReturn(false);
+        serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(
+            "",
+            caseData,
+            "email",
+            List.of(Document.builder().build()),
+            "Local authority"
+        );
+
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 }
