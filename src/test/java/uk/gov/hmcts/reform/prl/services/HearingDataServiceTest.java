@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1464,21 +1465,21 @@ public class HearingDataServiceTest {
 
     @Test
     public void testSetHearingDataForSelectedHearingForDaOrderCaCase() {
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+        PartyDetails respondentParty = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicant).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicantParty).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondentParty).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         CaseData caseData = CaseData.builder()
             .id(123)
@@ -1524,21 +1525,21 @@ public class HearingDataServiceTest {
 
     @Test
     public void testSetHearingDataForSelectedHearingForCaOrderCaCase() {
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+        PartyDetails respondentParty = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicant).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicantParty).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondentParty).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         CaseData caseData = CaseData.builder()
             .id(123)
@@ -1580,5 +1581,99 @@ public class HearingDataServiceTest {
         assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData,
                                                                           CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
+    }
+
+    @Test()
+    public void testGetHearingDataFeignException() {
+
+        List<CategoryValues> categoryValues = new ArrayList<>();
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
+        List<DynamicListElement> listHearingTypes = new ArrayList<>();
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
+        when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
+
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            //.emailId("Test")
+            //.fullName("Test")
+            //.surname("Test")
+            .personalCode("Test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        when(refDataUserService.getAllJudicialUserDetails(any())).thenThrow(FeignException.class);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        DynamicList dynamicList = DynamicList.builder()
+            //.listItems(dynamicListElementsList)
+            .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingTypes(dynamicList)
+                .hearingListedLinkedCases(dynamicList1)
+                .retrievedHearingDates(dynamicList1)
+                .retrievedHearingChannels(dynamicList1)
+                .retrievedVideoSubChannels(dynamicList1)
+                .retrievedTelephoneSubChannels(dynamicList1)
+                .retrievedCourtLocations(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .applicantName("Test")
+            .hearingJudgeNameAndEmail(judicialUser)
+            .build();
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
+            .build();
+        List<Element<HearingData>> expectedResponse =
+            hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
+                                                            hearingDataPrePopulatedDynamicLists,
+                                                            caseData);
+        assertNotNull(expectedResponse);
     }
 }
