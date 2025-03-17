@@ -621,8 +621,6 @@ public class CaseServiceTest {
             .c100RebuildData(c100RebuildData)
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails1);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData,
                                        C100_REQUEST_SUPPORT)).thenReturn(caseDetails1);
