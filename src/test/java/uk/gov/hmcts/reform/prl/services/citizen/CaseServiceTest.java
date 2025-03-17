@@ -609,10 +609,6 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .build();
-        UserDetails userDetails1 = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
 
         CaseDetails caseDetails1 = mock(CaseDetails.class);
 
