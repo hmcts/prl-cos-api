@@ -1444,7 +1444,8 @@ public class DraftAnOrderService {
             && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (caseData.getApplicants().size() > 1 || caseData.getRespondents().size() > 1)) {
             if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("You cannot add directions for a fact-finding hearing. Upload the order in manage orders - welsh");
+                errorList.add("Ni allwch ychwanegu cyfarwyddiadau ar gyfer gwrandawiad canfod ffeithiau. "
+                    + "Uwchlwythwch y gorchymyn yn yr adran rheoli achosion");
             } else {
                 errorList.add("You cannot add directions for a fact-finding hearing. Upload the order in manage orders");
             }

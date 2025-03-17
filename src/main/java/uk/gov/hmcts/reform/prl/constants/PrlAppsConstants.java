@@ -971,7 +971,7 @@ public class PrlAppsConstants {
 
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
-    public static final String ORDER_NOT_AVAILABLE_FL401_WELSH = "This order is not available to be created for FL401 cases - welsh";
+    public static final String ORDER_NOT_AVAILABLE_FL401_WELSH = "Nid yw’r gorchymyn hwn ar gael i’w greu ar gyfer achosion FL401";
 
     public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
         + "upload an order, as this case has multiple applicants or respondents.";
