@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -68,6 +69,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -3845,5 +3847,80 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(dataMap.get("orderCollection"));
 
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testsendEmailToCafcassCymruForC100CaseThrowsSendGridNotificationException() {
+        // Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassCymruEmail("test@test.com")
+                              .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doThrow(new SendGridNotificationException("SendGrid error")).when(sendgridService).sendEmailUsingTemplateWithAttachments(
+            any(SendgridEmailTemplateNames.class),
+            anyString(),
+            any(SendgridEmailConfig.class)
+        );
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        assertNotNull(caseDataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testSendEmailViaSendGridForC100CaseThrowsSendGridNotificationException() {
+        // Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
+                              .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doThrow(new SendGridNotificationException("SendGrid error")).when(sendgridService).sendEmailUsingTemplateWithAttachments(
+            any(SendgridEmailTemplateNames.class),
+            anyString(),
+            any(SendgridEmailConfig.class)
+        );
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        assertNotNull(caseDataMap.get("orderCollection"));
     }
 }

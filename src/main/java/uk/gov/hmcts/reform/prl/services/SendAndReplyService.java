@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -77,7 +79,6 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -736,7 +737,7 @@ public class SendAndReplyService {
                 caseReference
             );
             return createDynamicList(categoriesAndDocuments);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             log.error("Error in getCategoriesAndDocuments method {}", e.getMessage());
         }
         return DynamicList.builder()
@@ -1812,7 +1813,7 @@ public class SendAndReplyService {
     }
 
 
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
@@ -1850,7 +1851,7 @@ public class SendAndReplyService {
                             .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                             .build()
                     );
-                } catch (IOException e) {
+                } catch (SendGridNotificationException e) {
                     log.error("Failed to send Email", e);
                 }
             });
