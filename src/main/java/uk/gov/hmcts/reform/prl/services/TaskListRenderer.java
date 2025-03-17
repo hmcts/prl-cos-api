@@ -373,10 +373,10 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
                     || task.getEvent().equals(SUBMIT)  || task.getEvent().equals(FL401_RESUBMIT)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started / Heb ddechrau"));
                 }
                 break;
             case IN_PROGRESS:
@@ -385,11 +385,11 @@ public class TaskListRenderer {
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added / Gwybodaeth wedi’i hychwanegu"));
                 break;
             case CANNOT_START_YET:
                 lines.add(taskListRenderElements.renderDisabledLink(task)
-                        + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                        + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
@@ -398,7 +398,7 @@ public class TaskListRenderer {
                                   + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished / Wedi gorffen"));
                 }
                 break;
             default:

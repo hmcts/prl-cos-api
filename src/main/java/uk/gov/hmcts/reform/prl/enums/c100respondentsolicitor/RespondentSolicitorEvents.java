@@ -36,7 +36,7 @@ public enum RespondentSolicitorEvents {
             "responseToAllegationsOfHarmYesOrNoResponse,responseToAllegationsOfHarmDocument"),
     ABILITY_TO_PARTICIPATE(
             "c100ResSolLitigationCapacity",
-            "Litigation capacity",
+            "Litigation capacity / Capasiti cyfreitha",
             "abilityToParticipateInProceedings"
     ),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),

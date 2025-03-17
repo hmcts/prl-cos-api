@@ -14,7 +14,7 @@ import java.util.Arrays;
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1",
-        "Standard directions order - welsh"),
+        "Gorchymyn cyfarwyddo safonol"),
     @JsonProperty("directionOnIssue")
     directionOnIssue("directionOnIssue", "Directions on issue","2",
         "Cyfarwyddyd ar gychwyn achos"),
@@ -28,7 +28,7 @@ public enum CreateSelectOrderOptionsEnum {
         "Gorchymyn Trefniadau Plant, Mater Penodol neu Gamau Gwaharddedig (C43)"),
     @JsonProperty("parentalResponsibility")
     parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5",
-        "Parental responsibility order (C45A) - welsh"),
+        "Gorchymyn cyfrifoldeb rhiant (C45A)"),
     @JsonProperty("specialGuardianShip")
     specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6",
         "Gorchymyn Gwarcheidiaeth Arbennig (C43A)"),
@@ -43,7 +43,7 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
                                   "Transfer of case to another court (C49)","9",
-                  "Transfer of case to another court (C49) - welsh"),
+                  "TTrosglwyddo achos i lys arall (C49)"),
     @JsonProperty("appointmentOfGuardian")
     appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
         "Penodi gwarcheidwad (C47A)"),
@@ -55,7 +55,7 @@ public enum CreateSelectOrderOptionsEnum {
         "Gorchymyn Anheddu (FL404)"),
     @JsonProperty("powerOfArrest")
     powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13",
-        "Power of arrest (FL406) - welsh"),
+        "Pŵer i arestio (FL406)"),
     @JsonProperty("amendDischargedVaried")
     amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14",
         "Gorchymyn sydd wedi ei ddiwygio, ei ryddhau neu ei amrywio (FL404B)"),
@@ -70,7 +70,7 @@ public enum CreateSelectOrderOptionsEnum {
         "Rhybudd o achos (FL402)"),
     @JsonProperty("other")
     other("other", "Other (upload an order)","18",
-        "Other (upload an order) - welsh");
+        "Arall (uwchlwythwch orchymyn)");
 
     private final String id;
     private final String displayedValue;

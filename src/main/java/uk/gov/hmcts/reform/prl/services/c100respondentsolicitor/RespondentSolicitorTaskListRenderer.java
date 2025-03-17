@@ -157,10 +157,10 @@ public class RespondentSolicitorTaskListRenderer {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent));
                 } else if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
                     lines.add(taskListRenderElements.renderRespondentDisabledLink(respondentTask)
-                            + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                            + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
                 } else {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
+                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started / Heb ddechrau"));
                 }
                 break;
             case IN_PROGRESS:
@@ -169,7 +169,7 @@ public class RespondentSolicitorTaskListRenderer {
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                        + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
+                        + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added / Gwybodaeth wedi’i hychwanegu"));
                 break;
             case FINISHED:
                 if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
@@ -177,7 +177,7 @@ public class RespondentSolicitorTaskListRenderer {
                             + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                            + taskListRenderElements.renderImage(FINISHED, "Finished"));
+                            + taskListRenderElements.renderImage(FINISHED, "Finished / Wedi gorffen"));
                 }
                 break;
             default:

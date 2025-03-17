@@ -31,7 +31,7 @@ public enum Event {
     OTHER_PROCEEDINGS("otherProceedings", "Other proceedings / Achosion eraill"),
     ATTENDING_THE_HEARING("attendingTheHearing", "Attending the hearing / Mynychu’r gwrandawiad"),
     INTERNATIONAL_ELEMENT("internationalElement", "International element / Elfen ryngwladol"),
-    LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity"),
+    LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity / Capasiti cyfreitha"),
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements / Gofynion o ran yr iaith Gymraeg"),
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
