@@ -30,12 +30,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__({@Autowired, @Lazy}))
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
-    @Autowired
-    @Lazy
-    private EventsChecker eventsChecker;
+    private final EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
