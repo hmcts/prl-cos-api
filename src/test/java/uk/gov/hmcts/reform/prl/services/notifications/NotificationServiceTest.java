@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.BulkPrintException;
 import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -49,6 +50,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -135,6 +137,15 @@ public class NotificationServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .email("afl61@test.com")
             .build();
+        PartyDetails applicant7 = PartyDetails.builder()
+            .firstName("af7").lastName("al7")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .email("afl71@test.com")
+            .address(Address.builder().build())
+            .build();
+
+        PartyDetails applicant8 = PartyDetails.builder()
+            .build();
 
         List<Document> documents = new ArrayList<>();
         documents.add(Document.builder().documentFileName("TestFileName").build());
@@ -143,7 +154,7 @@ public class NotificationServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("test_case")
             .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4),
-                element(applicant5),element(applicant6)))
+                element(applicant5),element(applicant6),element(applicant7),element(applicant8)))
             .build();
 
         fl401CaseData = CaseData.builder()
@@ -194,7 +205,50 @@ public class NotificationServiceTest {
     }
 
     @Test
-    public void testNotificationsWhenRespondentSubmitsResponseAndExceptionOccurs() throws IOException {
+    public void testNotificationsWhenBulkPrintExceptionOccurs() throws IOException {
+        when(bulkPrintService.send(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(BulkPrintException.class);
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId("respondentApplication")
+            .uploaderRole(CITIZEN)
+            .build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
+            true).build());
+
+        assertExpectedException(() -> {
+            notificationService.sendNotifications(isCaseTypeIdC100 ? caseData : fl401CaseData,
+                                                  quarantineLegalDoc,
+                                                  CITIZEN);
+        }, RuntimeException.class);
+    }
+
+    @Test
+    public void testNotificationsWhenUserRoleIsCourtNav() throws IOException {
+
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId("respondentApplication")
+            .courtNavQuarantineDocument(Document.builder().build())
+            .uploaderRole(COURTNAV)
+            .build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
+            true).build());
+
+        notificationService.sendNotifications(
+            isCaseTypeIdC100 ? caseData : fl401CaseData,
+            quarantineLegalDoc,
+            COURTNAV
+        );
+    }
+
+
+    @Test
+    public void testNotificationsWhenSendGridNotificationExceptionOccurs() throws IOException {
 
         when(sendgridService.sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
