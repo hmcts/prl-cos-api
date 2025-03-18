@@ -1088,6 +1088,7 @@ public class CaseUtils {
 
         ClientContext clientContext = null;
 
+        log.info("client context string is {}", clientContextString);
         if (clientContextString != null) {
             byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
             String decodedString = new String(decodedBytes);
@@ -1098,6 +1099,7 @@ public class CaseUtils {
             }
         }
 
+        log.info("client context is {}", clientContext);
         if (null != clientContext
             && null != clientContext.getUserLanguage()) {
             return clientContext.getUserLanguage().getLanguage();
