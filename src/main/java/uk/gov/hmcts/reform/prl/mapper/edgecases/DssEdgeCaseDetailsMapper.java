@@ -16,12 +16,17 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.edgecases.DssCaseData;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails.FULL_NAME_FORMAT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.buildDateOfBirth;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.generatePartyUuidForFL401;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isNotEmpty;
@@ -49,6 +54,7 @@ public class DssEdgeCaseDetailsMapper {
         //Submit the case data to CCD with data mapped from DSS
         if (null != dssCaseDetails
             && StringUtils.isNotEmpty(dssCaseDetails.getDssCaseData())) {
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE));
             DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
             EdgeCaseTypeOfApplicationEnum edgeCaseType = EdgeCaseTypeOfApplicationEnum.fromKey(dssCaseData.getEdgeCaseTypeOfApplication());
             caseDataBuilder
@@ -62,7 +68,12 @@ public class DssEdgeCaseDetailsMapper {
                                     .dssApplicationFormDocuments(
                                         wrapElements(dssCaseData.getApplicantApplicationFormDocuments()))
                                     .dssAdditionalDocuments(
-                                        wrapElements(dssCaseData.getApplicantAdditionalDocuments())).build());
+                                        wrapElements(dssCaseData.getApplicantAdditionalDocuments())).build())
+                    .selectedCaseTypeID(caseData.getCaseTypeOfApplication())
+                    .applicantName(String.format(FULL_NAME_FORMAT,
+                            dssCaseData.getApplicantFirstName(), dssCaseData.getApplicantLastName()))
+                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+                    .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
                 caseDataBuilder
                         .applicants(List.of(element(getDssApplicantPartyDetails(dssCaseData))));

@@ -381,7 +381,6 @@ public class CaseService {
             dbCaseData = dbCaseData.toBuilder()
                 .userInfo(wrapElements(userInfo))
                 .taskListVersion(TASK_LIST_VERSION_V3)
-                .selectedCaseTypeID(caseData.getCaseTypeOfApplication())
                 .build();
 
             CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(dbCaseData, caseData.getDssCaseDetails());
