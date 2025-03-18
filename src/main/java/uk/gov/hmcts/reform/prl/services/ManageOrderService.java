@@ -183,6 +183,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.res
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -3473,7 +3474,7 @@ public class ManageOrderService {
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
                                                  List<String> selectedPartyIds, List<String> errorList,
                                                  Boolean isRespondent) {
-        List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
+        List<Element<PartyDetails>> selectedPartyList = nullSafeCollection(partyDetails).stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .toList();
         for (Element<PartyDetails> party : selectedPartyList) {
