@@ -86,20 +86,20 @@ public class HwfProcessUpdateCaseStateService {
                     log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
                     if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
-                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(
-                            caseDetails.getId().toString(),
-                            HWF_PROCESS_CASE_UPDATE.getValue()
-                        );
                         caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
                         if (caseDataUpdated.get(DATE_SUBMITTED_FIELD) == null) {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
                             log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseData.setDateSubmittedDate();
+                            Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
+                            caseDataUpdated.putAll(allTabsFields);
                         }
-                        Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
-                        caseDataUpdated.putAll(allTabsFields);
+                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                            = allTabService.getStartUpdateForSpecificEvent(
+                            caseDetails.getId().toString(),
+                            HWF_PROCESS_CASE_UPDATE.getValue()
+                        );
                         //Save case data
                         allTabService.submitAllTabsUpdate(
                             startAllTabsUpdateDataContent.authorisation(),
