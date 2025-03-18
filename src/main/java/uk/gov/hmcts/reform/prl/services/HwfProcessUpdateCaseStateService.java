@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -47,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
@@ -91,9 +94,13 @@ public class HwfProcessUpdateCaseStateService {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
                             log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
-                            caseData.setDateSubmittedDate();
-                            Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
-                            caseDataUpdated.putAll(allTabsFields);
+                            caseDataUpdated.put(
+                                DATE_OF_SUBMISSION,
+                                DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
+                                    DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime),
+                                    CommonUtils.DATE_OF_SUBMISSION_FORMAT
+                                ).replace("-", " ")).build()
+                            );
                         }
                         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                             = allTabService.getStartUpdateForSpecificEvent(
