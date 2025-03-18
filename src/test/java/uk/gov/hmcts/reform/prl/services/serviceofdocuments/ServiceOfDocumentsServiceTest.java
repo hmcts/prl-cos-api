@@ -271,21 +271,6 @@ public class ServiceOfDocumentsServiceTest {
         assertEquals(YesOrNo.No,response.get(SOA_OTHER_PEOPLE_PRESENT_IN_CASE));
     }
 
-
-    /*@Test
-    public void testHandleAboutToStartWithSodUnServedPack() {
-        serviceOfDocuments = serviceOfDocuments.toBuilder()
-            .sodUnServedPack(sodPack)
-            .build();
-        caseData = caseData.toBuilder()
-            .serviceOfDocuments(serviceOfDocuments)
-            .build();
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        Map<String, Object> response = serviceOfDocumentsService.handleAboutToStart(TEST_AUTHORIZATION, callbackRequest);
-        assertNotNull(response);
-        assertEquals(List.of("Can not execute service of documents, there are unserved document(s) pending review"), response.get("errors"));
-    }*/
-
     @Test
     public void testHandleAboutToSubmitC100CasePersonalServiceForApplicantSolicitor() {
         serviceOfDocuments = serviceOfDocuments.toBuilder()

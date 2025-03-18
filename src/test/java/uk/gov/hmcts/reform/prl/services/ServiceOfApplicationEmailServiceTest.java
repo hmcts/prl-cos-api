@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testLocalAuthorityEmail() throws IOException {
+    public void testLocalAuthorityEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -76,7 +75,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testLocalAuthorityEmailNotification() throws Exception {
+    public void testLocalAuthorityEmailNotification() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
             .thenReturn(true);
         CaseData caseData = CaseData.builder()
@@ -107,7 +106,7 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testsendEmailUsingTemplateWithAttachments() throws Exception {
+    public void testsendEmailUsingTemplateWithAttachments() {
         when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
             .thenReturn(true);
         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",

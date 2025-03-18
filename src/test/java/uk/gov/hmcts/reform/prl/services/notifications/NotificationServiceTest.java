@@ -93,7 +93,7 @@ public class NotificationServiceTest {
     private String uploaderRole;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         when(systemUserService.getSysUserToken()).thenReturn("auth");
         uploaderRole = CITIZEN;
         Document doc1 = Document.builder().build();

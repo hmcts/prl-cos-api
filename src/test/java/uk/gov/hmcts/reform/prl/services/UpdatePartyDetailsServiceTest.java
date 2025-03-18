@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -758,17 +757,12 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
-        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
@@ -822,17 +816,12 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
-        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -887,13 +876,8 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
@@ -983,9 +967,6 @@ public class UpdatePartyDetailsServiceTest {
         )).thenReturn(caseData);
 
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
-
-        //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
-        //final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
 
         PartyDetails applicantsFL401 = PartyDetails.builder()
             .firstName("test")
@@ -1105,16 +1086,12 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff",
                                             "applicantOrganisationPolicy", organisationPolicy
         );
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
-        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
         when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -1152,18 +1129,6 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondent1);
         respondentList.add(wrappedRespondent2);
-
-        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
-            .phoneNumber("1234567890")
-            .firstName("UserFirst")
-            .lastName("UserLast")
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .email("test@confidential.com")
-            .build();
-        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
-            .value(applicantConfidentialityDetails).build();
-        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
-            applicantConfidential);
 
         Child child = Child.builder()
             .firstName("Test")
@@ -1258,18 +1223,6 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondent1);
         respondentList.add(wrappedRespondent2);
-
-        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
-            .phoneNumber("1234567890")
-            .firstName("UserFirst")
-            .lastName("UserLast")
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .email("test@confidential.com")
-            .build();
-        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
-            .value(applicantConfidentialityDetails).build();
-        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
-            applicantConfidential);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1458,16 +1411,6 @@ public class UpdatePartyDetailsServiceTest {
                                                                    .addressLine1("addresdsd2").build())
                                                       .build()).build();
         respondentList1.add(wrappedRespondent6Changed);
-
-        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
-            .phoneNumber("1234567890")
-            .firstName("UserFirst")
-            .lastName("UserLast")
-            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .email("test@confidential.com")
-            .build();
-        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
-            .value(applicantConfidentialityDetails).build();
 
         List<Element<ResponseDocuments>> respDoclist = new ArrayList<>();
         respDoclist.add(Element.<ResponseDocuments>builder()
