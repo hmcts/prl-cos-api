@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -43,6 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP13;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP14;
@@ -106,6 +110,16 @@ public class NotificationService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @Async
+    public void sendNotificationsAsync(CaseData caseData,
+                                       QuarantineLegalDoc quarantineLegalDoc,
+                                       String userRole) {
+        scheduler.schedule(() -> sendNotifications(caseData,
+                                                   quarantineLegalDoc,
+                                                   userRole), 500, TimeUnit.MILLISECONDS);
+    }
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
