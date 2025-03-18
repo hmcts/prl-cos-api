@@ -34,7 +34,7 @@ public enum Event {
     LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity / Capasiti cyfreitha"),
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements / Gofynion o ran yr iaith Gymraeg"),
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application / Gweld y cais PDF"),
-    SUBMIT_AND_PAY("submitAndPay", "Submit and pay / Submit and pay"),
+    SUBMIT_AND_PAY("submitAndPay", "Submit and pay / Cyflwyno a thalu"),
     SUBMIT("submit", "Submit"),
     MANAGE_ORDERS("manageOrders", "Manage orders"),
     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildNotInTheCase","Other children not in the case / Plant eraill sydd ddim yn rhan o’r achos"),
