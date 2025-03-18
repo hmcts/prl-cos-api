@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.services.notifications;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -36,14 +39,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -76,7 +82,9 @@ public class NotificationServiceTest {
     private BulkPrintService bulkPrintService;
 
     private CaseData caseData;
+    private CaseData fl401CaseData;
     private QuarantineLegalDoc quarantineLegalDoc;
+    private boolean isCaseTypeIdC100 = true;
 
     @Before
     public void init() throws Exception {
@@ -115,11 +123,32 @@ public class NotificationServiceTest {
             .email("afl41@test.com")
             .address(Address.builder().addressLine1("test").build())
             .build();
+
+        PartyDetails applicant5 = PartyDetails.builder()
+            .firstName("af5").lastName("al5")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .address(Address.builder().addressLine1("test").build())
+            .build();
+
+        PartyDetails applicant6 = PartyDetails.builder()
+            .firstName("af6").lastName("al6")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .email("afl61@test.com")
+            .build();
+
         List<Document> documents = new ArrayList<>();
         documents.add(Document.builder().documentFileName("TestFileName").build());
         caseData = CaseData.builder()
             .id(123)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("test_case")
+            .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4),
+                element(applicant5),element(applicant6)))
+            .build();
+
+        fl401CaseData = CaseData.builder()
+            .id(123)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantCaseName("test_case")
             .applicants(List.of(element(applicant1), element(applicant2), element(applicant3), element(applicant4)))
             .build();
@@ -139,6 +168,52 @@ public class NotificationServiceTest {
             SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
             SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR
         );
+    }
+
+    @Test
+    public void testNotificationsWhenRespondentSubmitsResponseAndCaseTypeIdIsFL401() throws IOException {
+        isCaseTypeIdC100 = false;
+        testNotificationsWhenRespondentSubmitsResponse(
+            "respondentApplication",
+            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR
+        );
+        isCaseTypeIdC100 = true;
+    }
+
+    @Test
+    public void testNotificationsWhenRespondentSubmitsResponseAndCategoryIsApplicantC1AResponse() throws IOException {
+
+        testNotificationsWhenRespondentSubmitsResponse(
+            APPLICANT_C1A_RESPONSE,
+            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+            SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR
+        );
+    }
+
+    @Test
+    public void testNotificationsWhenRespondentSubmitsResponseAndExceptionOccurs() throws IOException {
+
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenThrow(SendGridNotificationException.class);
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId("respondentApplication")
+            .uploaderRole(CITIZEN)
+            .build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
+            true).build());
+
+        assertExpectedException(() -> {
+            notificationService.sendNotifications(isCaseTypeIdC100 ? caseData : fl401CaseData,
+                                                  quarantineLegalDoc,
+                                                  CITIZEN);
+        }, RuntimeException.class);
     }
 
     @Test
@@ -173,23 +248,26 @@ public class NotificationServiceTest {
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(
             true).build());
 
-
-        notificationService.sendNotifications(caseData,
+        notificationService.sendNotifications(isCaseTypeIdC100 ? caseData : fl401CaseData,
                                               quarantineLegalDoc,
                                               CITIZEN);
-
-        verify(emailService, times(1)).send(eq("afl11@test.com"),
+        int numberOfExpectedInvocations = 0;
+        //In source file currently there is no APPLICANT_C1A_RESPONSE. Only for testcase, below categoryId check is added
+        if (isCaseTypeIdC100 && !APPLICANT_C1A_RESPONSE.equalsIgnoreCase(quarantineLegalDoc.getCategoryId())) {
+            numberOfExpectedInvocations = 1;
+        }
+        verify(emailService, times(numberOfExpectedInvocations)).send(eq("afl11@test.com"),
                                             eq(emailTemplate), any(),
                                             eq(LanguagePreference.english)
         );
 
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+        verify(sendgridService, times(numberOfExpectedInvocations)).sendEmailUsingTemplateWithAttachments(
             eq(sendGridEmailTemplate),
             anyString(),
             any(SendgridEmailConfig.class)
         );
 
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+        verify(sendgridService, times(numberOfExpectedInvocations)).sendEmailUsingTemplateWithAttachments(
             eq(solicitorEmailTemplate),
             anyString(),
             any(SendgridEmailConfig.class)
@@ -288,5 +366,10 @@ public class NotificationServiceTest {
                 any(SendgridEmailConfig.class)
             );
         });
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        Assert.assertNotNull(exception.getMessage());
     }
 }

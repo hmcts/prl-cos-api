@@ -15,10 +15,14 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import javax.json.JsonValue;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -74,7 +78,7 @@ public class RespondentsMapperTest {
 
     @Test
     public void testRespondentsMapperEmptyCheck() {
-        respondents = Collections.emptyList();;
+        respondents = Collections.emptyList();
         assertTrue(respondentsMapper.map(respondents, respondentSolicitorMap).isEmpty());
     }
 
@@ -120,6 +124,5 @@ public class RespondentsMapperTest {
         assertNotNull(respondentsMapper.map(respondentsList, respondentSolicitorMap));
 
     }
-
 
 }
