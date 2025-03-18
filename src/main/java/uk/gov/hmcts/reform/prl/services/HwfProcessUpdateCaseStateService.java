@@ -96,7 +96,10 @@ public class HwfProcessUpdateCaseStateService {
                             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
                             log.info("DateTimeFormatter Date is {} ", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                            caseData.setDateSubmittedDate();
                         }
+                        Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
+                        caseDataUpdated.putAll(allTabsFields);
                         //Save case data
                         allTabService.submitAllTabsUpdate(
                             startAllTabsUpdateDataContent.authorisation(),
