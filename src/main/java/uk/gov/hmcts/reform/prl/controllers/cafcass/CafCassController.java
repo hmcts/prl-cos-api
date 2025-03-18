@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -40,14 +41,15 @@ public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private  final CaseDataService caseDataService;
     private final AuthorisationService authorisationService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Autowired
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
-                             CaseDataService caseDataService, AuthorisationService authorisationService) {
+                             CaseDataService caseDataService, AuthorisationService authorisationService, LaunchDarklyClient launchDarklyClient) {
         super(objectMapper, eventPublisher);
         this.caseDataService = caseDataService;
         this.authorisationService = authorisationService;
-
+        this.launchDarklyClient = launchDarklyClient;
     }
 
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -65,7 +67,8 @@ public class CafCassController extends AbstractCallbackController {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
 
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            if (launchDarklyClient.isFeatureEnabled("cafcass-search") && Boolean.TRUE.equals(authorisationService.authoriseUser(
+                authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
                 LocalDateTime startDateTime = LocalDateTime.parse(startDate);
