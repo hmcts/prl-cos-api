@@ -188,20 +188,20 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("event id: {}", callbackRequest.getEventId());
+
+            String language = CaseUtils.getLanguage(clientContext);
             if (!Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())
-                || !Event.DRAFT_AN_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 clientContext = null;
             }
-            log.info("generateDoc: clientContext: {}", clientContext);
+
             Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
                 authorisation,
                 callbackRequest,
                 clientContext,
-                CaseUtils.getLanguage(clientContext)
+                language
             );
+
             if (caseDataUpdated.containsKey("errorList")) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors((List<String>) caseDataUpdated.get("errorList"))
