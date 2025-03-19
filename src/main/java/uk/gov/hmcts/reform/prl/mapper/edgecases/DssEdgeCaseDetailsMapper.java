@@ -89,7 +89,6 @@ public class DssEdgeCaseDetailsMapper {
     }
 
     private PartyDetails getDssApplicantPartyDetails(DssCaseData dssCaseData) {
-        log.info("Post code received {}", dssCaseData.getApplicantAddressPostCode());
         return PartyDetails.builder()
             .firstName(dssCaseData.getApplicantFirstName())
             .lastName(dssCaseData.getApplicantLastName())
@@ -102,7 +101,7 @@ public class DssEdgeCaseDetailsMapper {
                          .addressLine2(dssCaseData.getApplicantAddress2())
                          .postTown(dssCaseData.getApplicantAddressTown())
                          .county(dssCaseData.getApplicantAddressCounty())
-                         .postCode(dssCaseData.getApplicantAddressPostCode())
+                         .postCode(dssCaseData.getApplicantAddressPostcode())
                          .country(dssCaseData.getApplicantAddressCountry())
                          .build())
             //Default gender to Female for FGM cases

@@ -28,7 +28,7 @@ public class DssCaseData {
     private String applicantAddress2;
     private String applicantAddressTown;
     private String applicantAddressCounty;
-    private String applicantAddressPostCode;
+    private String applicantAddressPostcode;
     private String applicantAddressCountry;
     private String selectedCourtId;
     private String applicantStatementOfTruth;
