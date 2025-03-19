@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -139,8 +140,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseServiceTest {
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String CASE_ID = "1234567891234567";
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "Bearer TestAuthToken";
+    public static final String caseId = "1234567891234567";
+    public static final String eventId = "1234567891234567";
+
+    public static final String accessCode = "123456";
 
     public static final String CA_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT,CAN9_SOA_PERSONAL_APPLICANT";
     public static final String DA_SOA_PERSONAL_APPLICANT = "DN2_SOA_PERSONAL_APPLICANT";
@@ -196,6 +201,7 @@ public class CaseServiceTest {
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
+    private CitizenUpdatedCaseData citizenUpdatedCaseData;
 
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -371,7 +377,7 @@ public class CaseServiceTest {
         map.put("fm5StatementsDocument",fm5QuarantineLegalDoc);
 
         //When
-        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(objectMapper.convertValue(quarantineLegalDoc, Map.class)).thenReturn(map);
         when(objectMapper.convertValue(fm5QuarantineLegalDoc, Map.class)).thenReturn(map);
 
@@ -401,7 +407,7 @@ public class CaseServiceTest {
             .id("00000000-0000-0000-0000-000000000000")
             .roles(List.of(Roles.CITIZEN.getValue())).build();
         //When
-        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         ServedParties servedParties = ServedParties.builder()
             .partyId("00000000-0000-0000-0000-000000000000")
@@ -462,10 +468,11 @@ public class CaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        when(caseRepository.createCase(AUTH_TOKEN, caseData)).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseRepository.createCase(authToken, caseData)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.createCase(caseData, AUTH_TOKEN);
+        CaseDetails actualCaseDetails =  caseService.createCase(caseData, authToken);
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -523,11 +530,11 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .data(stringObjectMap)
             .build();
-        when(caseService.getCase(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetailsCaseFlags);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetailsCaseFlags);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         // Unhappy path - when the request is valid, but party details is invalid.
-        Flags invalidUserExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "applicant-2");
+        Flags invalidUserExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-2");
         Assert.assertNull(invalidUserExternalFlag);
 
         // Happy path 1 - when the request is valid and respondent party external flags is retrieved from the existing case data.
@@ -537,7 +544,7 @@ public class CaseServiceTest {
             1
         )).thenReturn("caRespondent2ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(respondent2PartyFlags);
-        Flags respondentExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "respondent-2");
+        Flags respondentExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "respondent-2");
         Assert.assertNotNull(respondentExternalFlag);
         Assert.assertEquals("Respondent 2 FN Respondent 2 LN", respondentExternalFlag.getPartyName());
 
@@ -548,7 +555,7 @@ public class CaseServiceTest {
             0
         )).thenReturn("caApplicant1ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(applicant1PartyFlags);
-        Flags applicantExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "applicant-1");
+        Flags applicantExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-1");
         Assert.assertNotNull(applicantExternalFlag);
         Assert.assertEquals(applicant1PartyFlags, applicantExternalFlag);
     }
@@ -578,11 +585,12 @@ public class CaseServiceTest {
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
 
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -590,7 +598,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWhenNonCitizenEventID() throws IOException {
+    public void shouldUpdateCaseWhenNonCitizenEventId() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
@@ -610,11 +618,11 @@ public class CaseServiceTest {
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData,
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData,
                                        C100_REQUEST_SUPPORT)).thenReturn(caseDetails1);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, AUTH_TOKEN, CASE_ID,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -645,12 +653,13 @@ public class CaseServiceTest {
             .c100RebuildData(c100RebuildData)
             .build();
 
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
 
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -674,11 +683,12 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .build();
 
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -697,46 +707,47 @@ public class CaseServiceTest {
             .email("test@gmail.com")
             .build();
 
-        CaseDetails caseDetails1 = mock(CaseDetails.class);
+        CaseDetails caseDetails = mock(CaseDetails.class);
 
         CaseData updatedCaseData = caseData.toBuilder()
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
 
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails1);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
-        assertThat(actualCaseDetails).isEqualTo(caseDetails1);
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
     @Test
     public void getCaseWithHearing() {
-        when(coreCaseDataService.findCaseById(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetails);
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings(AUTH_TOKEN, "123")).thenReturn(Hearings.hearingsWith().build());
-        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(AUTH_TOKEN, CASE_ID, "yes");
+        when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "yes");
         assertNotNull(caseDataWithHearingResponse.getHearings());
     }
 
     @Test
     public void getCaseWithHearingHearingNotNeeded() {
-        when(coreCaseDataService.findCaseById(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetails);
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings(AUTH_TOKEN, CASE_ID)).thenReturn(Hearings.hearingsWith().build());
-        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(AUTH_TOKEN, CASE_ID, "dud");
+        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "dud");
         assertNull(caseDataWithHearingResponse.getHearings());
     }
 
     @Test
     public void testGetCitizenDocuments() {
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -752,7 +763,7 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(fm5QuarantineLegalDoc))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -768,7 +779,7 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(fm5QuarantineLegalDoc))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -795,7 +806,7 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(quarantineLegalDoc1))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -811,7 +822,7 @@ public class CaseServiceTest {
         citizenCaseData = CaseData.builder().state(State.DECISION_OUTCOME).build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -838,7 +849,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -856,7 +867,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
@@ -890,7 +901,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -915,7 +926,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -946,7 +957,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -977,7 +988,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -1025,7 +1036,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1085,7 +1096,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1141,7 +1152,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1204,7 +1215,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1235,7 +1246,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
@@ -1268,7 +1279,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1305,7 +1316,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -1338,7 +1349,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1367,7 +1378,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1410,7 +1421,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1438,7 +1449,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1465,7 +1476,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1499,7 +1510,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1524,7 +1535,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1551,7 +1562,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1588,7 +1599,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1624,7 +1635,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1668,7 +1679,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1734,7 +1745,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1760,7 +1771,7 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1774,7 +1785,7 @@ public class CaseServiceTest {
             .partyExternalFlags(FlagsRequest.builder().build())
             .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1799,7 +1810,7 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1830,7 +1841,7 @@ public class CaseServiceTest {
             .partyIdamId(TEST_UUID)
             .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1840,7 +1851,7 @@ public class CaseServiceTest {
     @Test
     public void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
-        Map<String, String> roles = caseService.fetchIdamAmRoles(AUTH_TOKEN, "test");
+        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, "test");
         assertEquals("role", roles.get("test"));
     }
 }
