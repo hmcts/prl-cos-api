@@ -11,7 +11,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -110,7 +117,18 @@ import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum.unrepresentedApplicant;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.*;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_APPROVED;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_NEEDED;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -4978,7 +4996,7 @@ public class ServiceOfApplicationServiceTest {
 
 
         List<Element<PartyDetails>> partiesList = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
-                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
+                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty2).build(),
                                                           Element.<PartyDetails>builder().id(testUuid).value(testParty3).build());
         serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
                                                             .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
@@ -5026,7 +5044,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenC8CheckNeededAndSOAEvent() {
+    public void testAutoLinkCitizenCaseWhenUserAndPartyEmaildIdIsDifferent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
         caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
@@ -5066,7 +5084,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testAutoLinkCitizenCaseWhenC8CheckNotApproved() {
+    public void testAutoLinkCitizenCaseWhenUserInfoIsNotPresent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
         caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
         PartyDetails testParty1 = PartyDetails.builder()
