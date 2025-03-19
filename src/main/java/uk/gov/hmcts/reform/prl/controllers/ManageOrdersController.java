@@ -184,6 +184,9 @@ public class ManageOrdersController {
                 if (Yes.equals(caseData.getIsCafcass())) {
                     caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
                 }
+                //PRL-4144 - populate edge case flag
+                caseDataUpdated.put("isEdgeCase", null != caseData.getDssCaseDetails()
+                    ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)

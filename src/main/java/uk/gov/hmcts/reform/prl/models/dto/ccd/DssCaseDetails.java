@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,8 @@ public class DssCaseDetails {
     private final EdgeCaseTypeOfApplicationEnum edgeCaseTypeOfApplication;
     private final String edgeCaseTypeOfApplicationDisplayValue;
     private final String selectedCourtId;
-    private YesOrNo isEdgeCase;
+    @JsonProperty("isEdgeCase")
+    private final YesOrNo isEdgeCase;
 
     private final String dssCaseData;
 }
