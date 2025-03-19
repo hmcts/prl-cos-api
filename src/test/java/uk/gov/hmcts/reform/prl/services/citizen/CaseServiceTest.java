@@ -462,7 +462,6 @@ public class CaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseRepository.createCase(AUTH_TOKEN, caseData)).thenReturn(caseDetails);
 
         //When
@@ -579,7 +578,6 @@ public class CaseServiceTest {
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
 
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
@@ -647,7 +645,6 @@ public class CaseServiceTest {
             .c100RebuildData(c100RebuildData)
             .build();
 
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
@@ -677,7 +674,6 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .build();
 
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
@@ -708,7 +704,6 @@ public class CaseServiceTest {
             .applicantCaseName("test")
             .build();
 
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails1);
 
