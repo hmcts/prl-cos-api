@@ -188,10 +188,14 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("event id: {}", callbackRequest.getEventId());
             if (!Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())
+                || !Event.DRAFT_AN_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 clientContext = null;
             }
+            log.info("generateDoc: clientContext: {}", clientContext);
             Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
                 authorisation,
                 callbackRequest,
