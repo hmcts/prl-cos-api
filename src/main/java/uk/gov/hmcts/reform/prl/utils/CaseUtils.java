@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.time.Duration;
@@ -1086,23 +1085,22 @@ public class CaseUtils {
 
     public static String getLanguage(String clientContextString) {
 
-        ClientContext clientContext = null;
+        WaMapper waMapper = null;
 
-        log.info("client context string is {}", clientContextString);
         if (clientContextString != null) {
             byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
             String decodedString = new String(decodedBytes);
             try {
-                clientContext = new ObjectMapper().readValue(decodedString, ClientContext.class);
+                waMapper = new ObjectMapper().readValue(decodedString, WaMapper.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());
             }
         }
 
-        log.info("client context is {}", clientContext);
-        if (null != clientContext
-            && null != clientContext.getUserLanguage()) {
-            return clientContext.getUserLanguage().getLanguage();
+        if (null != waMapper
+            && null != waMapper.getClientContext()
+            && null != waMapper.getClientContext().getUserLanguage()) {
+            return waMapper.getClientContext().getUserLanguage().getLanguage();
         }
 
         return ENGLISH;
