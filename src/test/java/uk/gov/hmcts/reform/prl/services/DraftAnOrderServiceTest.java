@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -143,7 +142,6 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DraftAnOrderServiceTest {
 
@@ -3591,7 +3589,7 @@ public class DraftAnOrderServiceTest {
             authToken,
             PrlAppsConstants.WELSH
         );
-        assertEquals("This order is not available to be drafted - welsh", response.getErrors().get(0));
+        assertEquals("Nid yw’r gorchymyn hwn ar gael i’w drafftio", response.getErrors().get(0));
         //assertEquals(1, response.getData().get("children").size());
 
     }

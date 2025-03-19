@@ -704,7 +704,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
-        final String authorisation = "Bearer someAuthorisationToken";
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -765,7 +764,6 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void  shouldPopulateCommonFieldsWithDoYouWantToEditField() {
-        final String authorisation = "Bearer someAuthorisationToken";
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -835,7 +833,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
-        final String authorisation = "Bearer someAuthorisationToken";
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -896,8 +893,6 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void testSaveServeOrderDetails() {
-
-        final String authorisation = "Bearer someAuthorisationToken";
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
