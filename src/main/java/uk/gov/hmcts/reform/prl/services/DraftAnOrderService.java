@@ -298,6 +298,10 @@ public class DraftAnOrderService {
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
+        //PRL-4144 - populate edge case flag
+        caseDataMap.put("isEdgeCase", null != caseData.getDssCaseDetails()
+            ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
+
         return caseDataMap;
     }
 
