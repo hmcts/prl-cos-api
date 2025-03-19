@@ -151,11 +151,14 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
-                callbackRequest
+                callbackRequest,
+                language
             );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
@@ -188,7 +191,8 @@ public class EditAndApproveDraftOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
                     authorisation,
-                    callbackRequest
+                    callbackRequest,
+                    PrlAppsConstants.ENGLISH
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -375,10 +379,12 @@ public class EditAndApproveDraftOrderController {
                 clientContext, callbackRequest.getEventId()
             );
 
+            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
                 caseData,
-                selectedOrder
+                selectedOrder,
+                language
             );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {

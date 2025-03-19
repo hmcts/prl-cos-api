@@ -680,7 +680,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "editReturnedOrder"
+            "editReturnedOrder",
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -732,7 +733,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "eventId"
+            "eventId",
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -793,7 +795,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "eventId"
+            "eventId",
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -848,7 +851,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
             caseData,
-            draftOrder
+            draftOrder,
+            PrlAppsConstants.ENGLISH
         );
         assertNotNull(caseDataMap);
     }
@@ -896,7 +900,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "eventId"
+            "eventId",
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -939,7 +944,8 @@ public class DraftAnOrderServiceTest {
             draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
                 "test token",
                 caseData,
-                null
+                null,
+                PrlAppsConstants.ENGLISH
             );
         } catch (Exception ex) {
             flag = false;
@@ -1217,7 +1223,8 @@ public class DraftAnOrderServiceTest {
 
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrder);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation,
+            caseData, draftOrder, PrlAppsConstants.ENGLISH);
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -1266,7 +1273,8 @@ public class DraftAnOrderServiceTest {
 
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrder);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData,
+            draftOrder, PrlAppsConstants.ENGLISH);
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -2790,7 +2798,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            EDIT_AND_APPROVE_ORDER.getId()
+            EDIT_AND_APPROVE_ORDER.getId(),
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -2986,7 +2995,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
-        stringObjectMap = draftAnOrderService.getEligibleServeOrderDetails(authToken, callbackRequest);
+        stringObjectMap = draftAnOrderService.getEligibleServeOrderDetails(authToken, callbackRequest, PrlAppsConstants.ENGLISH);
         assertNotNull(stringObjectMap);
     }
 
@@ -3041,7 +3050,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
         );
         assertNotNull(stringObjectMap);
     }
@@ -3092,7 +3102,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
         );
         assertNotNull(stringObjectMap);
     }
@@ -4276,7 +4287,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "testevent"
+            "testevent",
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
@@ -4339,7 +4351,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "eventId"
+            "eventId",
+            PrlAppsConstants.ENGLISH
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -5234,7 +5247,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "editReturnedOrder"
+            "editReturnedOrder",
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
         assertNotNull(((List<Element<DraftOrder>>) caseDataMap.get("orderCollection")));
@@ -5304,7 +5318,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "editReturnedOrder"
+            "editReturnedOrder",
+            PrlAppsConstants.ENGLISH
         );
         System.out.println("NNNNN " + caseDataMap);
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -5395,7 +5410,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "editReturnedOrder"
+            "editReturnedOrder",
+            PrlAppsConstants.ENGLISH
         );
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
         assertNotNull(((List<Element<DraftOrder>>) caseDataMap.get("orderCollection")));
@@ -5640,7 +5656,8 @@ public class DraftAnOrderServiceTest {
         caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "adminEditAndApproveAnOrder"
+            "adminEditAndApproveAnOrder",
+            PrlAppsConstants.ENGLISH
         );
         System.out.println("NNNNN " + caseDataMap);
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());

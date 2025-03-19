@@ -432,11 +432,19 @@ public class ManageOrdersUtils {
         return " ";
     }
 
-    public static String getOrderName(DraftOrder selectedOrder) {
+    public static String getOrderName(DraftOrder selectedOrder, String language) {
         if (null != selectedOrder.getC21OrderOptions()) {
-            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValueWelsh() + BOLD_END;
+            } else {
+                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+            }
         } else if (null != selectedOrder.getOrderType()) {
-            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValueWelsh() + BOLD_END;
+            } else {
+                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+            }
         }
         return null;
     }

@@ -354,7 +354,7 @@ public class DraftAnOrderService {
             || OrderStatusEnum.createdByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus()));
     }
 
-    public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
+    public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId, String language) {
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -383,7 +383,8 @@ public class DraftAnOrderService {
                         caseData,
                         authorisation,
                         draftOrder.getOrderType(),
-                        eventId
+                        eventId,
+                        language
                     );
                 }
 
@@ -408,7 +409,7 @@ public class DraftAnOrderService {
     }
 
     private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType,
-                                                         String eventId) {
+                                                         String eventId, String language) {
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
         Object dynamicList = caseData.getDraftOrdersDynamicList();
         if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
@@ -420,7 +421,7 @@ public class DraftAnOrderService {
             null,
             eventId
         );
-        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
+        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData, selectedOrder, language));
         StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
             //Setting null to draftOrderId as it needs to be set with real value only in judges approval journey from client context header
@@ -690,8 +691,9 @@ public class DraftAnOrderService {
             clientContext, eventId
         );
 
+        String languageChosen = CaseUtils.getLanguage(clientContext);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder, languageChosen));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
@@ -935,9 +937,9 @@ public class DraftAnOrderService {
         return standardDirectionOrder;
     }
 
-    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, DraftOrder selectedOrder) {
+    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, DraftOrder selectedOrder, String language) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder, language));
         caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
@@ -2092,11 +2094,11 @@ public class DraftAnOrderService {
         );
     }
 
-    public Map<String, Object> getEligibleServeOrderDetails(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> getEligibleServeOrderDetails(String authorisation, CallbackRequest callbackRequest, String language) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
-        caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
+        caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId, language));
         CaseData modifiedCaseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
@@ -2105,7 +2107,7 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> adminEditAndServeAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> adminEditAndServeAboutToSubmit(String authorisation, CallbackRequest callbackRequest, String language) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -2119,7 +2121,7 @@ public class DraftAnOrderService {
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(
                 authorisation,
-                caseData, eventId
+                caseData, eventId, language
             ));
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 CaseData modifiedCaseData = objectMapper.convertValue(

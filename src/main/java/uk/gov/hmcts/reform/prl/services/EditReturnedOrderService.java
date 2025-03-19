@@ -101,9 +101,9 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, DraftOrder selectedOrder) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, DraftOrder selectedOrder, String language) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder, language));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put(ORDER_TYPE, selectedOrder.getOrderType());
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
@@ -207,12 +207,13 @@ public class EditReturnedOrderService {
         );
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
+            String language = CaseUtils.getLanguage(clientContext);
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                         caseData.getManageOrders()
                                                                                             .getRejectedOrdersDynamicList(),
                                                                                         clientContext, callbackRequest.getEventId());
-            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder);
-            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
+            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder, language);
+            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder, language));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
