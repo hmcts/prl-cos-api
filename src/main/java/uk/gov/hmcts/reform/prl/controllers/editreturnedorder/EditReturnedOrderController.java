@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -64,9 +65,11 @@ public class EditReturnedOrderController {
     public AboutToStartOrSubmitCallbackResponse populateInstructionsToSolicitor(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authorisation, callbackRequest, null);
+            String language = CaseUtils.getLanguage(clientContext);
+            return editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authorisation, callbackRequest, null, language);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

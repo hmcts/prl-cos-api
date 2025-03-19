@@ -200,14 +200,14 @@ public class EditReturnedOrderService {
 
     public AboutToStartOrSubmitCallbackResponse populateInstructionsAndFieldsForLegalRep(String authorisation,
                                                                                          CallbackRequest callbackRequest,
-                                                                                         String clientContext) {
+                                                                                         String clientContext,
+                                                                                         String language) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
-            String language = CaseUtils.getLanguage(clientContext);
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                         caseData.getManageOrders()
                                                                                             .getRejectedOrdersDynamicList(),

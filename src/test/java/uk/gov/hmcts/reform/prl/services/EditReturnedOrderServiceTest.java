@@ -307,7 +307,8 @@ public class EditReturnedOrderServiceTest {
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(
             authToken,
             callbackRequest,
-            null
+            null,
+            PrlAppsConstants.ENGLISH
         );
         Assert.assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
         Assert.assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
@@ -333,7 +334,7 @@ public class EditReturnedOrderServiceTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
-            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null);
+            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null, PrlAppsConstants.ENGLISH);
         Assert.assertTrue(response.getErrors().size() > 0);
     }
 }
