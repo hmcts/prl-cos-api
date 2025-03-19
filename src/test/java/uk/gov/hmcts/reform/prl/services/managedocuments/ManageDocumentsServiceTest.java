@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -87,7 +86,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageDocumentsServiceTest {
 
@@ -1392,7 +1390,7 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(!caseDataMapUpdated.isEmpty());
-        assertEquals("You must give a reason why the document should be restricted - welsh", caseDataMapUpdated.get(0));
+        assertEquals("Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen", caseDataMapUpdated.get(0));
 
     }
 
@@ -1609,8 +1607,8 @@ public class ManageDocumentsServiceTest {
         List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest,
             userDetailsSolicitorRole, PrlAppsConstants.WELSH);
         assertNotNull(caseDataMapUpdated);
-        assertEquals("The statement of position on non-court dispute resolution (form FM5) "
-            + "cannot contain confidential information or be restricted. - welsh", caseDataMapUpdated.get(0));
+        assertEquals("Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys (ffurflen FM5)"
+            + " gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.", caseDataMapUpdated.get(0));
     }
 
     @Test
@@ -1666,7 +1664,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails, PrlAppsConstants.WELSH);
         Assert.assertNotNull(list);
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of' - welsh", list.get(0));
+        Assert.assertEquals("Dim ond staff gweinyddol y llys/Barnwr all ddewis yr opsiwn ‘llys’ ar gyfer yr opsiwn ‘cyflwyno ar ran’", list.get(0));
     }
 
     @Test
