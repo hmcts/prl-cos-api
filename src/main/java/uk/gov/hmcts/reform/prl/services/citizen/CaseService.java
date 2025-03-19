@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -57,6 +58,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -72,6 +74,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -124,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -200,6 +204,7 @@ public class CaseService {
     private final DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
     private final CourtSealFinderService courtSealFinderService;
     private final SystemUserService systemUserService;
+    private final CourtFinderService courtLocatorService;
 
     @Value("${courts.edgeCaseCourtList}")
     protected String edgeCasesFgmFmpoCourtsToFilter;
@@ -351,8 +356,11 @@ public class CaseService {
         return Collections.emptyList();
     }
 
-    public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, CaseData caseData) throws JsonProcessingException {
-        log.info("DSS CaseData received {}", caseData);
+    public CaseDetails updateCaseForDss(String authToken,
+                                        String caseId,
+                                        String eventId,
+                                        CaseData caseData) throws JsonProcessingException, NotFoundException {
+        log.info("DSS CaseData received {}", caseData.getDssCaseDetails());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
                 caseId,
@@ -386,10 +394,8 @@ public class CaseService {
             CaseData caseDataToSubmit = dssEdgeCaseDetailsMapper.mapDssCaseData(dbCaseData, caseData.getDssCaseDetails());
             caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
 
-            //For FGM & FMPO cases, update the court details
-            if (CaseEvent.SUBMIT_DSS_DA_EDGE_CASE.getValue().equalsIgnoreCase(eventId)) {
-                updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
-            }
+            updateCourtDetails(authToken, caseDataToSubmit, caseDataMapToBeUpdated);
+
             // Do not remove this line as it will overwrite the case state change
             caseDataMapToBeUpdated.remove("state");
         }
@@ -407,7 +413,8 @@ public class CaseService {
 
     private void updateCourtDetails(String authToken,
                                     CaseData updatedCaseData,
-                                    Map<String, Object> caseDataMapToBeUpdated) {
+                                    Map<String, Object> caseDataMapToBeUpdated) throws NotFoundException {
+        //For FGM & FMPO cases, update the court details
         if (null != updatedCaseData.getDssCaseDetails()
             && (EdgeCaseTypeOfApplicationEnum.FGM.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
             || EdgeCaseTypeOfApplicationEnum.FMPO.equals(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
@@ -428,6 +435,16 @@ public class CaseService {
                 //REMOVE Cafcass flag as it's not needed for DA Cases
                 caseDataMapToBeUpdated.remove(IS_CAFCASS);
             }
+        } else if (C100_CASE_TYPE.equalsIgnoreCase(updatedCaseData.getCaseTypeOfApplication())) {
+            //For CA cases, fetch & update nearest family court
+            updatedCaseData = updatedCaseData.toBuilder()
+                .c100RebuildData(C100RebuildData.builder()
+                                     .c100RebuildChildPostCode(updatedCaseData.getApplicants().get(0)
+                                                                   .getValue().getAddress().getPostCode()).build())
+                .build();
+            //Find nearest court for the child post code
+            Court nearestCourt = courtLocatorService.getNearestFamilyCourt(updatedCaseData);
+            caseDataMapToBeUpdated.put(COURT_NAME_FIELD, null != nearestCourt ? nearestCourt.getCourtName() : "No Court Fetched");
         }
     }
 

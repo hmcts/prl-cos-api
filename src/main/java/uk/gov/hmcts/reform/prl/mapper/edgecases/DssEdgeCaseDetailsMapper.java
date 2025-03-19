@@ -56,6 +56,7 @@ public class DssEdgeCaseDetailsMapper {
             && StringUtils.isNotEmpty(dssCaseDetails.getDssCaseData())) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE));
             DssCaseData dssCaseData = mapper.readValue(dssCaseDetails.getDssCaseData(), DssCaseData.class);
+            log.info("DSS CaseData {}", dssCaseData);
             EdgeCaseTypeOfApplicationEnum edgeCaseType = EdgeCaseTypeOfApplicationEnum.fromKey(dssCaseData.getEdgeCaseTypeOfApplication());
             caseDataBuilder
                 .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
@@ -88,6 +89,7 @@ public class DssEdgeCaseDetailsMapper {
     }
 
     private PartyDetails getDssApplicantPartyDetails(DssCaseData dssCaseData) {
+        log.info("Post code received {}", dssCaseData.getApplicantAddressPostCode());
         return PartyDetails.builder()
             .firstName(dssCaseData.getApplicantFirstName())
             .lastName(dssCaseData.getApplicantLastName())

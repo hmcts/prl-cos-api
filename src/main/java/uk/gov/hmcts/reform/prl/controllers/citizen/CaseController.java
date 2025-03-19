@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,7 +229,7 @@ public class CaseController {
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CaseData dssCaseData) throws JsonProcessingException {
+        @RequestBody CaseData dssCaseData) throws JsonProcessingException, NotFoundException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = caseService.updateCaseForDss(
                 authorisation,
