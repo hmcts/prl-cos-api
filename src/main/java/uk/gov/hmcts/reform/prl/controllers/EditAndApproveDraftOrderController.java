@@ -186,13 +186,14 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String language = CaseUtils.getLanguage(clientContext);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
                     authorisation,
                     callbackRequest,
-                    PrlAppsConstants.ENGLISH
+                    language
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -302,8 +303,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String language = CaseUtils.getLanguage(clientContext);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, PrlAppsConstants.ENGLISH);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -333,7 +335,7 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest,
                     caseData,
                     clientContext,
-                    PrlAppsConstants.ENGLISH
+                    language
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -424,14 +426,15 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, PrlAppsConstants.ENGLISH)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, PrlAppsConstants.ENGLISH)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(
