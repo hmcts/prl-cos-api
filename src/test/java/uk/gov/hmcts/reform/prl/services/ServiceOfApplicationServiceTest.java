@@ -11,14 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
-import uk.gov.hmcts.reform.ccd.client.model.Category;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -69,6 +62,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -116,15 +110,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum.unrepresentedApplicant;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -4950,5 +4936,176 @@ public class ServiceOfApplicationServiceTest {
 
         assertFalse(isCaApplicantRepresented);
     }
+
+    @Test
+    public void testAutoLinkCitizenCase() {
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
+        PartyDetails testParty1 = PartyDetails.builder()
+            .email("partyEmail@email")
+            .firstName(testString).lastName(testString).representativeFirstName(testString)
+            .partyId(UUID.fromString(TEST_UUID))
+            .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
+            .representativeFirstName(testString)
+            .representativeLastName(testString)
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+            .build();
+        PartyDetails testParty2 = PartyDetails.builder()
+            .email("partyEmail@email")
+            .solicitorEmail("SolicitorEmail@email")
+            .firstName(testString).lastName(testString).representativeFirstName(testString)
+            .partyId(UUID.fromString(TEST_UUID))
+            .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
+            .representativeFirstName(testString)
+            .representativeLastName(testString)
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+            .build();
+
+        PartyDetails testParty3 = PartyDetails.builder()
+            .email("partyEmail@email")
+            .solicitorEmail("SolicitorEmail@email")
+            .firstName(testString).lastName(testString).representativeFirstName(testString)
+            .partyId(UUID.fromString(TEST_UUID))
+            .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).idamId("idamId").build())
+            .representativeFirstName(testString)
+            .representativeLastName(testString)
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+            .build();
+
+
+        List<Element<PartyDetails>> partiesList = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
+                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
+                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty3).build());
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                                                                UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
+                                                            .applicants(partiesList)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(partiesList)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.SOA.getId());
+        assertNotNull(caseDataMap1.get(APPLICANTS));
+
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                                                                UserInfo.builder().emailAddress(testParty2.getEmail()).build()).build()))
+                                                            .applicants(partiesList)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(partiesList)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.SOA.getId());
+        assertNotNull(caseDataMap1.get(APPLICANTS));
+
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                                                                UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
+                                                            .applicants(partiesList)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(partiesList)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        assertNotNull(caseDataMap1.get(APPLICANTS));
+
+    }
+
+    @Test
+    public void testAutoLinkCitizenCaseWhenC8CheckNeededAndSOAEvent() {
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                                                                UserInfo.builder().emailAddress("email").build()).build()))
+                                                            .applicants(parties)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(parties)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.SOA.getId());
+        assertNull(caseDataMap1.get(APPLICANTS));
+
+    }
+
+    @Test
+    public void testAutoLinkCitizenCaseWhenC8CheckNeededAndApproved() {
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                                                                UserInfo.builder().emailAddress("email").build()).build()))
+                                                            .applicants(parties)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(parties)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        assertNull(caseDataMap1.get(APPLICANTS));
+
+    }
+
+    @Test
+    public void testAutoLinkCitizenCaseWhenC8CheckNotApproved() {
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
+        PartyDetails testParty1 = PartyDetails.builder()
+            .email("partyEmail@email")
+            .firstName(testString).lastName(testString).representativeFirstName(testString)
+            .partyId(UUID.fromString(TEST_UUID))
+            .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
+            .representativeFirstName(testString)
+            .representativeLastName(testString)
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+            .build();
+        List<Element<PartyDetails>> partiesList = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build());
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .applicants(partiesList)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .isApplicantRepresented(YES)
+                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                                                            .othersToNotify(partiesList)
+                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                                                            .build(),
+                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        assertNull(caseDataMap1.get(APPLICANTS));
+
+    }
+
+    @Test
+    public void testAutoLinkCitizenCaseWhenCaseCreatedBySolicitor() {
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
+        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
+                                                            .caseTypeOfApplication(C100_CASE_TYPE)
+                                                            .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                                                            .applicants(parties)
+                                                            .build(),
+                                                        caseDataMap1,Event.SOA.getId());
+        assertNull(caseDataMap1.get(APPLICANTS));
+
+    }
+
 
 }
