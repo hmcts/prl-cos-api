@@ -124,7 +124,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_AD
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_APPROVED;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_NEEDED;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE;
