@@ -138,6 +138,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -670,7 +671,7 @@ public class ManageOrderService {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
             //PRL-4144 - populate edge case flag
-            headerMap.put("isEdgeCase", null != caseData.getDssCaseDetails()
+            headerMap.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
                 ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
         } else {
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
