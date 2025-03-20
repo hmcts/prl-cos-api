@@ -156,7 +156,7 @@ public class RespondentSolicitorMiamService {
             "<p>See the <a href=\"https://www.gov.uk\" class=\"govuk-link\""
                 + "target=\"_blank\">GOV.UK</a> guidance on the <a href=\"https://www.gov.uk/guidance/family-mediation-voucher-scheme\" "
                 + "class=\"govuk-link\" target=\"_blank\">Family Mediation Voucher Scheme</a> for more information. - welsh</p>",
-            "<p>The MIAM process works, with agreement reached in over 70% of cases. - welsh</p>",
+            "<p>Mae’r broses MIAM yn gweithio. Mae partïon dros 70% o achosion yn dod i gytundeb.</p>",
             "<h3 class=\"govuk-heading-s\">Esemptiadau</h3>",
             "<p>Nid oes angen i chi fynychu MIAM os oes gennych reswm dilys. "
                 + "Er enghraifft, rydych chi neu'r plant mewn perygl o niwed.</p>",

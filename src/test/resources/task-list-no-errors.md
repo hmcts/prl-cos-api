@@ -42,7 +42,7 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress / Ar y gweill'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

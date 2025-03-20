@@ -184,8 +184,8 @@ public class TaskListRenderer {
                     If children live with another party in the case (other than the applicant or respondent) 
                     you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.
 
-                     Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn 
-                     yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.""")
+                    Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn 
+                    yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.\s""")
                 .withTask(tasks.get(CHILD_DETAILS_REVISED))
                 .withTask(tasks.get(APPLICANT_DETAILS))
                 .withTask(tasks.get(RESPONDENT_DETAILS))
@@ -270,8 +270,8 @@ public class TaskListRenderer {
                 If children live with another party in the case (other than the applicant or respondent) you can add 
                 these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.\s
 
-                 Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion 
-                 hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.""")
+                Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion 
+                hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.\s""")
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
@@ -389,7 +389,7 @@ public class TaskListRenderer {
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress / Ar y gweill"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
@@ -403,7 +403,7 @@ public class TaskListRenderer {
                 if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
                     || task.getEvent().equals(SUBMIT) || task.getEvent().equals(FL401_RESUBMIT)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet / Heb ei gychwyn eto"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage(FINISHED, "Finished / Wedi gorffen"));

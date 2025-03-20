@@ -103,6 +103,7 @@ public class TaskListRenderElementsTest {
             .build();
         String actual = underTest.renderRespondentSolicitorLink(respondentTask, "A");
 
-        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplicationA/c100ResSolConsentingToApplicationA1'>Do you give your consent?</a>", actual);
+        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplicationA/c100ResSolConsentingToApplicationA1'>"
+            + "Do you give your consent? / A ydych yn rhoi eich caniatâd?</a>", actual);
     }
 }

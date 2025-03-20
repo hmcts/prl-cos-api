@@ -25,8 +25,8 @@
 <div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent)
 you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.
 
- Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn
- yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.</div>
+Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn
+yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol. </div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -102,7 +102,7 @@ Add the details about other people in the case / Ychwanegu manylion am bobl erai
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm / Honiadau o niwed</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm / Honiadau o niwed</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress / Ar y gweill'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
