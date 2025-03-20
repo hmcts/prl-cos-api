@@ -180,11 +180,12 @@ public class TaskListRenderer {
                 .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-                .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
-                    + "'Other people in the case.' if you do complete this section, you must keep it up to date."
-                    + " / Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r "
-                    + "manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i "
-                    + "chi gadw’r wybodaeth yn gyfredol.")
+                .withInfo("""
+                    If children live with another party in the case (other than the applicant or respondent) 
+                    you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.
+
+                     Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn 
+                     yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.""")
                 .withTask(tasks.get(CHILD_DETAILS_REVISED))
                 .withTask(tasks.get(APPLICANT_DETAILS))
                 .withTask(tasks.get(RESPONDENT_DETAILS))
@@ -265,11 +266,12 @@ public class TaskListRenderer {
             .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-            .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
-                + "'Other people in the case.' if you do complete this section, you must keep it up to date."
-                + " / Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r "
-                + "manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i "
-                + "chi gadw’r wybodaeth yn gyfredol.")
+            .withInfo("""
+                If children live with another party in the case (other than the applicant or respondent) you can add 
+                these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.\s
+
+                 Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion 
+                 hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.""")
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
