@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -299,7 +300,7 @@ public class DraftAnOrderService {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
         //PRL-4144 - populate edge case flag
-        caseDataMap.put("isEdgeCase", null != caseData.getDssCaseDetails()
+        caseDataMap.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
             ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
 
         return caseDataMap;

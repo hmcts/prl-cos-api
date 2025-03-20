@@ -47,7 +47,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS_AM_PM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HWF_APP_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_THE_CASE_IN_DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper.getAwpTaskName;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
@@ -101,6 +104,9 @@ public class HelpWithFeesService {
                 .build());
             caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.Yes.getDisplayedValue());
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London"))));
+            //PRL-4138 - Check application for edge cases
+            caseDataUpdated.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
+                && YesOrNo.Yes.equals(caseData.getDssCaseDetails().getIsEdgeCase()) ? YES : NO);
         } else {
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
