@@ -127,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_APPROVED;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_NEEDED;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -3518,6 +3519,98 @@ public class ServiceOfApplicationServiceTest {
         );
 
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+    }
+
+    @Test
+    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNA() {
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,No,null,null);
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+    }
+
+    @Test
+    public void testSoaValidationWhenNoCafcassServedOptions() {
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
+                                                                          ManageOrders.builder().cafcassServedOptions(No).build());
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+    }
+
+    @Test
+    public void testSoaValidationWhenCafcassServedOptionsSelected() {
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
+                                                                          ManageOrders.builder().cafcassServedOptions(Yes).build());
+        assertNotNull(response);
+        assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testSoaValidationWhenSoaCafcassCymruServedOptionsIsYes() {
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,Yes,No,null,null);
+        assertNotNull(response);
+        assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testSoaValidationWhensoaServeLocalAuthorityIsYes() {
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,Yes,null,null);
+        assertNotNull(response);
+        assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandOtherPartiesSelectedToServe() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
+            "code").label("label").build();
+
+        DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().value(List.of(
+            dynamicMultiselectListElement)).build();
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
+    }
+
+    @Test
+    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandSoaOtherPartiesValuesIsEmpty() {
+        DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+    }
+
+    @Test
+    public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandNoValueForSoaOtherParties() {
+        DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
+    }
+
+    private AboutToStartOrSubmitCallbackResponse testSoaValidation(YesNoNotApplicable yesOrNOforSoaServeToRespOptions,
+                                                                   YesOrNo yesOrNoSoaCafcassCymruServedOptions, YesOrNo soaServeLocalAuthorityYesOrNo,
+                                                                   DynamicMultiSelectList soaOtherParties,ManageOrders manageOrders) {
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaOtherParties(soaOtherParties)
+                                      .soaServeToRespondentOptions(yesOrNOforSoaServeToRespOptions)
+                                      .soaCafcassCymruServedOptions(yesOrNoSoaCafcassCymruServedOptions)
+                                      .soaServeLocalAuthorityYesOrNo(soaServeLocalAuthorityYesOrNo).build())
+
+            .build();
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
+        return serviceOfApplicationService.soaValidation(callbackRequest1);
     }
 
     @Test
