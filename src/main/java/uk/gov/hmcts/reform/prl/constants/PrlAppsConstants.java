@@ -1088,6 +1088,7 @@ public class PrlAppsConstants {
 
     public static final String HWF_APP_LIST = "hwfAppList";
     public static final String IS_THE_CASE_IN_DRAFT_STATE = "isTheCaseInDraftState";
+    public static final String IS_C100_EDGE_CASE = "isC100EdgeCase";
 
     public static final String ADD_HWF_CASE_NOTE_SHORT = "addHwfCaseNoteShort";
 
