@@ -29,13 +29,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -43,7 +42,6 @@ import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesServ
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,9 +59,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService.HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -103,9 +99,6 @@ public class UpdatePartyDetailsServiceTest {
 
     @InjectMocks
     UpdatePartyDetailsService updatePartyDetailsService;
-
-    @Mock
-    ManageOrderService manageOrderService;
 
     @Test
     public void updateApplicantAndChildNames() {
@@ -278,15 +271,15 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId("amendApplicantsDetails")
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMapUpdated)
-                                   .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
             .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .state(State.CASE_ISSUED.getValue())
-                             .data(stringObjectMap)
-                             .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
             .build();
         when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
@@ -384,15 +377,15 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId("amendApplicantsDetails")
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMapUpdated)
-                                   .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
             .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .state(State.CASE_ISSUED.getValue())
-                             .data(stringObjectMap)
-                             .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
             .build();
         when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
@@ -491,15 +484,15 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId("amendApplicantsDetails")
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMapUpdated)
-                                   .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
             .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .state(State.CASE_ISSUED.getValue())
-                             .data(stringObjectMap)
-                             .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
             .build();
         when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
@@ -597,15 +590,15 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId("amendApplicantsDetails")
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMapUpdated)
-                                   .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
             .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .state(State.CASE_ISSUED.getValue())
-                             .data(stringObjectMap)
-                             .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
             .build();
         when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
@@ -712,15 +705,15 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .eventId("applicantsDetails")
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMapUpdated)
-                                   .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMapUpdated)
+                .build())
             .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .state(State.CASE_ISSUED.getValue())
-                             .data(stringObjectMap)
-                             .build())
+                .id(123L)
+                .state(State.CASE_ISSUED.getValue())
+                .data(stringObjectMap)
+                .build())
             .build();
         when(objectMapper.convertValue(stringObjectMapUpdated, CaseData.class)).thenReturn(caseDataUpdated1);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, "");
@@ -757,12 +750,17 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
+        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
@@ -816,12 +814,17 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
+        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -876,8 +879,13 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
@@ -967,6 +975,9 @@ public class UpdatePartyDetailsServiceTest {
         )).thenReturn(caseData);
 
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
+
+        //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
+        //final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
 
         PartyDetails applicantsFL401 = PartyDetails.builder()
             .firstName("test")
@@ -1072,10 +1083,10 @@ public class UpdatePartyDetailsServiceTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMap)
-                                   .build())
+                             .id(123L)
+                             .state(State.CASE_ISSUED.getValue())
+                             .data(stringObjectMap)
+                             .build())
             .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .state(State.CASE_ISSUED.getValue())
@@ -1086,12 +1097,16 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff",
                                             "applicantOrganisationPolicy", organisationPolicy
         );
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
         )).thenReturn(caseData);
-
+        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class)).thenReturn(caseData);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -1130,6 +1145,18 @@ public class UpdatePartyDetailsServiceTest {
         respondentList.add(wrappedRespondent1);
         respondentList.add(wrappedRespondent2);
 
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
+            applicantConfidential);
+
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -1167,10 +1194,10 @@ public class UpdatePartyDetailsServiceTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(123L)
-                                   .state(State.CASE_ISSUED.getValue())
-                                   .data(stringObjectMap)
-                                   .build())
+                             .id(123L)
+                             .state(State.CASE_ISSUED.getValue())
+                             .data(stringObjectMap)
+                             .build())
             .caseDetails(CaseDetails.builder()
                              .id(123L)
                              .state(State.CASE_ISSUED.getValue())
@@ -1223,6 +1250,18 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondent1);
         respondentList.add(wrappedRespondent2);
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
+            applicantConfidential);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1411,6 +1450,16 @@ public class UpdatePartyDetailsServiceTest {
                                                                    .addressLine1("addresdsd2").build())
                                                       .build()).build();
         respondentList1.add(wrappedRespondent6Changed);
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
 
         List<Element<ResponseDocuments>> respDoclist = new ArrayList<>();
         respDoclist.add(Element.<ResponseDocuments>builder()
@@ -2180,262 +2229,4 @@ public class UpdatePartyDetailsServiceTest {
             "newChildDetails");
         assertEquals(1, updatedChildDetails.size());
     }
-
-
-    @Test
-    public void testUpdateOtherPeopleInTheCaseConfidentialityData() {
-        PartyDetails applicant = PartyDetails.builder().firstName("test").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = new ArrayList<>();
-        applicantList.add(wrappedApplicant);
-
-        PartyDetails respondent = PartyDetails.builder().firstName("test")
-            .address(Address
-                         .builder()
-                         .build()).lastName("test").build();
-        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> respondentList = new ArrayList<>();
-        respondentList.add(wrappedRespondent);
-
-        PartyDetails otherParties = PartyDetails.builder().firstName("test")
-            .dateOfBirth(LocalDate.of(1976, 7, 7)).isDateOfBirthKnown(YesOrNo.Yes)
-            .placeOfBirth("birthPlace").isPlaceOfBirthKnown(YesOrNo.Yes).isCurrentAddressKnown(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(Document.builder().build())
-            .isAddressConfidential(YesOrNo.Yes)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .phoneNumber("1234567890")
-            .address(Address.builder().addressLine1("test").build()).lastName("test").build();
-        Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
-        PartyDetails otherParties2 = PartyDetails.builder().firstName("test")
-            .liveInRefuge(YesOrNo.No)
-            .refugeConfidentialityC8Form(Document.builder().build())
-            .address(Address.builder().addressLine1("test").addressLine2("test").build()).lastName("test").build();
-        Element<PartyDetails> wrappedOtherParties2 = Element.<PartyDetails>builder().value(otherParties2).build();
-        PartyDetails otherParties3 = PartyDetails.builder().firstName("test")
-            .address(Address.builder().addressLine1("test").postCode("test").build()).lastName("test").build();
-        Element<PartyDetails> wrappedOtherParties3 = Element.<PartyDetails>builder().value(otherParties3).build();
-        List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
-        PartyDetails otherParties4 = PartyDetails.builder().firstName("test")
-            .address(Address.builder().addressLine1("test").postCode("test").addressLine2("test").build()).lastName(
-                "test").build();
-        Element<PartyDetails> wrappedOtherParties4 = Element.<PartyDetails>builder().value(otherParties4).build();
-        otherPartiesList.add(wrappedOtherParties);
-        otherPartiesList.add(wrappedOtherParties2);
-        otherPartiesList.add(wrappedOtherParties3);
-        otherPartiesList.add(wrappedOtherParties4);
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
-            .applicants(applicantList)
-            .respondents(respondentList)
-            .otherPartyInTheCaseRevised(otherPartiesList)
-            .build();
-        Map<String, Object> objectMap = new HashMap<>();
-        objectMap.put("caseTypeOfApplication", "C100");
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
-                                                                                    .data(objectMap).id(1L)
-                                                                                    .createdDate(LocalDateTime.now())
-                                                                                    .lastModified(LocalDateTime.now())
-                                                                                    .build())
-            .caseDetailsBefore(CaseDetails.builder()
-                                   .data(objectMap)
-                                   .id(1L)
-                                   .createdDate(LocalDateTime.now())
-                                   .lastModified(LocalDateTime.now())
-                                   .build())
-            .eventId(HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])
-            .build();
-        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
-
-        RefugeConfidentialDocumentsRecord refugeConfidentialDocumentsRecord = new RefugeConfidentialDocumentsRecord(
-            List.of(element(
-                RefugeConfidentialDocuments.builder().build())),
-            List.of(element(RefugeConfidentialDocuments.builder().build()))
-        );
-        when(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
-            caseData, caseData, HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])).thenReturn(
-            refugeConfidentialDocumentsRecord);
-        doNothing().when(partyLevelCaseFlagsService).amendCaseFlags(
-            Mockito.anyMap(),
-            Mockito.anyMap(),
-            Mockito.anyString()
-        );
-        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
-            callbackRequest);
-        assertNotNull(updatedCaseData);
-
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsZero() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentAc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, true, 0, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(dataMap);
-        assertNotNull(updatedCaseData.get("respondentAc8Documents"));
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsOne() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentBc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(dataMap);
-        assertNotNull(updatedCaseData.get("respondentBc8Documents"));
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsTwo() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentCc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, false, 2, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(dataMap);
-        assertNotNull(updatedCaseData.get("respondentCc8Documents"));
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsThree() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentDc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, true, 3, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(dataMap);
-        assertNotNull(updatedCaseData.get("respondentDc8Documents"));
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsFour() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, false, 4, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(dataMap);
-        assertNotNull(updatedCaseData.get("respondentEc8Documents"));
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenPartyIndexIsNotValid() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
-                ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, false, 5, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertEquals(0,updatedCaseData.size());
-
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, false, -1, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertEquals(0,updatedCaseData.size());
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenThereAreNoRespondentC8Documents() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(updatedCaseData.get("respondentBc8Documents"));
-        assertEquals(1, ((ArrayList) updatedCaseData.get("respondentBc8Documents")).size());
-    }
-
-    @Test
-    public void testPopulateC8DocumentsWhenThereIsNoConfendentialData() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .respondentC8Document(RespondentC8Document.builder().build())
-            .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        updatePartyDetailsService.populateC8Documents(
-            "authToken", updatedCaseData, caseData, dataMap, true, 1, element(
-                PartyDetails.builder().firstName("firstName").lastName("lastName").build())
-        );
-        assertNotNull(updatedCaseData.get("respondentBc8Documents"));
-        assertEquals(Collections.emptyList(), (updatedCaseData.get("respondentBc8Documents")));
-    }
-
 }
