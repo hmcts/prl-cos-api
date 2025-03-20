@@ -110,7 +110,8 @@ public class ConfidentialityCheckService {
     }
 
     public void processOtherC8Documents(Map<String, Object> caseDataMap, CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && null != caseData.getOtherPartyInTheCaseRevised()) {
             caseData.getOtherPartyInTheCaseRevised().forEach(eachOther -> {
                 switch (caseData.getOtherPartyInTheCaseRevised().indexOf(eachOther)) {
                     case 0 -> findAndShowC8RefugeDocs(caseDataMap, eachOther.getValue(), "otherAC8RefugeDocument");
