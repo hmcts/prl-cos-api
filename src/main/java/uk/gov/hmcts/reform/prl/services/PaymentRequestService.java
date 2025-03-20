@@ -365,7 +365,10 @@ public class PaymentRequestService {
 
     public ServiceRequestReferenceStatusResponse fetchServiceRequestReferenceStatus(String authorization,
                                                                                     String serviceRequestReference) {
-        return ServiceRequestReferenceStatusResponse.builder().serviceRequestStatus("Paid").serviceRequestReference(serviceRequestReference).build();
+        return paymentApi
+            .fetchPaymentGroupReferenceStatus(authorization, authTokenGenerator.generate(),
+                                              serviceRequestReference
+            );
     }
 
     private boolean isApplicationNotAwp(CreatePaymentRequest createPaymentRequest) {
