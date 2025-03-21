@@ -125,7 +125,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
     public void testCheckHwfPaymentStatusAndUpdateCaseState() {
 
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        verify(paymentRequestService, times(1))
+        verify(paymentRequestService, times(2))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
         verify(allTabService).getStartUpdateForSpecificEvent(any(), any());
         verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture());
