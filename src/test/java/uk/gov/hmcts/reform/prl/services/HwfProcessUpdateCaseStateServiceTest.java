@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -17,18 +19,29 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -61,6 +74,8 @@ public class HwfProcessUpdateCaseStateServiceTest {
     @Mock
     PaymentRequestService paymentRequestService;
 
+    @Captor
+    private ArgumentCaptor<Map<String, Object>> caseDataUpdatedCaptor;
 
     @Before
     public void setUp() {
@@ -101,7 +116,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
                                                                                                         caseData.toMap(objectMapper),
                                                                                                         caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture())).thenReturn(caseDetails);
         when(paymentRequestService.fetchServiceRequestReferenceStatus(anyString(), anyString())).thenReturn(
             ServiceRequestReferenceStatusResponse.builder().serviceRequestStatus("Paid").build());
     }
@@ -112,6 +127,14 @@ public class HwfProcessUpdateCaseStateServiceTest {
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
         verify(paymentRequestService, times(1))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(any(), any());
+        verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture());
+        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        assertEquals(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime), caseUpdated.get(DATE_SUBMITTED_FIELD));
+        assertEquals(DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
+            DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime),
+            CommonUtils.DATE_OF_SUBMISSION_FORMAT).replace("-", " ")).build(), caseUpdated.get(DATE_OF_SUBMISSION));
 
     }
 
@@ -138,10 +161,9 @@ public class HwfProcessUpdateCaseStateServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-
         verify(paymentRequestService, times(0))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
-
+        verifyNoInteractions(allTabService);
     }
 
     @Test
@@ -158,6 +180,7 @@ public class HwfProcessUpdateCaseStateServiceTest {
         //verify
         verify(paymentRequestService, times(0))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
+        verifyNoInteractions(allTabService);
     }
 
 
