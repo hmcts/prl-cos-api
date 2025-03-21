@@ -52,12 +52,12 @@ public class RespondentSolicitorTaskListRenderer {
         if (!hasSubmitted) {
             lines.add(
                     DIV_CLASS_WIDTH_50
-                        + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
+                        + "<h3>Respond to the application for respondent " + representedRespondentName + " / "
+                        + "Ymateb i gais yr atebydd " + representedRespondentName + "</h3>"
                         + "<p>This online response combines forms C7 and C8."
                         + " It also allows you to make your own allegations of harm and violence (C1A)"
-                        + " in the section of safety concerns.</p>"
-                        + "<h3>Ymateb i gais yr atebydd " + representedRespondentName + "</h3>"
-                        + "<p>Mae'r ymateb ar-lein hwn yn cyfuno ffurflenni C7 a C8."
+                        + " in the section of safety concerns. / "
+                        + "Mae'r ymateb ar-lein hwn yn cyfuno ffurflenni C7 a C8."
                         + " Mae hefyd yn caniatáu ichi wneud eich honiadau eich hun o niwed a thrais (C1A)"
                         + " yn yr adran pryderon diogelwch.</p>"
                         + DIV);
