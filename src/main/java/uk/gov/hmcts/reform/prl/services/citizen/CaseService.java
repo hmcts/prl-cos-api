@@ -460,6 +460,12 @@ public class CaseService {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
     }
 
+    public Map<String, String> fetchPartyId(String authToken,
+                                             CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authToken);
+        return findPartyIdAndType(caseData, userDetails);
+    }
+
     public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
