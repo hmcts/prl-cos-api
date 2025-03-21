@@ -18,4 +18,5 @@ public class ProcessUrgentHelpWithFees {
     private YesOrNo outstandingBalance;
     private YesOrNo managerAgreedApplicationBeforePayment;
     private String isTheCaseInDraftState;
+    private String isC100EdgeCase;
 }

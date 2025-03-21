@@ -62,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -184,6 +185,9 @@ public class ManageOrdersController {
                 if (Yes.equals(caseData.getIsCafcass())) {
                     caseDataUpdated.put(PrlAppsConstants.CAFCASS_SERVED_OPTIONS, caseData.getManageOrders().getCafcassServedOptions());
                 }
+                //PRL-4144 - populate edge case flag
+                caseDataUpdated.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
+                    ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -465,7 +469,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)
+                || isCreateOrderForEdgeCase(caseData)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(List.of(THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE)).build();
             }
@@ -479,6 +484,13 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private boolean isCreateOrderForEdgeCase(CaseData caseData) {
+        //PRL-4144 - Block create order for edge case
+        return null != caseData.getDssCaseDetails()
+            && Yes.equals(caseData.getDssCaseDetails().getIsEdgeCase())
+            && createAnOrder.equals(caseData.getManageOrdersOptions());
     }
 
     @PostMapping(path = "/manage-orders/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
