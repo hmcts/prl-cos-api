@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -438,5 +439,106 @@ public class ApplicationsTabServiceHelperTest {
             List.of(expectedPartDetails),
             applicationsTabService.maskConfidentialDetails(List.of(partyDetails1))
         );
+    }
+
+    @Test
+    public void testMaskingPartyDetails1() {
+
+        Address address = Address.builder()
+            .addressLine1("55 Test Street")
+            .postTown("Town")
+            .postCode("N12 3BH")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .email("test@test.com")
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails expectedPartDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+
+        assertEquals(1, List.of(partyDetails1).size());
+        assertEquals(
+            List.of(partyDetails1),
+            applicationsTabService.maskConfidentialDetails(List.of(partyDetails1))
+        );
+    }
+
+
+    @Test
+    public void testMaskOtherPeopleConfidentialDetails() {
+        Address address = Address.builder()
+            .addressLine1("55 Test Street")
+            .postTown("Town")
+            .postCode("N12 3BH")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .email("test@test.com")
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+
+        List<PartyDetails> partyDetails = applicationsTabService.maskOtherPeopleConfidentialDetails(List.of(partyDetails1));
+        Assert.assertNotNull(partyDetails);
+        Assert.assertFalse(partyDetails.get(0).getEmail().equals(THIS_INFORMATION_IS_CONFIDENTIAL));
+
+    }
+
+    @Test
+    public void testMaskOtherPeopleConfidentialDetails1() {
+        Address address = Address.builder()
+            .addressLine1("55 Test Street")
+            .postTown("Town")
+            .postCode("N12 3BH")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email("test@test.com")
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .build();
+
+
+        List<PartyDetails> partyDetails = applicationsTabService.maskOtherPeopleConfidentialDetails(List.of(partyDetails1));
+        Assert.assertNotNull(partyDetails);
+        Assert.assertTrue(partyDetails.get(0).getEmail().equals(THIS_INFORMATION_IS_CONFIDENTIAL));
+
     }
 }
