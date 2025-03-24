@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -93,10 +94,14 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -162,14 +167,10 @@ public class ManageOrdersControllerTest {
     PartyDetails respondent;
 
     @Mock
-    AllTabServiceImpl tabService;
-
-    @Mock
     RefDataUserService refDataUserService;
 
     @Mock
     RoleAssignmentService roleAssignmentService;
-
 
 
     @Before
@@ -532,7 +533,7 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .isSdoSelected(No)
             .build();
 
@@ -542,7 +543,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -979,7 +980,7 @@ public class ManageOrdersControllerTest {
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .isSdoSelected(No)
             .build();
 
@@ -995,7 +996,7 @@ public class ManageOrdersControllerTest {
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .manageOrders(ManageOrders.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -1141,7 +1142,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -1256,7 +1257,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -1367,7 +1368,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -2063,7 +2064,7 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .isSdoSelected(No)
             .build();
 
@@ -2074,7 +2075,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -2130,7 +2131,7 @@ public class ManageOrdersControllerTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(standardDirectionsOrder)
             .isSdoSelected(Yes)
             .build();
@@ -2142,7 +2143,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -3383,7 +3384,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -3494,7 +3495,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(standardDirectionsOrder)
 
             .build();
@@ -3604,7 +3605,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrdersOptions(createAnOrder)
             .createSelectOrderOptions(standardDirectionsOrder)
 
             .build();
@@ -3742,4 +3743,124 @@ public class ManageOrdersControllerTest {
                                 RuntimeException.class, "Invalid Client");
 
     }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseIsYes() throws Exception {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, Yes);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertNotNull(
+            "THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE",
+            aboutToStartOrSubmitCallbackResponse.getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseWhenEdgeCaseIsNo() throws Exception {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrders() throws Exception {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, Yes);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrdersAndNoEdgeCase() throws Exception {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventWhenDssCaseDetailsIsNull() throws Exception {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, false, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    private AboutToStartOrSubmitCallbackResponse startTestManageOrderMidEventForEdgeCase(
+        ManageOrdersOptionsEnum manageOrdersOptionsEnum, boolean isDssCaseDetailsObjectReq, YesOrNo yesOrNoForEdgeCase) {
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
+            .dssCaseDetails(isDssCaseDetailsObjectReq ? DssCaseDetails.builder().isEdgeCase(yesOrNoForEdgeCase).build() : null)
+            .manageOrdersOptions(manageOrdersOptionsEnum)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
+        stringObjectMap.put("isTheOrderAboutChildren", No);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        return manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+    }
+
+    @Test
+    public void populateHeaderTestWhenCaseStateIsPrepareForHearing() throws Exception {
+        startTestPopoulateHeader(PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), No, "C100,", true);
+
+    }
+
+    @Test
+    public void populateHeaderTestWhenCaseStateDecisionOutcome() throws Exception {
+        startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", true);
+
+    }
+
+    @Test
+    public void populateHeaderTestWhenDssCaseDetailsIsNull() throws Exception {
+        startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", false);
+
+    }
+
+    private void startTestPopoulateHeader(String caseState, YesOrNo isCafcass, String caseTypeOfApplication, boolean isEdgeCase) {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .id(12345L)
+            .caseTypeOfApplication(caseTypeOfApplication)
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .isCafcass(isCafcass)
+            .dssCaseDetails(isEdgeCase ? DssCaseDetails.builder().isEdgeCase(Yes).build() : null)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("manageOrderHeader1", "test");
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        List<DynamicListElement> elements = new ArrayList<>();
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(elements);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .state(caseState)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
+            callbackRequest, authToken, s2sToken);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
+    }
+
 }
