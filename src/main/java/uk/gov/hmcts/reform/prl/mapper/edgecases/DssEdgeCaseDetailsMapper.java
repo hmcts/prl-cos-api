@@ -63,7 +63,6 @@ public class DssEdgeCaseDetailsMapper {
                 .helpWithFees(isNotEmpty(dssCaseData.getHelpWithFeesReferenceNumber()) ? YesOrNo.Yes : null)
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
                                     .isEdgeCase(YesOrNo.Yes)
-                                    .applicantPcqId(dssCaseData.getApplicantPcqId())
                                     .edgeCaseTypeOfApplication(edgeCaseType)
                                     .edgeCaseTypeOfApplicationDisplayValue(edgeCaseType.getDisplayedValue())
                                     .selectedCourtId(dssCaseData.getSelectedCourtId())
@@ -105,6 +104,7 @@ public class DssEdgeCaseDetailsMapper {
                          .postCode(dssCaseData.getApplicantAddressPostcode())
                          .country(dssCaseData.getApplicantAddressCountry())
                          .build())
+            .applicantPcqId(dssCaseData.getApplicantPcqId())
             //Default gender to Female for FGM cases
             .gender("FGM".equals(dssCaseData.getEdgeCaseTypeOfApplication())
                 && "self".equalsIgnoreCase(dssCaseData.getWhomYouAreApplying()) ? Gender.female : null)
