@@ -157,6 +157,96 @@ public class UpdateHearingActualsServiceTest {
     }
 
     @Test
+    public void testUpdateHearingActualTaskWhenHearingDataForDraftOrderIsNull() {
+
+        caseData = caseData.toBuilder()
+            .id(123L)
+            .draftOrderCollection(List.of(element(DraftOrder.builder()
+                                                      .manageOrderHearingDetails(
+                                                          List.of(element(HearingData.builder()
+                                                                              .confirmedHearingDates(DynamicList.builder().build())
+                                                                              .build())))
+                                                      .build())))
+
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                                 .manageOrderHearingDetails(
+                                                     List.of(element(HearingData.builder()
+                                                                         .confirmedHearingDates(DynamicList.builder()
+                                                                                                    .value(
+                                                                                                        DynamicListElement.builder().code(
+                                                                                                            "1234").build()).build())
+                                                                         .build())))
+                                                 .build())))
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .build();
+        caseDetails = caseDetails.toBuilder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult1 = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult1);
+        when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        updateHearingActualsService.updateHearingActuals();
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateHearingActualTaskWhenHearingDataForOrderIsNull() {
+
+        caseData = caseData.toBuilder()
+            .id(123L)
+            .draftOrderCollection(List.of(element(DraftOrder.builder()
+                                                      .manageOrderHearingDetails(
+                                                          List.of(element(HearingData.builder()
+                                                                              .confirmedHearingDates(DynamicList.builder()
+                                                                                                         .value(
+                                                                                                             DynamicListElement.builder().code(
+                                                                                                                 "1234").build()).build())
+                                                                              .build())))
+                                                      .build())))
+
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                                 .manageOrderHearingDetails(
+                                                     List.of(element(HearingData.builder()
+                                                                         .confirmedHearingDates(DynamicList.builder().build())
+                                                                         .build())))
+                                                 .build())))
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .build();
+        caseDetails = caseDetails.toBuilder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult1 = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult1);
+        when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        updateHearingActualsService.updateHearingActuals();
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
     public void testUpdateHearingActualTaskForDraftOrderCreatedForHearingId() {
         caseData = caseData.toBuilder()
             .id(123L)
