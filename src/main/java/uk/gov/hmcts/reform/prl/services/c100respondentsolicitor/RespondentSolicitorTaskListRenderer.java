@@ -121,7 +121,7 @@ public class RespondentSolicitorTaskListRenderer {
         final RespondentTaskSection viewResponse = newSection("6. View PDF response / Gweld ymateb PDF")
                 .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));
 
-        final RespondentTaskSection submit = newSection("7. Submit")
+        final RespondentTaskSection submit = newSection("7. Submit / Cyflwyno")
                 .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
 
         return Stream.of(
@@ -203,7 +203,7 @@ public class RespondentSolicitorTaskListRenderer {
                 .flatMap(task -> task.getErrors()
                         .stream()
                         .map(error -> format(
-                                "%s in %s",
+                                "%s %s",
                                 error,
                                 taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                         )))
