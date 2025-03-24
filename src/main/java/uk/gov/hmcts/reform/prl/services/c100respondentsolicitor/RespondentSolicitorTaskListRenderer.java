@@ -56,8 +56,8 @@ public class RespondentSolicitorTaskListRenderer {
                         + "Ymateb i gais yr atebydd " + representedRespondentName + "</h3>"
                         + "<p>This online response combines forms C7 and C8."
                         + " It also allows you to make your own allegations of harm and violence (C1A)"
-                        + " in the section of safety concerns. / "
-                        + "Mae'r ymateb ar-lein hwn yn cyfuno ffurflenni C7 a C8."
+                        + " in the section of safety concerns.</p>"
+                        + "\n\n<p>Mae'r ymateb ar-lein hwn yn cyfuno ffurflenni C7 a C8."
                         + " Mae hefyd yn caniatáu ichi wneud eich honiadau eich hun o niwed a thrais (C1A)"
                         + " yn yr adran pryderon diogelwch.</p>"
                         + DIV);
@@ -74,9 +74,9 @@ public class RespondentSolicitorTaskListRenderer {
             lines.add(
                     DIV_CLASS_WIDTH_50
                         + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
+                        + "<h3>Ymateb ar gyfer " + representedRespondentName + " wedi'i gyflwyno'n llwyddiannus.</h3>"
                         + "<p>You can find the response at <a href=\"" + caseDocumentsUrl + "\">Case Documents</a> tab"
                         + " in the section of safety concerns.</p>"
-                        + "<h3>Ymateb ar gyfer " + representedRespondentName + " wedi'i gyflwyno'n llwyddiannus.</h3>"
                         + "<p>Gallwch ddod o hyd i'r ymateb yn <a href=\"" + caseDocumentsUrl + "\">Dogfennau Achos</a> tab"
                         + " yn yr adran pryderon diogelwch.</p>"
                         + DIV);

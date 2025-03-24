@@ -50,7 +50,9 @@
 
 ## MIAM details / Manylion MIAM
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise. / Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. </div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.
+
+Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. </div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -126,9 +128,9 @@ Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?
 
 <div class='govuk-details__text'>
 
-ALLEGATIONS_OF_HARM_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a>
+ALLEGATIONS_OF_HARM_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a>
 
-ATTENDING_THE_HEARING_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing / Mynychu’r gwrandawiad</a>
+ATTENDING_THE_HEARING_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing / Mynychu’r gwrandawiad</a>
 
 </div>
 

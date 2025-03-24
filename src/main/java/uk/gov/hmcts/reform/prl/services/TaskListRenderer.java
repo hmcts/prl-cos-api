@@ -135,9 +135,11 @@ public class TaskListRenderer {
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-            .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise. /"
-                          + " Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn "
-                          + "cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. ")
+            .withInfo(new StringBuilder()
+                .append("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                .append("\n\nMae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn ")
+                .append("cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. ")
+                .toString())
             .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -183,10 +185,10 @@ public class TaskListRenderer {
             .withInfo(new StringBuilder()
                 .append("If children live with another party in the case (other than the applicant or respondent) you can add")
                 .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
-                .append("\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("\n\nOs oes plant yn byw gyda’r parti arall yn yr achos ")
                 .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
                 .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
-                .append("gyfredol.</div>")
+                .append("gyfredol.")
                 .toString())
             .withTask(tasks.get(CHILD_DETAILS_REVISED))
             .withTask(tasks.get(APPLICANT_DETAILS))
@@ -195,9 +197,11 @@ public class TaskListRenderer {
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships / Perthnasoedd")
-                .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application"
-                    + " / Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r "
-                    + "achos cyn i chi gyflwyno’r cais")
+                .withInfo(new StringBuilder()
+                    .append("Ensure relationship of children with all people on the case is captured, before submitting the application.")
+                    .append("\n\nSicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r ")
+                    .append("achos cyn i chi gyflwyno’r cais")
+                    .toString())
                 .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
                 .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
                 .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -223,7 +227,12 @@ public class TaskListRenderer {
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-                .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                .withInfo(new StringBuilder()
+                    .append("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                    .append("\n\nMae adran MIAM yn ddewisol ar gyfer cyflwyniad terfynol, os caiff gorchymyn cydsynio ei lanlwytho")
+                    .append("ac yn orfodol fel arall.")
+                    .toString())
+
                 .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -271,10 +280,10 @@ public class TaskListRenderer {
             .withInfo(new StringBuilder()
                 .append("If children live with another party in the case (other than the applicant or respondent) you can add")
                 .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
-                .append("\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("\n\nOs oes plant yn byw gyda’r parti arall yn yr achos ")
                 .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
                 .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
-                .append("gyfredol.</div>")
+                .append("gyfredol.")
                 .toString())
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
@@ -283,8 +292,11 @@ public class TaskListRenderer {
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships / Perthnasoedd")
-            .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application"
-            + " / Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais")
+            .withInfo(new StringBuilder()
+                .append("Ensure relationship of children with all people on the case is captured, before submitting the application.")
+                .append("Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n")
+                .append("rhan o’r achos cyn i chi gyflwyno’r cais")
+                .toString())
             .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
             .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
             .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -310,12 +322,12 @@ public class TaskListRenderer {
             .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-            .withInfo("Mediation Information and Assessment Meeting (MIAM)"
-                + " section is optional for final submission,"
-                + (" if a consent order is uploaded and mandatory otherwise. / "
-                + "Cyfarfod Gwybodaeth ac Asesu Cyfryngu (MIAM)"
-                + " mae'r adran yn ddewisol ar gyfer cyflwyniad terfynol,"
-                + " Os caiff gorchymyn cydsynio ei lanlwytho ac yn orfodol fel arall."))
+            .withInfo(new StringBuilder()
+                .append("Mediation Information and Assessment Meeting (MIAM) section is optional for final submission,")
+                .append("if a consent order is uploaded and mandatory otherwise.")
+                .append("\n\nCyfarfod Gwybodaeth ac Asesu Cyfryngu (MIAM) mae'r adran yn ddewisol ar gyfer cyflwyniad terfynol,")
+                .append("Os caiff gorchymyn cydsynio ei lanlwytho ac yn orfodol fel arall.")
+                .toString())
             .withTask(tasks.get(MIAM_POLICY_UPGRADE));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -431,7 +443,7 @@ public class TaskListRenderer {
         final List<String> errors = taskErrors.stream()
             .flatMap(task -> task.getErrors()
                 .stream()
-                .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+                .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
 
         return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); //Welsh123
@@ -444,7 +456,7 @@ public class TaskListRenderer {
         final List<String> errors = taskErrors.stream()
                 .flatMap(task -> task.getErrors()
                         .stream()
-                        .map(error -> format("%s to %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+                        .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
                 .toList();
 
         return taskListRenderElements.renderCollapsible("Why can't I enter relationship details? / Pam na fedraf nodi manylion perthynas?", errors);

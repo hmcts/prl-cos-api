@@ -110,9 +110,9 @@ Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?
 
 <div class='govuk-details__text'>
 
-WITHOUT_NOTICE_ORDER_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/withoutNoticeOrderDetails/withoutNoticeOrderDetails1'>Without notice order / Gorchymyn heb rybudd</a>
+WITHOUT_NOTICE_ORDER_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/withoutNoticeOrderDetails/withoutNoticeOrderDetails1'>Without notice order / Gorchymyn heb rybudd</a>
 
-FL401_APPLICANT_FAMILY_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family / Teulu’r ceisydd</a>
+FL401_APPLICANT_FAMILY_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family / Teulu’r ceisydd</a>
 
 </div>
 

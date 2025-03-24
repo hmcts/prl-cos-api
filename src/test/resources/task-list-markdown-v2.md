@@ -24,7 +24,7 @@
 
 <div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.</div></div>
+Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -52,7 +52,9 @@
 
 ## Relationships / Perthnasoedd
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relationship of children with all people on the case is captured, before submitting the application / Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relationship of children with all people on the case is captured, before submitting the application.
+
+Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -82,13 +84,13 @@ Why can't I enter relationship details? / Pam na fedraf nodi manylion perthynas?
 
 <div class='govuk-details__text'>
 
-Add child details / Ychwanegu manylion y plentyn to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details / Manylion y plentyn</a>
+Add child details / Ychwanegu manylion y plentyn <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details / Manylion y plentyn</a>
 
-Add people to the case details / Ychwanegu pobl at fanylion yr achos to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details / Manylion y ceisydd</a>
+Add people to the case details / Ychwanegu pobl at fanylion yr achos <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details / Manylion y ceisydd</a>
 
-Add people to the case details / Ychwanegu pobl at fanylion yr achos ar gyfer to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details / Manylion yr atebydd</a>
+Add people to the case details / Ychwanegu pobl at fanylion yr achos ar gyfer <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details / Manylion yr atebydd</a>
 
-Add the details about other people in the case / Ychwanegu manylion am bobl eraill yn yr achos to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case / Pobl eraill yn yr achos</a>
+Add the details about other people in the case / Ychwanegu manylion am bobl eraill yn yr achos <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case / Pobl eraill yn yr achos</a>
 
 </div>
 
@@ -108,7 +110,9 @@ Add the details about other people in the case / Ychwanegu manylion am bobl erai
 
 ## MIAM details / Manylion MIAM
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.
+
+Mae adran MIAM yn ddewisol ar gyfer cyflwyniad terfynol, os caiff gorchymyn cydsynio ei lanlwythoac yn orfodol fel arall.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -180,9 +184,9 @@ Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?
 
 <div class='govuk-details__text'>
 
-ALLEGATIONS_OF_HARM_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a>
+ALLEGATIONS_OF_HARM_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm / Honiadau o niwed</a>
 
-ATTENDING_THE_HEARING_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing / Mynychu’r gwrandawiad</a>
+ATTENDING_THE_HEARING_ERROR <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing / Mynychu’r gwrandawiad</a>
 
 </div>
 
