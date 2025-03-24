@@ -59,7 +59,7 @@ public class DssEdgeCaseDetailsMapper {
             log.info("DSS CaseData {}", dssCaseData);
             EdgeCaseTypeOfApplicationEnum edgeCaseType = EdgeCaseTypeOfApplicationEnum.fromKey(dssCaseData.getEdgeCaseTypeOfApplication());
             caseDataBuilder
-                .applicantPcqId(dssCaseData.getApplicantPcqId)
+                .applicantPcqId(dssCaseData.getApplicantPcqId())
                 .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
                 .helpWithFees(isNotEmpty(dssCaseData.getHelpWithFeesReferenceNumber()) ? YesOrNo.Yes : null)
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()
