@@ -333,8 +333,8 @@ public class TaskListRenderer {
                 .append("Mediation Information and Assessment Meeting (MIAM) section is optional for final submission,")
                 .append("if a consent order is uploaded and mandatory otherwise.")
                 .append(NEW_LINE)
-                .append("Cyfarfod Gwybodaeth ac Asesu Cyfryngu (MIAM) mae'r")
-                .append(" adran yn ddewisol ar gyfer cyflwyniad terfynol, Os caiff gorchymyn cydsynio ei lanlwytho ac yn orfodol fel arall.")
+                .append("Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei")
+                .append(" uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi.")
                 .toString())
             .withTask(tasks.get(MIAM_POLICY_UPGRADE));
 
