@@ -180,15 +180,19 @@ public class TaskListRenderer {
                 .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-                .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add"
-                + " these details to 'Other people in the case.' if you do complete this section, you must keep it up to date. / "
-                + "Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion "
-                + "hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.")
-                .withTask(tasks.get(CHILD_DETAILS_REVISED))
-                .withTask(tasks.get(APPLICANT_DETAILS))
-                .withTask(tasks.get(RESPONDENT_DETAILS))
-                .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
-                .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
+            .withInfo(new StringBuilder()
+                .append("If children live with another party in the case (other than the applicant or respondent) you can add")
+                .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
+                .append("\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
+                .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
+                .append("gyfredol.</div>")
+                .toString())
+            .withTask(tasks.get(CHILD_DETAILS_REVISED))
+            .withTask(tasks.get(APPLICANT_DETAILS))
+            .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
+            .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships / Perthnasoedd")
                 .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application"
@@ -264,10 +268,14 @@ public class TaskListRenderer {
             .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-            .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add"
-                + " these details to 'Other people in the case.' if you do complete this section, you must keep it up to date. / "
-                + "Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion "
-                + "hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.")
+            .withInfo(new StringBuilder()
+                .append("If children live with another party in the case (other than the applicant or respondent) you can add")
+                .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
+                .append("\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
+                .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
+                .append("gyfredol.</div>")
+                .toString())
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
