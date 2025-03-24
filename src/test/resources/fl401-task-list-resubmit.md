@@ -54,7 +54,7 @@
 
 ## Add additional information / Ychwanegu gwybodaeth ychwanegol
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

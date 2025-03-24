@@ -50,9 +50,7 @@
 
 ## MIAM details / Manylion MIAM
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.
-
-Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi. </div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.<br/>Mae llenwi’r adran Cyfarfod Asesu a Gwybodaetham Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

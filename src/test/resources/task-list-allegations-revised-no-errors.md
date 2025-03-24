@@ -22,9 +22,7 @@
 
 ## Add people to the case / Ychwanegu pobl i’r achos
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.
-
-Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.<br/>Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn gyfredol.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -52,9 +50,7 @@ Os oes plant yn byw gyda’r parti arall yn yr achos (heblaw’r ceisydd neu’r
 
 ## Relationships / Perthnasoedd
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relationship of children with all people on the case is captured, before submitting the application.
-
-Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relationship of children with all people on the case is captured, before submitting the application.<br/>Sicrhewch eich bod chi’n nodi sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -110,9 +106,7 @@ Add the details about other people in the case / Ychwanegu manylion am bobl erai
 
 ## MIAM details / Manylion MIAM
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.
-
-Mae adran MIAM yn ddewisol ar gyfer cyflwyniad terfynol, os caiff gorchymyn cydsynio ei lanlwythoac yn orfodol fel arall.</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.<br/>Mae adran MIAM yn ddewisol ar gyfer cyflwyniad terfynol, os caiff gorchymyn cydsynio ei lanlwytho ac yn orfodol fel arall.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
