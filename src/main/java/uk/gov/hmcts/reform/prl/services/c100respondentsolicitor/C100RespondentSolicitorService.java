@@ -846,18 +846,22 @@ public class C100RespondentSolicitorService {
     }
 
     private Consent optimiseConsent(Consent consent) {
-        String noConsentReason = consent.getNoConsentReason();
-        String courtOrderDetails = consent.getCourtOrderDetails();
-        if (YesOrNo.Yes.equals(consent.getConsentToTheApplication())) {
-            noConsentReason = null;
-        }
-        if (YesOrNo.No.equals(consent.getPermissionFromCourt())) {
-            courtOrderDetails = null;
-        }
-        return consent.toBuilder()
+        if (null != consent) {
+            String noConsentReason = consent.getNoConsentReason();
+            String courtOrderDetails = consent.getCourtOrderDetails();
+            if (YesOrNo.Yes.equals(consent.getConsentToTheApplication())) {
+                noConsentReason = null;
+            }
+            if (YesOrNo.No.equals(consent.getPermissionFromCourt())) {
+                courtOrderDetails = null;
+            }
+            return consent.toBuilder()
                 .noConsentReason(noConsentReason)
                 .courtOrderDetails(courtOrderDetails)
                 .build();
+        } else {
+            return Consent.builder().build();
+        }
     }
 
     public Optional<SolicitorRole> getSolicitorRole(CallbackRequest callbackRequest) {
