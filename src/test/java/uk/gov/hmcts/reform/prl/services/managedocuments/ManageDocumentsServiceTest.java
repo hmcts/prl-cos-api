@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -65,6 +66,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -2184,13 +2186,23 @@ public class ManageDocumentsServiceTest {
 
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testDownloadAndDeleteDocumentWhenExceptionOccurs() {
-        assertNotNull(manageDocumentsService.downloadAndDeleteDocument(
-            uk.gov.hmcts.reform.prl.models.documents
-                .Document.builder().documentFileName("CONFIDENTIAL_doc").build(),
-            "sysAuth"
-        ));
+        assertExpectedException(
+            () -> {
+                manageDocumentsService.downloadAndDeleteDocument(
+                    uk.gov.hmcts.reform.prl.models.documents
+                        .Document.builder().documentFileName("CONFIDENTIAL_doc").build(),
+                    "sysAuth");
+            }, IllegalStateException.class,"Failed to move document to confidential tab please retry"
+        );
+
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test

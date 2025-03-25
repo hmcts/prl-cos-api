@@ -3745,7 +3745,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventForEdgeCaseIsYes() throws Exception {
+    public void testManageOrderMidEventForEdgeCaseIsYes() {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             startTestManageOrderMidEventForEdgeCase(createAnOrder, true, Yes);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
@@ -3756,28 +3756,28 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventForEdgeCaseWhenEdgeCaseIsNo() throws Exception {
+    public void testManageOrderMidEventForEdgeCaseWhenEdgeCaseIsNo() {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             startTestManageOrderMidEventForEdgeCase(createAnOrder, true, No);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
     @Test
-    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrders() throws Exception {
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrders() {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, Yes);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
     @Test
-    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrdersAndNoEdgeCase() throws Exception {
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrdersAndNoEdgeCase() {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, No);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
     }
 
     @Test
-    public void testManageOrderMidEventWhenDssCaseDetailsIsNull() throws Exception {
+    public void testManageOrderMidEventWhenDssCaseDetailsIsNull() {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             startTestManageOrderMidEventForEdgeCase(servedSavedOrders, false, No);
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
@@ -3812,25 +3812,25 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void populateHeaderTestWhenCaseStateIsPrepareForHearing() throws Exception {
+    public void populateHeaderTestWhenCaseStateIsPrepareForHearing() {
         startTestPopoulateHeader(PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), No, "C100,", true);
 
     }
 
     @Test
-    public void populateHeaderTestWhenCaseStateDecisionOutcome() throws Exception {
+    public void populateHeaderTestWhenCaseStateDecisionOutcome() {
         startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", true);
 
     }
 
     @Test
-    public void populateHeaderTestWhenDssCaseDetailsIsNull() throws Exception {
+    public void populateHeaderTestWhenDssCaseDetailsIsNull() {
         startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", false);
 
     }
 
     private void startTestPopoulateHeader(String caseState, YesOrNo isCafcass, String caseTypeOfApplication, boolean isEdgeCase) {
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication(caseTypeOfApplication)
@@ -3841,11 +3841,11 @@ public class ManageOrdersControllerTest {
             .dssCaseDetails(isEdgeCase ? DssCaseDetails.builder().isEdgeCase(Yes).build() : null)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         stringObjectMap.put("manageOrderHeader1", "test");
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
-        when(manageOrderService.populateHeader(caseData))
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
+        when(manageOrderService.getUpdatedCaseData(caseData1)).thenReturn(stringObjectMap);
+        when(manageOrderService.populateHeader(caseData1))
             .thenReturn(stringObjectMap);
         List<DynamicListElement> elements = new ArrayList<>();
         when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(elements);

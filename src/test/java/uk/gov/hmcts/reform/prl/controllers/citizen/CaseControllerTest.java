@@ -446,7 +446,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testUpdateDssCaseWhenAuthServiceRespIsFalse() throws NotFoundException, JsonProcessingException {
+    public void testUpdateDssCaseWhenAuthServiceRespIsFalse()  {
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
 
         assertExpectedException(() -> {
@@ -455,7 +455,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testUpdateDssCaseWhenCaseDetailsUpdataionFailsAndNullResp() throws NotFoundException, JsonProcessingException {
+    public void testUpdateDssCaseWhenCaseDetailsUpdataionFailsAndNullResp() {
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
 
         assertExpectedException(() -> {
@@ -494,10 +494,7 @@ public class CaseControllerTest {
     @Test
     public void testCourtListWhenAuthServiceResponseIsFalse() {
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
-        assertExpectedException(
-            () -> {
-                startTestGetEdgeCaseCourtList();
-            }, RuntimeException.class, INVALID_CLIENT);
+        assertExpectedException(this::startTestGetEdgeCaseCourtList,RuntimeException.class, INVALID_CLIENT);
     }
 
 

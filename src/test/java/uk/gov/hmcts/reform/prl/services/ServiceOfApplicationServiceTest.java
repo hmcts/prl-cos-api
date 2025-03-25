@@ -5316,7 +5316,7 @@ public class ServiceOfApplicationServiceTest {
         when(hearingService.getHearings(authorization, String.valueOf(123L))).thenReturn(null);
         ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
             .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
-        CaseData caseData1 = CaseData.builder().id(Long.valueOf(123L)).caseTypeOfApplication(C100_CASE_TYPE)
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(serviceOfApplication1)
             .respondents(List.of(element(PartyDetails.builder().build())))
             .applicants(List.of(element(PartyDetails.builder().response(Response.builder().build()).build()))).build();
@@ -5338,7 +5338,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(Hearings.hearingsWith().build());
         ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
             .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
-        CaseData caseData1 = CaseData.builder().id(Long.valueOf(123L)).caseTypeOfApplication(C100_CASE_TYPE)
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(serviceOfApplication1)
             .respondents(List.of(element(PartyDetails.builder().build())))
             .applicants(List.of(element(PartyDetails.builder().build()))).build();
@@ -5362,7 +5362,7 @@ public class ServiceOfApplicationServiceTest {
         when(hearingService.getHearings(authorization, String.valueOf(123L))).thenReturn(hearings);
         ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
             .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
-        CaseData caseData1 = CaseData.builder().id(Long.valueOf(123L)).caseTypeOfApplication(FL401_CASE_TYPE)
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(serviceOfApplication1)
             .applicantsFL401(PartyDetails.builder().build()).build();
         Map<String, Object> caseDataHashMap = new HashMap<>();
@@ -5378,7 +5378,7 @@ public class ServiceOfApplicationServiceTest {
     public void testHandleAboutToSubmitWhenCaseTypeIsFL401AndApplicantsFl401ResponseIsNotNull() {
         ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
             .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
-        CaseData caseData1 = CaseData.builder().id(Long.valueOf(123L)).caseTypeOfApplication(FL401_CASE_TYPE)
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(serviceOfApplication1)
             .applicantsFL401(PartyDetails.builder().response(Response.builder().build()).build()).build();
         Map<String, Object> caseDataHashMap = new HashMap<>();

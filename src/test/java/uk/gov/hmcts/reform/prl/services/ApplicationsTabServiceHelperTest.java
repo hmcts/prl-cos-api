@@ -463,21 +463,6 @@ public class ApplicationsTabServiceHelperTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
 
-        PartyDetails expectedPartDetails = PartyDetails.builder()
-            .firstName("First name")
-            .lastName("Last name")
-            .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender(Gender.male)
-            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
-            .isAddressConfidential(YesOrNo.Yes)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
-            .phoneNumber("1234567890")
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-
-
         assertEquals(1, List.of(partyDetails1).size());
         assertEquals(
             List.of(partyDetails1),
@@ -510,7 +495,7 @@ public class ApplicationsTabServiceHelperTest {
 
         List<PartyDetails> partyDetails = applicationsTabService.maskOtherPeopleConfidentialDetails(List.of(partyDetails1));
         Assert.assertNotNull(partyDetails);
-        Assert.assertFalse(partyDetails.get(0).getEmail().equals(THIS_INFORMATION_IS_CONFIDENTIAL));
+        Assert.assertNotEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetails.get(0).getEmail());
 
     }
 
@@ -538,7 +523,7 @@ public class ApplicationsTabServiceHelperTest {
 
         List<PartyDetails> partyDetails = applicationsTabService.maskOtherPeopleConfidentialDetails(List.of(partyDetails1));
         Assert.assertNotNull(partyDetails);
-        Assert.assertTrue(partyDetails.get(0).getEmail().equals(THIS_INFORMATION_IS_CONFIDENTIAL));
+        Assert.assertEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetails.get(0).getEmail());
 
     }
 }

@@ -173,4 +173,15 @@ public class CitizenCallbackControllerTest {
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
     }
+
+    @Test
+    public void testHandleSubmitted() {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("usertoken");
+        citizenCallbackController.handleSubmitted(authToken,callbackRequest);
+    }
 }
