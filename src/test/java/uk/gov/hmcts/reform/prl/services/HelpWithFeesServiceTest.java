@@ -365,6 +365,7 @@ public class HelpWithFeesServiceTest {
         List<String> errorList = helpWithFeesService.checkForManagerApproval(caseDetails);
         assertNotNull(errorList);
     }
+
     @Test
     public void testCheckForManagerApproval3() {
         CaseData casedata1 = casedata.toBuilder()
