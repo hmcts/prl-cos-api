@@ -34,7 +34,7 @@ public class CaseWithdrawnRequestService {
 
     private final UserService userService;
     private final EventService eventPublisher;
-    private final ObjectMapper objectMapper; //Welsh123
+    private final ObjectMapper objectMapper; 
     public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Cais wedi’i dynnu’n ôl <br/> Application withdrawn";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
         ### Beth fydd yn digwydd nesaf <br/> What happens next

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum EventErrorsEnum { //Welsh123
+public enum EventErrorsEnum { 
 
     CHILD_DETAILS_ERROR("Add people to the case details to / Ychwanegu pobl at fanylion yr achos ar gyfer"),
     APPLICANTS_DETAILS_ERROR("Add people to the case details / Ychwanegu pobl at fanylion yr achos"),

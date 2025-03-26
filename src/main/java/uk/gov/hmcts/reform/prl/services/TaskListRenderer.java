@@ -85,11 +85,11 @@ public class TaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
-    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol"; //Welsh123
-    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM"; //Welsh123
-    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF"; //Welsh123
+    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol"; 
+    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM"; 
+    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF"; 
     public static final String SUBMIT1 = "Submit";
-    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu"; //Welsh123
+    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu"; 
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -454,7 +454,7 @@ public class TaskListRenderer {
                 .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); //Welsh123
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); 
     }
 
     private List<String> renderSectionErrors(List<EventValidationErrors> taskErrors) {

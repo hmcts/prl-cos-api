@@ -102,7 +102,7 @@ public class ManageOrdersUtils {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
                     if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add("Darparwch fanylion o leiaf un gwrandawiad");//Welsh123
+                        errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
                     } else {
                         errorList.add("Please provide at least one hearing details");
                     }

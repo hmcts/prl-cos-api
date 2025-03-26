@@ -62,7 +62,7 @@ public class RespondentSolicitorMiamService {
         return String.join("\n\n", collapsible);
     }
 
-    public String getCollapsableOfWhatIsMiamPlaceHolderWelsh() { //Welsh123
+    public String getCollapsableOfWhatIsMiamPlaceHolderWelsh() { 
         return String.join("\n\n", List.of(
             "<details class=\"govuk-details\">",
             SUMMARYCLASS, SPANCLASS,
@@ -132,7 +132,7 @@ public class RespondentSolicitorMiamService {
         return String.join("\n\n", collapsibleWillingnessToAttendMiam);
     }
 
-    public String getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh() { //Welsh123
+    public String getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh() { 
         return String.join("\n\n", List.of(
             "<details class=\"govuk-details\" data-module=\"govuk-details\">",
             SUMMARYCLASS,

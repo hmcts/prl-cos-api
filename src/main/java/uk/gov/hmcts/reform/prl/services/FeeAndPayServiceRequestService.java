@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FeeAndPayServiceRequestService { //Welsh123
+public class FeeAndPayServiceRequestService { 
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE
         = "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
 
