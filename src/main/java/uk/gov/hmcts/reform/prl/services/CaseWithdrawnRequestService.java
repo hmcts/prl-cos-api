@@ -34,20 +34,24 @@ public class CaseWithdrawnRequestService {
 
     private final UserService userService;
     private final EventService eventPublisher;
-    private final ObjectMapper objectMapper;
-    public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn";
+    private final ObjectMapper objectMapper; 
+    public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Cais wedi’i dynnu’n ôl <br/> Application withdrawn";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
-        ### What happens next
+        ### Beth fydd yn digwydd nesaf <br/> What happens next
 
+        Bydd yr achos nawr yn dangos fel “wedi’i dynnu’n ôl” yn eich rhestr achosion.<br/>
         This case will now display as “withdrawn” in your case list.""";
 
-    public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Requested Application Withdrawal";
+    public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Cais i Dynnu Cais yn Ôl <br/> "
+        + "Requested Application Withdrawal";
     public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = """
-        ### What happens next
+        ### Beth fydd yn digwydd nesaf <br/> What happens next
 
+        Bydd y llys yn ystyried eich cais i dynnu'n ôl <br/>
         The court will consider your withdrawal request.""";
 
-    public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled";
+    public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Cais wedi’i dynnu’n ôl wedi’i ganslo<br/> "
+        + "Application withdrawn cancelled";
 
     public SubmittedCallbackResponse caseWithdrawnEmailNotification(CallbackRequest callbackRequest, String authorisation) {
 
