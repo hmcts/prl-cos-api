@@ -104,12 +104,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
-            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+            String language = CaseUtils.getLanguage(clientContext);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -117,7 +119,8 @@ public class ManageOrdersController {
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                authorisation
+                authorisation,
+                language
             )).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
@@ -145,13 +148,14 @@ public class ManageOrdersController {
             if (getErrorsForOrdersProhibitedForC100FL401(
                 caseData,
                 caseData.getCreateSelectOrderOptions(),
-                errorList
+                errorList,
+                PrlAppsConstants.ENGLISH
             )) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
+                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -248,7 +252,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Inside about-to-submit callback --------->>>>>>");
             manageOrderService.resetChildOptions(callbackRequest);
@@ -257,37 +261,8 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            setHearingData(caseData, caseDataUpdated, authorisation);
 
-            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                    && isHearingPageNeeded(
-                    caseData.getCreateSelectOrderOptions(),
-                    caseData.getManageOrders().getC21OrderOptions()
-                )) {
-                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(
-                                                                               caseData,
-                                                                               hearings,
-                                                                               authorisation
-                                                                           ));
-                } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                    && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
-                }
-                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                    authorisation,
-                    caseData
-                ));
-            } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(
-                    ORDER_COLLECTION,
-                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
-                );
-            }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
@@ -318,6 +293,40 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
+        }
+    }
+
+    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
+        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+        } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                && isHearingPageNeeded(
+                caseData.getCreateSelectOrderOptions(),
+                caseData.getManageOrders().getC21OrderOptions()
+            )) {
+                caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                    .getHearingDataForSelectedHearing(
+                        caseData,
+                        hearings,
+                        authorisation
+                    ));
+            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
+            }
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation,
+                caseData,
+                PrlAppsConstants.ENGLISH
+            ));
+        } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            caseDataUpdated.put(
+                ORDER_COLLECTION,
+                manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
+            );
         }
     }
 
@@ -437,7 +446,8 @@ public class ManageOrdersController {
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
-                        caseData
+                        caseData,
+                        PrlAppsConstants.ENGLISH
                     ));
                 }
                 CaseData modifiedCaseData = objectMapper.convertValue(
@@ -530,12 +540,12 @@ public class ManageOrdersController {
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
-                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), PrlAppsConstants.ENGLISH);
             } else {
                 //PRL-4260 - hearing screen validations
                 errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                         caseData.getCreateSelectOrderOptions(),
-                                                        false);
+                                                        false, PrlAppsConstants.ENGLISH);
             }
 
             if (isNotEmpty(errorList)) {
@@ -546,7 +556,7 @@ public class ManageOrdersController {
 
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation, PrlAppsConstants.ENGLISH))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
