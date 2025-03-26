@@ -218,6 +218,8 @@ public class ManageOrderServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
 
+    private Map<String, Object> caseDataMap;
+
     @Before
     public void setup() {
         now = dateTime.now();
@@ -263,6 +265,8 @@ public class ManageOrderServiceTest {
                                                                                                    .surname("")
                                                                                                    .build());
         ReflectionTestUtils.setField(manageOrderService, "hearingStatusesToFilter", "COMPLETED, AWAITING_ACTUALS");
+
+        caseDataMap = new HashMap<>();
     }
 
     @Test
@@ -5648,7 +5652,7 @@ public class ManageOrderServiceTest {
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, hearingData)))
             .thenReturn(automatedHearingResponse);
-        assertNotNull(manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingDataList));
+        assertNotNull(manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingDataList, caseDataMap));
     }
 
     @Test
@@ -5776,7 +5780,7 @@ public class ManageOrderServiceTest {
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, hearingData)))
             .thenReturn(automatedHearingResponse);
-        assertNotNull(manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingDataList));
+        assertNotNull(manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingDataList, caseDataMap));
     }
 
     @Test
@@ -5853,7 +5857,7 @@ public class ManageOrderServiceTest {
         when(hearingService.createAutomatedHearing(authToken, null))
             .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
         Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
-            manageOrderService.createAutomatedHearingManagement(authToken, caseData, null);
+            manageOrderService.createAutomatedHearingManagement(authToken, caseData, null, caseDataMap);
         });
         String expectedMessage = "Invalid Json";
         assertTrue(expectedMessage.contains(exception.getMessage()));

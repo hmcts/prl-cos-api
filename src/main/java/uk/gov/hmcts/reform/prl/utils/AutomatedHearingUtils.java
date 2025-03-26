@@ -36,7 +36,8 @@ public class AutomatedHearingUtils {
                                                                               authorisation,
                                                                               caseData,
                                                                               order.getValue()
-                                                                                  .getManageOrderHearingDetails()
+                                                                                  .getManageOrderHearingDetails(),
+                                                                              caseDataMap
                                                                           ));
                         isAhrTriggered.set(true);
                     }
@@ -58,7 +59,8 @@ public class AutomatedHearingUtils {
                         order.getValue().setManageOrderHearingDetails(manageOrderService
                                                                           .createAutomatedHearingManagement(
                                                                               authorisation, caseData, order.getValue()
-                                                                                  .getManageOrderHearingDetails()
+                                                                                  .getManageOrderHearingDetails(),
+                                                                              caseDataMap
                                                                           ));
                         isAhrTriggered.set(true);
                     }
