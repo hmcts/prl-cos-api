@@ -37,4 +37,5 @@ public class DssCaseData {
 
     private List<Document> applicantApplicationFormDocuments;
     private List<Document> applicantAdditionalDocuments;
+    private String applicantPcqId;
 }
