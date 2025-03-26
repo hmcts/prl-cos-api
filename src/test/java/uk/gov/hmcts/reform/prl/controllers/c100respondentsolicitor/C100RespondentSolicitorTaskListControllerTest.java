@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class C100RespondentSolicitorTaskListControllerTest {
     @InjectMocks
     private C100RespondentSolicitorTaskListController c100RespondentSolicitorTaskListController;
@@ -71,7 +71,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
     Map<String, Object> c7DraftMap = new HashMap<>();
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
@@ -173,9 +173,9 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,s2sToken,authToken);
-        }, RuntimeException.class, "Invalid Client");
+        ThrowingRunnable executable = () -> c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest, s2sToken, authToken);
+        RuntimeException exception = assertThrows(RuntimeException.class, executable);
+        assertEquals("Invalid Client", exception.getMessage());
 
     }
 
