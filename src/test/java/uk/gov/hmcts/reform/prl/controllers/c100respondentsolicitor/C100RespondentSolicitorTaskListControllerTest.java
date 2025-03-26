@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -107,9 +105,6 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
