@@ -2396,7 +2396,7 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        assertNotNull(manageDocumentsService.validateCourtUser(callbackRequest, userDetailsSolicitorRole));
+        assertNotNull(manageDocumentsService.validateCourtUser(callbackRequest, userDetailsSolicitorRole,PrlAppsConstants.WELSH));
 
     }
 
