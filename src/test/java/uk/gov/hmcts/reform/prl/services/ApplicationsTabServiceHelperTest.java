@@ -25,11 +25,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -441,33 +443,49 @@ public class ApplicationsTabServiceHelperTest {
         );
     }
 
+
     @Test
     public void testMaskingPartyDetails1() {
-
         Address address = Address.builder()
             .addressLine1("55 Test Street")
             .postTown("Town")
             .postCode("N12 3BH")
             .build();
-        PartyDetails partyDetails1 = PartyDetails.builder()
+
+        PartyDetails partyDetails1 = buildPartyDetail(YesOrNo.No,YesOrNo.No,YesOrNo.No,"12345657899","test@test.com",address);
+        PartyDetails partyDetails2 = buildPartyDetail(YesOrNo.Yes,YesOrNo.Yes,YesOrNo.Yes,"12345657898","test@test.com",address);
+        PartyDetails partyDetails3 = buildPartyDetail(YesOrNo.Yes,YesOrNo.Yes,YesOrNo.Yes,null,null,null);
+        PartyDetails partyDetails4 = buildPartyDetail(YesOrNo.Yes, YesOrNo.Yes, YesOrNo.Yes, null, null, Address.builder().build());
+
+        List<PartyDetails> partyDetails = new ArrayList<>();
+        partyDetails.add(partyDetails1);
+        partyDetails.add(partyDetails2);
+        partyDetails.add(partyDetails3);
+        partyDetails.add(partyDetails4);
+        List<PartyDetails> partyDetailsList = applicationsTabService.maskConfidentialDetails(partyDetails);
+
+        assertEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetailsList.get(1).getAddress().getAddressLine1());
+        assertEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetailsList.get(1).getEmail());
+        assertEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetailsList.get(1).getPhoneNumber());
+
+    }
+
+    private PartyDetails buildPartyDetail(YesOrNo isAddressConfidential, YesOrNo isPhoneNumConfidential, YesOrNo isEmailAddressConfidential,
+                                          String phoneNum, String email, Address address) {
+
+        return PartyDetails.builder()
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
             .gender(Gender.male)
             .address(address)
-            .isAddressConfidential(YesOrNo.No)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .email("test@test.com")
-            .phoneNumber("1234567890")
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(isAddressConfidential)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(isEmailAddressConfidential)
+            .email(email)
+            .phoneNumber(phoneNum)
+            .isPhoneNumberConfidential(isPhoneNumConfidential)
             .build();
-
-        assertEquals(1, List.of(partyDetails1).size());
-        assertEquals(
-            List.of(partyDetails1),
-            applicationsTabService.maskConfidentialDetails(List.of(partyDetails1))
-        );
     }
 
 
@@ -495,7 +513,7 @@ public class ApplicationsTabServiceHelperTest {
 
         List<PartyDetails> partyDetails = applicationsTabService.maskOtherPeopleConfidentialDetails(List.of(partyDetails1));
         Assert.assertNotNull(partyDetails);
-        Assert.assertNotEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetails.get(0).getEmail());
+        assertNotEquals(THIS_INFORMATION_IS_CONFIDENTIAL,partyDetails.get(0).getEmail());
 
     }
 
