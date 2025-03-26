@@ -156,7 +156,6 @@ public class ManageOrdersUtils {
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData, String language) {
-        log.info("language is {}", language);
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
             if (PrlAppsConstants.WELSH.equals(language)) {

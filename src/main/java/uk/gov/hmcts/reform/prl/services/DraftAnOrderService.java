@@ -2349,7 +2349,6 @@ public class DraftAnOrderService {
             }
         }
 
-        log.info("Casedata updated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
