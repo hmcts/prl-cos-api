@@ -25,7 +25,7 @@ plugins {
 def versions = [
   awaitility                   : '4.2.2',
   bcpkixJdk18on                : '1.80',
-  ccdClient                    : '4.9.2',
+  ccdClient                    : '5.0.3',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.16.1',
   commonsLang3                 : '3.17.0',
@@ -300,13 +300,12 @@ configurations.configureEach {
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
-
     implementation 'org.testng:testng:7.10.2'
-  implementation 'org.testng:testng:7.10.2'
-  implementation 'org.testng:testng:7.10.2'
-  implementation 'org.testng:testng:7.10.2'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
-  implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    implementation 'org.testng:testng:7.10.2'
+    implementation 'org.testng:testng:7.10.2'
+    implementation 'org.testng:testng:7.10.2'
+    implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    implementation 'org.junit.jupiter:junit-jupiter:5.10.3'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
   testImplementation("org.projectlombok:lombok:${versions.lombok}")
@@ -350,9 +349,9 @@ dependencies {
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -490,7 +489,7 @@ dependencies {
 
 
   integrationTestImplementation(sourceSets.test.output)
-  testImplementation 'com.github.hmcts:fortify-client:1.4.7:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.8:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
   implementation group: 'org.pitest', name: 'pitest', version: versions.pitest

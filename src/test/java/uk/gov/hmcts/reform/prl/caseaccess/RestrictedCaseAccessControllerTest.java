@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.caseaccess;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.caseaccess.RestrictedCaseAccessController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -38,14 +38,20 @@ public class RestrictedCaseAccessControllerTest {
             .initiateUpdateCaseAccess(Mockito.any());
     }
 
-    @Test public void testRestrictedCaseAccessAboutToSubmitError() {
+    @Test
+    public void testRestrictedCaseAccessAboutToSubmitError() {
         
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        restrictedCaseAccessController
-            .restrictedCaseAccessAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
-            Mockito.verify(restrictedCaseAccessService,Mockito.times(1))
-                .initiateUpdateCaseAccess(Mockito.any());
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            restrictedCaseAccessController.restrictedCaseAccessAboutToSubmit(
+                AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        });
+
+        Assertions.assertEquals("Invalid Client", exception.getMessage());
+
+        Mockito.verify(restrictedCaseAccessService, Mockito.never())
+            .initiateUpdateCaseAccess(Mockito.any());
     }
 
     @Test

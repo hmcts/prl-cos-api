@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -26,8 +26,6 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -39,7 +37,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-
+    
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +58,6 @@ public class C100RespondentSolicitorControllerTest {
     @InjectMocks
     private C100RespondentSolicitorController c100RespondentSolicitorController;
     private CaseData caseData;
-    private Address address;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -125,9 +122,6 @@ public class C100RespondentSolicitorControllerTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
-
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
@@ -161,8 +155,6 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testHandleAboutToStart() {
 
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -186,8 +178,6 @@ public class C100RespondentSolicitorControllerTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -309,8 +299,6 @@ public class C100RespondentSolicitorControllerTest {
 
     @Test
     public void updateC7ResponseSubmitTest() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
