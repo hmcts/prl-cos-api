@@ -29,6 +29,7 @@ import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenCoreCaseDataServiceTest {
@@ -153,5 +154,30 @@ public class CitizenCoreCaseDataServiceTest {
         CaseDetails retrievedCaseDetails = citizenCoreCaseDataService.getCase(bearerToken, "12345L");
 
         Assert.assertEquals(caseDetails, retrievedCaseDetails);
+    }
+
+    @Test
+    public void citizenCoreCaseShouldBeUpdatedWhenUserRoleIsCoutAdmin() {
+        userDetails = UserDetails.builder()
+            .id("testUser").roles(List.of(COURT_ADMIN_ROLE)).build();
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+
+        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(bearerToken,
+                                                                           12345L,
+                                                                           caseDataMock,
+                                                                           CaseEvent.LINK_CITIZEN);
+        Assert.assertEquals(caseDetails, updatedDetails);
+    }
+
+    @Test
+    public void citizenCoreCaseShouldBeCreatedForCourtAdminRole() {
+
+        userDetails = UserDetails.builder()
+            .id("testUser").roles(List.of(COURT_ADMIN_ROLE)).build();
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+
+        CaseDetails createdCaseDetails = citizenCoreCaseDataService.createCase(bearerToken, caseDataMock);
+
+        Assert.assertEquals(caseDetails, createdCaseDetails);
     }
 }

@@ -998,5 +998,49 @@ public class PaymentRequestServiceTest {
         PaymentResponse paymentResponse1 = paymentRequestService.createPayment(authToken, createPaymentRequest);
         assertEquals("response", paymentResponse1.getServiceRequestReference());
     }
+
+    @Test
+    public void testCreatePaymentWhenFeeType() throws Exception {
+        testCreatePayment(FeeType.DECLARATION_OF_PARENTAGE);
+        testCreatePayment(FeeType.SPECIAL_GUARDIANSHIP_ORDER);
+        testCreatePayment(FeeType.PARENTAL_RESPONSIBILITY);
+        testCreatePayment(FeeType.PARENTAL_RESPONSIBILITY_SECOND_FEMALE_PARENT);
+        testCreatePayment(FeeType.APPOINTING_CHILD_GUARDIAN);
+        testCreatePayment(FeeType.CHANGE_CHILD_SURNAME);
+
+    }
+
+    private void testCreatePayment(FeeType feeType) throws Exception {
+        CreatePaymentRequest createPaymentRequest1 = CreatePaymentRequest.builder()
+            .caseId("12345")
+            .returnUrl(null)
+            .feeType(FeeType.PARENTAL_ORDER).build();
+        CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
+        Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(Long.parseLong(TEST_CASE_ID)).data(stringObjectMap)
+                .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest1
+            .getCaseId())).thenReturn(caseDetails);
+
+        when(feeService.fetchFeeDetails(any(FeeType.class))).thenReturn(feeResponse);
+
+        onlineCardPaymentRequest = OnlineCardPaymentRequest
+            .builder().returnUrl(null).amount(feeResponse.getAmount())
+            .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(paymentApi.createPaymentRequest(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             any(OnlineCardPaymentRequest.class)))
+            .thenReturn(PaymentResponse.builder().build());
+
+        assertNotNull(paymentRequestService.createPayment(authToken, createPaymentRequest1));
+    }
+
 }
 
