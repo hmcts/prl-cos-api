@@ -999,6 +999,7 @@ public class PrlAppsConstants {
     public static final String WA_HEARING_OPTION_SELECTED = "hearingOptionSelected";
     public static final String WA_IS_HEARING_TASK_NEEDED = "isHearingTaskNeeded";
     public static final String WA_MULTIPLE_OPTIONS_SELECTED_VALUE = "multipleOptionSelected";
+    public static final String WA_IS_AHR_FAILED = "isAhrFailed";
 
     public static final String WITHOUT_NOTICE_REJECTION = "Without notice rejection";
     public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."

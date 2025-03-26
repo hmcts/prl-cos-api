@@ -152,6 +152,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_AHR_FAILED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
@@ -3511,7 +3512,8 @@ public class ManageOrderService {
     }
 
     public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
-                                                                       List<Element<HearingData>> hearingsList) {
+                                                                       List<Element<HearingData>> hearingsList,
+                                                                       Map<String, Object> caseDataMap) {
         log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
             if (!hearingsList.isEmpty()) {
@@ -3532,9 +3534,11 @@ public class ManageOrderService {
                             log.info("Automated Hearing Response: {}", getPrettyJson(automatedHearingResponse));
                             if (null != automatedHearingResponse) {
                                 hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                                caseDataMap.put(WA_IS_AHR_FAILED, NO);
                             } else {
                                 log.error("Automated Hearing Request is failed, hearing response is null");
                                 //NEED TO HANDLE THIS FAILED SCENARIO FOR RETRY
+                                caseDataMap.put(WA_IS_AHR_FAILED, YES);
                             }
                         } else {
                             log.info("Not eligible for AHR, skip automated hearing request");
@@ -3542,6 +3546,7 @@ public class ManageOrderService {
                     });
             }
         } catch (Exception e) {
+            caseDataMap.put(WA_IS_AHR_FAILED, YES);
             throw new ManageOrderRuntimeException("Invalid Json", e);
         }
         log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
