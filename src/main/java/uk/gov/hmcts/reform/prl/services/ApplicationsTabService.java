@@ -896,9 +896,13 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getWelshLanguageRequirementsTable(CaseData caseData) {
-        WelshLanguageRequirements welshLanguageRequirements = objectMapper
-            .convertValue(caseData, WelshLanguageRequirements.class);
-        return toMap(welshLanguageRequirements);
+        if (caseData.getWelshLanguageRequirement() != null && caseData.getWelshLanguageRequirement().equals(YesOrNo.No)) {
+            return toMap(WelshLanguageRequirements.builder().welshLanguageRequirement(caseData.getWelshLanguageRequirement()).build());
+        } else {
+            WelshLanguageRequirements welshLanguageRequirements = objectMapper
+                .convertValue(caseData, WelshLanguageRequirements.class);
+            return toMap(welshLanguageRequirements);
+        }
     }
 
     public Map<String, Object> getAllegationsOfHarmOrdersTable(CaseData caseData) {
