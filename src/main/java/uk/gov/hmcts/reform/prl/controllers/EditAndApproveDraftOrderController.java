@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -211,6 +212,8 @@ public class EditAndApproveDraftOrderController {
 
             }
             manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
+            //Populate need to check automated hearing request
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -278,6 +281,7 @@ public class EditAndApproveDraftOrderController {
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
+
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
@@ -485,6 +489,16 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
+            }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
@@ -517,9 +531,9 @@ public class EditAndApproveDraftOrderController {
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
-                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
                     DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                              caseData.getDraftOrdersDynamicList(),
@@ -536,6 +550,16 @@ public class EditAndApproveDraftOrderController {
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
                                                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
                                                        .build());
+            }
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             allTabService.submitAllTabsUpdate(

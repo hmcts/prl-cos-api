@@ -68,9 +68,8 @@ import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static org.testng.util.Strings.isNotNullAndNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -639,6 +638,8 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             applicantSolicitorList = parties.stream()
                 .map(Element::getValue)
+                .filter(partyDetails -> isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -650,7 +651,9 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             respondentSolicitorList = parties.stream()
                 .map(Element::getValue)
-                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -659,12 +662,9 @@ public class CaseUtils {
 
     public static String getFL401SolicitorName(PartyDetails party) {
         if (null != party
-            && isNotBlank(party.getRepresentativeFirstName())
-            && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(
-                party.getRepresentativeFirstName(),
-                concat(" ", party.getRepresentativeLastName())
-            );
+            && isNotNullAndNotEmpty(party.getRepresentativeFirstName())
+            && isNotNullAndNotEmpty(party.getRepresentativeLastName())) {
+            return party.getRepresentativeFirstName() + " " + party.getRepresentativeLastName();
         }
         return null;
     }
