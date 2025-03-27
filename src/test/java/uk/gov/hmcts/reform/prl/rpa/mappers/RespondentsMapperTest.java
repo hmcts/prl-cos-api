@@ -16,14 +16,18 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.json.JsonValue;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsMapperTest {
@@ -74,7 +78,7 @@ public class RespondentsMapperTest {
 
     @Test
     public void testRespondentsMapperEmptyCheck() {
-        respondents = Collections.emptyList();;
+        respondents = Collections.emptyList();
         assertTrue(respondentsMapper.map(respondents, respondentSolicitorMap).isEmpty());
     }
 
@@ -83,5 +87,42 @@ public class RespondentsMapperTest {
         assertNotNull(respondentsMapper.map(respondents, respondentSolicitorMap));
     }
 
+    @Test
+    public void testMapWhenRespondentsIsNull() {
+        assertEquals(JsonValue.EMPTY_JSON_ARRAY,respondentsMapper.map(null, respondentSolicitorMap));
+    }
+
+    @Test
+    public void testMap() {
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorOrg(organisation)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .build();
+        PartyDetails partyDetails2 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .solicitorOrg(organisation)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .build();
+        List<Element<PartyDetails>> respondentsList = new ArrayList<>();
+        respondentsList.add(element(partyDetails1));
+        respondentsList.add(element(partyDetails2));
+        assertNotNull(respondentsMapper.map(respondentsList, respondentSolicitorMap));
+
+    }
 
 }

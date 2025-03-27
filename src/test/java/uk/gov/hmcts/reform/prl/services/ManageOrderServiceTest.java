@@ -290,7 +290,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.ENGLISH);
         assertEquals("testChild", caseDataUpdated.get("childrenList"));
         assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
@@ -325,7 +325,42 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.ENGLISH);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
+    }
+
+    @Test
+    public void getUpdatedCaseDataFl401Welsh() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenLiveAtAddress homeChild = ChildrenLiveAtAddress.builder()
+            .childFullName("Test Child Name")
+            .build();
+
+        Element<ChildrenLiveAtAddress> wrappedHomeChildren = Element.<ChildrenLiveAtAddress>builder().value(homeChild).build();
+        List<Element<ChildrenLiveAtAddress>> listOfHomeChildren = Collections.singletonList(wrappedHomeChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .manageOrders(manageOrders)
+            .home(Home.builder()
+                .children(listOfHomeChildren)
+                .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData, PrlAppsConstants.WELSH);
         assertEquals("testChild", caseDataUpdated.get("childrenList"));
         assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
@@ -399,7 +434,8 @@ public class ManageOrderServiceTest {
             .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
             .build();
 
-        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank);
+        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank,
+            PrlAppsConstants.ENGLISH);
 
         assertEquals(updatedCaseData.getManageOrders().getFl404CustomFields(), expectedDetails);
 
@@ -442,7 +478,7 @@ public class ManageOrderServiceTest {
             .build();
 
 
-        CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData);
+        CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData, PrlAppsConstants.ENGLISH);
 
         assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
 
@@ -970,7 +1006,8 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1039,7 +1076,7 @@ public class ManageOrderServiceTest {
 
         ReflectionTestUtils.setField(manageOrderService, "sdoWelshTemplate", "sdo-WEL-Template");
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1089,7 +1126,8 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1125,7 +1163,8 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData,
+            PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1169,7 +1208,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1261,7 +1300,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
 
@@ -1314,7 +1353,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1465,7 +1504,8 @@ public class ManageOrderServiceTest {
 
         CaseData caseData2 = manageOrderService.populateCustomOrderFields(
             caseData,
-            CreateSelectOrderOptionsEnum.nonMolestation
+            CreateSelectOrderOptionsEnum.nonMolestation,
+            PrlAppsConstants.ENGLISH
         );
 
         assertNotNull(caseData2.getManageOrders().getFl404CustomFields().getFl404bApplicantName());
@@ -1622,7 +1662,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1668,7 +1708,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -1781,7 +1821,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1814,7 +1854,8 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm);
+        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData,
+            CreateSelectOrderOptionsEnum.generalForm, PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersApplicantReference());
         assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersRespondentReference());
@@ -1844,7 +1885,8 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData,
+            CreateSelectOrderOptionsEnum.noticeOfProceedings, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -1928,7 +1970,7 @@ public class ManageOrderServiceTest {
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build())))
             .thenReturn(AutomatedHearingResponse.builder().build());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2027,7 +2069,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2088,7 +2130,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2177,7 +2219,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -2235,7 +2277,35 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank, PrlAppsConstants.ENGLISH));
+    }
+
+    @Test
+    public void testpopulateCustomOrderFieldsForUploadAnOrderWelsh() {
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersFl402CaseNo("12345674")
+            .manageOrdersFl402CourtName("Court name")
+            .manageOrdersFl402Applicant("app testLast")
+            .manageOrdersFl402ApplicantRef("test test1")
+            .orderDirections("order dir")
+            .furtherDirectionsIfRequired("fur dir")
+            .recitalsOrPreamble("reci")
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
+            .build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .manageOrders(expectedDetails)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank, PrlAppsConstants.WELSH));
     }
 
     @Test
@@ -2424,7 +2494,7 @@ public class ManageOrderServiceTest {
                                                                         .build())))
                               .build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData).get(
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH).get(
             "draftOrderCollection"));
     }
 
@@ -2519,7 +2589,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2552,7 +2622,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2729,7 +2799,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -2806,7 +2876,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3014,7 +3084,7 @@ public class ManageOrderServiceTest {
             .appointedGuardianName(null)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .build();
-        Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
+        Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData, PrlAppsConstants.ENGLISH);
         Assert.assertTrue(!result.isEmpty());
     }
 
@@ -3065,7 +3135,7 @@ public class ManageOrderServiceTest {
 
         ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -3342,7 +3412,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -3623,7 +3693,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
 
     }
 
@@ -4748,7 +4818,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -4835,7 +4905,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
             "test token",
-            caseData
+            caseData,
+            PrlAppsConstants.ENGLISH
         );
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
@@ -5105,7 +5176,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
 
     }
@@ -5150,7 +5221,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNotNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
         assertEquals("<div class=\"govuk-inset-text\"> "
                          + "If you need to include directions for a fact-finding hearing, you need to upload the"
@@ -5199,7 +5270,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
     }
 
@@ -6007,7 +6078,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth", PrlAppsConstants.ENGLISH);
         assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
     }
 
@@ -6070,7 +6141,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders)
             .build();
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -6098,7 +6169,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
     }
 
@@ -6128,7 +6199,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -6157,7 +6228,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
 
     }
@@ -6186,7 +6257,7 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
-        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
 
     }
