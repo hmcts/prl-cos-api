@@ -153,9 +153,6 @@ public class DraftAnOrderServiceTest {
     private ManageOrderService manageOrderService;
 
     @Mock
-    private DgsService dgsService;
-
-    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     @Mock
@@ -5925,7 +5922,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_RETURNED_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -5952,7 +5949,7 @@ public class DraftAnOrderServiceTest {
             .eventId(EDIT_RETURNED_ORDER.getId())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null));
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest, null, PrlAppsConstants.WELSH));
     }
 
     @Test
@@ -6014,8 +6011,8 @@ public class DraftAnOrderServiceTest {
                                                                                    null,
                                                                                    false,
                                                                                    CreateSelectOrderOptionsEnum.standardDirectionsOrder,
-                                                                                   null
-        );
+                                                                                   null,
+                                                                                   PrlAppsConstants.ENGLISH);
         assertNotNull(stringObjectMap);
     }
 
@@ -6053,11 +6050,10 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
-        );
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null,PrlAppsConstants.ENGLISH));
     }
 
     @Test
@@ -6094,11 +6090,10 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null)
-        );
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null,PrlAppsConstants.WELSH));
     }
 
     @Test
@@ -6153,7 +6148,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(caseData1, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
-            callbackRequest
+            callbackRequest,
+            PrlAppsConstants.ENGLISH
         );
         assertNotNull(stringObjectMap);
     }

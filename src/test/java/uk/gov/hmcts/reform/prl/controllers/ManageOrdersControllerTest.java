@@ -3846,7 +3846,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         stringObjectMap.put("manageOrderHeader1", "test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
-        when(manageOrderService.getUpdatedCaseData(caseData1)).thenReturn(stringObjectMap);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class), any())).thenReturn(stringObjectMap);
         when(manageOrderService.populateHeader(caseData1))
             .thenReturn(stringObjectMap);
         List<DynamicListElement> elements = new ArrayList<>();
