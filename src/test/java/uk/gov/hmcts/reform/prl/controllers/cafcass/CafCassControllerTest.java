@@ -64,7 +64,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
-        ResponseEntity responseEntity = cafCassController.searcCasesByDates(
+        ResponseEntity<Object> responseEntity = cafCassController.searcCasesByDates(
             "authorisation",
             "Bearer serviceAuthorisation",
             startDate,
@@ -82,9 +82,8 @@ public class CafCassControllerTest {
 
     @Test
     public void testInvalidServicAuth_401UnAuthorized() {
-        when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity<Object> response = cafCassController.searcCasesByDates(
             "authorisation",
             "inValidServiceAuthorisation",
             "startDate",
@@ -103,7 +102,7 @@ public class CafCassControllerTest {
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity<Object> response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             startDate,
@@ -119,7 +118,7 @@ public class CafCassControllerTest {
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity<Object> response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             startDate,
@@ -131,11 +130,9 @@ public class CafCassControllerTest {
     @Test
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate"
-        )).thenThrow(new RuntimeException());
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        when(authorisationService.authoriseUser(any())).thenReturn(true)
+            .thenThrow(new RuntimeException());
+        final ResponseEntity<Object> response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",
@@ -148,7 +145,7 @@ public class CafCassControllerTest {
     public void testExceptionInternalServerErrorForDateTimeRange() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity<Object> response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "2022-08-22T10:54:43.49",

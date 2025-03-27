@@ -91,7 +91,7 @@ public class CafcassDocumentManagementControllerTest {
                 documentId
             ))
             .thenReturn(expectedResponse);
-        ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
+        ResponseEntity<Object> responseEntity = cafcassDocumentManagementController.downloadDocument(
             CAFCASS_TEST_AUTHORISATION_TOKEN,
             CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
             documentId
@@ -117,7 +117,7 @@ public class CafcassDocumentManagementControllerTest {
             .thenReturn(new ResponseEntity<Resource>(
                 BAD_REQUEST));
 
-        ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
+        ResponseEntity<Object> responseEntity = cafcassDocumentManagementController.downloadDocument(
             CAFCASS_TEST_AUTHORISATION_TOKEN,
             CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
             documentId
@@ -130,9 +130,8 @@ public class CafcassDocumentManagementControllerTest {
 
     @Test
     public void testInvalidServicAuth_401UnAuthorized() {
-        when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
-        final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
+        final ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument(
             CAFCASS_TEST_AUTHORISATION_TOKEN,
             CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
             documentId
@@ -149,7 +148,7 @@ public class CafcassDocumentManagementControllerTest {
         when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
         when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
-        final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
+        final ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             documentId
@@ -166,7 +165,7 @@ public class CafcassDocumentManagementControllerTest {
 
         when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
-        final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
+        final ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             documentId
@@ -177,13 +176,9 @@ public class CafcassDocumentManagementControllerTest {
     @Test
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(cafcassCdamService.getDocument(
-            TEST_AUTHORIZATION,
-            TEST_SERVICE_AUTHORIZATION,
-            documentId
-        )).thenThrow(new RuntimeException());
-        final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
+        when(authorisationService.authoriseUser(any())).thenReturn(true)
+            .thenThrow(new RuntimeException());
+        final ResponseEntity<Object> response = cafcassDocumentManagementController.downloadDocument(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             documentId
