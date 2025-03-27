@@ -136,10 +136,6 @@ public class HwfProcessUpdateCaseStateService {
         );
     }
 
-    private String isEdgeCase(DssCaseDetails dssCaseDetails) {
-        return (null != dssCaseDetails
-            && YesOrNo.Yes.equals(dssCaseDetails.getIsEdgeCase()) ? YES : NO);
-    }
     public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState() {
 
         SearchResultResponse searchResultResponse = SearchResultResponse.builder()
@@ -217,5 +213,10 @@ public class HwfProcessUpdateCaseStateService {
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
             .build();
+    }
+
+    private String isEdgeCase(DssCaseDetails dssCaseDetails) {
+        return (null != dssCaseDetails
+            && YesOrNo.Yes.equals(dssCaseDetails.getIsEdgeCase()) ? YES : NO);
     }
 }
