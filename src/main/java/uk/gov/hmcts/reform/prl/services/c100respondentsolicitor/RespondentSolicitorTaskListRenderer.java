@@ -52,15 +52,11 @@ public class RespondentSolicitorTaskListRenderer {
         if (!hasSubmitted) {
             lines.add(
                     DIV_CLASS_WIDTH_50
-                        + "<h3>Respond to the application for respondent " + representedRespondentName + " / "
-                        + "Ymateb i gais yr atebydd " + representedRespondentName + "</h3>"
-                        + "<p>This online response combines forms C7 and C8."
-                        + " It also allows you to make your own allegations of harm and violence (C1A)"
-                        + " in the section of safety concerns.</p>"
-                        + "\n\n<p>Mae'r ymateb ar-lein hwn yn cyfuno ffurflenni C7 a C8."
-                        + " Mae hefyd yn caniatáu ichi wneud eich honiadau eich hun o niwed a thrais (C1A)"
-                        + " yn yr adran pryderon diogelwch.</p>"
-                        + DIV);
+                            + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
+                            + "<p>This online response combines forms C7 and C8."
+                            + " It also allows you to make your own allegations of harm and violence (C1A)"
+                            + " in the section of safety concerns.</p>"
+                            + DIV);
 
             lines.add(DIV_CLASS_WIDTH_50);
 
@@ -73,13 +69,10 @@ public class RespondentSolicitorTaskListRenderer {
             String caseDocumentsUrl =  "/cases/case-details/" + caseData.getId() + "/#Case%20documents";
             lines.add(
                     DIV_CLASS_WIDTH_50
-                        + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
-                        + "<h3>Ymateb ar gyfer " + representedRespondentName + " wedi'i gyflwyno'n llwyddiannus.</h3>"
-                        + "<p>You can find the response at <a href=\"" + caseDocumentsUrl + "\">Case Documents</a> tab"
-                        + " in the section of safety concerns.</p>"
-                        + "<p>Gallwch ddod o hyd i'r ymateb yn <a href=\"" + caseDocumentsUrl + "\">Dogfennau Achos</a> tab"
-                        + " yn yr adran pryderon diogelwch.</p>"
-                        + DIV);
+                            + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
+                            + "<p>You can find the response at <a href=\"" + caseDocumentsUrl + "\">Case Documents</a> tab"
+                            + " in the section of safety concerns.</p>"
+                            + DIV);
         }
 
         return String.join("\n\n", lines);
@@ -89,39 +82,39 @@ public class RespondentSolicitorTaskListRenderer {
         final Map<RespondentSolicitorEvents, RespondentTask> tasks
                 = allTasks.stream().collect(toMap(RespondentTask::getEvent, identity()));
 
-        final RespondentTaskSection consent = newSection("1. Consent to the Application / Caniatâd i'r Cais")
+        final RespondentTaskSection consent = newSection("1. Consent to the Application")
                 .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection yourDetails = newSection("2. Respondent's details / Manylion yr atebydd")
+        final RespondentTaskSection yourDetails = newSection("2. Respondent's details")
                 .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
                 .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
                 .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
 
-        final RespondentTaskSection applicationDetails = newSection("3. Application details / Manylion cais")
+        final RespondentTaskSection applicationDetails = newSection("3. Application details")
             .withTask(tasks.get(RespondentSolicitorEvents.MIAM));
 
         final RespondentTaskSection safetyConcerns;
 
         if (null != caseData.getC1ADocument()) {
-            safetyConcerns = newSection("4. Safety Concerns / Pryderon Diogelwch")
+            safetyConcerns = newSection("4. Safety Concerns")
                     .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM))
                     .withTask(tasks.get(RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM));
 
         } else {
-            safetyConcerns = newSection("4. Safety Concerns / Pryderon Diogelwch")
+            safetyConcerns = newSection("4. Safety Concerns")
                     .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
         }
 
-        final RespondentTaskSection additionalInformation = newSection("5. Additional information / Gwybodaeth ychwanegol")
+        final RespondentTaskSection additionalInformation = newSection("5. Additional information")
             .withInfo(PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT)
             .withTask(tasks.get(RespondentSolicitorEvents.OTHER_PROCEEDINGS))
                 .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
                 .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
 
-        final RespondentTaskSection viewResponse = newSection("6. View PDF response / Gweld ymateb PDF")
+        final RespondentTaskSection viewResponse = newSection("6. View PDF response")
                 .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));
 
-        final RespondentTaskSection submit = newSection("7. Submit / Cyflwyno")
+        final RespondentTaskSection submit = newSection("7. Submit")
                 .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
 
         return Stream.of(
@@ -164,27 +157,27 @@ public class RespondentSolicitorTaskListRenderer {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent));
                 } else if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
                     lines.add(taskListRenderElements.renderRespondentDisabledLink(respondentTask)
-                            + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
+                            + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started / Heb ddechrau"));
+                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
                 }
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                        + taskListRenderElements.renderImage(IN_PROGRESS, "In progress / Ar y gweill"));
+                        + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                        + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added / Gwybodaeth wedi’i hychwanegu"));
+                        + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case FINISHED:
                 if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet / Heb ei gychwyn eto"));
+                            + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
-                            + taskListRenderElements.renderImage(FINISHED, "Finished / Wedi gorffen"));
+                            + taskListRenderElements.renderImage(FINISHED, "Finished"));
                 }
                 break;
             default:
@@ -203,7 +196,7 @@ public class RespondentSolicitorTaskListRenderer {
                 .flatMap(task -> task.getErrors()
                         .stream()
                         .map(error -> format(
-                                "%s %s",
+                                "%s in %s",
                                 error,
                                 taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                         )))

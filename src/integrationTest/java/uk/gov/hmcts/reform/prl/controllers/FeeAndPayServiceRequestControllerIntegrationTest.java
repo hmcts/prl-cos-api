@@ -82,7 +82,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenReturn(List.of());
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any())).thenReturn(List.of());
 
         mockMvc.perform(
                 post(url)

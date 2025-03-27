@@ -178,12 +178,11 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.populateAboutToStartCaseData(any(), any())).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest)).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
             s2sToken,
-            PrlAppsConstants.ENGLISH,
             callbackRequest
         );
 
@@ -381,7 +380,7 @@ public class C100RespondentSolicitorControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            c100RespondentSolicitorController.handleAboutToStart(authToken, s2sToken,  PrlAppsConstants.ENGLISH, callbackRequest);
+            c100RespondentSolicitorController.handleAboutToStart(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }

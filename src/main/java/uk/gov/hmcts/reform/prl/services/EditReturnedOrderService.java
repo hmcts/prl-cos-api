@@ -101,9 +101,9 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, DraftOrder selectedOrder, String language) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, DraftOrder selectedOrder) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder, language));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put(ORDER_TYPE, selectedOrder.getOrderType());
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
@@ -200,8 +200,7 @@ public class EditReturnedOrderService {
 
     public AboutToStartOrSubmitCallbackResponse populateInstructionsAndFieldsForLegalRep(String authorisation,
                                                                                          CallbackRequest callbackRequest,
-                                                                                         String clientContext,
-                                                                                         String language) {
+                                                                                         String clientContext) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -212,8 +211,8 @@ public class EditReturnedOrderService {
                                                                                         caseData.getManageOrders()
                                                                                             .getRejectedOrdersDynamicList(),
                                                                                         clientContext, callbackRequest.getEventId());
-            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder, language);
-            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder, language));
+            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder);
+            caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {

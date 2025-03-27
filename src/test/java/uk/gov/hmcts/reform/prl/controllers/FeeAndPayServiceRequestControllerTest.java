@@ -12,7 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -138,10 +137,10 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.SUBMIT_AND_PAY.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
-            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -160,10 +159,10 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
-            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
         );
     }
 

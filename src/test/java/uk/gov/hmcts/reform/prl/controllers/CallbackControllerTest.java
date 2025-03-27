@@ -389,7 +389,7 @@ public class CallbackControllerTest {
         when(validateMiamApplicationOrExemptionWorkflow.run(callbackRequest))
             .thenReturn(workflowResult);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.validateMiamApplicationOrExemption(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+        callbackController.validateMiamApplicationOrExemption(authToken, s2sToken, callbackRequest);
 
         verify(validateMiamApplicationOrExemptionWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
@@ -2785,7 +2785,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         assertExpectedException(() -> {
-            callbackController.validateMiamApplicationOrExemption(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+            callbackController.validateMiamApplicationOrExemption(authToken,s2sToken,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

@@ -165,10 +165,10 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        when(draftAnOrderService.handleSelectedOrder(any(), any(), any()))
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(stringObjectMap).build());
         Map<String, Object> updatedCaseData = draftAnOrderController.populateHeader(
-            authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest
+            authToken, s2sToken, callbackRequest
         ).getData();
 
         Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.get("applicantCaseName"));
@@ -197,12 +197,12 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         when(draftAnOrderService.handleSelectedOrder(any(),
-                                                     any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                                                     any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
 
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -226,11 +226,11 @@ public class DraftAnOrderControllerTest {
             .build();
 
         when(draftAnOrderService.handleSelectedOrder(any(),
-                                                     any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                                                     any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -252,10 +252,10 @@ public class DraftAnOrderControllerTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(stringObjectMap);
         Assert.assertEquals(
             stringObjectMap,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
         );
     }
 
@@ -281,11 +281,11 @@ public class DraftAnOrderControllerTest {
             CaseData.class
         )).thenReturn(caseData);
         stringObjectMap.put("selectedOrder", "Test order");
-        when(draftAnOrderService.handleSelectedOrder(any(), any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
                                                                                                 .data(stringObjectMap).build());
         Assert.assertEquals(
             stringObjectMap.get("selectedOrder"),
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData().get("selectedOrder")
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().get("selectedOrder")
         );
     }
 
@@ -306,7 +306,7 @@ public class DraftAnOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(any(), any(), any()))
+        when(manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation))
             .thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -318,14 +318,14 @@ public class DraftAnOrderControllerTest {
             .build();
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
         );
     }
 
@@ -357,13 +357,12 @@ public class DraftAnOrderControllerTest {
 
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(any(), any(), any());
+            caseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,
-            PrlAppsConstants.ENGLISH,callbackRequest).getData());
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,callbackRequest).getData());
     }
 
     @Test
@@ -393,12 +392,16 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
+
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.blankOrderOrDirections);
+        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any(), any())).thenReturn(caseDataUpdated);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest).getData()
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
         );
     }
 
@@ -429,7 +432,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(DraftOrder.builder().build());
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken,"clcx", callbackRequest).getData());
     }
 
@@ -454,8 +457,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
-            PrlAppsConstants.ENGLISH,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals(MANDATORY_JUDGE,
                             response.getErrors().get(0));
     }
@@ -481,8 +483,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
-            PrlAppsConstants.ENGLISH,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals(MANDATORY_MAGISTRATE,
                             response.getErrors().get(0));
     }
@@ -514,10 +515,8 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();;
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken,
-            PrlAppsConstants.ENGLISH,callbackRequest);
-        Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken,
-                PrlAppsConstants.ENGLISH,callbackRequest),
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest),
                             response);
     }
 
@@ -596,7 +595,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             caseDataUpdated,
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getData()
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
         );
     }
 
@@ -635,7 +634,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
 
     }
@@ -782,7 +781,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.populateHeader(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -818,7 +817,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.populateFl404Fields(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest);
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -854,7 +853,7 @@ public class DraftAnOrderControllerTest {
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            draftAnOrderController.populateSdoFields(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -998,7 +997,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);
@@ -1037,7 +1036,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken,"clcx", callbackRequest);
 
@@ -1080,7 +1079,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(),
                                                               Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken,"clcx", callbackRequest);
 
@@ -1125,7 +1124,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);
@@ -1165,7 +1164,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
                                                               Mockito.anyString(), Mockito.anyString())).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGeneration(any(), any(), any(), any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest, null)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken,"clcx", callbackRequest);

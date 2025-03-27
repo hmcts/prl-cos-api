@@ -101,7 +101,7 @@ public class StmtOfServImplServiceTest {
     private static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         respondent = PartyDetails.builder()
             .lastName("TestLast")
             .firstName("TestFirst")

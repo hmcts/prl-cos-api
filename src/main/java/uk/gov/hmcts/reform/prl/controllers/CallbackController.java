@@ -118,7 +118,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -212,24 +211,10 @@ public class CallbackController {
     public ResponseEntity<CallbackResponse> validateMiamApplicationOrExemption(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
-
-            if (PrlAppsConstants.WELSH.equals(CaseUtils.getLanguage(clientContext))
-                && (isNotEmpty(workflowResult.getErrors()))) {
-                List<String> errorlist = new ArrayList<>();
-                errorlist
-                    .add(MIAM_ERROR_WELSH);
-                return ok(
-                    AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(errorlist)
-                        .build()
-                );
-            }
-
 
             return ok(
                 AboutToStartOrSubmitCallbackResponse.builder()

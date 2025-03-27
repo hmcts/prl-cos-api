@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
@@ -64,11 +63,10 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation, CaseUtils.getLanguage(clientContext));
+            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -82,7 +80,6 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateFl404Fields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -90,8 +87,7 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            String language = CaseUtils.getLanguage(clientContext);
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -99,7 +95,7 @@ public class DraftAnOrderController {
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null, language)).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation, null)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -113,7 +109,6 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateSdoFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
@@ -122,10 +117,9 @@ public class DraftAnOrderController {
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
-            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
                 draftAnOrderService.populateStandardDirectionOrderDefaultFields(
                     authorisation,
                     caseData,
@@ -188,20 +182,15 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-
-            String language = CaseUtils.getLanguage(clientContext);
             if (!Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 clientContext = null;
             }
-
             Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
                 authorisation,
                 callbackRequest,
-                clientContext,
-                language
+                clientContext
             );
-
             if (caseDataUpdated.containsKey("errorList")) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors((List<String>) caseDataUpdated.get("errorList"))

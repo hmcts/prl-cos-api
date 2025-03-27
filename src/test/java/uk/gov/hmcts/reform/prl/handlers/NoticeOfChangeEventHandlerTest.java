@@ -281,7 +281,7 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldSendAccessCodeToLipWhenAvailableViaEmail() {
+    public void shouldSendAccessCodeToLipWhenAvailableViaEmail() throws Exception {
         applicant1 = applicant1.toBuilder()
             .contactPreferences(ContactPreferences.post)
             .address(Address.builder()

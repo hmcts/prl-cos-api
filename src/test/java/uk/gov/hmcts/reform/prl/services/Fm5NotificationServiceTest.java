@@ -326,7 +326,7 @@ public class Fm5NotificationServiceTest {
 
 
     @Test
-    public void sendFm5ReminderForRespondentException() {
+    public void sendFm5ReminderForRespondentException() throws Exception {
 
         respondent = respondent.toBuilder().solicitorEmail("").build();
         caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();

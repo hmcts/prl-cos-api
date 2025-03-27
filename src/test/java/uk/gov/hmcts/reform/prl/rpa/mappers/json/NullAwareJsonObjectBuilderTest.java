@@ -48,15 +48,15 @@ public class NullAwareJsonObjectBuilderTest {
     @Test
     public void testNullAwareJsonBuilderWithStringAndIntParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
-        delegate.add("key",1);
-        assertEquals(nullAwareJsonObjectBuilder.add("key",1).build().get("key"),delegate.build().get("key"));
+        delegate.add("key",Integer.valueOf(1));
+        assertEquals(nullAwareJsonObjectBuilder.add("key",Integer.valueOf(1)).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
     public void testNullAwareJsonBuilderWithStringAndLongParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
-        delegate.add("key",1L);
-        assertEquals(nullAwareJsonObjectBuilder.add("key",1L).build().get("key"),delegate.build().get("key"));
+        delegate.add("key",Long.valueOf(1));
+        assertEquals(nullAwareJsonObjectBuilder.add("key",Long.valueOf(1)).build().get("key"),delegate.build().get("key"));
     }
 
     @Test
@@ -69,8 +69,8 @@ public class NullAwareJsonObjectBuilderTest {
     @Test
     public void testNullAwareJsonBuilderWithStringAndDoubleParams() {
         JsonObjectBuilder delegate = JsonProvider.provider().createObjectBuilder();
-        delegate.add("key",Double.valueOf("1"));
-        assertEquals(nullAwareJsonObjectBuilder.add("key",Double.valueOf("1")).build().get("key"),delegate.build().get("key"));
+        delegate.add("key",Double.valueOf(1));
+        assertEquals(nullAwareJsonObjectBuilder.add("key",Double.valueOf(1)).build().get("key"),delegate.build().get("key"));
     }
 
     @Test

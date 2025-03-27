@@ -45,13 +45,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -81,22 +77,14 @@ public class ManageOrdersUtils {
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
                                                            boolean isSolicitorOrdersHearings,
-<<<<<<< HEAD
                                                            String loggedInUserType) {
-=======
-                                                           String language) {
->>>>>>> 04d4663399882def364e49d9ebfdf4057468b984
         log.info("### Create select order options {}", selectedOrderType);
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings, language);
+        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-<<<<<<< HEAD
         hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings, loggedInUserType);
-=======
-        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings, language);
->>>>>>> 04d4663399882def364e49d9ebfdf4057468b984
 
         return errorList;
     }
@@ -104,32 +92,20 @@ public class ManageOrdersUtils {
     private static void singleHearingValidations(List<Element<HearingData>> ordersHearingDetails,
                                                  List<String> errorList,
                                                  CreateSelectOrderOptionsEnum selectedOrderType,
-                                                 boolean isSolicitorOrdersHearings,
-                                                 String language) {
+                                                 boolean isSolicitorOrdersHearings) {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
-                    if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
-                    } else {
-                        errorList.add("Please provide at least one hearing details");
-                    }
+                    errorList.add("Please provide at least one hearing details");
                 }
             } else if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
-                } else {
-                    errorList.add("Please provide at least one hearing details");
-                }
+                errorList.add("Please provide at least one hearing details");
+
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add("Dim ond un gwrandawiad y gellir creu");
-                } else {
-                    errorList.add("Only one hearing can be created");
-                }
+                errorList.add("Only one hearing can be created");
             }
         }
     }
@@ -137,16 +113,11 @@ public class ManageOrdersUtils {
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
                                                                   List<String> errorList,
                                                                   boolean isSolicitorOrdersHearings,
-<<<<<<< HEAD
                                                                   String loggedInUserType) {
-=======
-                                                                  String language) {
->>>>>>> 04d4663399882def364e49d9ebfdf4057468b984
         if (isNotEmpty(ordersHearingDetails)) {
             ordersHearingDetails.stream()
                 .map(Element::getValue)
                 .forEach(hearingData -> {
-<<<<<<< HEAD
                     //validate for manage orders, draft, edit returned order & judge creating order
                     if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
                         if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
@@ -173,20 +144,6 @@ public class ManageOrdersUtils {
                             validateHearingData(errorList, hearingData);
                         }
                     }
-=======
-                    //validate for manage orders, draft & edit returned order
-                    if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
-                        && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                        || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        if (PrlAppsConstants.WELSH.equals(language)) {
-                            errorList.add("Mae’n rhaid i chi ddewis math o wrandawiad");
-                        } else {
-                            errorList.add("You must select a hearing type");
-                        }
-                    }
-                    //numeric estimated timings validation
-                    validateHearingEstimatedTimings(errorList, hearingData, language);
->>>>>>> 04d4663399882def364e49d9ebfdf4057468b984
                 });
         }
     }
@@ -197,7 +154,6 @@ public class ManageOrdersUtils {
             .equals(hearingData.getHearingDateConfirmOptionEnum()));
     }
 
-<<<<<<< HEAD
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
         if (StringUtils.isBlank(hearingData.getHearingEstimatedDays()) && StringUtils
             .isBlank(hearingData.getHearingEstimatedHours()) && StringUtils
@@ -205,32 +161,17 @@ public class ManageOrdersUtils {
             errorList.add("You must enter a value for either Hearing estimated days or hours or minutes");
         }
 
-=======
-    private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData, String language) {
->>>>>>> 04d4663399882def364e49d9ebfdf4057468b984
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf dyddiau");
-            } else {
-                errorList.add("Please enter numeric value for Hearing estimated days");
-            }
+            errorList.add("Please enter numeric value for Hearing estimated days");
         }
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHours())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedHours())) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf oriau");
-            } else {
-                errorList.add("Please enter numeric value for Hearing estimated hours");
-            }
+            errorList.add("Please enter numeric value for Hearing estimated hours");
         }
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutes())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf munudau");
-            } else {
-                errorList.add("Please enter numeric value for Hearing estimated minutes");
-            }
+            errorList.add("Please enter numeric value for Hearing estimated minutes");
         }
     }
 
@@ -327,31 +268,31 @@ public class ManageOrdersUtils {
         }
     }
 
-    public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder, String language) {
+    public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {
         List<String> errorList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.urgentHearing)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoUrgentHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoUrgentHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.fhdra)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoFhdraHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoFhdraHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.permissionHearing)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoPermissionHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoPermissionHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.directionForDra)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoDraHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoDraHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.settlementConference)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSettlementHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSettlementHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails(), language);
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.factFindingHearing)
@@ -359,8 +300,7 @@ public class ManageOrdersUtils {
             && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails().getHearingDateConfirmOptionEnum())) {
             validateHearingEstimatedTimings(
                 errorList,
-                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
-                language
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
             );
         }
         return errorList;
@@ -447,39 +387,27 @@ public class ManageOrdersUtils {
         }
     }
 
-    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData, String language) {
+    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData) {
         List<String> errorList = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(caseData.getManageOrders())) {
             if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isBlank(caseData.getJusticeLegalAdviserFullName()))) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(MANDATORY_JUDGE_WELSH);
-                } else {
-                    errorList.add(MANDATORY_JUDGE);
-                }
+                errorList.add(MANDATORY_JUDGE);
             } else if (JudgeOrMagistrateTitleEnum.magistrate.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isEmpty(caseData.getMagistrateLastName()))) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(MANDATORY_MAGISTRATE_WELSH);
-                } else {
-                    errorList.add(MANDATORY_MAGISTRATE);
-                }
+                errorList.add(MANDATORY_MAGISTRATE);
             }
         }
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType, String language) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
         List<String> errorList = new ArrayList<>();
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
             && ObjectUtils.isNotEmpty(fl404CustomFields)
             && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                errorList.add("Rhowch naill ai adran y ceisydd neu’r atebydd");
-            } else {
-                errorList.add("Please enter either applicant or respondent section");
-            }
+            errorList.add("Please enter either applicant or respondent section");
         }
         return errorList;
     }
@@ -518,33 +446,20 @@ public class ManageOrdersUtils {
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
-                                                                   List<String> errorList,
-                                                                   String language) {
+                                                                   List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
-                    if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add("Nid yw’r gorchymyn hwn ar gael i’w greu");
-                    } else {
-                        errorList.add("This order is not available to be created");
-                    }
+                    errorList.add("This order is not available to be created");
                 }
                 if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
-                    if (PrlAppsConstants.WELSH.equals(language)) {
-                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH);
-                    } else {
-                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
-                    }
+                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                     .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(ORDER_NOT_AVAILABLE_FL401_WELSH);
-                } else {
-                    errorList.add(ORDER_NOT_AVAILABLE_FL401);
-                }
+                errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
         return !errorList.isEmpty();
@@ -575,19 +490,11 @@ public class ManageOrdersUtils {
         return " ";
     }
 
-    public static String getOrderName(DraftOrder selectedOrder, String language) {
+    public static String getOrderName(DraftOrder selectedOrder) {
         if (null != selectedOrder.getC21OrderOptions()) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValueWelsh() + BOLD_END;
-            } else {
-                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
-            }
+            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
         } else if (null != selectedOrder.getOrderType()) {
-            if (PrlAppsConstants.WELSH.equals(language)) {
-                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValueWelsh() + BOLD_END;
-            } else {
-                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
-            }
+            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
         }
         return null;
     }

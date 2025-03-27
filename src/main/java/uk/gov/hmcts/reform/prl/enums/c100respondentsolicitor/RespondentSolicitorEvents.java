@@ -11,36 +11,36 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Getter
 public enum RespondentSolicitorEvents {
-    CONSENT("c100ResSolConsentingToApplication", "Do you give your consent? / A ydych yn rhoi eich caniatâd?", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep details private / Cadwch y manylion yn breifat", "keepContactDetailsPrivate"),
+    CONSENT("c100ResSolConsentingToApplication", "Do you give your consent?", "respondentConsentToApplication"),
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep details private", "keepContactDetailsPrivate"),
     CONFIRM_EDIT_CONTACT_DETAILS(
             "c100ResSolConfirmOrEditContactDetails",
-            "Edit contact details / Golygu manylion cyswllt",
+            "Edit contact details",
             "resSolConfirmEditContactDetails"
     ),
-    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court / Mynychu'r llys", "respondentAttendingTheCourt"),
+    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
     MIAM(
             "c100ResSolMiam",
-            "MIAM / MIAM",
+            "MIAM",
         "hasRespondentAttendedMiam,respondentWillingToAttendMiam,respondentReasonNotAttendingMiam,"
                     + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
-    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings / Achosion eraill",
+    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings",
             "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
-    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Make allegations of harm / Gwneud honiadau o niwed", "respondentAohYesNo,"
+    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Make allegations of harm", "respondentAohYesNo,"
             + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
             + "respondentChildAbduction,respondentOtherConcerns"),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element / Elfen ryngwladol", "internationalElementChild"),
-    RESPOND_ALLEGATION_OF_HARM("c100ResSolResponseToAllegationsOfHarm","Respond to allegations of harm / Ymateb i honiadau o niwed",
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
+    RESPOND_ALLEGATION_OF_HARM("c100ResSolResponseToAllegationsOfHarm","Respond to allegations of harm",
             "responseToAllegationsOfHarmYesOrNoResponse,responseToAllegationsOfHarmDocument"),
     ABILITY_TO_PARTICIPATE(
             "c100ResSolLitigationCapacity",
-            "Litigation capacity / Capasiti cyfreitha",
+            "Litigation capacity",
             "abilityToParticipateInProceedings"
     ),
-    VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response / Gweld drafft o'ch ymateb", ""),
-    SUBMIT("c100ResSolSubmit", "Submit / Cyflwyno", "");
+    VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
+    SUBMIT("c100ResSolSubmit", "Submit", "");
 
     private final String eventId;
     private final String eventName;

@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.editreturnedorder.EditReturnedOrderController;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -116,7 +115,7 @@ public class EditReturnedOrderControllerTest {
     @Test
     public void testPopulateInstructions() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
+        when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("error1")).build());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -124,7 +123,7 @@ public class EditReturnedOrderControllerTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
-            .populateInstructionsToSolicitor(authToken,s2sToken,PrlAppsConstants.ENGLISH,callbackRequest);
+            .populateInstructionsToSolicitor(authToken,s2sToken,callbackRequest);
         Assert.assertFalse(response.getErrors().isEmpty());
     }
 
@@ -146,7 +145,7 @@ public class EditReturnedOrderControllerTest {
                              .build())
             .build();
         assertExpectedException(() -> {
-            editReturnedOrderController.populateInstructionsToSolicitor(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+            editReturnedOrderController.populateInstructionsToSolicitor(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

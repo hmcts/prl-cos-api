@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -59,8 +58,7 @@ public class ApplicantsMapper {
             .add("isAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsAddressConfidential()))
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(applicant.getIsPhoneNumberConfidential()))
             .add("isEmailAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsEmailAddressConfidential()))
-            .add("solicitorOrganisationID", ObjectUtils.isNotEmpty(applicant.getSolicitorOrg())
-                ? applicant.getSolicitorOrg().getOrganisationID() : null)
+            .add("solicitorOrganisationID", applicant.getSolicitorOrg().getOrganisationID())
             .add("solicitorID", "APP_SOL_" + counter.getAndIncrement())
             .add("dxNumber", applicant.getDxNumber())
             .build();

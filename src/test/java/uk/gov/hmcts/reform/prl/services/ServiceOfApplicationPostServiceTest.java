@@ -694,7 +694,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() {
+    public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
         List<Document> coversheets = serviceOfApplicationPostService.getCoverSheets(caseData,AUTH,address,"test name",

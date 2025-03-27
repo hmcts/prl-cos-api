@@ -622,13 +622,9 @@ public class UploadAdditionalApplicationService {
                     know what happens next.
                     """;
             } else {
-                confirmationHeader = "# Parhau i dalu<br/>Continue to payment";
-                confirmationBody = "### Beth fydd yn digwydd nesaf<br/>What happens next \n\n"
-                    + "Mae’r cais hwn wedi cael ei gyflwyno a bydd angen i chi dalu’r ffi ymgeisio nawr.<br/>"
-                    + "This application has been submitted and you will now need to pay the application fee.\n\n"
-                    + "Ewch i’r adran <a href='" + serviceRequestLink + "'>cais am wasanaeth</a> i wneud taliad. "
-                    + "Unwaith y bydd y ffi wedi'i thalu, bydd y llys yn prosesu'r cais.<br/>"
-                    + "Go to the <a href='" + serviceRequestLink + "'>Service request</a> section to make a payment. "
+                confirmationHeader = "# Continue to payment";
+                confirmationBody = "### What happens next \n\nThis application has been submitted and you will now need to pay the application fee."
+                    + " \n\nGo to the <a href='" + serviceRequestLink + "'>Service request</a> section to make a payment. "
                     + "Once the fee has been paid, the court will process the application.";
             }
         } else {

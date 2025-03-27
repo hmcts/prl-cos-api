@@ -12,29 +12,20 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum C21OrderOptionsEnum {
 
     @JsonProperty("c21ApplicationRefused")
-    c21ApplicationRefused("c21ApplicationRefused", "Blank order or directions (C21): application refused",
-        "Gorchymyn gwag neu gyfarwyddiadau (C21): cais wedi’i wrthod"),
+    c21ApplicationRefused("c21ApplicationRefused", "Blank order or directions (C21): application refused"),
     @JsonProperty("c21WithdrawApplication")
-    c21WithdrawApplication("c21WithdrawApplication", "Blank order or directions (C21): to withdraw application",
-        "Gorchymyn gwag neu gyfarwyddiadau (C21): tynnu cais yn ôl"),
+    c21WithdrawApplication("c21WithdrawApplication", "Blank order or directions (C21): to withdraw application"),
     @JsonProperty("c21NoOrderMade")
-    c21NoOrderMade("c21NoOrderMade", "Blank order or directions (C21): no order made",
-        "Gorchymyn gwag neu gyfarwyddiadau (C21): dim gorchymyn wedi’i wneud"),
+    c21NoOrderMade("c21NoOrderMade", "Blank order or directions (C21): no order made"),
     @JsonProperty("c21other")
-    c21other("c21other", "Blank order or directions (C21): Other",
-        "Gorchymyn gwag neu gyfarwyddiadau (C21): Arall");
+    c21other("c21other", "Blank order or directions (C21): Other");
 
     private final String id;
     private final String displayedValue;
-    private final String displayedValueWelsh;
 
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
-    }
-
-    public String getDisplayedValueWelsh() {
-        return displayedValueWelsh;
     }
 
     @JsonCreator

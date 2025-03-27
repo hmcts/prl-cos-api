@@ -3852,7 +3852,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testsendEmailToCafcassCymruForC100CaseThrowsSendGridNotificationException() {
         // Given
-        PartyDetails applicant1 = PartyDetails.builder()
+        PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3864,7 +3864,7 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant1)))
+            .applicants(List.of(element(applicant)))
             .manageOrders(ManageOrders.builder()
                               .displayLegalRepOption(PrlAppsConstants.NO)
                               .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
@@ -3890,7 +3890,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testSendEmailViaSendGridForC100CaseThrowsSendGridNotificationException() {
         // Given
-        PartyDetails applicant1 = PartyDetails.builder()
+        PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3902,7 +3902,7 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant1)))
+            .applicants(List.of(element(applicant)))
             .manageOrders(ManageOrders.builder()
                               .displayLegalRepOption(PrlAppsConstants.NO)
                               .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)

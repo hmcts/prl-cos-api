@@ -143,7 +143,7 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             SubmittedCallbackResponse.class
         );
-        Assert.assertEquals(res.getConfirmationHeader(), "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted");
+        Assert.assertEquals(res.getConfirmationHeader(), "# Draft order resubmitted");
 
     }
 }

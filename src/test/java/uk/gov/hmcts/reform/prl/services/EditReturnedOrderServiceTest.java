@@ -176,7 +176,7 @@ public class EditReturnedOrderServiceTest {
         Map<String, Object> response = editReturnedOrderService
             .populateInstructionsAndDocuments(caseData, DraftOrder.builder()
                 .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("hello").build())
-                .build(), PrlAppsConstants.ENGLISH);
+                .build());
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
@@ -192,7 +192,7 @@ public class EditReturnedOrderServiceTest {
         Map<String, Object> response = editReturnedOrderService
             .populateInstructionsAndDocuments(caseData, DraftOrder.builder()
                 .otherDetails(OtherDraftOrderDetails.builder().build())
-            .build(), PrlAppsConstants.ENGLISH);
+            .build());
         assertTrue(response.containsKey("editOrderTextInstructions"));
     }
 
@@ -211,7 +211,7 @@ public class EditReturnedOrderServiceTest {
                 .orderType(CreateSelectOrderOptionsEnum.generalForm)
                 .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
                 .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())
-                .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build(), PrlAppsConstants.ENGLISH);
+                .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
@@ -294,8 +294,7 @@ public class EditReturnedOrderServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         caseDataMap.put("orderType", "test");
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -307,8 +306,7 @@ public class EditReturnedOrderServiceTest {
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(
             authToken,
             callbackRequest,
-            null,
-            PrlAppsConstants.ENGLISH
+            null
         );
         Assert.assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
         Assert.assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
@@ -331,10 +329,9 @@ public class EditReturnedOrderServiceTest {
             .build();
 
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
-            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null, PrlAppsConstants.ENGLISH);
+            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest, null);
         Assert.assertTrue(response.getErrors().size() > 0);
     }
 }

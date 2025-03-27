@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,6 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
@@ -70,8 +68,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(respondentSolicitorService.populateAboutToStartCaseData(
-                    callbackRequest,
-                    CaseUtils.getLanguage(clientContext)
+                    callbackRequest
                 )).errors(errorList).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

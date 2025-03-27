@@ -27,8 +27,8 @@ public class TaskListRenderElementsTest {
                                                  .build());
 
         assertThat(actual).isEqualToIgnoringCase(
-            "<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name "
-                + "/ Enw'r achos</a>");
+            "<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name"
+                + "</a>");
     }
 
     @Test
@@ -36,7 +36,7 @@ public class TaskListRenderElementsTest {
         String actual = underTest.renderDisabledLink(Task.builder()
                                                          .event(Event.CASE_NAME)
                                                          .build());
-        assertThat(actual).isEqualToIgnoringCase("Case name / Enw'r achos");
+        assertThat(actual).isEqualToIgnoringCase("Case name");
     }
 
     @Test
@@ -103,7 +103,6 @@ public class TaskListRenderElementsTest {
             .build();
         String actual = underTest.renderRespondentSolicitorLink(respondentTask, "A");
 
-        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplicationA/c100ResSolConsentingToApplicationA1'>"
-            + "Do you give your consent? / A ydych yn rhoi eich caniatâd?</a>", actual);
+        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplicationA/c100ResSolConsentingToApplicationA1'>Do you give your consent?</a>", actual);
     }
 }

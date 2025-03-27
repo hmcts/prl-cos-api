@@ -13,77 +13,54 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
-    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1",
-        "Gorchymyn cyfarwyddo safonol"),
+    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1"),
     @JsonProperty("directionOnIssue")
-    directionOnIssue("directionOnIssue", "Directions on issue","2",
-        "Cyfarwyddyd ar gychwyn achos"),
+    directionOnIssue("directionOnIssue", "Directions on issue","2"),
     @JsonProperty("blankOrderOrDirections")
-    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3",
-        "Gorchymyn gwag neu gyfarwyddiadau (C21)"),
+    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
-         "Child arrangements, specific issue or prohibited steps order (C43)","4",
-        "Gorchymyn Trefniadau Plant, Mater Penodol neu Gamau Gwaharddedig (C43)"),
+         "Child arrangements, specific issue or prohibited steps order (C43)","4"),
     @JsonProperty("parentalResponsibility")
-    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5",
-        "Gorchymyn cyfrifoldeb rhiant (C45A)"),
+    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5"),
     @JsonProperty("specialGuardianShip")
-    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6",
-        "Gorchymyn Gwarcheidiaeth Arbennig (C43A)"),
+    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6"),
     @JsonProperty("noticeOfProceedingsParties")
     noticeOfProceedingsParties("noticeOfProceedingsParties",
-                                  "Notice of proceedings (C6) (Notice to parties)","7",
-                  "Hysbysiad o achosion (C6) (Hysbysiad i bartïon)"),
+                                  "Notice of proceedings (C6) (Notice to parties)","7"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
-                                  "Notice of proceedings (C6a) (Notice to non-parties)","8",
-                  "Hysbysiad o achosion (C6a) (Hysbysiad i bobl nad ydynt yn bartïon)"),
+                                  "Notice of proceedings (C6a) (Notice to non-parties)","8"),
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
-                                  "Transfer of case to another court (C49)","9",
-                  "TTrosglwyddo achos i lys arall (C49)"),
+                                  "Transfer of case to another court (C49)","9"),
     @JsonProperty("appointmentOfGuardian")
-    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
-        "Penodi gwarcheidwad (C47A)"),
+    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11",
-        "Gorchymyn rhag molestu (FL404A)"),
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order (FL404)","12",
-        "Gorchymyn Anheddu (FL404)"),
+    occupation("occupation", "Occupation order (FL404)","12"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13",
-        "Pŵer i arestio (FL406)"),
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14",
-        "Gorchymyn sydd wedi ei ddiwygio, ei ryddhau neu ei amrywio (FL404B)"),
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14"),
     @JsonProperty("blank")
-    blank("blank", "Blank order (FL404B)","15",
-        "Gorchymyn gwag (FL404B)"),
+    blank("blank", "Blank order (FL404B)","15"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking (N117)","16",
-        "Ffurfeln gyffredinol am ymgymeriad (N117)"),
+    generalForm("generalForm", "General form of undertaking (N117)","16"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17",
-        "Rhybudd o achos (FL402)"),
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17"),
     @JsonProperty("other")
-    other("other", "Other (upload an order)","18",
-        "Arall (uwchlwythwch orchymyn)");
+    other("other", "Other (upload an order)","18");
 
     private final String id;
     private final String displayedValue;
     private final String optionValue;
-    private final String displayedValueWelsh;
 
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
-    }
-
-    public String getDisplayedValueWelsh() {
-        return displayedValueWelsh;
     }
 
     @JsonCreator
