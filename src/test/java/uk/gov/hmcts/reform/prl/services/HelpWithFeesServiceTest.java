@@ -323,7 +323,7 @@ public class HelpWithFeesServiceTest {
     }
 
     private void testCaseStatus(YesOrNo isEdgeCase, String expectedResponse) {
-        CaseData casedata = CaseData.builder()
+        CaseData casedata1 = CaseData.builder()
             .state(State.SUBMITTED_PAID)
             .dssCaseDetails(DssCaseDetails.builder().isEdgeCase(isEdgeCase).build())
             .build();
@@ -333,7 +333,7 @@ public class HelpWithFeesServiceTest {
             .data(new HashMap<>())
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata1);
         Map<String, Object> response = helpWithFeesService
             .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
         assertNotNull(response);

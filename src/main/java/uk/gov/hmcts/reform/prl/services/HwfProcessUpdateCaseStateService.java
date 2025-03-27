@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -107,8 +108,7 @@ public class HwfProcessUpdateCaseStateService {
                             );
                         }
                         //PRL-4138 - Check application for edge cases
-                        caseDataUpdated.put(IS_C100_EDGE_CASE, null != caseData.getDssCaseDetails()
-                            && YesOrNo.Yes.equals(caseData.getDssCaseDetails().getIsEdgeCase()) ? YES : NO);
+                        caseDataUpdated.put(IS_C100_EDGE_CASE, isEdgeCase(caseData.getDssCaseDetails()));
 
                         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                             = allTabService.getStartUpdateForSpecificEvent(
@@ -136,6 +136,10 @@ public class HwfProcessUpdateCaseStateService {
         );
     }
 
+    private String isEdgeCase(DssCaseDetails dssCaseDetails) {
+        return (null != dssCaseDetails
+            && YesOrNo.Yes.equals(dssCaseDetails.getIsEdgeCase()) ? YES : NO);
+    }
     public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState() {
 
         SearchResultResponse searchResultResponse = SearchResultResponse.builder()

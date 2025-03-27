@@ -6018,7 +6018,7 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void test1PopulateDraftOrderFieldsWhenDraftAnOrderForC100() throws Exception {
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
@@ -6040,7 +6040,7 @@ public class DraftAnOrderServiceTest {
                               .cafcassCymruEmail("test@test.com")
                               .build())
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                              .data(stringObjectMap)
@@ -6049,8 +6049,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
-        )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData);
+        )).thenReturn(caseData1);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData1);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null,PrlAppsConstants.ENGLISH));
@@ -6058,7 +6058,7 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void test2PopulateDraftOrderFieldsWhenDraftAnOrderForC100() throws Exception {
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
@@ -6080,7 +6080,7 @@ public class DraftAnOrderServiceTest {
                               .cafcassCymruEmail("test@test.com")
                               .build())
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                              .data(stringObjectMap)
@@ -6089,8 +6089,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
-        )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData);
+        )).thenReturn(caseData1);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any(),Mockito.any())).thenReturn(caseData1);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null,PrlAppsConstants.WELSH));

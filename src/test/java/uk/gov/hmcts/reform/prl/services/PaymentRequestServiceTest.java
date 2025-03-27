@@ -1014,7 +1014,7 @@ public class PaymentRequestServiceTest {
         CreatePaymentRequest createPaymentRequest1 = CreatePaymentRequest.builder()
             .caseId("12345")
             .returnUrl(null)
-            .feeType(FeeType.PARENTAL_ORDER).build();
+            .feeType(feeType).build();
         CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
         Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
