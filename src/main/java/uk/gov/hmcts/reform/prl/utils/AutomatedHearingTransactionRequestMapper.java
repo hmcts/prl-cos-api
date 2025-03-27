@@ -72,10 +72,6 @@ public class AutomatedHearingTransactionRequestMapper {
                 .familymanCaseNumber(caseData.getFamilymanCaseNumber())
                 .dateSubmitted(caseData.getDateSubmitted())
                 .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
-                /*.applicants(applicantsAutomatedHearingpartyDetails)
-                .applicantsFL401(applicantsAutomatedHearingpartyDetails.get(0).getValue())
-                .respondents(respondentsAutomatedHearingpartyDetails)
-                .respondentsFL401(respondentsAutomatedHearingpartyDetails.get(0).getValue())*/
                 .otherPartyInTheCaseRevised(automatedHearingOtherPartyInTheCaseRevised)
                 .applicantSolicitorEmailAddress(caseData.getApplicantSolicitorEmailAddress())
                 .solicitorName(caseData.getSolicitorName())
@@ -103,9 +99,6 @@ public class AutomatedHearingTransactionRequestMapper {
                 automatedHearingCaseData.setApplicantsFL401(applicantsAutomatedHearingpartyDetails.get(0).getValue());
                 automatedHearingCaseData.setRespondentsFL401(respondentsAutomatedHearingpartyDetails.get(0).getValue());
             }
-            String automatedHearingCaseDataJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(
-                automatedHearingCaseData);
-            log.info("Automated Hearing Request Mapper: AutomatedHearingCaseData: {}", automatedHearingCaseDataJson);
             return automatedHearingCaseData;
         } catch (Exception e) {
             throw new RuntimeException(e);

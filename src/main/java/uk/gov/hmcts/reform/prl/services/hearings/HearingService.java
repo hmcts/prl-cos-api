@@ -221,7 +221,7 @@ public class HearingService {
 
     public AutomatedHearingResponse createAutomatedHearing(String userToken, AutomatedHearingCaseData automatedHearingCaseData) {
         try {
-            log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
+            log.info("Invoking HMC API fis-hmc-api/automated-hearing");
             ResponseEntity<AutomatedHearingResponse> response = hearingApiClient.createAutomatedHearing(userToken,
                                                                     authTokenGenerator.generate(), automatedHearingCaseData);
             if (response.getStatusCode().equals(HttpStatusCode.valueOf(200))) {

@@ -24,9 +24,8 @@ public class AutomatedHearingUtils {
                                                          CaseData caseData,
                                                          Map<String, Object> caseDataMap,
                                                          ManageOrderService manageOrderService) {
-        log.info("Automated Hearing Management: automatedHearingManagementRequest: Start");
+        log.info("AutomatedHearingUtils::automatedHearingManagementRequest: Start");
         if (CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
-            log.info("Automated Hearing Management: Triggering AHR for draft order");
             AtomicBoolean isAhrTriggered = new AtomicBoolean(false);
             caseData.getDraftOrderCollection().stream().findFirst()
                 .ifPresent(order -> {
@@ -40,17 +39,15 @@ public class AutomatedHearingUtils {
                                                                           ));
                         isAhrTriggered.set(true);
                     }
-                    log.info("Draft order collection, setting isAutoHearingReqPending to No");
                     order.getValue().setIsAutoHearingReqPending(No);
                 });
             if (isAhrTriggered.get()) {
-                log.info("AHR triggered, saving draft order collection to caseDataMap");
+                log.info("AHR triggered for a draft order, saving draft order collection to caseDataMap");
                 caseDataMap.put(DRAFT_ORDER_COLLECTION, caseData.getDraftOrderCollection());
             }
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
-            log.info("Automated Hearing Management: Triggering AHR for order");
             AtomicBoolean isAhrTriggered = new AtomicBoolean(false);
             caseData.getOrderCollection().stream().findFirst()
                 .ifPresent(order -> {
@@ -62,14 +59,13 @@ public class AutomatedHearingUtils {
                                                                           ));
                         isAhrTriggered.set(true);
                     }
-                    log.info("Order collection, setting isAutoHearingReqPending to No");
                     order.getValue().setIsAutoHearingReqPending(No);
                 });
             if (isAhrTriggered.get()) {
-                log.info("AHR triggered, saving order collection to caseDataMap");
+                log.info("AHR triggered for an order, saving order collection to caseDataMap");
                 caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
             }
         }
-        log.info("Automated Hearing Management: automatedHearingManagementRequest: End");
+        log.info("AutomatedHearingUtils::automatedHearingManagementRequest: End");
     }
 }

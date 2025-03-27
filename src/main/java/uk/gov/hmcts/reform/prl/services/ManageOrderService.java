@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -3530,16 +3529,11 @@ public class ManageOrderService {
 
     public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
                                                                        List<Element<HearingData>> hearingsList) {
-        log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
             if (!hearingsList.isEmpty()) {
-                log.info("Automated Hearing Management: hearingsList: {}", hearingsList);
                 hearingsList.stream()
                     .map(Element::getValue)
                     .forEach(hearingData -> {
-                        log.info("Automated Hearing Request: HearingDateConfirmOptionEnum: {}",
-                            hearingData.getHearingDateConfirmOptionEnum()
-                        );
                         if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
                             || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
                             log.info("Eligible for AHR, trigger automated hearing request");
@@ -3547,12 +3541,12 @@ public class ManageOrderService {
                                 authorisation,
                                 AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
-                            log.info("Automated Hearing Response: {}", getPrettyJson(automatedHearingResponse));
+                            log.info("Automated Hearing Response: {}", automatedHearingResponse);
                             if (null != automatedHearingResponse) {
                                 hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
                             } else {
                                 log.error("Automated Hearing Request is failed, hearing response is null");
-                                //NEED TO HANDLE THIS FAILED SCENARIO FOR RETRY
+                                //HANDLE THIS FAILED SCENARIO FOR RETRY AND CREATE WA TASK FOR MANUAL HEARING REQUEST
                             }
                         } else {
                             log.info("Not eligible for AHR, skip automated hearing request");
@@ -3560,27 +3554,15 @@ public class ManageOrderService {
                     });
             }
         } catch (Exception e) {
+            log.error("Exception occurred during Automated hearing request creation", e);
             throw new ManageOrderRuntimeException("Invalid Json", e);
         }
-        log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
         return hearingsList;
-    }
-
-    private String getPrettyJson(Object object) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        try {
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-        }
-        return null;
     }
 
     public void populateCheckForAutomatedRequest(CaseData caseData,
                                                  Map<String, Object> caseDataUpdated,
                                                  String eventId) {
-        log.info("Inside populateCheckForAutomatedRequest");
         YesOrNo checkForAutomatedHearing = No;
         /* Eligible for AHR
         1. Manage orders event(admin) & no check for Judge/Manager review
@@ -3593,7 +3575,7 @@ public class ManageOrderService {
             || EDIT_AND_APPROVE_ORDER.getId().equals(eventId))) {
             checkForAutomatedHearing = Yes;
         }
-        log.info("Eligible for Automated Hearing: {} ", checkForAutomatedHearing);
+        log.info("Is eligible for Automated Hearing ? : {} ", checkForAutomatedHearing);
         caseDataUpdated.put("checkForAutomatedHearing", checkForAutomatedHearing);
     }
 

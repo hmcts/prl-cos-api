@@ -1067,7 +1067,6 @@ public class DraftAnOrderService {
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
         //Check for Automated Hearing Management
-        log.info("isAutomatedHearingPresent: {}", isAutomatedHearingPresent);
         caseDataMap.put("isAutomatedHearingPresent", isAutomatedHearingPresent ? Yes : No);
     }
 
