@@ -206,6 +206,9 @@ public class EditAndApproveDraftOrderController {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
+            manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
+            //Populate need to check automated hearing request
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -476,6 +479,16 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
+            }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
@@ -509,13 +522,6 @@ public class EditAndApproveDraftOrderController {
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            // Check for Automated Hearing Management
-            AutomatedHearingUtils.automatedHearingManagementRequest(
-                authorisation,
-                caseData,
-                caseDataUpdated,
-                manageOrderService);
-
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
                 try {
@@ -534,6 +540,16 @@ public class EditAndApproveDraftOrderController {
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
                                                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
                                                        .build());
+            }
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             allTabService.submitAllTabsUpdate(

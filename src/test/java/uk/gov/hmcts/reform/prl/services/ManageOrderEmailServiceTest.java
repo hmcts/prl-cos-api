@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -67,6 +69,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -549,7 +552,7 @@ public class ManageOrderEmailServiceTest {
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
             .cafcassServedOptions(YesOrNo.Yes)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .build();
@@ -643,7 +646,7 @@ public class ManageOrderEmailServiceTest {
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
             .cafcassServedOptions(YesOrNo.Yes)
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .build();
@@ -717,7 +720,7 @@ public class ManageOrderEmailServiceTest {
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
                               .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
@@ -840,7 +843,7 @@ public class ManageOrderEmailServiceTest {
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
                 .serveOrderDynamicList(dynamicMultiSelectList)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
@@ -917,7 +920,7 @@ public class ManageOrderEmailServiceTest {
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
                 .serveOrderDynamicList(dynamicMultiSelectList)
-                .serveToRespondentOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesNoNotApplicable.Yes)
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                 .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
@@ -953,7 +956,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .cafcassCymruServedOptions(YesOrNo.Yes)
                 .cafcassEmailAddress(List.of(element("test")))
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                     .serveByPostOrEmail(DeliveryByEnum.email)
                     .emailInformation(EmailInformation.builder()
@@ -1018,7 +1021,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .cafcassCymruServedOptions(YesOrNo.Yes)
                 .cafcassEmailAddress(List.of(element("test")))
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
@@ -1083,7 +1086,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder()
                 .cafcassCymruServedOptions(YesOrNo.Yes)
                 .cafcassEmailAddress(List.of(element("test")))
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
@@ -1147,7 +1150,7 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .cafcassEmailId("test")
                 .serveOrderDynamicList(dynamicMultiSelectList).build())
@@ -1195,7 +1198,7 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .cafcassEmailId("test").build())
@@ -1240,7 +1243,7 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondents).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectLists)
                 .serveOrderDynamicList(dynamicMultiSelectLists)
                 .cafcassEmailId("test").build())
@@ -1305,7 +1308,7 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .cafcassEmailId("test").build())
@@ -1351,7 +1354,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -1405,7 +1408,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -1460,7 +1463,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
@@ -1511,7 +1514,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                     .applicantLegalRepresentative)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
@@ -1563,7 +1566,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -1613,7 +1616,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of())
                 .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -1664,7 +1667,7 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
@@ -1733,7 +1736,7 @@ public class ManageOrderEmailServiceTest {
         caseData = caseData.toBuilder()
             .respondents(List.of(element(uuid, respondent)))
             .manageOrders(ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .recipientsOptions(dynamicMultiSelectList)
                 .build())
@@ -1799,7 +1802,7 @@ public class ManageOrderEmailServiceTest {
                 element(UUID.fromString(uuid2), respondent2)))
             .othersToNotify(List.of(element(uuid, otherPerson)))
             .manageOrders(ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .otherParties(dynamicMultiSelectList)
                 .recipientsOptions(receipientDynamicMultiSelectList)
@@ -1871,7 +1874,7 @@ public class ManageOrderEmailServiceTest {
                 .code("00000000-0000-0000-0000-000000000000")
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
@@ -1982,7 +1985,7 @@ public class ManageOrderEmailServiceTest {
                 .code("00000000-0000-0000-0000-000000000000")
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of())
@@ -2069,7 +2072,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2163,7 +2166,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectListEmailOptionEmpty)
             .serveOrderDynamicList(dynamicMultiSelectListEmailOptionEmpty)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2258,7 +2261,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2352,7 +2355,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectListCourtBaliff)
             .serveOrderDynamicList(dynamicMultiSelectListCourtBaliff)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2447,7 +2450,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2541,7 +2544,7 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectListCourtAdmin)
             .serveOrderDynamicList(dynamicMultiSelectListCourtAdmin)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
@@ -2608,7 +2611,7 @@ public class ManageOrderEmailServiceTest {
                 .code("00000000-0000-0000-0000-000000000000")
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .cafcassCymruServedOptions(YesOrNo.Yes)
             .otherParties(dynamicMultiSelectList)
             .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
@@ -2687,12 +2690,12 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                 .emailInformation(EmailInformation.builder().emailName("").build())
@@ -2782,12 +2785,12 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectListC100Welsh)
             .serveOrderDynamicList(dynamicMultiSelectListC100Welsh)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtBailiff)
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                 .emailInformation(EmailInformation.builder().emailName("").build())
@@ -2877,10 +2880,10 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2976,10 +2979,10 @@ public class ManageOrderEmailServiceTest {
                 .code(TEST_UUID)
                 .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .recipientsOptions(dynamicMultiSelectListCaWelsh)
             .serveOrderDynamicList(dynamicMultiSelectListCaWelsh)
-            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum
                 .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -3076,7 +3079,7 @@ public class ManageOrderEmailServiceTest {
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .cafcassEmailId("test").build())
@@ -3150,7 +3153,7 @@ public class ManageOrderEmailServiceTest {
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .cafcassEmailId("test").build())
@@ -3212,7 +3215,7 @@ public class ManageOrderEmailServiceTest {
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                .serveToRespondentOptions(YesOrNo.No)
+                .serveToRespondentOptions(YesNoNotApplicable.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                 .cafcassEmailId("test").build())
@@ -3249,7 +3252,7 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicantPost)))
             .manageOrders(ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesNoNotApplicable.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
                 .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
@@ -3286,7 +3289,7 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicantNoAddress)))
             .manageOrders(ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesNoNotApplicable.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
                 .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
@@ -3322,7 +3325,7 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicantEmail)))
             .manageOrders(ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesNoNotApplicable.Yes)
                 .displayLegalRepOption(PrlAppsConstants.NO)
                 .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
@@ -3356,6 +3359,7 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(applicantPostFl401)
             .manageOrders(ManageOrders.builder()
                 .displayLegalRepOption(PrlAppsConstants.NO)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                 .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
                 .serveOrderDynamicList(dynamicMultiSelectList)
                 .build())
@@ -3565,7 +3569,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .displayLegalRepOption("No")
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
@@ -3625,7 +3629,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .displayLegalRepOption("No")
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
@@ -3695,7 +3699,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .displayLegalRepOption("No")
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
@@ -3765,7 +3769,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .displayLegalRepOption("No")
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
@@ -3825,7 +3829,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .displayLegalRepOption("No")
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test")
@@ -3843,5 +3847,80 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(dataMap.get("orderCollection"));
 
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testsendEmailToCafcassCymruForC100CaseThrowsSendGridNotificationException() {
+        // Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassCymruEmail("test@test.com")
+                              .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doThrow(new SendGridNotificationException("SendGrid error")).when(sendgridService).sendEmailUsingTemplateWithAttachments(
+            any(SendgridEmailTemplateNames.class),
+            anyString(),
+            any(SendgridEmailConfig.class)
+        );
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        assertNotNull(caseDataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testSendEmailViaSendGridForC100CaseThrowsSendGridNotificationException() {
+        // Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
+                              .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doThrow(new SendGridNotificationException("SendGrid error")).when(sendgridService).sendEmailUsingTemplateWithAttachments(
+            any(SendgridEmailTemplateNames.class),
+            anyString(),
+            any(SendgridEmailConfig.class)
+        );
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        assertNotNull(caseDataMap.get("orderCollection"));
     }
 }

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
@@ -656,7 +657,7 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
@@ -709,7 +710,7 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .build())
             .serveOrderData(ServeOrderData.builder()
@@ -767,7 +768,7 @@ public class DraftAnOrderServiceTest {
             .applicants(List.of(applicants))
             .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .ordersHearingDetails(List.of(element(HearingData.builder().build())))
                               .build())
@@ -2682,7 +2683,7 @@ public class DraftAnOrderServiceTest {
 
         assertExpectedException(() -> {
             draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false, null, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
-        }, ManageOrderRuntimeException.class, "Failed to update SDO order details");
+        }, ManageOrderRuntimeException.class, "Failed to parse SDO order details");
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
@@ -2889,7 +2890,7 @@ public class DraftAnOrderServiceTest {
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                               .emailInformationDA(List.of(emailInformationElement))
                               .postalInformationDA(List.of(postalInformationElement))
@@ -4258,7 +4259,7 @@ public class DraftAnOrderServiceTest {
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                               .emailInformationDA(List.of(emailInformationElement))
                               .postalInformationDA(List.of(postalInformationElement))
@@ -4315,7 +4316,7 @@ public class DraftAnOrderServiceTest {
             .applicants(List.of(applicants))
             .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .build())
             .serveOrderData(ServeOrderData.builder()
@@ -5184,7 +5185,7 @@ public class DraftAnOrderServiceTest {
             .applicants(List.of(applicants))
             .respondents(List.of(respondents))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .fl404CustomFields(FL404.builder().build())
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
@@ -5255,7 +5256,7 @@ public class DraftAnOrderServiceTest {
                                   .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
                                   .build())
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
@@ -5322,7 +5323,7 @@ public class DraftAnOrderServiceTest {
                                   .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
                                   .build())
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
@@ -5345,7 +5346,7 @@ public class DraftAnOrderServiceTest {
                                   .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
                                   .build())
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
@@ -5593,7 +5594,7 @@ public class DraftAnOrderServiceTest {
                                   .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
                                   .build())*/
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())

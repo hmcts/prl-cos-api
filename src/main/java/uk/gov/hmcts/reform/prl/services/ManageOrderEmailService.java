@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.constants.OrderEmailConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -42,7 +44,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -309,7 +310,7 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
                 handleNonPersonalServiceNotifications(
                     authorisation,
@@ -319,7 +320,7 @@ public class ManageOrderEmailService {
                     orderDocuments,
                     dynamicDataForEmail
                 );
-            } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
+            } else if (YesNoNotApplicable.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
                 String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                     ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions().getId();
@@ -377,7 +378,7 @@ public class ManageOrderEmailService {
                                                     List<EmailInformation> otherOrganisationEmailList,
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
-        if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+        if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
             log.info("Non personal service FL401");
             handleFL401NonPersonalServiceNotifications(authorisation,
                                                         caseData,
@@ -387,7 +388,7 @@ public class ManageOrderEmailService {
                                                         dynamicDataForEmail);
 
 
-        } else {
+        } else if (YesNoNotApplicable.Yes.equals(manageOrders.getServeToRespondentOptions())) {
             log.info("*** DA Personal service ");
             log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
@@ -636,7 +637,7 @@ public class ManageOrderEmailService {
                     .languagePreference(LanguagePreference.english)
                     .build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("There is a failure in sending send grid email with exception {}",
                       e.getMessage());
         }
@@ -656,7 +657,7 @@ public class ManageOrderEmailService {
                     dynamicData).listOfAttachments(
                     orderDocuments).languagePreference(LanguagePreference.english).build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
                       cafcassCymruEmailId, e.getMessage());
         }
@@ -918,7 +919,7 @@ public class ManageOrderEmailService {
                                           Address address,
                                           String name,
                                           String authorisation,
-                                          List<Document> orderDocuments) throws Exception {
+                                          List<Document> orderDocuments) {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(

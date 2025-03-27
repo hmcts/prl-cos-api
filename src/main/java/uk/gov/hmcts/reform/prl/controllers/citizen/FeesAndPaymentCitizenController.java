@@ -29,10 +29,11 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FETCH_FEE_INVALID_APPLICATION_TYPE;
 
 
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Tag(name = "fees-and-payment-controller")
 @RestController
 @RequestMapping("/fees-and-payment-apis")
@@ -40,14 +41,11 @@ public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String LOGGERMESSAGE = "Invalid Client";
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
-    @Autowired
-    private FeeService feeService;
+    private final FeeService feeService;
 
-    @Autowired
-    private PaymentRequestService paymentRequestService;
+    private final PaymentRequestService paymentRequestService;
 
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
@@ -146,9 +144,8 @@ public class FeesAndPaymentCitizenController {
     ) {
         FeeResponseForCitizen feeResponseForCitizen = null;
         try {
-            log.info("#### FeeRequest {}", feeRequest);
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
+                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
@@ -158,6 +155,23 @@ public class FeesAndPaymentCitizenController {
                 .build();
         }
         return feeResponseForCitizen;
+    }
+
+    @GetMapping(path = "/getFee/{applicationType}", produces = APPLICATION_JSON)
+    @Operation(description = "API to fetch the application fees by application type")
+    public FeeResponseForCitizen fetchFee(@RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+                                          @PathVariable String applicationType) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
+            log.info("### Fetch fees for application type: {}", applicationType);
+            if (null == applicationType || applicationType.isEmpty()) {
+                return FeeResponseForCitizen.builder()
+                    .errorRetrievingResponse(FETCH_FEE_INVALID_APPLICATION_TYPE)
+                    .build();
+            }
+            return feeService.fetchFee(applicationType);
+        } else {
+            throw (new RuntimeException(LOGGERMESSAGE));
+        }
     }
 
 }

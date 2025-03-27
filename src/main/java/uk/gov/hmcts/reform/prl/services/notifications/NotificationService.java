@@ -7,10 +7,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -36,17 +38,19 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP13_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP14_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.AP15_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP13;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP14;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP15;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
@@ -59,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.C1A_NOTIFICATION_APPLICANT;
@@ -105,6 +110,16 @@ public class NotificationService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @Async
+    public void sendNotificationsAsync(CaseData caseData,
+                                       QuarantineLegalDoc quarantineLegalDoc,
+                                       String userRole) {
+        scheduler.schedule(() -> sendNotifications(caseData,
+                                                   quarantineLegalDoc,
+                                                   userRole), 500, TimeUnit.MILLISECONDS);
+    }
 
     public void sendNotifications(CaseData caseData,
                                   QuarantineLegalDoc quarantineLegalDoc,
@@ -122,7 +137,7 @@ public class NotificationService {
                     caseData,
                     C7_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT,
-                    AP13_HINT,
+                    PRL_LET_ENG_C100_AP13,
                     C7_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -140,7 +155,7 @@ public class NotificationService {
                     caseData,
                     C1A_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-                    AP14_HINT,
+                    PRL_LET_ENG_C100_AP14,
                     C1A_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -158,7 +173,7 @@ public class NotificationService {
                     caseData,
                     C1A_RESPONSE_NOTIFICATION_APPLICANT,
                     SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT,
-                    AP15_HINT,
+                    PRL_LET_ENG_C100_AP15,
                     C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR,
                     respondentName,
                     responseDocument
@@ -306,7 +321,7 @@ public class NotificationService {
                     .languagePreference(LanguagePreference.english)
                     .build()
             );
-        } catch (IOException e) {
+        } catch (SendGridNotificationException e) {
             log.error("There is a failure in sending email to {} with exception {}", emailAddress, e.getMessage());
             throw (new RuntimeException(e));
         }
@@ -352,13 +367,9 @@ public class NotificationService {
                                                                             applicant.getValue().getAddress(),
                                                                             applicant.getValue().getLabelForDynamicList(),
                                                                             respondentName);
-                responseDocuments.addAll(serviceOfApplicationService
-                                             .getCoverLetters(
-                                                 authorisation,
-                                                 caseData,
-                                                 coverLetterTemplateHint,
-                                                 dataMap
-                                             ));
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                responseDocuments.addAll(serviceOfApplicationService.fetchCoverLetter(authorisation, coverLetterTemplateHint,
+                                                 dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh()));
                 //response document
                 responseDocuments.add(responseDocument);
 
@@ -438,7 +449,7 @@ public class NotificationService {
     private Document getQuarantineDocumentForUploader(String uploaderRole,
                                                       QuarantineLegalDoc quarantineLegalDoc) {
         return switch (uploaderRole) {
-            case SOLICITOR -> quarantineLegalDoc.getDocument();
+            case SOLICITOR, LEGAL_PROFESSIONAL -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();

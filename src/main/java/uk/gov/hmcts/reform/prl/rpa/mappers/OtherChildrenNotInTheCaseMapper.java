@@ -34,7 +34,7 @@ public class OtherChildrenNotInTheCaseMapper {
             .add("lastName", child.getLastName())
             .add("isDateOfBirtKnown", String.valueOf(child.getIsDateOfBirthKnown()))
             .add("dateOfBirth", String.valueOf(child.getDateOfBirth()))
-            .add("gender", child.getGender().getDisplayedValue())
+            .add("gender", null != child.getGender() ? child.getGender().getDisplayedValue() : null)
             .add("otherGender", child.getOtherGender())
             .build()).collect(JsonCollectors.toJsonArray());
     }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -78,7 +79,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,8 +99,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
@@ -2632,7 +2630,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
@@ -2739,7 +2737,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -3783,7 +3781,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForLa() throws Exception {
+    public void testSendNotificationForLa() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3865,7 +3863,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForLaWithException() throws Exception {
+    public void testSendNotificationForLaWithException() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3920,7 +3918,8 @@ public class ServiceOfApplicationServiceTest {
                                                                    .surname("test").build());
         when(serviceOfApplicationEmailService
                  .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
-                                                        Mockito.any(),Mockito.anyString())).thenThrow(IOException.class);
+                                                        Mockito.any(),Mockito.anyString())).thenThrow(
+            SendGridNotificationException.class);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             TEST_AUTH,
@@ -4139,7 +4138,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() throws IOException {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
 
         String[] caseTypes = {"C100", "FL401"};
         for (String caseType : caseTypes) {
@@ -4631,101 +4630,6 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
-    }
-
-    @Test
-    public void testGetRe7CoverLettersEnglishWelsh() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseInvites(List.of(element(caseInvite)))
-            .build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
-                                                                                                  .isGenWelsh(true).build());
-
-        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
-                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
-
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals(2, coverLetters.size());
-    }
-
-    @Test
-    public void testGetRe7CoverLettersEnglishOnly() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseInvites(List.of(element(caseInvite)))
-            .build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
-                                                                                                  .isGenWelsh(false).build());
-
-        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
-                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
-
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals(1, coverLetters.size());
-    }
-
-    @Test
-    public void testGetRe7CoverLettersWelshOnly() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseInvites(List.of(element(caseInvite)))
-            .build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(false)
-                                                                                                  .isGenWelsh(true).build());
-
-        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
-                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
-
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals(1, coverLetters.size());
-    }
-
-    @Test
-    public void testGetRe8CoverLettersEnglishWelsh() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseInvites(List.of(element(caseInvite)))
-            .build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
-                                                                                                  .isGenWelsh(true).build());
-
-        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
-                                                                                  caseData.getRespondents().get(0), RE8_HINT, true);
-
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals(2, coverLetters.size());
-    }
-
-    @Test
-    public void testGetCoverLettersEnglishWelshWithoutAccessCode() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseInvites(List.of(element(caseInvite)))
-            .build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
-                                                                                                  .isGenWelsh(true).build());
-
-        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
-                                                                                  caseData.getRespondents().get(0), RE7_HINT, false);
-
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals(2, coverLetters.size());
     }
 
     @Test

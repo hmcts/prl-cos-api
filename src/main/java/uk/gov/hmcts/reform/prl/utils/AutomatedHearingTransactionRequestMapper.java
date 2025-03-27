@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 public class AutomatedHearingTransactionRequestMapper {
@@ -38,7 +39,7 @@ public class AutomatedHearingTransactionRequestMapper {
             List<Element<AutomatedHearingPartyDetails>> applicantsAutomatedHearingpartyDetails = new ArrayList<>();
 
             List<Element<AutomatedHearingPartyDetails>> respondentsAutomatedHearingpartyDetails = new ArrayList<>();
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData.getApplicants().forEach(applicants -> getPartyDetailsForRequest(
                     applicants,
                     applicantsAutomatedHearingpartyDetails
@@ -71,8 +72,10 @@ public class AutomatedHearingTransactionRequestMapper {
                 .familymanCaseNumber(caseData.getFamilymanCaseNumber())
                 .dateSubmitted(caseData.getDateSubmitted())
                 .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
-                .applicants(applicantsAutomatedHearingpartyDetails)
+                /*.applicants(applicantsAutomatedHearingpartyDetails)
+                .applicantsFL401(applicantsAutomatedHearingpartyDetails.get(0).getValue())
                 .respondents(respondentsAutomatedHearingpartyDetails)
+                .respondentsFL401(respondentsAutomatedHearingpartyDetails.get(0).getValue())*/
                 .otherPartyInTheCaseRevised(automatedHearingOtherPartyInTheCaseRevised)
                 .applicantSolicitorEmailAddress(caseData.getApplicantSolicitorEmailAddress())
                 .solicitorName(caseData.getSolicitorName())
@@ -93,6 +96,13 @@ public class AutomatedHearingTransactionRequestMapper {
                                        .build())
                 .issueDate(caseData.getIssueDate())
                 .build();
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                automatedHearingCaseData.setApplicants(applicantsAutomatedHearingpartyDetails);
+                automatedHearingCaseData.setRespondents(respondentsAutomatedHearingpartyDetails);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                automatedHearingCaseData.setApplicantsFL401(applicantsAutomatedHearingpartyDetails.get(0).getValue());
+                automatedHearingCaseData.setRespondentsFL401(respondentsAutomatedHearingpartyDetails.get(0).getValue());
+            }
             String automatedHearingCaseDataJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(
                 automatedHearingCaseData);
             log.info("Automated Hearing Request Mapper: AutomatedHearingCaseData: {}", automatedHearingCaseDataJson);

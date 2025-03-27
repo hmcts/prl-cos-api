@@ -41,6 +41,8 @@ public class DgsServiceTest {
 
     @Mock
     private DgsApiClient dgsApiClient;
+    @Mock
+    private UserRoleService userRoleService;
 
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
@@ -172,7 +174,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateWelshDocumentWithCaseData() throws Exception {
+    public void testToGenerateWelshDocumentWithCaseData() {
 
         Map<String, Object> respondentDetails = new HashMap<>();
         respondentDetails.put("fullName", "test");
@@ -228,7 +230,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocumentThrowsException() {
+    public void testGenerateCitizenDocumentThrowsFeignException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -302,6 +304,22 @@ public class DgsServiceTest {
         assertExpectedException(() -> {
             dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
         }, DocumentGenerationException.class, null);
+    }
+
+    @Test
+    public void testToGenerateDocumentWithCaseDataThrowsRuntimeExcetion() {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsApiClient.generateDocument(any(),any())).thenThrow(RuntimeException.class);
+        assertExpectedException(() -> {
+            dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,respondentDetails);
+        }, DocumentGenerationException.class, null);
+
     }
 
     @Test

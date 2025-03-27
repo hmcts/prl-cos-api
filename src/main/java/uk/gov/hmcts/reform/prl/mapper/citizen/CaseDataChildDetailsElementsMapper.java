@@ -83,6 +83,7 @@ public class CaseDataChildDetailsElementsMapper {
 
 
         return Element.<ChildDetailsRevised>builder()
+            .id(UUID.fromString(childDetail.getId()))
             .value(ChildDetailsRevised.builder()
                        .firstName(childDetail.getFirstName())
                        .lastName(childDetail.getLastName())
@@ -96,7 +97,8 @@ public class CaseDataChildDetailsElementsMapper {
                                childDetail.getParentialResponsibility()))
             .whoDoesTheChildLiveWith(whoDoesTheChildLiveWithDynamicList)
             .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
-            .build()).build();
+            .build())
+            .id(UUID.fromString(childDetail.getId())).build();
     }
 
     private static LocalDate getDateOfBirth(ChildDetail childDetail) {

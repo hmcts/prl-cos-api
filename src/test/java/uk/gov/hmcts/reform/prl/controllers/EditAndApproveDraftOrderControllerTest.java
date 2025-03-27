@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
@@ -140,9 +141,8 @@ public class EditAndApproveDraftOrderControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
     public static Map<String, Object> clientContext = new HashMap<>();
-    private UUID uuid;
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    private static final String encodedString = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
+    private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
         + "xYzcyOWEtNTYzMC0xMWVmLWEwZDMtZWFmMDM2YWQ5MjBkIiwibmFtZSI6IlJldmlldyBhbmQgQXBwcm92ZSBMZWdhbCBy"
         + "ZXAgT3JkZXIiLCJhc3NpZ25lZSI6ImQ1YjIwOTEzLTc4ZWEtNDZkMi1iNjVjLTVlMTExZDllN2Y4NCIsInR5cGUiOiJyZXZpZXdTb2"
         + "xpY2l0b3JPcmRlclByb3ZpZGVkIiwidGFza19zdGF0ZSI6ImFzc2lnbmVkIiwidGFza19zeXN0ZW0iOiJTRUxGIiwic2VjdXJpdHlfY"
@@ -1019,7 +1019,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .ordersHearingDetails(List.of(element(HearingData.builder()
@@ -1085,7 +1085,7 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, encodedString, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, ENCODEDSTRING, callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1119,7 +1119,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesNoNotApplicable.No)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .ordersHearingDetails(List.of(element(HearingData.builder()
@@ -1158,7 +1158,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .manageOrders(manageOrders)
             .build();
         Map<String, Object> stringObjectMap = new HashMap<>();
-        uuid = UUID.fromString(TEST_UUID);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
@@ -1176,7 +1175,7 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(authToken, s2sToken, encodedString, callbackRequest);
+            .saveServeOrderDetails(authToken, s2sToken, ENCODEDSTRING, callbackRequest);
         Assert.assertNotNull(response);
     }
 

@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -191,7 +192,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
-    private final YesOrNo serveToRespondentOptions;
+    private final YesNoNotApplicable serveToRespondentOptions;
     @JsonProperty("servingOptionsForNonLegalRep")
     private final SoaCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
     private final SoaSolicitorServingRespondentsEnum personallyServeRespondentsOptions;
@@ -303,6 +304,9 @@ public class ManageOrders implements MappableObject {
     private final List<Element<EmailInformation>> emailInformationCA;
     @JsonProperty("postalInformationCA")
     private final List<Element<PostalInformation>> postalInformationCA;
+
+    @JsonProperty("checkForAutomatedHearing")
+    private YesOrNo checkForAutomatedHearing;
 
     /*
     * Unused fields

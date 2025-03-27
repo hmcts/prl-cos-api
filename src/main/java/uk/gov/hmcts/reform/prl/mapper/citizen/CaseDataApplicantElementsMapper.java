@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -71,7 +72,9 @@ public class CaseDataApplicantElementsMapper {
         List<ApplicantDto> applicantDtoList = c100RebuildApplicantDetailsElements.getApplicants();
 
         return applicantDtoList.stream()
-                .map(applicantDto -> Element.<PartyDetails>builder().value(buildPartyDetails(applicantDto)).build())
+                .map(applicantDto -> Element.<PartyDetails>builder()
+                    .id(StringUtils.isNotEmpty(applicantDto.getId()) ? UUID.fromString(applicantDto.getId()) : UUID.randomUUID())
+                    .value(buildPartyDetails(applicantDto)).build())
                 .toList();
     }
 
@@ -89,6 +92,8 @@ public class CaseDataApplicantElementsMapper {
                 .previousName(applicantDto.getPersonalDetails().getPreviousFullName())
                 .gender(Gender.getDisplayedValueFromEnumString(applicantDto.getPersonalDetails().getGender()))
                 .otherGender(applicantDto.getPersonalDetails().getOtherGenderDetails())
+                .liveInRefuge(applicantDto.getLiveInRefuge())
+                .refugeConfidentialityC8Form(applicantDto.getRefugeConfidentialityC8Form())
                 .dateOfBirth(buildDateOfBirth(applicantDto.getPersonalDetails().getDateOfBirth()))
                 .placeOfBirth(applicantDto.getPersonalDetails().getApplicantPlaceOfBirth())
                 .phoneNumber(isNotEmpty(applicantDto.getApplicantContactDetail().getTelephoneNumber())
@@ -102,9 +107,12 @@ public class CaseDataApplicantElementsMapper {
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
-                .isAddressConfidential(buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
-                .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-                .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+                .isAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
+                .isEmailAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
+                .isPhoneNumberConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                    : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
                 .build();
@@ -181,14 +189,17 @@ public class CaseDataApplicantElementsMapper {
 
                                  return Element.<ChildrenAndApplicantRelation>builder()
                                      .value(ChildrenAndApplicantRelation.builder()
-                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                                .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                                    .anyMatch(c -> c.getId().equals(applicantDto.getId())) ? Yes : No)
-                                                .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
-                                                .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                                    childRelationship.getRelationshipType()))
-                                                .childAndApplicantRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                                .build()).build();
+                                         .childId(childDetail.getId())
+                                         .applicantId(applicantDto.getId())
+                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                         .childLivesWith(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(applicantDto.getId())) ? Yes : No)
+                                         .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
+                                         .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                             childRelationship.getRelationshipType()))
+                                         .childAndApplicantRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                         .build())
+                                     .build();
                              }
                              return null;
                          })

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -135,7 +137,7 @@ public class HearingDataService {
             .retrievedHearingChannels(getDynamicList(hearingChannelsDetails.get(HEARINGCHANNEL)))
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
             .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
-            .retrievedCourtLocations(getDynamicList(locationRefDataService.getCourtLocations(authorisation)))
+            .retrievedCourtLocations(getCourtsDynamicList(locationRefDataService.getCourtLocations(authorisation), caseData))
             .hearingListedLinkedCases(getDynamicList(getLinkedCases(authorisation, caseData)))
             .build();
     }
@@ -511,8 +513,13 @@ public class HearingDataService {
     private List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser hearingJudgeNameAndEmail) {
 
         String[] judgePersonalCode = getPersonalCode(hearingJudgeNameAndEmail);
-        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                .personalCode(judgePersonalCode).build());
+        try {
+            return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                .personalCode(judgePersonalCode).build());
+        } catch (FeignException e) {
+            log.error("Error retrieving judicial user details: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     public DynamicList getDynamicList(List<DynamicListElement> listItems) {
@@ -620,6 +627,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
+                        .hearingId(String.valueOf(caseHearing.get().getHearingID()))
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
                                                                                       caseHearing.get().getHearingTypeValue()
                         ))
@@ -717,8 +725,7 @@ public class HearingDataService {
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
                                                                                            CaseData caseData, String hearingType) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
-            log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
-                .getHearingStartDateTime(), caseData.getId());
+
 
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
@@ -946,5 +953,23 @@ public class HearingDataService {
         if (4 < numberOfRespondentSolicitors) {
             tempPartyNamesMap.put("respondentSolicitor5", concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)"));
         }
+    }
+
+    public DynamicList getCourtsDynamicList(List<DynamicListElement> listItems,
+                                            CaseData caseData) {
+        //Default hearing location to court location
+        Optional<DynamicListElement> courtLocation = listItems.stream()
+            .filter(courtElement -> null != courtElement
+                && null != courtElement.getCode() && null != caseData.getCaseManagementLocation()
+                && courtElement.getCode().startsWith(caseData.getCaseManagementLocation().getBaseLocation()))
+            .findFirst();
+        if (courtLocation.isPresent()) {
+            return DynamicList.builder()
+                .value(courtLocation.get())
+                .listItems(listItems).build();
+        }
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
     }
 }

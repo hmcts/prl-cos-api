@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -49,9 +50,9 @@ public class CaseDataRespondentDetailsElementsMapper {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
 
-        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
-            buildPartyDetails(respondentDetails)).build()).toList();
-
+        return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder()
+            .id(UUID.fromString(respondentDetails.getId()))
+            .value(buildPartyDetails(respondentDetails)).build()).toList();
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
@@ -69,6 +70,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
+            .isCurrentAddressKnown(respondentDetails.getAddressUnknown() != null ? No : Yes)
             .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetails(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
@@ -151,14 +153,17 @@ public class CaseDataRespondentDetailsElementsMapper {
 
                                  return Element.<ChildrenAndRespondentRelation>builder()
                                      .value(ChildrenAndRespondentRelation.builder()
-                                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
-                                                .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                                    .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
-                                                .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
-                                                .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
-                                                    childRelationship.getRelationshipType()))
-                                                .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
-                                                .build()).build();
+                                         .childId(childDetail.getId())
+                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                         .childLivesWith(childDetail.getChildLiveWith().stream()
+                                             .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
+                                         .respondentId(respondentDetails.getId())
+                                         .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
+                                         .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                             childRelationship.getRelationshipType()))
+                                         .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                         .build())
+                                     .build();
                              }
                              return null;
                          })

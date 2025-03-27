@@ -1,134 +1,199 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.prl.Application;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-import static org.junit.Assert.assertEquals;
-
-@ContextConfiguration
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {SendAndReplyControllerIntegrationTest.class, Application.class})
+@ContextConfiguration
 public class SendAndReplyControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
+    private MockMvc mockMvc;
 
-    private final String taskListControllerEndPoint = "/update-task-list/submitted";
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    private final String validBody = "requests/send-and-reply-case-data.json";
+    @MockBean
+    SendAndReplyService sendAndReplyService;
 
-    @Test
-    public void whenInvalidRequestFormat_Return400() throws IOException {
+    @MockBean
+    ElementUtils elementUtils;
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/about-to-start");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
+    @MockBean
+    AllTabServiceImpl allTabService;
+
+    @MockBean
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new ParameterNamesModule());
     }
 
     @Test
-    public void whenInvalidRequestFormatmidEvent_Return400() throws IOException {
+    public void testAboutToStart() throws Exception {
+        String url = "/send-and-reply-to-messages/about-to-start";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/mid-event");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenInvalidRequestFormatAboutToSubmit_Return400() throws IOException {
+    public void testMidEvent() throws Exception {
+        String url = "/send-and-reply-to-messages/mid-event";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/about-to-submit");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenInvalidRequestFormatSubmitted_Return400() throws IOException {
+    public void testAboutToSubmit() throws Exception {
+        String url = "/send-and-reply-to-messages/about-to-submit";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/submitted");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenSendAndReplyMidEventValidRequest_Return200() throws Exception {
+    public void testSubmitted() throws Exception {
+        String url = "/send-and-reply-to-messages/submitted";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/mid-event");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenSendAndReplyAboutToSubmitValidRequest_Return200() throws Exception {
+    public void testSendOrReplyToMessagesAboutToStart() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/about-to-start";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/about-to-submit");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenSendAndReplySubmittedValidRequest_Return200() throws Exception {
+    public void testSendOrReplyToMessagesMidEvent() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/mid-event";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/submitted");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void whenSendAndReplyAboutToStartValidRequest_Return200() throws Exception {
+    public void testSendOrReplyToMessagesAboutToSubmit() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/about-start");
-        String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_NOT_FOUND,
-            httpResponse.getStatusLine().getStatusCode());
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitted() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/submitted";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testClearDynamicLists() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/clear-dynamic-lists";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        when(sendAndReplyService.resetSendAndReplyDynamicLists(any())).thenReturn(CaseData.builder().build());
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 }

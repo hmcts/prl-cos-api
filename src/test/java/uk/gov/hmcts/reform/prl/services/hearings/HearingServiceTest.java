@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -88,7 +90,6 @@ public class HearingServiceTest {
 
     PartyDetails applicant;
     PartyDetails respondent;
-    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     @Before
     public void init() {
@@ -193,10 +194,14 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
-            any(),
-            any(),
-            any()
-        )).thenThrow(new RuntimeException());
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+            .status(500)
+            .reason("Internal Server Error")
+            .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
+            .build()));
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
 
@@ -275,10 +280,14 @@ public class HearingServiceTest {
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
 
         when(hearingApiClient.getCaseLinkedData(
-            any(),
-            any(),
-            any()
-        )).thenThrow(new RuntimeException());
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(FeignException.errorStatus("getHearingDetails", Response.builder()
+            .status(500)
+            .reason("Internal Server Error")
+            .request(Request.create(Request.HttpMethod.POST, "/serviceLinkedCases", Map.of(), null, null, null))
+            .build()));
 
         List<CaseLinkedData> response =
             hearingService.getCaseLinkedData(auth,caseLinkedRequest);
@@ -381,10 +390,17 @@ public class HearingServiceTest {
         Assert.assertNull(automatedHearingsResponse);
     }
 
-    private CaseDataContent buildCaseDataContent() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("caseTypeOfApplication", "C100");
-        return CaseDataContent.builder().data(caseData).eventToken("EventToken").caseReference("CaseReference").build();
+    @Test
+    @DisplayName("test case for Automated Hearing Management with failure response.")
+    public void createAutomatedHearingManagementTestFailure() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
+        when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(ResponseEntity.internalServerError().build());
+        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+        Assert.assertNull(automatedHearingsResponse);
+
     }
 }
 

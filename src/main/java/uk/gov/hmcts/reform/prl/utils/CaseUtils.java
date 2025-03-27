@@ -6,7 +6,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.exception.NoCaseDataFoundException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -68,9 +68,8 @@ import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static org.testng.util.Strings.isNotNullAndNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -116,7 +115,7 @@ public class CaseUtils {
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
         if (caseDetails == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new NoCaseDataFoundException(HttpStatus.NOT_FOUND, "No case data found in the response");
         }
         return getCaseData(caseDetails, objectMapper);
     }
@@ -517,10 +516,10 @@ public class CaseUtils {
     }
 
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        log.info("Sate from callbackRequest " + callbackRequest.getCaseDetails().getState());
+        log.info("State from callbackRequest " + callbackRequest.getCaseDetails().getState());
         State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
         if (null != state) {
-            log.info("Sate " + state.getLabel());
+            log.info("State " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
     }
@@ -578,9 +577,6 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
-        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
-        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
         if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
             && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
@@ -641,6 +637,8 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             applicantSolicitorList = parties.stream()
                 .map(Element::getValue)
+                .filter(partyDetails -> isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -652,7 +650,9 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             respondentSolicitorList = parties.stream()
                 .map(Element::getValue)
-                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -661,12 +661,9 @@ public class CaseUtils {
 
     public static String getFL401SolicitorName(PartyDetails party) {
         if (null != party
-            && isNotBlank(party.getRepresentativeFirstName())
-            && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(
-                party.getRepresentativeFirstName(),
-                concat(" ", party.getRepresentativeLastName())
-            );
+            && isNotNullAndNotEmpty(party.getRepresentativeFirstName())
+            && isNotNullAndNotEmpty(party.getRepresentativeLastName())) {
+            return party.getRepresentativeFirstName() + " " + party.getRepresentativeLastName();
         }
         return null;
     }
@@ -759,8 +756,7 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside checkIfAddressIsChanged old {} , new {}",
-                 updatedParty.getAddress(), currentParty.getAddress());
+        log.info("verifying address change");
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
             ? updatedParty.getAddress() : Address.builder().build();
@@ -781,7 +777,7 @@ public class CaseUtils {
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
+        log.info("Verify email address change");
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
                                              updatedParty.getIsEmailAddressConfidential()))
@@ -792,7 +788,7 @@ public class CaseUtils {
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
+        log.info("verifying phone number change");
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
                                              updatedParty.getIsPhoneNumberConfidential()))
@@ -804,8 +800,6 @@ public class CaseUtils {
 
     private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
         log.info("inside isConfidentialityRemainsSame");
-        log.info("newConfidentiality ==> " + newConfidentiality);
-        log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
             && ObjectUtils.isEmpty(newConfidentiality)) {
             return true;
@@ -1086,5 +1080,9 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getContactInstructions(PartyDetails applicantsFL401) {
+        return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
     }
 }

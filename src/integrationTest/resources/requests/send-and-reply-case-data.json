@@ -10,21 +10,42 @@
         "messageSubject": "Testing",
         "messageUrgency": null
       },
-      "chooseSendOrReply": "REPLY",
       "messageReply": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": "fprl_caseworker_solicitor@mailinator.com",
         "messageSubject": "test",
-        "messageUrgency": null,
-        "isReplying": "Yes"
+        "messageUrgency": null
       },
-      "messageObject": {
-        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
-        "recipientEmail": "fprl_caseworker_solicitor@mailinator.com",
-        "messageSubject": "test",
-        "messageUrgency": null,
-        "isReplying": "Yes"
+      "replyMessageObject": {
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
       },
+      "sendMessageObject": {
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      },
+      "openMessages": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": {
+            "senderEmail": "string",
+            "recipientEmail": "string",
+            "messageSubject": "string",
+            "messageUrgency": "string",
+            "dateSent": "string",
+            "messageContent": "string",
+            "updatedTime": "2023-01-23T11:05:27.266000",
+            "status": "OPEN",
+            "latestMessage": "string",
+            "messageHistory": "string",
+            "isReplying": "Yes",
+            "replyFrom": "string",
+            "replyTo": "string"
+          }
+        }
+      ],
       "children": [
         {
           "id": "ea726437-e8d0-4b09-8f99-d0979b81296e",
@@ -41,16 +62,7 @@
               "childArrangementsOrder"
             ],
             "isDateOfBirthUnknown": null,
-            "personWhoLivesWithChild": [
-
-            ],
-            "relationshipToApplicant": null,
-            "relationshipToRespondent": null,
-            "applicantsRelationshipToChild": "father",
-            "parentalResponsibilityDetails": "asdf",
-            "respondentsRelationshipToChild": "mother",
-            "otherApplicantsRelationshipToChild": null,
-            "otherRespondentsRelationshipToChild": null
+            "personWhoLivesWithChild": []
           }
         }
       ],
@@ -120,9 +132,7 @@
             "respondentLivedWithApplicant": null,
             "doTheyHaveLegalRepresentation": null,
             "addressLivedLessThan5YearsDetails": null,
-            "otherPersonRelationshipToChildren": [
-
-            ],
+            "otherPersonRelationshipToChildren": [],
             "isAtAddressLessThan5YearsWithDontKnow": null
           }
         }
@@ -139,9 +149,7 @@
               "spoken",
               "written"
             ],
-            "fl401SpokenOrWritten": [
-
-            ]
+            "fl401SpokenOrWritten": []
           }
         }
       ],
@@ -203,9 +211,7 @@
             "respondentLivedWithApplicant": null,
             "doTheyHaveLegalRepresentation": "no",
             "addressLivedLessThan5YearsDetails": null,
-            "otherPersonRelationshipToChildren": [
-
-            ],
+            "otherPersonRelationshipToChildren": [],
             "isAtAddressLessThan5YearsWithDontKnow": "no"
           }
         }
@@ -350,9 +356,7 @@
             "phoneNumber": null,
             "placeOfBirth": null,
             "previousName": null,
-            "solicitorOrg": {
-
-            },
+            "solicitorOrg": {},
             "solicitorEmail": null,
             "solicitorReference": null,
             "isPlaceOfBirthKnown": "No",
@@ -402,9 +406,7 @@
             "otherGender": null,
             "childLiveWith": "Applicant",
             "orderAppliedFor": "Child Arrangements Order",
-            "personWhoLivesWithChild": [
-
-            ],
+            "personWhoLivesWithChild": [],
             "applicantsRelationshipToChild": "Father",
             "parentalResponsibilityDetails": "asdf",
             "respondentsRelationshipToChild": "Mother",
@@ -427,9 +429,7 @@
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "No"
       },
-      "existingProceedings": [
-
-      ],
+      "existingProceedings": [],
       "hearingUrgencyTable": {
         "isCaseUrgent": "No",
         "setOutReasonsBelow": null,
@@ -556,29 +556,17 @@
       "litigationCapacityReferrals": "Provide details of any referral to or assessment by the Adult Learning Disability team, and/or any adult health service, where known, together with the outcome (Optional)",
       "specialArrangementsRequired": null,
       "allegationsOfHarmOrdersTable": {
-        "occupationOrder": {
-
-        },
+        "occupationOrder": {},
         "ordersOccupation": null,
-        "restrainingOrder": {
-
-        },
+        "restrainingOrder": {},
         "ordersRestraining": null,
-        "nonMolestationOrder": {
-
-        },
+        "nonMolestationOrder": {},
         "ordersNonMolestation": null,
-        "otherInjunctiveOrder": {
-
-        },
+        "otherInjunctiveOrder": {},
         "ordersOtherInjunctive": null,
-        "undertakingInPlaceOrder": {
-
-        },
+        "undertakingInPlaceOrder": {},
         "ordersUndertakingInPlace": null,
-        "forcedMarriageProtectionOrder": {
-
-        },
+        "forcedMarriageProtectionOrder": {},
         "ordersForcedMarriageProtection": null
       },
       "habitualResidentInOtherState": "No",
@@ -675,7 +663,6 @@
       "languageRequirementApplicationNeedWelsh": "Yes",
       "previousOrOngoingProceedingsForChildren": "no",
       "welshLanguageRequirementApplicationNeedEnglish": null
-
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
