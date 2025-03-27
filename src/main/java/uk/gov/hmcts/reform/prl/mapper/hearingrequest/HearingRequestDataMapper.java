@@ -19,6 +19,7 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 
@@ -269,13 +270,11 @@ public class HearingRequestDataMapper {
                 hearingDataPrePopulatedDynamicLists
             ));
             hearingData.setApplicantName(ObjectUtils.isNotEmpty(caseData.getApplicantName()) ? caseData.getApplicantName() : "");
-            hearingData.setApplicantSolicitor(null != caseData.getApplicantsFL401()
-                                                  ? caseData.getApplicantsFL401().getRepresentativeFirstName()
-                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
+            hearingData.setApplicantSolicitor(null != getFL401SolicitorName(caseData.getApplicantsFL401())
+                                                  ? getFL401SolicitorName(caseData.getApplicantsFL401()) : "");
             hearingData.setRespondentName(ObjectUtils.isNotEmpty(caseData.getRespondentName()) ? caseData.getRespondentName() : "");
-            hearingData.setRespondentSolicitor(null != caseData.getRespondentsFL401()
-                                                   ? caseData.getRespondentsFL401().getRepresentativeFirstName()
-                + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
+            hearingData.setRespondentSolicitor(null != getFL401SolicitorName(caseData.getRespondentsFL401())
+                                                   ? getFL401SolicitorName(caseData.getRespondentsFL401()) : "");
         }
     }
 
