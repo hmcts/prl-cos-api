@@ -114,7 +114,7 @@ public class StatementOfServiceControllerFunctionalTest {
             .then()
             .extract()
             .as(SubmittedCallbackResponse.class);
-        Assert.assertEquals("# Application was served", response.getConfirmationHeader());
+        Assert.assertEquals("# Cais wedi’i gyflwyno<br/>Application was served", response.getConfirmationHeader());
     }
 
     @Test

@@ -85,11 +85,11 @@ public class TaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
-    public static final String ADD_REQUIRED_DETAILS = "Add required details";
-    public static final String MIAM_DETAILS = "MIAM details";
-    public static final String VIEW_PDF_APPLICATION = "View PDF application";
+    public static final String ADD_REQUIRED_DETAILS = "Add required details / Ychwanegu manylion angenrheidiol"; 
+    public static final String MIAM_DETAILS = "MIAM details / Manylion MIAM"; 
+    public static final String VIEW_PDF_APPLICATION = "View PDF application / Gweld y cais PDF"; 
     public static final String SUBMIT1 = "Submit";
-    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay";
+    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay / Cyflwyno a thalu"; 
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -135,7 +135,13 @@ public class TaskListRenderer {
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-            .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+            .withInfo(new StringBuilder()
+                .append("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                .append(NEW_LINE)
+                .append("Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth")
+                .append("am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn ")
+                .append("cydsynio’n cael ei uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi.")
+                .toString())
             .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -178,16 +184,28 @@ public class TaskListRenderer {
                 .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-                .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
-                        + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
-                .withTask(tasks.get(CHILD_DETAILS_REVISED))
-                .withTask(tasks.get(APPLICANT_DETAILS))
-                .withTask(tasks.get(RESPONDENT_DETAILS))
-                .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
-                .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
+            .withInfo(new StringBuilder()
+                .append("If children live with another party in the case (other than the applicant or respondent) you can add")
+                .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
+                .append(NEW_LINE)
+                .append("Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
+                .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
+                .append("gyfredol.")
+                .toString())
+            .withTask(tasks.get(CHILD_DETAILS_REVISED))
+            .withTask(tasks.get(APPLICANT_DETAILS))
+            .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
+            .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
-        final TaskSection relationships = newSection("Relationships")
-                .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application")
+        final TaskSection relationships = newSection("Relationships / Perthnasoedd")
+                .withInfo(new StringBuilder()
+                    .append("Ensure relationship of children with all people on the case is captured, before submitting the application.")
+                    .append(NEW_LINE)
+                    .append("Sicrhewch eich bod chi’n nodi ")
+                    .append("sut fath o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais")
+                    .toString())
                 .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
                 .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
                 .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -213,7 +231,13 @@ public class TaskListRenderer {
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-                .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                .withInfo(new StringBuilder()
+                    .append("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                    .append(NEW_LINE)
+                    .append("Mae adran MIAM yn ddewisol ")
+                    .append("ar gyfer cyflwyniad terfynol, os caiff gorchymyn cydsynio ei lanlwytho ac yn orfodol fel arall.")
+                    .toString())
+
                 .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -258,16 +282,28 @@ public class TaskListRenderer {
             .withTask(tasks.get(HEARING_URGENCY));
 
         final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-            .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
-                          + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
+            .withInfo(new StringBuilder()
+                .append("If children live with another party in the case (other than the applicant or respondent) you can add")
+                .append(" these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.")
+                .append(NEW_LINE)
+                .append("Os oes plant yn byw gyda’r parti arall yn yr achos ")
+                .append("(heblaw’r ceisydd neu’r atebydd), gallwch ychwanegu’r manylion ")
+                .append("hyn yn y blwch ‘Pobl eraill yn yr achos.’ Os ydych chi’n cwblhau’r adran hon, mae’n rhaid i chi gadw’r wybodaeth yn ")
+                .append("gyfredol.")
+                .toString())
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
             .withTask(tasks.get(CHILD_DETAILS_REVISED))
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
-        final TaskSection relationships = newSection("Relationships")
-            .withInfo("Ensure relationship of children with all people on the case is captured, before submitting the application")
+        final TaskSection relationships = newSection("Relationships / Perthnasoedd")
+            .withInfo(new StringBuilder()
+                .append("Ensure relationship of children with all people on the case is captured, before submitting the application.")
+                .append(NEW_LINE)
+                .append("Sicrhewch eich bod chi’n nodi sut fath ")
+                .append("o berthynas sydd gan y plant gyda’r holl bobl sy’n rhan o’r achos cyn i chi gyflwyno’r cais")
+                .toString())
             .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
             .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
             .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -293,9 +329,13 @@ public class TaskListRenderer {
             .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
-            .withInfo("Mediation Information and Assessment Meeting (MIAM)"
-                          + " section is optional for final submission,"
-                          + " if a consent order is uploaded and mandatory otherwise.")
+            .withInfo(new StringBuilder()
+                .append("Mediation Information and Assessment Meeting (MIAM) section is optional for final submission,")
+                .append("if a consent order is uploaded and mandatory otherwise.")
+                .append(NEW_LINE)
+                .append("Mae llenwi’r adran Cyfarfod Asesu a Gwybodaeth am Gyfryngu (MIAM) yn ddewisol os bydd gorchymyn cydsynio’n cael ei")
+                .append(" uwchlwytho wrth gyflwyno’r cais terfynol. Fel arall mae’n rhaid ei llenwi.")
+                .toString())
             .withTask(tasks.get(MIAM_POLICY_UPGRADE));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
@@ -368,32 +408,32 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
                     || task.getEvent().equals(SUBMIT)  || task.getEvent().equals(FL401_RESUBMIT)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started / Heb ddechrau"));
                 }
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress / Ar y gweill"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added / Gwybodaeth wedi’i hychwanegu"));
                 break;
             case CANNOT_START_YET:
                 lines.add(taskListRenderElements.renderDisabledLink(task)
-                        + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                        + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet / Methu dechrau eto"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
                     || task.getEvent().equals(SUBMIT) || task.getEvent().equals(FL401_RESUBMIT)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet / Heb ei gychwyn eto"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished / Wedi gorffen"));
                 }
                 break;
             default:
@@ -411,10 +451,10 @@ public class TaskListRenderer {
         final List<String> errors = taskErrors.stream()
             .flatMap(task -> task.getErrors()
                 .stream()
-                .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+                .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application? / Pam na fedraf gyflwyno fy nghais?", errors); 
     }
 
     private List<String> renderSectionErrors(List<EventValidationErrors> taskErrors) {
@@ -424,10 +464,10 @@ public class TaskListRenderer {
         final List<String> errors = taskErrors.stream()
                 .flatMap(task -> task.getErrors()
                         .stream()
-                        .map(error -> format("%s to %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+                        .map(error -> format("%s %s", error, taskListRenderElements.renderLink(task.getEvent()))))
                 .toList();
 
-        return taskListRenderElements.renderCollapsible("Why can't I enter relationship details?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I enter relationship details? / Pam na fedraf nodi manylion perthynas?", errors);
     }
 
 
@@ -445,7 +485,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
 
-        final TaskSection addCaseDetails = newSection("Add case details")
+        final TaskSection addCaseDetails = newSection("Add case details / Ychwanegu manylion yr achos")
             .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT));
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
@@ -459,22 +499,22 @@ public class TaskListRenderer {
         }
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
-            .withInfo("Only complete if relevant")
+            .withInfo("Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol")
             .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection uploadDocuments = newSection("Upload documents")
+        final TaskSection uploadDocuments = newSection("Upload documents / Uwchlwytho dogfennau")
             .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
         final TaskSection checkAndSignApplication;
 
         if (caseData.getState().equals(AWAITING_SUBMISSION_TO_HMCTS)) {
-            checkAndSignApplication = newSection("Check and sign application")
+            checkAndSignApplication = newSection("Check and sign application / Gwirio a llofnodi’r cais")
                 .withTask(tasks.get(VIEW_PDF_DOCUMENT))
                 .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
         } else {
-            checkAndSignApplication = newSection("Check and sign application")
+            checkAndSignApplication = newSection("Check and sign application / Gwirio a llofnodi’r cais")
                 .withTask(tasks.get(VIEW_PDF_DOCUMENT))
                 .withTask(tasks.get(FL401_RESUBMIT));
         }
