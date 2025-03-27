@@ -52,7 +52,7 @@ public class CaseWithdrawnRequestControllerFunctionalTest {
             .post("/case-withdrawn-email-notification")
             .then()
             .assertThat().statusCode(200)
-            .body("confirmation_header", equalTo("# Application withdrawn"),
+            .body("confirmation_header", equalTo("# Cais wedi’i dynnu’n ôl <br/> Application withdrawn"),
                   "confirmation_body", notNullValue()
             );
 

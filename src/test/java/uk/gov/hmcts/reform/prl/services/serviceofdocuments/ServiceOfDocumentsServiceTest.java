@@ -199,7 +199,7 @@ public class ServiceOfDocumentsServiceTest {
                                                                                   .label("respondent")
                                                                                   .code("respondent")
                                                                                   .build()
-                                                                              );
+        );
         DynamicMultiSelectList combinedRecipients = DynamicMultiSelectList.builder()
             .listItems(applicantRespondentList)
             .build();

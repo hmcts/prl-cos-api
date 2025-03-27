@@ -479,7 +479,6 @@ public class CaseServiceTest {
                 CaseHearing.caseHearingWith().hmcStatus(LISTED).build()
             )).build());
         ReflectionTestUtils.setField(caseService, "edgeCasesFgmFmpoCourtsToFilter", "courtEpimmsId,courtEpimmsId2");
-
     }
 
     @Test
