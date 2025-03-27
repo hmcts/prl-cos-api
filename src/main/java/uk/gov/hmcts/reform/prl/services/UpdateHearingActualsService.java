@@ -127,6 +127,7 @@ public class UpdateHearingActualsService {
                 .stream()
                 .map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
                     && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
     }
 
@@ -137,6 +138,7 @@ public class UpdateHearingActualsService {
             .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
                 .stream().map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
                     && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
     }
 
