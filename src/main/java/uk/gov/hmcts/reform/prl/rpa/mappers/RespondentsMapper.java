@@ -70,7 +70,8 @@ public class RespondentsMapper {
                 "doTheyHaveLegalRepresentation",
                 CommonUtils.getYesOrNoDontKnowValue(respondent.getDoTheyHaveLegalRepresentation())
             )
-            .add("solicitorOrganisationID", respondent.getSolicitorOrg().getOrganisationID())
+            .add("solicitorOrganisationID", respondent.getSolicitorOrg() != null
+                ? respondent.getSolicitorOrg().getOrganisationID() : null)
             .add(
                 "isAtAddressLessThan5YearsWithDontKnow",
                 CommonUtils.getYesOrNoDontKnowValue(respondent.getIsAtAddressLessThan5YearsWithDontKnow())

@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -124,12 +125,16 @@ public class HwfProcessUpdateCaseStateServiceTest {
     @Test
     public void testCheckHwfPaymentStatusAndUpdateCaseState() {
 
+        Map<String, Object> caseUpdated = new HashMap<>();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseUpdated, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture())).thenReturn(caseDetails);
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
-        verify(paymentRequestService, times(1))
+        verify(paymentRequestService, times(2))
             .fetchServiceRequestReferenceStatus(anyString(), anyString());
-        verify(allTabService).getStartUpdateForSpecificEvent(any(), any());
-        verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture());
-        Map<String, Object> caseUpdated = caseDataUpdatedCaptor.getValue();
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(any(), any());
+        verify(allTabService, times(2)).submitAllTabsUpdate(anyString(), anyString(), any(), any(), caseDataUpdatedCaptor.capture());
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         assertEquals(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime), caseUpdated.get(DATE_SUBMITTED_FIELD));
         assertEquals(DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
