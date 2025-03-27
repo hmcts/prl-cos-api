@@ -137,7 +137,7 @@ public class HearingDataService {
             .retrievedHearingChannels(getDynamicList(hearingChannelsDetails.get(HEARINGCHANNEL)))
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
             .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
-            .retrievedCourtLocations(getDynamicList(locationRefDataService.getCourtLocations(authorisation)))
+            .retrievedCourtLocations(getCourtsDynamicList(locationRefDataService.getCourtLocations(authorisation), caseData))
             .hearingListedLinkedCases(getDynamicList(getLinkedCases(authorisation, caseData)))
             .build();
     }
@@ -627,6 +627,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
+                        .hearingId(String.valueOf(caseHearing.get().getHearingID()))
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
                                                                                       caseHearing.get().getHearingTypeValue()
                         ))
@@ -952,5 +953,23 @@ public class HearingDataService {
         if (4 < numberOfRespondentSolicitors) {
             tempPartyNamesMap.put("respondentSolicitor5", concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)"));
         }
+    }
+
+    public DynamicList getCourtsDynamicList(List<DynamicListElement> listItems,
+                                            CaseData caseData) {
+        //Default hearing location to court location
+        Optional<DynamicListElement> courtLocation = listItems.stream()
+            .filter(courtElement -> null != courtElement
+                && null != courtElement.getCode() && null != caseData.getCaseManagementLocation()
+                && courtElement.getCode().startsWith(caseData.getCaseManagementLocation().getBaseLocation()))
+            .findFirst();
+        if (courtLocation.isPresent()) {
+            return DynamicList.builder()
+                .value(courtLocation.get())
+                .listItems(listItems).build();
+        }
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
     }
 }

@@ -68,9 +68,8 @@ import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static org.testng.util.Strings.isNotNullAndNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -84,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
@@ -638,6 +638,8 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             applicantSolicitorList = parties.stream()
                 .map(Element::getValue)
+                .filter(partyDetails -> isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -649,7 +651,9 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             respondentSolicitorList = parties.stream()
                 .map(Element::getValue)
-                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -658,12 +662,9 @@ public class CaseUtils {
 
     public static String getFL401SolicitorName(PartyDetails party) {
         if (null != party
-            && isNotBlank(party.getRepresentativeFirstName())
-            && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(
-                party.getRepresentativeFirstName(),
-                concat(" ", party.getRepresentativeLastName())
-            );
+            && isNotNullAndNotEmpty(party.getRepresentativeFirstName())
+            && isNotNullAndNotEmpty(party.getRepresentativeLastName())) {
+            return party.getRepresentativeFirstName() + " " + party.getRepresentativeLastName();
         }
         return null;
     }
@@ -1080,6 +1081,29 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getLanguage(String clientContextString) {
+
+        WaMapper waMapper = null;
+
+        if (clientContextString != null) {
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
+            String decodedString = new String(decodedBytes);
+            try {
+                waMapper = new ObjectMapper().readValue(decodedString, WaMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+
+        if (null != waMapper
+            && null != waMapper.getClientContext()
+            && null != waMapper.getClientContext().getUserLanguage()) {
+            return waMapper.getClientContext().getUserLanguage().getLanguage();
+        }
+
+        return ENGLISH;
     }
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {

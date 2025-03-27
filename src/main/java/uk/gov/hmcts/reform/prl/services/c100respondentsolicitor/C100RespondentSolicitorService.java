@@ -174,18 +174,20 @@ public class C100RespondentSolicitorService {
     private final CaseSummaryTabService caseSummaryTab;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
-    public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
-    public static final String CONTACT_LOCAL_COURT_LABEL = """
-        ### Your response is now submitted.
+    public static final String RESPONSE_SUBMITTED_LABEL = "# Ymateb wedi'i gyflwyno<br/>Response Submitted";
+    public static final String CONTACT_LOCAL_COURT_LABEL_WELSH = """
+        ### Mae eich ymateb wedi ei gyflwyno.<br/>Your response is now submitted.
 
 
-        You can contact your local court at\s""";
+        Gallwch gysylltu â’ch llys lleol yn\s""";
+
+    public static final String CONTACT_LOCAL_COURT_LABEL_ENG = "<br/>You can contact your local court at\s";
 
     private static final String OPEN_BRACKET = "(";
     private static final String CLOSE_BRACKET = ")";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
-    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
+    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String language) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -195,9 +197,10 @@ public class C100RespondentSolicitorService {
         }
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue() != null) {
             retrieveExistingResponseForSolicitor(
-                    callbackRequest,
-                    caseDataUpdated,
-                    solicitorRepresentedRespondent
+                callbackRequest,
+                caseDataUpdated,
+                solicitorRepresentedRespondent,
+                language
             );
             String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
                     + solicitorRepresentedRespondent.getValue().getLastName();
@@ -208,7 +211,7 @@ public class C100RespondentSolicitorService {
     }
 
     private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String,
-            Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent) {
+            Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent, String language) {
         String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
             switch (event) {
@@ -267,8 +270,13 @@ public class C100RespondentSolicitorService {
                         caseDataUpdated.put(miamFields[1], existingMiam.getWillingToAttendMiam());
                         caseDataUpdated.put(miamFields[2], existingMiam.getReasonNotAttendingMiam());
                     }
-                    caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
-                    caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolderWelsh());
+                        caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolderWelsh());
+                    } else {
+                        caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                        caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+                    }
                     break;
                 case OTHER_PROCEEDINGS:
                     String[] proceedingsFields = event.getCaseFieldName().split(",");
@@ -2221,10 +2229,12 @@ public class C100RespondentSolicitorService {
     }
 
     public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
+        String courtName = null != caseData.getCourtName() ? caseData.getCourtName() : "";
         return SubmittedCallbackResponse.builder().confirmationHeader(
-                        RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(null != caseData.getCourtName()
-                        ? caseData.getCourtName() : ""))
-                .build();
+                RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL_WELSH.concat(courtName)
+                                                               .concat(CONTACT_LOCAL_COURT_LABEL_ENG)
+                                                               .concat(courtName))
+            .build();
     }
 
 
