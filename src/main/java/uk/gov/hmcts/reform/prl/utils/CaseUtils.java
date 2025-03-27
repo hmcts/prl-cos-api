@@ -84,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
@@ -1080,6 +1081,29 @@ public class CaseUtils {
             }
         }
         return null;
+    }
+
+    public static String getLanguage(String clientContextString) {
+
+        WaMapper waMapper = null;
+
+        if (clientContextString != null) {
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContextString);
+            String decodedString = new String(decodedBytes);
+            try {
+                waMapper = new ObjectMapper().readValue(decodedString, WaMapper.class);
+            } catch (Exception ex) {
+                log.error("Exception while parsing the Client-Context {}", ex.getMessage());
+            }
+        }
+
+        if (null != waMapper
+            && null != waMapper.getClientContext()
+            && null != waMapper.getClientContext().getUserLanguage()) {
+            return waMapper.getClientContext().getUserLanguage().getLanguage();
+        }
+
+        return ENGLISH;
     }
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {
