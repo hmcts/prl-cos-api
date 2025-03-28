@@ -68,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -87,6 +88,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -166,6 +168,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1239,6 +1242,12 @@ public class ManageOrderService {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            //AHR - Admin creating an order
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && isEligibleForAutomatedHearing(caseData.getManageOrders().getOrdersHearingDetails())) {
+                draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()
+                    .isAutoHearingReqPending(Yes).build());
+            }
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1436,7 +1445,7 @@ public class ManageOrderService {
         String currentOrderStatus;
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             currentOrderStatus = OrderStatusEnum.reviewedByCA.getDisplayedValue();
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+        } else if (EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
                 currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
             } else {
@@ -2354,6 +2363,9 @@ public class ManageOrderService {
                            .isOrderUploaded(No)
                            //PRL-6046 - persist FL404 data
                            .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                           //Admin creating and finalising the order
+                           .isAutoHearingReqPending(isEligibleForAutomatedHearing(
+                               caseData.getManageOrders().getOrdersHearingDetails()) ? Yes : No)
                            .build());
     }
 
@@ -2961,7 +2973,7 @@ public class ManageOrderService {
             }
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
-        } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId()) && null != draftOrderId) {
+        } else if (eventId.equals(EDIT_AND_APPROVE_ORDER.getId()) && null != draftOrderId) {
             boolean isSdoOrder = false;
             DraftOrder selectedDraftOrder = CaseUtils.getDraftOrderFromCollectionId(caseData.getDraftOrderCollection(),
                                                                                     UUID.fromString(draftOrderId));
@@ -3513,5 +3525,65 @@ public class ManageOrderService {
     private boolean checkIfAddressIsPresent(Address address) {
         return null != address
             && null != address.getAddressLine1();
+    }
+
+    public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
+                                                                       List<Element<HearingData>> hearingsList) {
+        try {
+            if (!hearingsList.isEmpty()) {
+                hearingsList.stream()
+                    .map(Element::getValue)
+                    .forEach(hearingData -> {
+                        if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                            || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                            log.info("Eligible for AHR, trigger automated hearing request");
+                            AutomatedHearingResponse automatedHearingResponse = hearingService.createAutomatedHearing(
+                                authorisation,
+                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
+                            );
+                            log.info("Automated Hearing Response: {}", automatedHearingResponse);
+                            if (null != automatedHearingResponse) {
+                                hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                            } else {
+                                log.error("Automated Hearing Request is failed, hearing response is null");
+                                //HANDLE THIS FAILED SCENARIO FOR RETRY AND CREATE WA TASK FOR MANUAL HEARING REQUEST
+                            }
+                        } else {
+                            log.info("Not eligible for AHR, skip automated hearing request");
+                        }
+                    });
+            }
+        } catch (Exception e) {
+            log.error("Exception occurred during Automated hearing request creation", e);
+            throw new ManageOrderRuntimeException("Invalid Json", e);
+        }
+        return hearingsList;
+    }
+
+    public void populateCheckForAutomatedRequest(CaseData caseData,
+                                                 Map<String, Object> caseDataUpdated,
+                                                 String eventId) {
+        YesOrNo checkForAutomatedHearing = No;
+        /* Eligible for AHR
+        1. Manage orders event(admin) & no check for Judge/Manager review
+        2. Edit and serve order event(admin)
+        3. Edit and approve event(Judge/Manager) */
+        if (isEligibleForAutomatedHearing(caseData.getManageOrders().getOrdersHearingDetails())
+            && ((MANAGE_ORDERS.getId().equals(eventId)
+            && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
+            || ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+            || EDIT_AND_APPROVE_ORDER.getId().equals(eventId))) {
+            checkForAutomatedHearing = Yes;
+        }
+        log.info("Is eligible for Automated Hearing ? : {} ", checkForAutomatedHearing);
+        caseDataUpdated.put("checkForAutomatedHearing", checkForAutomatedHearing);
+    }
+
+    public boolean isEligibleForAutomatedHearing(List<Element<HearingData>> ordersHearingDetails) {
+        return isNotEmpty(ordersHearingDetails)
+            && ordersHearingDetails.stream()
+            .anyMatch(element ->
+                          HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(element.getValue().getHearingDateConfirmOptionEnum())
+                              || HearingDateConfirmOptionEnum.dateToBeFixed.equals(element.getValue().getHearingDateConfirmOptionEnum()));
     }
 }

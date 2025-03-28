@@ -210,6 +210,7 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
                 listWithoutNoticeHearingDetails).build())
+            .caseManagementLocation(CaseManagementLocation.builder().baseLocationId("Id").baseLocation("ABA5-ALL").build())
             .build();
         HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService
             .populateHearingDynamicLists(authToken, "45654654", caseData, Hearings.hearingsWith().build());
