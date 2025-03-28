@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -179,6 +180,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.put(
                     "isInHearingState",
@@ -232,6 +234,16 @@ public class ManageOrdersController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
+            // Check for Automated Hearing Management
+            if (Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
+            }
+
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
@@ -271,33 +283,41 @@ public class ManageOrdersController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             //Added below fields for WA purpose
-            UUID newDraftOrderCollectionId = null;
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-                && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
-                && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
-                && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-                List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
-                    DRAFT_ORDER_COLLECTION);
-
-                newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                    ? draftOrderCollection.get(0).getId() : null;
-            }
+            UUID newDraftOrderCollectionId = getDraftOrderId(authorisation, caseData, caseDataUpdated);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
                                                                          newDraftOrderCollectionId));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
+            //Populate need to check automated hearing request
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
+
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
+    }
+
+    private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        UUID newDraftOrderCollectionId = null;
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+            && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
+            && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
+            List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
+                DRAFT_ORDER_COLLECTION);
+
+            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                ? draftOrderCollection.get(0).getId() : null;
+        }
+        return newDraftOrderCollectionId;
     }
 
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
@@ -490,6 +510,7 @@ public class ManageOrdersController {
             }
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -548,16 +569,21 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            List<String> errorList;
+            List<String> errorList = new ArrayList<>();
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
                 errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), PrlAppsConstants.ENGLISH);
-            } else {
+            } else if (ManageOrdersUtils.isHearingPageNeeded(caseData.getCreateSelectOrderOptions(),
+                                                             caseData.getManageOrders().getC21OrderOptions())) {
                 //PRL-4260 - hearing screen validations
                 errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                         caseData.getCreateSelectOrderOptions(),
-                                                        false, PrlAppsConstants.ENGLISH);
+                                                        false,
+                                                        PrlAppsConstants.ENGLISH,
+                                                        loggedInUserType
+                );
             }
 
             if (isNotEmpty(errorList)) {
