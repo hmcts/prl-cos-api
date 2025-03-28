@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
@@ -59,6 +60,7 @@ public class DssEdgeCaseDetailsMapper {
             log.info("DSS CaseData {}", dssCaseData);
             EdgeCaseTypeOfApplicationEnum edgeCaseType = EdgeCaseTypeOfApplicationEnum.fromKey(dssCaseData.getEdgeCaseTypeOfApplication());
             caseDataBuilder
+                .c100RebuildData(C100RebuildData.builder().applicantPcqId(dssCaseData.getApplicantPcqId()).build())
                 .helpWithFeesNumber(dssCaseData.getHelpWithFeesReferenceNumber())
                 .helpWithFees(isNotEmpty(dssCaseData.getHelpWithFeesReferenceNumber()) ? YesOrNo.Yes : null)
                 .dssCaseDetails(caseDataBuilder.build().getDssCaseDetails().toBuilder()

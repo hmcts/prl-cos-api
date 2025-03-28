@@ -165,7 +165,6 @@ public class ManageOrdersControllerTest {
     RefDataUserService refDataUserService;
     @Mock
     RoleAssignmentService roleAssignmentService;
-
     @Mock
     AllTabServiceImpl allTabService;
 
@@ -1811,7 +1810,7 @@ public class ManageOrdersControllerTest {
         caseData = CaseData.builder()
             .id(12345L)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrdersOptions(servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -1931,7 +1930,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrdersOptions(servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
@@ -1982,7 +1981,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrdersOptions(servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
             .build();
@@ -2854,7 +2853,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrdersOptions(servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -3718,68 +3717,6 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventForEdgeCaseIsYes() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, Yes);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-        assertNotNull(
-            "THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE",
-            aboutToStartOrSubmitCallbackResponse.getErrors().get(0)
-        );
-    }
-
-    @Test
-    public void testManageOrderMidEventForEdgeCaseWhenEdgeCaseIsNo() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, No);
-        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-    }
-
-    @Test
-    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrders() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, Yes);
-        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-    }
-
-    @Test
-    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrdersAndNoEdgeCase() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, No);
-        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-    }
-
-    @Test
-    public void testManageOrderMidEventWhenDssCaseDetailsIsNull() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, false, No);
-        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-    }
-
-    private AboutToStartOrSubmitCallbackResponse startTestManageOrderMidEventForEdgeCase(
-        ManageOrdersOptionsEnum manageOrdersOptionsEnum, boolean isDssCaseDetailsObjectReq, YesOrNo yesOrNoForEdgeCase) {
-        CaseData caseData1 = CaseData.builder()
-            .id(12345L)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
-            .dssCaseDetails(isDssCaseDetailsObjectReq ? DssCaseDetails.builder().isEdgeCase(yesOrNoForEdgeCase).build() : null)
-            .manageOrdersOptions(manageOrdersOptionsEnum)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
-        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
-        stringObjectMap.put("isTheOrderAboutChildren", No);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        return manageOrdersController.manageOrderMidEvent(
-    
-    @Test
     public void testAutomatedHearingManagementRequest() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
@@ -3828,24 +3765,89 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseIsYes() {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, Yes);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertNotNull(
+            "THIS_FEATURE_IS_NOT_CURRENTLY_AVAILABLE_PLEASE_REFER_TO_HMCTS_GUIDANCE",
+            aboutToStartOrSubmitCallbackResponse.getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseWhenEdgeCaseIsNo() {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(createAnOrder, true, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrders() {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, Yes);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventForEdgeCaseManageOrderOptionsIsServedSavedOrdersAndNoEdgeCase() {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, true, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    @Test
+    public void testManageOrderMidEventWhenDssCaseDetailsIsNull() {
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            startTestManageOrderMidEventForEdgeCase(servedSavedOrders, false, No);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+    }
+
+    private AboutToStartOrSubmitCallbackResponse startTestManageOrderMidEventForEdgeCase(
+        ManageOrdersOptionsEnum manageOrdersOptionsEnum, boolean isDssCaseDetailsObjectReq, YesOrNo yesOrNoForEdgeCase) {
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
+            .dssCaseDetails(isDssCaseDetailsObjectReq ? DssCaseDetails.builder().isEdgeCase(yesOrNoForEdgeCase).build() : null)
+            .manageOrdersOptions(manageOrdersOptionsEnum)
+            .build();
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
+        stringObjectMap.put("isTheOrderAboutChildren", No);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        return manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
     }
 
     @Test
     public void populateHeaderTestWhenCaseStateIsPrepareForHearing() {
         startTestPopoulateHeader(PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), No, "C100,", true);
-
     }
 
     @Test
     public void populateHeaderTestWhenCaseStateDecisionOutcome() {
         startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", true);
-
     }
 
     @Test
     public void populateHeaderTestWhenDssCaseDetailsIsNull() {
         startTestPopoulateHeader(DECISION_OUTCOME.getValue(), No, "C100,", false);
-
     }
 
     private void startTestPopoulateHeader(String caseState, YesOrNo isCafcass, String caseTypeOfApplication, boolean isEdgeCase) {
@@ -3859,7 +3861,6 @@ public class ManageOrdersControllerTest {
             .isCafcass(isCafcass)
             .dssCaseDetails(isEdgeCase ? DssCaseDetails.builder().isEdgeCase(Yes).build() : null)
             .build();
-
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         stringObjectMap.put("manageOrderHeader1", "test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
@@ -3880,7 +3881,6 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
             callbackRequest, authToken, s2sToken);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
 }
