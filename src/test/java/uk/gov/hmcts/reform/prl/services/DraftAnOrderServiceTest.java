@@ -6025,4 +6025,235 @@ public class DraftAnOrderServiceTest {
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
                      updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection1() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            EDIT_AND_APPROVE_ORDER.getId(),
+            UserRoles.COURT_ADMIN.name(), true
+        );
+        assertEquals(Yes, updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+
+    }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection11() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            EDIT_AND_APPROVE_ORDER.getId(),
+            UserRoles.COURT_ADMIN.name(), false
+        );
+        assertNull(updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection2() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            EDIT_AND_APPROVE_ORDER.getId(),
+            UserRoles.SOLICITOR.name(), true
+        );
+        assertNull(updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+
+    }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection22() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+            UserRoles.SOLICITOR.name(), true
+        );
+
+        assertNull(updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection3() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+            UserRoles.COURT_ADMIN.name(), true
+        );
+        assertEquals(Yes, updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    public void testSolicitorEditReturnedC6OrderUpdateDraftOrderCollection4() {
+        List<Element<DraftOrder>> updatedDraftOrderCollection = testUpdateDraftOrderCollectionForAutoHearingReq(
+            Event.REMOVE_DRAFT_ORDER.getId(),
+            UserRoles.COURT_ADMIN.name(), true
+        );
+        assertNull(updatedDraftOrderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    public void testPopulateOrderHearingDetails1() {
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any())).thenReturn(
+            HearingDataPrePopulatedDynamicLists.builder().build());
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        hearingDataList.add(element(HearingData.builder()
+                                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                        .build()));
+        hearingDataList.add(element(HearingData.builder()
+                                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed).build()));
+        hearingDataList.add(element(HearingData.builder().hearingDateConfirmOptionEnum(dateReservedWithListAssit).build()));
+        Map<String, Object> caseDataMap = new HashMap<>();
+        draftAnOrderService.populateOrderHearingDetails(authToken, caseData, caseDataMap, hearingDataList);
+        Assert.assertNotNull(caseDataMap.get("ordersHearingDetails"));
+        Assert.assertEquals(Yes, caseDataMap.get("isAutomatedHearingPresent"));
+
+    }
+
+    @Test
+    public void testPopulateOrderHearingDetails2() {
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any())).thenReturn(
+            HearingDataPrePopulatedDynamicLists.builder().build());
+        Map<String, Object> caseDataMap = new HashMap<>();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        hearingDataList.add(element(HearingData.builder().hearingDateConfirmOptionEnum(dateReservedWithListAssit).build()));
+        draftAnOrderService.populateOrderHearingDetails(authToken, caseData, caseDataMap, hearingDataList);
+        Assert.assertNotNull(caseDataMap.get("ordersHearingDetails"));
+        Assert.assertEquals(No, caseDataMap.get("isAutomatedHearingPresent"));
+
+    }
+
+    @Test
+    public void testRemoveDraftOrderAndAddToFinalOrder1() {
+        testRemoveDraftOrderAndAddToFinalOrder(true, Yes);
+        testRemoveDraftOrderAndAddToFinalOrder(false, No);
+    }
+
+    private void testRemoveDraftOrderAndAddToFinalOrder(boolean serviceResponse, YesOrNo autoHearingReqPendingYesOrNo) {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .dateOrderMade(LocalDate.parse("2022-02-16"))
+            .isOrderCreatedBySolicitor(Yes)
+            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        List<Element<OrderDetails>> elementList = new ArrayList<>();
+        elementList.add(element(OrderDetails.builder().dateCreated(LocalDateTime.now()).build()));
+        caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .orderCollection(elementList)
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .applicantsFL401(PartyDetails.builder().firstName("test").lastName("test").build())
+            .respondentsFL401(PartyDetails.builder().firstName("test")
+                                  .lastName("test")
+                                  .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
+                                  .build())
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesNoNotApplicable.Yes)
+                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(Yes).build())
+            .build();
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
+        when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.isEligibleForAutomatedHearing(any())).thenReturn(serviceResponse);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+            "test token",
+            caseData,
+            "editReturnedOrder",
+            PrlAppsConstants.ENGLISH
+        );
+        System.out.println("NNNNN " + caseDataMap);
+        assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
+        List<Element<OrderDetails>> updatedOrderCollection1 = (List<Element<OrderDetails>>) caseDataMap.get(
+            "orderCollection");
+        assertNotNull(updatedOrderCollection1);
+        assertEquals(
+            autoHearingReqPendingYesOrNo,
+            updatedOrderCollection1.get(1).getValue().getIsAutoHearingReqPending()
+        );
+
+        assertEquals("FL401", caseDataMap.get("caseTypeOfApplication"));
+
+    }
+
+    private List<Element<DraftOrder>> testUpdateDraftOrderCollectionForAutoHearingReq(
+        String eventId, String userRole, boolean isEligibleForAutoHearingServiceResponse) {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .isJudgeApprovalNeeded(Yes)
+                              .build())
+            .build();
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        ordersHearingDetails.add(element(HearingData
+                                             .builder()
+                                             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam).build()));
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> partyElemnets = element(partyDetails);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .applicants(List.of(partyElemnets))
+            .respondents(List.of(partyElemnets))
+            .manageOrders(ManageOrders.builder()
+                              .hasJudgeProvidedHearingDetails(Yes)
+                              .ordersHearingDetails(ordersHearingDetails)
+                              .rejectedOrdersDynamicList(DynamicList.builder()
+                                                             .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
+                                                                        .build())
+                                                             .build()).build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(userRole);
+        when(manageOrderService.isEligibleForAutomatedHearing(
+            Mockito.any())).thenReturn(isEligibleForAutoHearingServiceResponse);
+        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            authToken,
+            eventId,
+            null
+        );
+
+        assertNotNull(caseDataMap);
+        assertNotNull(caseDataMap.get("draftOrderCollection"));
+        return (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
+    }
+
+
 }
