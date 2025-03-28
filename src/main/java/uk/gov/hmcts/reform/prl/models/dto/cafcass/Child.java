@@ -23,27 +23,37 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(toBuilder = true)
+@Builder(
+    toBuilder = true,
+    builderClassName = "Builder",
+    builderMethodName = "internalBuilder" )
 public class Child {
 
     private String firstName;
     private String lastName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
+
     private DontKnow isDateOfBirthUnknown; //TODO: field not used
+
     private Gender gender;
     private String otherGender;
     private List<OrderTypeEnum> orderAppliedFor;
     private RelationshipsEnum applicantsRelationshipToChild;
     private String otherApplicantsRelationshipToChild;
-    private RelationshipsEnum  respondentsRelationshipToChild;
+    private RelationshipsEnum respondentsRelationshipToChild;
     private String otherRespondentsRelationshipToChild;
+
     @JsonIgnore
     private Address address;
+
     @JsonIgnore
     private YesOrNo isChildAddressConfidential;
+
     private List<LiveWithEnum> childLiveWith;
     private List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
+
     private String parentalResponsibilityDetails;
     private WhoDoesTheChildLiveWith whoDoesTheChildLiveWith;
 
@@ -51,4 +61,43 @@ public class Child {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private static String clean(String value) {
+            return (value != null && !value.trim().isEmpty()) ? value : null;
+        }
+
+        public Builder firstName(String firstName) {
+            this.firstName = clean(firstName);
+            return this;
+        }
+
+        public Builder lastName(String lastName) {
+            this.lastName = clean(lastName);
+            return this;
+        }
+
+        public Builder otherGender(String otherGender) {
+            this.otherGender = clean(otherGender);
+            return this;
+        }
+
+        public Builder otherApplicantsRelationshipToChild(String otherRel) {
+            this.otherApplicantsRelationshipToChild = clean(otherRel);
+            return this;
+        }
+
+        public Builder otherRespondentsRelationshipToChild(String otherRel) {
+            this.otherRespondentsRelationshipToChild = clean(otherRel);
+            return this;
+        }
+
+        public Builder parentalResponsibilityDetails(String prDetails) {
+            this.parentalResponsibilityDetails = clean(prDetails);
+            return this;
+        }
+    }
 }

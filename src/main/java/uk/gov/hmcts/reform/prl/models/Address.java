@@ -1,29 +1,83 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Child;
 
 @Data
-@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(
+    toBuilder = true,
+    builderClassName = "Builder",
+    builderMethodName = "internalBuilder" )
 public class Address {
 
-    //TODO: need to ensure this can handle null values - see the civil implementation
-
     @JsonProperty("AddressLine1")
-    private final String addressLine1;
+    private String addressLine1;
     @JsonProperty("AddressLine2")
-    private final String addressLine2;
+    private String addressLine2;
     @JsonProperty("AddressLine3")
-    private final String addressLine3;
+    private String addressLine3;
     @JsonProperty("PostTown")
-    private final String postTown;
+    private String postTown;
     @JsonProperty("County")
-    private final String county;
+    private String county;
     @JsonProperty("Country")
-    private final String country;
+    private String country;
     @JsonProperty("PostCode")
-    private final String postCode;
+    private String postCode;
 
+    public static Address.Builder builder() {
+        return new Address.Builder();
+    }
 
+    public static class Builder {
+        private static String clean(String value) {
+            return (value != null && !value.trim().isEmpty()) ? value : null;
+        }
+
+        public Builder addressLine1(String addressLine1) {
+            this.addressLine1 = clean(addressLine1);
+            return this;
+        }
+
+        public Builder addressLine2(String addressLine2) {
+            this.addressLine2 = clean(addressLine2);
+            return this;
+        }
+
+        public Builder addressLine3(String addressLine3) {
+            this.addressLine3 = clean(addressLine3);
+            return this;
+        }
+
+        public Builder postTown(String postTown) {
+            this.postTown = clean(postTown);
+            return this;
+        }
+
+        public Builder county(String county) {
+            this.county = clean(county);
+            return this;
+        }
+
+        public Builder country(String country) {
+            this.country = clean(country);
+            return this;
+        }
+
+        public Builder postCode(String postCode) {
+            this.postCode = clean(postCode);
+            return this;
+        }
+    }
 }
+
