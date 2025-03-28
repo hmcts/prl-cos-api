@@ -638,7 +638,7 @@ public class CaseDataService {
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
                         cafCassCaseDetail.getId()))).findFirst().orElse(null);
 
-                if (filteredHearing != null) {
+                if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
                     cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
                     cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());

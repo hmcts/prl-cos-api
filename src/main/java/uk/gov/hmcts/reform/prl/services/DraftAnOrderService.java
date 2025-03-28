@@ -673,6 +673,9 @@ public class DraftAnOrderService {
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             //PRL-6046 - persist FL404 data
             .fl404CustomFields(draftOrder.getFl404CustomFields())
+            //Admin editing and finalising the order
+            .isAutoHearingReqPending(manageOrderService.isEligibleForAutomatedHearing(
+                draftOrder.getManageOrderHearingDetails()) ? Yes : No)
             .build();
     }
 
@@ -1033,6 +1036,7 @@ public class DraftAnOrderService {
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
                                             List<Element<HearingData>> manageOrderHearingDetail) {
+        boolean isAutomatedHearingPresent = false;
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -1052,6 +1056,14 @@ public class DraftAnOrderService {
                     .id(hearingDataElement.getId())
                     .build();
                 updatedManageOrderHearingDetail.add(hearingDataElement);
+                //For Automated Hearing Check for Judge and Manager
+                if (!isAutomatedHearingPresent
+                    && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(
+                    hearingDataElement.getValue().getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(
+                        hearingDataElement.getValue().getHearingDateConfirmOptionEnum()))) {
+                    isAutomatedHearingPresent = true;
+                }
             }
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
@@ -1059,6 +1071,8 @@ public class DraftAnOrderService {
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
+        //Check for Automated Hearing Management
+        caseDataMap.put("isAutomatedHearingPresent", isAutomatedHearingPresent ? Yes : No);
     }
 
     private static HearingData resetHearingConfirmedDatesAndLinkedCases(
@@ -1137,6 +1151,16 @@ public class DraftAnOrderService {
                 } else {
                     log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    //PRL-7018 - Fix to trigger AHR when Judge/Manager approves without editing order
+                    caseData.getManageOrders().setOrdersHearingDetails(draftOrder.getManageOrderHearingDetails());
+                }
+                //AHR - Judge/Manager approves an order or Admin edits an order & saves as draft
+                if (!UserRoles.SOLICITOR.name().equals(loggedInUserType)
+                    && (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
+                        || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId))
+                    && manageOrderService.isEligibleForAutomatedHearing(
+                        caseData.getManageOrders().getOrdersHearingDetails())) {
+                    draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
@@ -2462,7 +2486,8 @@ public class DraftAnOrderService {
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 caseData.getCreateSelectOrderOptions(),
                 true,
-                language
+                language,
+                null
             ));
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
@@ -2473,7 +2498,7 @@ public class DraftAnOrderService {
         return errorList;
     }
 
-    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder, String language) {
+    private List<String> validateEditedOrderDetails(CaseData caseData, DraftOrder draftOrder, String language, String loggedInUserType) {
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
@@ -2486,7 +2511,8 @@ public class DraftAnOrderService {
                 draftOrder.getOrderType(),
                 (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())),
-                language
+                language,
+                loggedInUserType
             ));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder(), language));
@@ -2541,7 +2567,8 @@ public class DraftAnOrderService {
             draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList, clientContext, callbackRequest.getEventId());
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                errorList = validateEditedOrderDetails(caseData, draftOrder, language);
+                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                errorList = validateEditedOrderDetails(caseData, draftOrder, language, loggedInUserType);
                 if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
                 }
