@@ -372,4 +372,25 @@ public class LocationRefDataServiceTest {
         List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test", caseData);
         assertNotNull(test);
     }
+
+    @Test
+    public void testFilterEdgeCaseCourtsListWithCourtId19() {
+        List<DynamicListElement> test = locationRefDataService.filterEdgeCaseCourtsList(CourtDetails.builder()
+                                                                                            .courtVenues(List.of(
+                                                                                                CourtVenue.builder().region(
+                                                                                                        "r").regionId("id").courtName(
+                                                                                                        "1")
+                                                                                                    .region("test").siteName(
+                                                                                                        "test")
+                                                                                                    .courtEpimmsId(
+                                                                                                        "12345")
+                                                                                                    .courtTypeId("19").build())).build());
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilterEdgeCaseCourtsListWhenCourtDetailsIsNull() {
+        List<DynamicListElement> test = locationRefDataService.filterEdgeCaseCourtsList(null);
+        assertNotNull(test);
+    }
 }

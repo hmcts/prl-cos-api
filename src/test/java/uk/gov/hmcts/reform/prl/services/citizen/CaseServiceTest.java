@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -18,15 +22,20 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.citizen.DashboardNotificationsConfig;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.edgecases.EdgeCaseTypeOfApplicationEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.edgecases.DssEdgeCaseDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -58,10 +67,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.FM5ReminderNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
@@ -74,10 +87,14 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
@@ -109,8 +126,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARIN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
@@ -123,6 +143,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.SUBMIT_DSS_CA_EDGE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.SUBMIT_DSS_CA_EDGE_CASE_HWF;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.SUBMIT_DSS_DA_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
@@ -195,6 +218,27 @@ public class CaseServiceTest {
 
     @Mock
     private RoleAssignmentService roleAssignmentService;
+
+    @Mock
+    private LocationRefDataApi locationRefDataApi;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
+
+    @Mock
+    private CourtSealFinderService courtSealFinderService;
+
+    @Mock
+    private DssEdgeCaseDetailsMapper dssEdgeCaseDetailsMapper;
+
+    @Mock
+    private CourtFinderService courtLocatorService;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -434,6 +478,7 @@ public class CaseServiceTest {
                 CaseHearing.caseHearingWith().hmcStatus(AWAITING_HEARING_DETAILS).build(),
                 CaseHearing.caseHearingWith().hmcStatus(LISTED).build()
             )).build());
+        ReflectionTestUtils.setField(caseService, "edgeCasesFgmFmpoCourtsToFilter", "courtEpimmsId,courtEpimmsId2");
     }
 
     @Test
@@ -1853,6 +1898,160 @@ public class CaseServiceTest {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
         Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, "test");
         assertEquals("role", roles.get("test"));
+    }
+
+    @Test
+    public void testGetEdgeCasesCourtList() {
+        List<CourtVenue> courtVenueList = new ArrayList<>();
+        courtVenueList.add(CourtVenue.builder().courtTypeId(FAMILY_COURT_TYPE_ID).courtEpimmsId("courtEpimmsId").build());
+        courtVenueList.add(CourtVenue.builder().courtTypeId("FAMILY_COURT_TYPE_ID").courtEpimmsId("courtEpimmsId").build());
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(CourtDetails.builder().courtVenues(courtVenueList).build());
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        List<CourtVenue> courtVenues = caseService.getEdgeCasesCourtList(authToken);
+        Assert.assertNotNull(courtVenues);
+        Assert.assertEquals(1, courtVenues.size());
+    }
+
+    @Test
+    public void testGetEdgeCasesCourtListWhenCourtDetailsIsNull() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(null);
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        List<CourtVenue> courtVenues = caseService.getEdgeCasesCourtList(authToken);
+        Assert.assertNotNull(courtVenues);
+        Assert.assertEquals(0, courtVenues.size());
+    }
+
+    @Test
+    public void testGetEdgeCasesCourtListWhenCourtVenuesIsEmpty() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(CourtDetails.builder().build());
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        List<CourtVenue> courtVenues = caseService.getEdgeCasesCourtList(authToken);
+        Assert.assertNotNull(courtVenues);
+        Assert.assertEquals(0, courtVenues.size());
+    }
+
+    @Test
+    public void testUpdateCaseForDssWhenSubmittedEventFor_Dss_DA_Edge_Case() throws NotFoundException, JsonProcessingException {
+
+        CaseDetails updatedCaseDetailsForDss = buildTestDataAndDoTest(
+            true, EdgeCaseTypeOfApplicationEnum.FGM,
+            C100_CASE_TYPE, SUBMIT_DSS_DA_EDGE_CASE.getValue()
+        );
+        assertNotNull(updatedCaseDetailsForDss);
+        assertEquals("courtRegionId", updatedCaseDetailsForDss.getData().get(COURT_SEAL_FIELD));
+    }
+
+    @Test
+    public void testUpdateCaseForDssWhenSubmittedEventFor_Dss_CA_Edge_Case() throws NotFoundException, JsonProcessingException {
+
+        CaseDetails updatedCaseDetailsForDss = buildTestDataAndDoTest(
+            true, EdgeCaseTypeOfApplicationEnum.FMPO,
+            C100_CASE_TYPE, SUBMIT_DSS_CA_EDGE_CASE.getValue()
+        );
+        assertNotNull(updatedCaseDetailsForDss);
+        assertEquals("courtRegionId", updatedCaseDetailsForDss.getData().get(COURT_SEAL_FIELD));
+    }
+
+    @Test
+    public void testUpdateCaseForDssWhenSubmittedEventFor_Dss_CA_Edge_Case_Hwf() throws NotFoundException, JsonProcessingException {
+
+        CaseDetails updatedCaseDetailsForDss = buildTestDataAndDoTest(
+            true, EdgeCaseTypeOfApplicationEnum.FGM,
+            C100_CASE_TYPE, SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue()
+        );
+        assertNotNull(updatedCaseDetailsForDss);
+        assertEquals("courtRegionId", updatedCaseDetailsForDss.getData().get(COURT_SEAL_FIELD));
+    }
+
+    @Test
+    public void testUpdateCaseForDssWhenDssCaseDetailsIsNullAndCaseTypeIsC100() throws NotFoundException, JsonProcessingException {
+
+        CaseDetails updatedCaseDetailsForDss = buildTestDataAndDoTest(
+            false, null,
+            C100_CASE_TYPE, SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue()
+        );
+        assertNotNull(updatedCaseDetailsForDss);
+        assertNull(updatedCaseDetailsForDss.getData().get(COURT_NAME_FIELD));
+    }
+
+    @Test
+    public void testUpdateCaseForDssWhenDssCaseDetailsIsNullAndCaseTypeOfAppIsFl401() throws NotFoundException, JsonProcessingException {
+
+        CaseDetails updatedCaseDetailsForDss = buildTestDataAndDoTest(
+            false, null,
+            FL401_CASE_TYPE, SUBMIT_DSS_CA_EDGE_CASE_HWF.getValue()
+        );
+        assertNotNull(updatedCaseDetailsForDss);
+        assertTrue(updatedCaseDetailsForDss.getData().containsKey(COURT_SEAL_FIELD));
+        assertFalse(updatedCaseDetailsForDss.getData().containsKey(COURT_NAME_FIELD));
+    }
+
+
+    private CaseDetails buildTestDataAndDoTest(boolean isDssCaseDetailsReq, EdgeCaseTypeOfApplicationEnum edgeCaseTypeOfApplicationEnum,
+                                               String caseTypeOfApplication, String eventId) throws NotFoundException, JsonProcessingException {
+
+        return testUpdateCaseForDss(
+            CaseData.builder().dssCaseDetails(isDssCaseDetailsReq ? DssCaseDetails.builder()
+                    .edgeCaseTypeOfApplication(edgeCaseTypeOfApplicationEnum)
+                    .selectedCourtId("courtId").build() : null)
+                .caseTypeOfApplication(caseTypeOfApplication)
+                .applicants(List.of(element(PartyDetails.builder().address(Address.builder().postCode("postCode").build()).build())))
+                .build(),
+            eventId
+        );
+    }
+
+    private CaseDetails testUpdateCaseForDss(CaseData caseData1, String eventId) throws JsonProcessingException, NotFoundException {
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent1 = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMapInitial,
+            caseData,
+            null
+        );
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData1);
+        when(objectMapper.convertValue(caseData1, Map.class)).thenReturn(caseDataMapInitial);
+        when(allTabsService.getStartUpdateForSpecificUserEvent(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString()
+        ))
+            .thenReturn(startAllTabsUpdateDataContent1);
+        List<CourtVenue> courtVenueList = new ArrayList<>();
+        courtVenueList.add(CourtVenue.builder().courtTypeId(FAMILY_COURT_TYPE_ID).courtEpimmsId("courtEpimmsId").build());
+        courtVenueList.add(CourtVenue.builder().courtTypeId("FAMILY_COURT_TYPE_ID").courtEpimmsId("courtEpimmsId").build());
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        when(locationRefDataApi.getCourtDetailsById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString()
+        )).thenReturn(courtVenueList);
+        Map<String,Object> updatedCaseData = new HashMap<>();
+        when(dssEdgeCaseDetailsMapper.updateDssCaseData(any())).thenReturn(updatedCaseData);
+        when(dssEdgeCaseDetailsMapper.mapDssCaseData(any(), any())).thenReturn(caseData1);
+        when(courtSealFinderService.getCourtSeal(anyString())).thenReturn("courtRegionId");
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put(COURT_SEAL_FIELD, "courtRegionId");
+        when(allTabsService.submitUpdateForSpecificUserEvent(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().data(caseDataUpdated).build());
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenReturn(Court.builder().build());
+
+        return caseService.updateCaseForDss(authToken, "caseID", eventId, caseData1);
+
     }
 
 }

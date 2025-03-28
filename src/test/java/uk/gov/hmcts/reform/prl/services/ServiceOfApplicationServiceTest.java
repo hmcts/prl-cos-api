@@ -105,6 +105,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
@@ -124,6 +126,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_AD
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_APPROVED;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.IS_C8_CHECK_NEEDED;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE;
@@ -610,6 +613,39 @@ public class ServiceOfApplicationServiceTest {
         serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
         assertNotNull(dataMap);
     }
+
+    @Test
+    public void testgeneratePacksForConfidentialCheckWhenSoaRecipientsOptionsIsNull() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(parties)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .build()))
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .applicationServedYesNo(YesOrNo.No)
+                                      .soaOtherParties(dynamicMultiSelectList)
+                                      .rejectionReason("pack contain confidential address")
+                                      .build()).build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
+        serviceOfApplicationService.generatePacksForConfidentialCheckC100(authorization, caseData, dataMap);
+        assertNotNull(dataMap);
+    }
+
+
 
     @Test
     public void testgeneratePacksForConfidentialCheckPersonal() {
@@ -5206,16 +5242,153 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCaseWhenCaseCreatedBySolicitor() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .caseCreatedBy(CaseCreatedBy.SOLICITOR)
-                                                            .applicants(parties)
-                                                            .build(),
-                                                        caseDataMap1,Event.SOA.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, NO);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                .applicants(parties)
+                .build(),
+            caseDataMap1, Event.SOA.getId()
+        );
         assertNull(caseDataMap1.get(APPLICANTS));
 
     }
 
+    @Test
+    public void testCheckIfPostalAddressMissedForRespondentAndOtherParties() {
+
+        PartyDetails partyDetails1 = PartyDetails.builder().isCurrentAddressKnown(No)
+            .address(Address.builder().addressLine1("addressLine1").build()).build();
+        serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData.builder()
+                                                                                               .otherPartyInTheCaseRevised(
+                                                                                                   List.of(element(
+                                                                                                       partyDetails1))).build());
+    }
+
+    @Test
+    public void testCheckIfPostalAddressMissedForRespondentAndOtherParties2() {
+
+        PartyDetails partyDetails1 = PartyDetails.builder().isCurrentAddressKnown(No)
+            .address(Address.builder().build()).build();
+        assertNotNull(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData.builder().caseTypeOfApplication(
+                C100_CASE_TYPE)
+                                                                                                             .otherPartyInTheCaseRevised(
+                                                                                                                 List.of(
+                                                                                                                     element(
+                                                                                                                         partyDetails1))).build()));
+    }
+
+    @Test
+    public void testCheckIfPostalAddressMissedForRespondentAndOtherParties1() {
+        PartyDetails otherParties = PartyDetails.builder().isCurrentAddressKnown(Yes).address(Address.builder().addressLine1(
+            "address").build()).build();
+        PartyDetails partyDetails1 = PartyDetails.builder().isCurrentAddressKnown(No).address(Address.builder().build()).build();
+        assertEquals(
+            DA_ADDRESS_MISSED_FOR_RESPONDENT,
+            serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData.builder().caseTypeOfApplication(
+                    FL401_CASE_TYPE)
+                                                                                                   .otherPartyInTheCaseRevised(
+                                                                                                       List.of(element(
+                                                                                                           otherParties)))
+                                                                                                   .respondentsFL401(
+                                                                                                       partyDetails1).build())
+        );
+    }
+
+    @Test
+    public void testCheckIfPostalAddressMissedForRespondentAndOtherParties3() {
+        PartyDetails otherParties = PartyDetails.builder().isCurrentAddressKnown(Yes).address(Address.builder().addressLine1(
+            "address").build()).build();
+        PartyDetails partyDetails1 = PartyDetails.builder().isCurrentAddressKnown(No).address(Address.builder().build()).build();
+        assertNotNull(serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData.builder().caseTypeOfApplication(
+                "FL401_CASE_TYPE")
+                                                                                                             .otherPartyInTheCaseRevised(
+                                                                                                                 List.of(
+                                                                                                                     element(
+                                                                                                                         otherParties)))
+                                                                                                             .respondentsFL401(
+                                                                                                                 partyDetails1).build()));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenHearingServiceRespIsNull() {
+        when(hearingService.getHearings(authorization, String.valueOf(123L))).thenReturn(null);
+        ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
+            .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(C100_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication1)
+            .respondents(List.of(element(PartyDetails.builder().build())))
+            .applicants(List.of(element(PartyDetails.builder().response(Response.builder().build()).build()))).build();
+        Map<String, Object> caseDataHashMap = new HashMap<>();
+        caseDataHashMap.put(WA_IS_APPLICANT_REPRESENTED, null);
+        when(objectMapper.convertValue(caseDataHashMap, CaseData.class)).thenReturn(caseData1);
+        assertNotNull(serviceOfApplicationService.handleAboutToSubmit(
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().data(caseDataHashMap).id(123L).createdDate(
+                    LocalDateTime.now()).lastModified(LocalDateTime.now())
+                                                      .state(CASE_ISSUED.getValue()).build()).build(), authorization
+        ));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenCaseHearingsIsNull() {
+        when(hearingService.getHearings(
+            authorization,
+            String.valueOf(123L)
+        )).thenReturn(Hearings.hearingsWith().build());
+        ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
+            .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(C100_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication1)
+            .respondents(List.of(element(PartyDetails.builder().build())))
+            .applicants(List.of(element(PartyDetails.builder().build()))).build();
+        Map<String, Object> caseDataHashMap = new HashMap<>();
+        caseDataHashMap.put(WA_IS_APPLICANT_REPRESENTED, null);
+        when(objectMapper.convertValue(caseDataHashMap, CaseData.class)).thenReturn(caseData1);
+        assertNotNull(serviceOfApplicationService.handleAboutToSubmit(
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().data(caseDataHashMap).id(123L).createdDate(
+                    LocalDateTime.now()).lastModified(LocalDateTime.now())
+                                                      .state(CASE_ISSUED.getValue()).build()).build(), authorization
+        ));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenCaseTypeIsFL401AndApplicantsFl401ResponseNull() {
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(
+            CaseHearing.caseHearingWith().hmcStatus(LISTED).nextHearingDate(LocalDateTime.now()).build(),
+            CaseHearing.caseHearingWith().hmcStatus(LISTED).build(),
+            CaseHearing.caseHearingWith().hmcStatus(HMC_STATUS_COMPLETED).build()
+        )).build();
+        when(hearingService.getHearings(authorization, String.valueOf(123L))).thenReturn(hearings);
+        ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
+            .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication1)
+            .applicantsFL401(PartyDetails.builder().build()).build();
+        Map<String, Object> caseDataHashMap = new HashMap<>();
+        caseDataHashMap.put(WA_IS_APPLICANT_REPRESENTED, null);
+        when(objectMapper.convertValue(caseDataHashMap, CaseData.class)).thenReturn(caseData1);
+        assertNotNull(serviceOfApplicationService.handleAboutToSubmit(
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().data(caseDataHashMap).id(123L)
+                                                      .createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now())
+                                                      .state(CASE_ISSUED.getValue()).build()).build(), authorization));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenCaseTypeIsFL401AndApplicantsFl401ResponseIsNotNull() {
+        ServiceOfApplication serviceOfApplication1 = ServiceOfApplication.builder()
+            .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.unrepresentedApplicant).build();
+        CaseData caseData1 = CaseData.builder().id(123L).caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication1)
+            .applicantsFL401(PartyDetails.builder().response(Response.builder().build()).build()).build();
+        Map<String, Object> caseDataHashMap = new HashMap<>();
+        caseDataHashMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
+        when(objectMapper.convertValue(caseDataHashMap, CaseData.class)).thenReturn(caseData1);
+        assertNotNull(serviceOfApplicationService.handleAboutToSubmit(
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().data(caseDataHashMap).id(123L).createdDate(
+                    LocalDateTime.now()).lastModified(LocalDateTime.now())
+                                                      .state(CASE_ISSUED.getValue()).build()).build(), authorization
+        ));
+    }
 
 }

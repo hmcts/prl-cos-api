@@ -7,6 +7,7 @@ import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -45,8 +48,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -432,5 +438,72 @@ public class CaseControllerTest {
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
     }
+
+    @Test
+    public void testUpdateDssCaseWhenAuthServiceRespIsTrue() throws NotFoundException, JsonProcessingException {
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        assertNotNull(startUpdatingDssCaseData(true));
+    }
+
+    @Test
+    public void testUpdateDssCaseWhenAuthServiceRespIsFalse()  {
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
+
+        assertExpectedException(() -> {
+            startUpdatingDssCaseData(true);
+        }, RuntimeException.class, INVALID_CLIENT);
+    }
+
+    @Test
+    public void testUpdateDssCaseWhenCaseDetailsUpdataionFailsAndNullResp() {
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+
+        assertExpectedException(() -> {
+            startUpdatingDssCaseData(false);
+        }, CoreCaseDataStoreException.class, "Edge case update/submit has failed for this transaction");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    private CaseData startUpdatingDssCaseData(boolean isCaseDetailsReq) throws NotFoundException, JsonProcessingException  {
+        CaseData caseData1 = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+        Mockito.when(caseService.updateCaseForDss(anyString(),anyString(), any(), any())).thenReturn(isCaseDetailsReq ? caseDetails : null);
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData1);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        //When
+        return caseController.updateDssCase("1234567891234567L","updateDssCase", authToken, servAuthToken, caseData1);
+    }
+
+    @Test
+    public void testCourtList() {
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
+        Assert.assertNotNull(startTestGetEdgeCaseCourtList());
+    }
+
+    @Test
+    public void testCourtListWhenAuthServiceResponseIsFalse() {
+        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
+        assertExpectedException(this::startTestGetEdgeCaseCourtList,RuntimeException.class, INVALID_CLIENT);
+    }
+
+
+
+    private List<CourtVenue> startTestGetEdgeCaseCourtList() {
+        when(caseService.getEdgeCasesCourtList(anyString())).thenReturn(List.of(CourtVenue.builder().build()));
+        return caseController.getEdgeCaseCourtList(authToken,servAuthToken);
+    }
+
+
 
 }

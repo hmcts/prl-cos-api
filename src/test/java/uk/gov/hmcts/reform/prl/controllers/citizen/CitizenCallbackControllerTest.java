@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -172,5 +173,23 @@ public class CitizenCallbackControllerTest {
         citizenCallbackController.updateDssEdgeCaseApplication(authToken, callbackRequest);
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
+    }
+
+    @Test
+    public void testHandleSubmitted() {
+        Map<String, Map<String, Map<String, Object>>> supplementaryData = new HashMap<>();
+        supplementaryData.put(
+            "supplementary_data_updates",
+            Map.of("$set", Map.of("HMCTSServiceId", "ABA5"))
+        );
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("usertoken");
+        citizenCallbackController.handleSubmitted(authToken,callbackRequest);
+        verify(coreCaseDataApi,times(1)).submitSupplementaryData("usertoken",null,"1",supplementaryData);
+
     }
 }
