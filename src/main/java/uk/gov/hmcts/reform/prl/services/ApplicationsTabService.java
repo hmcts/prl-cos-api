@@ -467,8 +467,9 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
+            Gender gender = Gender.getDisplayedValueFromEnumString(applicant.getGender());
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
-                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
+                .value(applicant.toBuilder().gender(gender != null ? gender.getDisplayedValue() : null).build())
                 .build();
             applicants.add(applicantElement);
         }
@@ -528,9 +529,10 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> currentRespondent : currentRespondents) {
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
-
+            Gender gender = Gender.getDisplayedValueFromEnumString(respondent.getGender());
+            String respondentGender = gender != null ? gender.getDisplayedValue() : null;
             Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId()).value(respondent.toBuilder()
-                .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
+                .gender(respondent.getGender() != null ? respondentGender : null)
                 .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
                                                    ? YesNoDontKnow.getDisplayedValueIgnoreCase(
                                                        respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
@@ -818,7 +820,8 @@ public class ApplicationsTabService implements TabService {
                 .collect(Collectors.joining(", "));
 
             OtherProceedingsDetails otherProceedingsDetails = OtherProceedingsDetails.builder()
-                .previousOrOngoingProceedings(p.getPreviousOrOngoingProceedings().getDisplayedValue())
+                .previousOrOngoingProceedings(null != p.getPreviousOrOngoingProceedings()
+                                                  ? p.getPreviousOrOngoingProceedings().getDisplayedValue() : null)
                 .caseNumber(p.getCaseNumber())
                 .dateStarted(p.getDateStarted())
                 .dateEnded(p.getDateEnded())
@@ -1166,11 +1169,12 @@ public class ApplicationsTabService implements TabService {
 
         for (PartyDetails currentOtherPerson : otherPeople) {
             OtherPersonInTheCase otherPerson = objectMapper.convertValue(currentOtherPerson, OtherPersonInTheCase.class);
+            Gender gender = Gender.getDisplayedValueFromEnumString(otherPerson.getGender());
+            String otherPersonGender = gender != null ? gender.getDisplayedValue() : null;
             Element<OtherPersonInTheCase> wrappedPerson = Element.<OtherPersonInTheCase>builder()
                 .value(otherPerson.toBuilder()
                            .relationshipToChild(currentOtherPerson.getOtherPersonRelationshipToChildren())
-                           .gender(otherPerson.getGender() != null
-                                       ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .gender(otherPerson.getGender() != null ? otherPersonGender : null)
                            .build())
                 .build();
             otherPersonsInTheCase.add(wrappedPerson);
@@ -1258,7 +1262,8 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
         FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
+        Gender gender = Gender.getDisplayedValueFromEnumString(applicant.getGender());
+        return toMap(applicant.toBuilder().gender(null != gender ? gender.getDisplayedValue() : null).build());
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
@@ -1339,24 +1344,25 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getHomeDetails(CaseData caseData) {
-        if (caseData.getHome() == null) {
+        log.info("Home details {}", caseData.getHome());
+        if (ObjectUtils.isEmpty(caseData.getHome())) {
             return Collections.emptyMap();
         }
 
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
-        List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
+        List<String> peopleLivingAtThisAddressEnum = isNotEmpty(home.getPeopleLivingAtThisAddress())
+            ? home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
-            .toList();
+            .toList() : new ArrayList<>();
 
-        List<String> familyHomeEnum = home.getFamilyHome().stream()
-            .map(FamilyHomeEnum::getDisplayedValue)
-            .toList();
+        List<String> familyHomeEnum = isNotEmpty(home.getFamilyHome())
+            ? home.getFamilyHome().stream()
+            .map(FamilyHomeEnum::getDisplayedValue).toList() : new ArrayList<>();
 
-        List<String> livingSituationEnum = home.getLivingSituation().stream()
-            .map(LivingSituationEnum::getDisplayedValue)
-            .toList();
+        List<String> livingSituationEnum = isNotEmpty(home.getLivingSituation())
+            ? home.getLivingSituation().stream().map(LivingSituationEnum::getDisplayedValue).toList() : new ArrayList<>();
 
         builder
             .address(home.getAddress())
@@ -1373,7 +1379,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if (home.getMortgages() != null && home.getMortgages().getMortgageNamedAfter() != null) {
+        if (home.getMortgages() != null && isNotEmpty(home.getMortgages().getMortgageNamedAfter())) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -1385,7 +1391,7 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
-        if (home.getLandlords() != null && home.getLandlords().getMortgageNamedAfterList() != null) {
+        if (home.getLandlords() != null && isNotEmpty(home.getLandlords().getMortgageNamedAfterList())) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()

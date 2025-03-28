@@ -352,6 +352,7 @@ public class ReviewDocumentServiceTest {
             .scannedDocuments(List.of(element(
                 ScannedDocument.builder()
                     .scannedDate(LocalDateTime.now())
+                    .scannedDatebulkscan(LocalDateTime.now())
                     .url(Document.builder().build())
                     .controlNumber("123")
                     .deliveryDate(LocalDateTime.now())
