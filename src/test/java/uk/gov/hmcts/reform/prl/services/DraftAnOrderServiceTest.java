@@ -3719,7 +3719,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioFmpo() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3754,7 +3754,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioC53() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3789,7 +3789,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioC63() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3824,7 +3824,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioRefusalOfParentalOrderC64() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3859,7 +3859,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioForcedMarriageFl402A() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3894,7 +3894,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioNoticeOfProceedingsFgm002() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
@@ -3929,7 +3929,7 @@ public class DraftAnOrderServiceTest {
     public void testSelectedOrderForUploadScenarioFgmProtectionOrderFgmpo() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
