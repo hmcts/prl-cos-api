@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ProcessUrgentHelpWithFees;
 
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_C100_EDGE_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.services.HelpWithFeesService.APPLICATION_UPDATED;
 import static uk.gov.hmcts.reform.prl.services.HelpWithFeesService.CONFIRMATION_BODY;
 import static uk.gov.hmcts.reform.prl.services.HelpWithFeesService.HWF_APPLICATION_DYNAMIC_DATA_LABEL;
@@ -311,4 +315,65 @@ public class HelpWithFeesServiceTest {
         String hwfApplicationDynamicData = (String) response.get(HWF_APPLICATION_DYNAMIC_DATA_LABEL);
         assertNotNull(hwfApplicationDynamicData);
     }
+
+    @Test
+    public void testCaseStatusWhenDssDetailsPresent() {
+        testCaseStatus(YesOrNo.Yes, YES);
+        testCaseStatus(YesOrNo.No, NO);
+    }
+
+    private void testCaseStatus(YesOrNo isEdgeCase, String expectedResponse) {
+        CaseData casedata1 = CaseData.builder()
+            .state(State.SUBMITTED_PAID)
+            .dssCaseDetails(DssCaseDetails.builder().isEdgeCase(isEdgeCase).build())
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_NOT_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata1);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build(), "testAuth");
+        assertNotNull(response);
+        CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
+        assertEquals("Submitted", caseStatus.getState());
+        assertEquals(expectedResponse, response.get(IS_C100_EDGE_CASE));
+    }
+
+    @Test
+    public void testCheckForManagerApproval1() {
+        CaseData casedata1 = casedata.toBuilder()
+            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder()
+                                           .outstandingBalance(YesOrNo.No)
+                                           .managerAgreedApplicationBeforePayment(YesOrNo.Yes).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata1);
+        List<String> errorList = helpWithFeesService.checkForManagerApproval(caseDetails);
+        assertNotNull(errorList);
+    }
+
+    @Test
+    public void testCheckForManagerApproval2() {
+        CaseData casedata1 = casedata.toBuilder()
+            .processUrgentHelpWithFees(ProcessUrgentHelpWithFees.builder()
+                                           .outstandingBalance(YesOrNo.Yes)
+                                           .managerAgreedApplicationBeforePayment(YesOrNo.Yes).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata1);
+        List<String> errorList = helpWithFeesService.checkForManagerApproval(caseDetails);
+        assertNotNull(errorList);
+    }
+
+    @Test
+    public void testCheckForManagerApproval3() {
+        CaseData casedata1 = casedata.toBuilder()
+            .processUrgentHelpWithFees(null)
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata1);
+        List<String> errorList = helpWithFeesService.checkForManagerApproval(caseDetails);
+        assertNotNull(errorList);
+    }
+
 }

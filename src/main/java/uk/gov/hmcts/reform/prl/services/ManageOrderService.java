@@ -140,6 +140,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -186,6 +187,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.res
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
@@ -671,6 +673,9 @@ public class ManageOrderService {
             } else {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
+            //PRL-4144 - populate edge case flag
+            headerMap.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
+                ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
         } else {
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
@@ -1651,12 +1656,6 @@ public class ManageOrderService {
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            //other parties
-            if (caseData.getManageOrders().getOtherParties() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherParties()
-                ));
-            }
             //personal service
             updatePersonalServedParties(caseData.getManageOrders().getPersonallyServeRespondentsOptions(),
                                         servedParties, representativeName);
@@ -1671,6 +1670,13 @@ public class ManageOrderService {
                                         servedParties, representativeName);
             //PRL-4113 - update applicant party id in case of personal service
             servedParties.add(ManageOrdersUtils.getServedParty(caseData.getApplicantsFL401()));
+        }
+        //other parties
+        //PRL-4144 - Other people enabled for FL401 FGM/FMPO edge cases
+        if (caseData.getManageOrders().getOtherParties() != null) {
+            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                caseData.getManageOrders().getOtherParties()
+            ));
         }
 
         return servedParties;
@@ -3499,7 +3505,7 @@ public class ManageOrderService {
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
                                                  List<String> selectedPartyIds, List<String> errorList,
                                                  Boolean isRespondent) {
-        List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
+        List<Element<PartyDetails>> selectedPartyList = nullSafeCollection(partyDetails).stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .toList();
         for (Element<PartyDetails> party : selectedPartyList) {

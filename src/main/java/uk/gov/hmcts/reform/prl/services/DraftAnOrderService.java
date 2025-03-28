@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -117,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_EDGE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -175,6 +175,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.rightToAskCourt;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.checkIfOrderCanBeUploadedBySolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
@@ -302,6 +303,10 @@ public class DraftAnOrderService {
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
+        //PRL-4144 - populate edge case flag
+        caseDataMap.put(IS_EDGE_CASE, null != caseData.getDssCaseDetails()
+            ? caseData.getDssCaseDetails().getIsEdgeCase() : null);
+
         return caseDataMap;
     }
 
@@ -2390,12 +2395,7 @@ public class DraftAnOrderService {
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if ((null != caseData.getChildArrangementOrders()
-                && ChildArrangementOrdersEnum.standardDirectionsOrder
-                .name()
-                .equalsIgnoreCase(caseData
-                                      .getChildArrangementOrders()
-                                      .toString()))) {
+            if (checkIfOrderCanBeUploadedBySolicitor(caseData)) {
                 return prohibitedOrdersForSolicitor(errorList, language);
             }
 

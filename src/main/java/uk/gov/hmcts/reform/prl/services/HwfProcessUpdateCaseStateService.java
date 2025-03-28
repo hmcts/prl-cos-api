@@ -17,11 +17,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -52,6 +54,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_C100_EDGE_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
 
 @Slf4j
@@ -102,6 +107,9 @@ public class HwfProcessUpdateCaseStateService {
                                 ).replace("-", " ")).build()
                             );
                         }
+                        //PRL-4138 - Check application for edge cases
+                        caseDataUpdated.put(IS_C100_EDGE_CASE, isEdgeCase(caseData.getDssCaseDetails()));
+
                         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                             = allTabService.getStartUpdateForSpecificEvent(
                             caseDetails.getId().toString(),
@@ -205,5 +213,10 @@ public class HwfProcessUpdateCaseStateService {
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
             .build();
+    }
+
+    private String isEdgeCase(DssCaseDetails dssCaseDetails) {
+        return (null != dssCaseDetails
+            && YesOrNo.Yes.equals(dssCaseDetails.getIsEdgeCase()) ? YES : NO);
     }
 }

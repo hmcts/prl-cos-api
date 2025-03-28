@@ -11,6 +11,7 @@ public enum CaseEvent {
     CITIZEN_CASE_UPDATE("citizen-case-update"),
     CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
+    DELETE_CASE("deleteApplication"),
     CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
     DELETE_APPLICATION("deleteApplication"),
     CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
@@ -72,7 +73,12 @@ public enum CaseEvent {
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
-    APPLICANT_DETAILS("applicantsDetails");
+    APPLICANT_DETAILS("applicantsDetails"),
+
+    UPDATE_DSS_EDGE_CASE("updateDssEdgeCase"),
+    SUBMIT_DSS_DA_EDGE_CASE("submitDssDaEdgeCase"),
+    SUBMIT_DSS_CA_EDGE_CASE("submitDssCaEdgeCase"),
+    SUBMIT_DSS_CA_EDGE_CASE_HWF("submitDssCaEdgeCaseWithHwf");
 
     private final String value;
 
