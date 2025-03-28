@@ -129,6 +129,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
@@ -6260,6 +6261,113 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
 
+    }
+
+    @Test
+    public void testPopulateFinalOrderFromCaseData1() throws Exception {
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        hearingDataList.add(element(HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed).build()));
+        testAddOrderDetailsAndReturnReverseSortedList(hearingDataList, YesOrNo.Yes);
+
+        hearingDataList.remove(0);
+        hearingDataList.add(element(HearingData.builder().build()));
+        testAddOrderDetailsAndReturnReverseSortedList(hearingDataList, null);
+
+    }
+
+    private void testAddOrderDetailsAndReturnReverseSortedList(List<Element<HearingData>> hearingDataList, YesOrNo expectedResult) {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(hearingDataList).build())
+            .build();
+
+        Map<String, Object> updatedCaseDataMap = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token",
+            caseData1,
+            PrlAppsConstants.ENGLISH
+        );
+        assertNotNull(updatedCaseDataMap);
+        List<Element<DraftOrder>> draftOrderUpdated = (List<Element<DraftOrder>>) updatedCaseDataMap.get(
+            DRAFT_ORDER_COLLECTION);
+        assertNotNull(draftOrderUpdated);
+        assertEquals(expectedResult, draftOrderUpdated.get(0).getValue().getIsAutoHearingReqPending());
+
+
+    }
+
+    @Test
+    public void testPopulateCheckForAutomatedRequest() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        hearingDataList.add(element(HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed).build()));
+        testPopulateCheckForAutomatedRequest(hearingDataList, AmendOrderCheckEnum.noCheck, YesOrNo.Yes, Event.MANAGE_ORDERS.getId());
+        testPopulateCheckForAutomatedRequest(hearingDataList, AmendOrderCheckEnum.managerCheck, YesOrNo.Yes, Event.MANAGE_ORDERS.getId());
+        testPopulateCheckForAutomatedRequest(null, AmendOrderCheckEnum.noCheck, YesOrNo.No, Event.MANAGE_ORDERS.getId());
+        testPopulateCheckForAutomatedRequest(hearingDataList, AmendOrderCheckEnum.noCheck,YesOrNo.Yes, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId());
+        testPopulateCheckForAutomatedRequest(hearingDataList, AmendOrderCheckEnum.noCheck, YesOrNo.Yes, Event.EDIT_AND_APPROVE_ORDER.getId());
+        testPopulateCheckForAutomatedRequest(hearingDataList,AmendOrderCheckEnum.noCheck, YesOrNo.No, Event.SERVICE_OF_DOCUMENTS.getId());
+        testPopulateCheckForAutomatedRequest(hearingDataList,AmendOrderCheckEnum.managerCheck, YesOrNo.Yes, Event.EDIT_AND_APPROVE_ORDER.getId());
+    }
+
+    private void testPopulateCheckForAutomatedRequest(List<Element<HearingData>> hearingDataList,AmendOrderCheckEnum amendOrderCheckEnum,
+                                                      YesOrNo expectedResult, String eventId) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(hearingDataList).amendOrderSelectCheckOptions(noCheck).build())
+            .build();
+
+        manageOrderService.populateCheckForAutomatedRequest(caseData1, caseDataMap, eventId);
+        assertEquals(expectedResult, caseDataMap.get("checkForAutomatedHearing"));
     }
 
 }
