@@ -2397,7 +2397,6 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             if (checkIfOrderCanBeUploadedBySolicitor(caseData)) {
                 return prohibitedOrdersForSolicitor(errorList, language);
-
             }
 
             caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
