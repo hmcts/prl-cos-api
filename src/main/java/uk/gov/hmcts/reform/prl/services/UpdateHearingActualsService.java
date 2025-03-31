@@ -136,7 +136,7 @@ public class UpdateHearingActualsService {
             .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
-    private String extractSelectedHearingId(HearingData hearingData) {
+    String extractSelectedHearingId(HearingData hearingData) {
         if (hearingData == null || hearingData.getConfirmedHearingDates() == null) {
             return null;
         }
