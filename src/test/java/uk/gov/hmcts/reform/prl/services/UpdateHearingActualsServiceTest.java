@@ -3,13 +3,11 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -34,47 +32,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class UpdateHearingActualsServiceTest {
+
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
-    @Mock
-    ObjectMapper objectMapper;
-    @Mock
-    SystemUserService systemUserService;
-    @Mock
-    AuthTokenGenerator authTokenGenerator;
-    @Mock
-    CoreCaseDataApi coreCaseDataApi;
-    @Mock
-    AllTabServiceImpl allTabService;
-    @Mock
-    HearingApiClient hearingApiClient;
-    private CaseDetails caseDetails;
-    private CaseData caseData;
+
+    @Mock ObjectMapper objectMapper;
+    @Mock SystemUserService systemUserService;
+    @Mock AuthTokenGenerator authTokenGenerator;
+    @Mock CoreCaseDataApi coreCaseDataApi;
+    @Mock AllTabServiceImpl allTabService;
+    @Mock HearingApiClient hearingApiClient;
 
     @InjectMocks
     private UpdateHearingActualsService updateHearingActualsService;
 
-    @SuppressWarnings("unchecked")
-    @BeforeEach
-    void setUp() {
+    private CaseData caseData;
+    private CaseDetails caseDetails;
+
+    void setupCommonStubs() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -83,38 +68,59 @@ class UpdateHearingActualsServiceTest {
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .build();
 
-        // Fix for convertValue(caseData, new TypeReference<>() {})
-        doReturn(new HashMap<String, Object>())
-            .when(objectMapper)
-            .convertValue(any(), any(TypeReference.class));
+        doReturn(new HashMap<>()).when(objectMapper).convertValue(any(), any(TypeReference.class));
 
         caseDetails = CaseDetails.builder()
             .id(123L)
-            .data(caseData.toMap(objectMapper)) // This now works safely
+            .data(caseData.toMap(objectMapper))
             .build();
+    }
 
+    @Test
+    void testUpdateHearingActualTaskCreatedSuccessfully() {
+        setupCommonStubs();
         SearchResult searchResult = SearchResult.builder()
             .total(1)
             .cases(List.of(caseDetails))
             .build();
-
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-
         SearchResultResponse response = SearchResultResponse.builder()
             .total(1)
             .cases(List.of(caseDetails))
             .build();
 
-        doReturn(caseData).when(objectMapper).convertValue(any(), eq(CaseData.class));
-        doReturn(response).when(objectMapper).convertValue(any(), eq(SearchResultResponse.class));
+        doReturn(response).when(objectMapper).convertValue(searchResult, SearchResultResponse.class);
+        doReturn(caseData).when(objectMapper).convertValue(caseDetails.getData(), CaseData.class);
+        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), anyString()))
+            .thenReturn(searchResult);
 
-        Map<String, List<String>> caseIdHearingIdMap = new HashMap<>();
-        caseIdHearingIdMap.put("123", Collections.singletonList("123"));
+        caseData = caseData.toBuilder()
+            .draftOrderCollection(List.of(element(DraftOrder.builder()
+                                                      .manageOrderHearingDetails(List.of(
+                                                          element(HearingData.builder()
+                                                                      .confirmedHearingDates(DynamicList.builder()
+                                                                                                 .value(DynamicListElement.builder().code("1234").build())
+                                                                                                 .build())
+                                                                      .build())))
+                                                      .build())))
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                                 .manageOrderHearingDetails(List.of(
+                                                     element(HearingData.builder()
+                                                                 .confirmedHearingDates(DynamicList.builder()
+                                                                                            .value(DynamicListElement.builder().code("1234").build())
+                                                                                            .build())
+                                                                 .build())))
+                                                 .build())))
+            .build();
 
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        Map<String, List<String>> caseIdMap = Map.of("123", List.of("123"));
         when(hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(any(), any(), anyList()))
-            .thenReturn(caseIdHearingIdMap);
+            .thenReturn(caseIdMap);
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+        StartAllTabsUpdateDataContent startContent = new StartAllTabsUpdateDataContent(
             s2sAuthToken,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
@@ -123,100 +129,63 @@ class UpdateHearingActualsServiceTest {
             null
         );
 
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString()))
-            .thenReturn(startAllTabsUpdateDataContent);
-    }
-
-    @Test
-    void testUpdateHearingActualTaskCreatedSuccessfully() {
-
-        caseData = caseData.toBuilder()
-            .id(123L)
-            .draftOrderCollection(List.of(element(DraftOrder.builder()
-                                                      .manageOrderHearingDetails(
-                                                          List.of(element(HearingData.builder()
-                                                                              .confirmedHearingDates(DynamicList.builder()
-                                                                                                         .value(
-                                                                                                             DynamicListElement.builder().code(
-                                                                                                                 "1234").build()).build())
-                                                                              .build())))
-                                                      .build())))
-
-            .orderCollection(List.of(element(OrderDetails.builder()
-                                                 .manageOrderHearingDetails(
-                                                     List.of(element(HearingData.builder()
-                                                                         .confirmedHearingDates(DynamicList.builder()
-                                                                                                    .value(
-                                                                                                        DynamicListElement.builder().code(
-                                                                                                            "1234").build()).build())
-                                                                         .build())))
-                                                 .build())))
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .build();
-        caseDetails = caseDetails.toBuilder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
-
-        SearchResult searchResult1 = SearchResult.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        SearchResultResponse response = SearchResultResponse.builder()
-            .total(1)
-            .cases(List.of(caseDetails))
-            .build();
-        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult1);
-        when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startContent);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
     @Test
     void testUpdateHearingActualTaskForDraftOrderCreatedForHearingId() {
-        caseData = caseData.toBuilder()
-            .id(123L)
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .draftOrderCollection(List.of(
-                element(DraftOrder.builder()
-                            .manageOrderHearingDetails(List.of(
-                                element(HearingData.builder()
-                                            .confirmedHearingDates(
-                                                DynamicList.builder()
-                                                    .value(DynamicListElement.builder().code("123").build())
-                                                    .listItems(List.of(DynamicListElement.defaultListItem("test")))
-                                                    .build()
-                                            )
-                                            .build()
-                                ))
-                            )
-                            .build())
-            ))
-            .build();
-        caseDetails = caseDetails.toBuilder()
-            .id(123L)
-            .data(caseData.toMap(objectMapper))
-            .build();
+        setupCommonStubs();
         SearchResult searchResult = SearchResult.builder()
             .total(1)
             .cases(List.of(caseDetails))
             .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(searchResult);
-
         SearchResultResponse response = SearchResultResponse.builder()
             .total(1)
             .cases(List.of(caseDetails))
             .build();
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+
+        doReturn(response).when(objectMapper).convertValue(searchResult, SearchResultResponse.class);
+        doReturn(caseData).when(objectMapper).convertValue(caseDetails.getData(), CaseData.class);
+        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), isNull()))
+            .thenReturn(searchResult);
+
+
+        caseData = caseData.toBuilder()
+            .draftOrderCollection(List.of(element(DraftOrder.builder()
+                                                      .manageOrderHearingDetails(List.of(element(HearingData.builder()
+                                                                                                     .confirmedHearingDates(DynamicList.builder()
+                                                                                                                                .value(DynamicListElement.builder().code("123").build())
+                                                                                                                                .listItems(List.of(DynamicListElement.defaultListItem("test")))
+                                                                                                                                .build())
+                                                                                                     .build())))
+                                                      .build())))
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        Map<String, List<String>> caseIdMap = Map.of("123", List.of("123"));
+        when(hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(any(), any(), anyList()))
+            .thenReturn(caseIdMap);
+
+        StartAllTabsUpdateDataContent startContent = new StartAllTabsUpdateDataContent(
+            s2sAuthToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(objectMapper),
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startContent);
+
         updateHearingActualsService.updateHearingActuals();
 
-        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
 
@@ -226,34 +195,26 @@ class UpdateHearingActualsServiceTest {
     }
 
     @Test
-    void testExtractSelectedHearingId_whenConfirmedHearingDatesIsNull_shouldReturnNull() {
-        HearingData hearingData = HearingData.builder()
-            .confirmedHearingDates(null)
-            .build();
-
-        String result = UpdateHearingActualsService.extractSelectedHearingId(hearingData);
-        assertNull(result);
+    void testExtractSelectedHearingIdShouldReturnNullForNullHearingDates() {
+        HearingData hearingData = HearingData.builder().confirmedHearingDates(null).build();
+        assertNull(UpdateHearingActualsService.extractSelectedHearingId(hearingData));
     }
 
     @Test
-    void testExtractSelectedHearingId_whenDynamicListValueIsNull_shouldReturnNull() {
+    void testExtractSelectedHearingIdShouldReturnNullForNullDynamicListValue() {
         HearingData hearingData = HearingData.builder()
             .confirmedHearingDates(DynamicList.builder().value(null).build())
             .build();
-
-        String result = UpdateHearingActualsService.extractSelectedHearingId(hearingData);
-        assertNull(result);
+        assertNull(UpdateHearingActualsService.extractSelectedHearingId(hearingData));
     }
 
     @Test
-    void testExtractSelectedHearingId_whenValid_shouldReturnCode() {
-        DynamicListElement element = DynamicListElement.builder().code("test-code").build();
+    void testExtractSelectedHearingIdShouldReturnCode() {
         HearingData hearingData = HearingData.builder()
-            .confirmedHearingDates(DynamicList.builder().value(element).build())
+            .confirmedHearingDates(DynamicList.builder()
+                                       .value(DynamicListElement.builder().code("test-code").build())
+                                       .build())
             .build();
-
-        String result = UpdateHearingActualsService.extractSelectedHearingId(hearingData);
-        assertEquals("test-code", result);
+        assertEquals("test-code", UpdateHearingActualsService.extractSelectedHearingId(hearingData));
     }
-
 }
