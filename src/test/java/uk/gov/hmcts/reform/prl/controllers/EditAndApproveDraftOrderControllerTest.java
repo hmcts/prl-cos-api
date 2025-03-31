@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -92,6 +93,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -2039,4 +2041,125 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
         Assert.assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
     }
+
+    @Test
+    public void testSendEmailNotificationToRecipientsServeOrderWhenAutoHearingIsYes() {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().value(DraftOrder.builder()
+                                                                                        .isAutoHearingReqPending(Yes).build()).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .checkForAutomatedHearing(Yes)
+                              .build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .draftOrderCollection(draftOrderCollection)
+            .orderCollection(List.of(element(OrderDetails.builder().isAutoHearingReqPending(Yes).build())))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(CaseDetails.builder().build());
+        when(manageOrderService.createAutomatedHearingManagement(any(), any(), any()))
+            .thenReturn(List.of(element(HearingData.builder().build())));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        List<Element<DraftOrder>> updatedDraftOrder = (List<Element<DraftOrder>>) callbackRequest.getCaseDetails()
+            .getData().get(DRAFT_ORDER_COLLECTION);
+        assertNotNull(updatedDraftOrder);
+        assertEquals(No, updatedDraftOrder.get(0).getValue().getIsAutoHearingReqPending());
+
+        List<Element<OrderDetails>> updatedOrderDetails = (List<Element<OrderDetails>>) callbackRequest.getCaseDetails()
+            .getData().get(ORDER_COLLECTION);
+        assertNotNull(updatedOrderDetails);
+        assertEquals(No, updatedOrderDetails.get(0).getValue().getIsAutoHearingReqPending());
+
+        verify(manageOrderEmailService, times(1))
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
+
+    }
+
+    @Test
+    public void testHandleEditAndApproveSubmittedForAutoHearing() {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().value(DraftOrder.builder().isAutoHearingReqPending(Yes)
+                                                                                        .build()).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        CaseData caseData1 = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .manageOrders(ManageOrders.builder().checkForAutomatedHearing(Yes).build())
+            .draftOrderCollection(draftOrderCollection)
+            .orderCollection(List.of(element(OrderDetails.builder().isAutoHearingReqPending(Yes).build())))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> caseDetails = caseData1.toMap(new ObjectMapper());
+
+        caseDetails.put(
+            "whatToDoWithOrderSolicitor",
+            OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+        );
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDetails)
+                             .build())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData1, null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
+            .handleEditAndApproveSubmitted(authToken, s2sToken, "clcx", callbackRequest);
+        assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
+        List<Element<DraftOrder>> updatedDraftOrder = (List<Element<DraftOrder>>) callbackRequest.getCaseDetails().getData()
+            .get(DRAFT_ORDER_COLLECTION);
+        assertNotNull(updatedDraftOrder);
+        assertEquals(No, updatedDraftOrder.get(0).getValue().getIsAutoHearingReqPending());
+
+        List<Element<OrderDetails>> updatedOrderDetails = (List<Element<OrderDetails>>) callbackRequest.getCaseDetails().getData().get(
+            ORDER_COLLECTION);
+        assertNotNull(updatedOrderDetails);
+        assertEquals(No, updatedOrderDetails.get(0).getValue().getIsAutoHearingReqPending());
+
+    }
+
+
 }
