@@ -132,11 +132,11 @@ public class UpdateHearingActualsService {
             .map(Element::getValue)
             .flatMap(draftOrder -> nullSafeCollection(draftOrder.getManageOrderHearingDetails()).stream())
             .map(Element::getValue)
-            .map(this::extractSelectedHearingId)
+            .map(UpdateHearingActualsService::extractSelectedHearingId)
             .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
-    String extractSelectedHearingId(HearingData hearingData) {
+    public static String extractSelectedHearingId(HearingData hearingData) {
         if (hearingData == null || hearingData.getConfirmedHearingDates() == null) {
             return null;
         }
@@ -151,7 +151,7 @@ public class UpdateHearingActualsService {
             .map(Element::getValue)
             .flatMap(order -> nullSafeCollection(order.getManageOrderHearingDetails()).stream())
             .map(Element::getValue)
-            .map(this::extractSelectedHearingId)
+            .map(UpdateHearingActualsService::extractSelectedHearingId)
             .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
