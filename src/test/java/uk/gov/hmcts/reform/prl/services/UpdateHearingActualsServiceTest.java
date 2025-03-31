@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -32,7 +34,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,12 +53,18 @@ class UpdateHearingActualsServiceTest {
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
 
-    @Mock ObjectMapper objectMapper;
-    @Mock SystemUserService systemUserService;
-    @Mock AuthTokenGenerator authTokenGenerator;
-    @Mock CoreCaseDataApi coreCaseDataApi;
-    @Mock AllTabServiceImpl allTabService;
-    @Mock HearingApiClient hearingApiClient;
+    @Mock
+    ObjectMapper objectMapper;
+    @Mock
+    SystemUserService systemUserService;
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+    @Mock
+    CoreCaseDataApi coreCaseDataApi;
+    @Mock
+    AllTabServiceImpl allTabService;
+    @Mock
+    HearingApiClient hearingApiClient;
 
     @InjectMocks
     private UpdateHearingActualsService updateHearingActualsService;
@@ -74,7 +81,9 @@ class UpdateHearingActualsServiceTest {
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .build();
 
-        doReturn(new HashMap<>()).when(objectMapper).convertValue(any(), any(TypeReference.class));
+        doReturn(new HashMap<String, Object>())
+            .when(objectMapper)
+            .convertValue(any(), ArgumentMatchers.<TypeReference<Map<String, Object>>>any());
 
         caseDetails = CaseDetails.builder()
             .id(123L)
@@ -99,22 +108,21 @@ class UpdateHearingActualsServiceTest {
         when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), anyString()))
             .thenReturn(searchResult);
 
+        List<Element<HearingData>> hearingDataElement = List.of(
+            element(HearingData.builder()
+                        .confirmedHearingDates(DynamicList.builder()
+                                                   .value(
+                                                       DynamicListElement.builder()
+                                                           .code("1234")
+                                                           .build())
+                                                   .build())
+                        .build()));
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(element(DraftOrder.builder()
-                                                      .manageOrderHearingDetails(List.of(
-                                                          element(HearingData.builder()
-                                                                      .confirmedHearingDates(DynamicList.builder()
-                                                                                                 .value(DynamicListElement.builder().code("1234").build())
-                                                                                                 .build())
-                                                                      .build())))
+                                                      .manageOrderHearingDetails(hearingDataElement)
                                                       .build())))
             .orderCollection(List.of(element(OrderDetails.builder()
-                                                 .manageOrderHearingDetails(List.of(
-                                                     element(HearingData.builder()
-                                                                 .confirmedHearingDates(DynamicList.builder()
-                                                                                            .value(DynamicListElement.builder().code("1234").build())
-                                                                                            .build())
-                                                                 .build())))
+                                                 .manageOrderHearingDetails(hearingDataElement)
                                                  .build())))
             .build();
 
@@ -163,10 +171,18 @@ class UpdateHearingActualsServiceTest {
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(element(DraftOrder.builder()
                                                       .manageOrderHearingDetails(List.of(element(HearingData.builder()
-                                                                                                     .confirmedHearingDates(DynamicList.builder()
-                                                                                                                                .value(DynamicListElement.builder().code("123").build())
-                                                                                                                                .listItems(List.of(DynamicListElement.defaultListItem("test")))
-                                                                                                                                .build())
+                                                                                                     .confirmedHearingDates(
+                                                                                                         DynamicList.builder()
+                                                                                                             .value(
+                                                                                                                 DynamicListElement.builder()
+                                                                                                                     .code(
+                                                                                                                         "123")
+                                                                                                                     .build())
+                                                                                                             .listItems(
+                                                                                                                 List.of(
+                                                                                                                     DynamicListElement.defaultListItem(
+                                                                                                                         "test")))
+                                                                                                             .build())
                                                                                                      .build())))
                                                       .build())))
             .build();
