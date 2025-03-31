@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.Child;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.Child;
 @Builder(
     toBuilder = true,
     builderClassName = "Builder",
-    builderMethodName = "internalBuilder" )
+    builderMethodName = "internalBuilder")
 public class Address {
 
     @JsonProperty("AddressLine1")

@@ -26,7 +26,7 @@ import java.util.List;
 @Builder(
     toBuilder = true,
     builderClassName = "Builder",
-    builderMethodName = "internalBuilder" )
+    builderMethodName = "internalBuilder")
 public class Child {
 
     private String firstName;

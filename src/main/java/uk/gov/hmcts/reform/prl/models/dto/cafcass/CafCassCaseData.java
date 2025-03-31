@@ -717,7 +717,7 @@ public class CafCassCaseData {
     }
 
     private Element<RelationshipToPartiesCafcass> mapToOtherPeopleRelationshipElement(
-        Element<RelationshipToPartiesCafcass> element ) {
+        Element<RelationshipToPartiesCafcass> element) {
         RelationshipToPartiesCafcass rel = element.getValue();
 
         return Element.<RelationshipToPartiesCafcass>builder()

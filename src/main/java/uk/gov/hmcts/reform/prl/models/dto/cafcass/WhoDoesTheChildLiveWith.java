@@ -15,15 +15,17 @@ import lombok.NoArgsConstructor;
 @Builder(
     toBuilder = true,
     builderClassName = "Builder",
-    builderMethodName = "internalBuilder" )
+    builderMethodName = "internalBuilder")
 public class WhoDoesTheChildLiveWith {
     private String partyId;
     private String partyFullName;
     private PartyTypeEnum partyType;
     private Address childAddress;
+
     public static Builder builder() {
         return new Builder();
     }
+
     public static class Builder {
         private static String clean(String value) {
             return (value != null && !value.trim().isEmpty()) ? value : null;
