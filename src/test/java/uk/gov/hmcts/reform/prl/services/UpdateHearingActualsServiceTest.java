@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +36,10 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -154,6 +157,55 @@ public class UpdateHearingActualsServiceTest {
 
         updateHearingActualsService.updateHearingActuals();
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testUpdateHearingActualTaskWhenException() {
+
+        caseData = caseData.toBuilder()
+            .id(123L)
+            .draftOrderCollection(List.of(element(DraftOrder.builder()
+                                                      .manageOrderHearingDetails(
+                                                          List.of(element(HearingData.builder()
+                                                                              .confirmedHearingDates(DynamicList.builder()
+                                                                                                         .value(
+                                                                                                             DynamicListElement.builder().code(
+                                                                                                                 "1234").build()).build())
+                                                                              .build())))
+                                                      .build())))
+
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                                 .manageOrderHearingDetails(
+                                                     List.of(element(HearingData.builder()
+                                                                         .confirmedHearingDates(DynamicList.builder()
+                                                                                                    .value(
+                                                                                                        DynamicListElement.builder().code(
+                                                                                                            "1234").build()).build())
+                                                                         .build())))
+                                                 .build())))
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .build();
+        caseDetails = caseDetails.toBuilder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult1 = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult1);
+        when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doThrow(FeignException.class).when(hearingApiClient).getListedHearingsForAllCaseIdsOnCurrentDate(any(), any(), anyList());
+
+        updateHearingActualsService.updateHearingActuals();
+        verifyNoInteractions(allTabService);
     }
 
     @Test
