@@ -20,7 +20,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
@@ -119,16 +122,24 @@ public class UpdateHearingActualsService {
         return true;
     }
 
-    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingId) {
-        return nullSafeCollection(caseData.getDraftOrderCollection())
-            .stream()
+    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingIds) {
+        return nullSafeCollection(caseData.getDraftOrderCollection()).stream()
             .map(Element::getValue)
-            .anyMatch(draftOrderElement -> nullSafeCollection(draftOrderElement.getManageOrderHearingDetails())
-                .stream()
-                .map(Element::getValue)
-                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
+            .flatMap(draftOrder -> nullSafeCollection(draftOrder.getManageOrderHearingDetails()).stream())
+            .map(Element::getValue)
+            .map(this::extractSelectedHearingId)
+            .anyMatch(id -> id != null && hearingIds.contains(id));
     }
+
+    private String extractSelectedHearingId(HearingData hearingData) {
+        if (hearingData == null || hearingData.getConfirmedHearingDates() == null) {
+            return null;
+        }
+        DynamicList selectedList = hearingData.getConfirmedHearingDates();
+        DynamicListElement selectedElement = selectedList.getValue();
+        return selectedElement != null ? selectedElement.getCode() : null;
+    }
+
 
     private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingId) {
         return nullSafeCollection(caseData.getOrderCollection())
