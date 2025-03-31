@@ -46,7 +46,7 @@ public class Address {
         private String postCode;
 
         private static String clean(String value) {
-            return (value != null && !value.trim().isEmpty()) ? value : null;
+            return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
         }
 
         public Builder addressLine1(String addressLine1) {
