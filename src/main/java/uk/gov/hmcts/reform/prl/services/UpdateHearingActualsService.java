@@ -89,18 +89,23 @@ public class UpdateHearingActualsService {
     private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
                                                  Map<String, List<String>> caseIds) {
         log.info("Case Id's {}", caseIds);
-        caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
-            caseId)).forEach(caseDetails -> {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-                log.info("Hearing id {}", hearingId);
-                triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    log.info("Hearing id is not mapped in orders");
-                    triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
-                }
-            }
-        ));
+        caseIds.forEach((caseId, hearingIds) -> {
+            List<String> safeHearingIds = hearingIds != null ? hearingIds : Collections.emptyList();
+
+            caseDetailsList.stream()
+                .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
+                .forEach(caseDetails -> {
+                    CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                    log.info("Hearing id {}", safeHearingIds);
+                    triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
+                    if (!checkIfHearingIdIsMappedInOrders(caseData, safeHearingIds)) {
+                        log.info("Hearing id is not mapped in orders for caseid {}", caseId);
+                        triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
+                    }
+                });
+        });
     }
+
 
     private void triggerSystemEventForWorkAllocationTask(String caseId, String caseEvent, Map<String, Object> caseDataUpdated) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, caseEvent);
@@ -141,14 +146,13 @@ public class UpdateHearingActualsService {
     }
 
 
-    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingId) {
-        return nullSafeCollection(caseData.getOrderCollection())
-            .stream()
+    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingIds) {
+        return nullSafeCollection(caseData.getOrderCollection()).stream()
             .map(Element::getValue)
-            .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
-                .stream().map(Element::getValue)
-                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
+            .flatMap(order -> nullSafeCollection(order.getManageOrderHearingDetails()).stream())
+            .map(Element::getValue)
+            .map(this::extractSelectedHearingId)
+            .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
