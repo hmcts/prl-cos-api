@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class WhoDoesTheChildLiveWithTest {
 

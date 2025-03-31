@@ -12,10 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(
-    toBuilder = true,
-    builderClassName = "Builder",
-    builderMethodName = "internalBuilder")
+@Builder(builderClassName = "LombokBuilder", builderMethodName = "internalBuilder")
 public class WhoDoesTheChildLiveWith {
     private String partyId;
     private String partyFullName;
@@ -27,8 +24,13 @@ public class WhoDoesTheChildLiveWith {
     }
 
     public static class Builder {
+        private String partyId;
+        private String partyFullName;
+        private PartyTypeEnum partyType;
+        private Address childAddress;
+
         private static String clean(String value) {
-            return (value != null && !value.trim().isEmpty()) ? value : null;
+            return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
         }
 
         public Builder partyId(String partyId) {
@@ -41,9 +43,24 @@ public class WhoDoesTheChildLiveWith {
             return this;
         }
 
+        public Builder partyType(PartyTypeEnum partyType) {
+            this.partyType = partyType;
+            return this;
+        }
+
         public Builder childAddress(Address childAddress) {
             this.childAddress = childAddress;
             return this;
         }
+
+        public WhoDoesTheChildLiveWith build() {
+            return WhoDoesTheChildLiveWith.internalBuilder()
+                .partyId(partyId)
+                .partyFullName(partyFullName)
+                .partyType(partyType)
+                .childAddress(childAddress)
+                .build();
+        }
     }
+
 }
