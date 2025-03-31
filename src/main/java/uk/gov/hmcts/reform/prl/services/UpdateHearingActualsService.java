@@ -127,7 +127,7 @@ public class UpdateHearingActualsService {
         return true;
     }
 
-    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingIds) {
+    boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingIds) {
         return nullSafeCollection(caseData.getDraftOrderCollection()).stream()
             .map(Element::getValue)
             .flatMap(draftOrder -> nullSafeCollection(draftOrder.getManageOrderHearingDetails()).stream())

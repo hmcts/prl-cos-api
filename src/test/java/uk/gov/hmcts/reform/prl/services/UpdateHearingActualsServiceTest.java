@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -239,4 +240,29 @@ class UpdateHearingActualsServiceTest {
             .build();
         assertEquals("test-code", UpdateHearingActualsService.extractSelectedHearingId(hearingData));
     }
+
+    @Test
+    void testCheckIfHearingIdIsMappedinDraftOrderShouldReturnTrueWhenMatchingId() {
+        String matchingHearingId = "abc-123";
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(List.of(
+                element(DraftOrder.builder()
+                            .manageOrderHearingDetails(List.of(
+                                element(HearingData.builder()
+                                            .confirmedHearingDates(DynamicList.builder()
+                                                                       .value(DynamicListElement.builder().code(matchingHearingId).build())
+                                                                       .build())
+                                            .build())
+                            ))
+                            .build())
+            ))
+            .build();
+
+        List<String> hearingIds = List.of(matchingHearingId);
+
+        boolean result = updateHearingActualsService.checkIfHearingIdIsMappedinDraftOrder(caseData, hearingIds);
+
+        assertTrue(result, "Expected hearing ID to be matched and return true");
+    }
+
 }
