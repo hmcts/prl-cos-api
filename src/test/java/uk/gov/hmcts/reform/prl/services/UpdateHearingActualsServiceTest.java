@@ -105,7 +105,7 @@ class UpdateHearingActualsServiceTest {
 
         doReturn(response).when(objectMapper).convertValue(searchResult, SearchResultResponse.class);
         doReturn(caseData).when(objectMapper).convertValue(caseDetails.getData(), CaseData.class);
-        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), anyString()))
+        when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), isNull()))
             .thenReturn(searchResult);
 
         List<Element<HearingData>> hearingDataElement = List.of(
@@ -167,23 +167,23 @@ class UpdateHearingActualsServiceTest {
         when(coreCaseDataApi.searchCases(eq(authToken), eq(s2sAuthToken), eq(CASE_TYPE), isNull()))
             .thenReturn(searchResult);
 
-
+        List<Element<HearingData>> hearingDateListWithTestVal = List.of(element(HearingData.builder()
+                                                              .confirmedHearingDates(
+                                                                  DynamicList.builder()
+                                                                      .value(
+                                                                          DynamicListElement.builder()
+                                                                              .code(
+                                                                                  "123")
+                                                                              .build())
+                                                                      .listItems(
+                                                                          List.of(
+                                                                              DynamicListElement.defaultListItem(
+                                                                                  "test")))
+                                                                      .build())
+                                                              .build()));
         caseData = caseData.toBuilder()
             .draftOrderCollection(List.of(element(DraftOrder.builder()
-                                                      .manageOrderHearingDetails(List.of(element(HearingData.builder()
-                                                                                                     .confirmedHearingDates(
-                                                                                                         DynamicList.builder()
-                                                                                                             .value(
-                                                                                                                 DynamicListElement.builder()
-                                                                                                                     .code(
-                                                                                                                         "123")
-                                                                                                                     .build())
-                                                                                                             .listItems(
-                                                                                                                 List.of(
-                                                                                                                     DynamicListElement.defaultListItem(
-                                                                                                                         "test")))
-                                                                                                             .build())
-                                                                                                     .build())))
+                                                      .manageOrderHearingDetails(hearingDateListWithTestVal)
                                                       .build())))
             .build();
 
