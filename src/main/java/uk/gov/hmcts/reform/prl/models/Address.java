@@ -13,10 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(
-    toBuilder = true,
-    builderClassName = "Builder",
-    builderMethodName = "internalBuilder")
+@Builder(builderClassName = "LombokBuilder", builderMethodName = "internalBuilder")
 public class Address {
 
     @JsonProperty("AddressLine1")
@@ -34,11 +31,20 @@ public class Address {
     @JsonProperty("PostCode")
     private String postCode;
 
-    public static Address.Builder builder() {
-        return new Address.Builder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {
+
+        private String addressLine1;
+        private String addressLine2;
+        private String addressLine3;
+        private String postTown;
+        private String county;
+        private String country;
+        private String postCode;
+
         private static String clean(String value) {
             return (value != null && !value.trim().isEmpty()) ? value : null;
         }
@@ -76,6 +82,10 @@ public class Address {
         public Builder postCode(String postCode) {
             this.postCode = clean(postCode);
             return this;
+        }
+
+        public Address build() {
+            return new Address(addressLine1, addressLine2, addressLine3, postTown, county, country, postCode);
         }
     }
 }

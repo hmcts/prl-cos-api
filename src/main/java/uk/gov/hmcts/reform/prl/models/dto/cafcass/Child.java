@@ -23,10 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder(
-    toBuilder = true,
-    builderClassName = "Builder",
-    builderMethodName = "internalBuilder")
+@Builder(builderClassName = "LombokBuilder", builderMethodName = "internalBuilder")
 public class Child {
 
     private String firstName;
@@ -66,8 +63,19 @@ public class Child {
     }
 
     public static class Builder {
+        private String firstName;
+        private String lastName;
+        private LocalDate dateOfBirth;
+        private Gender gender;
+        private String otherGender;
+        private List<OrderTypeEnum> orderAppliedFor;
+        private String otherApplicantsRelationshipToChild;
+        private String otherRespondentsRelationshipToChild;
+        private String parentalResponsibilityDetails;
+        private WhoDoesTheChildLiveWith whoDoesTheChildLiveWith;
+
         private static String clean(String value) {
-            return (value != null && !value.trim().isEmpty()) ? value : null;
+            return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
         }
 
         public Builder firstName(String firstName) {
@@ -85,19 +93,54 @@ public class Child {
             return this;
         }
 
-        public Builder otherApplicantsRelationshipToChild(String otherRel) {
-            this.otherApplicantsRelationshipToChild = clean(otherRel);
+        public Builder otherApplicantsRelationshipToChild(String value) {
+            this.otherApplicantsRelationshipToChild = clean(value);
             return this;
         }
 
-        public Builder otherRespondentsRelationshipToChild(String otherRel) {
-            this.otherRespondentsRelationshipToChild = clean(otherRel);
+        public Builder otherRespondentsRelationshipToChild(String value) {
+            this.otherRespondentsRelationshipToChild = clean(value);
             return this;
         }
 
-        public Builder parentalResponsibilityDetails(String prDetails) {
-            this.parentalResponsibilityDetails = clean(prDetails);
+        public Builder parentalResponsibilityDetails(String value) {
+            this.parentalResponsibilityDetails = clean(value);
             return this;
+        }
+
+        public Builder gender(Gender gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        public Builder dateOfBirth(LocalDate dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+            return this;
+        }
+
+        public Builder orderAppliedFor(List<OrderTypeEnum> orderAppliedFor) {
+            this.orderAppliedFor = orderAppliedFor;
+            return this;
+        }
+
+        public Builder whoDoesTheChildLiveWith(WhoDoesTheChildLiveWith who) {
+            this.whoDoesTheChildLiveWith = who;
+            return this;
+        }
+
+        public Child build() {
+            return Child.internalBuilder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .gender(gender)
+                .dateOfBirth(dateOfBirth)
+                .otherGender(otherGender)
+                .orderAppliedFor(orderAppliedFor)
+                .otherApplicantsRelationshipToChild(otherApplicantsRelationshipToChild)
+                .otherRespondentsRelationshipToChild(otherRespondentsRelationshipToChild)
+                .parentalResponsibilityDetails(parentalResponsibilityDetails)
+                .whoDoesTheChildLiveWith(whoDoesTheChildLiveWith)
+                .build();
         }
     }
 }
