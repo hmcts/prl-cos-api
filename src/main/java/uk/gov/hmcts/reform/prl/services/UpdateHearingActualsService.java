@@ -65,13 +65,17 @@ public class UpdateHearingActualsService {
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         log.info("Running Hearing actual task cron job...");
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
-        if (isNotEmpty(caseDetailsList)) {
-            log.info("Cases exist with current hearing");
-            createUpdateHearingActualWaTask(
-                caseDetailsList,
-                fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
-                    caseDetailsList))
-            );
+        try {
+            if (isNotEmpty(caseDetailsList)) {
+                log.info("Cases exist with current hearing");
+                createUpdateHearingActualWaTask(
+                    caseDetailsList,
+                    fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
+                        caseDetailsList))
+                );
+            }
+        } catch (Exception e) {
+            log.error("Error while updating hearing actuals", e);
         }
     }
 
