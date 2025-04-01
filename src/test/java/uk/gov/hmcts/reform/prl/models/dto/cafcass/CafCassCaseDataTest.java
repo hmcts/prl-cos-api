@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class CafCassCaseDataTest {
 
