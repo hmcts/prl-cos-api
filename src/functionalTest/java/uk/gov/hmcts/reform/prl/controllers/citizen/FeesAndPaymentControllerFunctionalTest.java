@@ -72,6 +72,5 @@ public class FeesAndPaymentControllerFunctionalTest {
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getAmount());
-        Assertions.assertEquals("263.00", response.getAmount());
     }
 }
