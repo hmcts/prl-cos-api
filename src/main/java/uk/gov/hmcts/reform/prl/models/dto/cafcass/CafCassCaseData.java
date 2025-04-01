@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
@@ -730,10 +732,9 @@ public class CafCassCaseData {
     }
 
     String buildFullName(String firstName, String lastName) {
-        return Optional.ofNullable(firstName).orElse("")
-            .concat(" ")
-            .concat(Optional.ofNullable(lastName).orElse(""))
-            .trim();
+        return Stream.of(firstName, lastName)
+            .filter(str -> str != null && !str.isBlank())
+            .collect(Collectors.joining(" "));
     }
 
 
