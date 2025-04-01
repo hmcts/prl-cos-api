@@ -20,7 +20,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
@@ -86,18 +89,23 @@ public class UpdateHearingActualsService {
     private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
                                                  Map<String, List<String>> caseIds) {
         log.info("Case Id's {}", caseIds);
-        caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
-            caseId)).forEach(caseDetails -> {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-                log.info("Hearing id {}", hearingId);
-                triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    log.info("Hearing id is not mapped in orders");
-                    triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
-                }
-            }
-        ));
+        caseIds.forEach((caseId, hearingIds) -> {
+            List<String> safeHearingIds = hearingIds != null ? hearingIds : Collections.emptyList();
+
+            caseDetailsList.stream()
+                .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
+                .forEach(caseDetails -> {
+                    CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                    log.info("Hearing id {}", safeHearingIds);
+                    triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
+                    if (!checkIfHearingIdIsMappedInOrders(caseData, safeHearingIds)) {
+                        log.info("Hearing id is not mapped in orders for caseid {}", caseId);
+                        triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
+                    }
+                });
+        });
     }
+
 
     private void triggerSystemEventForWorkAllocationTask(String caseId, String caseEvent, Map<String, Object> caseDataUpdated) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, caseEvent);
@@ -119,25 +127,32 @@ public class UpdateHearingActualsService {
         return true;
     }
 
-    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingId) {
-        return nullSafeCollection(caseData.getDraftOrderCollection())
-            .stream()
+    boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingIds) {
+        return nullSafeCollection(caseData.getDraftOrderCollection()).stream()
             .map(Element::getValue)
-            .anyMatch(draftOrderElement -> nullSafeCollection(draftOrderElement.getManageOrderHearingDetails())
-                .stream()
-                .map(Element::getValue)
-                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
+            .flatMap(draftOrder -> nullSafeCollection(draftOrder.getManageOrderHearingDetails()).stream())
+            .map(Element::getValue)
+            .map(UpdateHearingActualsService::extractSelectedHearingId)
+            .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
-    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingId) {
-        return nullSafeCollection(caseData.getOrderCollection())
-            .stream()
+    public static String extractSelectedHearingId(HearingData hearingData) {
+        if (hearingData == null || hearingData.getConfirmedHearingDates() == null) {
+            return null;
+        }
+        DynamicList selectedList = hearingData.getConfirmedHearingDates();
+        DynamicListElement selectedElement = selectedList.getValue();
+        return selectedElement != null ? selectedElement.getCode() : null;
+    }
+
+
+    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingIds) {
+        return nullSafeCollection(caseData.getOrderCollection()).stream()
             .map(Element::getValue)
-            .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
-                .stream().map(Element::getValue)
-                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
+            .flatMap(order -> nullSafeCollection(order.getManageOrderHearingDetails()).stream())
+            .map(Element::getValue)
+            .map(UpdateHearingActualsService::extractSelectedHearingId)
+            .anyMatch(id -> id != null && hearingIds.contains(id));
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
