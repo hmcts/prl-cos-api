@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum CafcassReportAndGuardianEnum {
 
+    childImpactReport("childImpactReport", "Child Impact Report"),
+
     safeguardingLetter("safeguardingLetter", "Safeguarding letter/Safeguarding Enquiries Report (SER)"),
 
     section7Report("section7Report", "Section 7 report/Child Impact Analysis"),
