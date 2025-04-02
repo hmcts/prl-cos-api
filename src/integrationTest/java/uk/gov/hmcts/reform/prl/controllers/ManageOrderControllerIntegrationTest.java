@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,9 +20,16 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
@@ -33,7 +41,10 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
@@ -56,6 +67,24 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 public class ManageOrderControllerIntegrationTest {
 
     private MockMvc mockMvc;
+    @Value("${case.orchestration.service.base.uri}")
+    protected String serviceUrl;
+
+    private final String populatePreviewOrderEndpoint = "/populate-preview-order";
+    private final String fetchChildDetailsEndpoint = "/fetch-child-details";
+    private final String populateHeaderEndpoint = "/populate-header";
+    private final String caseOrderEmailNotificationEndpoint = "/case-order-email-notification";
+    private final String manageOrdersEndpoint = "/manage-orders/about-to-submit";
+    private final String addressValidationEndpoint = "/manage-orders/recipients-validations";
+
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+
+    private static final String VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY = "requests/auto-hearing-case-data-request.json";
+
+    private static final String VALID_MANAGE_ORDER_REQUEST_BODY_REVISED = "requests/manage-order-fetch-children-request-integration.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS = "requests/manage-order-fetch-children-request-integration.json";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -291,6 +320,47 @@ public class ManageOrderControllerIntegrationTest {
     }
 
     @Test
+    public void testCaseOrderEmailNotificationEndpointForAutoHearing() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        List<Element<HearingData>>  hearingDataList = new ArrayList<>();
+        hearingDataList.add(ElementUtils.element(
+            HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam).build()));
+        ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).manageOrderHearingDetails(hearingDataList).build());
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).build()));
+        CaseData caseData = CaseData.builder()
+            .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).checkForAutomatedHearing(Yes).build())
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "authToken",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(hearingService.createAutomatedHearing(anyString(),any(AutomatedHearingCaseData.class))).thenReturn(
+            AutomatedHearingResponse.builder().hearingRequestID("123").build());
+        String jsonRequest = ResourceLoader.loadJson(VALID_MANAGE_ORDER_AUTOMATED_HEARING_REQUEST_BODY);
+        mockMvc.perform(
+                post(caseOrderEmailNotificationEndpoint)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
     public void testManageOrdersServeOrderMidEvent() throws Exception {
         String url = "/manage-orders/serve-order/mid-event";
         String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
@@ -317,6 +387,35 @@ public class ManageOrderControllerIntegrationTest {
 
         mockMvc.perform(
                 post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testCaseOrderSubmittedEndPointForAutoHearing() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        List<Element<HearingData>>  hearingDataList = new ArrayList<>();
+        hearingDataList.add(ElementUtils.element(
+            HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam).build()));
+        ElementUtils.element(DraftOrder.builder().isAutoHearingReqPending(Yes).manageOrderHearingDetails(hearingDataList).build());
+        CaseData caseData = CaseData.builder()
+            .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder().isCaseWithdrawn(No).checkForAutomatedHearing(Yes)
+                              .ordersHearingDetails(hearingDataList).amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck).build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        String jsonRequest = ResourceLoader.loadJson("requests/judge-draft-sdo-order-request.json");
+        mockMvc.perform(
+                post(manageOrdersEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)

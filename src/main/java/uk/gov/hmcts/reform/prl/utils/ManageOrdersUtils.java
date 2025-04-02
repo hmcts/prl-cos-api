@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,9 +45,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -75,14 +80,16 @@ public class ManageOrdersUtils {
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
-                                                           boolean isSolicitorOrdersHearings) {
+                                                           boolean isSolicitorOrdersHearings,
+                                                           String language,
+                                                           String loggedInUserType) {
         log.info("### Create select order options {}", selectedOrderType);
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
+        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings, language);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings);
+        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings, language, loggedInUserType);
 
         return errorList;
     }
@@ -90,90 +97,240 @@ public class ManageOrdersUtils {
     private static void singleHearingValidations(List<Element<HearingData>> ordersHearingDetails,
                                                  List<String> errorList,
                                                  CreateSelectOrderOptionsEnum selectedOrderType,
-                                                 boolean isSolicitorOrdersHearings) {
+                                                 boolean isSolicitorOrdersHearings,
+                                                 String language) {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
-                    errorList.add("Please provide at least one hearing details");
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
+                    } else {
+                        errorList.add("Please provide at least one hearing details");
+                    }
                 }
             } else if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                errorList.add("Please provide at least one hearing details");
-
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add("Darparwch fanylion o leiaf un gwrandawiad");
+                } else {
+                    errorList.add("Please provide at least one hearing details");
+                }
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
-                errorList.add("Only one hearing can be created");
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add("Dim ond un gwrandawiad y gellir creu");
+                } else {
+                    errorList.add("Only one hearing can be created");
+                }
             }
         }
     }
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
                                                                   List<String> errorList,
-                                                                  boolean isSolicitorOrdersHearings) {
+                                                                  boolean isSolicitorOrdersHearings,
+                                                                  String language,
+                                                                  String loggedInUserType) {
         if (isNotEmpty(ordersHearingDetails)) {
             ordersHearingDetails.stream()
                 .map(Element::getValue)
                 .forEach(hearingData -> {
-                    //validate for manage orders, draft & edit returned order
-                    if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
-                        && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                        || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        errorList.add("You must select a hearing type");
+                    //validate for manage orders, draft, edit returned order & judge creating order
+                    if (isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData)) {
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            if (PrlAppsConstants.WELSH.equals(language)) {
+                                errorList.add("Mae’n rhaid i chi ddewis math o wrandawiad");
+                            } else {
+                                errorList.add("You must select a hearing type");
+                            }
+                        }
+                        //numeric estimated timings validation
+                        validateHearingEstimatedTimings(errorList, hearingData, language);
                     }
-                    //numeric estimated timings validation
-                    validateHearingEstimatedTimings(errorList, hearingData);
+
+                    //validate for admin creating order with hearings for AHR
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        //Hearing type validation
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            if (PrlAppsConstants.WELSH.equals(language)) {
+                                errorList.add("Mae’n rhaid i chi ddewis math o wrandawiad");
+                            } else {
+                                errorList.add("You must select a hearing type");
+                            }
+                        }
+                        //For Judge user these fields are not shown
+                        if (!UserRoles.JUDGE.name().equals(loggedInUserType)) {
+                            //numeric estimated timings validation
+                            validateHearingEstimatedTimings(errorList, hearingData, language);
+                            validateHearingData(errorList, hearingData);
+                        }
+                    }
                 });
         }
     }
 
     private static boolean isDateReservedWithListAssist(HearingData hearingData) {
         return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-            && HearingDateConfirmOptionEnum.dateReservedWithListAssit
-            .equals(hearingData.getHearingDateConfirmOptionEnum());
+            && (HearingDateConfirmOptionEnum.dateReservedWithListAssit
+            .equals(hearingData.getHearingDateConfirmOptionEnum()));
     }
 
-    private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
+    private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData, String language) {
+        if (StringUtils.isBlank(hearingData.getHearingEstimatedDays()) && StringUtils
+            .isBlank(hearingData.getHearingEstimatedHours()) && StringUtils
+            .isBlank(hearingData.getHearingEstimatedMinutes())) {
+            errorList.add("You must enter a value for either Hearing estimated days or hours or minutes");
+        }
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
-            errorList.add("Please enter numeric value for Hearing estimated days");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf dyddiau");
+            } else {
+                errorList.add("Please enter numeric value for Hearing estimated days");
+            }
         }
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHours())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedHours())) {
-            errorList.add("Please enter numeric value for Hearing estimated hours");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf oriau");
+            } else {
+                errorList.add("Please enter numeric value for Hearing estimated hours");
+            }
         }
         if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutes())
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
-            errorList.add("Please enter numeric value for Hearing estimated minutes");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Rhowch rif ar gyfer Amcangyfrif amser ar gyfer y gwrandawiad ar ffurf munudau");
+            } else {
+                errorList.add("Please enter numeric value for Hearing estimated minutes");
+            }
         }
-        //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
 
-    public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {
+    private static void validateHearingData(List<String> errorList,HearingData hearingData) {
+
+        if (ObjectUtils.isEmpty(hearingData.getHearingAuthority())) {
+            errorList.add("You must select this hearing will be before");
+        }
+
+        if (YesOrNo.No.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())
+            && ((StringUtils.isNotEmpty(hearingData.getApplicantName())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel().getValue())))
+            && (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel().getValue())))
+            && (StringUtils.isNotEmpty(hearingData.getRespondentName())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel().getValue())))
+            && (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel().getValue())))
+            && (StringUtils.isNotEmpty(hearingData.getApplicantName1())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName2())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName3())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName4())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantName5())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getApplicantHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor1())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor2())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor3())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor4())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getApplicantSolicitor5())
+            && (ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getApplicantSolicitorHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName1())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName2())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName3())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName4())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentName5())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getRespondentHearingChannel5().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor1())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel1())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel1().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor2())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel2())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel2().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor3())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel3())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel3().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor4())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel4())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel4().getValue())))
+            || (StringUtils.isNotEmpty(hearingData.getRespondentSolicitor5())
+            && (ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel5())
+            || ObjectUtils.isEmpty(hearingData.getRespondentSolicitorHearingChannel5().getValue()))))) {
+            errorList.add("You must select this hearing channel");
+        }
+
+        //validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute
+        if (ObjectUtils.isNotEmpty(hearingData.getHearingMustTakePlaceAtHour())
+            && !StringUtils.isNumeric(hearingData.getHearingMustTakePlaceAtHour())) {
+            errorList.add("Please enter numeric value for Hearing must take place at hour");
+        }
+        if (ObjectUtils.isNotEmpty(hearingData.getHearingMustTakePlaceAtMinute())
+            && !StringUtils.isNumeric(hearingData.getHearingMustTakePlaceAtMinute())) {
+            errorList.add("Please enter numeric value for Hearing must take place at minute");
+        }
+    }
+
+    public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder, String language) {
         List<String> errorList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.urgentHearing)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoUrgentHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoUrgentHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.fhdra)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoFhdraHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoFhdraHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.permissionHearing)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoPermissionHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoPermissionHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.directionForDra)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoDraHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoDraHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.settlementConference)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSettlementHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSettlementHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
-            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
+            validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails(), language);
         }
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.factFindingHearing)
@@ -181,7 +338,8 @@ public class ManageOrdersUtils {
             && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails().getHearingDateConfirmOptionEnum())) {
             validateHearingEstimatedTimings(
                 errorList,
-                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
+                language
             );
         }
         return errorList;
@@ -268,27 +426,39 @@ public class ManageOrdersUtils {
         }
     }
 
-    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData) {
+    public static List<String> validateMandatoryJudgeOrMagistrate(CaseData caseData, String language) {
         List<String> errorList = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(caseData.getManageOrders())) {
             if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isBlank(caseData.getJusticeLegalAdviserFullName()))) {
-                errorList.add(MANDATORY_JUDGE);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(MANDATORY_JUDGE_WELSH);
+                } else {
+                    errorList.add(MANDATORY_JUDGE);
+                }
             } else if (JudgeOrMagistrateTitleEnum.magistrate.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                 && (isEmpty(caseData.getMagistrateLastName()))) {
-                errorList.add(MANDATORY_MAGISTRATE);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(MANDATORY_MAGISTRATE_WELSH);
+                } else {
+                    errorList.add(MANDATORY_MAGISTRATE);
+                }
             }
         }
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType, String language) {
         List<String> errorList = new ArrayList<>();
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
             && ObjectUtils.isNotEmpty(fl404CustomFields)
             && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
-            errorList.add("Please enter either applicant or respondent section");
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                errorList.add("Rhowch naill ai adran y ceisydd neu’r atebydd");
+            } else {
+                errorList.add("Please enter either applicant or respondent section");
+            }
         }
         return errorList;
     }
@@ -327,20 +497,33 @@ public class ManageOrdersUtils {
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
-                                                                   List<String> errorList) {
+                                                                   List<String> errorList,
+                                                                   String language) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
-                    errorList.add("This order is not available to be created");
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        errorList.add("Nid yw’r gorchymyn hwn ar gael i’w greu");
+                    } else {
+                        errorList.add("This order is not available to be created");
+                    }
                 }
                 if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
-                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
+                    if (PrlAppsConstants.WELSH.equals(language)) {
+                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH);
+                    } else {
+                        errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
+                    }
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                     .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_FL401);
+                if (PrlAppsConstants.WELSH.equals(language)) {
+                    errorList.add(ORDER_NOT_AVAILABLE_FL401_WELSH);
+                } else {
+                    errorList.add(ORDER_NOT_AVAILABLE_FL401);
+                }
             }
         }
         return !errorList.isEmpty();
@@ -371,11 +554,19 @@ public class ManageOrdersUtils {
         return " ";
     }
 
-    public static String getOrderName(DraftOrder selectedOrder) {
+    public static String getOrderName(DraftOrder selectedOrder, String language) {
         if (null != selectedOrder.getC21OrderOptions()) {
-            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValueWelsh() + BOLD_END;
+            } else {
+                return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+            }
         } else if (null != selectedOrder.getOrderType()) {
-            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+            if (PrlAppsConstants.WELSH.equals(language)) {
+                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValueWelsh() + BOLD_END;
+            } else {
+                return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+            }
         }
         return null;
     }

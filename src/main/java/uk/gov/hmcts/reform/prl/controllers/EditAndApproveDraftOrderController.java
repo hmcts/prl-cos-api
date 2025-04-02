@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -151,11 +152,14 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
-                callbackRequest
+                callbackRequest,
+                language
             );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
@@ -183,12 +187,14 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String language = CaseUtils.getLanguage(clientContext);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
                     authorisation,
-                    callbackRequest
+                    callbackRequest,
+                    language
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -206,6 +212,8 @@ public class EditAndApproveDraftOrderController {
 
             }
             manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
+            //Populate need to check automated hearing request
+            manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -273,6 +281,7 @@ public class EditAndApproveDraftOrderController {
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
+
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
@@ -298,8 +307,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String language = CaseUtils.getLanguage(clientContext);
 
-            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, language);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -328,7 +338,8 @@ public class EditAndApproveDraftOrderController {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
                     callbackRequest,
                     caseData,
-                    clientContext
+                    clientContext,
+                    language
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -374,10 +385,12 @@ public class EditAndApproveDraftOrderController {
                 clientContext, callbackRequest.getEventId()
             );
 
+            String language = CaseUtils.getLanguage(clientContext);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
                 caseData,
-                selectedOrder
+                selectedOrder,
+                language
             );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
@@ -417,14 +430,15 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String language = CaseUtils.getLanguage(clientContext);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
-                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(
@@ -475,6 +489,16 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
+            }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
@@ -507,9 +531,9 @@ public class EditAndApproveDraftOrderController {
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
-                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
                     DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                              caseData.getDraftOrdersDynamicList(),
@@ -526,6 +550,16 @@ public class EditAndApproveDraftOrderController {
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
                                                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
                                                        .build());
+            }
+            // Check for Automated Hearing Management
+            if (null != caseData.getManageOrders()
+                && Yes.equals(caseData.getManageOrders().getCheckForAutomatedHearing())) {
+                AutomatedHearingUtils.automatedHearingManagementRequest(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated,
+                    manageOrderService
+                );
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
