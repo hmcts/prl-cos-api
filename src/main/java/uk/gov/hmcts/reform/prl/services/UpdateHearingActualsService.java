@@ -65,13 +65,17 @@ public class UpdateHearingActualsService {
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         log.info("Running Hearing actual task cron job...");
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
-        if (isNotEmpty(caseDetailsList)) {
-            log.info("Cases exist with current hearing");
-            createUpdateHearingActualWaTask(
-                caseDetailsList,
-                fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
-                    caseDetailsList))
-            );
+        try {
+            if (isNotEmpty(caseDetailsList)) {
+                log.info("Cases exist with current hearing");
+                createUpdateHearingActualWaTask(
+                    caseDetailsList,
+                    fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
+                        caseDetailsList))
+                );
+            }
+        } catch (Exception e) {
+            log.error("Error while updating hearing actuals", e);
         }
     }
 
@@ -127,6 +131,7 @@ public class UpdateHearingActualsService {
                 .stream()
                 .map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
                     && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
     }
 
@@ -137,6 +142,7 @@ public class UpdateHearingActualsService {
             .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
                 .stream().map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
                     && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
     }
 

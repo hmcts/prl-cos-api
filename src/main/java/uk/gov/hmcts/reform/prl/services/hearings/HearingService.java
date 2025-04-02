@@ -5,9 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -213,6 +217,20 @@ public class HearingService {
             log.error("Error in getting hearings {}", e.getMessage());
         }
         return Collections.emptyList();
+    }
+
+    public AutomatedHearingResponse createAutomatedHearing(String userToken, AutomatedHearingCaseData automatedHearingCaseData) {
+        try {
+            log.info("Invoking HMC API fis-hmc-api/automated-hearing");
+            ResponseEntity<AutomatedHearingResponse> response = hearingApiClient.createAutomatedHearing(userToken,
+                                                                    authTokenGenerator.generate(), automatedHearingCaseData);
+            if (response.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            log.error("Error in createAutomatedHearing", e);
+        }
+        return null;
     }
 
 }
