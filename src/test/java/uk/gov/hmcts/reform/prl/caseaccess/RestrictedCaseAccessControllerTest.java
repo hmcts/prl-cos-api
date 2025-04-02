@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.caseaccess;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.caseaccess.RestrictedCaseAccessController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -14,11 +14,17 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService;
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class RestrictedCaseAccessControllerTest {
 
     public static final String AUTH_TOKEN = "auth-token";
     public static final String SERVICE_TOKEN = "service-token";
+    public static final String INVALID_CLIENT = "Invalid Client";
     @Mock
     private AuthorisationService authorisationService;
     @Mock
@@ -29,7 +35,7 @@ public class RestrictedCaseAccessControllerTest {
     @Test
     public void testRestrictedCaseAccessAboutToSubmit() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         restrictedCaseAccessController
             .restrictedCaseAccessAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
@@ -37,18 +43,25 @@ public class RestrictedCaseAccessControllerTest {
             .initiateUpdateCaseAccess(Mockito.any());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testRestrictedCaseAccessAboutToSubmitError() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        restrictedCaseAccessController
-            .restrictedCaseAccessAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            restrictedCaseAccessController
+                .restrictedCaseAccessAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build())
+        );
+
+        assertEquals(INVALID_CLIENT, exception.getMessage());
+
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
 
     @Test
     public void testRestrictedCaseAccessSubmitted() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         restrictedCaseAccessController
                 .restrictedCaseAccessSubmitted(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
@@ -56,18 +69,25 @@ public class RestrictedCaseAccessControllerTest {
                 .changeCaseAccessRequestSubmitted(Mockito.any());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testRestrictedCaseAccessSubmittedError() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        restrictedCaseAccessController
-                .restrictedCaseAccessSubmitted(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            restrictedCaseAccessController
+                .restrictedCaseAccessSubmitted(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build())
+        );
+
+        assertEquals(INVALID_CLIENT, exception.getMessage());
+
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
 
     @Test
     public void testChangeCaseAccess() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         restrictedCaseAccessController
             .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
@@ -75,21 +95,28 @@ public class RestrictedCaseAccessControllerTest {
             .changeCaseAccess(Mockito.any());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testChangeCaseAccessError() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        restrictedCaseAccessController
-            .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            restrictedCaseAccessController
+                .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build())
+        );
+
+        assertEquals(INVALID_CLIENT, exception.getMessage());
+
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
 
     @Test
     public void testRestrictedCaseAccessAboutToStartWithNoAccess() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("errors", "errors");
-        Mockito.when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(caseDataUpdated);
+        when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(caseDataUpdated);
         restrictedCaseAccessController
             .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
@@ -100,8 +127,8 @@ public class RestrictedCaseAccessControllerTest {
     @Test
     public void testRestrictedCaseAccessAboutToStartWithAccess() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        Mockito.when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(new HashMap<>());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(new HashMap<>());
         restrictedCaseAccessController
             .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
 
@@ -109,11 +136,18 @@ public class RestrictedCaseAccessControllerTest {
             .retrieveAssignedUserRoles(Mockito.any());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testRestrictedCaseAccessAboutToStartError() {
 
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
-        restrictedCaseAccessController
-            .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            restrictedCaseAccessController
+                .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build())
+        );
+
+        assertEquals(INVALID_CLIENT, exception.getMessage());
+
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_TOKEN);
     }
 }
