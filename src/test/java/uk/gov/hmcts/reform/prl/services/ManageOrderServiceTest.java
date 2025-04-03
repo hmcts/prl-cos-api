@@ -105,7 +105,6 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -6270,6 +6269,7 @@ public class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
             .uploadOrderDoc(Document.builder().build())
             .dateOrderMade(LocalDate.now())
             .approvalDate(LocalDate.now())
@@ -6287,7 +6287,7 @@ public class ManageOrderServiceTest {
             .build();
 
         DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(caseData, "testAuth", UserDetails.builder().build());
-        assertEquals(CaseUtils.getSelectTypeOfOrder(caseData), draftOrder.getTypeOfOrder());
+        assertTrue(SelectTypeOfOrderEnum.interim.getDisplayedValue().equalsIgnoreCase(draftOrder.getTypeOfOrder()));
         assertEquals(caseData.getUploadOrderDoc(), draftOrder.getOrderDocument());
         assertEquals(manageOrders.getIsTheOrderAboutChildren(), draftOrder.getIsTheOrderAboutChildren());
         assertEquals(manageOrders.getIsTheOrderAboutAllChildren(), draftOrder.getIsTheOrderAboutAllChildren());
