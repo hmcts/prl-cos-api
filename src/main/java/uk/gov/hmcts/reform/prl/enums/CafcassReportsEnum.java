@@ -18,6 +18,8 @@ public enum CafcassReportsEnum {
     privateLawReport("Private Law report Type"),
     @JsonProperty("addendumReport")
     addendumReport("S7 Addendum Report"),
+    @JsonProperty("childImpactReport")
+    childImpactReport("Child Impact Report"),
     @JsonProperty("section7Report")
     section7Report("Section 7 Report"),
     @JsonProperty("sixteenReport")
