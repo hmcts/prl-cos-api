@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.COURT_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
@@ -145,21 +146,22 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentCategories.list_items[9].code", equalTo(NOTICE_OF_HEARING),
                   "data.manageDocuments[0].value.documentCategories.list_items[10].code", equalTo(COURT_BUNDLE),
                   "data.manageDocuments[0].value.documentCategories.list_items[11].code", equalTo(CASE_SUMMARY),
-                  "data.manageDocuments[0].value.documentCategories.list_items[12].code", equalTo(SAFEGUARDING_LETTER),
-                  "data.manageDocuments[0].value.documentCategories.list_items[13].code", equalTo(SECTION7_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items[14].code", equalTo(SECTION_37_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items[15].code", equalTo(SIXTEEN_A_RISK_ASSESSMENT),
-                  "data.manageDocuments[0].value.documentCategories.list_items[16].code", equalTo(GUARDIAN_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items[17].code", equalTo(SPECIAL_GUARDIANSHIP_REPORT),
-                  "data.manageDocuments[0].value.documentCategories.list_items[18].code", equalTo(OTHER_DOCS),
-                  "data.manageDocuments[0].value.documentCategories.list_items[19].code", equalTo(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED),
-                  "data.manageDocuments[0].value.documentCategories.list_items[20].code", equalTo(PUBLIC_FUNDING_CERTIFICATES),
-                  "data.manageDocuments[0].value.documentCategories.list_items[21].code", equalTo(NOTICES_OF_ACTING_DISCHARGE),
-                  "data.manageDocuments[0].value.documentCategories.list_items[22].code", equalTo(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED),
-                  "data.manageDocuments[0].value.documentCategories.list_items[23].code", equalTo(WITNESS_AVAILABILITY),
-                  "data.manageDocuments[0].value.documentCategories.list_items[24].code", equalTo(LETTERS_OF_COMPLAINTS),
-                  "data.manageDocuments[0].value.documentCategories.list_items[25].code", equalTo(SPIP_REFERRAL_REQUESTS),
-                  "data.manageDocuments[0].value.documentCategories.list_items[26].code", equalTo(HOME_OFFICE_DWP_RESPONSES)
+                  "data.manageDocuments[0].value.documentCategories.list_items[12].code", equalTo(CHILD_IMPACT_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[13].code", equalTo(SAFEGUARDING_LETTER),
+                  "data.manageDocuments[0].value.documentCategories.list_items[14].code", equalTo(SECTION7_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[15].code", equalTo(SECTION_37_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[16].code", equalTo(SIXTEEN_A_RISK_ASSESSMENT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[17].code", equalTo(GUARDIAN_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[18].code", equalTo(SPECIAL_GUARDIANSHIP_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[19].code", equalTo(OTHER_DOCS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[20].code", equalTo(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED),
+                  "data.manageDocuments[0].value.documentCategories.list_items[21].code", equalTo(PUBLIC_FUNDING_CERTIFICATES),
+                  "data.manageDocuments[0].value.documentCategories.list_items[22].code", equalTo(NOTICES_OF_ACTING_DISCHARGE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[23].code", equalTo(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED),
+                  "data.manageDocuments[0].value.documentCategories.list_items[24].code", equalTo(WITNESS_AVAILABILITY),
+                  "data.manageDocuments[0].value.documentCategories.list_items[25].code", equalTo(LETTERS_OF_COMPLAINTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[26].code", equalTo(SPIP_REFERRAL_REQUESTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[27].code", equalTo(HOME_OFFICE_DWP_RESPONSES)
             )
             .assertThat().statusCode(200)
             .extract()
