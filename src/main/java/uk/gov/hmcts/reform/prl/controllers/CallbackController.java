@@ -44,13 +44,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -105,28 +99,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.CREATE_URGENT_CASES_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
@@ -732,6 +705,10 @@ public class CallbackController {
             populateCaseCreatedByField(authorisation,caseDataUpdated);
             // Saving the logged-in Solicitor and Org details for the docs..
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            //Added partyId for CAFCASS Api Spec
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                applicant.getValue().setPartyId(applicant.getId());
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
                 authorisation,
                 caseDataUpdated,
