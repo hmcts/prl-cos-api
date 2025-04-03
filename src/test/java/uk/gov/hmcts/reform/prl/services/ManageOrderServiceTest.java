@@ -105,6 +105,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -145,6 +146,8 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
@@ -6260,6 +6263,46 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest, PrlAppsConstants.ENGLISH);
         assertEquals(YesOrNo.No, caseDataUpdated.get("isSdoSelected"));
 
+    }
+
+    @Test
+    public void testGetCurrentUploadDraftOrderDetails() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .build();
+
+        DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(caseData, "testAuth", UserDetails.builder().build());
+        assertEquals(CaseUtils.getSelectTypeOfOrder(caseData), draftOrder.getTypeOfOrder());
+        assertEquals(caseData.getUploadOrderDoc(), draftOrder.getOrderDocument());
+        assertEquals(manageOrders.getIsTheOrderAboutChildren(), draftOrder.getIsTheOrderAboutChildren());
+        assertEquals(manageOrders.getIsTheOrderAboutAllChildren(), draftOrder.getIsTheOrderAboutAllChildren());
+        assertEquals(caseData.getDateOrderMade(), draftOrder.getDateOrderMade());
+        assertEquals(caseData.getApprovalDate(), draftOrder.getApprovalDate());
+        assertEquals(caseData.getJudgeDirectionsToAdmin(), draftOrder.getJudgeNotes());
+        assertEquals(manageOrders.getOrdersHearingDetails(), draftOrder.getManageOrderHearingDetails());
+        assertEquals(manageOrders.getHasJudgeProvidedHearingDetails(), draftOrder.getHasJudgeProvidedHearingDetails());
+        assertEquals(manageOrders.getHearingsType(), draftOrder.getHearingsType());
+        assertEquals(caseData.getWasTheOrderApprovedAtHearing(), draftOrder.getWasTheOrderApprovedAtHearing());
+        assertEquals(manageOrders.getJudgeOrMagistrateTitle(), draftOrder.getJudgeOrMagistrateTitle());
+        assertEquals(caseData.getJudgeOrMagistratesLastName(), draftOrder.getJudgeOrMagistratesLastName());
+        assertEquals(caseData.getJusticeLegalAdviserFullName(), draftOrder.getJusticeLegalAdviserFullName());
+        assertEquals(caseData.getMagistrateLastName(), draftOrder.getMagistrateLastName());
+        assertEquals(manageOrders.getIsTheOrderByConsent(), draftOrder.getIsTheOrderByConsent());
     }
 
 }
