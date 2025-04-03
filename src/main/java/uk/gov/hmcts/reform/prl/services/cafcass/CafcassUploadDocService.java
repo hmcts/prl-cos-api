@@ -45,7 +45,7 @@ public class CafcassUploadDocService {
 
     public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
-        "16_4_Report", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
+        "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
         "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report",
         "FAO_Report", "FAO_Workplan", "Letter_from_Child", "Other_Non_Section_7_Report",
         "Position_Statement", "Positive_Parenting_Programme_Report", "Re_W_Report",
@@ -178,8 +178,10 @@ public class CafcassUploadDocService {
     private static Map<String, CafcassReportAndGuardianEnum> createDocumentTypeMap() {
         Map<String, CafcassReportAndGuardianEnum> map = new HashMap<>();
         map.put("16_4_Report", CafcassReportAndGuardianEnum.guardianReport);
-        map.put("CIR_Part1", CafcassReportAndGuardianEnum.childImpactReport);
-        map.put("CIR_Part2", CafcassReportAndGuardianEnum.childImpactReport);
+        map.put("CR_1", CafcassReportAndGuardianEnum.childImpactReport);
+        map.put("CR_2", CafcassReportAndGuardianEnum.childImpactReport);
+        map.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
+        map.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
         map.put("CMO_report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Contact_Centre_Recordings", CafcassReportAndGuardianEnum.otherDocs);
