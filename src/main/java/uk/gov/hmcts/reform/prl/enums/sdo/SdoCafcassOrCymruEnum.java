@@ -19,8 +19,10 @@ public enum SdoCafcassOrCymruEnum {
     partyToProvideDetailsOnly("partyToProvideDetailsOnly", "Party to provide details of new partner to Cafcass"),
     @JsonProperty("partyToProvideDetailsCmyru")
     partyToProvideDetailsCmyru("partyToProvideDetailsCmyru", "Party to provide details of new partner to Cafcass Cymru"),
-    @JsonProperty("childImpactReport")
-    childImpactReport("childImpactReport", "Child Impact Report"),
+    @JsonProperty("childImpactReport1")
+    childImpactReport1("childImpactReport1", "Child Impact Report 1"),
+    @JsonProperty("childImpactReport2")
+    childImpactReport2("childImpactReport2", "Child Impact Report 2"),
     @JsonProperty("section7Report")
     section7Report("section7Report", "Section 7 report/Child impact analysis");
 

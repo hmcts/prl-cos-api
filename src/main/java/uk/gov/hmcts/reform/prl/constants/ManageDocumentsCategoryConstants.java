@@ -19,7 +19,8 @@ public class ManageDocumentsCategoryConstants {
     public static final String APPLICATIONS_FROM_OTHER_PROCEEDINGS = "applicationsFromOtherProceedings";
     public static final String NOTICE_OF_HEARING = "noticeOfHearing";
     public static final String COURT_BUNDLE = "courtBundle";
-    public static final String CHILD_IMPACT_REPORT = "childImpactReport";
+    public static final String CHILD_IMPACT_REPORT1 = "childImpactReport1";
+    public static final String CHILD_IMPACT_REPORT2 = "childImpactReport2";
     public static final String SAFEGUARDING_LETTER = "safeguardingLetter";
     public static final String SECTION7_REPORT = "section7Report";
     public static final String SECTION_37_REPORT = "section37Report";
