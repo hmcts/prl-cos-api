@@ -117,6 +117,7 @@ public class FL401ApplicationMapper {
             .isCourtNavCase(YesOrNo.Yes)
             .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseAccessCategory(PrlAppsConstants.FL401_CASE_TYPE)
             .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
             .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
             .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? YesOrNo.Yes : YesOrNo.No)
@@ -234,6 +235,7 @@ public class FL401ApplicationMapper {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseAccessCategory(PrlAppsConstants.FL401_CASE_TYPE)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .daApplicantContactInstructions(CaseUtils.getContactInstructions(caseData.getApplicantsFL401()))

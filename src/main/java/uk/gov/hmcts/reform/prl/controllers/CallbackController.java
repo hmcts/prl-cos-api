@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -725,6 +726,12 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
+                if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
+                    setTaskListVersion(caseDataUpdated);
+                }
+            }
+            if (caseDataUpdated.get(CASE_ACCESS_CATEGORY) != null) {
+                caseDataUpdated.put("selectedCaseAccessCategoryID", caseDataUpdated.get(CASE_ACCESS_CATEGORY));
                 if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
                     setTaskListVersion(caseDataUpdated);
                 }

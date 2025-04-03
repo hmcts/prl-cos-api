@@ -685,6 +685,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String CASE_ACCESS_CATEGORY = "caseAccessCategory";
     public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
@@ -912,10 +913,10 @@ public class PrlAppsConstants {
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case / Ychwanegu pobl i’r achos"; 
-    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol"; 
+    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case / Ychwanegu pobl i’r achos";
+    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol";
     public static final String  ADD_APPLICATION_DETAILS = "Add application details / Ychwanegu manylion y cais";
-    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information / Ychwanegu gwybodaeth ychwanegol"; 
+    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information / Ychwanegu gwybodaeth ychwanegol";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
     public static final String  TASK_LIST_VERSION_V3 = "v3";
