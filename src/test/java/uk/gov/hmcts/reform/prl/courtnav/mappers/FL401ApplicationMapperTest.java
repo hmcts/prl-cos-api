@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -1045,6 +1046,46 @@ public class FL401ApplicationMapperTest {
         assertEquals(YesOrNo.No, caseData1.getHome().getDoesApplicantHaveHomeRights());
         assertNull(caseData1.getHome().getLandlords());
 
+    }
+
+    @Test
+    public void testCourtnavFamilyHomeEmptyListDoesNotCauseNPE() throws NotFoundException {
+
+        home1 = home1.toBuilder()
+            .wantToHappenWithFamilyHome(Collections.emptyList())
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation1)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNotNull(caseData1.getHome().getLivingSituation());
+        assertNull(caseData1.getHome().getFamilyHome());
     }
 
     @Test
