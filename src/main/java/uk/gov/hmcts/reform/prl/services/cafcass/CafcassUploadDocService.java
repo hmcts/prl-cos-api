@@ -178,8 +178,8 @@ public class CafcassUploadDocService {
     private static Map<String, CafcassReportAndGuardianEnum> createDocumentTypeMap() {
         Map<String, CafcassReportAndGuardianEnum> map = new HashMap<>();
         map.put("16_4_Report", CafcassReportAndGuardianEnum.guardianReport);
-        map.put("CR_1", CafcassReportAndGuardianEnum.childImpactReport);
-        map.put("CR_2", CafcassReportAndGuardianEnum.childImpactReport);
+        map.put("CR_1", CafcassReportAndGuardianEnum.childImpactReport1);
+        map.put("CR_2", CafcassReportAndGuardianEnum.childImpactReport2);
         map.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);

@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -156,6 +157,8 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.childImpactReport1;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.childImpactReport2;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsOnly;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassCymru;
@@ -1727,13 +1730,15 @@ public class DraftAnOrderService {
         }
     }
 
-    private static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().contains(section7Report)
-            && !ElementUtils.nullSafeList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruTempList()).contains(section7Report)) {
-            caseDataUpdated.put(
-                "sdoSection7EditContent",
-                SECTION7_EDIT_CONTENT
-            );
+    static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<SdoCafcassOrCymruEnum> cafcassList = caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList();
+        List<SdoCafcassOrCymruEnum> cafcassTempList = ElementUtils.nullSafeList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruTempList());
+
+        boolean section7Condition = cafcassList.contains(section7Report) && !cafcassTempList.contains(section7Report);
+        boolean childImpactCondition = cafcassList.contains(childImpactReport1) || cafcassList.contains(childImpactReport2);
+
+        if (section7Condition || childImpactCondition) {
+            caseDataUpdated.put("sdoSection7EditContent", SECTION7_EDIT_CONTENT);
         }
         populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
         populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
