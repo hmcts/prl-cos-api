@@ -734,8 +734,10 @@ public class CallbackController {
             // Saving the logged-in Solicitor and Org details for the docs..
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             //Added partyId for CAFCASS Api Spec
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                applicant.getValue().setPartyId(applicant.getId());
+            if (caseData.getApplicants() != null) {
+                for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                    applicant.getValue().setPartyId(applicant.getId());
+                }
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
                 authorisation,
