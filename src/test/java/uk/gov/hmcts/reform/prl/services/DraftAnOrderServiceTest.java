@@ -104,7 +104,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -124,7 +123,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
@@ -6030,29 +6028,4 @@ public class DraftAnOrderServiceTest {
                      updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
 
-    @ParameterizedTest
-    @MethodSource("childImpactReports")
-    void shouldAddContentWhenChildImpactReportIsPresent(SdoCafcassOrCymruEnum report) {
-        StandardDirectionOrder sdo = StandardDirectionOrder.builder()
-            .sdoCafcassOrCymruList(List.of(report))
-            .sdoCafcassOrCymruTempList(List.of())
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .standardDirectionOrder(sdo)
-            .build();
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-
-        DraftAnOrderService.populateSection7ChildImpactAnalysis(caseData, caseDataUpdated);
-
-        assertEquals(SECTION7_EDIT_CONTENT, caseDataUpdated.get("sdoSection7EditContent"));
-    }
-
-    private static Stream<SdoCafcassOrCymruEnum> childImpactReports() {
-        return Stream.of(
-            SdoCafcassOrCymruEnum.childImpactReport1,
-            SdoCafcassOrCymruEnum.childImpactReport2
-        );
-    }
 }

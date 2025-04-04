@@ -1735,9 +1735,8 @@ public class DraftAnOrderService {
         List<SdoCafcassOrCymruEnum> cafcassTempList = ElementUtils.nullSafeList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruTempList());
 
         boolean section7Condition = cafcassList.contains(section7Report) && !cafcassTempList.contains(section7Report);
-        boolean childImpactCondition = cafcassList.contains(childImpactReport1) || cafcassList.contains(childImpactReport2);
 
-        if (section7Condition || childImpactCondition) {
+        if (section7Condition) {
             caseDataUpdated.put("sdoSection7EditContent", SECTION7_EDIT_CONTENT);
         }
         populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
