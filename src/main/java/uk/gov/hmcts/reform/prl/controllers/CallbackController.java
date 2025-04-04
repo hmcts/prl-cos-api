@@ -726,12 +726,7 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
-                    setTaskListVersion(caseDataUpdated);
-                }
-            }
-            if (caseDataUpdated.get(CASE_ACCESS_CATEGORY) != null) {
-                caseDataUpdated.put("selectedCaseAccessCategoryID", caseDataUpdated.get(CASE_ACCESS_CATEGORY));
+                caseDataUpdated.put(CASE_ACCESS_CATEGORY, caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
                 if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
                     setTaskListVersion(caseDataUpdated);
                 }
