@@ -230,8 +230,7 @@ public class ManageDocumentsService {
                 || DocumentPartyEnum.CAFCASS_CYMRU.equals(
                 manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
                 quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
-                    quarantineLegalDoc,
-                    caseData.getIsPathfinderCase()
+                    quarantineLegalDoc
                 );
             }
 
@@ -255,11 +254,11 @@ public class ManageDocumentsService {
         }
     }
 
-    private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc, YesOrNo isPathfinderCase) {
+    private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc) {
         return quarantineLegalDoc.toBuilder()
             .isConfidential(YesOrNo.Yes)
-            .categoryName(YesOrNo.Yes.equals(isPathfinderCase) ? "Pathfinder" : quarantineLegalDoc.getCategoryName())
-            .categoryId(YesOrNo.Yes.equals(isPathfinderCase) ? "pathfinder" : quarantineLegalDoc.getCategoryId())
+            .categoryName(quarantineLegalDoc.getCategoryName())
+            .categoryId(quarantineLegalDoc.getCategoryId())
             .build();
     }
 

@@ -41,6 +41,8 @@ public class QuarantineLegalDoc {
     private final Document noticeOfHearingDocument;
     private final Document courtBundleDocument;
     private final Document safeguardingLetterDocument;
+    private final Document childImpactReport1Document;
+    private final Document childImpactReport2Document;
     private final Document section7ReportDocument;
     private final Document section37ReportDocument;
     private final Document sixteenARiskAssessmentDocument; // 16aRiskAssessment

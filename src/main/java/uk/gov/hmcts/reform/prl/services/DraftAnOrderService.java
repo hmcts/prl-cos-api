@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -1727,13 +1728,14 @@ public class DraftAnOrderService {
         }
     }
 
-    private static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().contains(section7Report)
-            && !ElementUtils.nullSafeList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruTempList()).contains(section7Report)) {
-            caseDataUpdated.put(
-                "sdoSection7EditContent",
-                SECTION7_EDIT_CONTENT
-            );
+    static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<SdoCafcassOrCymruEnum> cafcassList = caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList();
+        List<SdoCafcassOrCymruEnum> cafcassTempList = ElementUtils.nullSafeList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruTempList());
+
+        boolean section7Condition = cafcassList.contains(section7Report) && !cafcassTempList.contains(section7Report);
+
+        if (section7Condition) {
+            caseDataUpdated.put("sdoSection7EditContent", SECTION7_EDIT_CONTENT);
         }
         populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
         populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);

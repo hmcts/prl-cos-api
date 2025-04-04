@@ -122,6 +122,12 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("safeguardingLetter")
     safeguardingLetter("safeguardingLetter", "safeguardingLetter"),
 
+    @JsonProperty("childImpactReport1")
+    childImpactReport1("childImpactReport1", "childImpactReport1"),
+
+    @JsonProperty("childImpactReport2")
+    childImpactReport2("childImpactReport2", "childImpactReport2"),
+
     @JsonProperty("section7Report")
     section7Report("section7Report", "section7Report"),
 

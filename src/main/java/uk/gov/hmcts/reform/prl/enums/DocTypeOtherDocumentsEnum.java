@@ -67,6 +67,10 @@ public enum DocTypeOtherDocumentsEnum {
     otherWitnessStatements("otherWitnessStatements","Other witness statements"),
     @JsonProperty("pathfinder")
     pathfinder("pathfinder","Pathfinder"),
+    @JsonProperty("childImpactReport1")
+    childImpactReport1("childImpactReport1", "Child Impact Report 1"),
+    @JsonProperty("childImpactReport2")
+    childImpactReport2("childImpactReport2", "Child Impact Report 2"),
     @JsonProperty("safeguardingLetter")
     safeguardingLetter("safeguardingLetter","Safeguarding letter/Safeguarding Enquiries Report (SER)"),
     @JsonProperty("section7Report")
