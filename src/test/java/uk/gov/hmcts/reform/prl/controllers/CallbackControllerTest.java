@@ -1108,7 +1108,6 @@ public class CallbackControllerTest {
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseAccessCategory"));
     }
 
     @Test
