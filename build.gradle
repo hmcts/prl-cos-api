@@ -472,7 +472,7 @@ dependencies {
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  implementation 'org.junit.vintage:junit-vintage-engine:5.10.3'
+  implementation 'org.junit.vintage:junit-vintage-engine:5.12.1'
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.10.3"
 
   contractTestRuntimeOnly(platform('org.junit:junit-bom:5.10.3'))
