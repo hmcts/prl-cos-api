@@ -166,13 +166,20 @@ public class CafcassUploadDocService {
     }
 
     private boolean isValidDocument(MultipartFile document, String typeOfDocument) {
-        if (document != null && document.getOriginalFilename() != null
-            && checkFileFormat(document.getOriginalFilename(), ALLOWED_FILE_TYPES)
-            && checkTypeOfDocument(typeOfDocument, ALLOWED_TYPE_OF_DOCS)) {
+        if (document == null || document.getOriginalFilename() == null) {
+            log.error("Document is null or has no filename.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument));
+        }
+
+        boolean isValidFormat = checkFileFormat(document.getOriginalFilename(), ALLOWED_FILE_TYPES);
+        boolean isValidType = checkTypeOfDocument(typeOfDocument, ALLOWED_TYPE_OF_DOCS);
+
+        if (isValidFormat && isValidType) {
             return true;
         }
-        log.error("Un acceptable format/type of document {}", typeOfDocument);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(INVALID_DOCUMENT_TYPE, typeOfDocument));
+
+        log.error("Unacceptable format/type of document: {}", typeOfDocument);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument));
     }
 
     private static Map<String, CafcassReportAndGuardianEnum> createDocumentTypeMap() {
