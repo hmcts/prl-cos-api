@@ -205,9 +205,13 @@ public class UpdatePartyDetailsService {
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
         //Added partyId for CAFCASS Api Spec
+        log.info("Before updating party details for case {}", callbackRequest.getCaseDetails().getId());
         if (null != caseData.getApplicants()) {
+            log.info("Applicants not null");
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                log.info("Applicant json id {}", applicant.getId());
                 applicant.getValue().setPartyId(applicant.getId());
+                log.info("Applicant partyId id {}", applicant.getValue().getPartyId());
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
