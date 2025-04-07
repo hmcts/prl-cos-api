@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -102,13 +100,6 @@ public class CaseOrder {
     private String selectedHearingType;
 
     private String hearingId;
-
-    public void setSelectedHearingType(String selectedHearingType) {
-        this.selectedHearingType = selectedHearingType;
-        if (selectedHearingType != null) {
-            setHearingId(selectedHearingType.split(HYPHEN_SEPARATOR)[0]);
-        }
-    }
 
     public void setHearingId(String hearingId) {
         if (null != hearingId && !hearingId.trim().isEmpty()) {
