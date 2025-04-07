@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
@@ -485,9 +487,8 @@ public class CafCassCaseData {
                 WhoDoesTheChildLiveWith.builder()
                     .partyId(String.valueOf(applicantDetailsElement.getId()))
                     .childAddress(applicantDetailsElement.getValue().getAddress())
-                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
-                                       .concat(" ")
-                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyFullName(buildFullName(applicantDetailsElement.getValue().getFirstName(),
+                                                 applicantDetailsElement.getValue().getLastName()))
                     .partyType(PartyTypeEnum.APPLICANT)
                     .build()
 
@@ -508,9 +509,8 @@ public class CafCassCaseData {
                 WhoDoesTheChildLiveWith.builder()
                     .partyId(String.valueOf(applicantDetailsElement.getId()))
                     .childAddress(applicantDetailsElement.getValue().getAddress())
-                    .partyFullName(applicantDetailsElement.getValue().getFirstName()
-                                       .concat(" ")
-                                       .concat(applicantDetailsElement.getValue().getLastName()))
+                    .partyFullName(buildFullName(applicantDetailsElement.getValue().getFirstName(),
+                                                 applicantDetailsElement.getValue().getLastName()))
                     .partyType(PartyTypeEnum.RESPONDENT)
                     .build()
             )
@@ -592,9 +592,8 @@ public class CafCassCaseData {
                         WhoDoesTheChildLiveWith.builder()
                             .partyId(String.valueOf(otherPartyInTheCase.getId()))
                             .childAddress(otherPartyInTheCase.getValue().getAddress())
-                            .partyFullName(otherPartyInTheCase.getValue().getFirstName()
-                                               .concat(" ")
-                                               .concat(otherPartyInTheCase.getValue().getLastName()))
+                            .partyFullName(buildFullName(otherPartyInTheCase.getValue().getFirstName(),
+                                                         otherPartyInTheCase.getValue().getLastName()))
                             .partyType(PartyTypeEnum.OTHERPEOPLE)
                             .build()
 
@@ -730,6 +729,13 @@ public class CafCassCaseData {
         }
         return updatedRelationshipToParties;
     }
+
+    String buildFullName(String firstName, String lastName) {
+        return Stream.of(firstName, lastName)
+            .filter(str -> str != null && !str.isBlank())
+            .collect(Collectors.joining(" "));
+    }
+
 
     private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
 
