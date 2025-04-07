@@ -204,6 +204,12 @@ public class UpdatePartyDetailsService {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
         }
+        //Added partyId for CAFCASS Api Spec
+        if (null != caseData.getApplicants()) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                applicant.getValue().setPartyId(applicant.getId());
+            }
+        }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         return updatedCaseData;
