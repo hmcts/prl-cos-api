@@ -115,6 +115,17 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        //Added partyId for CAFCASS Api Spec
+        log.info("Before updating party details for case {}", callbackRequest.getCaseDetails().getId());
+        if (null != caseData.getApplicants()) {
+            log.info("Applicants not null");
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                log.info("Applicant json id {}", applicant.getId());
+                applicant.getValue().setPartyId(applicant.getId());
+                log.info("Applicant partyId id {}", applicant.getValue().getPartyId());
+            }
+        }
+
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -203,16 +214,6 @@ public class UpdatePartyDetailsService {
         if (Objects.nonNull(callbackRequest.getCaseDetailsBefore())) {
             Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
             partyLevelCaseFlagsService.amendCaseFlags(oldCaseDataMap, updatedCaseData, callbackRequest.getEventId());
-        }
-        //Added partyId for CAFCASS Api Spec
-        log.info("Before updating party details for case {}", callbackRequest.getCaseDetails().getId());
-        if (null != caseData.getApplicants()) {
-            log.info("Applicants not null");
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                log.info("Applicant json id {}", applicant.getId());
-                applicant.getValue().setPartyId(applicant.getId());
-                log.info("Applicant partyId id {}", applicant.getValue().getPartyId());
-            }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
