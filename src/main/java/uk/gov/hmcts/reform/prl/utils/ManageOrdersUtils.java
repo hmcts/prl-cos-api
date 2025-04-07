@@ -460,7 +460,9 @@ public class ManageOrdersUtils {
                     errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE);
                 }
             }
-            if (StringUtils.isEmpty(caseData.getJudgeOrMagistratesLastName())) {
+            if (!(JudgeOrMagistrateTitleEnum.justicesLegalAdviser.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                || JudgeOrMagistrateTitleEnum.magistrate.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle()))
+                && StringUtils.isEmpty(caseData.getJudgeOrMagistratesLastName())) {
                 if (PrlAppsConstants.WELSH.equals(language)) {
                     errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME);
                 } else {
