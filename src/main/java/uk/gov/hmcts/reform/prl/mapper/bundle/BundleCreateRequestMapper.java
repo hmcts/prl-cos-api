@@ -370,6 +370,7 @@ public class BundleCreateRequestMapper {
         for (QuarantineLegalDoc doc : allDocs) {
             BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
             if (null != otherDoc) {
+                log.info("otherDoc in bundle with filename: {} for case: {}", otherDoc.documentFileName, caseData.getId());
                 otherBundlingDocuments.add(otherDoc);
             }
         }
