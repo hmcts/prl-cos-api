@@ -912,10 +912,10 @@ public class PrlAppsConstants {
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case / Ychwanegu pobl i’r achos"; 
-    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol"; 
+    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case / Ychwanegu pobl i’r achos";
+    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant / Llenwch yr adran hon dim ond os yw’n berthnasol";
     public static final String  ADD_APPLICATION_DETAILS = "Add application details / Ychwanegu manylion y cais";
-    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information / Ychwanegu gwybodaeth ychwanegol"; 
+    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information / Ychwanegu gwybodaeth ychwanegol";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
     public static final String  TASK_LIST_VERSION_V3 = "v3";
@@ -963,6 +963,8 @@ public class PrlAppsConstants {
     public static final String PM_UPPER_CASE = "PM";
 
     public static final String CAFCASS_PARTY = "CAFCASS";
+    public static final String MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE = "Select or amend the title of the judge or magistrate is required";
+    public static final String MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME = "Judge's full name is required";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";

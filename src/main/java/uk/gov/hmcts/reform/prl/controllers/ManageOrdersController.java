@@ -112,6 +112,7 @@ public class ManageOrdersController {
 
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
+            errorList.addAll(ManageOrdersUtils.validateMandatoryJudgeOrMagistrateTitleAndLastName(caseData, CaseUtils.getLanguage(clientContext)));
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
