@@ -47,9 +47,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Cyflwynwyd y ddogfen<br/>Documents submitted";
     public static final String CONFIRMATION_BODY =
-        """ 
+        """
         ### Beth fydd yn digwydd nesaf<br/>What happens next
-        
+
         Bydd y llys yn adolygu'r dogfennau a gyflwynwyd.<br/>The court will review the submitted documents.""";
 
     @Autowired
@@ -126,6 +126,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.error("check copyManageDocs called: {}", callbackRequest.getCaseDetails().toString());
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
