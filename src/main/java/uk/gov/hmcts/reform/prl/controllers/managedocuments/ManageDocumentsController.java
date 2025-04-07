@@ -126,7 +126,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.error("check copyManageDocs called: {}", callbackRequest.getCaseDetails().toString());
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))

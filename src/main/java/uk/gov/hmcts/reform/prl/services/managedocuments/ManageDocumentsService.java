@@ -193,7 +193,6 @@ public class ManageDocumentsService {
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-        log.error("into copyDocument");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
