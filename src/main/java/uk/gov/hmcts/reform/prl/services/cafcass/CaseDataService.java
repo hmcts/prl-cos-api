@@ -105,7 +105,6 @@ public class CaseDataService {
 
     public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
-        // Test push
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
