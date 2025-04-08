@@ -963,8 +963,6 @@ public class PrlAppsConstants {
     public static final String PM_UPPER_CASE = "PM";
 
     public static final String CAFCASS_PARTY = "CAFCASS";
-    public static final String MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE = "Select or amend the title of the judge or magistrate is required";
-    public static final String MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME = "Judge's full name is required";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";

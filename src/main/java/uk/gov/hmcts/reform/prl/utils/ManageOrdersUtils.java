@@ -45,8 +45,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE_WELSH;
@@ -444,29 +442,6 @@ public class ManageOrdersUtils {
                     errorList.add(MANDATORY_MAGISTRATE_WELSH);
                 } else {
                     errorList.add(MANDATORY_MAGISTRATE);
-                }
-            }
-        }
-        return errorList;
-    }
-
-    public static List<String> validateMandatoryJudgeOrMagistrateTitleAndLastName(CaseData caseData, String language) {
-        List<String> errorList = new ArrayList<>();
-        if (ObjectUtils.isNotEmpty(caseData.getManageOrders())) {
-            if (ObjectUtils.isEmpty(caseData.getManageOrders().getJudgeOrMagistrateTitle())) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE);
-                } else {
-                    errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_TITLE);
-                }
-            }
-            if (!(JudgeOrMagistrateTitleEnum.justicesLegalAdviser.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-                || JudgeOrMagistrateTitleEnum.magistrate.equals(caseData.getManageOrders().getJudgeOrMagistrateTitle()))
-                && StringUtils.isEmpty(caseData.getJudgeOrMagistratesLastName())) {
-                if (PrlAppsConstants.WELSH.equals(language)) {
-                    errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME);
-                } else {
-                    errorList.add(MANDATORY_JUDGE_OR_OR_MAGISTRATE_LASTNAME);
                 }
             }
         }
