@@ -140,4 +140,9 @@ public class BaseCaseData {
 
     @JsonProperty("daApplicantContactInstructions")
     private String daApplicantContactInstructions;
+
+    public void setCaseTypeOfApplication(String caseTypeOfApplication) {
+        this.caseTypeOfApplication = caseTypeOfApplication;
+        this.caseAccessCategory = caseTypeOfApplication;
+    }
 }
