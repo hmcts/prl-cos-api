@@ -6025,5 +6025,4 @@ public class DraftAnOrderServiceTest {
         assertEquals(dateReservedWithListAssit.getDisplayedValue(),
                      updatedDraftOrder.getManageOrderHearingDetails().get(0).getValue().getHearingDateConfirmOptionEnum().getDisplayedValue());
     }
-
 }
