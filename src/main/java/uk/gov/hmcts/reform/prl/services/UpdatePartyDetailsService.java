@@ -115,15 +115,15 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
-        //Added partyId for CAFCASS Api Spec, C100 applications
+        //Added partyId for Hearings Api Spec, C100 applications
         //Applicants
-        if (null != caseData.getApplicants()) {
+        if (caseData.getApplicants() != null) {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 applicant.getValue().setPartyId(applicant.getId());
             }
         }
         //Respondents
-        if (null != caseData.getRespondents()) {
+        if (caseData.getRespondents() != null) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
                 respondent.getValue().setPartyId(respondent.getId());
             }
