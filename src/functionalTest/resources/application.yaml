@@ -6,14 +6,6 @@ runs-locally: ${RUNS_LOCALLY:true}
 env: ${test_environment:local}
 TEST_URL: http://localhost:4044
 
-idam:
-  api:
-    url: http://localhost:5001
-  client:
-    baseUrl: http://localhost:5001
-    id: dummy-client
-    secret: dummy-secret
-
 case:
   orchestration:
     service:
