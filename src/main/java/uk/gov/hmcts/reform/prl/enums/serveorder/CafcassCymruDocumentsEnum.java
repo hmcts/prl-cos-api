@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum CafcassCymruDocumentsEnum {
     @JsonProperty("safeGuardingLetter")
     safeGuardingLetter("safeGuardingLetter", "Safeguarding letter"),
+    @JsonProperty("childImpactReport")
+    childImpactReport("childImpactReport", "Child Impact report"),
     @JsonProperty("childImpactReport1")
     childImpactReport1("childImpactReport1", "Child Impact Report 1"),
     @JsonProperty("childImpactReport2")
