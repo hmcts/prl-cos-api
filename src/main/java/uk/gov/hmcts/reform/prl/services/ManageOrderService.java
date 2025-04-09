@@ -1429,6 +1429,10 @@ public class ManageOrderService {
             //PRL-4854 - persist hearingsType dynamicList
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
+            .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
+            .magistrateLastName(caseData.getMagistrateLastName())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .build();
     }
