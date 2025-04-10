@@ -115,6 +115,20 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
+        //Added partyId for Hearings Api Spec, C100 applications
+        //Applicants
+        if (caseData.getApplicants() != null) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                applicant.getValue().setPartyId(applicant.getId());
+            }
+        }
+        //Respondents
+        if (caseData.getRespondents() != null) {
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                respondent.getValue().setPartyId(respondent.getId());
+            }
+        }
+
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
