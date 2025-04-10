@@ -69,15 +69,28 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        String applicantSolicitorEmailAddress = caseDetails.getData()
-            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
-        emailService.send(
-            applicantSolicitorEmailAddress,
-            EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails, false),
-            LanguagePreference.english
-        );
+        Object emailObj = caseDetails.getData().get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS);
 
+        if (emailObj == null || emailObj.toString().isBlank()) {
+            log.warn("No applicant solicitor email address found for case ID: {}", caseDetails.getId());
+            return;
+        }
+
+        String email = emailObj.toString();
+
+        try {
+            emailService.send(
+                email,
+                EmailTemplateNames.SOLICITOR,
+                buildEmail(caseDetails, false),
+                LanguagePreference.english
+            );
+            log.info("Email sent to applicant solicitor [{}] for case ID: {}", email, caseDetails.getId());
+
+        } catch (Exception e) {
+            log.error("Failed to send email to applicant solicitor [{}] for case ID: {}. Error: {}",
+                      email, caseDetails.getId(), e.getMessage(), e);
+        }
     }
 
     public void sendReSubmitEmail(CaseDetails caseDetails) {
