@@ -480,6 +480,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildData(c100RebuildData)
             .build();
         CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData,c100RebuildData);
+        assertEquals(caseData.getCaseTypeOfApplication(), caseDataResult.getCaseAccessCategory());
         assertNotNull(caseDataResult);
     }
 
@@ -646,6 +647,8 @@ public class CitizenPartyDetailsMapperTest {
         assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getIsAddressConfidential());
         assertEquals(YesOrNo.Yes, caseDataResult.getOtherPartyInTheCaseRevised().get(0).getValue().getLiveInRefuge());
     }
+
+
 
     @Test
     public void testBuildUpdatedCaseDataOtherPersonAddressUnknown() throws IOException {
