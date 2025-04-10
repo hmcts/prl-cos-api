@@ -987,7 +987,7 @@ public class CitizenPartyDetailsMapper {
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
-        caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
+        caseDataBuilder.caseAccessCategory("C100");
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
         caseDataBuilder.applicantName(getPartyName(caseDataBuilder.build().getApplicants()));
