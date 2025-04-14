@@ -1081,6 +1081,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("About to submit");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Flags caseFlags = caseData.getCaseFlags();
             log.info("Case flags {}", caseFlags);
@@ -1093,7 +1094,7 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "case-flags/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/case-flags/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update confidentiality for other people in the case while staying in refuge")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -1106,6 +1107,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Submitted");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Flags caseFlags = caseData.getCaseFlags();
             log.info("Case flags {}", caseFlags);
