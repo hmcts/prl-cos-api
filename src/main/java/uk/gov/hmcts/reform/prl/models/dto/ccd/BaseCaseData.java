@@ -62,7 +62,6 @@ public class BaseCaseData {
      * Case Type Of Application.
      */
     private String selectedCaseTypeID;
-
     /**
      * Case Type Of Application.
      */
