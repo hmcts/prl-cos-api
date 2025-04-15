@@ -6,7 +6,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FLAG_INITIAL_STATUS;
 
 @Data
 @Builder(toBuilder = true)
@@ -73,4 +83,58 @@ public class AllPartyFlags {
     private Flags daApplicantSolicitorInternalFlags;
     private Flags daRespondentInternalFlags;
     private Flags daRespondentSolicitorInternalFlags;
+
+    public boolean isExternalReviewPendingForCaseType(CaseData caseData) {
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        if(C100_CASE_TYPE.equals(caseTypeOfApplication)) {
+            return isRequestStatusPresent(getCaExternalFlags());
+        } else if (FL401_CASE_TYPE.equals(caseTypeOfApplication)) {
+            return isRequestStatusPresent(getDaExternalFlags());
+        }
+        throw new IllegalArgumentException("Invalid case type: "+ caseTypeOfApplication);
+    }
+
+    private boolean isRequestStatusPresent(List<Flags> flags) {
+        return flags.stream()
+            .filter(Objects::nonNull)
+            .map(Flags::getDetails)
+            .flatMap(Collection::stream)
+            .map(Element::getValue)
+            .anyMatch(flagDetail -> FLAG_INITIAL_STATUS.equals(flagDetail.getStatus()));
+    }
+
+    private List<Flags> getCaExternalFlags() {
+        return List.of(caApplicant1ExternalFlags,
+                        caApplicant2ExternalFlags,
+                        caApplicant3ExternalFlags,
+                        caApplicant4ExternalFlags,
+                        caApplicant5ExternalFlags,
+                        caApplicantSolicitor1ExternalFlags,
+                        caApplicantSolicitor2ExternalFlags,
+                        caApplicantSolicitor3ExternalFlags,
+                        caApplicantSolicitor4ExternalFlags,
+                        caApplicantSolicitor5ExternalFlags,
+                        caRespondent1ExternalFlags,
+                        caRespondent2ExternalFlags,
+                        caRespondent3ExternalFlags,
+                        caRespondent4ExternalFlags,
+                        caRespondent5ExternalFlags,
+                        caRespondentSolicitor1ExternalFlags,
+                        caRespondentSolicitor2ExternalFlags,
+                        caRespondentSolicitor3ExternalFlags,
+                        caRespondentSolicitor4ExternalFlags,
+                        caRespondentSolicitor5ExternalFlags,
+                        caOtherParty1ExternalFlags,
+                        caOtherParty2ExternalFlags,
+                        caOtherParty3ExternalFlags,
+                        caOtherParty4ExternalFlags,
+                        caOtherParty5ExternalFlags);
+    }
+
+    private List<Flags> getDaExternalFlags() {
+            return List.of(daApplicantExternalFlags,
+            daApplicantSolicitorExternalFlags,
+            daRespondentExternalFlags,
+            daRespondentSolicitorExternalFlags);
+    }
 }
