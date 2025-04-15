@@ -143,7 +143,7 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
         dependencySet(group: 'io.netty', version: '4.1.118.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
@@ -152,6 +152,8 @@ allprojects {
             entry 'netty-handler'
             entry 'netty-resolver'
             entry 'netty-transport'
+            entry 'netty-transport-native-unix-common'
+            entry 'netty-transport-classes-epoll'
         }
 
       // CVE-2019-10086
@@ -348,7 +350,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.7.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.16.0'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
