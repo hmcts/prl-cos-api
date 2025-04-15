@@ -383,6 +383,11 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
   implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.118.Final'
+  // Fixes for CVE-2025-25193
+  implementation group: 'io.netty', name: 'netty-transport-classes-epoll', version: '4.1.118.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-unix-common', version: '4.1.118.Final'
+  // Fix for CVE-2024-45772
+  implementation group: 'org.apache.lucene', name: 'lucene-core', version: '9.12.0'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
