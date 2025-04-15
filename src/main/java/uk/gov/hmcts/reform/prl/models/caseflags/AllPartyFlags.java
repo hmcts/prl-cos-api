@@ -86,12 +86,12 @@ public class AllPartyFlags {
 
     public boolean isExternalReviewPendingForCaseType(CaseData caseData) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        if(C100_CASE_TYPE.equals(caseTypeOfApplication)) {
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             return isRequestStatusPresent(getCaExternalFlags());
         } else if (FL401_CASE_TYPE.equals(caseTypeOfApplication)) {
             return isRequestStatusPresent(getDaExternalFlags());
         }
-        throw new IllegalArgumentException("Invalid case type: "+ caseTypeOfApplication);
+        throw new IllegalArgumentException("Invalid case type: " + caseTypeOfApplication);
     }
 
     private boolean isRequestStatusPresent(List<Flags> flags) {
@@ -132,9 +132,9 @@ public class AllPartyFlags {
     }
 
     private List<Flags> getDaExternalFlags() {
-            return List.of(daApplicantExternalFlags,
-            daApplicantSolicitorExternalFlags,
-            daRespondentExternalFlags,
-            daRespondentSolicitorExternalFlags);
+        return List.of(daApplicantExternalFlags,
+                       daApplicantSolicitorExternalFlags,
+                       daRespondentExternalFlags,
+                       daRespondentSolicitorExternalFlags);
     }
 }
