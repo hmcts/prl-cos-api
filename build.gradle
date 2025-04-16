@@ -144,7 +144,7 @@ allprojects {
       }
 
         // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-        dependencySet(group: 'io.netty', version: '4.1.118.Final') {
+        dependencySet(group: 'io.netty', version: '4.1.119.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-http'
@@ -152,6 +152,8 @@ allprojects {
             entry 'netty-handler'
             entry 'netty-resolver'
             entry 'netty-transport'
+            entry 'netty-transport-native-unix-common'
+            entry 'netty-transport-classes-epoll'
         }
 
       // CVE-2019-10086
@@ -348,7 +350,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.7.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.16.2'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
@@ -382,7 +384,7 @@ dependencies {
 
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.118.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.119.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
