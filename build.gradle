@@ -63,7 +63,6 @@ def versions = [
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.33',
   springFramework              : '6.1.14',
-  luceneVersion                : '9.12.0'
 ]
 
 allprojects {
@@ -298,6 +297,16 @@ configurations.configureEach {
   }
 }
 
+// Fixes for CVE-2024-45772
+configurations.configureEach {
+  resolutionStrategy.eachDependency {
+    // lucene-analyzers-common is not a vulnerable dependency and doesn't have a version 9.12.0
+    if (requested.group == 'org.apache.lucene' && requested.name != 'lucene-analyzers-common') {
+      useVersion '9.12.0'
+    }
+  }
+}
+
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
@@ -387,20 +396,6 @@ dependencies {
   // Fixes for CVE-2025-25193
   implementation group: 'io.netty', name: 'netty-transport-classes-epoll', version: '4.1.118.Final'
   implementation group: 'io.netty', name: 'netty-transport-native-unix-common', version: '4.1.118.Final'
-
-  // Fixes for CVE-2024-45772
-  implementation group: 'org.apache.lucene', name: 'lucene-analysis-common', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-backward-codecs', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-core', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-grouping', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-highlighter', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-join', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-memory', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-misc', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-queries', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-queryparser', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-sandbox', version: versions.luceneVersion
-  implementation group: 'org.apache.lucene', name: 'lucene-suggest', version: versions.luceneVersion
 
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
