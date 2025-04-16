@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -33,6 +32,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -415,7 +418,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         assertEquals(email, solicitorEmailService.buildFl401SolicitorEmail(caseDetails));
     }
@@ -450,9 +453,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
 
@@ -487,9 +491,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
 
@@ -526,9 +531,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
 
@@ -563,9 +569,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
 
@@ -693,9 +700,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
 
@@ -732,9 +740,10 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email =
+            fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(emailService.getCaseData(any(CaseDetails.class))).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
 
@@ -828,15 +837,16 @@ public class SolicitorEmailServiceTest {
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-            .state("PENDING").caseId("123").caseData(
-            CaseData.builder()
-                .id(12345L)
-                .applicantCaseName("TestCaseName")
-                .applicants(listOfApplicants)
-                .children(listOfChildren)
-                .courtName("testcourt")
-                .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+                .state("PENDING").caseId("123").caseData(
+                    CaseData.builder()
+                        .id(12345L)
+                        .applicantCaseName("TestCaseName")
+                        .applicants(listOfApplicants)
+                        .children(listOfChildren)
+                        .courtName("testcourt")
+                        .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
         CaseDetails caseDetails1 = CaseDetails.builder().state(caseDetails.getState())
             .id(Long.valueOf(caseDetails.getCaseId()))
             .data(caseDetails.getCaseData()
@@ -871,15 +881,16 @@ public class SolicitorEmailServiceTest {
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-            .state("PENDING").caseId("123").caseData(
-                CaseData.builder()
-                    .id(12345L)
-                    .applicantCaseName("TestCaseName")
-                    .applicants(listOfApplicants)
-                    .children(listOfChildren)
-                    .courtName("testcourt")
-                    .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+                .state("PENDING").caseId("123").caseData(
+                    CaseData.builder()
+                        .id(12345L)
+                        .applicantCaseName("TestCaseName")
+                        .applicants(listOfApplicants)
+                        .children(listOfChildren)
+                        .courtName("testcourt")
+                        .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
         CaseDetails caseDetails1 = CaseDetails.builder().state(caseDetails.getState())
             .id(Long.valueOf(caseDetails.getCaseId()))
             .data(caseDetails.getCaseData()
@@ -888,6 +899,53 @@ public class SolicitorEmailServiceTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         solicitorEmailService.sendHelpWithFeesEmail(caseDetails);
         assertEquals("hello@gmail.com", caseDetails.getCaseData().getApplicantSolicitorEmailAddress());
+    }
+
+    @Test
+    public void shouldNotSendEmail_WhenEmailIsNull() {
+        Map<String, Object> data = new HashMap<>();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        solicitorEmailService.sendEmail(caseDetails);
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    public void shouldNotSendEmail_WhenEmailIsBlank() {
+        Map<String, Object> data = new HashMap<>();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        caseDetails.getData().put("applicantSolicitorEmailAddress", "  ");
+        solicitorEmailService.sendEmail(caseDetails);
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    public void shouldCatchException_WhenEmailSendingFails() {
+        Map<String, Object> data = new HashMap<>();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        caseDetails.getData().put("applicantSolicitorEmailAddress", "solicitor@test.com");
+
+        CaseData dummyCaseData = CaseData.builder().applicants(Collections.emptyList()).build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(dummyCaseData);
+
+        doThrow(new RuntimeException("SMTP error"))
+            .when(emailService)
+            .send(any(), any(), any(), any());
+
+        solicitorEmailService.sendEmail(caseDetails);
+
+        verify(emailService).send(any(), any(), any(), any());
     }
 }
 
