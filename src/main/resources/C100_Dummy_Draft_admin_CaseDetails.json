@@ -2627,6 +2627,7 @@
     "applicantAttendedMiam": "Yes",
     "caseNameHmctsInternal": "Test case",
     "caseTypeOfApplication": "C100",
+    "caseAccessCategory": "C100",
     "claimingExemptionMiam": null,
     "draftConsentOrderFile": null,
     "otherProceedingsTable": {
