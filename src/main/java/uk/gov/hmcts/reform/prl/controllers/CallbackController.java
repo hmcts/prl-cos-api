@@ -282,7 +282,7 @@ public class CallbackController {
                 .build();
         } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             caseData = caseData.toBuilder()
-                .home(null)// TODO: Why do we set home to null here?
+                .home(null)
                 .build();
         }
         return caseData;
