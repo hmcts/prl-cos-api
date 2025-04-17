@@ -142,6 +142,11 @@ public class CaseDataService {
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
                     filteredCafcassData = removeUnnecessaryFieldsFromResponse(filteredCafcassData);
+                    for (CafCassCaseDetail cafcassCase : filteredCafcassData.getCases()) {
+                        log.info("Found case with id {} and courtName {} ",
+                                 cafcassCase.getId(), cafcassCase.getCaseData().getCourtName()
+                        );
+                    }
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())

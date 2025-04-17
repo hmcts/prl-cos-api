@@ -44,6 +44,8 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
@@ -368,6 +370,7 @@ public class BundleCreateRequestMapper {
         for (QuarantineLegalDoc doc : allDocs) {
             BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
             if (null != otherDoc) {
+                log.info("otherDoc in bundle with filename: {} for case: {}", otherDoc.documentFileName, caseData.getId());
                 otherBundlingDocuments.add(otherDoc);
             }
         }
@@ -538,6 +541,20 @@ public class BundleCreateRequestMapper {
                 .documentLink(doc.getSafeguardingLetterDocument())
                 .documentFileName(doc.getSafeguardingLetterDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.safeguardingLetter).build() : null
+        );
+        bundleMap.put(
+            CHILD_IMPACT_REPORT1,
+            Objects.nonNull(doc.getChildImpactReport1Document()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getChildImpactReport1Document())
+                .documentFileName(doc.getChildImpactReport1Document().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.childImpactReport1).build() : null
+        );
+        bundleMap.put(
+            CHILD_IMPACT_REPORT2,
+            Objects.nonNull(doc.getChildImpactReport2Document()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getChildImpactReport2Document())
+                .documentFileName(doc.getChildImpactReport2Document().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.childImpactReport2).build() : null
         );
         bundleMap.put(
             SECTION7_REPORT,
