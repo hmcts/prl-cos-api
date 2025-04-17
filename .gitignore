@@ -4,6 +4,7 @@
 *.class
 bin/main/application.yaml
 src/main/resources/application.yaml
+.mirrord
 
 ### STS ###
 .apt_generated
