@@ -402,7 +402,7 @@ dependencies {
 
   implementation(group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.16')
   implementation(group: 'ch.qos.logback', name: 'logback-core', version: '1.5.16')
-  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'7.4'
+  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version:'8.1'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
