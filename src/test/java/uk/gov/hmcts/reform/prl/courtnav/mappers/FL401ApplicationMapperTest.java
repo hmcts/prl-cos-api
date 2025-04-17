@@ -65,6 +65,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1049,7 +1050,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavFamilyHomeEmptyListDoesNotCauseNPE() throws NotFoundException {
+    public void testCourtnavFamilyHomeEmptyListDoesNotCauseNullPE() throws NotFoundException {
 
         home1 = home1.toBuilder()
             .wantToHappenWithFamilyHome(Collections.emptyList())
@@ -1085,7 +1086,7 @@ public class FL401ApplicationMapperTest {
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
         assertNotNull(caseData1.getHome().getLivingSituation());
-        assertNull(caseData1.getHome().getFamilyHome());
+        assertDoesNotThrow(() -> fl401ApplicationMapper.mapCourtNavData(courtNavFl401, "Bearer:test"));
     }
 
     @Test

@@ -121,6 +121,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
@@ -1887,6 +1888,7 @@ public class ApplicationsTabServiceTest {
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
+        assertDoesNotThrow(() -> applicationsTabService.getHomeDetails(caseData));
     }
 
     @Test
