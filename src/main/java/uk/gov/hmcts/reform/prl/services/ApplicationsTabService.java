@@ -1346,15 +1346,21 @@ public class ApplicationsTabService implements TabService {
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
-        List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
+        List<String> peopleLivingAtThisAddressEnum = Optional.ofNullable(home.getPeopleLivingAtThisAddress())
+            .orElseGet(Collections::emptyList)
+            .stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
             .toList();
 
-        List<String> familyHomeEnum = home.getFamilyHome().stream()
+        List<String> familyHomeEnum = Optional.ofNullable(home.getFamilyHome())
+            .orElseGet(Collections::emptyList)
+            .stream()
             .map(FamilyHomeEnum::getDisplayedValue)
             .toList();
 
-        List<String> livingSituationEnum = home.getLivingSituation().stream()
+        List<String> livingSituationEnum = Optional.ofNullable(home.getLivingSituation())
+            .orElseGet(Collections::emptyList)
+            .stream()
             .map(LivingSituationEnum::getDisplayedValue)
             .toList();
 
