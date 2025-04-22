@@ -1770,9 +1770,9 @@ public class ApplicationsTabServiceTest {
             .isPropertyRented(No)
             .isThereMortgageOnProperty(No)
             .isPropertyAdapted(No)
-            .peopleLivingAtThisAddress(null) // Make separate test
-            .familyHome(List.of(FamilyHomeEnum.payOrContributeRent)) // Make separate test
-            .livingSituation(List.of(LivingSituationEnum.awayFromHome)) // Make separate test
+            .peopleLivingAtThisAddress(null)
+            .familyHome(List.of(FamilyHomeEnum.payOrContributeRent))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
                     "wer")
                            .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
@@ -1816,9 +1816,9 @@ public class ApplicationsTabServiceTest {
             .isPropertyRented(No)
             .isThereMortgageOnProperty(No)
             .isPropertyAdapted(No)
-            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant)) // Make separate test
-            .familyHome(null) // Make separate test
-            .livingSituation(List.of(LivingSituationEnum.awayFromHome)) // Make separate test
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(null)
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
                     "wer")
                            .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
