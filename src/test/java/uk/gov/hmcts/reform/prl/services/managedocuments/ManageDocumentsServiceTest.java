@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -72,7 +73,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageDocumentsServiceTest {
 
+    @Spy
     @InjectMocks
     ManageDocumentsService manageDocumentsService;
 
@@ -188,7 +192,9 @@ public class ManageDocumentsServiceTest {
 
     UserDetails userDetailsCourtNavRole;
 
-    UserDetails userDetailsCourtStaffRoleExpectAdmin;
+    UserDetails userDetailsJudgeRole;
+
+    UserDetails userDetailsStaff;
 
     List<String> categoriesToExclude;
 
@@ -257,7 +263,13 @@ public class ManageDocumentsServiceTest {
             .surname("test")
             .roles(List.of(COURT_ADMIN_ROLE, COURT_STAFF))
             .build();
-        userDetailsCourtStaffRoleExpectAdmin = UserDetails.builder()
+        userDetailsStaff = UserDetails.builder()
+            .id("567")
+            .forename("staff")
+            .surname("staff")
+            .roles(Collections.singletonList(COURT_STAFF))
+            .build();
+        userDetailsJudgeRole = UserDetails.builder()
             .id("456")
             .forename("test")
             .surname("test")
@@ -566,7 +578,7 @@ public class ManageDocumentsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsJudgeRole);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "allocated-magistrate");
@@ -623,7 +635,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsJudgeRole);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
@@ -1050,6 +1062,84 @@ public class ManageDocumentsServiceTest {
 
         assertNotNull(quarantineLegalDoc);
     }
+
+    @Test
+    public void testMoveDocumentsToRespectiveCategoriesNewSendAsyncNotification() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("NonConfidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", doc);
+
+        quarantineLegalDocElement = element(quarantineConfidentialDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+
+        when(caseDocumentClient
+                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(expectedResponse);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentFileName("test")
+                          .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No).categoryId("test").build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsStaff);
+
+        doReturn(quarantineLegalDoc)
+            .when(manageDocumentsService)
+            .convertQuarantineDocumentToRightCategoryDocument(any(), any());
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc,
+            userDetailsSolicitorRole,
+            caseData,
+            caseDataMapInitial,
+            "Staff"
+        );
+
+        verify(notificationService).sendNotificationsAsync(
+            any(),
+            any(),
+            any()
+        );
+    }
+
 
     @Test
     public void testCopyDocumentIfRestricted() {
@@ -2039,7 +2129,7 @@ public class ManageDocumentsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
 
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(Mockito.any(), eq(QuarantineLegalDoc.class))).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
@@ -2460,7 +2550,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testAppendConfidentialDocumentNameForCourtAdmin() {
         Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsJudgeRole);
         manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
             auth, caseDataUpdated1, CaseData.builder().reviewDocuments(
                 ReviewDocuments.builder()
