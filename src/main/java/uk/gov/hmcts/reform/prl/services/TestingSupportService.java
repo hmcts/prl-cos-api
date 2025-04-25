@@ -440,7 +440,8 @@ public class TestingSupportService {
         }
     }
 
-    public CaseData createDummyLiPC100CaseWithBody(String authorisation, String s2sToken, String jsonBody) throws RuntimeException, JsonProcessingException {
+    public CaseData createDummyLiPC100CaseWithBody(String authorisation, String s2sToken, String jsonBody) throws RuntimeException,
+        JsonProcessingException {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails dummyCaseDetails = objectMapper.readValue(
                 jsonBody,
