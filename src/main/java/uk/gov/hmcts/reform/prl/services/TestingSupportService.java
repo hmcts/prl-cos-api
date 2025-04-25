@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -440,8 +439,7 @@ public class TestingSupportService {
         }
     }
 
-    public CaseData createDummyLiPC100CaseWithBody(String authorisation, String s2sToken, String jsonBody) throws RuntimeException,
-        JsonProcessingException {
+    public CaseData createDummyLiPC100CaseWithBody(String authorisation, String s2sToken, String jsonBody) throws Exception {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails dummyCaseDetails = objectMapper.readValue(
                 jsonBody,
