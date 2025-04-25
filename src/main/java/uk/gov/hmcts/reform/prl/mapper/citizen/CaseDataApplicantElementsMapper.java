@@ -155,6 +155,13 @@ public class CaseDataApplicantElementsMapper {
         if (Yes.equals(applicantDto.getLiveInRefuge())) {
             return KeepDetailsPrivate
                 .builder()
+                .otherPeopleKnowYourContactDetails(YesNoIDontKnow.dontKnow)
+                .confidentiality(YesOrNo.Yes)
+                .confidentialityList(List.of(
+                    ConfidentialityListEnum.email,
+                    ConfidentialityListEnum.address,
+                    ConfidentialityListEnum.phoneNumber)
+                )
                 .build();
         }
 
