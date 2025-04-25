@@ -111,8 +111,9 @@ public class CaseDataApplicantElementsMapper {
                     : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
                 .isEmailAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
                     : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-                .isPhoneNumberConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
-                    : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+                .isPhoneNumberConfidential(Yes.equals(applicantDto.getLiveInRefuge())
+                                               ? Yes
+                                               : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
                 .build();
@@ -154,8 +155,6 @@ public class CaseDataApplicantElementsMapper {
         if (Yes.equals(applicantDto.getLiveInRefuge())) {
             return KeepDetailsPrivate
                 .builder()
-                .confidentiality(Yes)
-                .confidentialityList(buildConfidentialityList(contactDetailsPrivateList))
                 .build();
         }
 
