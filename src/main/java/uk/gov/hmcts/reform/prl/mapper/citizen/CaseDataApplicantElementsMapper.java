@@ -55,7 +55,7 @@ public class CaseDataApplicantElementsMapper {
 
         List<Element<PartyDetails>> applicants = buildApplicants(c100RebuildApplicantDetailsElements);
         if (StringUtils.isNotEmpty(applicantPcqId)) {
-            checkAndupdatePcqIdForParty(applicants.get(0).getValue(), applicantPcqId);
+            checkAndupdatePcqIdForParty(applicants.getFirst().getValue(), applicantPcqId);
         }
         caseDataBuilder
             .applicants(applicants)
@@ -151,27 +151,36 @@ public class CaseDataApplicantElementsMapper {
 
     private static KeepDetailsPrivate buildKeepDetailsPrivate(ApplicantDto applicantDto,
                                                               List<String> contactDetailsPrivateList) {
-        if (Yes.equals(applicantDto.getLiveInRefuge())) {
-            return KeepDetailsPrivate
-                .builder()
-                .otherPeopleKnowYourContactDetails(YesNoIDontKnow.dontKnow)
-                .confidentiality(YesOrNo.Yes)
-                .confidentialityList(List.of(
-                    ConfidentialityListEnum.email,
-                    ConfidentialityListEnum.address,
-                    ConfidentialityListEnum.phoneNumber)
-                )
-                .build();
-        }
+        return Yes.equals(applicantDto.getLiveInRefuge())
+            ? buildKeepDetailsPrivateForRefugeApplicants()
+            : buildKeepDetailsPrivateFromConfidentialityData(applicantDto, contactDetailsPrivateList);
+    }
 
-        return KeepDetailsPrivate
-            .builder()
-            .otherPeopleKnowYourContactDetails(I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
-                                                   ? YesNoIDontKnow.dontKnow :
-                                                   YesNoIDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
-            .confidentiality(isNotEmpty(applicantDto.getStart())
-                                 ? YesOrNo.getValue(applicantDto.getStart())
-                                 : YesOrNo.getValue(applicantDto.getStartAlternative()))
+    private static KeepDetailsPrivate buildKeepDetailsPrivateForRefugeApplicants() {
+        return KeepDetailsPrivate.builder()
+            .otherPeopleKnowYourContactDetails(YesNoIDontKnow.dontKnow)
+            .confidentiality(YesOrNo.Yes)
+            .confidentialityList(List.of(
+                ConfidentialityListEnum.email,
+                ConfidentialityListEnum.address,
+                ConfidentialityListEnum.phoneNumber)
+            )
+            .build();
+    }
+
+    private static KeepDetailsPrivate buildKeepDetailsPrivateFromConfidentialityData(ApplicantDto applicantDto,
+                                                                                     List<String> contactDetailsPrivateList) {
+        return KeepDetailsPrivate.builder()
+            .otherPeopleKnowYourContactDetails(
+                I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
+                    ? YesNoIDontKnow.dontKnow
+                    : YesNoIDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown())
+            )
+            .confidentiality(
+                isNotEmpty(applicantDto.getStart())
+                    ? YesOrNo.getValue(applicantDto.getStart())
+                    : YesOrNo.getValue(applicantDto.getStartAlternative())
+            )
             .confidentialityList(buildConfidentialityList(contactDetailsPrivateList))
             .build();
     }
