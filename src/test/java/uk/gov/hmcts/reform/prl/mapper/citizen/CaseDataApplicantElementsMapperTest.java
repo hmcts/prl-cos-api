@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
-import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -23,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow.dontKnow;
+import static uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow.no;
+import static uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
@@ -59,6 +59,8 @@ class CaseDataApplicantElementsMapperTest {
     void shouldSetPartialConfidentialityBasedOnContactDetailsPrivate() {
         // given
         ApplicantDto applicant = buildBasicApplicantDto();
+        applicant.setDetailsKnown("yes");
+        applicant.setStartAlternative("Yes");
         applicant.setContactDetailsPrivate(new String[]{"email"});
         applicantDetails = buildApplicantDetailsElements(List.of(applicant));
 
@@ -71,6 +73,11 @@ class CaseDataApplicantElementsMapperTest {
         assertEquals(Yes, partyDetails.getIsEmailAddressConfidential());
         assertEquals(No, partyDetails.getIsAddressConfidential());
         assertEquals(No, partyDetails.getIsPhoneNumberConfidential());
+
+        assertEquals(yes, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
+        assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
+        assertEquals("email", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().getFirst().getId());
+        assertEquals(1, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().size());
     }
 
     @Test
@@ -88,25 +95,21 @@ class CaseDataApplicantElementsMapperTest {
 
         // then
         PartyDetails partyDetails = caseData.getApplicants().getFirst().getValue();
-        assertEquals(YesNoIDontKnow.no, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
-        assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
         assertEquals(Yes, partyDetails.getIsAddressConfidential());
         assertEquals(Yes, partyDetails.getIsEmailAddressConfidential());
         assertEquals(Yes, partyDetails.getIsPhoneNumberConfidential());
 
+        assertEquals(no, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
         assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
-        assertEquals(YesNoIDontKnow.no, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
+        assertEquals("email", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().getFirst().getId());
+        assertEquals("address", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().get(1).getId());
+        assertEquals("phoneNumber", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().get(2).getId());
+        assertEquals(3, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().size());
 
-        List<String> expectedIds = List.of("email", "address", "phoneNumber");
-        List<ConfidentialityListEnum> confidentialityList = partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList();
-
-        for (int i = 0; i < expectedIds.size(); i++) {
-            assertEquals(expectedIds.get(i), confidentialityList.get(i).getId());
-        }
     }
 
     @Test
-    void shouldNoValuesConfidentialityBasedOnContactDetailsPrivate() {
+    void shouldSetValuesNotConfidentialBasedOnContactDetailsPrivate() {
         // given
         ApplicantDto applicant = buildBasicApplicantDto();
         applicant.setDetailsKnown("Yes");
@@ -122,13 +125,13 @@ class CaseDataApplicantElementsMapperTest {
         assertEquals(No, partyDetails.getIsAddressConfidential());
         assertEquals(No, partyDetails.getIsPhoneNumberConfidential());
 
+        assertEquals(yes, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
         assertEquals(No, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
-        assertEquals(YesNoIDontKnow.yes, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
         assertThat(partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList()).isEmpty();
     }
 
     @Test
-    void shouldMarkAllDetailsConfidentialWhenLiveInRefuge() {
+    void shouldSetAllDetailsConfidentialWhenLiveInRefuge() {
         // given
         ApplicantDto applicant = buildBasicApplicantDto();
         applicant.setLiveInRefuge(Yes);
@@ -141,22 +144,16 @@ class CaseDataApplicantElementsMapperTest {
         // then
         PartyDetails partyDetails = caseData.getApplicants().getFirst().getValue();
 
-        assertEquals(dontKnow, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
-        assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
         assertEquals(Yes, partyDetails.getIsAddressConfidential());
         assertEquals(Yes, partyDetails.getIsEmailAddressConfidential());
         assertEquals(Yes, partyDetails.getIsPhoneNumberConfidential());
 
-        assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
         assertEquals(dontKnow, partyDetails.getResponse().getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
-
-        List<String> expectedIds = List.of("email", "address", "phoneNumber");
-        List<ConfidentialityListEnum> confidentialityList = partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList();
-
-        for (int i = 0; i < expectedIds.size(); i++) {
-            assertEquals(expectedIds.get(i), confidentialityList.get(i).getId());
-        }
-
+        assertEquals(Yes, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality());
+        assertEquals("email", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().getFirst().getId());
+        assertEquals("address", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().get(1).getId());
+        assertEquals("phoneNumber", partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().get(2).getId());
+        assertEquals(3, partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().size());
     }
 
     @Test
