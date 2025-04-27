@@ -151,7 +151,7 @@ public class CaseDataApplicantElementsMapper {
 
     private static KeepDetailsPrivate buildKeepDetailsPrivate(ApplicantDto applicantDto,
                                                               List<String> contactDetailsPrivateList) {
-        return Yes.equals(applicantDto.getLiveInRefuge())
+        return applicantDto.getLiveInRefuge().equals(Yes)
             ? buildKeepDetailsPrivateForRefugeApplicants()
             : buildKeepDetailsPrivateFromConfidentialityData(applicantDto, contactDetailsPrivateList);
     }
@@ -159,7 +159,7 @@ public class CaseDataApplicantElementsMapper {
     private static KeepDetailsPrivate buildKeepDetailsPrivateForRefugeApplicants() {
         return KeepDetailsPrivate.builder()
             .otherPeopleKnowYourContactDetails(YesNoIDontKnow.dontKnow)
-            .confidentiality(YesOrNo.Yes)
+            .confidentiality(Yes)
             .confidentialityList(List.of(
                 ConfidentialityListEnum.email,
                 ConfidentialityListEnum.address,
@@ -172,7 +172,7 @@ public class CaseDataApplicantElementsMapper {
                                                                                      List<String> contactDetailsPrivateList) {
         return KeepDetailsPrivate.builder()
             .otherPeopleKnowYourContactDetails(
-                I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
+                applicantDto.getDetailsKnown().equalsIgnoreCase(I_DONT_KNOW)
                     ? YesNoIDontKnow.dontKnow
                     : YesNoIDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown())
             )
