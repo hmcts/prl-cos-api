@@ -327,7 +327,7 @@ public class ManageDocumentsService {
         }
     }
 
-    QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
+    private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
 
         Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);

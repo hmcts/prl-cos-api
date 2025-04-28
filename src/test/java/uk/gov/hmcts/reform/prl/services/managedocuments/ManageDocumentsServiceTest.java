@@ -75,7 +75,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1065,12 +1064,25 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testMoveDocumentsToRespectiveCategoriesNewSendAsyncNotification() {
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No)
+            .isRestricted(YesOrNo.No)
+            .categoryId("test")
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentFileName("NonConfidential_test.pdf")
+                          .documentUrl("http://test.link")
+                          .documentBinaryUrl("http://test.link")
+                          .build())
+            .build();
+
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .documentCategories(DynamicList.builder()
+                                    .value(DynamicListElement.builder().code("test").label("test").build())
+                                    .build())
             .isRestricted(YesOrNo.No)
             .isConfidential(YesOrNo.No)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .document(quarantineLegalDoc.getDocument())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
@@ -1078,15 +1090,6 @@ public class ManageDocumentsServiceTest {
 
         manageDocumentsElement = element(manageDocuments);
 
-        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName("NonConfidential_test.pdf")
-            .documentBinaryUrl("http://test.link")
-            .documentUrl("http://test.link").build();
-
-        HashMap hashMap = new HashMap();
-        hashMap.put("testDocument", doc);
-
-        quarantineLegalDocElement = element(quarantineConfidentialDoc);
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
@@ -1094,36 +1097,30 @@ public class ManageDocumentsServiceTest {
                                            .manageDocuments(List.of(manageDocumentsElement))
                                            .build())
             .build();
+
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
-        when(systemUserService.getSysUserToken()).thenReturn("test");
-        when(authTokenGenerator.generate()).thenReturn("test");
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("test-token");
 
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
 
-        when(caseDocumentClient
-                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
             .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        when(caseDocumentClientApi.getDocumentBinary(anyString(), anyString(), any()))
             .thenReturn(expectedResponse);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentFileName("test")
-                          .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
-            .isRestricted(YesOrNo.No).categoryId("test").build();
 
-        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsStaff);
-
-        doReturn(quarantineLegalDoc)
-            .when(manageDocumentsService)
-            .convertQuarantineDocumentToRightCategoryDocument(any(), any());
+        when(objectMapper.convertValue(any(Map.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
+            .thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper))
+            .thenReturn(caseData);
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(userDetailsStaff);
 
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             quarantineLegalDoc,
@@ -1139,7 +1136,6 @@ public class ManageDocumentsServiceTest {
             any()
         );
     }
-
 
     @Test
     public void testCopyDocumentIfRestricted() {
