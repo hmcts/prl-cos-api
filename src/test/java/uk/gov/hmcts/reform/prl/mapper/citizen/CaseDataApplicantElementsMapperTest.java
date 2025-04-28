@@ -143,7 +143,6 @@ class CaseDataApplicantElementsMapperTest {
 
         // then
         PartyDetails partyDetails = caseData.getApplicants().getFirst().getValue();
-
         assertEquals(Yes, partyDetails.getIsAddressConfidential());
         assertEquals(Yes, partyDetails.getIsEmailAddressConfidential());
         assertEquals(Yes, partyDetails.getIsPhoneNumberConfidential());
