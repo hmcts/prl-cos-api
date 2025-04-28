@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -1062,6 +1063,39 @@ public class CallbackController {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/case-flags/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Trigger event to close external WA Task if all flags are reviewed")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse caseFlagSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Submitted");
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+            boolean externalReviewPendingForCaseType = allPartyFlags.isExternalReviewPendingForCaseType(caseData);
+
+            if (!externalReviewPendingForCaseType) {
+                log.info("Trigger event to close the task");
+            } else {
+                log.info("Don't trigger event");
+            }
+
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(caseData.toMap(objectMapper))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
