@@ -439,6 +439,24 @@ public class TestingSupportService {
         }
     }
 
+    public CaseData createDummyLiPC100CaseWithBody(String authorisation, String s2sToken, String jsonBody) throws Exception {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails dummyCaseDetails = objectMapper.readValue(
+                jsonBody,
+                CaseDetails.class
+            );
+            CaseDetails caseDetails = citizenCaseService.createCase(CaseUtils.getCaseData(
+                dummyCaseDetails,
+                objectMapper
+            ), authorisation);
+            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     private boolean isAuthorized(String authorisation, String s2sToken) {
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
