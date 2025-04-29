@@ -321,7 +321,7 @@ public class ManageDocumentsService {
 
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
-            notificationService.sendNotifications(caseData,
+            notificationService.sendNotificationsAsync(caseData,
                                                   quarantineLegalDoc,
                                                   userRole);
         }
