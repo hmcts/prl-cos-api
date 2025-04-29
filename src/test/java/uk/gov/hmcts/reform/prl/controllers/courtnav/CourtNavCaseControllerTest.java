@@ -14,10 +14,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -25,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +38,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -99,7 +105,6 @@ public class CourtNavCaseControllerTest {
         assertEquals(201, response.getStatusCodeValue());
 
     }
-
 
     @Test
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() throws Exception {
@@ -224,5 +229,39 @@ public class CourtNavCaseControllerTest {
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
+    }
+
+    @Test
+    public void shouldCreateCaseWhenFamilyHomeListIsEmpty() throws Exception {
+        Home testHome = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(Collections.emptyList()).build();
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .home(testHome)
+            .build();
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                           ApplicantAge.eighteenOrOlder).build())
+                       .theHome(TheHome.builder()
+                                    .wantToHappenWithFamilyHome(Collections.emptyList())
+                                    .build())
+                       .build())
+            .build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+
+        ResponseEntity<Object> response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(201,  response.getStatusCode().value());
     }
 }
