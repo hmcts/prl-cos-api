@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestingSupportController;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -93,6 +92,14 @@ public class TestingSupportControllerTest {
     }
 
     @Test
+    public void testCreateDummyCitizenCaseWithBody() throws Exception {
+        String testBody = "test body";
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.createDummyCitizenCaseWithBody(authToken, s2sToken, testBody);
+        verify(testingSupportService, times(1)).createDummyLiPC100CaseWithBody(Mockito.anyString(), Mockito.anyString(), Mockito.matches(testBody));
+    }
+
+    @Test
     public void testFillRespondentTaskList() throws Exception {
         testingSupportController.fillRespondentTaskList(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).initiateRespondentResponseCreation(Mockito.anyString(), Mockito.any(
@@ -138,11 +145,21 @@ public class TestingSupportControllerTest {
     }
 
     @Test
-    public void testExeptionForCreateDummyCitizenCase() {
+    public void testExceptionForCreateDummyCitizenCase() {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
             testingSupportController.createDummyCitizenCase(authToken, s2sToken);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForCreateDummyCitizenCaseWithBody() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> testingSupportController.createDummyCitizenCaseWithBody(
+            authToken,
+            s2sToken,
+            "test body"
+        ), RuntimeException.class, "Invalid Client");
     }
 
     @Test
