@@ -629,6 +629,31 @@ public class TestingSupportServiceTest {
     }
 
     @Test
+    public void testCreateDummyLiPC100CaseWithBody() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_SOLICITOR_APPLICATION.getId())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
+        when(caseService.createCase(Mockito.any(), Mockito.anyString())).thenReturn(caseDetails);
+
+        CaseData updatedCaseData = testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+        assertEquals(12345678L, updatedCaseData.getId());
+    }
+
+    @Test
     public void testAboutToSubmitSolicitorCaseCreationForAdminWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
@@ -772,6 +797,24 @@ public class TestingSupportServiceTest {
     public void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
         when(authorisationService.authoriseUser(anyString())).thenReturn(false);
         testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100CaseWithBody_InvalidClient_LdDisabled() throws Exception {
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100CaseWithBody_InvalidS2S() throws Exception {
+        when(authorisationService.authoriseService(anyString())).thenReturn(false);
+        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100CaseWithBody_InvalidAuthorisation() throws Exception {
+        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        testingSupportService.createDummyLiPC100CaseWithBody(auth, s2sAuth, "test body");
     }
 
     @Test(expected = RuntimeException.class)
