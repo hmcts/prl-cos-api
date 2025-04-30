@@ -16,9 +16,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.languagecontext.UserLanguage;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,19 +53,6 @@ public class ReviewAdditionalApplicationServiceTest {
 
     @Before
     public void setup() {
-
-        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
-            .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                         .applicationType(
-                                             OtherApplicationType
-                                                 .D89_COURT_BAILIFF)
-                                         .build())
-            .build();
-
-        Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement = Element.<AdditionalApplicationsBundle>builder()
-            .id(UUID.randomUUID())
-            .value(additionalApplicationsBundle)
-            .build();
 
     }
 
@@ -92,6 +86,60 @@ public class ReviewAdditionalApplicationServiceTest {
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData, authToken, null,
                                                                                          REVIEW_ADDITIONAL_APPLICATION.getId());
+        assertNotNull(caseDataMap.get(CASE_TYPE_OF_APPLICATION));
+        assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
+    }
+
+    @Test
+    public void testPopulateReviewAdditionalApplicationWhenClientContextIsNotNull() throws Exception {
+        UUID applicationUId = UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b");
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                .userLanguage(UserLanguage.builder().language("en").build())
+                .userTask(UserTask.builder()
+                    .completeTask(true)
+                    .taskData(TaskData.builder()
+                        .id("test")
+                        .name("test")
+                        .additionalProperties(AdditionalProperties.builder()
+                            .orderId(UUID.randomUUID().toString())
+                            .additionalApplicationId(applicationUId.toString())
+                            .build())
+                        .build())
+                    .build())
+                .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        String clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicantName("test")
+                                         .applicationType(
+                                             OtherApplicationType
+                                                 .D89_COURT_BAILIFF)
+                                         .build())
+            .build();
+
+        Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement = customElement(additionalApplicationsBundle);
+        List<Element<AdditionalApplicationsBundle>> elementList = new ArrayList<>();
+        elementList.add(additionalApplicationsBundleElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .additionalApplicationsBundle(elementList)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .respondents(List.of(respondents))
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
+        Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+            caseData, authToken, clientContextCoded,
+            REVIEW_ADDITIONAL_APPLICATION.getId());
         assertNotNull(caseDataMap.get(CASE_TYPE_OF_APPLICATION));
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
