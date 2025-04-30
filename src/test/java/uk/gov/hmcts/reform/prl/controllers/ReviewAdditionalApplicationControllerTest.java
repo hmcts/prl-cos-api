@@ -47,8 +47,8 @@ public class ReviewAdditionalApplicationControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
     public static Map<String, Object> clientContext = new HashMap<>();
 
     @Before
@@ -84,12 +84,12 @@ public class ReviewAdditionalApplicationControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData,
-                                                                                    authToken,
+                                                                                    AUTH_TOKEN,
                                                                                     "clcx",
                                                                                     Event.REVIEW_ADDITIONAL_APPLICATION.getId()))
             .thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = reviewAdditionalApplicationController
-            .populateReviewAdditionalApplication(authToken,s2sToken,"clcx", callbackRequest);
+            .populateReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 }

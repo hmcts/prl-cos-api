@@ -34,6 +34,7 @@ public class ReviewAdditionalApplicationService {
         );
 
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataMap.put("selectedAdditionalApplicationsBundle", selectedAdditionalApplicationsBundle);
         return caseDataMap;
     }
 
