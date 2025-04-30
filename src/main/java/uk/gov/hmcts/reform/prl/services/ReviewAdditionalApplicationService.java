@@ -37,7 +37,7 @@ public class ReviewAdditionalApplicationService {
         return caseDataMap;
     }
 
-    public AdditionalApplicationsBundle getSelectedAdditionalApplicationDetails(
+    private AdditionalApplicationsBundle getSelectedAdditionalApplicationDetails(
                                             List<Element<AdditionalApplicationsBundle>> additionalApplicationCollection,
                                             String clientContext,
                                             String eventId) {
