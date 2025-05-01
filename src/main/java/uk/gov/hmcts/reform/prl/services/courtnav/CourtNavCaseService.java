@@ -133,7 +133,7 @@ public class CourtNavCaseService {
             QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
                 document.getOriginalFilename(),
                 tempCaseData,
-                uploadResponse.getDocuments().get(0),
+                uploadResponse.getDocuments().getFirst(),
                 typeOfDocument
             );
 
@@ -306,5 +306,24 @@ public class CourtNavCaseService {
         );
         log.info("Common component setup for NoC and case flags is completed");
     }
+
+    public void validateCaseManagementLocation(CaseData caseData) {
+        var loc = caseData.getCaseManagementLocation();
+
+        if (loc == null
+            || isBlank(loc.getRegion())
+            || isBlank(loc.getBaseLocation())
+            || isBlank(loc.getRegionName())
+            || isBlank(loc.getBaseLocationName())) {
+
+            log.warn("Case management location must include non-blank region, baseLocation, regionName, and baseLocationName");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Case management location is invalid.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
 }
 
