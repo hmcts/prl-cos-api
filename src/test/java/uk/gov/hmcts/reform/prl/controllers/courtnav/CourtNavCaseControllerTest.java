@@ -108,30 +108,30 @@ public class CourtNavCaseControllerTest {
         assertEquals(CREATED, response.getStatusCode());
     }
 
-        @Test
-        public void shouldReturn422WhenCaseManagementLocationIsInvalid() throws Exception {
-            CaseData caseData = CaseData.builder()
-                .caseManagementLocation(CaseManagementLocation.builder()
-                                            .region("")
-                                            .regionName("North West")
-                                            .baseLocation("701411")
-                                            .baseLocationName("Manchester")
-                                            .build())
-                .build();
+    @Test
+    public void shouldReturn422WhenCaseManagementLocationIsInvalid() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("")
+                                        .regionName("North West")
+                                        .baseLocation("701411")
+                                        .baseLocationName("Manchester")
+                                        .build())
+            .build();
 
-            when(authorisationService.authoriseService(any())).thenReturn(true);
-            when(authorisationService.authoriseUser(any())).thenReturn(true);
-            when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(caseData);
-            doThrow(new ResponseStatusException(UNPROCESSABLE_ENTITY, "Case management location is invalid."))
-                .when(courtNavCaseService).validateCaseManagementLocation(any());
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(caseData);
+        doThrow(new ResponseStatusException(UNPROCESSABLE_ENTITY, "Case management location is invalid."))
+            .when(courtNavCaseService).validateCaseManagementLocation(any());
 
-            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-                courtNavCaseController.createCase("Bearer:test", "s2s token", CourtNavFl401.builder().build());
-            });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            courtNavCaseController.createCase("Bearer:test", "s2s token", CourtNavFl401.builder().build());
+        });
 
-            assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
-            assertEquals("Case management location is invalid.", exception.getReason());
-        }
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals("Case management location is invalid.", exception.getReason());
+    }
 
     @Test
     public void shouldCreateCaseWhenCaseManagementLocationIsValid() throws Exception {

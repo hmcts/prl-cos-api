@@ -288,8 +288,8 @@ public class CourtNavCaseServiceTest {
                                         .baseLocation("701411")
                                         .regionName("North West")
                                         .baseLocationName("Manchester")
-                                        .regionId(null) // allowed to be null
-                                        .baseLocationId(null) // allowed to be null
+                                        .regionId(null)
+                                        .baseLocationId(null)
                                         .build())
             .build();
 
@@ -314,8 +314,8 @@ public class CourtNavCaseServiceTest {
                                         .baseLocation("701411")
                                         .regionName("North West")
                                         .baseLocationName("Manchester")
-                                        .regionId(null) // allowed to be null
-                                        .baseLocationId(null) // allowed to be null
+                                        .regionId(null)
+                                        .baseLocationId(null)
                                         .build())
             .build();
 
@@ -333,8 +333,8 @@ public class CourtNavCaseServiceTest {
                                         .baseLocation("")
                                         .regionName("North West")
                                         .baseLocationName("Manchester")
-                                        .regionId(null) // allowed to be null
-                                        .baseLocationId(null) // allowed to be null
+                                        .regionId(null)
+                                        .baseLocationId(null)
                                         .build())
             .build();
 
@@ -352,8 +352,8 @@ public class CourtNavCaseServiceTest {
                                         .baseLocation("701411")
                                         .regionName("")
                                         .baseLocationName("Manchester")
-                                        .regionId(null) // allowed to be null
-                                        .baseLocationId(null) // allowed to be null
+                                        .regionId(null)
+                                        .baseLocationId(null)
                                         .build())
             .build();
 
@@ -371,8 +371,8 @@ public class CourtNavCaseServiceTest {
                                         .baseLocation("701411")
                                         .regionName("North West")
                                         .baseLocationName("")
-                                        .regionId(null) // allowed to be null
-                                        .baseLocationId(null) // allowed to be null
+                                        .regionId(null)
+                                        .baseLocationId(null)
                                         .build())
             .build();
 
