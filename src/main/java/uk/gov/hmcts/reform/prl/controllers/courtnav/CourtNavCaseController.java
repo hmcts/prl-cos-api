@@ -55,6 +55,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "201", description = "Case is created"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "422", description = "Unprocessable Entity: Invalid case management location"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Object> createCase(
@@ -66,6 +67,7 @@ public class CourtNavCaseController {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
             CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData, authorisation);
+            courtNavCaseService.validateCaseManagementLocation(caseData);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 authorisation,
                 caseData
