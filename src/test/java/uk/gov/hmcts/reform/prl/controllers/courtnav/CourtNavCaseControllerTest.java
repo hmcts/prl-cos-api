@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
@@ -37,15 +38,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseControllerTest {
 
-    private static final String FILE_NAME = "fileName";
-    private static final String CONTENT_TYPE = "application/json";
     private static final String AUTH = "auth";
 
     @InjectMocks
@@ -102,12 +105,58 @@ public class CourtNavCaseControllerTest {
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
 
         ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(CREATED, response.getStatusCode());
+    }
 
+        @Test
+        public void shouldReturn422WhenCaseManagementLocationIsInvalid() throws Exception {
+            CaseData caseData = CaseData.builder()
+                .caseManagementLocation(CaseManagementLocation.builder()
+                                            .region("")
+                                            .regionName("North West")
+                                            .baseLocation("701411")
+                                            .baseLocationName("Manchester")
+                                            .build())
+                .build();
+
+            when(authorisationService.authoriseService(any())).thenReturn(true);
+            when(authorisationService.authoriseUser(any())).thenReturn(true);
+            when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(caseData);
+            doThrow(new ResponseStatusException(UNPROCESSABLE_ENTITY, "Case management location is invalid."))
+                .when(courtNavCaseService).validateCaseManagementLocation(any());
+
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+                courtNavCaseController.createCase("Bearer:test", "s2s token", CourtNavFl401.builder().build());
+            });
+
+            assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
+            assertEquals("Case management location is invalid.", exception.getReason());
+        }
+
+    @Test
+    public void shouldCreateCaseWhenCaseManagementLocationIsValid() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("4")
+                                        .regionName("North West")
+                                        .baseLocation("701411")
+                                        .baseLocationName("Manchester")
+                                        .build())
+            .build();
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(fl401ApplicationMapper.mapCourtNavData(any(), any())).thenReturn(caseData);
+        when(courtNavCaseService.createCourtNavCase(any(), any()))
+            .thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+
+        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", CourtNavFl401.builder().build());
+
+        assertEquals(CREATED, response.getStatusCode());
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() throws Exception {
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
@@ -124,12 +173,11 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
-
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() throws Exception {
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
@@ -147,8 +195,7 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
-
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test
@@ -183,7 +230,6 @@ public class CourtNavCaseControllerTest {
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
         assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
-
     }
 
     @Test(expected = ResponseStatusException.class)
@@ -210,8 +256,7 @@ public class CourtNavCaseControllerTest {
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
-        assertEquals(200, response.getStatusCodeValue());
-
+        assertEquals(OK, response.getStatusCode());
     }
 
     @Test(expected = ResponseStatusException.class)
@@ -262,6 +307,6 @@ public class CourtNavCaseControllerTest {
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
 
         ResponseEntity<Object> response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(201,  response.getStatusCode().value());
+        assertEquals(CREATED, response.getStatusCode());
     }
 }

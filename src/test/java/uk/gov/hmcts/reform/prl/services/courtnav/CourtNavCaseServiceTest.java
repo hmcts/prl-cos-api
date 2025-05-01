@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -45,6 +46,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -57,15 +61,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
-    private static final String systemUpdateUser = "system User";
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
-    private final String eventName = "system-update";
-    private final String systemUserId = "systemUserID";
     private final String eventToken = "eventToken";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-    private static final String randomAlphaNumeric = "A1b2c3EFGH";
+    private static final String RANDOM_ALPHA_NUMERIC = "A1b2c3EFGH";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -281,11 +280,113 @@ public class CourtNavCaseServiceTest {
                                Mockito.any(CaseData.class));
     }
 
+    @Test
+    public void shouldPassWhenAllRequiredFieldsAreSet() {
+        caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("4")
+                                        .baseLocation("701411")
+                                        .regionName("North West")
+                                        .baseLocationName("Manchester")
+                                        .regionId(null) // allowed to be null
+                                        .baseLocationId(null) // allowed to be null
+                                        .build())
+            .build();
+
+        assertDoesNotThrow(() -> courtNavCaseService.validateCaseManagementLocation(caseData));
+    }
+
+    @Test
+    public void shouldFailWhenCaseManagementLocationIsNull() {
+        caseData = CaseData.builder().caseManagementLocation(null).build();
+
+        var exception = assertThrows(ResponseStatusException.class,
+                                     () -> courtNavCaseService.validateCaseManagementLocation(caseData));
+
+        assertEquals(422, exception.getStatusCode().value());
+    }
+
+    @Test
+    public void shouldFailWhenRegionIsBlank() {
+        caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("")
+                                        .baseLocation("701411")
+                                        .regionName("North West")
+                                        .baseLocationName("Manchester")
+                                        .regionId(null) // allowed to be null
+                                        .baseLocationId(null) // allowed to be null
+                                        .build())
+            .build();
+
+        var exception = assertThrows(ResponseStatusException.class,
+                                     () -> courtNavCaseService.validateCaseManagementLocation(caseData));
+
+        assertEquals(422, exception.getStatusCode().value());
+    }
+
+    @Test
+    public void shouldFailWhenBaseLocationIsBlank() {
+        caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("4")
+                                        .baseLocation("")
+                                        .regionName("North West")
+                                        .baseLocationName("Manchester")
+                                        .regionId(null) // allowed to be null
+                                        .baseLocationId(null) // allowed to be null
+                                        .build())
+            .build();
+
+        var exception = assertThrows(ResponseStatusException.class,
+                                     () -> courtNavCaseService.validateCaseManagementLocation(caseData));
+
+        assertEquals(422, exception.getStatusCode().value());
+    }
+
+    @Test
+    public void shouldFailWhenRegionNameIsBlank() {
+        caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("4")
+                                        .baseLocation("701411")
+                                        .regionName("")
+                                        .baseLocationName("Manchester")
+                                        .regionId(null) // allowed to be null
+                                        .baseLocationId(null) // allowed to be null
+                                        .build())
+            .build();
+
+        var exception = assertThrows(ResponseStatusException.class,
+                                     () -> courtNavCaseService.validateCaseManagementLocation(caseData));
+
+        assertEquals(422, exception.getStatusCode().value());
+    }
+
+    @Test
+    public void shouldFailWhenBaseLocationNameIsBlank() {
+        caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("4")
+                                        .baseLocation("701411")
+                                        .regionName("North West")
+                                        .baseLocationName("")
+                                        .regionId(null) // allowed to be null
+                                        .baseLocationId(null) // allowed to be null
+                                        .build())
+            .build();
+
+        var exception = assertThrows(ResponseStatusException.class,
+                                     () -> courtNavCaseService.validateCaseManagementLocation(caseData));
+
+        assertEquals(422, exception.getStatusCode().value());
+    }
+
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
-        binaryLink.href = randomAlphaNumeric;
+        binaryLink.href = RANDOM_ALPHA_NUMERIC;
         Document.Link selfLink = new Document.Link();
-        selfLink.href = randomAlphaNumeric;
+        selfLink.href = RANDOM_ALPHA_NUMERIC;
 
         Document.Links links = new Document.Links();
         links.binary = binaryLink;
@@ -293,7 +394,7 @@ public class CourtNavCaseServiceTest {
 
         Document document = Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphaNumeric;
+        document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
     }
