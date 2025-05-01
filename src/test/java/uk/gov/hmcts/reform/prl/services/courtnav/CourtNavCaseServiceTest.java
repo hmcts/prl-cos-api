@@ -54,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -303,7 +304,7 @@ public class CourtNavCaseServiceTest {
         var exception = assertThrows(ResponseStatusException.class,
                                      () -> courtNavCaseService.validateCaseManagementLocation(caseData));
 
-        assertEquals(422, exception.getStatusCode().value());
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
     }
 
     @Test
@@ -322,7 +323,7 @@ public class CourtNavCaseServiceTest {
         var exception = assertThrows(ResponseStatusException.class,
                                      () -> courtNavCaseService.validateCaseManagementLocation(caseData));
 
-        assertEquals(422, exception.getStatusCode().value());
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
     }
 
     @Test
@@ -341,7 +342,7 @@ public class CourtNavCaseServiceTest {
         var exception = assertThrows(ResponseStatusException.class,
                                      () -> courtNavCaseService.validateCaseManagementLocation(caseData));
 
-        assertEquals(422, exception.getStatusCode().value());
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
     }
 
     @Test
@@ -360,7 +361,7 @@ public class CourtNavCaseServiceTest {
         var exception = assertThrows(ResponseStatusException.class,
                                      () -> courtNavCaseService.validateCaseManagementLocation(caseData));
 
-        assertEquals(422, exception.getStatusCode().value());
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
     }
 
     @Test
@@ -379,7 +380,7 @@ public class CourtNavCaseServiceTest {
         var exception = assertThrows(ResponseStatusException.class,
                                      () -> courtNavCaseService.validateCaseManagementLocation(caseData));
 
-        assertEquals(422, exception.getStatusCode().value());
+        assertEquals(UNPROCESSABLE_ENTITY, exception.getStatusCode());
     }
 
     public static Document testDocument() {

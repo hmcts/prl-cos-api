@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,6 +43,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -110,14 +112,14 @@ public class CourtNavCaseService {
             );
             StartEventResponse startEventResponse = checkIfCasePresent(caseId, authorisation, eventRequestData);
             if (startEventResponse == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+                throw new ResponseStatusException(NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
             int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
             if (tempCaseData.getNumberOfAttachments() != null
                 && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                throw new ResponseStatusException(BAD_REQUEST);
             }
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
@@ -174,7 +176,7 @@ public class CourtNavCaseService {
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(BAD_REQUEST);
         }
     }
 
@@ -317,7 +319,7 @@ public class CourtNavCaseService {
             || isBlank(loc.getBaseLocationName())) {
 
             log.warn("Case management location must include non-blank region, baseLocation, regionName, and baseLocationName");
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Case management location is invalid.");
+            throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Case management location is invalid.");
         }
     }
 
