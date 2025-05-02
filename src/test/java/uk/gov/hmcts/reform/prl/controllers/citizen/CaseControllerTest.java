@@ -67,11 +67,11 @@ public class CaseControllerTest {
     private final String testValue = "testValue";
     private final String invalidClient = "Invalid Client";
     private final String testEmail = "test@email.com";
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String serviceAuthToken = "Bearer TestServToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String SERVICE_AUTH_TOKEN = "Bearer TestServToken";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -83,115 +83,115 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testGetCase() {
+    void testGetCase() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
-        when(authorisationService.authoriseService(serviceAuthToken)).thenReturn(true);
-        UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, serviceAuthToken);
+        when(caseService.getCase(AUTH_TOKEN, caseId)).thenReturn(caseDetails);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(true);
+        when(authorisationService.authoriseService(SERVICE_AUTH_TOKEN)).thenReturn(true);
+        UiCitizenCaseData caseData1 = caseController.getCase(caseId, AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
-        assertEquals(true, authorisationService.authoriseUser(authToken));
-        assertEquals(true, authorisationService.authoriseService(serviceAuthToken));
-        assertEquals(serviceAuthToken, authTokenGenerator.generate());
+        assertEquals(true, authorisationService.authoriseUser(AUTH_TOKEN));
+        assertEquals(true, authorisationService.authoriseService(SERVICE_AUTH_TOKEN));
+        assertEquals(SERVICE_AUTH_TOKEN, authTokenGenerator.generate());
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
     }
 
     @Test
-    public void testGetCaseInvalidClient() {
+    void testGetCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.getCase(caseId, authToken, serviceAuthToken)
+            caseController.getCase(caseId, AUTH_TOKEN, SERVICE_AUTH_TOKEN)
         );
 
         assertEquals(invalidClient, exception.getMessage());
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
     }
 
     @Test
-    public void testGetCaseWithHearing() {
+    void testGetCaseWithHearing() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(true);
-        when(caseService.getCaseWithHearing(authToken, caseId, testValue)).thenReturn(CaseDataWithHearingResponse.builder().build());
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(caseService.getCaseWithHearing(AUTH_TOKEN, caseId, testValue)).thenReturn(CaseDataWithHearingResponse.builder().build());
 
-        assertNotNull(caseController.retrieveCaseWithHearing(caseId, testValue, authToken, serviceAuthToken));
+        assertNotNull(caseController.retrieveCaseWithHearing(caseId, testValue, AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test
-    public void testGetCaseWithHearingInvalidClient() {
+    void testGetCaseWithHearingInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.retrieveCaseWithHearing(caseId, testValue, authToken, serviceAuthToken)
+            caseController.retrieveCaseWithHearing(caseId, testValue, AUTH_TOKEN, SERVICE_AUTH_TOKEN)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
 
     }
 
     @Test
-    public void testUpdateCaseInvalidClient() {
+    void testUpdateCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.updateCase(caseData, caseId, testValue, authToken, serviceAuthToken, testValue)
+            caseController.updateCase(caseData, caseId, testValue, AUTH_TOKEN, SERVICE_AUTH_TOKEN, testValue)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test()
-    public void testRetrieveCaseInvalidClient() {
+    void testRetrieveCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.retrieveCases(caseId, caseId, authToken, serviceAuthToken)
+            caseController.retrieveCases(caseId, caseId, AUTH_TOKEN, SERVICE_AUTH_TOKEN)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test()
-    public void testRetrieveCitizenCaseInvalidClient() {
+    void testRetrieveCitizenCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.retrieveCitizenCases(authToken, serviceAuthToken)
+            caseController.retrieveCitizenCases(AUTH_TOKEN, SERVICE_AUTH_TOKEN)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test
-    public void shouldCreateCase() {
+    void shouldCreateCase() {
 
         caseData = CaseData.builder()
             .id(caseIdNumber)
@@ -203,32 +203,32 @@ public class CaseControllerTest {
             caseIdNumber).data(stringObjectMap).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(true);
+        when(caseService.createCase(caseData, AUTH_TOKEN)).thenReturn(caseDetails);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(true);
 
-        CaseData actualCaseData = caseController.createCase(authToken, serviceAuthToken, caseData);
+        CaseData actualCaseData = caseController.createCase(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseData);
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
         assertThat(actualCaseData).isEqualTo(caseData);
     }
 
     @Test()
-    public void testCreateCaseInvalidClient() {
+    void testCreateCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.createCase(authToken, serviceAuthToken, caseData)
+            caseController.createCase(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseData)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test
-    public void testGetAllHearingsForCitizenCase() {
+    void testGetAllHearingsForCitizenCase() {
 
         CaseHearing caseHearing = new CaseHearing();
 
@@ -250,60 +250,60 @@ public class CaseControllerTest {
         Hearings hearings = new Hearings();
         hearings.setCaseHearings(caseHearingsList);
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(true);
-        when(caseController.getAllHearingsForCitizenCase(authToken, serviceAuthToken, caseId)).thenReturn(hearings);
-        when(hearingService.getHearings(authToken, caseId)).thenReturn(hearings);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseId)).thenReturn(hearings);
+        when(hearingService.getHearings(AUTH_TOKEN, caseId)).thenReturn(hearings);
 
         Hearings hearingForCase = caseController.getAllHearingsForCitizenCase(
-            authToken, serviceAuthToken, caseId);
+            AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseId);
 
         assertThat(hearingForCase.getCaseHearings()).hasSize(1);
     }
 
     @Test()
-    public void testGetAllHearingsForCaseInvalidClient() {
+    void testGetAllHearingsForCaseInvalidClient() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.getAllHearingsForCitizenCase(authToken, serviceAuthToken, testValue)
+            caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERVICE_AUTH_TOKEN, testValue)
         );
 
-        verify(authorisationService).isAuthorized(authToken, serviceAuthToken);
+        verify(authorisationService).isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN);
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
     }
 
     @Test
-    public void testFetchIdamAmRoles() {
+    void testFetchIdamAmRoles() {
         String emailId = testEmail;
         Map<String, String> amRoles = new HashMap<>();
         amRoles.put("amRoles","case-worker");
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(caseService.fetchIdamAmRoles(AUTH_TOKEN, emailId)).thenReturn(amRoles);
 
         Map<String, String> roles = caseController.fetchIdamAmRoles(
-            authToken, emailId);
+            AUTH_TOKEN, emailId);
         assertFalse(roles.isEmpty());
     }
 
     @Test
-    public void testFetchIdamAmRolesFails() {
+    void testFetchIdamAmRolesFails() {
 
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            caseController.fetchIdamAmRoles(authToken, testEmail)
+            caseController.fetchIdamAmRoles(AUTH_TOKEN, testEmail)
         );
 
         assertEquals(invalidClient, exception.getMessage());
-        assertFalse(authorisationService.isAuthorized(authToken, serviceAuthToken));
-        verify(authorisationService).authoriseUser(authToken);
+        assertFalse(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN));
+        verify(authorisationService).authoriseUser(AUTH_TOKEN);
     }
 
     @Test
-    public void shouldCreateC100Case() {
+    void shouldCreateC100Case() {
 
         caseData = CaseData.builder()
             .id(caseIdNumber)
@@ -316,16 +316,15 @@ public class CaseControllerTest {
             caseIdNumber).data(stringObjectMap).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
-        when(authorisationService.isAuthorized(authToken, serviceAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(caseService.createCase(caseData, AUTH_TOKEN)).thenReturn(caseDetails);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
         when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
 
-        CaseData actualCaseData = caseController.createCase(authToken, serviceAuthToken, caseData);
+        CaseData actualCaseData = caseController.createCase(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseData);
 
         assertThat(actualCaseData).isEqualTo(caseData);
-        assertEquals(serviceAuthToken, authTokenGenerator.generate());
+        assertEquals(SERVICE_AUTH_TOKEN, authTokenGenerator.generate());
         verify(authTokenGenerator).generate();
     }
-
 }
