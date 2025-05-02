@@ -67,13 +67,13 @@ public class C100RespondentSolicitorTaskListControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String BEARER_TEST_AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TEST_AUTH_TOKEN = "s2s AuthToken";
 
     Map<String, Object> c7DraftMap = new HashMap<>();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
@@ -109,8 +109,8 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
+        //DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
+        //DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
@@ -135,7 +135,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    void testHandleAboutToSubmit() throws {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -154,7 +154,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
         )).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorTaskListController.handleSubmitted(
-            callbackRequest, authToken,s2sToken
+            callbackRequest, BEARER_TEST_AUTH_TOKEN,S2S_TEST_AUTH_TOKEN
         );
 
         assertTrue(response.getData().containsKey("state"));
@@ -173,9 +173,9 @@ public class C100RespondentSolicitorTaskListControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(BEARER_TEST_AUTH_TOKEN, S2S_TEST_AUTH_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
-            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,s2sToken,authToken);
+            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,S2S_TEST_AUTH_TOKEN,BEARER_TEST_AUTH_TOKEN);
         }, RuntimeException.class, "Invalid Client");
 
     }
