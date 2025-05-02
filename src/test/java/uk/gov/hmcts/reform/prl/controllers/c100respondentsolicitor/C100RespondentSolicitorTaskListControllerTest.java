@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,8 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -36,10 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -109,9 +103,6 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        //DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
-        //DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
-
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
@@ -135,7 +126,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
 
     @Test
-    void testHandleAboutToSubmit() throws {
+    void testHandleAboutToSubmit() {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -161,7 +152,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
     }
 
     @Test
-    public void testExceptionForHandleSubmitted() throws Exception {
+    void testExceptionForHandleSubmitted() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -174,16 +165,11 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(BEARER_TEST_AUTH_TOKEN, S2S_TEST_AUTH_TOKEN)).thenReturn(false);
-        assertExpectedException(() -> {
-            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,S2S_TEST_AUTH_TOKEN,BEARER_TEST_AUTH_TOKEN);
-        }, RuntimeException.class, "Invalid Client");
 
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            c100RespondentSolicitorTaskListController.handleSubmitted(callbackRequest,S2S_TEST_AUTH_TOKEN,BEARER_TEST_AUTH_TOKEN)
+        );
+
+        assertEquals("Invalid Client", exception.getMessage());
     }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
 }
