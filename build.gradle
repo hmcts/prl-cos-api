@@ -25,7 +25,7 @@ plugins {
 def versions = [
   awaitility                   : '4.2.2',
   bcpkixJdk18on                : '1.80',
-  ccdClient                    : '4.9.2',
+  ccdClient                    : '5.0.3',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.16.1',
   commonsLang3                 : '3.17.0',
@@ -95,11 +95,11 @@ allprojects {
     }
   }
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(21)
     }
+  }
 
   tasks.withType(JavaExec).configureEach {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
@@ -143,16 +143,16 @@ allprojects {
         entry 'jackson-module-parameter-names'
       }
 
-        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-        dependencySet(group: 'io.netty', version: '4.1.118.Final') {
-            entry 'netty-buffer'
-            entry 'netty-codec'
-            entry 'netty-codec-http'
-            entry 'netty-common'
-            entry 'netty-handler'
-            entry 'netty-resolver'
-            entry 'netty-transport'
-        }
+      // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
+      dependencySet(group: 'io.netty', version: '4.1.118.Final') {
+        entry 'netty-buffer'
+        entry 'netty-codec'
+        entry 'netty-codec-http'
+        entry 'netty-common'
+        entry 'netty-handler'
+        entry 'netty-resolver'
+        entry 'netty-transport'
+      }
 
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.10.1'
@@ -313,8 +313,7 @@ configurations.configureEach {
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
-
-    implementation 'org.testng:testng:7.10.2'
+  implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
   implementation 'org.testng:testng:7.10.2'
@@ -339,7 +338,6 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.11'
@@ -364,9 +362,9 @@ dependencies {
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.15.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
   implementation group: 'commons-net', name: 'commons-net', version: '3.11.1'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -407,9 +405,9 @@ dependencies {
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
 
 
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+  testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'
@@ -618,9 +616,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java'
 ]
 
 sonarqube {
