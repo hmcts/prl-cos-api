@@ -14,8 +14,6 @@ public class PrlAppsConstants {
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
 
-    public static final String FLAG_INITIAL_STATUS = "Requested";
-
     public static final String NEXT_HEARING_DATE = "nextHearingDate";
     public static final String STATE = "state";
 
