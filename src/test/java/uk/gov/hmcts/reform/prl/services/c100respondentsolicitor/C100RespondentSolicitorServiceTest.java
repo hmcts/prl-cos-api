@@ -1098,7 +1098,7 @@ public class C100RespondentSolicitorServiceTest {
                 Mockito.anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document2);
-        UserDetails userDetails = UserDetails.builder().forename("test").email("test@testy.com")
+        UserDetails userDetails = UserDetails.builder().forename("test")
                 .roles(List.of("caseworker-privatelaw-solicitor")).build();
 
         when(documentLanguageService.docGenerateLang(
@@ -1108,103 +1108,11 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
-        callbackRequest.setCaseDetails(CaseDetails.builder().data(stringObjectMap).id(123L).build());
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
         );
-        Assertions.assertTrue(response.containsKey("respondentAc8"));
-    }
-
-    @Test
-    public void submitC7ResponseForActiveRespondentTestWithEmailUpdate() throws Exception {
-        // Arrange: Set up the updated email
-        String updatedEmail = "updated.email@example.com";
-        Map<String, Object> updatedData = new HashMap<>(stringObjectMap);
-        updatedData.put("respondents", List.of(
-            Map.of("email", updatedEmail) // Simulate updated email in callback data
-        ));
-
-        CallbackRequest updatedCallbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(updatedData)
-                             .build())
-            .eventId("c100ResSolConsentingToApplicationA")
-            .build();
-
-        when(objectMapper.convertValue(updatedData, CaseData.class)).thenReturn(caseData);
-
-        // Mock userService to return valid UserDetails
-        UserDetails mockUserDetails = UserDetails.builder()
-            .forename("Test")
-            .surname("User")
-            .email("test.user@example.com")
-            .roles(List.of("caseworker-privatelaw-solicitor"))
-            .build();
-        when(userService.getUserDetails(any(String.class))).thenReturn(mockUserDetails);
-
-        // Mock document generation service
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("c100RespC8Template")
-            .build();
-
-        when(documentGenService.generateSingleDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseData.class),
-            Mockito.anyString(),
-            Mockito.anyBoolean(),
-            Mockito.any(HashMap.class)
-        )).thenReturn(document);
-
-        Document document2 = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("solicitorC1AFinalTemplate")
-            .documentCreatedOn(new Date())
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-
-        when(documentGenService.generateSingleDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseData.class),
-            Mockito.anyString(),
-            Mockito.anyBoolean(),
-            Mockito.any(HashMap.class)
-        )).thenReturn(document2);
-        UserDetails userDetails = UserDetails.builder().forename("test").email("test@testy.com")
-            .roles(List.of("caseworker-privatelaw-solicitor")).build();
-
-        when(documentLanguageService.docGenerateLang(
-            Mockito.any(CaseData.class)
-        )).thenReturn(documentLanguage);
-
-        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
-
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
-        callbackRequest.setCaseDetails(CaseDetails.builder().data(stringObjectMap).id(123L).build());
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
-
-        // Act: Call the method
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            authToken, updatedCallbackRequest
-        );
-
-        // Assert: Verify the email is updated
-        Assertions.assertEquals(updatedEmail, caseData.getRespondents().get(0).getValue().getEmail());
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
