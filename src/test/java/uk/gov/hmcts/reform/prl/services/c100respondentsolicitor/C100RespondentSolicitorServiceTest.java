@@ -1,11 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -96,7 +92,6 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -1103,7 +1098,7 @@ public class C100RespondentSolicitorServiceTest {
                 Mockito.anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document2);
-        UserDetails userDetails = UserDetails.builder().forename("test")
+        UserDetails userDetails = UserDetails.builder().forename("test").email("test@testy.com")
                 .roles(List.of("caseworker-privatelaw-solicitor")).build();
 
         when(documentLanguageService.docGenerateLang(
@@ -1113,6 +1108,7 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        callbackRequest.setCaseDetails(CaseDetails.builder().data(stringObjectMap).id(123L).build());
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
@@ -1123,7 +1119,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestWithEmailUpdate() throws Exception {
-
         // Arrange: Set up the updated email
         String updatedEmail = "updated.email@example.com";
         Map<String, Object> updatedData = new HashMap<>(stringObjectMap);
@@ -1131,7 +1126,15 @@ public class C100RespondentSolicitorServiceTest {
             Map.of("email", updatedEmail) // Simulate updated email in callback data
         ));
 
-        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenReturn(caseData);
+        CallbackRequest updatedCallbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(updatedData)
+                             .build())
+            .eventId("c100ResSolConsentingToApplicationA")
+            .build();
+
+        when(objectMapper.convertValue(updatedData, CaseData.class)).thenReturn(caseData);
 
         // Mock userService to return valid UserDetails
         UserDetails mockUserDetails = UserDetails.builder()
@@ -1195,24 +1198,13 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setCaseDetails(CaseDetails.builder().data(stringObjectMap).id(123L).build());
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
-        CallbackRequest updatedCallbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(updatedData)
-                             .build())
-            .eventId("c100ResSolConsentingToApplicationA")
-            .build();
+        // Act: Call the method
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             authToken, updatedCallbackRequest
         );
 
         // Assert: Verify the email is updated
-        CaseData responseData = objectMapper.convertValue(
-            response,
-            CaseData.class
-        );
-
-        Assertions.assertEquals(updatedEmail, responseData.getRespondents().get(0).getValue().getEmail());
+        Assertions.assertEquals(updatedEmail, caseData.getRespondents().get(0).getValue().getEmail());
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
