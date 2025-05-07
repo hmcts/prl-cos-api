@@ -46,7 +46,7 @@ public class CaseFlagsEventHandler {
             .stream()
             .map(RoleAssignmentResponse::getRoleName)
             .toList();
-        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN_TEAM_LEADER.getRoles()::contains)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
