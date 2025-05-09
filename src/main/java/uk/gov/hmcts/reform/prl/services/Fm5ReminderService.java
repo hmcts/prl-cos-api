@@ -169,6 +169,7 @@ public class Fm5ReminderService {
             );
 
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
+                log.info("List of hearings for cases with court venue: {}", hearingsForAllCaseIdsWithCourtVenue);
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
                         if (isFirstListedHearingAwayForDays(hearing,
