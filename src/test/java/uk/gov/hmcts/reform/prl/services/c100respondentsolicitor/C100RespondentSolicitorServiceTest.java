@@ -1184,11 +1184,6 @@ public class C100RespondentSolicitorServiceTest {
             .response(response)
             .build();
 
-        PartyDetails updated = existing.toBuilder()
-            .email(updatedEmail)
-            .firstName("New")
-            .build();
-
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(new ArrayList<>(List.of(element(respondentId, existing))))
@@ -1220,6 +1215,10 @@ public class C100RespondentSolicitorServiceTest {
                             .roles(List.of("caseworker-privatelaw-solicitor"))
                             .build());
 
+        PartyDetails updated = existing.toBuilder()
+            .email(updatedEmail)
+            .firstName("New")
+            .build();
         when(citizenPartyDetailsMapper.updateCitizenPersonalDetails(eq(existing), any()))
             .thenReturn(updated);
 
