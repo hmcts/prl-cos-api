@@ -558,9 +558,14 @@ public class ApplicationsTabService implements TabService {
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
 
-        if ((null != caseData.getIsCourtNavCase() && YesOrNo.Yes.equals(caseData.getIsCourtNavCase()))
-            || (null != caseData.getCaseCreatedBy()) && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            declarationText = declarationText + "I believe that the facts stated in this application are true.";
+        boolean isCourtNavCase = YesOrNo.Yes.equals(caseData.getIsCourtNavCase());
+        boolean isCitizenCreated = CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy());
+
+        if (isCourtNavCase || isCitizenCreated) {
+            if (isCitizenCreated && StringUtils.isNotBlank(caseData.getApplicantName())) {
+                statementOfTruthPlaceHolder = caseData.getApplicantName();
+            }
+            declarationText += "I believe that the facts stated in this application are true.";
         } else {
             declarationText = declarationText + "The applicant believes that the facts stated in this form and any "
                 + "continuation sheets are true. " + statementOfTruthPlaceHolder
