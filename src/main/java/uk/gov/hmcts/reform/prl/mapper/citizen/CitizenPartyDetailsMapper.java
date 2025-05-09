@@ -614,7 +614,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    public PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 

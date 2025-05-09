@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -109,6 +110,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
@@ -182,6 +185,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
     @Mock
     SystemUserService systemUserService;
@@ -586,10 +592,10 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
+                anyBoolean()
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
 
@@ -851,10 +857,10 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
+                anyBoolean()
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData2)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
 
@@ -1037,7 +1043,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build()).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(Mockito.any(), Mockito.anyBoolean())).thenReturn(true);
+        when(responseSubmitChecker.isFinished(Mockito.any(), anyBoolean())).thenReturn(true);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -1073,10 +1079,10 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         when(documentGenService.generateSingleDocument(
-                Mockito.anyString(),
+                anyString(),
                 Mockito.any(CaseData.class),
-                Mockito.anyString(),
-                Mockito.anyBoolean(),
+                anyString(),
+                anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document);
 
@@ -1092,10 +1098,10 @@ public class C100RespondentSolicitorServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         when(documentGenService.generateSingleDocument(
-                Mockito.anyString(),
+                anyString(),
                 Mockito.any(CaseData.class),
-                Mockito.anyString(),
-                Mockito.anyBoolean(),
+                anyString(),
+                anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
@@ -1117,6 +1123,237 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    public void shouldDeserializeRespondentsCorrectlyFromUpdatedData() {
+        Map<String, Object> respondentValue = new HashMap<>();
+        respondentValue.put("email", "updated.email@example.com");
+        respondentValue.put("firstName", "Test");
+        respondentValue.put("lastName", "User");
+
+        Map<String, Object> respondentElement = new HashMap<>();
+        respondentElement.put("id", UUID.randomUUID().toString());
+        respondentElement.put("value", respondentValue);
+
+        Map<String, Object> updatedData = new HashMap<>();
+        updatedData.put("respondents", List.of(respondentElement));
+
+        CaseData caseDataFromMap = objectMapper.convertValue(updatedData, CaseData.class);
+
+        assertNotNull(caseDataFromMap.getRespondents());
+        assertEquals("updated.email@example.com",
+                     caseDataFromMap.getRespondents().get(0).getValue().getEmail());
+    }
+
+    @Test
+    public void submitC7ResponseForActiveRespondentTestWithEmailUpdateNew() throws Exception {
+
+        String updatedEmail = "updated.email@example.com";
+        String updatedFirstName = "UpdatedFirst";
+        String updatedLastName = "UpdatedLast";
+        UUID respondentId = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
+
+        PartyDetails updatedPartyDetails = PartyDetails.builder()
+            .email(updatedEmail)
+            .firstName(updatedFirstName)
+            .lastName(updatedLastName)
+            .user(User.builder()
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .idamId("test-user-id")
+                      .build())
+            .response(Response.builder()
+                          .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                           .responseToAllegationsOfHarmYesOrNoResponse(YesOrNo.Yes)
+                                                           .build())
+                          .citizenDetails(CitizenDetails.builder()
+                                              .contact(Contact.builder()
+                                                           .email(updatedEmail)
+                                                           .phoneNumber("07700900000")
+                                                           .build())
+                                              .build())
+                          .build())
+            .build();
+
+
+
+        Element<PartyDetails> updatedRespondent = Element.<PartyDetails>builder()
+            .id(respondentId)
+            .value(updatedPartyDetails)
+            .build();
+
+        // CaseData with updated respondent from callback
+        CaseData updatedCaseData = caseData.toBuilder()
+            .respondents(new ArrayList<>(List.of(updatedRespondent)))
+            .build();
+
+        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
+            .thenReturn(updatedCaseData);
+
+        // Simulate full data structure returned to the callback handler
+        Map<String, Object> updatedData = new HashMap<>();
+        updatedData.put("respondents", List.of(
+            Map.of(
+                "id", respondentId.toString(),
+                "value", Map.of(
+                    "email", updatedEmail,
+                    "firstName", updatedFirstName,
+                    "lastName", updatedLastName
+                )
+            )
+        ));
+
+        CallbackRequest updatedCallbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(updatedData)
+                             .build())
+            .eventId("c100ResSolConsentingToApplicationA")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("User")
+            .email("test.user@example.com")
+            .roles(List.of("caseworker-privatelaw-solicitor"))
+            .build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        when(citizenPartyDetailsMapper.updateCitizenPersonalDetails(any(), any()))
+            .thenAnswer(invocation -> {
+                PartyDetails original = invocation.getArgument(0);
+                PartyDetails updated = invocation.getArgument(1);
+                return original.toBuilder()
+                    .email(updated.getEmail())
+                    .firstName(updated.getFirstName())
+                    .lastName(updated.getLastName())
+                    .response(original.getResponse())
+                    .build();
+            });
+
+        Document mockDocument = Document.builder()
+            .documentFileName("mocked-file.pdf")
+            .documentUrl("http://dummy-url")
+            .documentBinaryUrl("http://dummy-binary-url")
+            .documentHash("dummy-hash")
+            .build();
+
+        when(documentGenService.generateSingleDocument(
+            anyString(),
+            any(CaseData.class),
+            anyString(),
+            anyBoolean(),
+            any(Map.class)
+        )).thenReturn(mockDocument);
+
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            authToken, updatedCallbackRequest
+        );
+
+        CaseData resultingCaseData = objectMapper.convertValue(response, CaseData.class);
+        PartyDetails mergedRespondent = resultingCaseData.getRespondents().get(0).getValue();
+
+        Assertions.assertEquals(updatedEmail, mergedRespondent.getEmail());
+        Assertions.assertEquals(updatedFirstName, mergedRespondent.getFirstName());
+        Assertions.assertEquals(updatedLastName, mergedRespondent.getLastName());
+    }
+
+    @Test
+    public void submitC7ResponseForActiveRespondentTestWithEmailUpdate() throws Exception {
+        // Arrange: Set up the updated email
+        String updatedEmail = "updated.email@example.com";
+        Map<String, Object> respondentValue = new HashMap<>();
+        respondentValue.put("email", updatedEmail);
+        respondentValue.put("firstName", "Test");
+        respondentValue.put("lastName", "User");
+        Map<String, Object> respondentElement = new HashMap<>();
+        respondentElement.put("id", UUID.randomUUID().toString());
+        respondentElement.put("value", respondentValue);
+
+        Map<String, Object> updatedData = new HashMap<>(stringObjectMap);
+        updatedData.put("respondents", List.of(respondentElement));
+        CallbackRequest updatedCallbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(updatedData)
+                             .build())
+            .eventId("c100ResSolConsentingToApplicationA")
+            .build();
+
+        //TODO when(objectMapper.convertValue(updatedData, CaseData.class)).thenReturn(caseData);
+        CaseData caseDataFromMap = objectMapper.convertValue(updatedData, CaseData.class);
+        System.out.println("Respondents after conversion: " + caseDataFromMap.getRespondents());
+        // Mock userService to return valid UserDetails
+        UserDetails mockUserDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("User")
+            .email("test.user@example.com")
+            .roles(List.of("caseworker-privatelaw-solicitor"))
+            .build();
+        when(userService.getUserDetails(any(String.class))).thenReturn(mockUserDetails);
+
+        // Mock document generation service
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(
+            anyString(),
+            Mockito.any(CaseData.class),
+            anyString(),
+            anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document);
+
+        Document document2 = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("solicitorC1AFinalTemplate")
+            .documentCreatedOn(new Date())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        when(documentGenService.generateSingleDocument(
+            anyString(),
+            Mockito.any(CaseData.class),
+            anyString(),
+            anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document2);
+        UserDetails userDetails = UserDetails.builder().forename("test").email("test@testy.com")
+            .roles(List.of("caseworker-privatelaw-solicitor")).build();
+
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        callbackRequest.setCaseDetails(CaseDetails.builder().data(stringObjectMap).id(123L).build());
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+
+        // Act: Call the method
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            authToken, updatedCallbackRequest
+        );
+
+        // Assert: Verify the email is updated
+        Assertions.assertEquals(updatedEmail, caseData.getRespondents().get(0).getValue().getEmail());
+        Assertions.assertTrue(response.containsKey("respondentAc8"));
+    }
+
+    @Test
     public void submitC7ResponseForActiveRespondentWelshTest() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1132,10 +1369,10 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         when(documentGenService.generateSingleDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(CaseData.class),
-            Mockito.anyString(),
-            Mockito.anyBoolean(),
+            anyString(),
+            anyBoolean(),
             Mockito.any(HashMap.class)
         )).thenReturn(document);
 
@@ -1151,10 +1388,10 @@ public class C100RespondentSolicitorServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         when(documentGenService.generateSingleDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(CaseData.class),
-            Mockito.anyString(),
-            Mockito.anyBoolean(),
+            anyString(),
+            anyBoolean(),
             Mockito.any(HashMap.class)
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
@@ -1187,10 +1424,10 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         when(documentGenService.generateSingleDocument(
-                Mockito.anyString(),
+                anyString(),
                 Mockito.any(CaseData.class),
-                Mockito.anyString(),
-                Mockito.anyBoolean(),
+                anyString(),
+                anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document);
 
@@ -1280,10 +1517,10 @@ public class C100RespondentSolicitorServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         when(documentGenService.generateSingleDocument(
-                Mockito.anyString(),
+                anyString(),
                 Mockito.any(CaseData.class),
-                Mockito.anyString(),
-                Mockito.anyBoolean(),
+                anyString(),
+                anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
@@ -1601,10 +1838,10 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
+                anyBoolean()
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
 
@@ -1667,11 +1904,11 @@ public class C100RespondentSolicitorServiceTest {
 
             when(confidentialDetailsMapper.mapConfidentialData(
                     Mockito.any(CaseData.class),
-                    Mockito.anyBoolean()
+                    anyBoolean()
             )).thenReturn(caseData);
 
             when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
-            when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+            when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
                     Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
             when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                     Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
@@ -1747,12 +1984,12 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),
-                Mockito.anyBoolean()
+                anyBoolean()
         )).thenReturn(caseData1);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
         when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
@@ -2051,7 +2288,7 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException());
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenThrow(new RuntimeException());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
         Map<String,Object> response2 = populateDataMap(stringObjectMap);
@@ -2282,10 +2519,10 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         when(documentGenService.generateSingleDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(CaseData.class),
-            Mockito.anyString(),
-            Mockito.anyBoolean(),
+            anyString(),
+            anyBoolean(),
             Mockito.any(HashMap.class)
         )).thenReturn(document);
 
@@ -2721,10 +2958,10 @@ public class C100RespondentSolicitorServiceTest {
             .build();
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
+            anyBoolean()
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+        when(organisationService.getOrganisationDetails(anyString(), anyString())).thenReturn(
             Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
 

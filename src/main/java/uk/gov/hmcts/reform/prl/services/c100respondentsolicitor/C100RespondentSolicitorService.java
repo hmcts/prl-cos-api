@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -166,6 +167,7 @@ public class C100RespondentSolicitorService {
     private final ManageOrderService manageOrderService;
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     private final OrganisationService organisationService;
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
     private final ManageDocumentsService manageDocumentsService;
@@ -972,94 +974,92 @@ public class C100RespondentSolicitorService {
         final String[] surname = {null};
         userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
         UserDetails updatedUserDetails = UserDetails.builder()
-                .email(userDetails.getEmail())
-                .id(userDetails.getId())
-                .surname(surname[0])
-                .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
-                .roles(manageDocumentsService.getLoggedInUserType(authorisation))
-                .build();
-        CaseData caseData = objectMapper.convertValue(
-                updatedCaseData,
-                CaseData.class
-        );
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
+
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
-        Element<PartyDetails> representedRespondent = null;
-        if (solicitorRole.isPresent()) {
-            representedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
-        }
+        final Element<PartyDetails> representedRespondent = solicitorRole
+            .map(role -> findSolicitorRepresentedRespondents(callbackRequest, role))
+            .orElse(null);
 
-        if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
-                caseData.getCaseTypeOfApplication())) {
-            if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
-                    && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
-                    .getResponseToAllegationsOfHarmDocument() != null) {
+        if (representedRespondent != null && representedRespondent.getValue() != null
+            && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
 
-                quarantineLegalDocList.add(getQuarantineLegalDocuments(
-                        updatedUserDetails,
-                        representedRespondent.getValue().getResponse()
-                                .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
-                        "respondentC1AResponse", "Respondent C1A response",
-                        representedRespondent.getValue().getLabelForDynamicList(),
-                        String.valueOf(representedRespondent.getId())));
-            }
-            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
+            Element<PartyDetails> updatedRespondentFromCallback = caseData.getRespondents().stream()
+                .filter(r -> r.getId().equals(representedRespondent.getId()))
+                .findFirst()
+                .orElse(representedRespondent);
 
-            PartyDetails amended = representedRespondent.getValue().toBuilder()
-                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
-                            .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
-                                    .responseToAllegationsOfHarmYesOrNoResponse(
-                                            representedRespondent.getValue()
-                                                    .getResponse().getResponseToAllegationsOfHarm()
-                                                    .getResponseToAllegationsOfHarmYesOrNoResponse())
-                                    .build())
-                            .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
-                            .build())
-                    .build();
+            PartyDetails merged = citizenPartyDetailsMapper.updateCitizenPersonalDetails(
+                representedRespondent.getValue(),
+                updatedRespondentFromCallback.getValue()
+            );
+
+            PartyDetails amended = merged.toBuilder()
+                .response(merged.getResponse().toBuilder()
+                              .c7ResponseSubmitted(Yes)
+                              .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                               .responseToAllegationsOfHarmYesOrNoResponse(
+                                                                   representedRespondent.getValue()
+                                                                       .getResponse().getResponseToAllegationsOfHarm()
+                                                                       .getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                               .build())
+                              .respondentExistingProceedings(getAmendedProceedings(representedRespondent))
+                              .build())
+                .build();
 
             amended = updatedRefugeData(amended);
             caseData = updateRefugeDocumentList(caseData, amended);
 
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            caseData.getRespondents().set(
-                    caseData.getRespondents().indexOf(representedRespondent),
-                    element(representedRespondent.getId(), amended)
-            );
+            int respondentIndex = caseData.getRespondents().indexOf(representedRespondent);
+            caseData.getRespondents().set(respondentIndex, element(representedRespondent.getId(), amended));
+
             confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(
                 updatedCaseData,
                 representedRespondent.getValue(),
                 caseData.getRefugeDocuments(),
                 caseData.getHistoricalRefugeDocuments(),
-                caseData.getRespondents().indexOf(representedRespondent) + 1
+                respondentIndex + 1
             );
+
             String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
-                    ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
+                ? party
+                : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
+
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
-                    authorisation,
-                    callbackRequest,
-                    caseData,
-                    representedRespondent,
-                    quarantineLegalDocList
+                authorisation,
+                callbackRequest,
+                caseData,
+                representedRespondent,
+                quarantineLegalDocList
             );
 
             generateC8AndUpdateCaseData(
-                    authorisation,
-                    updatedCaseData,
-                    caseData,
-                    solicitorRole,
-                    party,
-                    createdBy,
-                    dataMap
+                authorisation,
+                updatedCaseData,
+                caseData,
+                solicitorRole,
+                party,
+                createdBy,
+                dataMap
             );
         }
 
         updatedCaseData.putAll(caseSummaryTab.updateTab(caseData));
-        moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
+        moveRespondentDocumentsToQuarantineTab(updatedCaseData, userDetails, quarantineLegalDocList);
 
         return updatedCaseData;
     }
+
 
     private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
 
