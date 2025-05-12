@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
@@ -167,7 +168,6 @@ public class C100RespondentSolicitorService {
     private final ManageOrderService manageOrderService;
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
-    private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     private final OrganisationService organisationService;
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
     private final ManageDocumentsService manageDocumentsService;
@@ -1007,7 +1007,7 @@ public class C100RespondentSolicitorService {
                 .findFirst()
                 .orElse(representedRespondent);
 
-            PartyDetails merged = citizenPartyDetailsMapper.updateCitizenPersonalDetails(
+            PartyDetails merged = CitizenPartyDetailsMapper.updateCitizenPersonalDetails(
                 representedRespondent.getValue(),
                 updatedRespondentFromCallback.getValue()
             );
