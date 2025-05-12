@@ -1,0 +1,3 @@
+[31m[1mUsage Error[22m[39m: No project found in /Users/michael.johnson/repos/HMCTS/prl-cos-api
+
+[1m$ [22myarn npm audit [-A,--all] [-R,--recursive] [--environment #0] [--json] [--no-deprecations] [--severity #0] [--exclude #0] [--ignore #0]
