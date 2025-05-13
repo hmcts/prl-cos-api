@@ -762,7 +762,7 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
+    static Response buildKeepDetailsPrivateForRefuge(CaseData caseData,
                                                              Response buildResponseForRespondent,
                                                              Element<PartyDetails> respondent) {
         setRespondentConfidentiality(caseData, respondent);
@@ -785,7 +785,7 @@ public class C100RespondentSolicitorService {
         return  buildResponseForRespondent;
     }
 
-    private static Response buildKeepDetailsPrivateForNonRefuge(CaseData caseData,
+    static Response buildKeepDetailsPrivateForNonRefuge(CaseData caseData,
                                                                 Response buildResponseForRespondent,
                                                                 Element<PartyDetails> respondent) {
         setRespondentConfidentiality(caseData, respondent);

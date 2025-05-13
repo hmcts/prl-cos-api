@@ -2902,4 +2902,77 @@ public class C100RespondentSolicitorServiceTest {
         );
         assertEquals(6, caseData.getRespondentDocsList().size());
     }
+
+    @Test
+    public void testBuildKeepDetailsPrivateForRefuge() {
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondents);
+        caseData = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .respondentNameForResponse("Test respondent")
+                                         .build())
+            .build();
+
+        CaseData caseData = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm2)
+                                         .build())
+            .build();
+
+        Response response = Response.builder().build();
+        PartyDetails partyDetails = PartyDetails.builder().build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(partyDetails).build();
+
+        Response result =
+            C100RespondentSolicitorService.buildKeepDetailsPrivateForRefuge(caseData, response, respondent);
+
+        assertNotNull(result);
+        assertNotNull(result.getKeepDetailsPrivate());
+        assertEquals(3, result.getKeepDetailsPrivate().getConfidentialityList().size());
+        assertTrue(result.getKeepDetailsPrivate().getConfidentialityList().contains(ConfidentialityListEnum.address));
+        assertTrue(result.getKeepDetailsPrivate().getConfidentialityList().contains(ConfidentialityListEnum.email));
+        assertTrue(result.getKeepDetailsPrivate().getConfidentialityList()
+                       .contains(ConfidentialityListEnum.phoneNumber));
+    }
+
+    @Test
+    public void testBuildKeepDetailsPrivateForNonRefuge() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+        confidentialityListEnums.add(ConfidentialityListEnum.email);
+        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+        CaseData caseData = CaseData.builder()
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(No).build())
+                                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                        .confidentiality(Yes)
+                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.no)
+                                                                        .build())
+                                         .build())
+            .build();
+
+        PartyDetails partyDetails = PartyDetails.builder().build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(partyDetails).build();
+
+        Response response = C100RespondentSolicitorService.buildKeepDetailsPrivateForNonRefuge(
+            caseData,
+            Response.builder().build(),
+            respondent
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getKeepDetailsPrivate());
+        assertEquals(YesNoIDontKnow.no, response.getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
+        assertEquals(YesOrNo.No, response.getKeepDetailsPrivate().getConfidentiality());
+        assertTrue(response.getKeepDetailsPrivate().getConfidentialityList().isEmpty());
+    }
 }
