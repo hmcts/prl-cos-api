@@ -7,9 +7,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
@@ -102,17 +100,14 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ApplicationMapper {
 
-    public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
-
     private final CourtFinderService courtFinderService;
-    private final LaunchDarklyClient launchDarklyClient;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
 
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
-        CaseData caseData = null;
+        CaseData caseData;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
             .state(State.SUBMITTED_PAID)
@@ -263,14 +258,9 @@ public class FL401ApplicationMapper {
         if (!StringUtils.isEmpty(epimsId)) {
             courtVenue = getCourtVenue(authorization, epimsId);
         }
-        //2. if not found check launch-darkly flag and populate default Swansea court Id.
-        if (launchDarklyClient.isFeatureEnabled(PrlLaunchDarklyFlagConstants.COURTNAV_SWANSEA_COURT_MAPPING)
-            && courtVenue.isEmpty()) {
-            epimsId = COURTNAV_DUMMY_BASE_LOCATION_ID;
-            courtVenue = getCourtVenue(authorization, epimsId);
-        }
-        //3. if court details found then populate court information and case management location.
-        if (!courtVenue.isEmpty()) {
+
+        //2. if court details found then populate court information and case management location.
+        if (courtVenue.isPresent()) {
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
@@ -283,7 +273,7 @@ public class FL401ApplicationMapper {
                 .courtSeal(courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId()))
                 .build();
         } else {
-            // 4. populate court details from fact-finder Api.
+            // 3. populate court details from fact-finder Api.
             caseData = caseData.toBuilder()
                 .courtName(getCourtName(caseData))
                 .courtEmailAddress(getCourtEmailAddress(court))
