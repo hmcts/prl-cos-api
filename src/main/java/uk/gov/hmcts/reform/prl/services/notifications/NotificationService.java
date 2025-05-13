@@ -203,7 +203,7 @@ public class NotificationService {
                 "Response documents are sent to Cafcass cymru via gov notify email for the case {}",
                 caseData.getId()
             );
-        }
+        } // TODO: Put a log in when email is null
     }
 
     private EmailTemplateVars buildEmailData(CaseData caseData,
