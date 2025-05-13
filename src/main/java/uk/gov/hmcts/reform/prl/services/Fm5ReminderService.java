@@ -91,10 +91,11 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-
+            log.info("final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
+                    log.info("Processing FM5 notification for case {}",key);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(fm5PendingParty)) {
@@ -168,6 +169,7 @@ public class Fm5ReminderService {
             );
 
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
+                log.info("List of hearings for cases with court venue: {}", hearingsForAllCaseIdsWithCourtVenue);
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
                         if (isFirstListedHearingAwayForDays(hearing,
