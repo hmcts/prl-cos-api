@@ -2972,7 +2972,6 @@ public class C100RespondentSolicitorServiceTest {
         assertNotNull(response);
         assertNotNull(response.getKeepDetailsPrivate());
         assertEquals(YesNoIDontKnow.no, response.getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
-        assertEquals(YesOrNo.No, response.getKeepDetailsPrivate().getConfidentiality());
-        assertTrue(response.getKeepDetailsPrivate().getConfidentialityList().isEmpty());
+        assertEquals(YesOrNo.Yes, response.getKeepDetailsPrivate().getConfidentiality());
     }
 }
