@@ -51,11 +51,13 @@ public class CaseFlagsEventHandler {
             CaseData.class
         );
 
-        List<Element<FlagDetail>> requestedFlags = Optional.ofNullable(caseData.getCaseFlags())
-            .map(flags -> flags.getDetails().stream()
-                .filter(flagElement -> "Requested".equalsIgnoreCase(flagElement.getValue().getStatus()))
-                .toList()
-            ).orElse(Collections.emptyList());
+        boolean isLastFlagRequested = Optional.ofNullable(caseData.getCaseFlags())
+            .map(flags -> flags.getDetails())
+            .filter(details -> !details.isEmpty())
+            .map(details -> "Requested".equalsIgnoreCase(
+                details.get(details.size() - 1).getValue().getStatus()
+            ))
+            .orElse(false);
 
 
         List<String> roles = roleAssignmentServiceResponse
@@ -63,7 +65,7 @@ public class CaseFlagsEventHandler {
             .stream()
             .map(RoleAssignmentResponse::getRoleName)
             .toList();
-        if (!requestedFlags.isEmpty() && roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN_TEAM_LEADER.getRoles()::contains)) {
+        if (isLastFlagRequested && roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN_TEAM_LEADER.getRoles()::contains)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
