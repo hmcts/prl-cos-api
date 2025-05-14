@@ -126,7 +126,7 @@ public class ReviewAdditionalApplicationControllerTest {
                                                                                     Event.REVIEW_ADDITIONAL_APPLICATION.getId()))
             .thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = reviewAdditionalApplicationController
-            .populateReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .aboutToStartReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
 }
