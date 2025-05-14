@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.closingcase;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +12,12 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import static org.mockito.Mockito.*;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class ReturnToPreviousStateControllerTest {
 
