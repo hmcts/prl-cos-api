@@ -2974,4 +2974,40 @@ public class C100RespondentSolicitorServiceTest {
         assertEquals(YesNoIDontKnow.no, response.getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
         assertEquals(YesOrNo.Yes, response.getKeepDetailsPrivate().getConfidentiality());
     }
+
+    @Test
+    public void testBuildKeepDetailsPrivateForRefugeWithKeepContactDetailsPrivate() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+        confidentialityListEnums.add(ConfidentialityListEnum.email);
+        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+
+        KeepDetailsPrivate keepDetailsPrivate = KeepDetailsPrivate.builder()
+            .confidentiality(Yes)
+            .build();
+
+        RespondentSolicitorData respondentSolicitorData = RespondentSolicitorData.builder()
+            .keepContactDetailsPrivate(keepDetailsPrivate)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(No).build())
+                                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                        .confidentiality(Yes)
+                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.no)
+                                                                        .build())
+                                         .build())
+            .build();
+
+        Response response = Response.builder().build();
+        PartyDetails partyDetails = PartyDetails.builder().build();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(partyDetails).build();
+
+        Response responseRefuge = C100RespondentSolicitorService.buildKeepDetailsPrivateForRefuge(caseData, response, respondent);
+
+        assertNotNull(responseRefuge);
+        assertEquals(Yes, responseRefuge.getKeepDetailsPrivate().getConfidentiality());
+    }
 }
