@@ -51,7 +51,7 @@ def versions = [
   reformsJavaLogging           : '6.1.8',
   sendLetterClient             : '4.0.4',
   serenity                     : '4.2.16',
-  serenityCucumber             : '4.2.16',
+  serenityCucumber             : '4.2.22',
   serviceTokenGenerator        : '4.1.2',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.8.16',
@@ -592,7 +592,7 @@ jacocoTestReport {
   }
 }
 jacoco {
-  toolVersion = "0.8.12"
+  toolVersion = "0.8.13"
 }
 
 jacocoTestCoverageVerification {
