@@ -61,4 +61,31 @@ public class ReviewAdditionalApplicationController {
         }
 
     }
+
+    @PostMapping(path = "/review-additional-application/about-to-start",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback to populate review additional application"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse aboutToStartReviewAdditionalApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+                    caseData, authorisation, clientContext, callbackRequest.getEventId())).build();
+
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
+    }
 }

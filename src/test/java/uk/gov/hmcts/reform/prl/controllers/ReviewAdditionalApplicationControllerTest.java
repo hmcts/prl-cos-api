@@ -92,4 +92,41 @@ public class ReviewAdditionalApplicationControllerTest {
             .populateReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         Assert.assertNotNull(response);
     }
+
+    @Test
+    public void shouldAboutToStartReviewAdditionalApplication() {
+        Element<AdditionalApplicationsBundle> reviewAdditionalApplicationElement = Element.<AdditionalApplicationsBundle>builder().build();
+        List<Element<AdditionalApplicationsBundle>> reviewAdditionalApplicationCollection = new ArrayList<>();
+        reviewAdditionalApplicationCollection.add(reviewAdditionalApplicationElement);
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .additionalApplicationsBundle(reviewAdditionalApplicationCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData,
+                                                                                    AUTH_TOKEN,
+                                                                                    "clcx",
+                                                                                    Event.REVIEW_ADDITIONAL_APPLICATION.getId()))
+            .thenReturn(caseDataMap);
+        AboutToStartOrSubmitCallbackResponse response = reviewAdditionalApplicationController
+            .populateReviewAdditionalApplication(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+        Assert.assertNotNull(response);
+    }
 }
