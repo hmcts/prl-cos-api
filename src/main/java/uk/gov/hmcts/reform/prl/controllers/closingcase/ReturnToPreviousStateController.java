@@ -32,7 +32,7 @@ public class ReturnToPreviousStateController extends AbstractCallbackController 
     }
 
 
-    @PostMapping("/returnToPreviousState")
+    @PostMapping("/returnToPreviousStateSubmitted")
     public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
