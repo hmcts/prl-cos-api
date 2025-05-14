@@ -2992,7 +2992,7 @@ public class C100RespondentSolicitorServiceTest {
 
         CaseData caseData = CaseData.builder()
             .respondentSolicitorData(RespondentSolicitorData.builder()
-                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(No).build())
+                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(Yes).build())
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
