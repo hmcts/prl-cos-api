@@ -190,6 +190,7 @@ public class Fm5ReminderService {
         HashMap<String, Fm5PendingParty> caseIdPendingPartyMapping = new HashMap<>();
         //if consent order is present, no need to remind
         if (null != caseData.getDraftConsentOrderFile()) {
+            log.info("Draft consent order file found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -197,12 +198,14 @@ public class Fm5ReminderService {
         //if no emergency care proceedings, no need to remind
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
+            log.info("Miam policy upgrade details found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
         //if applicant AOH is present, no need to remind
         if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
+            log.info("C1A document found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -235,6 +238,7 @@ public class Fm5ReminderService {
             citizenUploadedCaseDocsList,
             restrictedDocumentsList
         )) {
+            log.info("Party Aoh available for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
