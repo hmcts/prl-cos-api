@@ -13,14 +13,12 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -34,7 +32,7 @@ public class CaseFlagsEventHandler {
     @Async
     @EventListener
     public void triggerDummyEventForCaseFlags(final CaseFlagsEvent event) {
-        String caseId = String.valueOf(event.callbackRequest().getCaseDetails().getData());
+        String caseId = String.valueOf(event.callbackRequest().getCaseDetails().getId());
         UserDetails userDetails = userService.getUserDetails(event.authorisation());
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
             event.authorisation(),
@@ -43,26 +41,12 @@ public class CaseFlagsEventHandler {
             userDetails.getId()
         );
 
-        CaseData caseData = objectMapper.convertValue(
-            event.callbackRequest().getCaseDetails().getData(),
-            CaseData.class
-        );
-
-        boolean isLastFlagRequested = Optional.ofNullable(caseData.getCaseFlags())
-            .map(flags -> flags.getDetails())
-            .filter(details -> !details.isEmpty())
-            .map(details -> "Requested".equalsIgnoreCase(
-                details.get(details.size() - 1).getValue().getStatus()
-            ))
-            .orElse(false);
-
-
         List<String> roles = roleAssignmentServiceResponse
             .getRoleAssignmentResponse()
             .stream()
             .map(RoleAssignmentResponse::getRoleName)
             .toList();
-        if (isLastFlagRequested && roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN_TEAM_LEADER.getRoles()::contains)) {
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
