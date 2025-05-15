@@ -121,6 +121,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
@@ -901,6 +902,25 @@ public class ApplicationsTabServiceTest {
         expectedDeclarationMap.put("declarationText", declarationText);
         expectedDeclarationMap.put("agreedBy", solicitor);
         caseDataWithParties = caseDataWithParties.toBuilder().caseCreatedBy(CaseCreatedBy.SOLICITOR).build();
+
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testCitizenCreatedUsesApplicantNameIfPresent() {
+        caseDataWithParties = caseDataWithParties.toBuilder()
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantName("John Citizen")
+            .solicitorName(null)
+            .build();
+
+        Map<String, Object> expectedDeclarationMap = new HashMap<>();
+        expectedDeclarationMap.put("declarationText",
+                                   "I understand that proceedings for contempt of court may be brought"
+                                       + " against anyone who makes, or causes to be made, a false statement in a document verified"
+                                       + " by a statement of truth without an honest belief in its truth. "
+                                       + "I believe that the facts stated in this application are true.");
+        expectedDeclarationMap.put("agreedBy", "John Citizen");
 
         assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
     }
@@ -1749,6 +1769,145 @@ public class ApplicationsTabServiceTest {
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetHomeDetailsWithNullPeopleLivingAtThisAddress() {
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home testHome = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(null)
+            .familyHome(List.of(FamilyHomeEnum.payOrContributeRent))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .landlords(Landlord.builder().landlordName("test")
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
+            .build();
+        CaseData caseData = CaseData.builder().home(testHome).build();
+
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetHomeDetailsWithNullFamilyHome() {
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home testHome = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(null)
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .landlords(Landlord.builder().landlordName("test")
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
+            .build();
+        CaseData caseData = CaseData.builder().home(testHome).build();
+
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetHomeDetailsWithNullLivingSituation() {
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home testHome = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(List.of(FamilyHomeEnum.payOrContributeRent))
+            .livingSituation(null)
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .landlords(Landlord.builder().landlordName("test")
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
+            .build();
+        CaseData caseData = CaseData.builder().home(testHome).build();
+
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
+        assertEquals(expected, result);
+        assertDoesNotThrow(() -> applicationsTabService.getHomeDetails(caseData));
     }
 
     @Test

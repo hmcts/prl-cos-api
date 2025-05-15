@@ -181,6 +181,25 @@ public class TestingSupportController {
         }
     }
 
+    @PostMapping(path = "/create-dummy-citizen-case-with-body")
+    @Operation(description = "Initiate the dummy citizen case creation for testing support using a given request body")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Dummy case created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData createDummyCitizenCaseWithBody(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody String jsonBody
+    ) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return testingSupportService.createDummyLiPC100CaseWithBody(authorisation, s2sToken, jsonBody);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/submitted-payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Confirm the payment for testing support")
     @ApiResponses(value = {
