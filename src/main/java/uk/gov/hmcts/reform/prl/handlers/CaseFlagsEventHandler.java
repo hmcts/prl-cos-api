@@ -63,8 +63,8 @@ public class CaseFlagsEventHandler {
             .sorted(Comparator.comparing(detail -> detail.getValue().getDateTimeCreated()))
             .toList();
 
-        boolean isLastFlagRequested = !sortedDetails.isEmpty() &&
-            "Requested".equalsIgnoreCase(sortedDetails.get(sortedDetails.size() - 1).getValue().getStatus());
+        boolean isLastFlagRequested = !sortedDetails.isEmpty()
+            && "Requested".equalsIgnoreCase(sortedDetails.get(sortedDetails.size() - 1).getValue().getStatus());
 
 
         List<String> roles = roleAssignmentServiceResponse
