@@ -3308,6 +3308,7 @@
     },
     "caseNameHmctsInternal": "John Doe Vs Mary Richards v3",
     "caseTypeOfApplication": "C100",
+    "caseAccessCategory": "C100",
     "draftConsentOrderFile": null,
     "otherProceedingsTable": {
       "previousOrOngoingProceedings": ""
