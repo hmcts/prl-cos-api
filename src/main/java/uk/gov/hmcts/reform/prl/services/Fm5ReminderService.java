@@ -91,7 +91,7 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-            log.info("final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
+            log.info("Final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
@@ -171,10 +171,10 @@ public class Fm5ReminderService {
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
-                        log.info("checking first listed hearing for case {}", hearing.getCaseRef());
+                        log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
-                            log.info("putting qualified case before hearing for case {}", hearing.getCaseRef());
+                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
@@ -349,7 +349,7 @@ public class Fm5ReminderService {
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
             }
-            log.info("first hearing outside of date range for case {}", hearings.getCaseRef());
+            log.info("First hearing outside of date range for case {}", hearings.getCaseRef());
         }
         return false;
     }
