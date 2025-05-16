@@ -91,10 +91,11 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
-
+            log.info("Final list of cases to process for FM5 notifications: {}", qualifiedCasesAndPartiesBeforeHearing);
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fm5PendingParty) -> {
+                    log.info("Processing FM5 notification for case {}",key);
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(fm5PendingParty)) {
@@ -170,8 +171,10 @@ public class Fm5ReminderService {
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
+                        log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
+                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
@@ -188,6 +191,7 @@ public class Fm5ReminderService {
         HashMap<String, Fm5PendingParty> caseIdPendingPartyMapping = new HashMap<>();
         //if consent order is present, no need to remind
         if (null != caseData.getDraftConsentOrderFile()) {
+            log.info("Draft consent order file found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -195,12 +199,14 @@ public class Fm5ReminderService {
         //if no emergency care proceedings, no need to remind
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
+            log.info("Miam policy upgrade details found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
         //if applicant AOH is present, no need to remind
         if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
+            log.info("C1A document found for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -233,6 +239,7 @@ public class Fm5ReminderService {
             citizenUploadedCaseDocsList,
             restrictedDocumentsList
         )) {
+            log.info("Party Aoh available for caseId {}", caseData.getId());
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -342,6 +349,7 @@ public class Fm5ReminderService {
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
             }
+            log.info("First hearing outside of date range for case {}", hearings.getCaseRef());
         }
         return false;
     }
