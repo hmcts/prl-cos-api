@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +55,10 @@ public class CaseFlagsEventHandlerTest {
 
     @Test
     public void testTriggerDummyEventForCaseFlags() {
-       Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
-       Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
-       getRoleAssignmentsWith("ctsc");
-       getCaseFlagsWithStatus("Requested");
+        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
+        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        getRoleAssignmentsWith("ctsc");
+        getCaseFlagsWithStatus("Requested");
 
         CaseData caseData = CaseData.builder()
             .id(123L)
