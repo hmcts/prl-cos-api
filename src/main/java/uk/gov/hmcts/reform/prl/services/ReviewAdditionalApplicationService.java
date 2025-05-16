@@ -11,12 +11,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 
 @Service
 @Slf4j
@@ -24,16 +21,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 public class ReviewAdditionalApplicationService {
 
     public Map<String, Object> populateReviewAdditionalApplication(CaseData caseData,
+                                                                   Map<String, Object> caseDataMap,
                                                                    String authorization,
                                                                    String clientContext,
                                                                    String eventId) {
-        Map<String, Object> caseDataMap = new HashMap<>();
         AdditionalApplicationsBundle selectedAdditionalApplicationsBundle = getSelectedAdditionalApplicationDetails(
             caseData.getAdditionalApplicationsBundle(),
             clientContext, eventId
         );
-
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put("selectedAdditionalApplicationsBundle", selectedAdditionalApplicationsBundle);
         return caseDataMap;
     }

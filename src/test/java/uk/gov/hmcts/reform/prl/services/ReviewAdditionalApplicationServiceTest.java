@@ -26,13 +26,13 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.REVIEW_ADDITIONAL_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -84,9 +84,8 @@ public class ReviewAdditionalApplicationServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
-        Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData, authToken, null,
-                                                                                         REVIEW_ADDITIONAL_APPLICATION.getId());
-        assertNotNull(caseDataMap.get(CASE_TYPE_OF_APPLICATION));
+        Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+            caseData, new HashMap<>(), authToken, null, REVIEW_ADDITIONAL_APPLICATION.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
@@ -138,9 +137,9 @@ public class ReviewAdditionalApplicationServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
-            caseData, authToken, clientContextCoded,
+            caseData, new HashMap<>(), authToken, clientContextCoded,
             REVIEW_ADDITIONAL_APPLICATION.getId());
-        assertNotNull(caseDataMap.get(CASE_TYPE_OF_APPLICATION));
+
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
@@ -172,9 +171,8 @@ public class ReviewAdditionalApplicationServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
-        Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(caseData, authToken, null,
-                                                                                                                 EDIT_AND_APPROVE_ORDER.getId());
-        assertNotNull(caseDataMap.get(CASE_TYPE_OF_APPLICATION));
+        Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+            caseData, new HashMap<>(), authToken, null, EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
