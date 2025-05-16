@@ -18,16 +18,21 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
@@ -51,7 +56,6 @@ public class CaseFlagsEventHandlerTest {
     private CaseFlagsEventHandler caseFlagsEventHandler;
 
     @Test
-    @Ignore
     public void testTriggerDummyEventForCaseFlags() {
         List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
@@ -64,6 +68,28 @@ public class CaseFlagsEventHandlerTest {
                                 .roleAssignmentResponse(roleAssignmentResponses)
                                 .build());
         Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        List<Element<FlagDetail>> flagDetails = List.of(
+            new Element<>(UUID.randomUUID(), FlagDetail.builder()
+                .status("Requested")
+                .dateTimeCreated(LocalDateTime.now())
+                .build())
+        );
+
+        Flags caseFlags = Flags.builder()
+            .details(flagDetails)
+            .build();
+
+        CaseData mappedCaseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication("C100")
+            .state(State.CASE_ISSUED)
+            .caseFlags(caseFlags)
+            .build();
+
+        Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
+            .thenReturn(mappedCaseData);
+
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -89,7 +115,6 @@ public class CaseFlagsEventHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testTriggerDummyEventForWhenNotCTscUser() {
         List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
@@ -102,6 +127,26 @@ public class CaseFlagsEventHandlerTest {
                             .roleAssignmentResponse(roleAssignmentResponses)
                             .build());
         Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        List<Element<FlagDetail>> flagDetails = List.of(
+            new Element<>(UUID.randomUUID(), FlagDetail.builder()
+                .status("Requested")
+                .dateTimeCreated(LocalDateTime.now())
+                .build())
+        );
+
+        Flags caseFlags = Flags.builder()
+            .details(flagDetails)
+            .build();
+
+        CaseData mappedCaseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication("C100")
+            .state(State.CASE_ISSUED)
+            .caseFlags(caseFlags)
+            .build();
+
+        Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
+            .thenReturn(mappedCaseData);
         CaseData caseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
