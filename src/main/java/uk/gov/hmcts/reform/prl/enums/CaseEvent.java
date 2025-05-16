@@ -72,7 +72,9 @@ public enum CaseEvent {
     AMEND_APPLICANTS_DETAILS("amendApplicantsDetails"),
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
-    APPLICANT_DETAILS("applicantsDetails");
+    APPLICANT_DETAILS("applicantsDetails"),
+    REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
+    SYSTEM_REVIEW_ADDITIONAL_APPLICATION("systemReviewAdditionalApplication");
 
     private final String value;
 
