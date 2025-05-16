@@ -169,11 +169,12 @@ public class Fm5ReminderService {
             );
 
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
-                log.info("List of hearings for cases with court venue: {}", hearingsForAllCaseIdsWithCourtVenue);
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
+                        log.info("checking first listed hearing for case {}", hearing.getCaseRef());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
+                            log.info("putting qualified case before hearing for case {}", hearing.getCaseRef());
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
@@ -348,6 +349,7 @@ public class Fm5ReminderService {
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
             }
+            log.info("first hearing outside of date range for case {}", hearings.getCaseRef());
         }
         return false;
     }
