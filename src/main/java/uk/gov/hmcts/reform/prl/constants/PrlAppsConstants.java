@@ -1128,5 +1128,5 @@ public class PrlAppsConstants {
     public static final String PLEASE_SELECT_ONE_OPTION = "Please select at least one options from below";
     public static final String PLEASE_SELECT_ONE_OPTION_WELSH = "Dewiswch o leiaf un opsiwn o’r opsiynau isod";
 
-
+    public static final String FLAG_INITIAL_STATUS = "Requested";
 }
