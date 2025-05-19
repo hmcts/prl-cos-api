@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -58,7 +59,7 @@ public class CaseFlagsEventHandlerTest {
         Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
         Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
         getRoleAssignmentsWith("ctsc");
-        getCaseFlagsWithStatus("Requested");
+        getCaseFlagsAndAllPartyFlagsWithStatus("Requested");
 
         CaseData caseData = CaseData.builder()
             .id(123L)
@@ -92,7 +93,7 @@ public class CaseFlagsEventHandlerTest {
         Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
 
         getRoleAssignmentsWith("admin");
-        getCaseFlagsWithStatus("Requested");
+        getCaseFlagsAndAllPartyFlagsWithStatus("Requested");
 
         CaseData caseData = CaseData.builder()
             .id(123L)
@@ -127,7 +128,7 @@ public class CaseFlagsEventHandlerTest {
         Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
 
         getRoleAssignmentsWith("team-leader");
-        getCaseFlagsWithStatus("Active");
+        getCaseFlagsAndAllPartyFlagsWithStatus("Active");
 
         CaseData caseData = CaseData.builder()
             .id(123L)
@@ -156,6 +157,8 @@ public class CaseFlagsEventHandlerTest {
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
     }
 
+
+
     private void getRoleAssignmentsWith(String roleName) {
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName(roleName);
@@ -167,7 +170,7 @@ public class CaseFlagsEventHandlerTest {
                             .build());
     }
 
-    private void getCaseFlagsWithStatus(String status) {
+    private void getCaseFlagsAndAllPartyFlagsWithStatus(String status) {
         List<Element<FlagDetail>> flagDetails = List.of(
             new Element<>(UUID.randomUUID(), FlagDetail.builder()
                 .status(status)
@@ -179,14 +182,20 @@ public class CaseFlagsEventHandlerTest {
             .details(flagDetails)
             .build();
 
+        AllPartyFlags partyFlags = AllPartyFlags.builder()
+            .caApplicant1InternalFlags(caseFlags)
+            .build();
+
         CaseData mappedCaseData = CaseData.builder()
             .id(123L)
             .caseTypeOfApplication("C100")
             .state(State.CASE_ISSUED)
             .caseFlags(caseFlags)
+            .allPartyFlags(partyFlags)
             .build();
 
         Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
             .thenReturn(mappedCaseData);
     }
+
 }
