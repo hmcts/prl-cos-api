@@ -23,7 +23,9 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReviewAdditionalApplicationService;
@@ -31,9 +33,13 @@ import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
@@ -44,6 +50,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
+import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessages;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -111,6 +118,27 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping("/review-additional-application/mid-event")
+    public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        List<String> errors = new ArrayList<>();
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
+
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
     @PostMapping("/review-additional-application/about-to-submit")
@@ -225,5 +253,27 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         }
 
         return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    @PostMapping("/review-additional-application/clear-dynamic-lists")
+    public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")
+                                                                  @Parameter(hidden = true) String authorisation,
+                                                                  @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            if (!sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                    "No recipients selected to send your message. Select at least one party")).build();
+            }
+        }
+        //reset dynamic list fields
+        caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 }
