@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -155,6 +156,103 @@ public class CaseFlagsEventHandlerTest {
         ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
         Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+    }
+
+    @Test
+    public void testWaTaskIsNotCreatedWhenCaseFlagsAndAllPartyFlagsAreNull() {
+        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
+        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        getRoleAssignmentsWith("team-leader");
+
+        CaseData mappedCaseDataWithNullFlags = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication("C100")
+            .state(State.CASE_ISSUED)
+            .caseFlags(null)
+            .allPartyFlags(null)
+            .build();
+        Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
+            .thenReturn(mappedCaseDataWithNullFlags);
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
+                                                StartEventResponse.builder().build(), caseDataMap, caseData, null
+        );
+        Mockito.when(allTabService
+                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
+            startAllTabsUpdateDataContent);
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
+                                                               .caseDetails(CaseDetails.builder()
+                                                                                .id(123L).build())
+                                                               .build(), TEST_AUTH);
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        Mockito.verify(
+            allTabService,
+            Mockito.times(0)
+        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
+        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+    }
+
+    @Test
+    public void testWaTaskIsNotCreatedWhenFlagsDetailsAreNull() {
+        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
+        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        getRoleAssignmentsWith("team-leader");
+
+        Flags caseFlags = Flags.builder()
+            .details(null)
+            .build();
+
+        AllPartyFlags partyFlags = AllPartyFlags.builder()
+            .caApplicant1InternalFlags(caseFlags)
+            .build();
+
+        CaseData mappedCaseDataWithNullFlags = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication("C100")
+            .state(State.CASE_ISSUED)
+            .caseFlags(caseFlags)
+            .allPartyFlags(partyFlags)
+            .build();
+        Mockito.when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class)))
+            .thenReturn(mappedCaseDataWithNullFlags);
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
+                                                StartEventResponse.builder().build(), caseDataMap, caseData, null
+        );
+        Mockito.when(allTabService
+                         .getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any())).thenReturn(
+            startAllTabsUpdateDataContent);
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
+                                                               .caseDetails(CaseDetails.builder()
+                                                                                .id(123L).build())
+                                                               .build(), TEST_AUTH);
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        Mockito.verify(
+            allTabService,
+            Mockito.times(0)
+        ).getStartUpdateForSpecificEvent(Mockito.any(), Mockito.any());
+        Mockito.verify(allTabService, Mockito.times(0)).submitAllTabsUpdate(
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyMap());
+        assertNull(mappedCaseDataWithNullFlags.getCaseFlags().getDetails());
     }
 
 
