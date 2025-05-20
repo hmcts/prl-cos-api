@@ -146,6 +146,16 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+            if (SEND.equals(caseData.getChooseSendOrReply())
+                && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
+                Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+                String applicationId = caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsId();
+                DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
+                    .filter(d -> d.getCode().equals(applicationId)).findAny().orElse(null);
+                if (Objects.nonNull(dynamicListElement)) {
+                    message.getApplicationsList().setValue(dynamicListElement);
+                }
+            }
         }
 
         return CallbackResponse.builder().data(caseData).errors(errors).build();
