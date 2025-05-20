@@ -131,8 +131,8 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
-            && NO.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-            errors.add("Please review additional application");
+            && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+            errors.add("Please review other applications, <a href='/cases/case-details/" + caseDetails.getId() +"#Other%20applications'>click here</a>");
             return CallbackResponse.builder().data(caseData).errors(errors).build();
         }
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
@@ -156,7 +156,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
-            && YES.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+            && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
             if (caseData.getChooseSendOrReply().equals(SEND)) {
                 caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
                 String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
