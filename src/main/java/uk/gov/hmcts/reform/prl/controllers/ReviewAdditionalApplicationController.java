@@ -45,8 +45,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
@@ -132,7 +130,8 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         List<String> errors = new ArrayList<>();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-            errors.add("Please review other applications, <a href='/cases/case-details/" + caseDetails.getId() +"#Other%20applications'>click here</a>");
+            errors.add("Please review other applications, <a href='/cases/case-details/" + caseDetails.getId()
+                           + "#Other%20applications'>click here</a>");
             return CallbackResponse.builder().data(caseData).errors(errors).build();
         }
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
@@ -241,7 +240,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
         if (caseData.getReviewAdditionalApplicationWrapper() != null
-            && YES.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+            && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
             if (REPLY.equals(caseData.getChooseSendOrReply())
                 && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 return ok(SubmittedCallbackResponse.builder().confirmationBody(
