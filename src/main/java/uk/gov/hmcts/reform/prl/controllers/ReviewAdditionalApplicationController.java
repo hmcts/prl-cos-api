@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -71,6 +72,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     public static final String MESSAGES = "messages";
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
+
 
     @Autowired
     public ReviewAdditionalApplicationController(ObjectMapper objectMapper,
@@ -128,6 +130,11 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
+        if (caseData.getReviewAdditionalApplicationWrapper() != null
+            && NO.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+            errors.add("Please review additional application");
+            return CallbackResponse.builder().data(caseData).errors(errors).build();
+        }
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
                 errors.add("There are no messages to respond to.");
