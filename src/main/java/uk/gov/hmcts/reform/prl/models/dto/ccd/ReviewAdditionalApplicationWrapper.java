@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 public class ReviewAdditionalApplicationWrapper {
 
     private YesOrNo isAdditionalApplicationReviewed;
-
     private AdditionalApplicationsBundle selectedAdditionalApplicationsBundle;
+    private String selectedAdditionalApplicationsId;
+
 }

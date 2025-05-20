@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -105,6 +106,9 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             );
             Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
             //clear temp fields
+            caseDataMap.remove("isAdditionalApplicationReviewed");
+            caseDataMap.remove("selectedAdditionalApplicationsBundle");
+            caseDataMap.remove("selectedAdditionalApplicationsId");
             sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
             caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
@@ -121,7 +125,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     }
 
     @PostMapping("/review-additional-application/mid-event")
-    public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
+    public CallbackResponse reviewAdditionalApplicatonMidEvent(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
@@ -130,8 +134,8 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         List<String> errors = new ArrayList<>();
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-            errors.add("Please review other applications, <a href='/cases/case-details/" + caseDetails.getId()
-                           + "#Other%20applications'>click here</a>");
+
+            errors.add("Please review other applications");
             return CallbackResponse.builder().data(caseData).errors(errors).build();
         }
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
@@ -142,6 +146,32 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
+
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
+    }
+
+    @PostMapping("/review-additional-application/populate-application")
+    public CallbackResponse populateApplication(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        List<String> errors = new ArrayList<>();
+        if (caseData.getReviewAdditionalApplicationWrapper() != null
+            && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
+
+            if (SEND.equals(caseData.getChooseSendOrReply())
+                && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
+                Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+                DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
+                    .filter(d -> d.getCode().equals(caseData.getReviewAdditionalApplicationWrapper()
+                                           .getSelectedAdditionalApplicationsId())).findAny().orElse(null);
+                if (Objects.nonNull(dynamicListElement)) {
+                    message.getApplicationsList().setValue(dynamicListElement);
+                }
+            }
         }
 
         return CallbackResponse.builder().data(caseData).errors(errors).build();

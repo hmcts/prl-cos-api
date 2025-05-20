@@ -26,18 +26,20 @@ public class ReviewAdditionalApplicationService {
                                                                    String clientContext,
                                                                    String eventId) {
         AdditionalApplicationsBundle selectedAdditionalApplicationsBundle = getSelectedAdditionalApplicationDetails(
-            caseData.getAdditionalApplicationsBundle(),
+            caseData,
+            caseDataMap,
             clientContext, eventId
         );
         caseDataMap.put("selectedAdditionalApplicationsBundle", selectedAdditionalApplicationsBundle);
         return caseDataMap;
     }
 
-    private AdditionalApplicationsBundle getSelectedAdditionalApplicationDetails(
-                                            List<Element<AdditionalApplicationsBundle>> additionalApplicationCollection,
-                                            String clientContext,
-                                            String eventId) {
+    private AdditionalApplicationsBundle getSelectedAdditionalApplicationDetails(CaseData caseData,
+                                                                                Map<String, Object> caseDataMap,
+                                                                                String clientContext,
+                                                                                String eventId) {
         final UUID additionalApplicationId;
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationCollection = caseData.getAdditionalApplicationsBundle();
         log.info("Inside getSelectedAdditionalApplicationDetails");
         if (Event.REVIEW_ADDITIONAL_APPLICATION.getId().equals(eventId) && StringUtils.isNotEmpty(clientContext)) {
             log.info("Getting additional application id from client context");
@@ -47,6 +49,7 @@ public class ReviewAdditionalApplicationService {
             log.info("Getting first additional application id from dynamic list ");
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
+        caseDataMap.put("selectedAdditionalApplicationsId", additionalApplicationId);
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
     }
 
