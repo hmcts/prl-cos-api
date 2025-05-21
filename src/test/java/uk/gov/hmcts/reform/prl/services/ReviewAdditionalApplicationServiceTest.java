@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,8 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.REVIEW_ADDITIONAL_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -174,6 +178,50 @@ public class ReviewAdditionalApplicationServiceTest {
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), authToken, null, EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
+    }
+
+    @Test
+    public void testGetOtherApplicationBundleDynamicCode() {
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicantName("test")
+                                         .applicationType(
+                                             OtherApplicationType
+                                                 .D89_COURT_BAILIFF)
+                                         .applicationStatus(AWP_STATUS_SUBMITTED)
+                                         .uploadedDateTime("21-May-2025 10:19:50 am")
+                                         .build())
+            .build();
+        String applicationBundleDynamicCode = reviewAdditionalApplicationService.getApplicationBundleDynamicCode(
+            additionalApplicationsBundle);
+        assertEquals("OT_21-May-2025 10:19:50 am", applicationBundleDynamicCode);
+    }
+
+    @Test
+    public void testGetC2ApplicationBundleDynamicCode() {
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .c2DocumentBundle(C2DocumentBundle.builder()
+                                         .applicantName("test")
+                                         .applicationStatus(AWP_STATUS_SUBMITTED)
+                                         .uploadedDateTime("21-May-2025 10:19:50 am")
+                                         .build())
+            .build();
+        String applicationBundleDynamicCode = reviewAdditionalApplicationService.getApplicationBundleDynamicCode(
+            additionalApplicationsBundle);
+        assertEquals("C2_21-May-2025 10:19:50 am", applicationBundleDynamicCode);
+    }
+
+    @Test
+    public void testGetC2OrOtherApplicationBundleDynamicCodeShouldReturnNull() {
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .c2DocumentBundle(C2DocumentBundle.builder()
+                                  .applicantName("test")
+                                  .uploadedDateTime("21-May-2025 10:19:50 am")
+                                  .build())
+            .build();
+        String applicationBundleDynamicCode = reviewAdditionalApplicationService.getApplicationBundleDynamicCode(
+            additionalApplicationsBundle);
+        assertNull(applicationBundleDynamicCode);
     }
 
 

@@ -158,9 +158,11 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
             if (caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
                 Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-                String applicationId = caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsId();
+                String applicationCode = reviewAdditionalApplicationService
+                    .getApplicationBundleDynamicCode(caseData.getReviewAdditionalApplicationWrapper()
+                                                         .getSelectedAdditionalApplicationsBundle());
                 DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
-                    .filter(d -> d.getCode().equals(applicationId)).findAny().orElse(null);
+                    .filter(d -> d.getCode().equals(applicationCode)).findAny().orElse(null);
                 if (Objects.nonNull(dynamicListElement)) {
                     message.getApplicationsList().setValue(dynamicListElement);
                 }

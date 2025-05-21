@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -14,6 +16,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 
 @Service
 @Slf4j
@@ -51,6 +58,24 @@ public class ReviewAdditionalApplicationService {
         }
         caseDataMap.put("selectedAdditionalApplicationsId", additionalApplicationId);
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
+    }
+
+    public String getApplicationBundleDynamicCode(AdditionalApplicationsBundle additionalApplicationsBundle) {
+        if (null != additionalApplicationsBundle.getOtherApplicationsBundle()) {
+            OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundle.getOtherApplicationsBundle();
+            if (null != otherApplicationsBundle.getApplicationStatus()
+                && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)) {
+                return AWP_OTHER_APPLICATION_SNR_CODE.concat(UNDERSCORE)
+                    .concat(otherApplicationsBundle.getUploadedDateTime());
+            }
+        } else if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
+            C2DocumentBundle c2DocumentBundle = additionalApplicationsBundle.getC2DocumentBundle();
+            if (null != c2DocumentBundle.getApplicationStatus()
+                && c2DocumentBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)) {
+                return AWP_C2_APPLICATION_SNR_CODE.concat(UNDERSCORE).concat(c2DocumentBundle.getUploadedDateTime());
+            }
+        }
+        return null;
     }
 
 }
