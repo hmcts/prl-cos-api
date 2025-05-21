@@ -28,10 +28,10 @@ public class ApplicantsDetails {
     private String applicantPhoneNumber;
     private String applicantEmailAddress;
     private String applicantContactInstructions;
-    private CourtnavAddress applicantAddress;
+    private CourtNavAddress applicantAddress;
     private List<PreferredContactEnum> applicantPreferredContact;
     private final String legalRepresentativeFirm;
-    private final CourtnavAddress legalRepresentativeAddress;
+    private final CourtNavAddress legalRepresentativeAddress;
     private final String legalRepresentativeDx;
     private final String legalRepresentativeReference;
     private final String legalRepresentativeFirstName;

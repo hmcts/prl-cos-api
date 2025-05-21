@@ -21,7 +21,7 @@ import java.util.List;
 public class TheHome {
 
     private final boolean applyingForOccupationOrder;
-    private final CourtnavAddress occupationOrderAddress;
+    private final CourtNavAddress occupationOrderAddress;
     private final List<CurrentResidentAtAddressEnum> currentlyLivesAtAddress;
     private final String currentlyLivesAtAddressOther;
     private final PreviousOrIntendedResidentAtAddressEnum previouslyLivedAtAddress;
@@ -35,12 +35,12 @@ public class TheHome {
     private final String namedOnMortgageOther;
     private final String mortgageNumber;
     private final String mortgageLenderName;
-    private final CourtnavAddress mortgageLenderAddress;
+    private final CourtNavAddress mortgageLenderAddress;
     private final boolean propertyIsRented;
     private final List<ContractEnum> namedOnRentalAgreement;
     private final String namedOnRentalAgreementOther;
     private final String landlordName;
-    private final CourtnavAddress landlordAddress;
+    private final CourtNavAddress landlordAddress;
     private final boolean haveHomeRights;
     private final List<LivingSituationOutcomeEnum> wantToHappenWithLivingSituation;
     private final List<FamilyHomeOutcomeEnum> wantToHappenWithFamilyHome;

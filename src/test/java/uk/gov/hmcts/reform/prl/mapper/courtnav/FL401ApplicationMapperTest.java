@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRes
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtnavAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
@@ -171,7 +171,7 @@ public class FL401ApplicationMapperTest {
             .applicantPhoneNumber("12345678907")
             .applicantHasLegalRepresentative(false)
             .applicantPreferredContact(List.of(PreferredContactEnum.email))
-            .applicantAddress(CourtnavAddress.builder()
+            .applicantAddress(CourtNavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")
@@ -187,7 +187,7 @@ public class FL401ApplicationMapperTest {
                                        .year(1989)
                                        .build())
             .respondentEmailAddress("test@resp.com")
-            .respondentAddress(CourtnavAddress.builder()
+            .respondentAddress(CourtNavAddress.builder()
                                    .addressLine1("55 Test Street")
                                    .postTown("Town")
                                    .postCode("LU1 5ET")
@@ -290,7 +290,7 @@ public class FL401ApplicationMapperTest {
 
         home1 = TheHome.builder()
             .applyingForOccupationOrder(true)
-            .occupationOrderAddress(CourtnavAddress.builder()
+            .occupationOrderAddress(CourtNavAddress.builder()
                                         .addressLine1("55 Test Street")
                                         .postTown("Town")
                                         .postCode("N12 3BH")
@@ -307,13 +307,13 @@ public class FL401ApplicationMapperTest {
             .namedOnMortgageOther("test")
             .mortgageNumber("2345678")
             .mortgageLenderName("test mort")
-            .mortgageLenderAddress(CourtnavAddress.builder()
+            .mortgageLenderAddress(CourtNavAddress.builder()
                                        .addressLine1("ABC").postCode("AB1 2MN").build())
             .propertyIsRented(true)
             .namedOnRentalAgreement(contractEnum)
             .namedOnRentalAgreementOther("test")
             .landlordName("landlord")
-            .landlordAddress(CourtnavAddress.builder()
+            .landlordAddress(CourtNavAddress.builder()
                                  .addressLine1("ABC").postCode("AB1 2MN").build())
             .haveHomeRights(true)
             .wantToHappenWithLivingSituation(livingSituationOutcomeEnum)
@@ -1095,7 +1095,7 @@ public class FL401ApplicationMapperTest {
         applicantsDetails = applicantsDetails.toBuilder()
             .applicantGender(ApplicantGenderEnum.female)
             .shareContactDetailsWithRespondent(true)
-            .applicantAddress(CourtnavAddress.builder()
+            .applicantAddress(CourtNavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")

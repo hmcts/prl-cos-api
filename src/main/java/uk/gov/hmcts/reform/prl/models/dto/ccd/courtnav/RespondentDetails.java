@@ -20,6 +20,6 @@ public class RespondentDetails {
     private final CourtNavDate respondentDateOfBirth;
     private String respondentPhoneNumber;
     private String respondentEmailAddress;
-    private CourtnavAddress respondentAddress;
+    private CourtNavAddress respondentAddress;
     private final boolean respondentLivesWithApplicant;
 }

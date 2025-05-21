@@ -15,7 +15,7 @@ import lombok.extern.jackson.Jacksonized;
 @Setter
 @AllArgsConstructor
 @Jacksonized
-public class CourtnavAddress {
+public class CourtNavAddress {
 
     @JsonProperty("addressLine1")
     private final String addressLine1;

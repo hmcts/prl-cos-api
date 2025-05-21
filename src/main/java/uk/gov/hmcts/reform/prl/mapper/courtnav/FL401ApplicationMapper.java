@@ -61,7 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtnavAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
@@ -556,7 +556,7 @@ public class FL401ApplicationMapper {
             ? YesOrNo.Yes : YesOrNo.No;
     }
 
-    private Address getAddress(CourtnavAddress courtnavAddress) {
+    private Address getAddress(CourtNavAddress courtnavAddress) {
 
         Address address = null;
         if (null != courtnavAddress) {
