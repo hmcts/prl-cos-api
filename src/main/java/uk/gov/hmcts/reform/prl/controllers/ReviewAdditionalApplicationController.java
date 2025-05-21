@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -164,6 +165,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
                 DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
                     .filter(d -> d.getCode().equals(applicationCode)).findAny().orElse(null);
                 if (Objects.nonNull(dynamicListElement)) {
+                    message.setMessageAbout(MessageAboutEnum.APPLICATION);
                     message.getApplicationsList().setValue(dynamicListElement);
                 }
             }
