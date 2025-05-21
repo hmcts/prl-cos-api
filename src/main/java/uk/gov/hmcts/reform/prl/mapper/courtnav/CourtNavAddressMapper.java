@@ -8,4 +8,3 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 public interface CourtNavAddressMapper {
     Address map(CourtNavAddress courtNavAddress);
 }
-
