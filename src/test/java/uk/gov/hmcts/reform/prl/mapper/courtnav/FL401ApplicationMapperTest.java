@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
@@ -28,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRes
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
@@ -36,7 +37,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
@@ -82,7 +82,6 @@ public class FL401ApplicationMapperTest {
 
     @Mock
     private Court court;
-
     private CourtNavFl401 courtNavFl401;
 
     private Situation situation;
@@ -98,8 +97,10 @@ public class FL401ApplicationMapperTest {
     private CourtNavStmtOfTruth stmtOfTruth;
     private GoingToCourt goingToCourt;
     private CourtNavMetaData courtNavMetaData;
+
     @Mock
     private LaunchDarklyClient launchDarklyClient;
+
     @Mock
     private LocationRefDataService locationRefDataService;
 
@@ -108,6 +109,16 @@ public class FL401ApplicationMapperTest {
 
     @Before
     public void setUp() {
+        CourtNavAddressMapper addressMapper = new CourtNavAddressMapperImpl();
+        CourtNavApplicantMapper courtNavApplicantMapper = new CourtNavApplicantMapper(addressMapper);
+
+        fl401ApplicationMapper = new FL401ApplicationMapper(
+            courtFinderService,
+            launchDarklyClient,
+            locationRefDataService,
+            courtSealFinderService,
+            courtNavApplicantMapper
+        );
 
         court = Court.builder()
             .courtName("testcourt")
@@ -165,7 +176,7 @@ public class FL401ApplicationMapperTest {
                                       .month(9)
                                       .year(1992)
                                       .build())
-            .applicantGender(ApplicantGenderEnum.female)
+            .applicantGender(Gender.female)
             .shareContactDetailsWithRespondent(false)
             .applicantEmailAddress("test@courtNav.com")
             .applicantPhoneNumber("12345678907")
@@ -714,9 +725,6 @@ public class FL401ApplicationMapperTest {
     @Test
     public void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
 
-        List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
-        specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
-
         goingToCourt = GoingToCourt.builder()
             .isInterpreterRequired(true)
             .interpreterLanguage("test")
@@ -1093,7 +1101,7 @@ public class FL401ApplicationMapperTest {
     public void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder()
-            .applicantGender(ApplicantGenderEnum.female)
+            .applicantGender(Gender.female)
             .shareContactDetailsWithRespondent(true)
             .applicantAddress(CourtNavAddress.builder()
                                   .addressLine1("55 Test Street")

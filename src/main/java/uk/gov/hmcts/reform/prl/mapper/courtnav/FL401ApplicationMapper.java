@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.mapper.courtnav;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,11 +12,9 @@ import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
-import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -29,7 +26,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -57,11 +53,10 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
@@ -74,7 +69,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -94,7 +88,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -108,12 +101,12 @@ public class FL401ApplicationMapper {
     private final LaunchDarklyClient launchDarklyClient;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
+    private final CourtNavApplicantMapper courtNavApplicantMapper;
 
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
-        CaseData caseData = null;
-        caseData = CaseData.builder()
+        CaseData caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
             .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -143,7 +136,7 @@ public class FL401ApplicationMapper {
             .anyOtherDtailsForWithoutNoticeOrder(OtherDetailsOfWithoutNoticeOrder.builder()
                                                      .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
-            .applicantsFL401(mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
+            .applicantsFL401(courtNavApplicantMapper.mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
             .respondentsFL401(mapRespondent(courtNavCaseData.getFl401().getRespondentDetails()))
             .applicantFamilyDetails(ApplicantFamilyDetails.builder()
                                         .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
@@ -270,7 +263,7 @@ public class FL401ApplicationMapper {
             courtVenue = getCourtVenue(authorization, epimsId);
         }
         //3. if court details found then populate court information and case management location.
-        if (!courtVenue.isEmpty()) {
+        if (courtVenue.isPresent()) {
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
@@ -701,51 +694,6 @@ public class FL401ApplicationMapper {
             .respondentLivedWithApplicant(respondent.isRespondentLivesWithApplicant() ? YesOrNo.Yes : YesOrNo.No)
             .applicantContactInstructions(null)
             .applicantPreferredContact(null)
-            .partyId(UUID.randomUUID())
-            .build();
-    }
-
-    private PartyDetails mapApplicant(ApplicantsDetails applicant) {
-
-        ContactPreferences contactPreferences = null;
-        if (isNotEmpty(applicant.getApplicantPreferredContact())) {
-            contactPreferences = applicant.getApplicantPreferredContact()
-                .contains(PreferredContactEnum.email) ? ContactPreferences.email : ContactPreferences.post;
-        }
-
-        return PartyDetails.builder()
-            .firstName(applicant.getApplicantFirstName())
-            .lastName(applicant.getApplicantLastName())
-            .previousName(applicant.getApplicantOtherNames())
-            .dateOfBirth(LocalDate.parse(applicant.getApplicantDateOfBirth().mergeDate()))
-            .gender(Gender.getDisplayedValueFromEnumString(applicant.getApplicantGender().getId()))
-            .otherGender(applicant.getApplicantGender().getDisplayedValue().equals("other")
-                             ? applicant.getApplicantGenderOther() : null)
-            .address(null != applicant.getApplicantAddress()
-                         ? getAddress(applicant.getApplicantAddress()) : null)
-            .isAddressConfidential(ObjectUtils.isNotEmpty(applicant.getApplicantAddress())
-                                       && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
-            .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getApplicantEmailAddress() ? "Yes" : "No"))
-            .email(applicant.getApplicantEmailAddress())
-            .isEmailAddressConfidential(StringUtils.isNotEmpty(applicant.getApplicantEmailAddress())
-                                            && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
-            .phoneNumber(applicant.getApplicantPhoneNumber())
-            .isPhoneNumberConfidential(StringUtils.isNotEmpty(applicant.getApplicantPhoneNumber())
-                                           && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
-            .applicantPreferredContact(applicant.getApplicantPreferredContact())
-            .applicantContactInstructions(applicant.getApplicantContactInstructions())
-            .representativeFirstName(applicant.getLegalRepresentativeFirstName())
-            .representativeLastName(applicant.getLegalRepresentativeLastName())
-            .solicitorTelephone(applicant.getLegalRepresentativePhone())
-            .solicitorReference(applicant.getLegalRepresentativeReference())
-            .contactPreferences(contactPreferences)
-            .solicitorOrg(Organisation.builder()
-                              .organisationName(applicant.getLegalRepresentativeFirm())
-                              .build())
-            .solicitorEmail(applicant.getLegalRepresentativeEmail())
-            .solicitorAddress(null != applicant.getLegalRepresentativeAddress()
-                                  ? getAddress(applicant.getLegalRepresentativeAddress()) : null)
-            .dxNumber(applicant.getLegalRepresentativeDx())
             .partyId(UUID.randomUUID())
             .build();
     }
