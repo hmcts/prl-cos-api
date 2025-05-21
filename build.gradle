@@ -326,6 +326,9 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
+  implementation 'org.mapstruct:mapstruct:1.6.3'
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
   implementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: versions.junit
   implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.5'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
