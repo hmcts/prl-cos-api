@@ -56,7 +56,6 @@ public class ReviewAdditionalApplicationService {
             log.info("Getting first additional application id from dynamic list ");
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
-        caseDataMap.put("selectedAdditionalApplicationsId", additionalApplicationId);
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
     }
 

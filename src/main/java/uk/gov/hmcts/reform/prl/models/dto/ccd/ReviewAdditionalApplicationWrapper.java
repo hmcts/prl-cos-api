@@ -16,6 +16,5 @@ public class ReviewAdditionalApplicationWrapper {
 
     private YesOrNo isAdditionalApplicationReviewed;
     private AdditionalApplicationsBundle selectedAdditionalApplicationsBundle;
-    private String selectedAdditionalApplicationsId;
 
 }

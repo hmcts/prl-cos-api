@@ -109,7 +109,6 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             //clear temp fields
             caseDataMap.remove("isAdditionalApplicationReviewed");
             caseDataMap.remove("selectedAdditionalApplicationsBundle");
-            caseDataMap.remove("selectedAdditionalApplicationsId");
             sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
             caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
