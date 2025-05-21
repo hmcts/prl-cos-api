@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -101,24 +100,22 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         @RequestBody CallbackRequest callbackRequest) {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
             //clear temp fields
             caseDataMap.remove("isAdditionalApplicationReviewed");
             caseDataMap.remove("selectedAdditionalApplicationsBundle");
             sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
                 caseData, caseDataMap, authorisation, clientContext, callbackRequest.getEventId());
 
-            caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
+            caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataMap).build();
-
+                .data(caseDataMap)
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
