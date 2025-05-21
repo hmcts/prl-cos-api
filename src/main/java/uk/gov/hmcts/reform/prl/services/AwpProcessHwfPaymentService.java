@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ADDITIONAL_APPLICATION_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_AWP_STATUS_UPDATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -136,16 +137,18 @@ public class AwpProcessHwfPaymentService {
                     });
             }
             log.info("All Hwf AwP payments processed? " + allCitizenAwpWithHwfHasBeenProcessed);
+            caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
+            if (caseData.getAdditionalApplicationsBundle().size() >= 1) {
+                caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, caseData.getAdditionalApplicationsBundle().get(0).getId());
+            }
+            caseDataUpdated.put(
+                "hwfRequestedForAdditionalApplicationsFlag",
+                YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplicationsFlag()
+            );
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(
                 caseDetails.getId().toString(),
                 HWF_PROCESS_AWP_STATUS_UPDATE.getValue()
-            );
-
-            caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, caseData.getAdditionalApplicationsBundle());
-            caseDataUpdated.put(
-                "hwfRequestedForAdditionalApplicationsFlag",
-                YesOrNo.Yes.equals(allCitizenAwpWithHwfHasBeenProcessed) ? YesOrNo.No : caseData.getHwfRequestedForAdditionalApplicationsFlag()
             );
 
             //Save case data

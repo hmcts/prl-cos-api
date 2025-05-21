@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS_AM_PM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HWF_APP_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_THE_CASE_IN_DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ADDITIONAL_APPLICATION_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper.getAwpTaskName;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.CASE_STATUS;
@@ -133,6 +134,9 @@ public class HelpWithFeesService {
                         additionalApplicationsBundle
                     )
                 );
+                if (caseData.getAdditionalApplicationsBundle().size() >= 1) {
+                    caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, chosenAdditionalApplication.getId());
+                }
                 caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplications);
                 caseDataUpdated.put(IS_THE_CASE_IN_DRAFT_STATE, YesOrNo.No.getDisplayedValue());
                 //WA fields
