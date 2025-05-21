@@ -13,15 +13,15 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -38,6 +38,8 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
@@ -102,12 +104,12 @@ public class CourtNavCaseControllerTest {
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
 
         ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(CREATED, response.getStatusCode());
 
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() throws Exception {
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
@@ -124,12 +126,12 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(OK, response.getStatusCode());
 
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() throws Exception {
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
@@ -147,7 +149,7 @@ public class CourtNavCaseControllerTest {
             file,
             "fl401Doc1"
         );
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(OK, response.getStatusCode());
 
     }
 
@@ -210,7 +212,7 @@ public class CourtNavCaseControllerTest {
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(OK, response.getStatusCode());
 
     }
 
@@ -254,7 +256,7 @@ public class CourtNavCaseControllerTest {
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build())
-                       .theHome(TheHome.builder()
+                       .courtNavHome(CourtNavHome.builder()
                                     .wantToHappenWithFamilyHome(Collections.emptyList())
                                     .build())
                        .build())
