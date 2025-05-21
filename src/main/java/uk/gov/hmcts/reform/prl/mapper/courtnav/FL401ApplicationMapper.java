@@ -14,28 +14,18 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
-import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
-import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
-import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
@@ -52,21 +42,14 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -100,6 +83,7 @@ public class FL401ApplicationMapper {
     private final CourtSealFinderService courtSealFinderService;
     private final CourtNavApplicantMapper courtNavApplicantMapper;
     private final CourtNavRespondentMapper courtNavRespondentMapper;
+    private final CourtNavHomeMapper courtNavHomeMapper;
 
     private Court court = null;
 
@@ -188,9 +172,9 @@ public class FL401ApplicationMapper {
                 .relationOptionsOther(courtNavCaseData.getFl401()
                                           .getRelationshipWithRespondent().getRespondentsRelationshipToApplicantOther())
                 .build()) : null)
-            .home(courtNavCaseData.getFl401().getSituation()
-                      .getOrdersAppliedFor().contains(FL401OrderTypeEnum.occupationOrder)
-                      ? mapHomeDetails(courtNavCaseData) : null)
+            .home(courtNavCaseData.getFl401().getCourtNavHome() != null
+                      ? courtNavHomeMapper.mapHome(courtNavCaseData.getFl401().getCourtNavHome())
+                      : null)
             .fl401StmtOfTruth(StatementOfTruth.builder()
                                   .applicantConsent(courtNavCaseData.getFl401()
                                                         .getStatementOfTruth()
@@ -454,207 +438,6 @@ public class FL401ApplicationMapper {
 
         return List.of(
             ElementUtils.element(interpreterNeed));
-    }
-
-    private Home mapHomeDetails(CourtNavFl401 courtNavCaseData) {
-
-        return Home.builder()
-            .address(getAddress(courtNavCaseData.getFl401().getTheHome().getOccupationOrderAddress()))
-            .peopleLivingAtThisAddress(getPeopleLivingAtThisAddress(courtNavCaseData))
-            .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getCurrentlyLivesAtAddressOther())
-            .everLivedAtTheAddress(null != courtNavCaseData.getFl401()
-                .getTheHome()
-                .getPreviouslyLivedAtAddress() ? YesNoBothEnum
-                .getDisplayedValueFromEnumString(courtNavCaseData.getFl401()
-                                                     .getTheHome()
-                                                     .getPreviouslyLivedAtAddress().getId()) : null)
-            .intendToLiveAtTheAddress(null != courtNavCaseData.getFl401()
-                .getTheHome()
-                .getIntendedToLiveAtAddress() ? YesNoBothEnum
-                .getDisplayedValueFromEnumString(courtNavCaseData.getFl401()
-                                                     .getTheHome()
-                                                     .getIntendedToLiveAtAddress().getId()) : null)
-            .doAnyChildrenLiveAtAddress(getAnyChildrenLivedAtAddress(courtNavCaseData))
-            .children(getChildrenDetails(courtNavCaseData)
-                          ? mapHomeChildren(courtNavCaseData.getFl401()
-                                              .getTheHome()) : null)
-            .isPropertyAdapted(courtNavCaseData.getFl401()
-                                   .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
-            .howIsThePropertyAdapted(courtNavCaseData.getFl401()
-                                         .getTheHome().getPropertySpeciallyAdaptedDetails())
-            .isThereMortgageOnProperty(courtNavCaseData.getFl401()
-                                           .getTheHome().isPropertyHasMortgage() ? YesOrNo.Yes : YesOrNo.No)
-            .mortgages(getMortgageMappingDetails(courtNavCaseData))
-            .isPropertyRented(courtNavCaseData.getFl401().getTheHome().isPropertyIsRented() ? YesOrNo.Yes : YesOrNo.No)
-            .landlords(getLandlordMappingDetails(courtNavCaseData))
-            .doesApplicantHaveHomeRights(courtNavCaseData.getFl401().getTheHome().isHaveHomeRights() ? YesOrNo.Yes : YesOrNo.No)
-            .livingSituation((null != courtNavCaseData.getFl401()
-                .getTheHome().getWantToHappenWithLivingSituation())
-                                 ? getLivingSituationDetails(courtNavCaseData) : null)
-            .familyHome((null != courtNavCaseData.getFl401()
-                .getTheHome().getWantToHappenWithFamilyHome())
-                            ? getFamilyHomeDetails(courtNavCaseData) : null)
-            .furtherInformation(courtNavCaseData.getFl401().getTheHome().getAnythingElseForCourtToConsider())
-            .build();
-
-    }
-
-    private Landlord getLandlordMappingDetails(CourtNavFl401 courtNavCaseData) {
-        Landlord landlord = null;
-        if (courtNavCaseData.getFl401().getTheHome().isPropertyIsRented()) {
-            landlord = Landlord.builder()
-                .mortgageNamedAfterList((null != courtNavCaseData.getFl401()
-                    .getTheHome().getNamedOnRentalAgreement())
-                                            ? getLandlordDetails(courtNavCaseData) : null)
-                .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnRentalAgreementOther())
-                .landlordName(courtNavCaseData.getFl401().getTheHome().getLandlordName())
-                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getLandlordAddress()))
-                .build();
-        }
-        return landlord;
-    }
-
-    private Mortgage getMortgageMappingDetails(CourtNavFl401 courtNavCaseData) {
-        Mortgage mortgage = null;
-
-        if (courtNavCaseData.getFl401().getTheHome().isPropertyHasMortgage()) {
-            mortgage = Mortgage.builder()
-                .mortgageNamedAfter((null != courtNavCaseData.getFl401()
-                    .getTheHome().getNamedOnMortgage())
-                                        ? getMortageDetails(courtNavCaseData) : null)
-                .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnMortgageOther())
-                .mortgageLenderName(courtNavCaseData.getFl401().getTheHome().getMortgageLenderName())
-                .mortgageNumber(courtNavCaseData.getFl401().getTheHome().getMortgageNumber())
-                .address(getAddress(courtNavCaseData.getFl401().getTheHome().getMortgageLenderAddress()))
-                .build();
-        }
-        return mortgage;
-
-    }
-
-    private boolean getChildrenDetails(CourtNavFl401 courtNavCaseData) {
-
-        return (null != courtNavCaseData.getFl401().getTheHome().getChildrenApplicantResponsibility()
-            || null != courtNavCaseData.getFl401().getTheHome().getChildrenSharedResponsibility());
-
-    }
-
-    private YesOrNo getAnyChildrenLivedAtAddress(CourtNavFl401 courtNavCaseData) {
-        return (null != courtNavCaseData.getFl401().getTheHome()
-            .getChildrenApplicantResponsibility())
-            || (null != courtNavCaseData.getFl401().getTheHome()
-            .getChildrenSharedResponsibility())
-            ? YesOrNo.Yes : YesOrNo.No;
-    }
-
-    private Address getAddress(CourtNavAddress courtnavAddress) {
-
-        Address address = null;
-        if (null != courtnavAddress) {
-            address = Address.builder()
-                .addressLine1(courtnavAddress.getAddressLine1())
-                .addressLine2(courtnavAddress.getAddressLine2())
-                .addressLine3(courtnavAddress.getAddressLine3())
-                .postTown(courtnavAddress.getPostTown())
-                .postCode(courtnavAddress.getPostCode())
-                .county(courtnavAddress.getCounty())
-                .country(courtnavAddress.getCountry())
-                .build();
-        }
-        return address;
-    }
-
-    private List<FamilyHomeEnum> getFamilyHomeDetails(CourtNavFl401 courtNavCaseData) {
-
-        List<FamilyHomeOutcomeEnum> familyHomeList = courtNavCaseData.getFl401().getTheHome().getWantToHappenWithFamilyHome();
-        List<FamilyHomeEnum> familyHomeEnumList = new ArrayList<>();
-        for (FamilyHomeOutcomeEnum familyHome : familyHomeList) {
-            familyHomeEnumList.add(FamilyHomeEnum
-                                       .getDisplayedValueFromEnumString(String.valueOf(familyHome)));
-        }
-        return familyHomeEnumList;
-    }
-
-
-    private List<LivingSituationEnum> getLivingSituationDetails(CourtNavFl401 courtNavCaseData) {
-
-        List<LivingSituationOutcomeEnum> livingSituationOutcomeList = courtNavCaseData.getFl401().getTheHome().getWantToHappenWithLivingSituation();
-        List<LivingSituationEnum> livingSituationList = new ArrayList<>();
-        for (LivingSituationOutcomeEnum livingSituation : livingSituationOutcomeList) {
-            livingSituationList.add(LivingSituationEnum
-                                        .getDisplayedValueFromEnumString(String.valueOf(livingSituation)));
-        }
-        return livingSituationList;
-
-    }
-
-    private List<MortgageNamedAfterEnum> getLandlordDetails(CourtNavFl401 courtNavCaseData) {
-
-        List<ContractEnum> contractList = courtNavCaseData.getFl401().getTheHome().getNamedOnRentalAgreement();
-        List<MortgageNamedAfterEnum> mortagageNameList = new ArrayList<>();
-        for (ContractEnum contract : contractList) {
-            mortagageNameList.add(MortgageNamedAfterEnum
-                                      .getDisplayedValueFromEnumString(String.valueOf(contract)));
-        }
-        return mortagageNameList;
-    }
-
-    private List<MortgageNamedAfterEnum> getMortageDetails(CourtNavFl401 courtNavCaseData) {
-
-        List<ContractEnum> contractList = courtNavCaseData.getFl401().getTheHome().getNamedOnMortgage();
-        List<MortgageNamedAfterEnum> mortagageNameList = new ArrayList<>();
-        for (ContractEnum contract : contractList) {
-            mortagageNameList.add(MortgageNamedAfterEnum
-                                      .getDisplayedValueFromEnumString(String.valueOf(contract)));
-        }
-        return mortagageNameList;
-    }
-
-    private List<PeopleLivingAtThisAddressEnum> getPeopleLivingAtThisAddress(CourtNavFl401 courtNavCaseData) {
-
-        List<CurrentResidentAtAddressEnum> currentlyLivesAtAddressList = courtNavCaseData.getFl401()
-            .getTheHome().getCurrentlyLivesAtAddress();
-        List<PeopleLivingAtThisAddressEnum> peopleLivingAtThisAddressList = new ArrayList<>();
-        for (CurrentResidentAtAddressEnum currentlyLivesAtAddress : currentlyLivesAtAddressList) {
-
-            peopleLivingAtThisAddressList.add(PeopleLivingAtThisAddressEnum
-                                                  .getDisplayedValueFromEnumString(String.valueOf(
-                                                      currentlyLivesAtAddress)));
-        }
-        return peopleLivingAtThisAddressList;
-    }
-
-    private List<Element<ChildrenLiveAtAddress>> mapHomeChildren(TheHome theHome) {
-
-        List<Element<ChildrenLiveAtAddress>> childList = new ArrayList<>();
-
-        List<ChildAtAddress> childrenApplicantResponsibility = theHome.getChildrenApplicantResponsibility();
-        List<ChildAtAddress> childrenSharedResponsibility = theHome.getChildrenSharedResponsibility();
-
-        if (null != childrenSharedResponsibility) {
-            for (ChildAtAddress child : childrenSharedResponsibility) {
-                ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-                    .keepChildrenInfoConfidential(YesOrNo.No)
-                    .childFullName(child.getFullName())
-                    .childsAge(String.valueOf(child.getAge()))
-                    .isRespondentResponsibleForChild(YesOrNo.Yes)
-                    .build();
-                childList.add(element(childrenLiveAtAddress));
-            }
-        }
-
-        if (null != childrenApplicantResponsibility) {
-            for (ChildAtAddress child : childrenApplicantResponsibility) {
-                ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-                    .keepChildrenInfoConfidential(YesOrNo.No)
-                    .childFullName(child.getFullName())
-                    .childsAge(String.valueOf(child.getAge()))
-                    .isRespondentResponsibleForChild(YesOrNo.No)
-                    .build();
-                childList.add(element(childrenLiveAtAddress));
-            }
-        }
-        return childList;
     }
 
     private List<Element<ApplicantChild>> mapProtectedChild(List<ProtectedChild> protectedChildren) {
