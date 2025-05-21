@@ -111,13 +111,15 @@ public class FL401ApplicationMapperTest {
     public void setUp() {
         CourtNavAddressMapper addressMapper = new CourtNavAddressMapperImpl();
         CourtNavApplicantMapper courtNavApplicantMapper = new CourtNavApplicantMapper(addressMapper);
+        CourtNavRespondentMapper courtNavRespondentMapper = new CourtNavRespondentMapper(addressMapper);
 
         fl401ApplicationMapper = new FL401ApplicationMapper(
             courtFinderService,
             launchDarklyClient,
             locationRefDataService,
             courtSealFinderService,
-            courtNavApplicantMapper
+            courtNavApplicantMapper,
+            courtNavRespondentMapper
         );
 
         court = Court.builder()

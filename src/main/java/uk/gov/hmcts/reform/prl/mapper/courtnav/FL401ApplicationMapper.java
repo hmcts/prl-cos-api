@@ -37,7 +37,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
@@ -58,7 +57,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
@@ -85,7 +83,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -102,6 +99,7 @@ public class FL401ApplicationMapper {
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
     private final CourtNavApplicantMapper courtNavApplicantMapper;
+    private final CourtNavRespondentMapper courtNavRespondentMapper;
 
     private Court court = null;
 
@@ -137,7 +135,7 @@ public class FL401ApplicationMapper {
                                                      .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
             .applicantsFL401(courtNavApplicantMapper.mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
-            .respondentsFL401(mapRespondent(courtNavCaseData.getFl401().getRespondentDetails()))
+            .respondentsFL401(courtNavRespondentMapper.mapRespondent(courtNavCaseData.getFl401().getRespondentDetails()))
             .applicantFamilyDetails(ApplicantFamilyDetails.builder()
                                         .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
                                                                        .getWhoApplicationIsFor()
@@ -676,25 +674,4 @@ public class FL401ApplicationMapper {
         return applicantChild;
     }
 
-    private PartyDetails mapRespondent(RespondentDetails respondent) {
-        return PartyDetails.builder()
-            .firstName(respondent.getRespondentFirstName())
-            .lastName(respondent.getRespondentLastName())
-            .previousName(respondent.getRespondentOtherNames())
-            .dateOfBirth(null != respondent.getRespondentDateOfBirth()
-                        ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
-            .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
-            .email(respondent.getRespondentEmailAddress())
-            .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))
-            .phoneNumber(respondent.getRespondentPhoneNumber())
-            .canYouProvidePhoneNumber(YesOrNo.valueOf(null != respondent.getRespondentPhoneNumber() ? "Yes" : "No"))
-            .address(null != respondent.getRespondentAddress()
-                         ? getAddress(respondent.getRespondentAddress()) : null)
-            .isCurrentAddressKnown(YesOrNo.valueOf(null != respondent.getRespondentAddress() ? "Yes" : "No"))
-            .respondentLivedWithApplicant(respondent.isRespondentLivesWithApplicant() ? YesOrNo.Yes : YesOrNo.No)
-            .applicantContactInstructions(null)
-            .applicantPreferredContact(null)
-            .partyId(UUID.randomUUID())
-            .build();
-    }
 }
