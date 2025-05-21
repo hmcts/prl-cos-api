@@ -17,20 +17,25 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class CourtNavAddress {
 
-    @JsonProperty("addressLine1")
+    @JsonProperty("AddressLine1")
     private final String addressLine1;
-    @JsonProperty("addressLine2")
+
+    @JsonProperty("AddressLine2")
     private final String addressLine2;
-    @JsonProperty("addressLine3")
+
+    @JsonProperty("AddressLine3")
     private final String addressLine3;
-    @JsonProperty("postTown")
+
+    @JsonProperty("PostTown")
     private final String postTown;
-    @JsonProperty("postCode")
+
+    @JsonProperty("PostCode")
     @Size(max = 14)
     private final String postCode;
-    @JsonProperty("county")
-    private final String county;
-    @JsonProperty("country")
-    private final String country;
 
+    @JsonProperty("County")
+    private final String county;
+
+    @JsonProperty("Country")
+    private final String country;
 }
