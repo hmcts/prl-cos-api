@@ -52,7 +52,7 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Home.
      */
-    private final TheHome theHome;
+    private final CourtNavHome courtNavHome;
 
 
     /**

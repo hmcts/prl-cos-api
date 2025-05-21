@@ -18,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class TheHome {
+public class CourtNavHome {
 
     private final boolean applyingForOccupationOrder;
     private final CourtNavAddress occupationOrderAddress;
