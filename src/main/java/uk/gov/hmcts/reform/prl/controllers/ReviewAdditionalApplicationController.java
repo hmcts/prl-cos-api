@@ -136,28 +136,7 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
             && YesOrNo.No.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
 
             errors.add("Please review other applications");
-            return CallbackResponse.builder().data(caseData).errors(errors).build();
         }
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
-            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
-                errors.add("There are no messages to respond to.");
-            } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
-            }
-        } else {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
-            if (SEND.equals(caseData.getChooseSendOrReply())
-                && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
-                Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-                String applicationId = caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsId();
-                DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
-                    .filter(d -> d.getCode().equals(applicationId)).findAny().orElse(null);
-                if (Objects.nonNull(dynamicListElement)) {
-                    message.getApplicationsList().setValue(dynamicListElement);
-                }
-            }
-        }
-
         return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
@@ -169,15 +148,19 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
-        if (caseData.getReviewAdditionalApplicationWrapper() != null
-            && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
-
-            if (SEND.equals(caseData.getChooseSendOrReply())
-                && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+            if (caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
                 Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+                String applicationId = caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsId();
                 DynamicListElement dynamicListElement = message.getApplicationsList().getListItems().stream()
-                    .filter(d -> d.getCode().equals(caseData.getReviewAdditionalApplicationWrapper()
-                                           .getSelectedAdditionalApplicationsId())).findAny().orElse(null);
+                    .filter(d -> d.getCode().equals(applicationId)).findAny().orElse(null);
                 if (Objects.nonNull(dynamicListElement)) {
                     message.getApplicationsList().setValue(dynamicListElement);
                 }
