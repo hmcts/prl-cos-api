@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;

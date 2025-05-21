@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;

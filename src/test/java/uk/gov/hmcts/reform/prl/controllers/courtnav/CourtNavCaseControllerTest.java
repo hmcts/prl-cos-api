@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;

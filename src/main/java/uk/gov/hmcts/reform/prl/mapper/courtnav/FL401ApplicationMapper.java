@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.courtnav.mappers;
+package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
