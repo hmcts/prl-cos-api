@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavMetaData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRespondent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
@@ -35,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Situation;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
@@ -91,8 +91,8 @@ public class FL401ApplicationMapperTest {
     private RespondentDetails respondentDetails;
     private CourtNavRelationShipToRespondent relationShipToRespondent;
     private Family family;
-    private TheHome home;
-    private TheHome home1;
+    private CourtNavHome home;
+    private CourtNavHome home1;
     private CourtNavRespondentBehaviour respondentBehaviour;
     private CourtNavStmtOfTruth stmtOfTruth;
     private GoingToCourt goingToCourt;
@@ -112,6 +112,7 @@ public class FL401ApplicationMapperTest {
         CourtNavAddressMapper addressMapper = new CourtNavAddressMapperImpl();
         CourtNavApplicantMapper courtNavApplicantMapper = new CourtNavApplicantMapper(addressMapper);
         CourtNavRespondentMapper courtNavRespondentMapper = new CourtNavRespondentMapper(addressMapper);
+        CourtNavHomeMapper courtNavHomeMapper = new CourtNavHomeMapper(addressMapper);
 
         fl401ApplicationMapper = new FL401ApplicationMapper(
             courtFinderService,
@@ -119,7 +120,8 @@ public class FL401ApplicationMapperTest {
             locationRefDataService,
             courtSealFinderService,
             courtNavApplicantMapper,
-            courtNavRespondentMapper
+            courtNavRespondentMapper,
+            courtNavHomeMapper
         );
 
         court = Court.builder()
@@ -270,7 +272,7 @@ public class FL401ApplicationMapperTest {
             .stopBehaviourTowardsChildren(behaviourTowardsChildrenEnum)
             .build();
 
-        home = TheHome.builder()
+        home = CourtNavHome.builder()
             .applyingForOccupationOrder(false)
             .build();
 
@@ -301,7 +303,7 @@ public class FL401ApplicationMapperTest {
         List<FamilyHomeOutcomeEnum> familyHomeOutcomeEnum = new ArrayList<>();
         familyHomeOutcomeEnum.add(FamilyHomeOutcomeEnum.respondentToPayRentMortgage);
 
-        home1 = TheHome.builder()
+        home1 = CourtNavHome.builder()
             .applyingForOccupationOrder(true)
             .occupationOrderAddress(CourtNavAddress.builder()
                                         .addressLine1("55 Test Street")
@@ -434,7 +436,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -471,7 +473,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -516,7 +518,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -559,7 +561,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -603,7 +605,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -649,7 +651,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -700,7 +702,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt.toBuilder().interpreterDialect(null).build())
                        .build())
@@ -745,7 +747,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -813,7 +815,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -858,7 +860,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -899,7 +901,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -941,7 +943,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -985,7 +987,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1029,7 +1031,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1075,7 +1077,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1121,7 +1123,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1169,7 +1171,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1229,7 +1231,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1289,7 +1291,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1335,7 +1337,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1382,7 +1384,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home1)
+                       .courtNavHome(home1)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1419,7 +1421,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1454,7 +1456,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1487,7 +1489,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1520,7 +1522,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
@@ -1557,7 +1559,7 @@ public class FL401ApplicationMapperTest {
                        .family(family)
                        .relationshipWithRespondent(relationShipToRespondent)
                        .respondentBehaviour(respondentBehaviour)
-                       .theHome(home)
+                       .courtNavHome(home)
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
