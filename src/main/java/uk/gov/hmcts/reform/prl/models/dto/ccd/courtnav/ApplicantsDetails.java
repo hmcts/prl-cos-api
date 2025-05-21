@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class ApplicantsDetails {
     private final String applicantLastName;
     private final String applicantOtherNames;
     private final CourtNavDate applicantDateOfBirth;
-    private final ApplicantGenderEnum applicantGender;
+    private final Gender applicantGender;
     private final String applicantGenderOther;
     private final boolean shareContactDetailsWithRespondent;
     private String applicantPhoneNumber;
