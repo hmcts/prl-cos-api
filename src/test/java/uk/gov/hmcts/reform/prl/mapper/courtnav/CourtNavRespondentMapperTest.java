@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondent;
 
 import java.time.LocalDate;
 
@@ -14,26 +15,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@SpringBootTest
 class CourtNavRespondentMapperTest {
 
-    private CourtNavRespondentMapper respondentMapper;
-
-    @BeforeEach
-    void setUp() {
-        CourtNavAddressMapper addressMapper = new CourtNavAddressMapperImpl();
-        respondentMapper = new CourtNavRespondentMapper(addressMapper);
-    }
+    @Autowired
+    private CourtNavRespondentMapper courtNavRespondentMapper;
 
     @Test
     void shouldMapFullRespondentDetailsCorrectly() {
-        RespondentDetails input = RespondentDetails.builder()
-            .respondentFirstName("John")
-            .respondentLastName("Smith")
-            .respondentOtherNames("Jon")
-            .respondentDateOfBirth(new CourtNavDate(1, 2, 1980))
-            .respondentEmailAddress("john@example.com")
-            .respondentPhoneNumber("0123456789")
-            .respondentAddress(CourtNavAddress.builder()
+        CourtNavRespondent input = CourtNavRespondent.builder()
+            .firstName("John")
+            .lastName("Smith")
+            .previousName("Jon")
+            .dateOfBirth(new CourtNavDate(1, 2, 1980))
+            .email("john@example.com")
+            .phoneNumber("0123456789")
+            .address(CourtNavAddress.builder()
                                    .addressLine1("1 Main St")
                                    .postTown("Town")
                                    .postCode("TS1 1AA")
@@ -41,7 +38,7 @@ class CourtNavRespondentMapperTest {
             .respondentLivesWithApplicant(true)
             .build();
 
-        PartyDetails result = respondentMapper.mapRespondent(input);
+        PartyDetails result = courtNavRespondentMapper.mapRespondent(input);
 
         assertEquals("John", result.getFirstName());
         assertEquals("Smith", result.getLastName());
@@ -59,13 +56,13 @@ class CourtNavRespondentMapperTest {
 
     @Test
     void shouldHandleNullContactDetailsSafely() {
-        RespondentDetails input = RespondentDetails.builder()
-            .respondentFirstName("Anon")
-            .respondentLastName("Unknown")
+        CourtNavRespondent input = CourtNavRespondent.builder()
+            .firstName("Anon")
+            .lastName("Unknown")
             .respondentLivesWithApplicant(false)
             .build();
 
-        PartyDetails result = respondentMapper.mapRespondent(input);
+        PartyDetails result = courtNavRespondentMapper.mapRespondent(input);
 
         assertEquals("Anon", result.getFirstName());
         assertNull(result.getDateOfBirth());
@@ -75,4 +72,3 @@ class CourtNavRespondentMapperTest {
         assertEquals(YesOrNo.No, result.getRespondentLivedWithApplicant());
     }
 }
-

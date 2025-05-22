@@ -1,39 +1,39 @@
 package uk.gov.hmcts.reform.prl.mapper.courtnav;
 
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondent;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
-@Component
-@AllArgsConstructor
-public class CourtNavRespondentMapper {
+@Mapper(componentModel = "spring", uses = CourtNavAddressMapper.class)
+public interface CourtNavRespondentMapper {
 
-    private final CourtNavAddressMapper addressMapper;
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth", qualifiedByName = "mapCourtNavDate")
+    @Mapping(target = "isDateOfBirthKnown", source = "dateOfBirth", qualifiedByName = "isNotNull")
+    @Mapping(target = "canYouProvideEmailAddress", source = "email", qualifiedByName = "isNotNull")
+    @Mapping(target = "canYouProvidePhoneNumber", source = "phoneNumber", qualifiedByName = "isNotNull")
+    @Mapping(target = "isCurrentAddressKnown", source = "address", qualifiedByName = "isNotNull")
+    @Mapping(target = "respondentLivedWithApplicant", source = "respondentLivesWithApplicant", qualifiedByName = "booleanToYesOrNo")
+    @Mapping(target = "partyId", expression = "java(java.util.UUID.randomUUID())")
+    PartyDetails mapRespondent(CourtNavRespondent respondent);
 
-    public PartyDetails mapRespondent(RespondentDetails respondent) {
-        return PartyDetails.builder()
-            .firstName(respondent.getRespondentFirstName())
-            .lastName(respondent.getRespondentLastName())
-            .previousName(respondent.getRespondentOtherNames())
-            .dateOfBirth(null != respondent.getRespondentDateOfBirth()
-                             ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
-            .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
-            .email(respondent.getRespondentEmailAddress())
-            .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))
-            .phoneNumber(respondent.getRespondentPhoneNumber())
-            .canYouProvidePhoneNumber(YesOrNo.valueOf(null != respondent.getRespondentPhoneNumber() ? "Yes" : "No"))
-            .address(null != respondent.getRespondentAddress()
-                         ? addressMapper.map(respondent.getRespondentAddress()) : null)
-            .isCurrentAddressKnown(YesOrNo.valueOf(null != respondent.getRespondentAddress() ? "Yes" : "No"))
-            .respondentLivedWithApplicant(respondent.isRespondentLivesWithApplicant() ? YesOrNo.Yes : YesOrNo.No)
-            .applicantContactInstructions(null)
-            .applicantPreferredContact(null)
-            .partyId(UUID.randomUUID())
-            .build();
+    @Named("mapCourtNavDate")
+    default LocalDate mapCourtNavDate(CourtNavDate courtNavDate) {
+        return courtNavDate != null ? LocalDate.parse(courtNavDate.mergeDate()) : null;
+    }
+
+    @Named("isNotNull")
+    default YesOrNo isNotNull(Object field) {
+        return field != null ? YesOrNo.Yes : YesOrNo.No;
+    }
+
+    @Named("booleanToYesOrNo")
+    default YesOrNo booleanToYesOrNo(Boolean value) {
+        return Boolean.TRUE.equals(value) ? YesOrNo.Yes : YesOrNo.No;
     }
 }

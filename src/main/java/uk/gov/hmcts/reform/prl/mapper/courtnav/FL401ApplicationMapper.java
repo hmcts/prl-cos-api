@@ -4,7 +4,6 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -72,7 +71,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class FL401ApplicationMapper {
 
     public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
@@ -119,7 +118,7 @@ public class FL401ApplicationMapper {
                                                      .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
             .applicantsFL401(courtNavApplicantMapper.mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
-            .respondentsFL401(courtNavRespondentMapper.mapRespondent(courtNavCaseData.getFl401().getRespondentDetails()))
+            .respondentsFL401(courtNavRespondentMapper.mapRespondent(courtNavCaseData.getFl401().getCourtNavRespondent()))
             .applicantFamilyDetails(ApplicantFamilyDetails.builder()
                                         .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
                                                                        .getWhoApplicationIsFor()
@@ -347,8 +346,8 @@ public class FL401ApplicationMapper {
         String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getApplicantFirstName() + " "
             + courtNavCaseData.getFl401().getApplicantDetails().getApplicantLastName();
 
-        String respondentName = courtNavCaseData.getFl401().getRespondentDetails().getRespondentFirstName() + " "
-            + courtNavCaseData.getFl401().getRespondentDetails().getRespondentLastName();
+        String respondentName = courtNavCaseData.getFl401().getCourtNavRespondent().getFirstName() + " "
+            + courtNavCaseData.getFl401().getCourtNavRespondent().getLastName();
 
         return applicantName + " & " + respondentName;
     }
