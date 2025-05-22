@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,8 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -32,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -46,7 +42,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApp
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
@@ -79,6 +74,7 @@ public class FL401ApplicationMapper {
     private final CourtNavHomeMapper courtNavHomeMapper;
     private final ApplicantChildMapper applicantChildMapper;
     private final InterpreterNeedsMapper interpreterNeedsMapper;
+    private final OrderWithoutNoticeMapper orderWithoutNoticeMapper;
 
     private Court court = null;
 
@@ -97,22 +93,10 @@ public class FL401ApplicationMapper {
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getFl401().getSituation().getOrdersAppliedFor())
                                          .build())
-            .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
-                                                      .orderWithoutGivingNotice(courtNavCaseData
-                                                                                    .getFl401()
-                                                                                    .getSituation()
-                                                                                    .isOrdersAppliedWithoutNotice()
-                                                                                    ? YesOrNo.Yes : YesOrNo.No)
-                                                      .build())
-            .reasonForOrderWithoutGivingNotice(!courtNavCaseData.getFl401().getSituation().isOrdersAppliedWithoutNotice() ? null
-                                                   : (ReasonForWithoutNoticeOrder.builder()
-                .reasonForOrderWithoutGivingNotice(getReasonForWithOutOrderNotice(courtNavCaseData))
-                .futherDetails(courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReasonDetails())
-                .build()))
+            .orderWithoutGivingNoticeToRespondent(orderWithoutNoticeMapper.mapOrderWithoutNotice(courtNavCaseData))
+            .reasonForOrderWithoutGivingNotice(orderWithoutNoticeMapper.mapReasonForWithoutNotice(courtNavCaseData))
+            .anyOtherDtailsForWithoutNoticeOrder(orderWithoutNoticeMapper.mapOtherDetails(courtNavCaseData))
             .bailDetails(getRespondentBailConditionDetails(courtNavCaseData))
-            .anyOtherDtailsForWithoutNoticeOrder(OtherDetailsOfWithoutNoticeOrder.builder()
-                                                     .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
-                                                     .build())
             .applicantsFL401(courtNavApplicantMapper.mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
             .respondentsFL401(courtNavRespondentMapper.mapRespondent(courtNavCaseData.getFl401().getCourtNavRespondent()))
             .applicantFamilyDetails(ApplicantFamilyDetails.builder()
@@ -374,18 +358,6 @@ public class FL401ApplicationMapper {
         return applicantStopFromRespondentDoingList;
     }
 
-    private List<ReasonForOrderWithoutGivingNoticeEnum> getReasonForWithOutOrderNotice(CourtNavFl401 courtNavCaseData) {
-
-        List<WithoutNoticeReasonEnum> withoutOrderReasonList = courtNavCaseData.getFl401()
-            .getSituation().getOrdersAppliedWithoutNoticeReason();
-        List<ReasonForOrderWithoutGivingNoticeEnum> reasonForOrderWithoutGivingNoticeList = new ArrayList<>();
-        for (WithoutNoticeReasonEnum withoutOrderReason : withoutOrderReasonList) {
-            reasonForOrderWithoutGivingNoticeList.add(ReasonForOrderWithoutGivingNoticeEnum
-                                                          .getDisplayedValueFromEnumString(String.valueOf(
-                                                              withoutOrderReason)));
-        }
-        return reasonForOrderWithoutGivingNoticeList;
-    }
 
     private String getCourtName(CaseData caseData) throws NotFoundException {
         court = courtFinderService.getNearestFamilyCourt(caseData);
