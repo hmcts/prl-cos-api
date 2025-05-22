@@ -356,7 +356,7 @@ public class Fm5ReminderService {
             }
             log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
         }
-        log.info("hearings is empty");
+        log.info("hearingsToProcess is null");
         return false;
     }
 
