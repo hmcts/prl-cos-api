@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Component
 @AllArgsConstructor
@@ -43,14 +45,14 @@ public class CourtNavApplicantMapper {
             .address(null != applicant.getApplicantAddress()
                          ? courtNavAddressMapper.map(applicant.getApplicantAddress()) : null)
             .isAddressConfidential(ObjectUtils.isNotEmpty(applicant.getApplicantAddress())
-                                       && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+                                       && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getApplicantEmailAddress() ? "Yes" : "No"))
             .email(applicant.getApplicantEmailAddress())
             .isEmailAddressConfidential(StringUtils.isNotEmpty(applicant.getApplicantEmailAddress())
-                                            && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+                                            && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
             .phoneNumber(applicant.getApplicantPhoneNumber())
             .isPhoneNumberConfidential(StringUtils.isNotEmpty(applicant.getApplicantPhoneNumber())
-                                           && !applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
+                                           && !applicant.isShareContactDetailsWithRespondent() ? Yes : No)
             .applicantPreferredContact(applicant.getApplicantPreferredContact())
             .applicantContactInstructions(applicant.getApplicantContactInstructions())
             .representativeFirstName(applicant.getLegalRepresentativeFirstName())

@@ -11,13 +11,16 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReason
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+
 @Mapper(componentModel = "spring")
 public interface OrderWithoutNoticeMapper {
 
     default WithoutNoticeOrderDetails mapOrderWithoutNotice(CourtNavFl401 source) {
         boolean appliedWithoutNotice = source.getFl401().getSituation().isOrdersAppliedWithoutNotice();
         return WithoutNoticeOrderDetails.builder()
-            .orderWithoutGivingNotice(appliedWithoutNotice ? uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes : uk.gov.hmcts.reform.prl.enums.YesOrNo.No)
+            .orderWithoutGivingNotice(appliedWithoutNotice ? Yes : No)
             .build();
     }
 
