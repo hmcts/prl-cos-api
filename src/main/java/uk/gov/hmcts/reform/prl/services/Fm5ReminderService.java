@@ -172,7 +172,7 @@ public class Fm5ReminderService {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
                         log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
-                        log.info("first listed hearing: {}", hearing.getCaseHearings().getFirst());
+                        log.info("first listed hearing: {}", hearing.getCaseHearings().getFirst().getHearingID());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
                             log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
@@ -334,11 +334,12 @@ public class Fm5ReminderService {
 
     public boolean isFirstListedHearingAwayForDays(Hearings hearings,
                                                    long days) {
-        log.info("setting hearings to process for case {} with hearing {}", hearings.getCaseRef(),
-                 hearings.getCaseHearings().getFirst());
-        Hearings hearingToProcess = hearings;
-        if (null != hearingToProcess) {
-            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearings.getCaseHearings()).stream()
+        Hearings hearingsToProcess;
+        hearingsToProcess = hearings;
+        if (null != hearingsToProcess) {
+            log.info("sorting schedule for hearing {}", hearingsToProcess.getCaseHearings().getFirst().getHearingID());
+            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearingsToProcess
+                                                                                        .getCaseHearings()).stream()
                 .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
                     && null != eachHearing.getHearingDaySchedule())
                 .map(CaseHearing::getHearingDaySchedule)
@@ -351,10 +352,11 @@ public class Fm5ReminderService {
 
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
-                    .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
+                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
             }
-            log.info("First hearing outside of date range for case {}", hearings.getCaseRef());
+            log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
         }
+        log.info("hearings is empty");
         return false;
     }
 
