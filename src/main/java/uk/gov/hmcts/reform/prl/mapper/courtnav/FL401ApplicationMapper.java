@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -43,7 +42,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
@@ -83,6 +81,7 @@ public class FL401ApplicationMapper {
     private final CourtNavApplicantMapper courtNavApplicantMapper;
     private final CourtNavRespondentMapper courtNavRespondentMapper;
     private final CourtNavHomeMapper courtNavHomeMapper;
+    private final ApplicantChildMapper applicantChildMapper;
 
     private Court court = null;
 
@@ -126,10 +125,8 @@ public class FL401ApplicationMapper {
                                                                        ? YesOrNo.No : YesOrNo.Yes)
                                         .build())
             .applicantChildDetails(!courtNavCaseData.getFl401().getFamily()
-                .getWhoApplicationIsFor()
-                .equals(ApplicationCoverEnum.applicantOnly)
-                                       ? mapProtectedChild(courtNavCaseData.getFl401()
-                                                               .getFamily().getProtectedChildren()) : null)
+                .getWhoApplicationIsFor().equals(ApplicationCoverEnum.applicantOnly)
+                                       ? applicantChildMapper.mapProtectedChildren(courtNavCaseData.getFl401().getFamily().getProtectedChildren()) : null)
             .respondentBehaviourData(courtNavCaseData.getFl401().getSituation()
                                          .getOrdersAppliedFor().contains(FL401OrderTypeEnum.nonMolestationOrder)
                                          ? (RespondentBehaviour.builder()
@@ -437,23 +434,6 @@ public class FL401ApplicationMapper {
 
         return List.of(
             ElementUtils.element(interpreterNeed));
-    }
-
-    private List<Element<ApplicantChild>> mapProtectedChild(List<ProtectedChild> protectedChildren) {
-
-        List<Element<ApplicantChild>> applicantChild = new ArrayList<>();
-        for (ProtectedChild protectedChild : protectedChildren) {
-            ApplicantChild a = ApplicantChild.builder()
-                .fullName(protectedChild.getFullName())
-                .dateOfBirth(LocalDate.parse(protectedChild.getDateOfBirth().mergeDate()))
-                .applicantChildRelationship(protectedChild.getRelationship())
-                .applicantRespondentShareParental(protectedChild.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
-                .respondentChildRelationship(protectedChild.getRespondentRelationship())
-                .build();
-            applicantChild.add(element(a));
-        }
-
-        return applicantChild;
     }
 
 }
