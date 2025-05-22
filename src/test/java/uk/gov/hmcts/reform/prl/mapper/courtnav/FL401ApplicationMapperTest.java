@@ -50,7 +50,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedR
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
@@ -76,15 +75,6 @@ class FL401ApplicationMapperTest {
     @Autowired
     private FL401ApplicationMapper fl401ApplicationMapper;
 
-    @Autowired
-    private CourtNavApplicantMapper courtNavApplicantMapper;
-
-    @Autowired
-    private CourtNavRespondentMapper courtNavRespondentMapper;
-
-    @Autowired
-    private CourtNavHomeMapper courtNavHomeMapper;
-
     @MockBean
     private CourtFinderService courtFinderService;
 
@@ -93,9 +83,6 @@ class FL401ApplicationMapperTest {
 
     @MockBean
     private LocationRefDataService locationRefDataService;
-
-    @MockBean
-    private CourtSealFinderService courtSealFinderService;
 
     private Court court;
     private CourtNavFl401 courtNavFl401;
