@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
@@ -106,8 +108,11 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -174,6 +179,7 @@ public class SendAndReplyService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
+    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     @Value("${sendandreply.category-id}")
     private String categoryId;
@@ -242,6 +248,7 @@ public class SendAndReplyService {
 
     private static final String LETTER_TYPE = "MessagePack";
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+    public static final String MESSAGES = "messages";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -2087,5 +2094,89 @@ public class SendAndReplyService {
         return CollectionUtils.isNotEmpty(message.getExternalMessageWhoToSendTo().getValue())
             || Yes.equals(message.getSendMessageToCafcass()) || Yes.equals(message.getSendMessageToOtherParties());
 
+    }
+
+    public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            if (!atLeastOnePartySelectedForExternalMessage(message)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                    "No recipients selected to send your message. Select at least one party")).build();
+            }
+        }
+        //reset dynamic list fields
+        caseData = resetSendAndReplyDynamicLists(caseData);
+
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+    public void sendMessages(String authorisation, CaseData caseData, Map<String, Object> caseDataMap) {
+        caseDataMap.put(MESSAGES, addMessage(caseData, authorisation, caseDataMap));
+        String additionalApplicationCodeSelected = fetchAdditionalApplicationCodeIfExist(
+            caseData, SEND
+        );
+
+        if (null != additionalApplicationCodeSelected) {
+            caseDataMap.put(
+                AWP_ADDTIONAL_APPLICATION_BUNDLE,
+                uploadAdditionalApplicationService
+                    .updateAwpApplicationStatus(
+                        additionalApplicationCodeSelected,
+                        caseData.getAdditionalApplicationsBundle(),
+                        AWP_STATUS_IN_REVIEW
+                    )
+            );
+        }
+
+        sendNotificationToExternalParties(
+            caseData,
+            authorisation
+        );
+
+        //send emails in case of sending to others with emails
+        sendNotificationEmailOther(caseData);
+        //WA - clear reply field in case of SEND
+        removeTemporaryFields(caseDataMap, "replyMessageObject");
+    }
+
+    public void replyMessages(String authorisation, CaseData caseData, Map<String, Object> caseDataMap) {
+        if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            //Reply & close
+            caseDataMap.put(MESSAGES, closeMessage(caseData, caseDataMap));
+
+            // Update status of Additional applications if selected to Closed
+            String additionalApplicationCodeSelected = fetchAdditionalApplicationCodeIfExist(
+                caseData, REPLY
+            );
+            log.info("additionalApplicationCodeSelected while closing message {}", additionalApplicationCodeSelected);
+            if (null != additionalApplicationCodeSelected) {
+                caseDataMap.put(
+                    AWP_ADDTIONAL_APPLICATION_BUNDLE,
+                    uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus(
+                            additionalApplicationCodeSelected,
+                            caseData.getAdditionalApplicationsBundle(),
+                            AWP_STATUS_CLOSED
+                        )
+                );
+            }
+
+            // in case of reply and close message, removing replymessageobject for wa
+            removeTemporaryFields(caseDataMap, "replyMessageObject");
+        } else {
+            //Reply & append history
+            caseDataMap.put(MESSAGES, replyAndAppendMessageHistory(
+                caseData,
+                authorisation,
+                caseDataMap
+            ));
+        }
+        //WA - clear send field in case of REPLY
+        removeTemporaryFields(caseDataMap, "sendMessageObject");
     }
 }

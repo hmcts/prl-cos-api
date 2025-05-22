@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
-import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -34,16 +33,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -61,7 +56,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final SendAndReplyService sendAndReplyService;
     private final ElementUtils elementUtils;
     private final AllTabServiceImpl allTabService;
-    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
 
     public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = """
@@ -77,13 +71,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                                   EventService eventPublisher,
                                   SendAndReplyService sendAndReplyService,
                                   ElementUtils elementUtils,
-                                  AllTabServiceImpl allTabService,
-                                  UploadAdditionalApplicationService uploadAdditionalApplicationService) {
+                                  AllTabServiceImpl allTabService) {
         super(objectMapper, eventPublisher);
         this.sendAndReplyService = sendAndReplyService;
         this.elementUtils = elementUtils;
         this.allTabService = allTabService;
-        this.uploadAdditionalApplicationService = uploadAdditionalApplicationService;
     }
 
     @PostMapping("/about-to-start")
@@ -261,62 +253,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
-            String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
-                caseData, SEND
-            );
-
-            if (null != additionalApplicationCodeSelected) {
-                caseDataMap.put(
-                    AWP_ADDTIONAL_APPLICATION_BUNDLE,
-                    uploadAdditionalApplicationService
-                        .updateAwpApplicationStatus(
-                            additionalApplicationCodeSelected,
-                            caseData.getAdditionalApplicationsBundle(),
-                            AWP_STATUS_IN_REVIEW
-                        )
-                );
-            }
-
-            sendAndReplyService.sendNotificationToExternalParties(
-                caseData,
-                authorisation
-            );
-
-            //send emails in case of sending to others with emails
-            sendAndReplyService.sendNotificationEmailOther(caseData);
-            //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+            sendAndReplyService.sendMessages(authorisation, caseData, caseDataMap);
         } else {
-            if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-                //Reply & close
-                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData, caseDataMap));
-
-                // Update status of Additional applications if selected to Closed
-                String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
-                    caseData, REPLY
-                );
-                log.info("additionalApplicationCodeSelected while closing message {}", additionalApplicationCodeSelected);
-                if (null != additionalApplicationCodeSelected) {
-                    caseDataMap.put(
-                        AWP_ADDTIONAL_APPLICATION_BUNDLE,
-                        uploadAdditionalApplicationService
-                            .updateAwpApplicationStatus(
-                                additionalApplicationCodeSelected,
-                                caseData.getAdditionalApplicationsBundle(),
-                                AWP_STATUS_CLOSED
-                            )
-                    );
-                }
-
-                // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
-            } else {
-                //Reply & append history
-                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation, caseDataMap));
-            }
-            //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
+            sendAndReplyService.replyMessages(authorisation, caseData, caseDataMap);
         }
 
         //clear temp fields
@@ -355,21 +294,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")
                                                                   @Parameter(hidden = true) String authorisation,
                                                                   @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        if (Objects.nonNull(message) && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-            if (!sendAndReplyService.atLeastOnePartySelectedForExternalMessage(message)) {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
-                    "No recipients selected to send your message. Select at least one party")).build();
-            }
-        }
-        //reset dynamic list fields
-        caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
-
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return sendAndReplyService.clearDynamicLists(callbackRequest);
     }
 }
