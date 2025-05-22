@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
@@ -53,14 +51,12 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -82,6 +78,7 @@ public class FL401ApplicationMapper {
     private final CourtNavRespondentMapper courtNavRespondentMapper;
     private final CourtNavHomeMapper courtNavHomeMapper;
     private final ApplicantChildMapper applicantChildMapper;
+    private final InterpreterNeedsMapper interpreterNeedsMapper;
 
     private Court court = null;
 
@@ -187,7 +184,7 @@ public class FL401ApplicationMapper {
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
-                               .interpreterNeeds(getInterpreterNeeds(courtNavCaseData))
+                               .interpreterNeeds(interpreterNeedsMapper.mapInterpreterNeeds(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
                                                         ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
@@ -220,11 +217,6 @@ public class FL401ApplicationMapper {
 
         return caseData;
 
-    }
-
-    private List<Element<InterpreterNeed>> getInterpreterNeeds(CourtNavFl401 courtNavCaseData) {
-        return Boolean.FALSE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
-            ? Collections.emptyList() : interpreterLanguageDetails(courtNavCaseData);
     }
 
     private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
@@ -420,20 +412,6 @@ public class FL401ApplicationMapper {
         }
         return fl401ProceedingList;
 
-    }
-
-    private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
-
-        InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .party(List.of(PartyEnum.applicant))
-            .language(null != courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
-                ? courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage() + " - "
-                    + courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect()
-                : courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
-            .build();
-
-        return List.of(
-            ElementUtils.element(interpreterNeed));
     }
 
 }
