@@ -11,6 +11,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -80,7 +81,16 @@ public class DocumentSealingServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
         mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal.png")).thenReturn(sealBinaries);
-        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal.png]").build();
+        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal.png]")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("2")
+                                        .regionId(null)
+                                        .regionName("Midlands")
+                                        .baseLocation("123456789")
+                                        .baseLocationId(null)
+                                        .baseLocationName("Birmingham")
+                                        .build())
+            .build();
 
         final Document actualSealedDocumentReference = documentSealingService
             .sealDocument(inputDocument, caseData, "testAuth");
@@ -120,7 +130,16 @@ public class DocumentSealingServiceTest {
         mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal-bilingual.png")).thenReturn(
             sealBinaries);
 
-        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]").build();
+        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("7")
+                                        .regionId(null)
+                                        .regionName("Wales")
+                                        .baseLocation("234946")
+                                        .baseLocationId(null)
+                                        .baseLocationName("Swansea")
+                                        .build())
+            .build();
 
         final Document actualSealedDocumentReference = documentSealingService
             .sealDocument(inputDocument, caseData, "testAuth");
@@ -151,7 +170,16 @@ public class DocumentSealingServiceTest {
         mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal-bilingual.png")).thenReturn(
             sealBinaries);
 
-        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]").build();
+        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .region("7")
+                                        .regionId(null)
+                                        .regionName("Wales")
+                                        .baseLocation("234946")
+                                        .baseLocationId(null)
+                                        .baseLocationName("Swansea")
+                                        .build())
+            .build();
         Document inputDocument = Document.builder()
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
 
