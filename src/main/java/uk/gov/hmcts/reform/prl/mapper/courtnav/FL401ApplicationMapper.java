@@ -8,10 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
-import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
-import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
-import uk.gov.hmcts.reform.prl.enums.FL401Consent;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -21,8 +17,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
-import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -33,9 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
@@ -71,6 +62,8 @@ public class FL401ApplicationMapper {
     private final InterpreterNeedsMapper interpreterNeedsMapper;
     private final OrderWithoutNoticeMapper orderWithoutNoticeMapper;
     private final ApplicantRelationshipMapper applicantRelationshipMapper;
+    private final RespondentBehaviourMapper respondentBehaviourMapper;
+    private final StatementOfTruthMapper statementOfTruthMapper;
 
     private Court court = null;
 
@@ -105,33 +98,14 @@ public class FL401ApplicationMapper {
                 .getWhoApplicationIsFor().equals(ApplicationCoverEnum.applicantOnly)
                                        ? applicantChildMapper.mapProtectedChildren(
                                            courtNavCaseData.getFl401().getFamily().getProtectedChildren()) : null)
-            .respondentBehaviourData(courtNavCaseData.getFl401().getSituation()
-                                         .getOrdersAppliedFor().contains(FL401OrderTypeEnum.nonMolestationOrder)
-                                         ? (RespondentBehaviour.builder()
-                .applicantWantToStopFromRespondentDoing(getApplicantBehaviourList(courtNavCaseData))
-                .applicantWantToStopFromRespondentDoingToChild(getChildrenBehaviourList(courtNavCaseData))
-                .otherReasonApplicantWantToStopFromRespondentDoing(
-                    courtNavCaseData.getFl401().getRespondentBehaviour().getStopBehaviourAnythingElse())
-                .build()) : null)
+            .respondentBehaviourData(respondentBehaviourMapper.mapRespondentBehaviour(courtNavCaseData))
             .respondentRelationObject(applicantRelationshipMapper.mapRelationType(courtNavCaseData))
             .respondentRelationDateInfoObject(applicantRelationshipMapper.mapRelationDates(courtNavCaseData))
             .respondentRelationOptions(applicantRelationshipMapper.mapRelationOptions(courtNavCaseData))
             .home(courtNavCaseData.getFl401().getCourtNavHome() != null
                       ? courtNavHomeMapper.mapHome(courtNavCaseData.getFl401().getCourtNavHome())
                       : null)
-            .fl401StmtOfTruth(StatementOfTruth.builder()
-                                  .applicantConsent(courtNavCaseData.getFl401()
-                                                        .getStatementOfTruth()
-                                                        .getDeclaration().stream()
-                                                        .map(ConsentEnum::getId)
-                                                        .map(FL401Consent::getDisplayedValueFromEnumString)
-                                                        .toList())
-                                  .signature(courtNavCaseData.getFl401().getStatementOfTruth().getSignature())
-                                  .fullname(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureFullName())
-                                  .date(LocalDate.parse(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureDate().mergeDate()))
-                                  .nameOfFirm(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativeFirmName())
-                                  .signOnBehalf(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativePositionHeld())
-                                  .build())
+            .fl401StmtOfTruth(statementOfTruthMapper.mapStatementOfTruth(courtNavCaseData))
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
                                                         ? YesOrNo.Yes : YesOrNo.No)
@@ -240,20 +214,6 @@ public class FL401ApplicationMapper {
             .build();
     }
 
-    private List<ApplicantStopFromRespondentDoingToChildEnum> getChildrenBehaviourList(CourtNavFl401 courtNavCaseData) {
-
-        return (null !=  courtNavCaseData.getFl401()
-            .getRespondentBehaviour().getStopBehaviourTowardsChildren())
-            ? getBehaviourTowardsChildren(courtNavCaseData) : null;
-    }
-
-    private List<ApplicantStopFromRespondentDoingEnum> getApplicantBehaviourList(CourtNavFl401 courtNavCaseData) {
-
-        return (null !=  courtNavCaseData.getFl401()
-            .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
-            ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
-    }
-
     private String getCaseName(CourtNavFl401 courtNavCaseData) {
 
         String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getApplicantFirstName() + " "
@@ -264,40 +224,6 @@ public class FL401ApplicationMapper {
 
         return applicantName + " & " + respondentName;
     }
-
-    private List<ApplicantStopFromRespondentDoingToChildEnum> getBehaviourTowardsChildren(CourtNavFl401 courtNavCaseData) {
-
-        List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenList = courtNavCaseData
-            .getFl401()
-            .getRespondentBehaviour()
-            .getStopBehaviourTowardsChildren();
-        List<ApplicantStopFromRespondentDoingToChildEnum> applicantStopFromRespondentDoingToChildList = new ArrayList<>();
-        for (BehaviourTowardsChildrenEnum behaviourTowardsChildren : behaviourTowardsChildrenList) {
-
-            applicantStopFromRespondentDoingToChildList.add(ApplicantStopFromRespondentDoingToChildEnum
-                                                                .getDisplayedValueFromEnumString(String.valueOf(
-                                                                    behaviourTowardsChildren)));
-
-        }
-        return applicantStopFromRespondentDoingToChildList;
-
-    }
-
-    private List<ApplicantStopFromRespondentDoingEnum> getBehaviourTowardsApplicant(CourtNavFl401 courtNavCaseData) {
-
-        List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantList = courtNavCaseData.getFl401()
-            .getRespondentBehaviour().getStopBehaviourTowardsApplicant();
-        List<ApplicantStopFromRespondentDoingEnum> applicantStopFromRespondentDoingList = new ArrayList<>();
-        for (BehaviourTowardsApplicantEnum behaviourTowardsApplicant : behaviourTowardsApplicantList) {
-
-            applicantStopFromRespondentDoingList.add(ApplicantStopFromRespondentDoingEnum
-                                                         .getDisplayedValueFromEnumString(String.valueOf(
-                                                             behaviourTowardsApplicant)));
-
-        }
-        return applicantStopFromRespondentDoingList;
-    }
-
 
     private String getCourtName(CaseData caseData) throws NotFoundException {
         court = courtFinderService.getNearestFamilyCourt(caseData);
