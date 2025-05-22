@@ -42,6 +42,9 @@ import java.util.Objects;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -177,9 +180,72 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
         if (caseData.getReviewAdditionalApplicationWrapper() != null
             && YesOrNo.Yes.equals(caseData.getReviewAdditionalApplicationWrapper().getIsAdditionalApplicationReviewed())) {
             if (caseData.getChooseSendOrReply().equals(SEND)) {
-                sendAndReplyService.sendMessages(authorisation, caseData, caseDataMap);
+                caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation, caseDataMap));
+                String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
+                    caseData, SEND
+                );
+
+                if (null != additionalApplicationCodeSelected) {
+                    caseDataMap.put(
+                        AWP_ADDTIONAL_APPLICATION_BUNDLE,
+                        uploadAdditionalApplicationService
+                            .updateAwpApplicationStatus(
+                                additionalApplicationCodeSelected,
+                                caseData.getAdditionalApplicationsBundle(),
+                                AWP_STATUS_IN_REVIEW
+                            )
+                    );
+                }
+
+                sendAndReplyService.sendNotificationToExternalParties(
+                    caseData,
+                    authorisation
+                );
+
+                //send emails in case of sending to others with emails
+                sendAndReplyService.sendNotificationEmailOther(caseData);
+                //WA - clear reply field in case of SEND
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
-                sendAndReplyService.replyMessages(authorisation, caseData, caseDataMap);
+                if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+                    //Reply & close
+                    caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData, caseDataMap));
+
+                    // Update status of Additional applications if selected to Closed
+                    String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
+                        caseData, REPLY
+                    );
+                    log.info(
+                        "additionalApplicationCodeSelected while closing message {}",
+                        additionalApplicationCodeSelected
+                    );
+                    if (null != additionalApplicationCodeSelected) {
+                        caseDataMap.put(
+                            AWP_ADDTIONAL_APPLICATION_BUNDLE,
+                            uploadAdditionalApplicationService
+                                .updateAwpApplicationStatus(
+                                    additionalApplicationCodeSelected,
+                                    caseData.getAdditionalApplicationsBundle(),
+                                    AWP_STATUS_CLOSED
+                                )
+                        );
+                    }
+
+                    // in case of reply and close message, removing replymessageobject for wa
+                    sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+                } else {
+                    //Reply & append history
+                    caseDataMap.put(
+                        MESSAGES,
+                        sendAndReplyService.replyAndAppendMessageHistory(
+                            caseData,
+                            authorisation,
+                            caseDataMap
+                        )
+                    );
+                }
+                //WA - clear send field in case of REPLY
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
             }
         }
 

@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -64,6 +65,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -79,6 +81,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     SendAndReplyService sendAndReplyService;
+
+    @Mock
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -522,11 +527,16 @@ public class SendAndReplyControllerTest {
             .data(caseDataMap)
             .build();
 
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND)).thenReturn(dynamicList.getValueCode());
+        when(uploadAdditionalApplicationService.updateAwpApplicationStatus(dynamicList.getValueCode(),
+                                                                           caseData.getAdditionalApplicationsBundle(),
+                                                                           AWP_STATUS_IN_REVIEW)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -630,10 +640,13 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,SEND))
+            .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -676,13 +689,18 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.addMessage(caseData, auth, caseDataMap)).thenReturn(msgListWithNewMessage);
+
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyService).addMessage(caseData, auth, caseDataMap);
     }
 
     @Test
     public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
+
+
+
         caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
@@ -727,6 +745,8 @@ public class SendAndReplyControllerTest {
 
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,REPLY))
+            .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
         LocalDateTime dateTimeNow = LocalDateTime.now();
         String dateSubmitted = dateTimeNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH));
         CaseData caseDataAfterClosed = CaseData.builder().id(12345L)
@@ -749,7 +769,7 @@ public class SendAndReplyControllerTest {
             .build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyMessages(auth, caseDataAfterClosed, caseDataMap);
+        verify(sendAndReplyService).closeMessage(caseDataAfterClosed, caseDataMap);
     }
 
     @Test
@@ -796,10 +816,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth, caseDataMap)).thenReturn(messagesWithHistory);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth, caseDataMap);
     }
 
     @Test
@@ -824,10 +845,11 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.closeMessage(caseData, caseDataMap)).thenReturn(listOfClosedMessages);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyService).closeMessage(caseData, caseDataMap);
     }
 
     @Test
