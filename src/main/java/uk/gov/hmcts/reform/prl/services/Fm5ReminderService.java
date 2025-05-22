@@ -172,6 +172,7 @@ public class Fm5ReminderService {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
                         log.info("Checking first listed hearing for case {}", hearing.getCaseRef());
+                        log.info("first listed hearing: {}", hearing.getCaseHearings().getFirst());
                         if (isFirstListedHearingAwayForDays(hearing,
                                                             null != hearingAwayDays ? hearingAwayDays : 18)) {
                             log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
@@ -333,7 +334,10 @@ public class Fm5ReminderService {
 
     public boolean isFirstListedHearingAwayForDays(Hearings hearings,
                                                    long days) {
-        if (null != hearings) {
+        log.info("setting hearings to process for case {} with hearing {}", hearings.getCaseRef(),
+                 hearings.getCaseHearings().getFirst());
+        Hearings hearingToProcess = hearings;
+        if (null != hearingToProcess) {
             List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearings.getCaseHearings()).stream()
                 .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
                     && null != eachHearing.getHearingDaySchedule())
