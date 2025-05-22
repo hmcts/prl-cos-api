@@ -349,14 +349,20 @@ public class Fm5ReminderService {
                     Comparator.nullsLast(Comparator.naturalOrder())
                 ))
                 .toList();
-
+            log.info("sorted hearing day schedules: {}", sortedHearingDaySchedules.stream().toList());
             if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
+                log.info("hearing day schedules found {}",
+                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
+                log.info("checking if {} days is the same as {}", LocalDateTime.now().plusDays(days),
+                         sortedHearingDaySchedules.getFirst().getHearingStartDateTime());
+                log.info("returning {}", LocalDate.from(LocalDateTime.now()).plusDays(days)
+                    .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime())));
                 return LocalDate.from(LocalDateTime.now()).plusDays(days)
                     .equals(LocalDate.from(sortedHearingDaySchedules.getFirst().getHearingStartDateTime()));
             }
             log.info("First hearing outside of date range for case {}", hearingsToProcess.getCaseRef());
         }
-        log.info("hearings is empty");
+        log.info("hearingsToProcess is null");
         return false;
     }
 
