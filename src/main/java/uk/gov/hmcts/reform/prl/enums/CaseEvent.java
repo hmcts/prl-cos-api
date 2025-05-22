@@ -51,6 +51,8 @@ public enum CaseEvent {
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
     ALL_AWP_IN_REVIEW("allAwPInReview"),
     CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
+    CREATE_WA_TASK_FOR_C100_CTSC_CASE_NOTES_AND_FLAGS("createWaTaskForC100ReviewCaseNotesAndCreateFlags"),
+    CREATE_WA_TASK_FOR_FL401_CTSC_CASE_NOTES_AND_FLAGS("createWaTaskForFL401ReviewCaseNotesAndCreateFlags"),
     MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
     MARK_CASE_AS_PRIVATE("privateCaseAccess"),
     MARK_CASE_AS_PUBLIC("publicCaseAccess"),
